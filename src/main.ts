@@ -7,7 +7,7 @@ function installReactDevTools() {
 
   installExtension(REACT_DEVELOPER_TOOLS)
     .then((name:any) => console.log(`Added Extension:  ${name}`))
-    .catch((err:any) => console.log('An error occurred: ', err));
+    .catch((err: any) => console.log('An error occurred: ', err));
 }
 
 function onReady() {
@@ -23,6 +23,11 @@ function onReady() {
   mainWindow.loadURL(fileName);
 
   mainWindow.on('close', () => app.quit());
+
+  // devtools
+  const devtools = new BrowserWindow();
+  mainWindow.webContents.setDevToolsWebContents(devtools.webContents);
+  mainWindow.webContents.openDevTools({ mode: 'detach' });
 }
 
 app.on('ready', () => onReady());

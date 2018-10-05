@@ -11,17 +11,24 @@
   "license": "ISC",
   "devDependencies": {
     "awesome-typescript-loader": "^5.2.1",
+    "css-loader": "^1.0.0",
     "electron": "^3.0.2",
     "electron-devtools-installer": "^2.2.4",
+    "file-loader": "^2.0.0",
     "html-webpack-plugin": "^3.2.0",
     "source-map-loader": "^0.2.4",
+    "style-loader": "^0.23.0",
     "typescript": "^3.1.1",
     "webpack": "^4.20.2",
     "webpack-cli": "^3.1.2"
   },
   "dependencies": {
+    "@blueprintjs/core": "^3.6.1",
     "@types/react": "^16.4.14",
     "@types/react-dom": "^16.0.8",
+    "mobx": "^3.2.1",
+    "mobx-react": "^4.2.2",
+    "mobx-react-devtools": "^4.2.15",
     "react": "^16.5.2",
     "react-dom": "^16.5.2"
   }
