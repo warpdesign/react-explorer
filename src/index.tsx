@@ -1,6 +1,6 @@
 import * as React from "react";
 import * as ReactDOM from "react-dom";
-import { observer } from 'mobx-react';
+import { Provider } from 'mobx-react';
 import DevTools from 'mobx-react-devtools';
 
 const css = require("@blueprintjs/core/lib/css/blueprint.css");
@@ -55,11 +55,13 @@ class TimerView extends React.Component<{ appState: AppState }, {}> {
 const appState = new AppState();
 
 ReactDOM.render(
-    <React.Fragment>
-            <SideView fileCache={appState.localCache} leftIcon="home" />
-            <SideView fileCache={appState.remoteCache} leftIcon="globe" />
-            <button id="dtc" onClick={appState.test.bind(appState)}>Path Change</button>
-    </React.Fragment>,
+    <Provider appState={appState}>
+        <React.Fragment>
+                <SideView type="local" />
+                <SideView type="remote" />
+                <button id="dtc" onClick={appState.test.bind(appState)}>Path Change</button>
+        </React.Fragment>
+    </Provider>,
     document.getElementById('root'));
 
 // const button = React.createElement(Button, {
@@ -74,10 +76,12 @@ window.addEventListener('load', () => {
     });
 });
 
-Fs.readDirectory('.').then((files) => {
-    appState.setFiles(false, files);
-    console.log('yeah, got files', files);
-});
+// Fs.readDirectory('.').then((files) => {
+//     appState.setFiles(false, files);
+//     console.log('yeah, got files', files);
+// });
+appState.readDirectory('.', 'local');
+console.log('yep!');
 
 // ReactDOM.render(<FileList/>, document.querySelector("#btn"));
 

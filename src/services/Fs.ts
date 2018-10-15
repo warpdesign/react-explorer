@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 
-const Parent = {
+const Parent:File = {
     dir: '..',
     fullname: '..',
     name: '..',
@@ -10,11 +10,10 @@ const Parent = {
     mDate: new Date(),
     length: 0,
     mode: 0,
-    isDir: true,
-    isParent: true
+    isDir: true
 };
 
-interface File {
+export interface File {
     dir: string;
     name: string;
     fullname: string;
@@ -93,7 +92,7 @@ class FsSingleton {
                 } else {
                     console.log(items);
 
-                    const files: File[] = [Parent];
+                    const files: File[] = [];
 
                     for (var i = 0; i < items.length; i++) {
                         const fullPath = path.join(path.resolve(dir), items[i]);
@@ -117,7 +116,7 @@ class FsSingleton {
                     }
                     this.updateCache(dir, files);
 
-                    resolve(files);
+                    resolve([Parent].concat(files));
                 }
             });
         });

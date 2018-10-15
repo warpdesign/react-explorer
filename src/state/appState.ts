@@ -1,7 +1,11 @@
-import { observable } from 'mobx';
-import { Cache } from '../services/Fs';
+import { computed, action, observable, runInAction } from 'mobx';
+import { Cache, Fs } from '../services/Fs';
+import * as path from 'path';
 
 export class AppState {
+    readingRemote: Promise<Array<any>>;
+    readingLocal: Promise<Array<any>>;
+
     @observable localCache: Cache = {
         path: '.',
         files: new Array()
@@ -12,21 +16,29 @@ export class AppState {
         files: new Array()
     };
 
-    test() {
-        console.log('**click!!');
-        this.localCache.path = '** dtc !!';
+    @action readDirectory(dir: string, type: string = 'local') {
+        if (type === 'local') {
+            this.readingLocal = Fs.readDirectory(dir);
+
+            this.readingLocal.then((files) => {
+                console.log('yeah, got files', files);
+                runInAction(() => {
+                    this.localCache.files = files;
+                    this.localCache.path = path.resolve(dir);
+                });
+            });
+        }
     }
 
-    setFiles(remote: boolean, files: Array<any>) {
-        if (remote) {
-            this.remoteCache.files = files;
-        } else {
-            this.localCache.files = files;
-        }
+    test() {
+        console.log('**click!!');
+        this.localCache.path = '** click';
     }
 
     constructor() {
         // TODO: get initial path values ?
+        this.readingRemote = Promise.resolve(Array());
+        this.readingLocal = Promise.resolve(Array());
     }
 }
 

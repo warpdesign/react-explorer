@@ -19,3 +19,7 @@
     margin:10px;
     flex-grow:1;
 }
+
+.bp3-tree-node.isHidden{
+    opacity:.8;
+}

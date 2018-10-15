@@ -1,10 +1,12 @@
 import * as React from "react";
-import { observer } from 'mobx-react';
+import { observer, inject } from 'mobx-react';
 import { PathInput } from './PathInput';
 import { FileList } from './FileList';
-import { Cache } from '../services/Fs';
+import { AppState } from '../state/appState';
 
-@observer export class SideView extends React.Component<{ fileCache:Cache, leftIcon:string }>{
+@inject('appState')
+@observer
+export class SideView extends React.Component<{ type:string }>{
     pathChange() {
         debugger;
     }
@@ -12,8 +14,8 @@ import { Cache } from '../services/Fs';
     render() {
         return (
             <div>
-                <PathInput fileCache={this.props.fileCache} leftIcon={this.props.leftIcon} onPathChange={this.pathChange} />
-                <FileList path={this.props.fileCache.path} files={this.props.fileCache.files} />
+                {/* <PathInput fileCache={this.props.fileCache} type={this.props.type} onPathChange={this.pathChange} /> */}
+                <FileList type={this.props.type} />
             </div>
         );
     }

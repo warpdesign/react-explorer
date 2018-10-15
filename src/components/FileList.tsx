@@ -1,7 +1,10 @@
 import * as React from "react";
-import { observer } from 'mobx-react';
-import { Classes, Icon, ITreeNode, Tooltip, Tree } from "@blueprintjs/core";
-import { autorun } from "mobx";
+import { observer, inject } from 'mobx-react';
+import { Classes, ITreeNode, Tooltip, Tree } from "@blueprintjs/core";
+import { AppState } from "../state/appState";
+import { File } from "../services/Fs";
+import { shell } from 'electron';
+import * as path from 'path';
 
 export interface ITreeExampleState {
     nodes: ITreeNode[];
@@ -60,13 +63,33 @@ const INITIAL_STATE: ITreeNode[] = [
     { id: 3, icon: "document", label: "Item 1" },
 ];
 
-@observer export class FileList extends React.Component<any, ITreeExampleState> {
+interface FileListProps{
+    type: string
+}
+
+// Here we extend our props in order to keep the injected props private
+// and still keep strong typing.
+//
+// if appState was added to the public props FileListProps,
+// it would have to be specified when composing FileList, ie:
+// <FileList ... appState={appState}/> and we don't want that
+interface InjectedProps extends FileListProps {
+    appState: AppState
+}
+
+@inject('appState')
+@observer
+export class FileList extends React.Component<FileListProps, ITreeExampleState> {
     constructor(props: any) {
         super(props);
     }
 
+    get injected() {
+        return this.props as InjectedProps;
+    }
+
     buildNodes(files: Array<any>): ITreeNode<{}>[] {
-        const fileList = files
+        return files
             .sort((file1, file2) => {
                 if (file2.isDir && !file1.isDir) {
                     return 1;
@@ -80,18 +103,42 @@ const INITIAL_STATE: ITreeNode[] = [
                 const res: ITreeNode = {
                     id: i,
                     icon: file.isDir && "folder-close" || 'document',
-                    label: file.fullname
+                    label: file.fullname,
+                    nodeData: file,
+                    className: file.fullname !== '..' && file.fullname.startsWith('.') && 'isHidden'
                 };
             return res;
         });
+    }
 
-        return fileList;
+    onDoubleClick(node: ITreeNode) {
+        const data = node.nodeData as File;
+        const { appState } = this.injected;
+
+        if (data.isDir) {
+            console.log('need to read dir');
+            console.log(path.resolve(path.join(data.dir, data.fullname)));
+            appState.readDirectory(path.join(appState.localCache.path, data.fullname), this.props.type);
+        } else {
+            console.log('oops, need to open file');
+            shell.openItem(path.join(data.dir, data.fullname));
+        }
     }
 
     public render() {
+        const { appState } = this.injected;
+        let files: Array<any>;
+
+        if (this.props.type === 'local') {
+            files = appState.localCache.files;
+        } else {
+            files = appState.remoteCache.files;
+        }
+
         return <Tree
-            contents={this.buildNodes(this.props.files)}
+            contents={this.buildNodes(files)}
             className={Classes.ELEVATION_0}
+            onNodeDoubleClick={this.onDoubleClick.bind(this)}
         />;
     }
 }

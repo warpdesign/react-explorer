@@ -1,8 +1,10 @@
 import * as React from "react";
-import { observer } from 'mobx-react';
+import { observer, inject } from 'mobx-react';
 import { InputGroup, Spinner, Icon, ControlGroup, Button } from '@blueprintjs/core';
 
-@observer export class PathInput extends React.Component<any> {
+@inject('appState')
+@observer
+export class PathInput extends React.Component<any> {
     constructor(props: {}) {
         super(props);
     }
@@ -19,18 +21,18 @@ import { InputGroup, Spinner, Icon, ControlGroup, Button } from '@blueprintjs/co
     render() {
         const disabled = false;
         const loadingSpinner = false ? <Spinner size={Icon.SIZE_STANDARD} /> : undefined;
-
+        const icon = this.props.type === 'local' && 'home' || 'globe';
         console.log('render');
 
         return (
             <ControlGroup>
                 <InputGroup
                         disabled={disabled}
-                        leftIcon={this.props.leftIcon}
+                        leftIcon={icon}
                         onChange={this.onPathChange.bind(this)}
                         placeholder="Enter Path to load"
                         rightElement={loadingSpinner}
-                        value={this.props.fileCache.path}
+                        value={this.props.leCache.path}
                 />
                 <Button rightIcon="arrow-right" />
             </ControlGroup>
