@@ -1,0 +1,21 @@
+.bp3-tree-node-caret-none{
+    min-width:10px;
+}
+
+
+#reload{
+    position:absolute;
+    opacity:.3;
+    right:0;
+    top:0;
+}
+
+#root{
+    display:flex;
+    justify-content: center;
+}
+
+#root > div{
+    margin:10px;
+    flex-grow:1;
+}

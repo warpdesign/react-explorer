@@ -1,17 +1,32 @@
 import * as fs from 'fs';
+import * as path from 'path';
+
+const Parent = {
+    dir: '..',
+    fullname: '..',
+    name: '..',
+    extension: '',
+    cDate: new Date(),
+    mDate: new Date(),
+    length: 0,
+    mode: 0,
+    isDir: true,
+    isParent: true
+};
 
 interface File {
-    path: string;
+    dir: string;
     name: string;
+    fullname: string;
     extension: string;
     cDate: Date;
     mDate: Date;
     length: number;
-    permissions: number;
+    mode: number;
     isDir: boolean;
 }
 
-interface Cache {
+export interface Cache {
     path: string;
     files: File[];
 }
@@ -66,37 +81,41 @@ class FsSingleton {
                 this.watchers.splice(index, 1);
             }
         }
-
+        // blah9987
     };
 
-    readDirectory(path: string): Promise<File[]> {
-        console.log('calling readDirectory', path);
+    readDirectory(dir: string): Promise<File[]> {
+        console.log('calling readDirectory', dir);
         return new Promise((resolve, reject) => {
-            fs.readdir(path, (err, items) => {
+            fs.readdir(dir, (err, items) => {
                 if (err) {
                     reject(`Could not read directy '${path}', reason: err`);
                 } else {
                     console.log(items);
 
-                    const files: File[] = new Array();
+                    const files: File[] = [Parent];
 
                     for (var i = 0; i < items.length; i++) {
+                        const fullPath = path.join(path.resolve(dir), items[i]);
+                        const format = path.parse(fullPath);
+                        const stats = fs.statSync(path.join(path.resolve(dir), items[i]));
                         console.log(items[i]);
                         const file =
                         {
-                            path: items[i],
-                            name: items[i],
-                            extension: items[i],
-                            cDate: new Date(),
-                            mDate: new Date(),
-                            length: 0,
-                            permissions: 0,
-                            isDir: false
+                            dir: format.dir,
+                            fullname: items[i],
+                            name: format.name,
+                            extension: format.ext,
+                            cDate: stats.ctime,
+                            mDate: stats.mtime,
+                            length: stats.size,
+                            mode: stats.mode,
+                            isDir: stats.isDirectory()
                         };
 
                         files.push(file);
                     }
-                    this.updateCache(path, files);
+                    this.updateCache(dir, files);
 
                     resolve(files);
                 }

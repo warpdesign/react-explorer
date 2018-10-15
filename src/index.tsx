@@ -1,20 +1,24 @@
 import * as React from "react";
 import * as ReactDOM from "react-dom";
-
-import { observable } from 'mobx';
 import { observer } from 'mobx-react';
 import DevTools from 'mobx-react-devtools';
 
 const css = require("@blueprintjs/core/lib/css/blueprint.css");
 const bcss = require("@blueprintjs/icons/lib/css/blueprint-icons.css");
+const rcss = require("./css/main.css");
 
-import { Button, Intent, InputGroup, Spinner } from "@blueprintjs/core";
+import { Button } from "@blueprintjs/core";
 
-import { FileList } from './components/FileList';
 import { SideView } from './components/SideView';
+import { AppState } from './state/appState';
 
-import { Fs } from './services/Fs';
+import { spawn } from 'child_process';
+import { BADSTR } from "dns";
 
+import { remote } from 'electron';
+import { Fs } from "./services/Fs";
+
+/*
 class AppState {
     @observable timer = 0;
 
@@ -47,18 +51,33 @@ class TimerView extends React.Component<{ appState: AppState }, {}> {
         Fs.readDirectory('.').then((files) => console.log('yeah, got files', files));
     }
 };
-
-/*
-const appState = new AppState();
-ReactDOM.render(<TimerView appState={appState} />, document.getElementById('root'));
 */
-ReactDOM.render(<SideView />, document.getElementById('root'));
+const appState = new AppState();
 
-const button = React.createElement(Button, {
-    icon: "cloud",
-    text: "CDN Blueprint is go!",
+ReactDOM.render(
+    <React.Fragment>
+            <SideView fileCache={appState.localCache} leftIcon="home" />
+            <SideView fileCache={appState.remoteCache} leftIcon="globe" />
+            <button id="dtc" onClick={appState.test.bind(appState)}>Path Change</button>
+    </React.Fragment>,
+    document.getElementById('root'));
+
+// const button = React.createElement(Button, {
+//     icon: "cloud",
+//     text: "CDN Blueprint is go!",
+// });
+
+window.addEventListener('load', () => {
+    const btn: HTMLButtonElement = document.querySelector('#reload');
+    btn.addEventListener('click', () => {
+        remote.getCurrentWebContents().reloadIgnoringCache();
+    });
 });
 
+Fs.readDirectory('.').then((files) => {
+    appState.setFiles(false, files);
+    console.log('yeah, got files', files);
+});
 
 // ReactDOM.render(<FileList/>, document.querySelector("#btn"));
 

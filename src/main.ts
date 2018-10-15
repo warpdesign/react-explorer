@@ -1,5 +1,8 @@
-import { app, BrowserWindow } from 'electron'
+import { app, BrowserWindow } from 'electron';
+import { watch } from 'fs';
+
 declare var __dirname: string
+
 let mainWindow: Electron.BrowserWindow
 
 function installReactDevTools() {
@@ -10,6 +13,12 @@ function installReactDevTools() {
     .catch((err: any) => console.log('An error occurred: ', err));
 }
 
+function installWatcher(path:string, window:BrowserWindow) {
+  watch(path, { recursive: true }, () => {
+    window.webContents.reloadIgnoringCache();
+  });
+}
+
 function onReady() {
   installReactDevTools();
 
@@ -17,6 +26,8 @@ function onReady() {
     width: 800,
     height: 600
   });
+
+  installWatcher('./dist', mainWindow);
 
   const fileName = `file://${__dirname}/index.html`;
 

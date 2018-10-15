@@ -1,49 +1,39 @@
 import * as React from "react";
-import { InputGroup, Spinner, Icon, Label } from '@blueprintjs/core';
-import { cpus } from "os";
+import { observer } from 'mobx-react';
+import { InputGroup, Spinner, Icon, ControlGroup, Button } from '@blueprintjs/core';
 
-interface PathInputState {
-    pathValue: string;
-    disabled: boolean;
-    loading: boolean;
-}
-
-export class PathInput extends React.Component<{}, PathInputState> {
+@observer export class PathInput extends React.Component<any> {
     constructor(props: {}) {
         super(props);
-
-        this.state = {
-            pathValue: 'dtc',
-            disabled: false,
-            loading: false
-        };
     }
 
     onPathChange(event: React.FormEvent<HTMLElement>) {
-        this.setState({ pathValue: (event.target as HTMLInputElement).value });
+        this.updateStore((event.target as HTMLInputElement).value);
+    }
+
+    updateStore(val:string) {
+        console.log('state change, updating store', val);
+        this.props.fileCache.path = val;
     }
 
     render() {
+        const disabled = false;
+        const loadingSpinner = false ? <Spinner size={Icon.SIZE_STANDARD} /> : undefined;
 
-        const { pathValue, loading, disabled } = this.state;
-
-        const loadingSpinner = loading ? <Spinner size={Icon.SIZE_STANDARD} /> : undefined;
+        console.log('render');
 
         return (
-            <Label
-
-            >
-            Path
-            <InputGroup
-                disabled={disabled}
-                leftIcon="filter"
-                onChange={this.onPathChange.bind(this)}
-                placeholder="Enter Path to load"
-                rightElement={loadingSpinner}
-                value={pathValue}
-                className="bp3-inline"
+            <ControlGroup>
+                <InputGroup
+                        disabled={disabled}
+                        leftIcon={this.props.leftIcon}
+                        onChange={this.onPathChange.bind(this)}
+                        placeholder="Enter Path to load"
+                        rightElement={loadingSpinner}
+                        value={this.props.fileCache.path}
                 />
-                </Label>
+                <Button rightIcon="arrow-right" />
+            </ControlGroup>
         )
     }
 }
