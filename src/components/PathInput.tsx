@@ -16,6 +16,8 @@ interface InjectedProps extends PathInputProps {
 interface PathInputState {
     status: -1 | 0 | 1;
     path: string;
+    history: string[],
+    current: number
 }
 
 function debounce(a: any, b: any, c?: any) { var d: any, e: any; return function () { function h() { d = null, c || (e = a.apply(f, g)) } var f = this, g = arguments; return clearTimeout(d), d = setTimeout(h, b), c && !d && (e = a.apply(f, g)), e } };
@@ -24,12 +26,15 @@ function debounce(a: any, b: any, c?: any) { var d: any, e: any; return function
 @observer
 export class PathInput extends React.Component<PathInputProps, PathInputState> {
     private cache: Cache;
+    private direction = 0;
 
     constructor(props: any) {
         super(props);
         this.state = {
             status: 0,
-            path: ''
+            path: '',
+            history: new Array(),
+            current: -1
         };
         const { appState } = this.injected;
 
@@ -41,8 +46,6 @@ export class PathInput extends React.Component<PathInputProps, PathInputState> {
                 // event.persist();
                 if (Fs.pathExists(this.state.path)) {
                     this.setState({ status: 1 });
-                    // const { appState } = this.injected;
-                    // appState.readDirectory(this.state.path, this.props.type);
                 } else {
                     console.log('directory doesn\'t exists!');
                     this.setState({ status: -1 });
@@ -59,18 +62,67 @@ export class PathInput extends React.Component<PathInputProps, PathInputState> {
     installReaction() {
         const reaction1 = reaction(
             () => { return this.cache.path },
-            path => { const status = 0; this.setState({path, status}); }
+            path => {
+                const status = 0;
+
+                if (!this.direction) {
+                    this.addPathToHistory(path);
+                } else {
+                    this.navHistory(this.direction);
+                    this.direction = 0;
+                }
+                this.setState({ path, status });
+            }
         );
     }
 
+    addPathToHistory(path: string) {
+        const { history, current } = this.state;
+
+        this.setState({
+            history: history.slice(0, current + 1).concat([path]),
+            current: this.state.current + 1
+        });
+    }
+
+    navHistory(dir = -1, updatePath = false) {
+        const { history, current } = this.state;
+
+        const length = history.length;
+        let newCurrent = current + dir;
+
+        if (newCurrent < 0) {
+            newCurrent = 0;
+        } else if (newCurrent >= length) {
+            newCurrent = length - 1;
+        }
+        if (!updatePath) {
+            this.setState({
+                current: newCurrent
+            });
+        } else {
+            const { appState } = this.injected;
+            const path = history[current + dir];
+            appState.readDirectory(path, this.props.type);
+        }
+    }
+
+    onBackward(event: React.FormEvent<HTMLElement>) {
+        this.direction = -1;
+        this.navHistory(this.direction, true);
+    }
+
+    onForward(event: React.FormEvent<HTMLElement>) {
+        this.direction = 1;
+        this.navHistory(this.direction, true);
+    }
+
     onPathChange(event: React.FormEvent<HTMLElement>) {
-        // TODO:
         // 1.Update date
         const path = (event.target as HTMLInputElement).value;
         this.setState({ path });
-        this.checkPath(event);
         // 2. isValid ? => loadDirectory
-        // this.updateStore((event.target as HTMLInputElement).value);
+        this.checkPath(event);
     }
 
     onSubmit() {
@@ -80,31 +132,31 @@ export class PathInput extends React.Component<PathInputProps, PathInputState> {
         }
     }
 
-    // updateStore(val:string) {
-    //     console.log('state change, updating store', val);
-    //     this.props.fileCache.path = val;
-    // }
-
     render() {
+        const { current, history, status, path } = this.state;
+        const canGoBackward = current > 0;
+        const canGoForward = history.length > 1 && current < history.length - 1;
         const disabled = false;
         const loadingSpinner = false ? <Spinner size={Icon.SIZE_STANDARD} /> : undefined;
         const icon = this.props.type === 'local' && 'home' || 'globe';
-        const { appState } = this.injected;
-        const path = '';
-        const intent = this.state.status === -1 ? 'danger' : 'none';
+        const intent = status === -1 ? 'danger' : 'none';
+
+        console.log('**', this.state.history, this.state.current);
 
         return (
             <ControlGroup>
+                <Button disabled={!canGoBackward} onClick={this.onBackward.bind(this)} rightIcon="chevron-left"></Button>
+                <Button disabled={!canGoForward} onClick={this.onForward.bind(this)} rightIcon="chevron-right"></Button>
                 <InputGroup
                         disabled={disabled}
                         leftIcon={icon}
                         onChange={this.onPathChange.bind(this)}
                         placeholder="Enter Path to load"
                         rightElement={loadingSpinner}
-                        value={this.state.path}
+                        value={path}
                         intent={intent}
                 />
-                <Button rightIcon="arrow-right" disabled={this.state.status === -1} onClick={this.onSubmit.bind(this)} />
+                <Button rightIcon="arrow-right" disabled={status === -1} onClick={this.onSubmit.bind(this)} intent="primary" />
             </ControlGroup>
         )
     }

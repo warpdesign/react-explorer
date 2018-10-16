@@ -73,13 +73,14 @@ interface FileListProps{
 // if appState was added to the public props FileListProps,
 // it would have to be specified when composing FileList, ie:
 // <FileList ... appState={appState}/> and we don't want that
+// see:
 interface InjectedProps extends FileListProps {
     appState: AppState
 }
 
 @inject('appState')
 @observer
-export class FileList extends React.Component<FileListProps, ITreeExampleState> {
+export class FileList extends React.Component<FileListProps> {
     constructor(props: any) {
         super(props);
     }

@@ -92,13 +92,13 @@ class FsSingleton {
     }
 
     readDirectory(dir: string): Promise<File[]> {
-        console.log('calling readDirectory', dir);
+        // console.log('calling readDirectory', dir);
         return new Promise((resolve, reject) => {
             fs.readdir(dir, (err, items) => {
                 if (err) {
                     reject(`Could not read directy '${path}', reason: err`);
                 } else {
-                    console.log(items);
+                    // console.log(items);
 
                     const files: File[] = [];
 
@@ -106,7 +106,7 @@ class FsSingleton {
                         const fullPath = path.join(path.resolve(dir), items[i]);
                         const format = path.parse(fullPath);
                         const stats = fs.statSync(path.join(path.resolve(dir), items[i]));
-                        console.log(items[i]);
+                        // console.log(items[i]);
                         const file =
                         {
                             dir: format.dir,
