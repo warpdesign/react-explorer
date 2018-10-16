@@ -23,3 +23,7 @@
 .bp3-tree-node.isHidden{
     opacity:.8;
 }
+
+.bp3-input-group{
+    flex-grow:1;
+}

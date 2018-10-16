@@ -80,8 +80,16 @@ class FsSingleton {
                 this.watchers.splice(index, 1);
             }
         }
-        // blah9987
     };
+
+    pathExists(path:string):boolean {
+        try {
+            const stat = fs.statSync(path);
+            return stat.isDirectory();
+        } catch {
+            return false;
+        }
+    }
 
     readDirectory(dir: string): Promise<File[]> {
         console.log('calling readDirectory', dir);

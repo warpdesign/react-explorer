@@ -4,17 +4,12 @@ import { PathInput } from './PathInput';
 import { FileList } from './FileList';
 import { AppState } from '../state/appState';
 
-@inject('appState')
 @observer
 export class SideView extends React.Component<{ type:string }>{
-    pathChange() {
-        debugger;
-    }
-
     render() {
         return (
             <div>
-                {/* <PathInput fileCache={this.props.fileCache} type={this.props.type} onPathChange={this.pathChange} /> */}
+                <PathInput type={this.props.type} />
                 <FileList type={this.props.type} />
             </div>
         );
