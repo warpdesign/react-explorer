@@ -77,11 +77,14 @@ export class PathInput extends React.Component<PathInputProps, PathInputState> {
     }
 
     addPathToHistory(path: string) {
-        const { history, current } = this.state;
-
-        this.setState({
-            history: history.slice(0, current + 1).concat([path]),
-            current: this.state.current + 1
+        this.setState((state) => {
+            {
+                const { history, current } = state;
+                return {
+                    history: history.slice(0, current + 1).concat([path]),
+                    current: current + 1
+                };
+            }
         });
     }
 
@@ -140,8 +143,6 @@ export class PathInput extends React.Component<PathInputProps, PathInputState> {
         const loadingSpinner = false ? <Spinner size={Icon.SIZE_STANDARD} /> : undefined;
         const icon = this.props.type === 'local' && 'home' || 'globe';
         const intent = status === -1 ? 'danger' : 'none';
-
-        console.log('**', this.state.history, this.state.current);
 
         return (
             <ControlGroup>

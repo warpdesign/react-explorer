@@ -138,7 +138,7 @@ export class FileList extends React.Component<FileListProps> {
 
         return <Tree
             contents={this.buildNodes(files)}
-            className={Classes.ELEVATION_0}
+            className={`${Classes.ELEVATION_0}`}
             onNodeDoubleClick={this.onDoubleClick.bind(this)}
         />;
     }
