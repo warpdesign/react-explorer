@@ -47,7 +47,6 @@ export class AppState {
 
     @action
     setClipboard(source: 'local' | 'remote', elements: string[]) {
-        debugger;
         this.clipboard = { source, elements };
     }
 

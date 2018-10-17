@@ -124,8 +124,6 @@ class FsSingleton {
                     }
                     this.updateCache(dir, files);
 
-                    debugger;
-
                     resolve([Parent].concat(files));
                 }
             });

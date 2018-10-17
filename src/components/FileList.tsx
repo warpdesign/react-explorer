@@ -1,7 +1,7 @@
 import * as React from "react";
 import { inject } from 'mobx-react';
 import { reaction } from 'mobx';
-import { Position, Classes, Button, ITreeNode, Tooltip, Tree } from "@blueprintjs/core";
+import { Position, Classes, Button, ITreeNode, Tooltip, Tree, Toaster, Intent } from "@blueprintjs/core";
 import { AppState } from "../state/appState";
 import { File, Cache } from "../services/Fs";
 import { shell } from 'electron';
@@ -13,6 +13,11 @@ export interface FileListState {
 };
 
 let i = 0;
+
+export const AppToaster = Toaster.create({
+    className: "recipe-toaster",
+    position: Position.TOP,
+});
 
 const INITIAL_STATE: ITreeNode[] = [
     {
@@ -172,11 +177,18 @@ export class FileList extends React.Component<FileListProps, FileListState> {
 
     private onClipboardCopy = () => {
         const { appState } = this.injected;
-        const { nodes } = this.state;
+        const { nodes, selected } = this.state;
 
         const elements = nodes.filter((node) => node.isSelected).map((node) => { const nodeData = node.nodeData as File; return path.join(nodeData.dir, nodeData.fullname); });
 
-        appState.setClipboard(this.props.type as 'remote'|'local', elements);
+        appState.setClipboard(this.props.type as 'remote' | 'local', elements);
+
+        AppToaster.show({
+            message: `${selected} element(s) copied to the clipboard`,
+            icon: "tick",
+            intent: Intent.SUCCESS,
+            timeout: 2000
+        });
     }
 
     public render() {

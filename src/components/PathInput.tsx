@@ -27,6 +27,8 @@ function debounce(a: any, b: any, c?: any) { var d: any, e: any; return function
 export class PathInput extends React.Component<PathInputProps, PathInputState> {
     private cache: Cache;
     private direction = 0;
+    private input: HTMLInputElement | null = null;
+
     private checkPath: (event: React.FormEvent<HTMLElement>) => any;
 
     constructor(props: any) {
@@ -120,6 +122,7 @@ export class PathInput extends React.Component<PathInputProps, PathInputState> {
     }
 
     private onPathChange = (event: React.FormEvent<HTMLElement>) => {
+        console.log('change', this);
         // 1.Update date
         const path = (event.target as HTMLInputElement).value;
         this.setState({ path });
@@ -132,6 +135,19 @@ export class PathInput extends React.Component<PathInputProps, PathInputState> {
             const { appState } = this.injected;
             appState.readDirectory(this.state.path, this.props.type);
         }
+    }
+
+    private onKeyUp = (event: React.KeyboardEvent<HTMLElement>) => {
+        if (event.keyCode === 27) {
+            // restore current path from appState
+            this.setState({ path: this.cache.path, status: 0 });
+            // lose focus
+            this.input.blur();
+        }
+    }
+
+    private refHandler = (input: HTMLInputElement) => {
+        this.input = input;
     }
 
     public render() {
@@ -151,10 +167,12 @@ export class PathInput extends React.Component<PathInputProps, PathInputState> {
                         disabled={disabled}
                         leftIcon={icon}
                         onChange={this.onPathChange}
+                        onKeyUp={this.onKeyUp}
                         placeholder="Enter Path to load"
                         rightElement={loadingSpinner}
                         value={path}
                         intent={intent}
+                        inputRef={this.refHandler}
                 />
                 <Button rightIcon="arrow-right" disabled={status === -1} onClick={this.onSubmit} intent="primary" />
             </ControlGroup>
