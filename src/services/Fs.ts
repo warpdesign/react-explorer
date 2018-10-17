@@ -4,7 +4,7 @@ import * as path from 'path';
 const Parent:File = {
     dir: '..',
     fullname: '..',
-    name: '..',
+    name: '',
     extension: '',
     cDate: new Date(),
     mDate: new Date(),

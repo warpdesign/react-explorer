@@ -21,6 +21,13 @@ interface PathInputState {
     current: number
 }
 
+enum KEYS {
+    Escape = 27,
+    Enter = 13
+};
+
+const DEBOUNCE_DELAY = 400;
+
 function debounce(a: any, b: any, c?: any) { var d: any, e: any; return function () { function h() { d = null, c || (e = a.apply(f, g)) } var f = this, g = arguments; return clearTimeout(d), d = setTimeout(h, b), c && !d && (e = a.apply(f, g)), e } };
 
 @inject('appState', 'fileCache')
@@ -54,7 +61,7 @@ export class PathInput extends React.Component<PathInputProps, PathInputState> {
                     console.log('directory doesn\'t exists!');
                     this.setState({ status: -1 });
                 }
-            }, 400);
+            }, DEBOUNCE_DELAY);
     }
 
     private get injected() {
@@ -124,7 +131,6 @@ export class PathInput extends React.Component<PathInputProps, PathInputState> {
     }
 
     private onPathChange = (event: React.FormEvent<HTMLElement>) => {
-        console.log('change', this);
         // 1.Update date
         const path = (event.target as HTMLInputElement).value;
         this.setState({ path });
@@ -141,12 +147,12 @@ export class PathInput extends React.Component<PathInputProps, PathInputState> {
     }
 
     private onKeyUp = (event: React.KeyboardEvent<HTMLElement>) => {
-        if (event.keyCode === 27) {
+        if (event.keyCode === KEYS.Escape) {
             // restore current path from appState
             this.setState({ path: this.cache.path, status: 0 });
             // lose focus
             this.input.blur();
-        } else if (event.keyCode === 13) {
+        } else if (event.keyCode === KEYS.Enter) {
             this.onSubmit();
         }
     }

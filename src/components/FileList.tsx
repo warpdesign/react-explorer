@@ -125,9 +125,9 @@ export class FileList extends React.Component<FileListProps, FileListState> {
     private buildNodes = (files:File[]): ITreeNode<{}>[] => {
         return files
             .sort((file1, file2) => {
-                if (file2.isDir && !file1.isDir) {
+                if ((file2.isDir && !file1.isDir) ) {
                     return 1;
-                } else if (file1.isDir && !file2.isDir) {
+                } else if (!file1.name.length || (file1.isDir && !file2.isDir)) {
                     return -1;
                 } else {
                     return file1.fullname.localeCompare(file2.fullname);
