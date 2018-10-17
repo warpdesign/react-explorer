@@ -34,6 +34,3 @@ window.addEventListener('load', () => {
         remote.getCurrentWebContents().reloadIgnoringCache();
     });
 });
-
-// hardcoded for now
-appState.readDirectory('.', 'local');

@@ -1,8 +1,9 @@
 import * as React from "react";
-import { inject } from 'mobx-react';
+import { observer, inject } from 'mobx-react';
 import { reaction } from 'mobx';
 import { Position, Classes, Button, ITreeNode, Tooltip, Tree, Toaster, Intent } from "@blueprintjs/core";
 import { AppState } from "../state/appState";
+// TODO: remove any calls to shell, path
 import { File, Cache } from "../services/Fs";
 import { shell } from 'electron';
 import * as path from 'path';
@@ -83,19 +84,22 @@ interface FileListProps{
 // <FileList ... appState={appState}/> and we don't want that
 // see: https://github.com/mobxjs/mobx-react/issues/256
 interface InjectedProps extends FileListProps {
-    appState: AppState
+    appState: AppState;
+    fileCache: Cache;
 }
 
-@inject('appState')
+@inject('appState', 'fileCache')
+@observer
 export class FileList extends React.Component<FileListProps, FileListState> {
     private cache: Cache;
 
     constructor(props: any) {
         super(props);
 
-        const { appState } = this.injected;
+        const { fileCache } = this.injected;
 
-        this.cache = props.type === 'local' ? appState.localCache : appState.remoteCache;
+        // this.cache = props.type === 'local' ? appState.localCache : appState.remoteCache;
+        this.cache = fileCache;
 
         this.state = {
             nodes: [],
@@ -146,11 +150,10 @@ export class FileList extends React.Component<FileListProps, FileListState> {
         const { appState } = this.injected;
 
         if (data.isDir) {
-            console.log('need to read dir');
-            console.log(path.resolve(path.join(data.dir, data.fullname)));
-            appState.readDirectory(path.join(appState.localCache.path, data.fullname), this.props.type);
+            console.log('need to read dir', path.resolve(path.join(data.dir, data.fullname)));
+            // appState.readDirectory(path.join(appState.localCache.path, data.fullname), this.props.type);
+            appState.updateCache(this.cache, path.resolve(path.join(data.dir, data.fullname)));
         } else {
-            console.log('oops, need to open file');
             shell.openItem(path.join(data.dir, data.fullname));
         }
     }

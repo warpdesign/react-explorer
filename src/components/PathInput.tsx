@@ -11,6 +11,7 @@ interface PathInputProps {
 
 interface InjectedProps extends PathInputProps {
     appState: AppState;
+    fileCache: Cache;
 }
 
 interface PathInputState {
@@ -22,7 +23,7 @@ interface PathInputState {
 
 function debounce(a: any, b: any, c?: any) { var d: any, e: any; return function () { function h() { d = null, c || (e = a.apply(f, g)) } var f = this, g = arguments; return clearTimeout(d), d = setTimeout(h, b), c && !d && (e = a.apply(f, g)), e } };
 
-@inject('appState')
+@inject('appState', 'fileCache')
 @observer
 export class PathInput extends React.Component<PathInputProps, PathInputState> {
     private cache: Cache;
@@ -39,9 +40,9 @@ export class PathInput extends React.Component<PathInputProps, PathInputState> {
             history: new Array(),
             current: -1
         };
-        const { appState } = this.injected;
+        const { fileCache } = this.injected;
 
-        this.cache = props.type === 'local' ? appState.localCache : appState.remoteCache;
+        this.cache = fileCache;
 
         this.installReaction();
         this.checkPath = debounce(
@@ -107,7 +108,8 @@ export class PathInput extends React.Component<PathInputProps, PathInputState> {
         } else {
             const { appState } = this.injected;
             const path = history[current + dir];
-            appState.readDirectory(path, this.props.type);
+            // appState.readDirectory(path, this.props.type);
+            appState.updateCache(this.cache, path);
         }
     }
 
@@ -133,7 +135,8 @@ export class PathInput extends React.Component<PathInputProps, PathInputState> {
     private onSubmit = () => {
         if (this.cache.path !== this.state.path && Fs.pathExists(this.state.path)) {
             const { appState } = this.injected;
-            appState.readDirectory(this.state.path, this.props.type);
+            // appState.readDirectory(this.state.path, this.props.type);
+            appState.updateCache(this.cache, this.state.path);
         }
     }
 
@@ -143,6 +146,8 @@ export class PathInput extends React.Component<PathInputProps, PathInputState> {
             this.setState({ path: this.cache.path, status: 0 });
             // lose focus
             this.input.blur();
+        } else if (event.keyCode === 13) {
+            this.onSubmit();
         }
     }
 
