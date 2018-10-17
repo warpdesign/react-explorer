@@ -7,7 +7,7 @@ import { FileList } from './FileList';
 export class SideView extends React.Component<{ type:string }>{
     render() {
         return (
-            <div>
+            <div className="sideview">
                 <PathInput type={this.props.type} />
                 <FileList type={this.props.type} />
             </div>

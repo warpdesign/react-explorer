@@ -2,6 +2,11 @@ import { action, observable, runInAction } from 'mobx';
 import { Cache, Fs } from '../services/Fs';
 import * as path from 'path';
 
+interface Clipboard {
+    source: 'local' | 'remote';
+    elements: string[];
+}
+
 export class AppState {
     readingRemote: Promise<Array<any>>;
     readingLocal: Promise<Array<any>>;
@@ -16,6 +21,13 @@ export class AppState {
     remoteCache: Cache = {
         path: 'ftp://192.168.0.1',
         files: new Array()
+    };
+
+    // global
+    @observable
+    clipboard: Clipboard = {
+        source: 'local',
+        elements: []
     };
 
     @action
@@ -33,9 +45,10 @@ export class AppState {
         }
     }
 
-    test() {
-        console.log('**click!!');
-        this.localCache.path = '** click';
+    @action
+    setClipboard(source: 'local' | 'remote', elements: string[]) {
+        debugger;
+        this.clipboard = { source, elements };
     }
 
     constructor() {

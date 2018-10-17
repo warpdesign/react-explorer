@@ -1,7 +1,7 @@
 import * as React from "react";
-import { observer, inject } from 'mobx-react';
+import { inject } from 'mobx-react';
 import { reaction } from 'mobx';
-import { Classes, ITreeNode, Tooltip, Tree } from "@blueprintjs/core";
+import { Position, Classes, Button, ITreeNode, Tooltip, Tree } from "@blueprintjs/core";
 import { AppState } from "../state/appState";
 import { File, Cache } from "../services/Fs";
 import { shell } from 'electron';
@@ -9,6 +9,7 @@ import * as path from 'path';
 
 export interface FileListState {
     nodes: ITreeNode[];
+    selected: number;
 };
 
 let i = 0;
@@ -92,7 +93,8 @@ export class FileList extends React.Component<FileListProps, FileListState> {
         this.cache = props.type === 'local' ? appState.localCache : appState.remoteCache;
 
         this.state = {
-            nodes: []
+            nodes: [],
+            selected: 0
         };
 
         this.installReaction();
@@ -107,7 +109,7 @@ export class FileList extends React.Component<FileListProps, FileListState> {
             () => { return this.cache.files },
             (files: File[]) => {
                 const nodes = this.buildNodes(files);
-                this.setState({ nodes });
+                this.setState({ nodes, selected: 0 });
             });
     }
 
@@ -150,21 +152,51 @@ export class FileList extends React.Component<FileListProps, FileListState> {
 
     private onNodeClick = (nodeData: ITreeNode, _nodePath: number[], e: React.MouseEvent<HTMLElement>) => {
         const originallySelected = nodeData.isSelected;
+        const { nodes, selected } = this.state;
+        let newSelected = selected;
+
         if (!e.shiftKey) {
-            this.state.nodes.forEach( n => (n.isSelected = false) );
+            newSelected = 0;
+            nodes.forEach( n => (n.isSelected = false) );
         }
         nodeData.isSelected = originallySelected == null ? true : !originallySelected;
-        this.setState(this.state);
+
+        if (nodeData.isSelected) {
+            newSelected++;
+        } else if (originallySelected && newSelected > 0) {
+            newSelected--;
+        }
+
+        this.setState({ nodes, selected: newSelected });
     };
 
+    private onClipboardCopy = () => {
+        const { appState } = this.injected;
+        const { nodes } = this.state;
+
+        const elements = nodes.filter((node) => node.isSelected).map((node) => { const nodeData = node.nodeData as File; return path.join(nodeData.dir, nodeData.fullname); });
+
+        appState.setClipboard(this.props.type as 'remote'|'local', elements);
+    }
+
     public render() {
-        if (this.props.type === 'local')
+        if (this.props.type === 'local') {
             console.log('render', i++);
-        return <Tree
-            contents={this.state.nodes}
-            className={`${Classes.ELEVATION_0}`}
-            onNodeDoubleClick={this.onNodeDoubleClick}
-            onNodeClick={this.onNodeClick}
-        />;
+        }
+
+        let copyToClipboardClasses = 'copy';
+        if (this.state.selected > 0) {
+            copyToClipboardClasses += " showClipboard";
+        }
+
+        return <React.Fragment>
+            <Tree
+                contents={this.state.nodes}
+                className={`${Classes.ELEVATION_0}`}
+                onNodeDoubleClick={this.onNodeDoubleClick}
+                onNodeClick={this.onNodeClick}
+            />
+            <Button icon="duplicate" className={copyToClipboardClasses} onClick={this.onClipboardCopy}>{this.state.selected} element(s)</Button>
+        </React.Fragment>;
     }
 }

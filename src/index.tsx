@@ -1,6 +1,7 @@
 import * as React from "react";
 import * as ReactDOM from "react-dom";
 import { Provider } from 'mobx-react';
+import { FocusStyleManager } from "@blueprintjs/core";
 import DevTools from 'mobx-react-devtools';
 
 const css = require("@blueprintjs/core/lib/css/blueprint.css");
@@ -13,6 +14,9 @@ import { AppState } from './state/appState';
 import { remote } from 'electron';
 
 const appState = new AppState();
+
+// do not show outlines when using the mouse
+FocusStyleManager.onlyShowFocusOnTabs();
 
 ReactDOM.render(
     <Provider appState={appState}>
