@@ -27,6 +27,7 @@ function debounce(a: any, b: any, c?: any) { var d: any, e: any; return function
 export class PathInput extends React.Component<PathInputProps, PathInputState> {
     private cache: Cache;
     private direction = 0;
+    private checkPath: (event: React.FormEvent<HTMLElement>) => any;
 
     constructor(props: any) {
         super(props);
@@ -53,13 +54,11 @@ export class PathInput extends React.Component<PathInputProps, PathInputState> {
             }, 400);
     }
 
-    get injected() {
+    private get injected() {
         return this.props as InjectedProps;
     }
 
-    checkPath: (event: React.FormEvent<HTMLElement>) => any;
-
-    installReaction() {
+    private installReaction() {
         const reaction1 = reaction(
             () => { return this.cache.path },
             path => {
@@ -76,7 +75,7 @@ export class PathInput extends React.Component<PathInputProps, PathInputState> {
         );
     }
 
-    addPathToHistory(path: string) {
+    private addPathToHistory(path: string) {
         this.setState((state) => {
             {
                 const { history, current } = state;
@@ -88,7 +87,7 @@ export class PathInput extends React.Component<PathInputProps, PathInputState> {
         });
     }
 
-    navHistory(dir = -1, updatePath = false) {
+    private navHistory(dir = -1, updatePath = false) {
         const { history, current } = this.state;
 
         const length = history.length;
@@ -110,17 +109,17 @@ export class PathInput extends React.Component<PathInputProps, PathInputState> {
         }
     }
 
-    onBackward(event: React.FormEvent<HTMLElement>) {
+    private onBackward = (event: React.FormEvent<HTMLElement>) => {
         this.direction = -1;
         this.navHistory(this.direction, true);
     }
 
-    onForward(event: React.FormEvent<HTMLElement>) {
+    private onForward = (event: React.FormEvent<HTMLElement>) => {
         this.direction = 1;
         this.navHistory(this.direction, true);
     }
 
-    onPathChange(event: React.FormEvent<HTMLElement>) {
+    private onPathChange = (event: React.FormEvent<HTMLElement>) => {
         // 1.Update date
         const path = (event.target as HTMLInputElement).value;
         this.setState({ path });
@@ -128,14 +127,14 @@ export class PathInput extends React.Component<PathInputProps, PathInputState> {
         this.checkPath(event);
     }
 
-    onSubmit() {
+    private onSubmit = () => {
         if (this.cache.path !== this.state.path && Fs.pathExists(this.state.path)) {
             const { appState } = this.injected;
             appState.readDirectory(this.state.path, this.props.type);
         }
     }
 
-    render() {
+    public render() {
         const { current, history, status, path } = this.state;
         const canGoBackward = current > 0;
         const canGoForward = history.length > 1 && current < history.length - 1;
@@ -146,18 +145,18 @@ export class PathInput extends React.Component<PathInputProps, PathInputState> {
 
         return (
             <ControlGroup>
-                <Button disabled={!canGoBackward} onClick={this.onBackward.bind(this)} rightIcon="chevron-left"></Button>
-                <Button disabled={!canGoForward} onClick={this.onForward.bind(this)} rightIcon="chevron-right"></Button>
+                <Button disabled={!canGoBackward} onClick={this.onBackward} rightIcon="chevron-left"></Button>
+                <Button disabled={!canGoForward} onClick={this.onForward} rightIcon="chevron-right"></Button>
                 <InputGroup
                         disabled={disabled}
                         leftIcon={icon}
-                        onChange={this.onPathChange.bind(this)}
+                        onChange={this.onPathChange}
                         placeholder="Enter Path to load"
                         rightElement={loadingSpinner}
                         value={path}
                         intent={intent}
                 />
-                <Button rightIcon="arrow-right" disabled={status === -1} onClick={this.onSubmit.bind(this)} intent="primary" />
+                <Button rightIcon="arrow-right" disabled={status === -1} onClick={this.onSubmit} intent="primary" />
             </ControlGroup>
         )
     }

@@ -1,15 +1,17 @@
 import * as React from "react";
 import { observer, inject } from 'mobx-react';
+import { reaction } from 'mobx';
 import { Classes, ITreeNode, Tooltip, Tree } from "@blueprintjs/core";
 import { AppState } from "../state/appState";
-import { File } from "../services/Fs";
+import { File, Cache } from "../services/Fs";
 import { shell } from 'electron';
 import * as path from 'path';
 
-export interface ITreeExampleState {
+export interface FileListState {
     nodes: ITreeNode[];
-    path: string
 };
+
+let i = 0;
 
 const INITIAL_STATE: ITreeNode[] = [
     {
@@ -73,23 +75,43 @@ interface FileListProps{
 // if appState was added to the public props FileListProps,
 // it would have to be specified when composing FileList, ie:
 // <FileList ... appState={appState}/> and we don't want that
-// see:
+// see: https://github.com/mobxjs/mobx-react/issues/256
 interface InjectedProps extends FileListProps {
     appState: AppState
 }
 
 @inject('appState')
-@observer
-export class FileList extends React.Component<FileListProps> {
+export class FileList extends React.Component<FileListProps, FileListState> {
+    private cache: Cache;
+
     constructor(props: any) {
         super(props);
+
+        const { appState } = this.injected;
+
+        this.cache = props.type === 'local' ? appState.localCache : appState.remoteCache;
+
+        this.state = {
+            nodes: []
+        };
+
+        this.installReaction();
     }
 
-    get injected() {
+    private get injected() {
         return this.props as InjectedProps;
     }
 
-    buildNodes(files: Array<any>): ITreeNode<{}>[] {
+    private installReaction() {
+        const reaction1 = reaction(
+            () => { return this.cache.files },
+            (files: File[]) => {
+                const nodes = this.buildNodes(files);
+                this.setState({ nodes });
+            });
+    }
+
+    private buildNodes = (files:File[]): ITreeNode<{}>[] => {
         return files
             .sort((file1, file2) => {
                 if (file2.isDir && !file1.isDir) {
@@ -112,7 +134,7 @@ export class FileList extends React.Component<FileListProps> {
         });
     }
 
-    onDoubleClick(node: ITreeNode) {
+    private onNodeDoubleClick = (node: ITreeNode) => {
         const data = node.nodeData as File;
         const { appState } = this.injected;
 
@@ -126,20 +148,23 @@ export class FileList extends React.Component<FileListProps> {
         }
     }
 
-    public render() {
-        const { appState } = this.injected;
-        let files: Array<any>;
-
-        if (this.props.type === 'local') {
-            files = appState.localCache.files;
-        } else {
-            files = appState.remoteCache.files;
+    private onNodeClick = (nodeData: ITreeNode, _nodePath: number[], e: React.MouseEvent<HTMLElement>) => {
+        const originallySelected = nodeData.isSelected;
+        if (!e.shiftKey) {
+            this.state.nodes.forEach( n => (n.isSelected = false) );
         }
+        nodeData.isSelected = originallySelected == null ? true : !originallySelected;
+        this.setState(this.state);
+    };
 
+    public render() {
+        if (this.props.type === 'local')
+            console.log('render', i++);
         return <Tree
-            contents={this.buildNodes(files)}
+            contents={this.state.nodes}
             className={`${Classes.ELEVATION_0}`}
-            onNodeDoubleClick={this.onDoubleClick.bind(this)}
+            onNodeDoubleClick={this.onNodeDoubleClick}
+            onNodeClick={this.onNodeClick}
         />;
     }
 }
