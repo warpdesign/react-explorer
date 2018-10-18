@@ -1,11 +1,13 @@
 import * as React from "react";
 import { inject } from 'mobx-react';
 import { reaction } from 'mobx';
-import { Position, Classes, Button, ITreeNode, Tooltip, Tree } from "@blueprintjs/core";
+import { Position, Classes, Button, ITreeNode, Tooltip, Tree, Toaster, Intent } from "@blueprintjs/core";
 import { AppState } from "../state/appState";
+// TODO: remove any calls to shell, path
 import { File, Cache } from "../services/Fs";
 import { shell } from 'electron';
 import * as path from 'path';
+import { Logger } from "./Log";
 
 export interface FileListState {
     nodes: ITreeNode[];
@@ -13,6 +15,13 @@ export interface FileListState {
 };
 
 let i = 0;
+
+export const AppToaster = Toaster.create({
+    className: "recipe-toaster",
+    position: Position.TOP,
+});
+
+const TOAST_TIMEOUT = 2000;
 
 const INITIAL_STATE: ITreeNode[] = [
     {
@@ -78,19 +87,21 @@ interface FileListProps{
 // <FileList ... appState={appState}/> and we don't want that
 // see: https://github.com/mobxjs/mobx-react/issues/256
 interface InjectedProps extends FileListProps {
-    appState: AppState
+    appState: AppState;
+    fileCache: Cache;
 }
 
-@inject('appState')
+@inject('appState', 'fileCache')
 export class FileList extends React.Component<FileListProps, FileListState> {
     private cache: Cache;
 
     constructor(props: any) {
         super(props);
 
-        const { appState } = this.injected;
+        const { fileCache } = this.injected;
 
-        this.cache = props.type === 'local' ? appState.localCache : appState.remoteCache;
+        // this.cache = props.type === 'local' ? appState.localCache : appState.remoteCache;
+        this.cache = fileCache;
 
         this.state = {
             nodes: [],
@@ -116,9 +127,9 @@ export class FileList extends React.Component<FileListProps, FileListState> {
     private buildNodes = (files:File[]): ITreeNode<{}>[] => {
         return files
             .sort((file1, file2) => {
-                if (file2.isDir && !file1.isDir) {
+                if ((file2.isDir && !file1.isDir) ) {
                     return 1;
-                } else if (file1.isDir && !file2.isDir) {
+                } else if (!file1.name.length || (file1.isDir && !file2.isDir)) {
                     return -1;
                 } else {
                     return file1.fullname.localeCompare(file2.fullname);
@@ -141,11 +152,10 @@ export class FileList extends React.Component<FileListProps, FileListState> {
         const { appState } = this.injected;
 
         if (data.isDir) {
-            console.log('need to read dir');
-            console.log(path.resolve(path.join(data.dir, data.fullname)));
-            appState.readDirectory(path.join(appState.localCache.path, data.fullname), this.props.type);
+            Logger.log('need to read dir', path.resolve(path.join(data.dir, data.fullname)));
+            // appState.readDirectory(path.join(appState.localCache.path, data.fullname), this.props.type);
+            appState.updateCache(this.cache, path.resolve(path.join(data.dir, data.fullname)));
         } else {
-            console.log('oops, need to open file');
             shell.openItem(path.join(data.dir, data.fullname));
         }
     }
@@ -172,16 +182,23 @@ export class FileList extends React.Component<FileListProps, FileListState> {
 
     private onClipboardCopy = () => {
         const { appState } = this.injected;
-        const { nodes } = this.state;
+        const { nodes, selected } = this.state;
 
         const elements = nodes.filter((node) => node.isSelected).map((node) => { const nodeData = node.nodeData as File; return path.join(nodeData.dir, nodeData.fullname); });
 
-        appState.setClipboard(this.props.type as 'remote'|'local', elements);
+        appState.setClipboard(this.props.type as 'remote' | 'local', elements);
+
+        AppToaster.show({
+            message: `${selected} element(s) copied to the clipboard`,
+            icon: "tick",
+            intent: Intent.SUCCESS,
+            timeout: TOAST_TIMEOUT
+        });
     }
 
     public render() {
         if (this.props.type === 'local') {
-            console.log('render', i++);
+            Logger.log('render', i++);
         }
 
         let copyToClipboardClasses = 'copy';

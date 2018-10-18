@@ -4,7 +4,7 @@ import * as path from 'path';
 const Parent:File = {
     dir: '..',
     fullname: '..',
-    name: '..',
+    name: '',
     extension: '',
     cDate: new Date(),
     mDate: new Date(),
@@ -92,20 +92,22 @@ class FsSingleton {
     }
 
     readDirectory(dir: string): Promise<File[]> {
-        // console.log('calling readDirectory', dir);
+        console.log('calling readDirectory', dir);
         return new Promise((resolve, reject) => {
             fs.readdir(dir, (err, items) => {
                 if (err) {
-                    reject(`Could not read directy '${path}', reason: err`);
+                    debugger;
+                    reject(`Could not read directory '${path}', reason: ${err}`);
                 } else {
+                    const dirPath = path.resolve(dir);
                     // console.log(items);
 
                     const files: File[] = [];
 
                     for (var i = 0; i < items.length; i++) {
-                        const fullPath = path.join(path.resolve(dir), items[i]);
+                        const fullPath = path.join(dirPath, items[i]);
                         const format = path.parse(fullPath);
-                        const stats = fs.statSync(path.join(path.resolve(dir), items[i]));
+                        const stats = fs.statSync(path.join(dirPath, items[i]));
                         // console.log(items[i]);
                         const file =
                         {
@@ -124,9 +126,10 @@ class FsSingleton {
                     }
                     this.updateCache(dir, files);
 
-                    debugger;
+                    // add parent
+                    const parent = { ...Parent, dir: dirPath };
 
-                    resolve([Parent].concat(files));
+                    resolve([parent].concat(files));
                 }
             });
         });
