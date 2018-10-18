@@ -4,7 +4,7 @@ import { reaction } from 'mobx';
 import { Position, Classes, Button, ITreeNode, Tooltip, Tree, Toaster, Intent } from "@blueprintjs/core";
 import { AppState } from "../state/appState";
 // TODO: remove any calls to shell, path
-import { File, Cache } from "../services/Fs";
+import { File, Directory } from "../services/Fs";
 import { shell } from 'electron';
 import * as path from 'path';
 import { Logger } from "./Log";
@@ -88,12 +88,12 @@ interface FileListProps{
 // see: https://github.com/mobxjs/mobx-react/issues/256
 interface InjectedProps extends FileListProps {
     appState: AppState;
-    fileCache: Cache;
+    fileCache: Directory;
 }
 
 @inject('appState', 'fileCache')
 export class FileList extends React.Component<FileListProps, FileListState> {
-    private cache: Cache;
+    private cache: Directory;
 
     constructor(props: any) {
         super(props);

@@ -3,7 +3,7 @@ import { reaction } from 'mobx';
 import { inject } from 'mobx-react';
 import { InputGroup, Spinner, Icon, ControlGroup, Button } from '@blueprintjs/core';
 import { AppState } from "../state/appState";
-import { Cache, Fs } from "../services/Fs";
+import { Directory, Fs } from "../services/Fs";
 import { debounce } from '../utils/debounce';
 
 interface PathInputProps {
@@ -12,7 +12,7 @@ interface PathInputProps {
 
 interface InjectedProps extends PathInputProps {
     appState: AppState;
-    fileCache: Cache;
+    fileCache: Directory;
 }
 
 interface PathInputState {
@@ -31,11 +31,19 @@ const DEBOUNCE_DELAY = 400;
 
 @inject('appState', 'fileCache')
 export class PathInput extends React.Component<PathInputProps, PathInputState> {
-    private cache: Cache;
+    private cache: Directory;
     private direction = 0;
     private input: HTMLInputElement | null = null;
 
-    private checkPath: (event: React.FormEvent<HTMLElement>) => any;
+    private checkPath: (event: React.FormEvent<HTMLElement>) => any = debounce(
+        async (event: React.FormEvent<HTMLElement>) => {
+            try {
+                const exists = await Fs.pathExists(this.state.path);
+                this.setState({ status: exists ? 1 : -1 });
+            } catch {
+                this.setState({ status: -1 })
+            }
+        }, DEBOUNCE_DELAY);
 
     constructor(props: any) {
         super(props);
@@ -50,16 +58,6 @@ export class PathInput extends React.Component<PathInputProps, PathInputState> {
         this.cache = fileCache;
 
         this.installReaction();
-        this.checkPath = debounce(
-            (event: React.FormEvent<HTMLElement>) => {
-                // event.persist();
-                if (Fs.pathExists(this.state.path)) {
-                    this.setState({ status: 1 });
-                } else {
-                    console.log('directory doesn\'t exists!');
-                    this.setState({ status: -1 });
-                }
-            }, DEBOUNCE_DELAY);
     }
 
     private get injected() {

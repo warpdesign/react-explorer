@@ -25,73 +25,29 @@ export interface File {
     isDir: boolean;
 }
 
-export interface Cache {
+export interface Directory {
     path: string;
     files: File[];
 }
 
-interface Watcher {
-    path: string,
-    ref: fs.FSWatcher
-};
+interface FsInterface {
+    readDirectory: (dir: string) => Promise<File[]>;
+    pathExists: (path: string) => Promise<boolean>;
+}
 
-class FsSingleton {
-    cachedContents: Cache[] = new Array();
-    watchers: Watcher[] = new Array();
-
-    updateCache(path:string, files: File[]) {
-        const cache = this.cachedContents.find((cache) => cache.path === path);
-
-        if (!cache) {
-            const cache = {
-                path: path,
-                files
-            };
-
-            this.cachedContents.push(cache);
-        } else {
-            cache.files = files;
-        }
-    }
-
-    getWatcher(path: string): Watcher | null {
-        return this.watchers.find((watcher) => watcher.path === path);
-    };
-
-    watch(path:string, fn: any) {
-        if (!this.getWatcher(path)) {
-            const watcher = fs.watch(path, {
-                recursive: false
-            }, fn);
-
-            this.watchers.push({
-                path: path,
-                ref: watcher
-            });
-        }
-    };
-
-    stopWatching(path:string) {
-        const watcher = this.getWatcher(path);
-        if (watcher) {
-            watcher.ref.close();
-            const index = this.watchers.findIndex((w) => w === watcher);
-            if (index > -1) {
-                this.watchers.splice(index, 1);
+export const Fs: FsInterface = {
+    pathExists: (path: string): Promise<boolean> => {
+        return new Promise((resolve, reject) => {
+            try {
+                const stat = fs.statSync(path);
+                resolve(stat.isDirectory());
+            } catch (err) {
+                reject(false);
             }
-        }
-    };
+        });
+    },
 
-    pathExists(path:string):boolean {
-        try {
-            const stat = fs.statSync(path);
-            return stat.isDirectory();
-        } catch {
-            return false;
-        }
-    }
-
-    readDirectory(dir: string): Promise<File[]> {
+    readDirectory: (dir: string): Promise<File[]> => {
         console.log('calling readDirectory', dir);
         return new Promise((resolve, reject) => {
             fs.readdir(dir, (err, items) => {
@@ -124,7 +80,6 @@ class FsSingleton {
 
                         files.push(file);
                     }
-                    this.updateCache(dir, files);
 
                     // add parent
                     const parent = { ...Parent, dir: dirPath };
@@ -133,7 +88,5 @@ class FsSingleton {
                 }
             });
         });
-    };
-}
-
-export const Fs = new FsSingleton();
+    }
+};

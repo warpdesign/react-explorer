@@ -3,7 +3,7 @@ import { observer, inject, Provider } from 'mobx-react';
 import { PathInput } from './PathInput';
 import { FileList } from './FileList';
 import { AppState } from "../state/appState";
-import { Cache } from "../services/Fs";
+import { Directory } from "../services/Fs";
 
 interface SideViewProps {
     type: string;
@@ -14,7 +14,7 @@ interface InjectedProps extends SideViewProps{
 }
 
 interface SideViewState{
-    fileCache: Cache;
+    fileCache: Directory;
 }
 
 @inject('appState')
@@ -24,7 +24,7 @@ export class SideView extends React.Component<SideViewProps, SideViewState>{
         super(props);
 
         const { appState } = this.injected;
-        const cache: Cache = appState.addCache();
+        const cache: Directory = appState.addCache();
 
         this.state = {
             fileCache: cache

@@ -36,26 +36,24 @@ export class LogUI extends React.Component<any, LogUIState> {
     private consoleDiv: HTMLDivElement;
     private lastScrollTop: number = 0;
     private keepScrollPos: boolean = false;
-    private checkScroll: (event: React.FormEvent<HTMLElement>) => void;
+    private checkScroll: (event: React.FormEvent<HTMLElement>) => void = debounce(
+        (event: React.FormEvent<HTMLElement>) => {
+            const scrollTop = this.consoleDiv.scrollTop;
+            if (!scrollTop || scrollTop !== (this.consoleDiv.scrollHeight - this.consoleDiv.clientHeight)) {
+                this.keepScrollPos = true;
+            } else {
+                this.keepScrollPos = false;
+            }
+
+            // if state was visible, first keep scroll position
+            this.lastScrollTop = scrollTop;
+        }, DEBOUNCE_DELAY);
 
     constructor(props: {}) {
         super(props);
         this.state = {
             visible: false
         };
-
-        this.checkScroll = debounce(
-            (event: React.FormEvent<HTMLElement>) => {
-                const scrollTop = this.consoleDiv.scrollTop;
-                if (!scrollTop || scrollTop !== (this.consoleDiv.scrollHeight - this.consoleDiv.clientHeight)) {
-                    this.keepScrollPos = true;
-                } else {
-                    this.keepScrollPos = false;
-                }
-
-                // if state was visible, first keep scroll position
-                this.lastScrollTop = scrollTop;
-            }, DEBOUNCE_DELAY);
     }
 
     onKeyUp = (e: KeyboardEvent) => {

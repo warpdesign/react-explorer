@@ -1,5 +1,5 @@
 import { action, observable, runInAction, computed, autorun, isObservableMap, isObservable } from 'mobx';
-import { Cache, Fs } from '../services/Fs';
+import { Directory, Fs } from '../services/Fs';
 import * as path from 'path';
 
 interface Clipboard {
@@ -12,13 +12,13 @@ export class AppState {
     readingLocal: Promise<Array<any>>;
 
     /** new stuff */
-    caches: Cache[] = new Array();
+    caches: Directory[] = new Array();
 
     // TODO: type ??
     @action
     addCache(type: string = 'local', path: string = '.') {
         console.log('addCache');
-        const cache:Cache = observable({
+        const cache:Directory = observable({
             path,
             files: new Array()
         });
@@ -30,7 +30,7 @@ export class AppState {
 
     // TODO: type ??
     @action
-    updateCache(cache: Cache, newPath: string) {
+    updateCache(cache: Directory, newPath: string) {
         Fs.readDirectory(newPath)
             .then((files) => {
                 console.log('yeah, got files 2', files);
