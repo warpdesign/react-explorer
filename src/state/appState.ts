@@ -1,7 +1,6 @@
 import { action, observable, runInAction, computed, autorun, isObservableMap, isObservable } from 'mobx';
 import { Cache, Fs } from '../services/Fs';
 import * as path from 'path';
-import { observer } from 'mobx-react';
 
 interface Clipboard {
     source: 'local' | 'remote';

@@ -29,6 +29,7 @@
     "@types/react": "^16.4.14",
     "@types/react-dom": "^16.0.8",
     "electron-reload": "^1.2.5",
+    "ftp": "^0.3.10",
     "mobx": "^3.2.1",
     "mobx-react": "^4.2.2",
     "mobx-react-devtools": "^4.2.15",

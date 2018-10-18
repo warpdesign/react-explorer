@@ -1,0 +1,26 @@
+.console{
+    position:absolute;
+    z-index:1;
+    background-color:rgba(255,255,255,.9);
+    padding:10px;
+    left:0;
+    right:0;
+    bottom:-40px;
+    height:0;
+    overflow:auto;
+    transition-property:height;
+    transition-timing-function: ease-in-out;
+    transition-duration:.3s;
+    box-shadow:0 -5px 40px rgba(0,0,0,.4);
+}
+
+.console.visible{
+    height:200px;
+}
+
+.console .consoleDate{
+    display:inline-block;
+    width:80px;
+    color:#aaa;
+    overflow:hidden;
+}

@@ -1,5 +1,5 @@
 import * as React from "react";
-import { observer, inject } from 'mobx-react';
+import { inject } from 'mobx-react';
 import { reaction } from 'mobx';
 import { Position, Classes, Button, ITreeNode, Tooltip, Tree, Toaster, Intent } from "@blueprintjs/core";
 import { AppState } from "../state/appState";
@@ -19,6 +19,8 @@ export const AppToaster = Toaster.create({
     className: "recipe-toaster",
     position: Position.TOP,
 });
+
+const TOAST_TIMEOUT = 2000;
 
 const INITIAL_STATE: ITreeNode[] = [
     {
@@ -89,7 +91,6 @@ interface InjectedProps extends FileListProps {
 }
 
 @inject('appState', 'fileCache')
-@observer
 export class FileList extends React.Component<FileListProps, FileListState> {
     private cache: Cache;
 
@@ -190,7 +191,7 @@ export class FileList extends React.Component<FileListProps, FileListState> {
             message: `${selected} element(s) copied to the clipboard`,
             icon: "tick",
             intent: Intent.SUCCESS,
-            timeout: 2000
+            timeout: TOAST_TIMEOUT
         });
     }
 

@@ -31,7 +31,6 @@ const DEBOUNCE_DELAY = 400;
 function debounce(a: any, b: any, c?: any) { var d: any, e: any; return function () { function h() { d = null, c || (e = a.apply(f, g)) } var f = this, g = arguments; return clearTimeout(d), d = setTimeout(h, b), c && !d && (e = a.apply(f, g)), e } };
 
 @inject('appState', 'fileCache')
-@observer
 export class PathInput extends React.Component<PathInputProps, PathInputState> {
     private cache: Cache;
     private direction = 0;
@@ -147,7 +146,12 @@ export class PathInput extends React.Component<PathInputProps, PathInputState> {
     }
 
     private onKeyUp = (event: React.KeyboardEvent<HTMLElement>) => {
+        console.log('path keyup');
         if (event.keyCode === KEYS.Escape) {
+            // since React events are attached to the root document
+            // event already has bubbled up so we must stop
+            // its immediate propagation
+            event.nativeEvent.stopImmediatePropagation();
             // restore current path from appState
             this.setState({ path: this.cache.path, status: 0 });
             // lose focus
