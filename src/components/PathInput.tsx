@@ -158,6 +158,10 @@ export class PathInput extends React.Component<PathInputProps, PathInputState> {
         }
     }
 
+    private onReload = () => {
+        this.navHistory(0, true);
+    }
+
     private refHandler = (input: HTMLInputElement) => {
         this.input = input;
     }
@@ -175,6 +179,7 @@ export class PathInput extends React.Component<PathInputProps, PathInputState> {
             <ControlGroup>
                 <Button disabled={!canGoBackward} onClick={this.onBackward} rightIcon="chevron-left"></Button>
                 <Button disabled={!canGoForward} onClick={this.onForward} rightIcon="chevron-right"></Button>
+                <Button onClick={this.onReload} rightIcon="repeat"></Button>
                 <InputGroup
                         disabled={disabled}
                         leftIcon={icon}
