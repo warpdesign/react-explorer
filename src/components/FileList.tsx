@@ -7,6 +7,7 @@ import { AppState } from "../state/appState";
 import { File, Cache } from "../services/Fs";
 import { shell } from 'electron';
 import * as path from 'path';
+import { Logger } from "./Log";
 
 export interface FileListState {
     nodes: ITreeNode[];
@@ -151,7 +152,7 @@ export class FileList extends React.Component<FileListProps, FileListState> {
         const { appState } = this.injected;
 
         if (data.isDir) {
-            console.log('need to read dir', path.resolve(path.join(data.dir, data.fullname)));
+            Logger.log('need to read dir', path.resolve(path.join(data.dir, data.fullname)));
             // appState.readDirectory(path.join(appState.localCache.path, data.fullname), this.props.type);
             appState.updateCache(this.cache, path.resolve(path.join(data.dir, data.fullname)));
         } else {
@@ -197,7 +198,7 @@ export class FileList extends React.Component<FileListProps, FileListState> {
 
     public render() {
         if (this.props.type === 'local') {
-            console.log('render', i++);
+            Logger.log('render', i++);
         }
 
         let copyToClipboardClasses = 'copy';
