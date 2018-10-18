@@ -1,7 +1,11 @@
+body{
+    margin:0;
+    overflow:hidden;
+}
+
 .bp3-tree-node-caret-none{
     min-width:10px;
 }
-
 
 #reload{
     position:absolute;
@@ -15,7 +19,7 @@
     justify-content: center;
 }
 
-#root > div{
+#root > .sideview{
     margin:10px;
     flex-grow:1;
 }
