@@ -4,12 +4,13 @@ import { Provider } from 'mobx-react';
 import { FocusStyleManager } from "@blueprintjs/core";
 import DevTools from 'mobx-react-devtools';
 
-const css = require("@blueprintjs/core/lib/css/blueprint.css");
-const bcss = require("@blueprintjs/icons/lib/css/blueprint-icons.css");
-const rcss = require("./css/main.css");
+require("@blueprintjs/core/lib/css/blueprint.css");
+require("@blueprintjs/icons/lib/css/blueprint-icons.css");
+require("./css/main.css");
 
 import { SideView } from './components/SideView';
 import { AppState } from './state/appState';
+import { LogUI } from './components/Log';
 
 import { remote } from 'electron';
 
@@ -23,6 +24,7 @@ ReactDOM.render(
         <React.Fragment>
             <SideView type="local" />
             <SideView type="remote" />
+            <LogUI></LogUI>
         </React.Fragment>
     </Provider>,
     document.getElementById('root'));
@@ -34,6 +36,3 @@ window.addEventListener('load', () => {
         remote.getCurrentWebContents().reloadIgnoringCache();
     });
 });
-
-// hardcoded for now
-appState.readDirectory('.', 'local');

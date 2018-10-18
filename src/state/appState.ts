@@ -1,4 +1,4 @@
-import { action, observable, runInAction } from 'mobx';
+import { action, observable, runInAction, computed, autorun, isObservableMap, isObservable } from 'mobx';
 import { Cache, Fs } from '../services/Fs';
 import * as path from 'path';
 
@@ -11,17 +11,36 @@ export class AppState {
     readingRemote: Promise<Array<any>>;
     readingLocal: Promise<Array<any>>;
 
-    @observable
-    localCache: Cache = {
-        path: '.',
-        files: new Array()
-    };
+    /** new stuff */
+    caches: Cache[] = new Array();
 
-    @observable
-    remoteCache: Cache = {
-        path: 'ftp://192.168.0.1',
-        files: new Array()
-    };
+    // TODO: type ??
+    @action
+    addCache(type: string = 'local', path: string = '.') {
+        console.log('addCache');
+        const cache:Cache = observable({
+            path,
+            files: new Array()
+        });
+
+        this.caches.push(cache);
+
+        return cache;
+    }
+
+    // TODO: type ??
+    @action
+    updateCache(cache: Cache, newPath: string) {
+        Fs.readDirectory(newPath)
+            .then((files) => {
+                console.log('yeah, got files 2', files);
+                runInAction(() => {
+                    cache.files = files;
+                    cache.path = path.resolve(newPath);
+                });
+            });
+    }
+    /** /new */
 
     // global
     @observable
@@ -31,23 +50,7 @@ export class AppState {
     };
 
     @action
-    readDirectory(dir: string, type: string = 'local') {
-        if (type === 'local') {
-            this.readingLocal = Fs.readDirectory(dir);
-
-            this.readingLocal.then((files) => {
-                console.log('yeah, got files', files);
-                runInAction(() => {
-                    this.localCache.files = files;
-                    this.localCache.path = path.resolve(dir);
-                });
-            });
-        }
-    }
-
-    @action
     setClipboard(source: 'local' | 'remote', elements: string[]) {
-        debugger;
         this.clipboard = { source, elements };
     }
 

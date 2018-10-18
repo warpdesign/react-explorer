@@ -1,0 +1,36 @@
+.console{
+    overflow:auto;
+    position:absolute;
+    z-index:1;
+    font-family: "Lucida Grande","sans-serif";
+    font-size:12px;
+    background-color:rgba(255,255,255,.9);
+    color:#656565;
+    padding:0;
+    left:0;
+    right:0;
+    bottom:0;
+    height:200px;
+    transform:translateY(220px);
+    overflow:auto;
+    transition-property:transform;
+    transition-timing-function: ease-in-out;
+    transition-duration:.3s;
+    box-shadow:0 -5px 40px rgba(0,0,0,.4);
+}
+
+.console.visible{
+    transform:translateY(0);
+}
+
+.console .consoleDate{
+    display:inline-block;
+    width:80px;
+    color:#aaa;
+    overflow:hidden;
+}
+
+.console .consoleLine{
+    padding: 4px 25px;
+    border-bottom:1px solid rgb(232,230,230);
+}

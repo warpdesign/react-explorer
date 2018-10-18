@@ -1,9 +1,10 @@
 import * as React from "react";
 import { reaction } from 'mobx';
-import { observer, inject } from 'mobx-react';
+import { inject } from 'mobx-react';
 import { InputGroup, Spinner, Icon, ControlGroup, Button } from '@blueprintjs/core';
 import { AppState } from "../state/appState";
 import { Cache, Fs } from "../services/Fs";
+import { debounce } from '../utils/debounce';
 
 interface PathInputProps {
     type: string;
@@ -11,6 +12,7 @@ interface PathInputProps {
 
 interface InjectedProps extends PathInputProps {
     appState: AppState;
+    fileCache: Cache;
 }
 
 interface PathInputState {
@@ -20,13 +22,19 @@ interface PathInputState {
     current: number
 }
 
-function debounce(a: any, b: any, c?: any) { var d: any, e: any; return function () { function h() { d = null, c || (e = a.apply(f, g)) } var f = this, g = arguments; return clearTimeout(d), d = setTimeout(h, b), c && !d && (e = a.apply(f, g)), e } };
+enum KEYS {
+    Escape = 27,
+    Enter = 13
+};
 
-@inject('appState')
-@observer
+const DEBOUNCE_DELAY = 400;
+
+@inject('appState', 'fileCache')
 export class PathInput extends React.Component<PathInputProps, PathInputState> {
     private cache: Cache;
     private direction = 0;
+    private input: HTMLInputElement | null = null;
+
     private checkPath: (event: React.FormEvent<HTMLElement>) => any;
 
     constructor(props: any) {
@@ -37,9 +45,9 @@ export class PathInput extends React.Component<PathInputProps, PathInputState> {
             history: new Array(),
             current: -1
         };
-        const { appState } = this.injected;
+        const { fileCache } = this.injected;
 
-        this.cache = props.type === 'local' ? appState.localCache : appState.remoteCache;
+        this.cache = fileCache;
 
         this.installReaction();
         this.checkPath = debounce(
@@ -51,7 +59,7 @@ export class PathInput extends React.Component<PathInputProps, PathInputState> {
                     console.log('directory doesn\'t exists!');
                     this.setState({ status: -1 });
                 }
-            }, 400);
+            }, DEBOUNCE_DELAY);
     }
 
     private get injected() {
@@ -105,7 +113,8 @@ export class PathInput extends React.Component<PathInputProps, PathInputState> {
         } else {
             const { appState } = this.injected;
             const path = history[current + dir];
-            appState.readDirectory(path, this.props.type);
+            // appState.readDirectory(path, this.props.type);
+            appState.updateCache(this.cache, path);
         }
     }
 
@@ -130,8 +139,29 @@ export class PathInput extends React.Component<PathInputProps, PathInputState> {
     private onSubmit = () => {
         if (this.cache.path !== this.state.path && Fs.pathExists(this.state.path)) {
             const { appState } = this.injected;
-            appState.readDirectory(this.state.path, this.props.type);
+            // appState.readDirectory(this.state.path, this.props.type);
+            appState.updateCache(this.cache, this.state.path);
         }
+    }
+
+    private onKeyUp = (event: React.KeyboardEvent<HTMLElement>) => {
+        console.log('path keyup');
+        if (event.keyCode === KEYS.Escape) {
+            // since React events are attached to the root document
+            // event already has bubbled up so we must stop
+            // its immediate propagation
+            event.nativeEvent.stopImmediatePropagation();
+            // restore current path from appState
+            this.setState({ path: this.cache.path, status: 0 });
+            // lose focus
+            this.input.blur();
+        } else if (event.keyCode === KEYS.Enter) {
+            this.onSubmit();
+        }
+    }
+
+    private refHandler = (input: HTMLInputElement) => {
+        this.input = input;
     }
 
     public render() {
@@ -151,10 +181,12 @@ export class PathInput extends React.Component<PathInputProps, PathInputState> {
                         disabled={disabled}
                         leftIcon={icon}
                         onChange={this.onPathChange}
+                        onKeyUp={this.onKeyUp}
                         placeholder="Enter Path to load"
                         rightElement={loadingSpinner}
                         value={path}
                         intent={intent}
+                        inputRef={this.refHandler}
                 />
                 <Button rightIcon="arrow-right" disabled={status === -1} onClick={this.onSubmit} intent="primary" />
             </ControlGroup>
