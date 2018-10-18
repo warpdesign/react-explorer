@@ -1,13 +1,9 @@
 import * as React from 'react';
 import { observer } from 'mobx-react';
 import { observable, runInAction } from 'mobx';
+import { debounce } from '../utils/debounce';
 
 require('../css/log.css');
-
-interface LogLine{
-    line: string;
-    date: Date
-}
 
 export const Logger = {
     logs: observable.array(new Array()),
@@ -32,29 +28,38 @@ interface LogUIState{
     visible: boolean;
 }
 
-Logger.log('dtc', 3);
-
 const ESCAPE_KEY = 27;
+const DEBOUNCE_DELAY = 500;
 
 @observer
 export class LogUI extends React.Component<any, LogUIState> {
     private consoleDiv: HTMLDivElement;
     private lastScrollTop: number = 0;
-    private keepBottom: boolean = false;
+    private keepScrollPos: boolean = false;
+    private checkScroll: (event: React.FormEvent<HTMLElement>) => void;
 
     constructor(props: {}) {
         super(props);
         this.state = {
             visible: false
         };
+
+        this.checkScroll = debounce(
+            (event: React.FormEvent<HTMLElement>) => {
+                const scrollTop = this.consoleDiv.scrollTop;
+                if (!scrollTop || scrollTop !== (this.consoleDiv.scrollHeight - this.consoleDiv.clientHeight)) {
+                    this.keepScrollPos = true;
+                } else {
+                    this.keepScrollPos = false;
+                }
+
+                // if state was visible, first keep scroll position
+                this.lastScrollTop = scrollTop;
+            }, DEBOUNCE_DELAY);
     }
 
     onKeyUp = (e: KeyboardEvent) => {
         if (e.keyCode === ESCAPE_KEY) {
-            // if state was visible, first keep scroll position
-            if (this.state.visible) {
-                this.lastScrollTop = this.consoleDiv.scrollTop;
-            }
             this.setState({ visible: !this.state.visible });
         }
     }
@@ -67,23 +72,17 @@ export class LogUI extends React.Component<any, LogUIState> {
         document.removeEventListener('keyup', this.onKeyUp);
     }
 
-    componentWillUpdate() {
-        if (this.consoleDiv.scrollTop === this.consoleDiv.scrollHeight) {
-            this.keepBottom = true;
-        } else {
-            this.keepBottom = false;
-        }
-    }
-
     componentDidUpdate() {
-        this.consoleDiv.scrollTop = this.keepBottom && this.consoleDiv.scrollHeight || this.lastScrollTop;
+        console.log('did update', this.keepScrollPos, this.lastScrollTop);
+        // here we keep previous scroll position in case scrolling was anywhere but at the end
+        this.consoleDiv.scrollTop = this.keepScrollPos ? this.lastScrollTop : (this.consoleDiv.scrollHeight - this.consoleDiv.clientHeight);
     }
 
     public render() {
         const classes = 'console ' + (this.state.visible && 'visible');
 
         return (
-            <div ref={(el) => { this.consoleDiv = el; }} className={`${classes}`}>
+            <div ref={(el) => { this.consoleDiv = el; }} onScroll={this.checkScroll} className={`${classes}`}>
             {
                 Logger.logs.map((line, i) => {
                         return <div key={i} className="consoleLine">

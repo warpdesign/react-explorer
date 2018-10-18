@@ -1,9 +1,10 @@
 import * as React from "react";
 import { reaction } from 'mobx';
-import { observer, inject } from 'mobx-react';
+import { inject } from 'mobx-react';
 import { InputGroup, Spinner, Icon, ControlGroup, Button } from '@blueprintjs/core';
 import { AppState } from "../state/appState";
 import { Cache, Fs } from "../services/Fs";
+import { debounce } from '../utils/debounce';
 
 interface PathInputProps {
     type: string;
@@ -27,8 +28,6 @@ enum KEYS {
 };
 
 const DEBOUNCE_DELAY = 400;
-
-function debounce(a: any, b: any, c?: any) { var d: any, e: any; return function () { function h() { d = null, c || (e = a.apply(f, g)) } var f = this, g = arguments; return clearTimeout(d), d = setTimeout(h, b), c && !d && (e = a.apply(f, g)), e } };
 
 @inject('appState', 'fileCache')
 export class PathInput extends React.Component<PathInputProps, PathInputState> {
