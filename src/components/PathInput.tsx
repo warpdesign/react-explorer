@@ -3,11 +3,10 @@ import { reaction } from 'mobx';
 import { inject } from 'mobx-react';
 import { InputGroup, Spinner, Icon, ControlGroup, Button } from '@blueprintjs/core';
 import { AppState } from "../state/appState";
-import { Directory, Fs } from "../services/Fs";
+import { Directory, Fs, DirectoryType } from "../services/Fs";
 import { debounce } from '../utils/debounce';
 
 interface PathInputProps {
-    type: string;
 }
 
 interface InjectedProps extends PathInputProps {
@@ -19,7 +18,8 @@ interface PathInputState {
     status: -1 | 0 | 1;
     path: string;
     history: string[],
-    current: number
+    current: number,
+    type: DirectoryType
 }
 
 enum KEYS {
@@ -30,7 +30,7 @@ enum KEYS {
 const DEBOUNCE_DELAY = 400;
 
 @inject('appState', 'fileCache')
-export class PathInput extends React.Component<PathInputProps, PathInputState> {
+export class PathInput extends React.Component<{}, PathInputState> {
     private cache: Directory;
     private direction = 0;
     private input: HTMLInputElement | null = null;
@@ -47,13 +47,16 @@ export class PathInput extends React.Component<PathInputProps, PathInputState> {
 
     constructor(props: any) {
         super(props);
+
+        const { fileCache } = this.injected;
+
         this.state = {
             status: 0,
             path: '',
             history: new Array(),
-            current: -1
+            current: -1,
+            type: fileCache.type
         };
-        const { fileCache } = this.injected;
 
         this.cache = fileCache;
 
@@ -167,12 +170,12 @@ export class PathInput extends React.Component<PathInputProps, PathInputState> {
     }
 
     public render() {
-        const { current, history, status, path } = this.state;
+        const { current, history, status, path, type } = this.state;
         const canGoBackward = current > 0;
         const canGoForward = history.length > 1 && current < history.length - 1;
         const disabled = false;
         const loadingSpinner = false ? <Spinner size={Icon.SIZE_STANDARD} /> : undefined;
-        const icon = this.props.type === 'local' && 'home' || 'globe';
+        const icon = type === DirectoryType.LOCAL && 'home' || 'globe';
         const intent = status === -1 ? 'danger' : 'none';
 
         return (

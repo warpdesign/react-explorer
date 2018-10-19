@@ -4,7 +4,7 @@ import { reaction } from 'mobx';
 import { Position, Classes, Button, ITreeNode, Tooltip, Tree, Toaster, Intent } from "@blueprintjs/core";
 import { AppState } from "../state/appState";
 // TODO: remove any calls to shell, path
-import { File, Directory } from "../services/Fs";
+import { File, Directory, DirectoryType } from "../services/Fs";
 import { shell } from 'electron';
 import * as path from 'path';
 import { Logger } from "./Log";
@@ -12,6 +12,7 @@ import { Logger } from "./Log";
 export interface FileListState {
     nodes: ITreeNode[];
     selected: number;
+    type: DirectoryType
 };
 
 let i = 0;
@@ -76,7 +77,6 @@ const INITIAL_STATE: ITreeNode[] = [
 ];
 
 interface FileListProps{
-    type: string
 }
 
 // Here we extend our props in order to keep the injected props private
@@ -92,7 +92,7 @@ interface InjectedProps extends FileListProps {
 }
 
 @inject('appState', 'fileCache')
-export class FileList extends React.Component<FileListProps, FileListState> {
+export class FileList extends React.Component<{}, FileListState> {
     private cache: Directory;
 
     constructor(props: any) {
@@ -105,7 +105,8 @@ export class FileList extends React.Component<FileListProps, FileListState> {
 
         this.state = {
             nodes: [],
-            selected: 0
+            selected: 0,
+            type: fileCache.type
         };
 
         this.installReaction();
@@ -186,7 +187,7 @@ export class FileList extends React.Component<FileListProps, FileListState> {
 
         const elements = nodes.filter((node) => node.isSelected).map((node) => { const nodeData = node.nodeData as File; return path.join(nodeData.dir, nodeData.fullname); });
 
-        appState.setClipboard(this.props.type as 'remote' | 'local', elements);
+        appState.setClipboard(this.state.type, elements);
 
         AppToaster.show({
             message: `${selected} element(s) copied to the clipboard`,
@@ -197,7 +198,7 @@ export class FileList extends React.Component<FileListProps, FileListState> {
     }
 
     public render() {
-        if (this.props.type === 'local') {
+        if (this.state.type === DirectoryType.LOCAL) {
             Logger.log('render', i++);
         }
 

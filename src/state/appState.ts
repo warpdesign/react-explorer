@@ -1,9 +1,9 @@
 import { action, observable, runInAction, computed, autorun, isObservableMap, isObservable } from 'mobx';
-import { Directory, Fs } from '../services/Fs';
+import { Directory, Fs, DirectoryType } from '../services/Fs';
 import * as path from 'path';
 
 interface Clipboard {
-    source: 'local' | 'remote';
+    source: DirectoryType;
     elements: string[];
 }
 
@@ -14,13 +14,13 @@ export class AppState {
     /** new stuff */
     caches: Directory[] = new Array();
 
-    // TODO: type ??
     @action
-    addCache(type: string = 'local', path: string = '.') {
+    addCache(type: DirectoryType = DirectoryType.LOCAL, path: string = '.') {
         console.log('addCache');
         const cache:Directory = observable({
             path,
-            files: new Array()
+            files: new Array(),
+            type
         });
 
         this.caches.push(cache);
@@ -45,12 +45,12 @@ export class AppState {
     // global
     @observable
     clipboard: Clipboard = {
-        source: 'local',
+        source: DirectoryType.LOCAL,
         elements: []
     };
 
     @action
-    setClipboard(source: 'local' | 'remote', elements: string[]) {
+    setClipboard(source: DirectoryType, elements: string[]) {
         this.clipboard = { source, elements };
     }
 

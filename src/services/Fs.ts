@@ -28,6 +28,12 @@ export interface File {
 export interface Directory {
     path: string;
     files: File[];
+    type: DirectoryType
+}
+
+export enum DirectoryType {
+    LOCAL = 0,
+    REMOTE
 }
 
 interface FsInterface {

@@ -31,6 +31,29 @@
 }
 
 .console .consoleLine{
+    position:relative;
     padding: 4px 25px;
     border-bottom:1px solid rgb(232,230,230);
+}
+
+.console .warn{
+    background-color:rgb(247, 247, 205);
+    color:rgb(142, 133, 0)
+}
+
+.console .error{
+    color:rgb(226, 12, 12);
+    background-color:rgb(255, 230, 230);
+}
+
+.console .warn:before, .console .error:before{
+    content: '⚠️';
+    position:absolute;
+    left:0;
+    text-align: center;
+    width: 25px;
+}
+
+.console .error:before{
+    content:'❌';
 }

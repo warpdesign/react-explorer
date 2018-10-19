@@ -8,21 +8,32 @@ require('../css/log.css');
 export const Logger = {
     logs: observable.array(new Array()),
     log(...lines: (string | number)[]) {
-        // since this method may be called from a render
-        // function we wrapp it into a setTimeout to
-        // be sure the state is modified *outside*
-        // of any render function
-        setTimeout(() => {
-            console.log.apply(undefined, lines);
-            runInAction(() => {
-                this.logs.push({
-                    date: new Date(),
-                    line: lines.join(' ')
-                });
-            });
-        })
+        pushLog(lines, 'none');
+    },
+    warn(...lines: (string | number)[]) {
+        pushLog(lines, 'warn');
+    },
+    error(...lines: (string | number)[]) {
+        pushLog(lines, 'error');
     }
 };
+
+function pushLog(lines: (string|number)[], intent: 'none' | 'warn' | 'error') {
+    // since this method may be called from a render
+    // function we wrap it into a setTimeout to
+    // be sure the state is modified *outside*
+    // of any render function
+    setTimeout(() => {
+        console.log.apply(undefined, lines);
+        runInAction(() => {
+            Logger.logs.push({
+                date: new Date(),
+                line: lines.join(' '),
+                intent: intent
+            });
+        });
+    });
+}
 
 interface LogUIState{
     visible: boolean;
@@ -82,7 +93,7 @@ export class LogUI extends React.Component<any, LogUIState> {
             <div ref={(el) => { this.consoleDiv = el; }} onScroll={this.checkScroll} className={`${classes}`}>
             {
                 Logger.logs.map((line, i) => {
-                        return <div key={i} className="consoleLine">
+                        return <div key={i} className={`consoleLine ${line.intent}`}>
                         {/* <span className="consoleDate">{line.date}</span> */}
                         {line.line}
                     </div>
