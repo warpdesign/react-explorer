@@ -164,6 +164,8 @@ export class FileList extends React.Component<{}, FileListState> {
     private onNodeClick = (nodeData: ITreeNode, _nodePath: number[], e: React.MouseEvent<HTMLElement>) => {
         const originallySelected = nodeData.isSelected;
         const { nodes, selected } = this.state;
+        const { fileCache, appState } = this.injected;
+
         let newSelected = selected;
 
         if (!e.shiftKey) {
@@ -179,6 +181,7 @@ export class FileList extends React.Component<{}, FileListState> {
         }
 
         this.setState({ nodes, selected: newSelected });
+        appState.updateSelection(fileCache, newSelected);
     };
 
     private onClipboardCopy = () => {

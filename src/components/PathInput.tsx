@@ -6,6 +6,8 @@ import { AppState } from "../state/appState";
 import { Directory, Fs, DirectoryType } from "../services/Fs";
 import { debounce } from '../utils/debounce';
 import { FileMenu } from "./FileMenu";
+import { MakedirDialog } from "./MakedirDialog";
+import { Logger } from "./Log";
 
 interface PathInputProps {
 }
@@ -20,7 +22,9 @@ interface PathInputState {
     path: string;
     history: string[],
     current: number,
-    type: DirectoryType
+    type: DirectoryType,
+    selectedItems: number,
+    isOpen: boolean
 }
 
 enum KEYS {
@@ -56,19 +60,21 @@ export class PathInput extends React.Component<{}, PathInputState> {
             path: '',
             history: new Array(),
             current: -1,
-            type: fileCache.type
+            type: fileCache.type,
+            isOpen: false,
+            selectedItems: 0
         };
 
         this.cache = fileCache;
 
-        this.installReaction();
+        this.installReactions();
     }
 
     private get injected() {
         return this.props as InjectedProps;
     }
 
-    private installReaction() {
+    private installReactions() {
         const reaction1 = reaction(
             () => { return this.cache.path },
             path => {
@@ -81,6 +87,13 @@ export class PathInput extends React.Component<{}, PathInputState> {
                     this.direction = 0;
                 }
                 this.setState({ path, status });
+            }
+        );
+
+        const reaction2 = reaction(
+        () => { return this.cache.selected },
+        selectedItems => {
+            this.setState({ selectedItems });
             }
         );
     }
@@ -170,22 +183,39 @@ export class PathInput extends React.Component<{}, PathInputState> {
         this.input = input;
     }
 
+    private makedir = (dirName: string) => {
+        this.setState({isOpen: false});        
+        Logger.log('yo! lets create a directory :)', dirName);
+    }
+
+    private onFileAction = (action: string) => {
+        switch(action) {
+            case 'makedir':
+                Logger.log('need to make new directory :)');
+                this.setState({isOpen: true});                
+                break;
+            default:
+                Logger.warn('action unknown', action);
+        }
+    }
+
     public render() {
         const { current, history, status, path, type } = this.state;
+        const { fileCache } = this.injected;
         const canGoBackward = current > 0;
         const canGoForward = history.length > 1 && current < history.length - 1;
         const disabled = false;
-        const loadingSpinner = false ? <Spinner size={Icon.SIZE_STANDARD} /> : undefined;
+        // const loadingSpinner = false ? <Spinner size={Icon.SIZE_STANDARD} /> : undefined;
+        const reloadButton = <Button className="small" onClick={this.onReload} minimal rightIcon="repeat"></Button>;
         const icon = type === DirectoryType.LOCAL && 'home' || 'globe';
         const intent = status === -1 ? 'danger' : 'none';
 
         return (
             <ControlGroup>
                 <ButtonGroup style={{ minWidth: 120 }}>
-                <Button disabled={!canGoBackward} onClick={this.onBackward} rightIcon="chevron-left"></Button>
-                <Button disabled={!canGoForward} onClick={this.onForward} rightIcon="chevron-right"></Button>
-                <Button onClick={this.onReload} rightIcon="repeat"></Button>
-                    <Popover content={<FileMenu />}>
+                    <Button disabled={!canGoBackward} onClick={this.onBackward} rightIcon="chevron-left"></Button>
+                    <Button disabled={!canGoForward} onClick={this.onForward} rightIcon="chevron-right"></Button>
+                    <Popover content={<FileMenu selectedItems={fileCache.selected} onFileAction={this.onFileAction} />}>
                         <Button rightIcon="caret-down" icon="cog" text="" />
                     </Popover>
                 </ButtonGroup>
@@ -195,11 +225,12 @@ export class PathInput extends React.Component<{}, PathInputState> {
                         onChange={this.onPathChange}
                         onKeyUp={this.onKeyUp}
                         placeholder="Enter Path to load"
-                        rightElement={loadingSpinner}
+                        rightElement={reloadButton}
                         value={path}
                         intent={intent}
                         inputRef={this.refHandler}
                 />
+                <MakedirDialog isOpen={this.state.isOpen} onClose={this.makedir} ></MakedirDialog>
                 <Button rightIcon="arrow-right" disabled={status === -1} onClick={this.onSubmit} intent="primary" />
             </ControlGroup>
         )

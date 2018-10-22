@@ -28,6 +28,7 @@ export interface File {
 export interface Directory {
     path: string;
     files: File[];
+    selected: number;
     type: DirectoryType
 }
 
@@ -39,9 +40,21 @@ export enum DirectoryType {
 interface FsInterface {
     readDirectory: (dir: string) => Promise<File[]>;
     pathExists: (path: string) => Promise<boolean>;
+    makedir: (path: string) => Promise<boolean>;
 }
 
 export const Fs: FsInterface = {
+    makedir: (path: string): Promise<boolean> => {
+        return new Promise((resolve, reject) => {
+            try {
+                const stat = fs.statSync(path);
+                resolve(stat.isDirectory());
+            } catch (err) {
+                reject(false);
+            }
+        });
+    },
+
     pathExists: (path: string): Promise<boolean> => {
         return new Promise((resolve, reject) => {
             try {

@@ -3,6 +3,15 @@ body{
     overflow:hidden;
 }
 
+button.small{
+    transform:scale(.8);
+    opacity:.6;
+}
+
+button.small:hover{
+    opacity:1;
+}
+
 .bp3-tree-node-caret-none{
     min-width:10px;
 }

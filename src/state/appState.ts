@@ -20,12 +20,18 @@ export class AppState {
         const cache:Directory = observable({
             path,
             files: new Array(),
-            type
+            type,
+            selected: 0
         });
 
         this.caches.push(cache);
 
         return cache;
+    }
+
+    @action
+    updateSelection(cache: Directory, newSelection: number) {
+        cache.selected = newSelection;
     }
 
     // TODO: type ??
@@ -37,6 +43,7 @@ export class AppState {
                 runInAction(() => {
                     cache.files = files;
                     cache.path = path.resolve(newPath);
+                    cache.selected = 0;
                 });
             });
     }
