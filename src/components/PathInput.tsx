@@ -1,10 +1,11 @@
 import * as React from "react";
 import { reaction } from 'mobx';
 import { inject } from 'mobx-react';
-import { InputGroup, Spinner, Icon, ControlGroup, Button } from '@blueprintjs/core';
+import { InputGroup, Spinner, Icon, ControlGroup, Button, ButtonGroup, Popover } from '@blueprintjs/core';
 import { AppState } from "../state/appState";
 import { Directory, Fs, DirectoryType } from "../services/Fs";
 import { debounce } from '../utils/debounce';
+import { FileMenu } from "./FileMenu";
 
 interface PathInputProps {
 }
@@ -180,9 +181,14 @@ export class PathInput extends React.Component<{}, PathInputState> {
 
         return (
             <ControlGroup>
+                <ButtonGroup style={{ minWidth: 120 }}>
                 <Button disabled={!canGoBackward} onClick={this.onBackward} rightIcon="chevron-left"></Button>
                 <Button disabled={!canGoForward} onClick={this.onForward} rightIcon="chevron-right"></Button>
                 <Button onClick={this.onReload} rightIcon="repeat"></Button>
+                    <Popover content={<FileMenu />}>
+                        <Button rightIcon="caret-down" icon="cog" text="" />
+                    </Popover>
+                </ButtonGroup>
                 <InputGroup
                         disabled={disabled}
                         leftIcon={icon}
