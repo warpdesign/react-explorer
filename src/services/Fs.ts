@@ -41,10 +41,24 @@ interface FsInterface {
     readDirectory: (dir: string) => Promise<File[]>;
     pathExists: (path: string) => Promise<boolean>;
     makedir: (path: string) => Promise<boolean>;
+    delete: (src: string, files: string[]) => Promise<boolean>;    
 }
 
 export const Fs: FsInterface = {
+    // TODO
     makedir: (path: string): Promise<boolean> => {
+        return new Promise((resolve, reject) => {
+            try {
+                const stat = fs.statSync(path);
+                resolve(stat.isDirectory());
+            } catch (err) {
+                reject(false);
+            }
+        });
+    },
+
+    // TODO
+    delete: (path: string): Promise<boolean> => {
         return new Promise((resolve, reject) => {
             try {
                 const stat = fs.statSync(path);

@@ -2,8 +2,8 @@
     overflow:auto;
     position:absolute;
     z-index:9999;
-    font-family: "Lucida Grande","sans-serif";
-    font-size:12px;
+    font-family: sans-serif;
+    font-size:13px;
     background-color:rgba(255,255,255,.9);
     color:#656565;
     padding:0;
@@ -16,7 +16,7 @@
     transition-property:transform;
     transition-timing-function: ease-in-out;
     transition-duration:.3s;
-    box-shadow:0 -5px 40px rgba(0,0,0,.4);
+    box-shadow:0 -5px 12px rgba(0,0,0,.3);
 }
 
 .console.visible{

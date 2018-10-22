@@ -68,7 +68,10 @@ export class LogUI extends React.Component<any, LogUIState> {
     }
 
     onKeyUp = (e: KeyboardEvent) => {
-        if (e.keyCode === ESCAPE_KEY) {
+        const element = e.target as HTMLElement || null;        
+        const tagName = element.tagName.toLowerCase();
+
+        if (e.keyCode === ESCAPE_KEY && !tagName.match(/input|textarea/) && (!element || !element.classList.contains('bp3-menu-item')) && !document.body.classList.contains('bp3-overlay-open')) {
             this.setState({ visible: !this.state.visible });
         }
     }
