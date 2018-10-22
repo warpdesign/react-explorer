@@ -13,7 +13,7 @@
     "awesome-typescript-loader": "^5.2.1",
     "aws-sdk": "^2.332.0",
     "css-loader": "^1.0.0",
-    "electron": "^3.0.2",
+    "electron": "^3.0.5",
     "electron-devtools-installer": "^2.2.4",
     "electron-rebuild": "^1.8.2",
     "file-loader": "^2.0.0",
