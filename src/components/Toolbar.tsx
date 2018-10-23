@@ -1,13 +1,14 @@
 import * as React from "react";
 import { reaction } from 'mobx';
 import { inject } from 'mobx-react';
-import { InputGroup, Spinner, Icon, ControlGroup, Button, ButtonGroup, Popover } from '@blueprintjs/core';
+import { InputGroup, Spinner, Icon, ControlGroup, Button, ButtonGroup, Popover, Intent } from '@blueprintjs/core';
 import { AppState } from "../state/appState";
 import { Directory, Fs, DirectoryType } from "../services/Fs";
 import { debounce } from '../utils/debounce';
 import { FileMenu } from "./FileMenu";
 import { MakedirDialog } from "./MakedirDialog";
 import { Logger } from "./Log";
+import { AppToaster } from "./AppToaster";
 
 interface PathInputProps {
 }
@@ -35,7 +36,7 @@ enum KEYS {
 const DEBOUNCE_DELAY = 400;
 
 @inject('appState', 'fileCache')
-export class PathInput extends React.Component<{}, PathInputState> {
+export class Toolbar extends React.Component<{}, PathInputState> {
     private cache: Directory;
     private direction = 0;
     private input: HTMLInputElement | null = null;
@@ -91,7 +92,7 @@ export class PathInput extends React.Component<{}, PathInputState> {
         );
 
         const reaction2 = reaction(
-        () => { return this.cache.selected },
+        () => { return this.cache.selected.length },
         selectedItems => {
             this.setState({ selectedItems });
             }
@@ -183,17 +184,50 @@ export class PathInput extends React.Component<{}, PathInputState> {
         this.input = input;
     }
 
-    private makedir = (dirName: string) => {
-        this.setState({isOpen: false});        
+    private makedir = async (dirName: string, navigate: boolean) => {
+        this.setState({isOpen: false});
         Logger.log('yo! lets create a directory :)', dirName);
+        try {
+            await Fs.makedir(this.state.path, dirName);
+            // TODO: reload
+        } catch(err) {
+            AppToaster.show({
+                message: `Error creating folder: ${err}`,
+                icon: 'error',
+                intent: Intent.DANGER,
+                timeout: 4000
+            });
+        }
+    }
+
+    private delete = async () => {
+        Logger.log('delete selected files');
+        try {
+            const { fileCache } = this.injected;
+
+            await Fs.delete(this.state.path, fileCache.selected);
+            // TODO: reload
+        } catch(err) {
+            AppToaster.show({
+                message: `Error deleting files: ${err}`,
+                icon: 'error',
+                intent: Intent.DANGER,
+                timeout: 4000
+            });
+        }
     }
 
     private onFileAction = (action: string) => {
         switch(action) {
             case 'makedir':
-                Logger.log('need to make new directory :)');
+                Logger.log('Opening new folder dialog');
                 this.setState({isOpen: true});                
                 break;
+
+            case 'delete':
+                this.delete();
+                break;
+
             default:
                 Logger.warn('action unknown', action);
         }
@@ -204,7 +238,6 @@ export class PathInput extends React.Component<{}, PathInputState> {
         const { fileCache } = this.injected;
         const canGoBackward = current > 0;
         const canGoForward = history.length > 1 && current < history.length - 1;
-        const disabled = false;
         // const loadingSpinner = false ? <Spinner size={Icon.SIZE_STANDARD} /> : undefined;
         const reloadButton = <Button className="small" onClick={this.onReload} minimal rightIcon="repeat"></Button>;
         const icon = type === DirectoryType.LOCAL && 'home' || 'globe';
@@ -220,7 +253,6 @@ export class PathInput extends React.Component<{}, PathInputState> {
                     </Popover>
                 </ButtonGroup>
                 <InputGroup
-                        disabled={disabled}
                         leftIcon={icon}
                         onChange={this.onPathChange}
                         onKeyUp={this.onKeyUp}
@@ -230,7 +262,7 @@ export class PathInput extends React.Component<{}, PathInputState> {
                         intent={intent}
                         inputRef={this.refHandler}
                 />
-                <MakedirDialog isOpen={this.state.isOpen} onClose={this.makedir} ></MakedirDialog>
+                <MakedirDialog isOpen={this.state.isOpen} onClose={this.makedir} parentPath={path}></MakedirDialog>
                 <Button rightIcon="arrow-right" disabled={status === -1} onClick={this.onSubmit} intent="primary" />
             </ControlGroup>
         )

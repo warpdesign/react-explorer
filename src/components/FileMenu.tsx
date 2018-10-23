@@ -2,10 +2,11 @@ import * as React from "react";
 import { Menu, MenuItem, MenuDivider } from "@blueprintjs/core";
 import { observer, inject } from "mobx-react";
 import { AppState } from "../state/appState";
+import { File } from "../services/Fs";
 
 interface IFileMenuProps {
     onFileAction: (action: string) => any;
-    selectedItems: number;
+    selectedItems: File[];
 };
 
 interface InjectedProps extends IFileMenuProps{
@@ -31,6 +32,10 @@ export class FileMenu extends React.Component<IFileMenuProps>{
         this.props.onFileAction('paste');
     }
 
+    private onDelete = () => {
+        this.props.onFileAction('delete');
+    }    
+
     public render() {
         const { appState } = this.injected;
         const clipboardLength = appState.clipboard.elements.length;
@@ -42,7 +47,7 @@ export class FileMenu extends React.Component<IFileMenuProps>{
                 <MenuItem text="New Folder" icon="folder-new" onClick={this.onNewfolder}/>
                 <MenuDivider />
                 <MenuItem text={`Paste ${clipboardLength} item(s)`} icon="duplicate" onClick={this.onPaste} disabled={!clipboardLength} />
-                <MenuItem text={`Delete ${selectedItems} item(s)`} intent={selectedItems && "danger" || "none"} icon="delete" disabled={!selectedItems} />            
+                <MenuItem text={`Delete ${selectedItems.length} item(s)`} onClick={this.onDelete} intent={selectedItems.length && "danger" || "none"} icon="delete" disabled={!selectedItems.length} />
             </Menu>
         </React.Fragment>
         )

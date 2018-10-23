@@ -1,5 +1,5 @@
 import { action, observable, runInAction, computed, autorun, isObservableMap, isObservable } from 'mobx';
-import { Directory, Fs, DirectoryType } from '../services/Fs';
+import { Directory, Fs, DirectoryType, File } from '../services/Fs';
 import * as path from 'path';
 
 interface Clipboard {
@@ -21,7 +21,7 @@ export class AppState {
             path,
             files: new Array(),
             type,
-            selected: 0
+            selected: new Array()
         });
 
         this.caches.push(cache);
@@ -30,7 +30,7 @@ export class AppState {
     }
 
     @action
-    updateSelection(cache: Directory, newSelection: number) {
+    updateSelection(cache: Directory, newSelection: File[]) {
         cache.selected = newSelection;
     }
 
@@ -43,7 +43,7 @@ export class AppState {
                 runInAction(() => {
                     cache.files = files;
                     cache.path = path.resolve(newPath);
-                    cache.selected = 0;
+                    cache.selected = new Array();
                 });
             });
     }

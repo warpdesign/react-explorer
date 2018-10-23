@@ -1,8 +1,9 @@
 import * as React from "react";
 import { inject } from 'mobx-react';
 import { reaction } from 'mobx';
-import { Position, Classes, Button, ITreeNode, Tooltip, Tree, Toaster, Intent } from "@blueprintjs/core";
+import { Classes, Button, ITreeNode, Tooltip, Tree, Intent } from "@blueprintjs/core";
 import { AppState } from "../state/appState";
+import { AppToaster } from './AppToaster';
 // TODO: remove any calls to shell, path
 import { File, Directory, DirectoryType } from "../services/Fs";
 import { shell } from 'electron';
@@ -16,13 +17,6 @@ export interface FileListState {
 };
 
 let i = 0;
-
-export const AppToaster = Toaster.create({
-    className: "recipe-toaster",
-    position: Position.TOP,
-});
-
-const TOAST_TIMEOUT = 2000;
 
 const INITIAL_STATE: ITreeNode[] = [
     {
@@ -181,7 +175,9 @@ export class FileList extends React.Component<{}, FileListState> {
         }
 
         this.setState({ nodes, selected: newSelected });
-        appState.updateSelection(fileCache, newSelected);
+        const selection = nodes.filter((node) => node.isSelected).map((node) => node.nodeData) as File[];
+
+        appState.updateSelection(fileCache, selection);
     };
 
     private onClipboardCopy = () => {
@@ -195,8 +191,7 @@ export class FileList extends React.Component<{}, FileListState> {
         AppToaster.show({
             message: `${selected} element(s) copied to the clipboard`,
             icon: "tick",
-            intent: Intent.SUCCESS,
-            timeout: TOAST_TIMEOUT
+            intent: Intent.SUCCESS
         });
     }
 

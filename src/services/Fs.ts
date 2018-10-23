@@ -1,5 +1,8 @@
 import * as fs from 'fs';
 import * as path from 'path';
+import * as process from 'process';
+import * as mkdir from 'mkdirp';
+import * as rimraf from 'rimraf';
 
 const Parent:File = {
     dir: '..',
@@ -28,7 +31,7 @@ export interface File {
 export interface Directory {
     path: string;
     files: File[];
-    selected: number;
+    selected: File[];
     type: DirectoryType
 }
 
@@ -40,29 +43,58 @@ export enum DirectoryType {
 interface FsInterface {
     readDirectory: (dir: string) => Promise<File[]>;
     pathExists: (path: string) => Promise<boolean>;
-    makedir: (path: string) => Promise<boolean>;
-    delete: (src: string, files: string[]) => Promise<boolean>;    
+    makedir: (parent: string, dirName: string) => Promise<boolean>;
+    delete: (src: string, files: File[]) => Promise<boolean>;    
+    isDirectoryNameValid: (dirName: string) => boolean;
 }
 
+const isWin = process.platform === "win32";
+const invalidChars = isWin && /[\*:<>\?|"]+/ig || /^[\.]+$/ig;
+
 export const Fs: FsInterface = {
-    // TODO
-    makedir: (path: string): Promise<boolean> => {
+    isDirectoryNameValid: (dirName: string): boolean => {
+        console.log('checking dir', dirName);
+        return !invalidChars.test(dirName);
+    },
+
+    makedir: (parent: string, dirName: string): Promise<boolean> => {
         return new Promise((resolve, reject) => {
+            const unixPath = path.join(parent, dirName).replace(/\\/g, '/');
             try {
-                const stat = fs.statSync(path);
-                resolve(stat.isDirectory());
-            } catch (err) {
+                console.log('mkdir', unixPath);
+                reject(false);
+                // mkdir(unixPath, (err) => {
+                //     if (err) {
+                //         reject(false);    
+                //     } else {
+                //         resolve(true);
+                //     }
+                // });
+
+            } catch(err) {
+                console.error(err);
                 reject(false);
             }
         });
     },
 
-    // TODO
-    delete: (path: string): Promise<boolean> => {
+    delete: (src: string, files: File[]): Promise<boolean> => {
+        let toDelete = files.map((file) => path.join(src, file.fullname)).join(' ');
+
         return new Promise((resolve, reject) => {
             try {
-                const stat = fs.statSync(path);
-                resolve(stat.isDirectory());
+                console.log('delete', toDelete);
+                reject(false);
+                // rimraf(toDelete, {
+                //     glob: false
+                // }, (err) => {
+                //     if (err) {
+                //         console.error(err);
+                //         reject(false);
+                //     } else {
+                //         resolve(true);
+                //     }
+                // });
             } catch (err) {
                 reject(false);
             }

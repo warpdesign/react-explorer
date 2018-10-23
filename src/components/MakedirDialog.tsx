@@ -1,49 +1,83 @@
 import * as React from "react";
-import { Dialog, Classes, Intent, Button, InputGroup, FormGroup } from "@blueprintjs/core";
+import { Dialog, Classes, Intent, Button, InputGroup, FormGroup, Label, Checkbox } from "@blueprintjs/core";
+import { debounce } from "../utils/debounce";
+import { Fs } from "../services/Fs";
+import { sep as separator } from 'path';
 
 interface IMakedirProps {
     isOpen: boolean;
-    onClose?: (dirName: string) => void
+    parentPath: string;
+    onClose?: (dirName: string, navigate: boolean) => void
 };
 
 interface IMakedirState {
     path: string;
+    isChecked: boolean;
+    valid: boolean;
 }
+
+const DEBOUNCE_DELAY = 300;
 
 export class MakedirDialog extends React.Component<IMakedirProps, IMakedirState>{
     constructor(props:any) {
         super(props);
 
         this.state = {
-            path: 'dtc'
+            path: '',
+            isChecked: false,
+            valid: true
         };
     }
 
-    private cancelClose = () => {
-        console.log('handleClose');        
-        this.props.onClose("");
+    private isValid(path: string): boolean {
+        return Fs.isDirectoryNameValid(path);
     }
 
-    private onClose = () => {
+    private checkPath: (event: React.FormEvent<HTMLElement>) => any = debounce(
+        async (event: React.FormEvent<HTMLElement>) => {
+            try {
+                const isValid = this.isValid(this.state.path);
+                this.setState({ valid: isValid });
+            } catch {
+                this.setState({ valid: false });
+            }
+        }, DEBOUNCE_DELAY);
+
+    private cancelClose = () => {
+        console.log('handleClose');        
+        this.props.onClose("", false);
+    }
+
+    private onCreate = () => {
         console.log('onCloseMakerdirDialog');
-        this.props.onClose(this.state.path);
+        const { path, isChecked } = this.state;
+        if (this.isValid(path)) {
+            this.props.onClose(path, isChecked);
+        } else {
+            this.setState({ valid: false });            
+        }
     }
 
     private onPathChange = (event: React.FormEvent<HTMLElement>) => {
         // 1.Update date
         const path = (event.target as HTMLInputElement).value;
         this.setState({ path });
-        // // 2. isValid ? => loadDirectory
-        // this.checkPath(event);
+        // // 2. isValid ?
+        this.checkPath(event);
+    }
+
+    private onCheckChange = () => {
+        this.setState({ isChecked: !this.state.isChecked });
     }
 
     public render() {
-        const { path } = this.state;
+        const { path, valid } = this.state;
+        const intent = !valid && 'danger' || 'none';
 
         return(
             <Dialog
             icon="folder-new"
-            title="New Directory"
+            title="New Folder"
             isOpen={this.props.isOpen}
             autoFocus={true}
             enforceFocus={true}
@@ -52,19 +86,20 @@ export class MakedirDialog extends React.Component<IMakedirProps, IMakedirState>
             onClose={this.cancelClose}
         >
             <div className={Classes.DIALOG_BODY}>
-                <p>Enter a name to create a new directory:</p>
+                <p>Enter a name to create a new folder:</p>
                 <FormGroup
-                    helperText="Helper text with details..."
+                    helperText={<Checkbox checked={this.state.isChecked} label="Navigate to the new folder" onChange={this.onCheckChange} />}
                     inline={true}
                     labelFor="directory-input"
-                    labelInfo="/mnt/c/"
+                    labelInfo={`${this.props.parentPath}${separator}`}
                 >                
                     <InputGroup
                         onChange={this.onPathChange}
-                        placeholder="Enter directory name"
+                        placeholder="Enter folder name"
                         value={path}
                         id="directory-input"
                         name="directory-input"
+                        intent={intent}
                     />
                 </FormGroup>
             </div>
@@ -72,7 +107,7 @@ export class MakedirDialog extends React.Component<IMakedirProps, IMakedirState>
                 <div className={Classes.DIALOG_FOOTER_ACTIONS}>
                     <Button onClick={this.cancelClose}>Cancel</Button>
 
-                    <Button intent={Intent.PRIMARY} onClick={this.onClose} disabled={!path.length}>
+                    <Button intent={Intent.PRIMARY} onClick={this.onCreate} disabled={!path.length || !valid}>
                         Create
                     </Button>
                 </div>
