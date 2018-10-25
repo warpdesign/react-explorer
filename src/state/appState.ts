@@ -49,6 +49,11 @@ export class AppState {
     }
     /** /new */
 
+    @action
+    refreshCache(cache: Directory) {
+        this.updateCache(cache, cache.path);
+    }
+
     // global
     @observable
     clipboard: Clipboard = {

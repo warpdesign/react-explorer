@@ -1,7 +1,7 @@
 import * as React from "react";
 import { reaction } from 'mobx';
 import { inject } from 'mobx-react';
-import { InputGroup, Spinner, Icon, ControlGroup, Button, ButtonGroup, Popover, Intent } from '@blueprintjs/core';
+import { InputGroup, Spinner, Icon, ControlGroup, Button, ButtonGroup, Popover, Intent, Alert } from '@blueprintjs/core';
 import { AppState } from "../state/appState";
 import { Directory, Fs, DirectoryType } from "../services/Fs";
 import { debounce } from '../utils/debounce';
@@ -21,11 +21,12 @@ interface InjectedProps extends PathInputProps {
 interface PathInputState {
     status: -1 | 0 | 1;
     path: string;
-    history: string[],
-    current: number,
-    type: DirectoryType,
-    selectedItems: number,
-    isOpen: boolean
+    history: string[];
+    current: number;
+    type: DirectoryType;
+    selectedItems: number;
+    isOpen: boolean;
+    isDeleteOpen: boolean;
 }
 
 enum KEYS {
@@ -63,6 +64,7 @@ export class Toolbar extends React.Component<{}, PathInputState> {
             current: -1,
             type: fileCache.type,
             isOpen: false,
+            isDeleteOpen: false,
             selectedItems: 0
         };
 
@@ -188,8 +190,13 @@ export class Toolbar extends React.Component<{}, PathInputState> {
         this.setState({isOpen: false});
         Logger.log('yo! lets create a directory :)', dirName);
         try {
-            await Fs.makedir(this.state.path, dirName);
-            // TODO: reload
+            const dir = await Fs.makedir(this.state.path, dirName);
+            const { appState } = this.injected;
+            if (!navigate) {
+                appState.refreshCache(this.cache);
+            } else {
+                appState.updateCache(this.cache, dir);
+            }
         } catch(err) {
             AppToaster.show({
                 message: `Error creating folder: ${err}`,
@@ -200,13 +207,17 @@ export class Toolbar extends React.Component<{}, PathInputState> {
         }
     }
 
+    private deleteCancel = () => {
+        this.setState({ isDeleteOpen: false });
+    }
+
     private delete = async () => {
         Logger.log('delete selected files');
         try {
-            const { fileCache } = this.injected;
+            const { fileCache, appState } = this.injected;
 
             await Fs.delete(this.state.path, fileCache.selected);
-            // TODO: reload
+            appState.refreshCache(this.cache);
         } catch(err) {
             AppToaster.show({
                 message: `Error deleting files: ${err}`,
@@ -215,17 +226,19 @@ export class Toolbar extends React.Component<{}, PathInputState> {
                 timeout: 4000
             });
         }
+
+        this.setState({ isDeleteOpen: false });
     }
 
     private onFileAction = (action: string) => {
         switch(action) {
             case 'makedir':
                 Logger.log('Opening new folder dialog');
-                this.setState({isOpen: true});                
+                this.setState({isOpen: true});
                 break;
 
             case 'delete':
-                this.delete();
+                this.setState({isDeleteOpen: true});
                 break;
 
             default:
@@ -234,7 +247,7 @@ export class Toolbar extends React.Component<{}, PathInputState> {
     }
 
     public render() {
-        const { current, history, status, path, type } = this.state;
+        const { current, history, status, path, type, isOpen, isDeleteOpen, selectedItems } = this.state;
         const { fileCache } = this.injected;
         const canGoBackward = current > 0;
         const canGoForward = history.length > 1 && current < history.length - 1;
@@ -262,7 +275,20 @@ export class Toolbar extends React.Component<{}, PathInputState> {
                         intent={intent}
                         inputRef={this.refHandler}
                 />
-                <MakedirDialog isOpen={this.state.isOpen} onClose={this.makedir} parentPath={path}></MakedirDialog>
+                <MakedirDialog isOpen={isOpen} onClose={this.makedir} parentPath={path}></MakedirDialog>
+                <Alert
+                    cancelButtonText="Cancel"
+                    confirmButtonText="Delete"
+                    icon="trash"
+                    intent={Intent.DANGER}
+                    isOpen={isDeleteOpen}
+                    onConfirm={this.delete}
+                    onCancel={this.deleteCancel}
+                >
+                    <p>
+                        Are you sure you want to delete {`${selectedItems}`} <b>file(s)/folder(s)</b>?<br />This action will <b>permanentaly</b> delete the selected elements.
+                    </p>
+                </Alert>
                 <Button rightIcon="arrow-right" disabled={status === -1} onClick={this.onSubmit} intent="primary" />
             </ControlGroup>
         )

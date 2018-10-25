@@ -3,6 +3,10 @@ body{
     overflow:hidden;
 }
 
+.bp3-dark {
+    color: #f5f8fa;
+}
+
 button.small{
     transform:scale(.8);
     opacity:.6;

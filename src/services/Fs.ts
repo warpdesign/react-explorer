@@ -2,7 +2,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as process from 'process';
 import * as mkdir from 'mkdirp';
-import * as rimraf from 'rimraf';
+import * as del from 'del';
 
 const Parent:File = {
     dir: '..',
@@ -43,7 +43,7 @@ export enum DirectoryType {
 interface FsInterface {
     readDirectory: (dir: string) => Promise<File[]>;
     pathExists: (path: string) => Promise<boolean>;
-    makedir: (parent: string, dirName: string) => Promise<boolean>;
+    makedir: (parent: string, dirName: string) => Promise<string>;
     delete: (src: string, files: File[]) => Promise<boolean>;    
     isDirectoryNameValid: (dirName: string) => boolean;
 }
@@ -57,19 +57,18 @@ export const Fs: FsInterface = {
         return !invalidChars.test(dirName);
     },
 
-    makedir: (parent: string, dirName: string): Promise<boolean> => {
+    makedir: (parent: string, dirName: string): Promise<string> => {
         return new Promise((resolve, reject) => {
             const unixPath = path.join(parent, dirName).replace(/\\/g, '/');
             try {
                 console.log('mkdir', unixPath);
-                reject(false);
-                // mkdir(unixPath, (err) => {
-                //     if (err) {
-                //         reject(false);    
-                //     } else {
-                //         resolve(true);
-                //     }
-                // });
+                mkdir(unixPath, (err) => {
+                    if (err) {
+                        reject(false);    
+                    } else {
+                        resolve(path.join(parent, dirName));
+                    }
+                });
 
             } catch(err) {
                 console.error(err);
@@ -79,22 +78,13 @@ export const Fs: FsInterface = {
     },
 
     delete: (src: string, files: File[]): Promise<boolean> => {
-        let toDelete = files.map((file) => path.join(src, file.fullname)).join(' ');
+        let toDelete = files.map((file) => path.join(src, file.fullname));
 
-        return new Promise((resolve, reject) => {
+        return new Promise(async (resolve, reject) => {
             try {
                 console.log('delete', toDelete);
-                reject(false);
-                // rimraf(toDelete, {
-                //     glob: false
-                // }, (err) => {
-                //     if (err) {
-                //         console.error(err);
-                //         reject(false);
-                //     } else {
-                //         resolve(true);
-                //     }
-                // });
+                await del(toDelete);
+                resolve(true);
             } catch (err) {
                 reject(false);
             }
