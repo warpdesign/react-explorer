@@ -3,7 +3,8 @@ import { Directory, Fs, DirectoryType, File } from '../services/Fs';
 import * as path from 'path';
 
 interface Clipboard {
-    source: DirectoryType;
+    type: DirectoryType;
+    source: string;
     elements: string[];
 }
 
@@ -45,25 +46,42 @@ export class AppState {
                     cache.path = path.resolve(newPath);
                     cache.selected = new Array();
                 });
+                
+
+                // if (forceSync) {
+                //     this.refreshCache(cache);
+                // }
             });
     }
     /** /new */
 
     @action
-    refreshCache(cache: Directory) {
+    refreshCache(cache: Directory, sync = false) {
         this.updateCache(cache, cache.path);
+    }
+
+    @action syncCaches(source: Directory) {
+        for (let cache of this.caches) {
+            // only refresh cache that don't have files selected: we don't we to lose
+            // the user's selection
+            // we could do even better and keep the user's selection while refreshing
+            if (source !== cache && cache.path === source.path && !cache.selected.length) {
+                this.refreshCache(cache);
+            }
+        }
     }
 
     // global
     @observable
     clipboard: Clipboard = {
-        source: DirectoryType.LOCAL,
+        type: DirectoryType.LOCAL,
+        source: '',
         elements: []
     };
 
     @action
-    setClipboard(source: DirectoryType, elements: string[]) {
-        this.clipboard = { source, elements };
+    setClipboard(type: DirectoryType, source: string, elements: string[]) {
+        this.clipboard = { source, type, elements };
     }
 
     constructor() {

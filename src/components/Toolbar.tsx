@@ -230,6 +230,23 @@ export class Toolbar extends React.Component<{}, PathInputState> {
         this.setState({ isDeleteOpen: false });
     }
 
+    private copy = async () => {
+        try {
+            const { appState } = this.injected;
+            const source = appState.clipboard.source;
+            const elements = appState.clipboard.elements.map((el) => el);
+            console.log('copying', elements, 'to', this.state.path);
+            const bytes = await Fs.size(source, elements);
+            console.log('size', bytes);
+            // await Fs.copy(source, elements, this.state.path).on('progress', (data) => {
+            //     console.log('progress', data);
+            // });
+            /// appState.refreshCache(this.cache);
+        } catch(err) {
+            console.log('error copying files', err);
+        }
+    }
+
     private onFileAction = (action: string) => {
         switch(action) {
             case 'makedir':
@@ -239,6 +256,10 @@ export class Toolbar extends React.Component<{}, PathInputState> {
 
             case 'delete':
                 this.setState({isDeleteOpen: true});
+                break;
+
+            case 'paste':
+                this.copy();
                 break;
 
             default:

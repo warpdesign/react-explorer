@@ -3,6 +3,8 @@ import * as path from 'path';
 import * as process from 'process';
 import * as mkdir from 'mkdirp';
 import * as del from 'del';
+import * as cp from 'cpy';
+import { size } from '../utils/size';
 
 const Parent:File = {
     dir: '..',
@@ -44,7 +46,9 @@ interface FsInterface {
     readDirectory: (dir: string) => Promise<File[]>;
     pathExists: (path: string) => Promise<boolean>;
     makedir: (parent: string, dirName: string) => Promise<string>;
-    delete: (src: string, files: File[]) => Promise<boolean>;    
+    delete: (src: string, files: File[]) => Promise<boolean>;
+    size: (source: string, files: string[]) => Promise<number>;
+    copy: (source: string, files: string[], dest: string) => Promise<void> & cp.ProgressEmitter;   
     isDirectoryNameValid: (dirName: string) => boolean;
 }
 
@@ -55,6 +59,25 @@ export const Fs: FsInterface = {
     isDirectoryNameValid: (dirName: string): boolean => {
         console.log('checking dir', dirName);
         return !invalidChars.test(dirName);
+    },
+
+    size: (source:string, files: string[]): Promise<number> => {
+        return new Promise(async (resolve, reject) => {
+            try {
+                let bytes = 0;
+                for(let file of files) {
+                    bytes += await size(path.join(source, file));
+                }
+                resolve(bytes);
+            } catch(err) {
+                reject(err);
+            }
+        });
+    },
+
+    copy: (source: string, files: string[], dest: string): Promise<void> & cp.ProgressEmitter => {
+        console.log(files, dest, source);
+        return cp(files, dest, { parents: true, cwd: source });
     },
 
     makedir: (parent: string, dirName: string): Promise<string> => {

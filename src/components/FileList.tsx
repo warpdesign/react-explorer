@@ -184,9 +184,9 @@ export class FileList extends React.Component<{}, FileListState> {
         const { appState } = this.injected;
         const { nodes, selected } = this.state;
 
-        const elements = nodes.filter((node) => node.isSelected).map((node) => { const nodeData = node.nodeData as File; return path.join(nodeData.dir, nodeData.fullname); });
+        const elements = nodes.filter((node) => node.isSelected).map((node) => { const nodeData = node.nodeData as File; return nodeData.fullname; });
 
-        appState.setClipboard(this.state.type, elements);
+        appState.setClipboard(this.state.type, this.cache.path, elements);
 
         AppToaster.show({
             message: `${selected} element(s) copied to the clipboard`,
