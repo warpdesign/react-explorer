@@ -156,11 +156,15 @@ export class Toolbar extends React.Component<{}, PathInputState> {
         this.checkPath(event);
     }
 
-    private onSubmit = () => {
-        if (this.cache.path !== this.state.path && Fs.pathExists(this.state.path)) {
-            const { appState } = this.injected;
-            // appState.readDirectory(this.state.path, this.props.type);
-            appState.updateCache(this.cache, this.state.path);
+    private onSubmit = async () => {
+        try {
+            const pathExists = await Fs.pathExists(this.state.path);
+            if (this.cache.path !== this.state.path && pathExists) {
+                const { appState } = this.injected;
+                appState.updateCache(this.cache, this.state.path);
+            }            
+        } catch(err) {
+            console.warn('error submiting: path probably does not exist');
         }
     }
 

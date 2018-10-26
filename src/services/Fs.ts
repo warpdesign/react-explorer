@@ -120,7 +120,7 @@ export const Fs: FsInterface = {
                 const stat = fs.statSync(path);
                 resolve(stat.isDirectory());
             } catch (err) {
-                reject(false);
+                reject(err);
             }
         });
     },
