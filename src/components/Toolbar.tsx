@@ -1,14 +1,16 @@
 import * as React from "react";
 import { reaction } from 'mobx';
 import { inject } from 'mobx-react';
-import { InputGroup, Spinner, Icon, ControlGroup, Button, ButtonGroup, Popover, Intent, Alert } from '@blueprintjs/core';
+import { InputGroup, Spinner, Icon, ControlGroup, Button, ButtonGroup, Popover, Intent, Alert, ProgressBar, Classes, IToasterProps } from '@blueprintjs/core';
 import { AppState } from "../state/appState";
 import { Directory, Fs, DirectoryType } from "../services/Fs";
 import { debounce } from '../utils/debounce';
 import { FileMenu } from "./FileMenu";
 import { MakedirDialog } from "./MakedirDialog";
 import { Logger } from "./Log";
-import { AppToaster } from "./AppToaster";
+import { AppToaster, IToasterOpts } from "./AppToaster";
+import { throttle } from "../utils/throttle";
+import cpy = require("cpy");
 
 interface PathInputProps {
 }
@@ -42,7 +44,7 @@ export class Toolbar extends React.Component<{}, PathInputState> {
     private direction = 0;
     private input: HTMLInputElement | null = null;
 
-    private checkPath: (event: React.FormEvent<HTMLElement>) => any = debounce(
+    private checkPath: (event: React.FormEvent<HTMLElement>) => void = debounce(
         async (event: React.FormEvent<HTMLElement>) => {
             try {
                 const exists = await Fs.pathExists(this.state.path);
@@ -230,21 +232,63 @@ export class Toolbar extends React.Component<{}, PathInputState> {
         this.setState({ isDeleteOpen: false });
     }
 
+    private renderCopyProgress(percent: number): IToasterOpts {
+            return {
+            icon: "cloud-upload",
+            message: (
+                <ProgressBar
+                    className={percent >= 100 && Classes.PROGRESS_NO_STRIPES}
+                    intent={percent < 100 ? Intent.PRIMARY : Intent.SUCCESS}
+                    value={percent / 100}
+                />
+            ),
+            timeout: percent < 100 ? 0 : 2000
+        }
+    }
+
+
     private copy = async () => {
-        try {
+        // try {
             const { appState } = this.injected;
             const source = appState.clipboard.source;
             const elements = appState.clipboard.elements.map((el) => el);
             console.log('copying', elements, 'to', this.state.path);
             const bytes = await Fs.size(source, elements);
             console.log('size', bytes);
-            // await Fs.copy(source, elements, this.state.path).on('progress', (data) => {
-            //     console.log('progress', data);
-            // });
-            /// appState.refreshCache(this.cache);
-        } catch(err) {
-            console.log('error copying files', err);
-        }
+            let key = '';
+            // only show toaster if (source=remote or bytes > 50*1024*1024)
+            const timeout = setTimeout(() => {
+                key = AppToaster.show(
+                    this.renderCopyProgress(0)
+                );
+            }, 1000);
+            console.time('copy');
+            let i = 0;
+            Fs.copy(source, elements, this.state.path).on('progress', throttle((data:cpy.ProgressData) => {
+                console.log('progress', i++);
+                console.log('progress', data, 'percent', (data.completedSize * 100) / bytes);
+                if (key) {
+                    AppToaster.show(this.renderCopyProgress((data.completedSize * 100) / bytes), key);
+                }
+            }, 400)).then(() => {
+                console.log('copy done');
+                console.timeEnd('copy');
+                if (key) {
+                    // in case copy finishes between two throttles toaster could get stuck
+                    AppToaster.show(this.renderCopyProgress(100), key);
+                    key = '';
+                }                
+                // do not show toaster if copy doesn't last more than 1 sec
+                clearTimeout(timeout);
+                appState.refreshCache(this.cache);
+            })
+            .catch((err) => {
+                clearTimeout(timeout);
+                // show error + log error
+            });
+        // } catch(err) {
+        //     console.log('error copying files', err);
+        // }
     }
 
     private onFileAction = (action: string) => {

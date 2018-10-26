@@ -136,7 +136,8 @@ export class FileList extends React.Component<{}, FileListState> {
                     icon: file.isDir && "folder-close" || 'document',
                     label: file.fullname,
                     nodeData: file,
-                    className: file.fullname !== '..' && file.fullname.startsWith('.') && 'isHidden'
+                    className: file.fullname !== '..' && file.fullname.startsWith('.') && 'isHidden',
+                    secondaryLabel: !file.isDir && (<div className="bp3-text-small">{file.length}</div>) || ''
                 };
             return res;
         });
