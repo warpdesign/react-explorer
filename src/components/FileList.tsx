@@ -119,6 +119,14 @@ export class FileList extends React.Component<{}, FileListState> {
             });
     }
 
+    // took this from stack overflow: https://stackoverflow.com/questions/15900485/correct-way-to-convert-size-in-bytes-to-kb-mb-gb-in-javascript
+    private sizeExtension(bytes:number):string {
+        const i = Math.floor(Math.log2(bytes)/10);
+        const num = (bytes/Math.pow(1024, i));
+
+        return  (i > 0 ? num.toFixed(2) : (num | 0)) + ' ' + ['Bytes','Kb','Mb','Gb','Tb'][i];
+    } 
+
     private buildNodes = (files:File[]): ITreeNode<{}>[] => {
         return files
             .sort((file1, file2) => {
@@ -137,7 +145,7 @@ export class FileList extends React.Component<{}, FileListState> {
                     label: file.fullname,
                     nodeData: file,
                     className: file.fullname !== '..' && file.fullname.startsWith('.') && 'isHidden',
-                    secondaryLabel: !file.isDir && (<div className="bp3-text-small">{file.length}</div>) || ''
+                    secondaryLabel: !file.isDir && (<div className="bp3-text-small">{this.sizeExtension(file.length)}</div>) || ''
                 };
             return res;
         });
