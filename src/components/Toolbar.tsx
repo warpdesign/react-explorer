@@ -1,9 +1,9 @@
 import * as React from "react";
 import { reaction } from 'mobx';
 import { inject } from 'mobx-react';
-import { InputGroup, Spinner, Icon, ControlGroup, Button, ButtonGroup, Popover, Intent, Alert, ProgressBar, Classes, IToasterProps } from '@blueprintjs/core';
+import { InputGroup, ControlGroup, Button, ButtonGroup, Popover, Intent, Alert, ProgressBar, Classes } from '@blueprintjs/core';
 import { AppState } from "../state/appState";
-import { Directory, Fs, DirectoryType } from "../services/Fs";
+import { Directory, DirectoryType } from "../services/Fs";
 import { debounce } from '../utils/debounce';
 import { FileMenu } from "./FileMenu";
 import { MakedirDialog } from "./MakedirDialog";
@@ -47,7 +47,7 @@ export class Toolbar extends React.Component<{}, PathInputState> {
     private checkPath: (event: React.FormEvent<HTMLElement>) => void = debounce(
         async (event: React.FormEvent<HTMLElement>) => {
             try {
-                const exists = await Fs.pathExists(this.state.path);
+                const exists = await this.cache.FS.pathExists(this.state.path);
                 this.setState({ status: exists ? 1 : -1 });
             } catch {
                 this.setState({ status: -1 })
@@ -64,7 +64,7 @@ export class Toolbar extends React.Component<{}, PathInputState> {
             path: '',
             history: new Array(),
             current: -1,
-            type: fileCache.type,
+            type: fileCache.FS.type,
             isOpen: false,
             isDeleteOpen: false,
             selectedItems: 0
@@ -133,7 +133,6 @@ export class Toolbar extends React.Component<{}, PathInputState> {
         } else {
             const { appState } = this.injected;
             const path = history[current + dir];
-            // appState.readDirectory(path, this.props.type);
             appState.updateCache(this.cache, path);
         }
     }
@@ -158,11 +157,11 @@ export class Toolbar extends React.Component<{}, PathInputState> {
 
     private onSubmit = async () => {
         try {
-            const pathExists = await Fs.pathExists(this.state.path);
+            const pathExists = await this.cache.FS.pathExists(this.state.path);
             if (this.cache.path !== this.state.path && pathExists) {
                 const { appState } = this.injected;
                 appState.updateCache(this.cache, this.state.path);
-            }            
+            }
         } catch(err) {
             console.warn('error submiting: path probably does not exist');
         }
@@ -194,9 +193,9 @@ export class Toolbar extends React.Component<{}, PathInputState> {
 
     private makedir = async (dirName: string, navigate: boolean) => {
         this.setState({isOpen: false});
-        Logger.log('yo! lets create a directory :)', dirName);
+        Logger.log('yo! lets create a directory :)', dirName, navigate);
         try {
-            const dir = await Fs.makedir(this.state.path, dirName);
+            const dir = await this.cache.FS.makedir(this.state.path, dirName);
             const { appState } = this.injected;
             if (!navigate) {
                 appState.refreshCache(this.cache);
@@ -222,7 +221,7 @@ export class Toolbar extends React.Component<{}, PathInputState> {
         try {
             const { fileCache, appState } = this.injected;
 
-            await Fs.delete(this.state.path, fileCache.selected);
+            await this.cache.FS.delete(this.state.path, fileCache.selected);
             appState.refreshCache(this.cache);
         } catch(err) {
             AppToaster.show({
@@ -257,7 +256,7 @@ export class Toolbar extends React.Component<{}, PathInputState> {
             const source = appState.clipboard.source;
             const elements = appState.clipboard.elements.map((el) => el);
             console.log('copying', elements, 'to', this.state.path);
-            const bytes = await Fs.size(source, elements);
+            const bytes = await this.cache.FS.size(source, elements);
             console.log('size', bytes);
             let key = '';
             // only show toaster if (source=remote or bytes > 50*1024*1024)
@@ -268,7 +267,7 @@ export class Toolbar extends React.Component<{}, PathInputState> {
             }, 1000);
             console.time('copy');
             let i = 0;
-            Fs.copy(source, elements, this.state.path).on('progress', throttle((data:cpy.ProgressData) => {
+            this.cache.FS.copy(source, elements, this.state.path).on('progress', throttle((data:cpy.ProgressData) => {
                 console.log('progress', i++);
                 console.log('progress', data, 'percent', (data.completedSize * 100) / bytes);
                 if (key) {
@@ -281,7 +280,7 @@ export class Toolbar extends React.Component<{}, PathInputState> {
                     // in case copy finishes between two throttles toaster could get stuck
                     AppToaster.show(this.renderCopyProgress(100), key);
                     key = '';
-                }                
+                }
                 // do not show toaster if copy doesn't last more than 1 sec
                 clearTimeout(timeout);
                 appState.refreshCache(this.cache);
@@ -344,7 +343,7 @@ export class Toolbar extends React.Component<{}, PathInputState> {
                         intent={intent}
                         inputRef={this.refHandler}
                 />
-                <MakedirDialog isOpen={isOpen} onClose={this.makedir} parentPath={path}></MakedirDialog>
+                <MakedirDialog isOpen={isOpen} onClose={this.makedir} onValidation={this.cache.FS.isDirectoryNameValid} parentPath={path}></MakedirDialog>
                 <Alert
                     cancelButtonText="Cancel"
                     confirmButtonText="Delete"

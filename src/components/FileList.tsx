@@ -100,7 +100,7 @@ export class FileList extends React.Component<{}, FileListState> {
         this.state = {
             nodes: [],
             selected: 0,
-            type: fileCache.type
+            type: fileCache.FS.type
         };
 
         this.installReaction();
@@ -125,7 +125,7 @@ export class FileList extends React.Component<{}, FileListState> {
         const num = (bytes/Math.pow(1024, i));
 
         return  (i > 0 ? num.toFixed(2) : (num | 0)) + ' ' + ['Bytes','Kb','Mb','Gb','Tb'][i];
-    } 
+    }
 
     private buildNodes = (files:File[]): ITreeNode<{}>[] => {
         return files
@@ -157,7 +157,6 @@ export class FileList extends React.Component<{}, FileListState> {
 
         if (data.isDir) {
             Logger.log('need to read dir', path.resolve(path.join(data.dir, data.fullname)));
-            // appState.readDirectory(path.join(appState.localCache.path, data.fullname), this.props.type);
             appState.updateCache(this.cache, path.resolve(path.join(data.dir, data.fullname)));
         } else {
             shell.openItem(path.join(data.dir, data.fullname));

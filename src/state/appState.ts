@@ -1,6 +1,5 @@
-import { action, observable, runInAction, computed, autorun, isObservableMap, isObservable } from 'mobx';
-import { Directory, Fs, DirectoryType, File } from '../services/Fs';
-import * as path from 'path';
+import { action, observable, runInAction } from 'mobx';
+import { Directory, DirectoryType, File, getFs } from '../services/Fs';
 
 interface Clipboard {
     type: DirectoryType;
@@ -16,13 +15,13 @@ export class AppState {
     caches: Directory[] = new Array();
 
     @action
-    addCache(type: DirectoryType = DirectoryType.LOCAL, path: string = '.') {
+    addCache(path: string = '') {
         console.log('addCache');
         const cache:Directory = observable({
             path,
             files: new Array(),
-            type,
-            selected: new Array()
+            selected: new Array(),
+            FS: getFs(path)
         });
 
         this.caches.push(cache);
@@ -35,18 +34,26 @@ export class AppState {
         cache.selected = newSelection;
     }
 
-    // TODO: type ??
+    @action updateFS(cache: Directory, path: string) {
+        if (cache.path.substr(0, 5) !== path.substr(0, 5)) {
+            cache.FS = getFs(path);
+            console.log('updateFS: FS may have changed, new FS:', cache.FS.name);
+        }
+    }
+
     @action
     updateCache(cache: Directory, newPath: string) {
-        Fs.readDirectory(newPath)
-            .then((files) => {
+        this.updateFS(cache, newPath);
+
+        cache.FS.readDirectory(newPath)
+            .then((files:File[]) => {
                 console.log('yeah, got files 2', files);
                 runInAction(() => {
                     cache.files = files;
-                    cache.path = path.resolve(newPath);
+                    cache.path = cache.FS.resolve(newPath);
                     cache.selected = new Array();
                 });
-                
+
 
                 // if (forceSync) {
                 //     this.refreshCache(cache);

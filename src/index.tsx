@@ -13,7 +13,6 @@ import { AppState } from './state/appState';
 import { LogUI, Logger } from './components/Log';
 
 import { remote } from 'electron';
-import { DirectoryType } from "./services/Fs";
 
 const appState = new AppState();
 
@@ -26,8 +25,8 @@ Logger.error('Hi from React FTP!\n :)');
 ReactDOM.render(
     <Provider appState={appState}>
         <React.Fragment>
-            <SideView type={DirectoryType.LOCAL} />
-            <SideView type={DirectoryType.REMOTE} />
+            <SideView/>
+            <SideView/>
             <LogUI></LogUI>
         </React.Fragment>
     </Provider>,

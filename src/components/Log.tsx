@@ -7,18 +7,18 @@ require('../css/log.css');
 
 export const Logger = {
     logs: observable.array(new Array()),
-    log(...lines: (string | number)[]) {
+    log(...lines: (string | number | boolean)[]) {
         pushLog(lines, 'none');
     },
-    warn(...lines: (string | number)[]) {
+    warn(...lines: (string | number | boolean)[]) {
         pushLog(lines, 'warn');
     },
-    error(...lines: (string | number)[]) {
+    error(...lines: (string | number | boolean)[]) {
         pushLog(lines, 'error');
     }
 };
 
-function pushLog(lines: (string|number)[], intent: 'none' | 'warn' | 'error') {
+function pushLog(lines: (string|number|boolean)[], intent: 'none' | 'warn' | 'error') {
     // since this method may be called from a render
     // function we wrap it into a setTimeout to
     // be sure the state is modified *outside*
@@ -68,7 +68,7 @@ export class LogUI extends React.Component<any, LogUIState> {
     }
 
     onKeyUp = (e: KeyboardEvent) => {
-        const element = e.target as HTMLElement || null;        
+        const element = e.target as HTMLElement || null;
         const tagName = element.tagName.toLowerCase();
 
         if (e.keyCode === ESCAPE_KEY && !tagName.match(/input|textarea/) && (!element || !element.classList.contains('bp3-menu-item')) && !document.body.classList.contains('bp3-overlay-open')) {

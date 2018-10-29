@@ -1,13 +1,13 @@
 import * as React from "react";
 import { Dialog, Classes, Intent, Button, InputGroup, FormGroup, Label, Checkbox } from "@blueprintjs/core";
 import { debounce } from "../utils/debounce";
-import { Fs } from "../services/Fs";
 import { sep as separator } from 'path';
 
 interface IMakedirProps {
     isOpen: boolean;
     parentPath: string;
     onClose?: (dirName: string, navigate: boolean) => void
+    onValidation: (dir: string) => boolean
 };
 
 interface IMakedirState {
@@ -43,7 +43,7 @@ export class MakedirDialog extends React.Component<IMakedirProps, IMakedirState>
     }
 
     private isValid(path: string): boolean {
-        return Fs.isDirectoryNameValid(path);
+        return this.props.onValidation(path);
     }
 
     private checkPath: (event: React.FormEvent<HTMLElement>) => any = debounce(
@@ -57,7 +57,7 @@ export class MakedirDialog extends React.Component<IMakedirProps, IMakedirState>
         }, DEBOUNCE_DELAY);
 
     private cancelClose = () => {
-        console.log('handleClose');        
+        console.log('handleClose');
         this.props.onClose("", false);
     }
 
@@ -67,7 +67,7 @@ export class MakedirDialog extends React.Component<IMakedirProps, IMakedirState>
         if (this.isValid(path)) {
             this.props.onClose(path, ctrlKey);
         } else {
-            this.setState({ valid: false });            
+            this.setState({ valid: false });
         }
     }
 
@@ -85,12 +85,12 @@ export class MakedirDialog extends React.Component<IMakedirProps, IMakedirState>
 
     componentWillMount() {
         document.addEventListener('keyup', this.onKeyUp);
-        document.addEventListener('keydown', this.onKeyDown);        
+        document.addEventListener('keydown', this.onKeyDown);
     }
 
     componentWillUnmount() {
         document.removeEventListener('keyup', this.onKeyUp);
-        document.removeEventListener('keydown', this.onKeyDown);        
+        document.removeEventListener('keydown', this.onKeyDown);
     }
 
     public render() {
@@ -115,7 +115,7 @@ export class MakedirDialog extends React.Component<IMakedirProps, IMakedirState>
                     inline={true}
                     labelFor="directory-input"
                     labelInfo={`${this.props.parentPath}${separator}`}
-                >                
+                >
                     <InputGroup
                         onChange={this.onPathChange}
                         placeholder="Enter folder name"
@@ -134,7 +134,7 @@ export class MakedirDialog extends React.Component<IMakedirProps, IMakedirState>
                         {!ctrlKey && 'Create' || 'Create & read folder'}
                     </Button>
                 </div>
-            </div>            
+            </div>
             </Dialog>
         )
     }
