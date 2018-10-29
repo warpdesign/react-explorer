@@ -1,8 +1,9 @@
 import * as React from "react";
 import { inject } from 'mobx-react';
 import { reaction } from 'mobx';
-import { Position, Classes, Button, ITreeNode, Tooltip, Tree, Toaster, Intent } from "@blueprintjs/core";
+import { Classes, Button, ITreeNode, Tooltip, Tree, Intent } from "@blueprintjs/core";
 import { AppState } from "../state/appState";
+import { AppToaster } from './AppToaster';
 // TODO: remove any calls to shell, path
 import { File, Directory, DirectoryType } from "../services/Fs";
 import { shell } from 'electron';
@@ -16,13 +17,6 @@ export interface FileListState {
 };
 
 let i = 0;
-
-export const AppToaster = Toaster.create({
-    className: "recipe-toaster",
-    position: Position.TOP,
-});
-
-const TOAST_TIMEOUT = 2000;
 
 const INITIAL_STATE: ITreeNode[] = [
     {
@@ -106,7 +100,7 @@ export class FileList extends React.Component<{}, FileListState> {
         this.state = {
             nodes: [],
             selected: 0,
-            type: fileCache.type
+            type: fileCache.FS.type
         };
 
         this.installReaction();
@@ -123,6 +117,14 @@ export class FileList extends React.Component<{}, FileListState> {
                 const nodes = this.buildNodes(files);
                 this.setState({ nodes, selected: 0 });
             });
+    }
+
+    // took this from stack overflow: https://stackoverflow.com/questions/15900485/correct-way-to-convert-size-in-bytes-to-kb-mb-gb-in-javascript
+    private sizeExtension(bytes:number):string {
+        const i = Math.floor(Math.log2(bytes)/10);
+        const num = (bytes/Math.pow(1024, i));
+
+        return  (i > 0 ? num.toFixed(2) : (num | 0)) + ' ' + ['Bytes','Kb','Mb','Gb','Tb'][i];
     }
 
     private buildNodes = (files:File[]): ITreeNode<{}>[] => {
@@ -142,7 +144,8 @@ export class FileList extends React.Component<{}, FileListState> {
                     icon: file.isDir && "folder-close" || 'document',
                     label: file.fullname,
                     nodeData: file,
-                    className: file.fullname !== '..' && file.fullname.startsWith('.') && 'isHidden'
+                    className: file.fullname !== '..' && file.fullname.startsWith('.') && 'isHidden',
+                    secondaryLabel: !file.isDir && (<div className="bp3-text-small">{this.sizeExtension(file.length)}</div>) || ''
                 };
             return res;
         });
@@ -154,7 +157,6 @@ export class FileList extends React.Component<{}, FileListState> {
 
         if (data.isDir) {
             Logger.log('need to read dir', path.resolve(path.join(data.dir, data.fullname)));
-            // appState.readDirectory(path.join(appState.localCache.path, data.fullname), this.props.type);
             appState.updateCache(this.cache, path.resolve(path.join(data.dir, data.fullname)));
         } else {
             shell.openItem(path.join(data.dir, data.fullname));
@@ -164,6 +166,8 @@ export class FileList extends React.Component<{}, FileListState> {
     private onNodeClick = (nodeData: ITreeNode, _nodePath: number[], e: React.MouseEvent<HTMLElement>) => {
         const originallySelected = nodeData.isSelected;
         const { nodes, selected } = this.state;
+        const { fileCache, appState } = this.injected;
+
         let newSelected = selected;
 
         if (!e.shiftKey) {
@@ -179,21 +183,23 @@ export class FileList extends React.Component<{}, FileListState> {
         }
 
         this.setState({ nodes, selected: newSelected });
+        const selection = nodes.filter((node) => node.isSelected).map((node) => node.nodeData) as File[];
+
+        appState.updateSelection(fileCache, selection);
     };
 
     private onClipboardCopy = () => {
         const { appState } = this.injected;
         const { nodes, selected } = this.state;
 
-        const elements = nodes.filter((node) => node.isSelected).map((node) => { const nodeData = node.nodeData as File; return path.join(nodeData.dir, nodeData.fullname); });
+        const elements = nodes.filter((node) => node.isSelected).map((node) => { const nodeData = node.nodeData as File; return nodeData.fullname; });
 
-        appState.setClipboard(this.state.type, elements);
+        appState.setClipboard(this.state.type, this.cache.path, elements);
 
         AppToaster.show({
             message: `${selected} element(s) copied to the clipboard`,
             icon: "tick",
-            intent: Intent.SUCCESS,
-            timeout: TOAST_TIMEOUT
+            intent: Intent.SUCCESS
         });
     }
 

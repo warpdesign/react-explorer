@@ -1,17 +1,6 @@
-import * as fs from 'fs';
-import * as path from 'path';
-
-const Parent:File = {
-    dir: '..',
-    fullname: '..',
-    name: '',
-    extension: '',
-    cDate: new Date(),
-    mDate: new Date(),
-    length: 0,
-    mode: 0,
-    isDir: true
-};
+import * as cp from 'cpy';
+import { FsLocal } from './FsLocal';
+import { FsGeneric } from './FsGeneric';
 
 export interface File {
     dir: string;
@@ -28,7 +17,8 @@ export interface File {
 export interface Directory {
     path: string;
     files: File[];
-    type: DirectoryType
+    selected: File[];
+    FS: FsInterface;
 }
 
 export enum DirectoryType {
@@ -36,63 +26,33 @@ export enum DirectoryType {
     REMOTE
 }
 
-interface FsInterface {
+export interface FsInterface {
+    name: string;
+    type: DirectoryType;
+    description: string;
     readDirectory: (dir: string) => Promise<File[]>;
     pathExists: (path: string) => Promise<boolean>;
+    makedir: (parent: string, dirName: string) => Promise<string>;
+    delete: (src: string, files: File[]) => Promise<boolean>;
+    size: (source: string, files: string[]) => Promise<number>;
+    copy: (source: string, files: string[], dest: string) => Promise<void> & cp.ProgressEmitter;
+    isDirectoryNameValid: (dirName: string) => boolean;
+    resolve: (dirName: string) => string;
+    guess: (path: string) => boolean;
 }
 
-export const Fs: FsInterface = {
-    pathExists: (path: string): Promise<boolean> => {
-        return new Promise((resolve, reject) => {
-            try {
-                const stat = fs.statSync(path);
-                resolve(stat.isDirectory());
-            } catch (err) {
-                reject(false);
-            }
-        });
-    },
+const interfaces: Array<FsInterface> = new Array();
 
-    readDirectory: (dir: string): Promise<File[]> => {
-        console.log('calling readDirectory', dir);
-        return new Promise((resolve, reject) => {
-            fs.readdir(dir, (err, items) => {
-                if (err) {
-                    debugger;
-                    reject(`Could not read directory '${path}', reason: ${err}`);
-                } else {
-                    const dirPath = path.resolve(dir);
-                    // console.log(items);
-
-                    const files: File[] = [];
-
-                    for (var i = 0; i < items.length; i++) {
-                        const fullPath = path.join(dirPath, items[i]);
-                        const format = path.parse(fullPath);
-                        const stats = fs.statSync(path.join(dirPath, items[i]));
-                        // console.log(items[i]);
-                        const file =
-                        {
-                            dir: format.dir,
-                            fullname: items[i],
-                            name: format.name,
-                            extension: format.ext,
-                            cDate: stats.ctime,
-                            mDate: stats.mtime,
-                            length: stats.size,
-                            mode: stats.mode,
-                            isDir: stats.isDirectory()
-                        };
-
-                        files.push(file);
-                    }
-
-                    // add parent
-                    const parent = { ...Parent, dir: dirPath };
-
-                    resolve([parent].concat(files));
-                }
-            });
-        });
-    }
+function registerFs(fs: FsInterface): void {
+    console.log('Registring Fs', fs.name);
+    interfaces.push(fs);
 };
+
+export function getFs(path: string): FsInterface {
+    const fs = interfaces.find((filesystem) => filesystem.guess(path));
+
+    return fs;
+}
+
+registerFs(FsLocal);
+registerFs(FsGeneric);

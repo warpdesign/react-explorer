@@ -1,9 +1,9 @@
-import { action, observable, runInAction, computed, autorun, isObservableMap, isObservable } from 'mobx';
-import { Directory, Fs, DirectoryType } from '../services/Fs';
-import * as path from 'path';
+import { action, observable, runInAction } from 'mobx';
+import { Directory, DirectoryType, File, getFs } from '../services/Fs';
 
 interface Clipboard {
-    source: DirectoryType;
+    type: DirectoryType;
+    source: string;
     elements: string[];
 }
 
@@ -15,12 +15,13 @@ export class AppState {
     caches: Directory[] = new Array();
 
     @action
-    addCache(type: DirectoryType = DirectoryType.LOCAL, path: string = '.') {
+    addCache(path: string = '') {
         console.log('addCache');
         const cache:Directory = observable({
             path,
             files: new Array(),
-            type
+            selected: new Array(),
+            FS: getFs(path)
         });
 
         this.caches.push(cache);
@@ -28,30 +29,66 @@ export class AppState {
         return cache;
     }
 
-    // TODO: type ??
+    @action
+    updateSelection(cache: Directory, newSelection: File[]) {
+        cache.selected = newSelection;
+    }
+
+    @action updateFS(cache: Directory, path: string) {
+        if (cache.path.substr(0, 5) !== path.substr(0, 5)) {
+            cache.FS = getFs(path);
+            console.log('updateFS: FS may have changed, new FS:', cache.FS.name);
+        }
+    }
+
     @action
     updateCache(cache: Directory, newPath: string) {
-        Fs.readDirectory(newPath)
-            .then((files) => {
+        this.updateFS(cache, newPath);
+
+        cache.FS.readDirectory(newPath)
+            .then((files:File[]) => {
                 console.log('yeah, got files 2', files);
                 runInAction(() => {
                     cache.files = files;
-                    cache.path = path.resolve(newPath);
+                    cache.path = cache.FS.resolve(newPath);
+                    cache.selected = new Array();
                 });
+
+
+                // if (forceSync) {
+                //     this.refreshCache(cache);
+                // }
             });
     }
     /** /new */
 
+    @action
+    refreshCache(cache: Directory, sync = false) {
+        this.updateCache(cache, cache.path);
+    }
+
+    @action syncCaches(source: Directory) {
+        for (let cache of this.caches) {
+            // only refresh cache that don't have files selected: we don't we to lose
+            // the user's selection
+            // we could do even better and keep the user's selection while refreshing
+            if (source !== cache && cache.path === source.path && !cache.selected.length) {
+                this.refreshCache(cache);
+            }
+        }
+    }
+
     // global
     @observable
     clipboard: Clipboard = {
-        source: DirectoryType.LOCAL,
+        type: DirectoryType.LOCAL,
+        source: '',
         elements: []
     };
 
     @action
-    setClipboard(source: DirectoryType, elements: string[]) {
-        this.clipboard = { source, elements };
+    setClipboard(type: DirectoryType, source: string, elements: string[]) {
+        this.clipboard = { source, type, elements };
     }
 
     constructor() {
