@@ -34,6 +34,7 @@ export interface FsInterface {
     pathExists: (path: string) => Promise<boolean>;
     makedir: (parent: string, dirName: string) => Promise<string>;
     delete: (src: string, files: File[]) => Promise<boolean>;
+    rename: (src: File, newName: string) => Promise<string>;
     size: (source: string, files: string[]) => Promise<number>;
     copy: (source: string, files: string[], dest: string) => Promise<void> & cp.ProgressEmitter;
     isDirectoryNameValid: (dirName: string) => boolean;

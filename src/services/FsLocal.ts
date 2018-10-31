@@ -8,7 +8,7 @@ import * as cp from 'cpy';
 import { size } from '../utils/size';
 
 const isWin = process.platform === "win32";
-const invalidChars = isWin && /[\*:<>\?|"]+/ig || /^[\.]+$/ig;
+const invalidChars = isWin && /[\*:<>\?|"]+/ig || /^[\.]+[\/]+(.)*$/ig;
 const localStart = isWin && /^([a-zA-Z]\:)/ || /^(\/|\.)/;
 
 const Parent: File = {
@@ -92,6 +92,26 @@ export const FsLocal: FsInterface = {
                 reject(false);
             }
         });
+    },
+
+    rename: (src: File, newName: string): Promise <string> => {
+        const oldPath = path.join(src.dir, src.fullname);
+        const newPath = path.join(src.dir, newName);
+        console.log(newPath);
+        if (!newName.match(invalidChars)) {
+            console.log('valid !');
+            return new Promise((resolve, reject) => {
+                fs.rename(oldPath, newPath, (err) => {
+                    if (err) {
+                        reject(src.fullname);
+                    } else {
+                        resolve(newName);
+                    }
+                });
+            });
+        }
+        // resolve promise with previous name in case of invalid chars
+        return Promise.resolve(src.fullname);
     },
 
     pathExists: (path: string): Promise<boolean> => {

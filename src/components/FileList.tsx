@@ -210,7 +210,10 @@ export class FileList extends React.Component<{}, FileListState> {
         } else {
             console.log('renaming value');
             // call rename function
-            this.editingElement.innerText = this.editingFile.fullname;
+            this.cache.FS.rename(this.editingFile, this.editingElement.innerText)
+                .then(() => {
+                    this.injected.appState.refreshCache(this.cache);
+                });
         }
         this.editingElement = null;
         this.editingFile = null;
@@ -225,6 +228,12 @@ export class FileList extends React.Component<{}, FileListState> {
         }
     }
 
+    onKeyDown = (e: React.KeyboardEvent<HTMLElement>) => {
+        if (this.editingElement && e.keyCode === KEYS.Enter) {
+            e.preventDefault();
+        }
+    }
+
     public render() {
         if (this.state.type === DirectoryType.LOCAL) {
             Logger.log('render', i++);
@@ -235,7 +244,7 @@ export class FileList extends React.Component<{}, FileListState> {
             copyToClipboardClasses += " showClipboard";
         }
 
-        return <div onKeyUp={this.onKeyUp}>
+        return <div onKeyUp={this.onKeyUp} onKeyDown={this.onKeyDown}>
             <Tree
                 contents={this.state.nodes}
                 className={`${Classes.ELEVATION_0}`}

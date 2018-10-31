@@ -49,6 +49,11 @@ export const FsGeneric: FsInterface = {
         return Promise.resolve(true);
     },
 
+    rename: (src: File, newName: string): Promise<string> => {
+        console.log('FsGeneric.rename');
+        return Promise.resolve(newName);
+    },
+
     pathExists: (path: string): Promise<boolean> => {
         console.log('FsGeneric.pathExists');
         return Promise.resolve(true);

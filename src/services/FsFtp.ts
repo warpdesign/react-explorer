@@ -4,7 +4,7 @@ import * as cp from 'cpy';
 const FtpUrl = /^(ftp|[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})/;
 const invalidChars = /^[\.]+$/ig;
 
-export const FsGeneric: FsInterface = {
+export const FsFtp: FsInterface = {
     name: 'ftp',
     description: 'Fs that just implements fs over ftp',
     type: 1,
@@ -51,6 +51,11 @@ export const FsGeneric: FsInterface = {
     delete: (src: string, files: File[]): Promise<boolean> => {
         console.log('FsGeneric.delete');
         return Promise.resolve(true);
+    },
+
+    rename: (src: File, newName: string): Promise<string> => {
+        console.log('FsGeneric.rename');
+        return Promise.resolve(newName);
     },
 
     pathExists: (path: string): Promise<boolean> => {
