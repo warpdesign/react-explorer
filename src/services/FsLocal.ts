@@ -9,7 +9,7 @@ import { size } from '../utils/size';
 
 const isWin = process.platform === "win32";
 const invalidChars = isWin && /[\*:<>\?|"]+/ig || /^[\.]+[\/]+(.)*$/ig;
-const localStart = isWin && /^([a-zA-Z]\:)/ || /^(\/|\.)/;
+const localStart = isWin && /^(([a-zA-Z]\:)|(\/|\.))/ || /^(\/|\.)/;
 
 const Parent: File = {
     dir: '..',

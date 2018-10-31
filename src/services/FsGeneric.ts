@@ -7,7 +7,7 @@ export const FsGeneric: FsInterface = {
     type: 0,
 
     guess: (str: string): boolean => {
-        return false;
+        return true;
     },
 
     isDirectoryNameValid: (dirName: string): boolean => {
@@ -61,7 +61,6 @@ export const FsGeneric: FsInterface = {
 
     readDirectory: async (dir: string): Promise<File[]> => {
         console.log('FsGeneric.readDirectory');
-        debugger;
         const pathExists = await FsGeneric.pathExists(dir);
 
         if (pathExists) {

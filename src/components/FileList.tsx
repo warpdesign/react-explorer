@@ -23,7 +23,7 @@ enum KEYS {
     Enter = 13
 };
 
-const CLICK_DELAY = 20;
+const CLICK_DELAY = 200;
 
 interface FileListProps{
 }
@@ -46,6 +46,7 @@ export class FileList extends React.Component<{}, FileListState> {
     private editingElement: HTMLElement;
     private editingFile: File;
     private doubleClick: boolean;
+    private clickTimeout: any;
 
     constructor(props: any) {
         super(props);
@@ -112,6 +113,8 @@ export class FileList extends React.Component<{}, FileListState> {
         const data = node.nodeData as File;
         const { appState } = this.injected;
 
+        console.log('double click');
+
         this.doubleClick = true;
 
         if ((e.target as HTMLElement) !== this.editingElement) {
@@ -156,6 +159,9 @@ export class FileList extends React.Component<{}, FileListState> {
                 this.editingElement = element;
                 this.editingFile = file;
                 this.selectLeftPart();
+                element.onblur = () => {
+                    this.onInlineEdit(true);
+                }
             } else {
                 // clear rename
                 if (this.editingElement) {
@@ -187,8 +193,9 @@ export class FileList extends React.Component<{}, FileListState> {
             newSelected = 0;
             nodes.forEach(n => (n.isSelected = false));
             nodeData.isSelected = true;
-            setTimeout(() => {
+            this.clickTimeout = setTimeout(() => {
                 if (!this.doubleClick) {
+                    console.log('rename');
                     this.toggleInlineRename(element, originallySelected, nodeData.nodeData as File);
                 }
             }, CLICK_DELAY);
