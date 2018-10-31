@@ -12,6 +12,7 @@ export interface File {
     length: number;
     mode: number;
     isDir: boolean;
+    readonly: boolean;
 }
 
 export interface Directory {

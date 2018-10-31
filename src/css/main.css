@@ -24,6 +24,7 @@ button.small:hover{
 .bp3-tree-node-label[contenteditable]{
     background-color:white;
     color:black;
+    cursor:text;
 }
 
 #reload{

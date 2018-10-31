@@ -23,6 +23,8 @@ enum KEYS {
     Enter = 13
 };
 
+const CLICK_DELAY = 20;
+
 interface FileListProps{
 }
 
@@ -43,6 +45,7 @@ export class FileList extends React.Component<{}, FileListState> {
     private cache: Directory;
     private editingElement: HTMLElement;
     private editingFile: File;
+    private doubleClick: boolean;
 
     constructor(props: any) {
         super(props);
@@ -105,15 +108,19 @@ export class FileList extends React.Component<{}, FileListState> {
         });
     }
 
-    private onNodeDoubleClick = (node: ITreeNode) => {
+    private onNodeDoubleClick = (node: ITreeNode, _nodePath: number[], e: React.MouseEvent<HTMLElement>) => {
         const data = node.nodeData as File;
         const { appState } = this.injected;
 
-        if (data.isDir) {
-            Logger.log('need to read dir', path.resolve(path.join(data.dir, data.fullname)));
-            appState.updateCache(this.cache, path.resolve(path.join(data.dir, data.fullname)));
-        } else {
-            shell.openItem(path.join(data.dir, data.fullname));
+        this.doubleClick = true;
+
+        if ((e.target as HTMLElement) !== this.editingElement) {
+            if (data.isDir) {
+                Logger.log('need to read dir', path.resolve(path.join(data.dir, data.fullname)));
+                appState.updateCache(this.cache, path.resolve(path.join(data.dir, data.fullname)));
+            } else {
+                shell.openItem(path.join(data.dir, data.fullname));
+            }
         }
     }
 
@@ -140,23 +147,14 @@ export class FileList extends React.Component<{}, FileListState> {
         selection.addRange(range);
     }
 
-    private onNodeClick = (nodeData: ITreeNode, _nodePath: number[], e: React.MouseEvent<HTMLElement>) => {
-        console.log(e.target);
-        const originallySelected = nodeData.isSelected;
-        const { nodes, selected } = this.state;
-        const { fileCache, appState } = this.injected;
-
-        let newSelected = selected;
-
-        if (!e.shiftKey) {
-            newSelected = 0;
-            nodes.forEach(n => (n.isSelected = false));
-            nodeData.isSelected = true;
+    private toggleInlineRename(element: HTMLElement, originallySelected: boolean, file: File) {
+        // do not activate rename when clicking on parent ('..') entry
+        if (!file.readonly) {
             if (originallySelected) {
-                (e.target as HTMLElement).contentEditable = "true";
-                (e.target as HTMLElement).focus();
-                this.editingElement = e.target as HTMLElement;
-                this.editingFile = nodeData.nodeData as File;
+                element.contentEditable = "true";
+                element.focus();
+                this.editingElement = element;
+                this.editingFile = file;
                 this.selectLeftPart();
             } else {
                 // clear rename
@@ -166,6 +164,34 @@ export class FileList extends React.Component<{}, FileListState> {
                     this.editingElement = null;
                 }
             }
+        }
+    }
+
+    private onNodeClick = (nodeData: ITreeNode, _nodePath: number[], e: React.MouseEvent<HTMLElement>) => {
+        const originallySelected = nodeData.isSelected;
+        const { nodes, selected } = this.state;
+        const { fileCache, appState } = this.injected;
+        // keep a reference to the target before set setTimeout is called
+        // because React set the event to null
+        const element = e.target as HTMLElement;
+
+        if (this.editingElement === element) {
+            return;
+        }
+
+        let newSelected = selected;
+
+        this.doubleClick = false;
+
+        if (!e.shiftKey) {
+            newSelected = 0;
+            nodes.forEach(n => (n.isSelected = false));
+            nodeData.isSelected = true;
+            setTimeout(() => {
+                if (!this.doubleClick) {
+                    this.toggleInlineRename(element, originallySelected, nodeData.nodeData as File);
+                }
+            }, CLICK_DELAY);
         } else {
             nodeData.isSelected = originallySelected == null ? true : !originallySelected;
             this.editingElement = null;
@@ -200,19 +226,23 @@ export class FileList extends React.Component<{}, FileListState> {
     }
 
     private onInlineEdit(cancel: boolean) {
-        this.editingElement.blur();
-        this.editingElement.removeAttribute('contenteditable');
+        const editingElement = this.editingElement;
+
+        editingElement.blur();
+        editingElement.removeAttribute('contenteditable');
 
         if (cancel) {
             console.log('restoring value');
             // restore previous value
-            this.editingElement.innerText = this.editingFile.fullname;
+            editingElement.innerText = this.editingFile.fullname;
         } else {
             console.log('renaming value');
             // call rename function
-            this.cache.FS.rename(this.editingFile, this.editingElement.innerText)
+            this.cache.FS.rename(this.editingFile, editingElement.innerText)
                 .then(() => {
                     this.injected.appState.refreshCache(this.cache);
+                }).catch((oldName) => {
+                    editingElement.innerText = oldName;
                 });
         }
         this.editingElement = null;

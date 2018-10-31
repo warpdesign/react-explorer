@@ -20,7 +20,8 @@ const Parent: File = {
     mDate: new Date(),
     length: 0,
     mode: 0,
-    isDir: true
+    isDir: true,
+    readonly: true
 };
 
 export const FsLocal: FsInterface = {
@@ -97,7 +98,7 @@ export const FsLocal: FsInterface = {
     rename: (src: File, newName: string): Promise <string> => {
         const oldPath = path.join(src.dir, src.fullname);
         const newPath = path.join(src.dir, newName);
-        console.log(newPath);
+
         if (!newName.match(invalidChars)) {
             console.log('valid !');
             return new Promise((resolve, reject) => {
@@ -110,8 +111,8 @@ export const FsLocal: FsInterface = {
                 });
             });
         }
-        // resolve promise with previous name in case of invalid chars
-        return Promise.resolve(src.fullname);
+        // reject promise with previous name in case of invalid chars
+        return Promise.reject(src.fullname);
     },
 
     pathExists: (path: string): Promise<boolean> => {
@@ -144,7 +145,7 @@ export const FsLocal: FsInterface = {
                             const fullPath = path.join(dirPath, items[i]);
                             const format = path.parse(fullPath);
                             const stats = fs.statSync(path.join(dirPath, items[i]));
-                            // console.log(items[i]);
+
                             const file =
                             {
                                 dir: format.dir,
@@ -155,7 +156,8 @@ export const FsLocal: FsInterface = {
                                 mDate: stats.mtime,
                                 length: stats.size,
                                 mode: stats.mode,
-                                isDir: stats.isDirectory()
+                                isDir: stats.isDirectory(),
+                                readonly: false
                             };
 
                             files.push(file);
@@ -164,6 +166,7 @@ export const FsLocal: FsInterface = {
                         // add parent
                         const parent = { ...Parent, dir: dirPath };
 
+                        // TODO: detect root directory and only append parent if not root
                         resolve([parent].concat(files));
                     }
                 });
