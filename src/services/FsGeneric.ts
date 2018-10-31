@@ -54,10 +54,15 @@ export const FsGeneric: FsInterface = {
         return Promise.resolve(true);
     },
 
-    readDirectory: (dir: string): Promise<File[]> => {
+    readDirectory: async (dir: string): Promise<File[]> => {
         console.log('FsGeneric.readDirectory');
-        return Promise.resolve([
+        debugger;
+        const pathExists = await FsGeneric.pathExists(dir);
 
-        ]);
+        if (pathExists) {
+            return Promise.resolve([ ]);
+        } else {
+            Promise.reject('error');
+        }
     }
 };

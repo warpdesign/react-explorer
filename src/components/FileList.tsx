@@ -18,57 +18,10 @@ export interface FileListState {
 
 let i = 0;
 
-const INITIAL_STATE: ITreeNode[] = [
-    {
-        id: 0,
-        icon: "folder-close",
-        label: "Folder 0",
-    },
-    {
-        id: 1,
-        icon: "folder-close",
-        // isExpanded: true,
-        label: <Tooltip content="I'm a folder <3">Folder 1</Tooltip>,
-        // childNodes: [
-        //     {
-        //         id: 2,
-        //         icon: "document",
-        //         label: "Item 0"
-        //         // secondaryLabel: (
-        //         //     <Tooltip content="An eye!">
-        //         //         <Icon icon="eye-open" />
-        //         //     </Tooltip>
-        //         // ),
-        //     },
-        //     {
-        //         id: 3,
-        //         icon: "tag",
-        //         label: "Organic meditation gluten-free, sriracha VHS drinking vinegar beard man."
-        //     },
-        //     {
-        //         id: 4,
-        //         hasCaret: true,
-        //         icon: "folder-close",
-        //         label: <Tooltip content="foo">Folder 2</Tooltip>,
-        //         childNodes: [
-        //             { id: 5, label: "No-Icon Item" },
-        //             { id: 6, icon: "tag", label: "Item 1" },
-        //             {
-        //                 id: 7,
-        //                 hasCaret: true,
-        //                 icon: "folder-close",
-        //                 label: "Folder 3",
-        //                 childNodes: [
-        //                     { id: 8, icon: "document", label: "Item 0" },
-        //                     { id: 9, icon: "tag", label: "Item 1" }
-        //                 ]
-        //             }
-        //         ]
-        //     }
-        // ]
-    },
-    { id: 3, icon: "document", label: "Item 1" },
-];
+enum KEYS {
+    Escape = 27,
+    Enter = 13
+};
 
 interface FileListProps{
 }
@@ -88,13 +41,14 @@ interface InjectedProps extends FileListProps {
 @inject('appState', 'fileCache')
 export class FileList extends React.Component<{}, FileListState> {
     private cache: Directory;
+    private editingElement: HTMLElement;
+    private editingFile: File;
 
     constructor(props: any) {
         super(props);
 
         const { fileCache } = this.injected;
 
-        // this.cache = props.type === 'local' ? appState.localCache : appState.remoteCache;
         this.cache = fileCache;
 
         this.state = {
@@ -163,7 +117,31 @@ export class FileList extends React.Component<{}, FileListState> {
         }
     }
 
+    private selectLeftPart() {
+        const filename = this.editingFile.fullname;
+        const regex = RegExp('\\.', 'g');
+        const matches = filename.match(regex);
+        const selection = window.getSelection();
+        const range = document.createRange();
+        const textNode = this.editingElement.childNodes[0];
+
+        let selectionLength = filename.length;
+
+        if (matches) {
+            const pos = filename.lastIndexOf('.');
+            if (pos > 0) {
+                selectionLength = pos;
+            }
+        }
+
+        range.setStart(textNode, 0);
+        range.setEnd(textNode, selectionLength);
+        selection.empty();
+        selection.addRange(range);
+    }
+
     private onNodeClick = (nodeData: ITreeNode, _nodePath: number[], e: React.MouseEvent<HTMLElement>) => {
+        console.log(e.target);
         const originallySelected = nodeData.isSelected;
         const { nodes, selected } = this.state;
         const { fileCache, appState } = this.injected;
@@ -172,9 +150,27 @@ export class FileList extends React.Component<{}, FileListState> {
 
         if (!e.shiftKey) {
             newSelected = 0;
-            nodes.forEach( n => (n.isSelected = false) );
+            nodes.forEach(n => (n.isSelected = false));
+            nodeData.isSelected = true;
+            if (originallySelected) {
+                (e.target as HTMLElement).contentEditable = "true";
+                (e.target as HTMLElement).focus();
+                this.editingElement = e.target as HTMLElement;
+                this.editingFile = nodeData.nodeData as File;
+                this.selectLeftPart();
+            } else {
+                // clear rename
+                if (this.editingElement) {
+                    this.editingElement.blur();
+                    this.editingElement.removeAttribute('contenteditable');
+                    this.editingElement = null;
+                }
+            }
+        } else {
+            nodeData.isSelected = originallySelected == null ? true : !originallySelected;
+            this.editingElement = null;
         }
-        nodeData.isSelected = originallySelected == null ? true : !originallySelected;
+
 
         if (nodeData.isSelected) {
             newSelected++;
@@ -203,6 +199,32 @@ export class FileList extends React.Component<{}, FileListState> {
         });
     }
 
+    private onInlineEdit(cancel: boolean) {
+        this.editingElement.blur();
+        this.editingElement.removeAttribute('contenteditable');
+
+        if (cancel) {
+            console.log('restoring value');
+            // restore previous value
+            this.editingElement.innerText = this.editingFile.fullname;
+        } else {
+            console.log('renaming value');
+            // call rename function
+            this.editingElement.innerText = this.editingFile.fullname;
+        }
+        this.editingElement = null;
+        this.editingFile = null;
+    }
+
+    onKeyUp = (e: React.KeyboardEvent<HTMLElement>) => {
+        if (this.editingElement) {
+            e.nativeEvent.stopImmediatePropagation();
+            if (e.keyCode === KEYS.Escape || e.keyCode === KEYS.Enter) {
+                this.onInlineEdit(e.keyCode === KEYS.Escape);
+            }
+        }
+    }
+
     public render() {
         if (this.state.type === DirectoryType.LOCAL) {
             Logger.log('render', i++);
@@ -213,7 +235,7 @@ export class FileList extends React.Component<{}, FileListState> {
             copyToClipboardClasses += " showClipboard";
         }
 
-        return <React.Fragment>
+        return <div onKeyUp={this.onKeyUp}>
             <Tree
                 contents={this.state.nodes}
                 className={`${Classes.ELEVATION_0}`}
@@ -221,6 +243,6 @@ export class FileList extends React.Component<{}, FileListState> {
                 onNodeClick={this.onNodeClick}
             />
             <Button icon="duplicate" className={copyToClipboardClasses} onClick={this.onClipboardCopy}>{this.state.selected} element(s)</Button>
-        </React.Fragment>;
+        </div>;
     }
 }

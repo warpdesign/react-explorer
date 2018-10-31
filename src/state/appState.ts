@@ -46,7 +46,7 @@ export class AppState {
         this.updateFS(cache, newPath);
 
         cache.FS.readDirectory(newPath)
-            .then((files:File[]) => {
+            .then((files: File[]) => {
                 console.log('yeah, got files 2', files);
                 runInAction(() => {
                     cache.files = files;
@@ -58,6 +58,9 @@ export class AppState {
                 // if (forceSync) {
                 //     this.refreshCache(cache);
                 // }
+            })
+            .catch((err) => {
+                console.log('error reading directory', err);
             });
     }
     /** /new */

@@ -148,17 +148,15 @@ export class Toolbar extends React.Component<{}, PathInputState> {
     }
 
     private onPathChange = (event: React.FormEvent<HTMLElement>) => {
-        // 1.Update date
         const path = (event.target as HTMLInputElement).value;
         this.setState({ path });
-        // 2. isValid ? => loadDirectory
         this.checkPath(event);
     }
 
-    private onSubmit = async () => {
+    private onSubmit = () => {
         try {
-            const pathExists = await this.cache.FS.pathExists(this.state.path);
-            if (this.cache.path !== this.state.path && pathExists) {
+            // const pathExists = await this.cache.FS.pathExists(this.state.path);
+            if (this.cache.path !== this.state.path /*&& pathExists*/) {
                 const { appState } = this.injected;
                 appState.updateCache(this.cache, this.state.path);
             }

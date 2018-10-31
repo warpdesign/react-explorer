@@ -105,46 +105,51 @@ export const FsLocal: FsInterface = {
         });
     },
 
-    readDirectory: (dir: string): Promise<File[]> => {
+    readDirectory: async (dir: string): Promise<File[]> => {
         console.log('calling readDirectory', dir);
-        return new Promise((resolve, reject) => {
-            fs.readdir(dir, (err, items) => {
-                if (err) {
-                    debugger;
-                    reject(`Could not read directory '${path}', reason: ${err}`);
-                } else {
-                    const dirPath = path.resolve(dir);
-                    // console.log(items);
+        const pathExists = await FsLocal.pathExists(dir);
 
-                    const files: File[] = [];
+        if (pathExists) {
+            return new Promise<File[]>((resolve, reject) => {
+                fs.readdir(dir, (err, items) => {
+                    if (err) {
+                        reject(`Could not read directory '${path}', reason: ${err}`);
+                    } else {
+                        const dirPath = path.resolve(dir);
+                        // console.log(items);
 
-                    for (var i = 0; i < items.length; i++) {
-                        const fullPath = path.join(dirPath, items[i]);
-                        const format = path.parse(fullPath);
-                        const stats = fs.statSync(path.join(dirPath, items[i]));
-                        // console.log(items[i]);
-                        const file =
-                        {
-                            dir: format.dir,
-                            fullname: items[i],
-                            name: format.name,
-                            extension: format.ext,
-                            cDate: stats.ctime,
-                            mDate: stats.mtime,
-                            length: stats.size,
-                            mode: stats.mode,
-                            isDir: stats.isDirectory()
-                        };
+                        const files: File[] = [];
 
-                        files.push(file);
+                        for (var i = 0; i < items.length; i++) {
+                            const fullPath = path.join(dirPath, items[i]);
+                            const format = path.parse(fullPath);
+                            const stats = fs.statSync(path.join(dirPath, items[i]));
+                            // console.log(items[i]);
+                            const file =
+                            {
+                                dir: format.dir,
+                                fullname: items[i],
+                                name: format.name,
+                                extension: format.ext,
+                                cDate: stats.ctime,
+                                mDate: stats.mtime,
+                                length: stats.size,
+                                mode: stats.mode,
+                                isDir: stats.isDirectory()
+                            };
+
+                            files.push(file);
+                        }
+
+                        // add parent
+                        const parent = { ...Parent, dir: dirPath };
+
+                        resolve([parent].concat(files));
                     }
-
-                    // add parent
-                    const parent = { ...Parent, dir: dirPath };
-
-                    resolve([parent].concat(files));
-                }
+                });
             });
-        });
+        } else {
+            return Promise.reject(false);
+        }
     }
 };

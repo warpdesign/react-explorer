@@ -20,6 +20,12 @@ button.small:hover{
     min-width:10px;
 }
 
+/* inline rename */
+.bp3-tree-node-label[contenteditable]{
+    background-color:white;
+    color:black;
+}
+
 #reload{
     position:absolute;
     opacity:.3;

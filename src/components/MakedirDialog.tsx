@@ -47,7 +47,7 @@ export class MakedirDialog extends React.Component<IMakedirProps, IMakedirState>
     }
 
     private checkPath: (event: React.FormEvent<HTMLElement>) => any = debounce(
-        async (event: React.FormEvent<HTMLElement>) => {
+        (event: React.FormEvent<HTMLElement>) => {
             try {
                 const isValid = this.isValid(this.state.path);
                 this.setState({ valid: isValid });
