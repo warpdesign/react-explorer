@@ -47,7 +47,6 @@ export class AppState {
 
         cache.FS.readDirectory(newPath)
             .then((files: File[]) => {
-                console.log('yeah, got files 2', files);
                 runInAction(() => {
                     cache.files = files;
                     cache.path = cache.FS.resolve(newPath);

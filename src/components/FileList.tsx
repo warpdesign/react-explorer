@@ -113,8 +113,6 @@ export class FileList extends React.Component<{}, FileListState> {
         const data = node.nodeData as File;
         const { appState } = this.injected;
 
-        console.log('double click');
-
         this.doubleClick = true;
 
         if ((e.target as HTMLElement) !== this.editingElement) {
@@ -160,7 +158,9 @@ export class FileList extends React.Component<{}, FileListState> {
                 this.editingFile = file;
                 this.selectLeftPart();
                 element.onblur = () => {
-                    this.onInlineEdit(true);
+                    if (this.editingElement) {
+                        this.onInlineEdit(true);
+                    }
                 }
             } else {
                 // clear rename
@@ -193,12 +193,14 @@ export class FileList extends React.Component<{}, FileListState> {
             newSelected = 0;
             nodes.forEach(n => (n.isSelected = false));
             nodeData.isSelected = true;
-            this.clickTimeout = setTimeout(() => {
-                if (!this.doubleClick) {
-                    console.log('rename');
-                    this.toggleInlineRename(element, originallySelected, nodeData.nodeData as File);
-                }
-            }, CLICK_DELAY);
+            // online toggle rename when clicking on the label, not the icon
+            if (element.classList.contains('bp3-tree-node-label') && originallySelected) {
+                this.clickTimeout = setTimeout(() => {
+                    if (!this.doubleClick) {
+                        this.toggleInlineRename(element, originallySelected, nodeData.nodeData as File);
+                    }
+                }, CLICK_DELAY);
+            }
         } else {
             nodeData.isSelected = originallySelected == null ? true : !originallySelected;
             this.editingElement = null;
@@ -235,9 +237,6 @@ export class FileList extends React.Component<{}, FileListState> {
     private onInlineEdit(cancel: boolean) {
         const editingElement = this.editingElement;
 
-        editingElement.blur();
-        editingElement.removeAttribute('contenteditable');
-
         if (cancel) {
             console.log('restoring value');
             // restore previous value
@@ -254,6 +253,9 @@ export class FileList extends React.Component<{}, FileListState> {
         }
         this.editingElement = null;
         this.editingFile = null;
+
+        editingElement.blur();
+        editingElement.removeAttribute('contenteditable');        
     }
 
     onKeyUp = (e: React.KeyboardEvent<HTMLElement>) => {

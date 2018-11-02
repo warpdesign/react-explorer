@@ -100,7 +100,7 @@ export const FsLocal: FsInterface = {
         const newPath = path.join(src.dir, newName);
 
         if (!newName.match(invalidChars)) {
-            console.log('valid !');
+            console.log('valid !', oldPath, newPath);
             return new Promise((resolve, reject) => {
                 fs.rename(oldPath, newPath, (err) => {
                     if (err) {
