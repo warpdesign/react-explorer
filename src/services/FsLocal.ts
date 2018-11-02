@@ -34,8 +34,7 @@ export const FsLocal: FsInterface = {
     },
 
     isDirectoryNameValid: (dirName: string): boolean => {
-        console.log('checking dir', dirName);
-        return !invalidChars.test(dirName);
+        return !!!dirName.match(invalidChars);
     },
 
     resolve: (newPath: string): string => {
@@ -137,7 +136,6 @@ export const FsLocal: FsInterface = {
                         reject(`Could not read directory '${path}', reason: ${err}`);
                     } else {
                         const dirPath = path.resolve(dir);
-                        // console.log(items);
 
                         const files: File[] = [];
 

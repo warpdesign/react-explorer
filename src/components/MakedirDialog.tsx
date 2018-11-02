@@ -46,10 +46,10 @@ export class MakedirDialog extends React.Component<IMakedirProps, IMakedirState>
         return this.props.onValidation(path);
     }
 
-    private checkPath: (event: React.FormEvent<HTMLElement>) => any = debounce(
-        (event: React.FormEvent<HTMLElement>) => {
+    private checkPath: (path: string) => any = debounce(
+        (path: string) => {
             try {
-                const isValid = this.isValid(this.state.path);
+                const isValid = this.isValid(path);
                 this.setState({ valid: isValid });
             } catch {
                 this.setState({ valid: false });
@@ -76,7 +76,7 @@ export class MakedirDialog extends React.Component<IMakedirProps, IMakedirState>
         const path = (event.target as HTMLInputElement).value;
         this.setState({ path });
         // // 2. isValid ?
-        this.checkPath(event);
+        this.checkPath(path);
     }
 
     // private onCheckChange = () => {
@@ -96,6 +96,7 @@ export class MakedirDialog extends React.Component<IMakedirProps, IMakedirState>
     public render() {
         const { path, valid, ctrlKey } = this.state;
         const intent = !valid && 'danger' || 'none';
+        const helperText = !valid && (<span>Folder name not valid</span>) || (<span>&nbsp;</span>);
 
         return(
             <Dialog
@@ -111,7 +112,7 @@ export class MakedirDialog extends React.Component<IMakedirProps, IMakedirState>
             <div className={Classes.DIALOG_BODY}>
                 <p>Enter a name to create a new folder:</p>
                 <FormGroup
-                    helperText={"aa"/*<Checkbox checked={this.state.isChecked} label="Navigate to the new folder" onChange={this.onCheckChange} />*/}
+                    helperText={helperText}
                     inline={true}
                     labelFor="directory-input"
                     labelInfo={`${this.props.parentPath}${separator}`}
