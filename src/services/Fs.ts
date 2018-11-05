@@ -1,6 +1,7 @@
 import * as cp from 'cpy';
 import { FsLocal } from './FsLocal';
 import { FsGeneric } from './FsGeneric';
+import { FsFtp } from './FsFtp';
 
 export interface File {
     dir: string;
@@ -57,4 +58,5 @@ export function getFs(path: string): FsInterface {
 }
 
 registerFs(FsLocal);
+registerFs(FsFtp);
 registerFs(FsGeneric);
