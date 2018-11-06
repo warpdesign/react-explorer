@@ -37,8 +37,16 @@ export const FsLocal: FsInterface = {
         return !!!dirName.match(invalidChars);
     },
 
+    join: (...paths): string => {
+        return path.join(...paths);
+    },
+
     resolve: (newPath: string): string => {
         return path.resolve(newPath);
+    },
+
+    joinResolve(...paths): string {
+        return this.resolve(this.join(...paths));
     },
 
     size: (source: string, files: string[]): Promise<number> => {
@@ -60,16 +68,16 @@ export const FsLocal: FsInterface = {
         return cp(files, dest, { parents: true, cwd: source });
     },
 
-    makedir: (parent: string, dirName: string): Promise<string> => {
+    makedir: (source: string, dirName: string): Promise<string> => {
         return new Promise((resolve, reject) => {
-            const unixPath = path.join(parent, dirName).replace(/\\/g, '/');
+            const unixPath = path.join(source, dirName).replace(/\\/g, '/');
             try {
                 console.log('mkdir', unixPath);
                 mkdir(unixPath, (err) => {
                     if (err) {
                         reject(false);
                     } else {
-                        resolve(path.join(parent, dirName));
+                        resolve(path.join(source, dirName));
                     }
                 });
 
@@ -80,8 +88,8 @@ export const FsLocal: FsInterface = {
         });
     },
 
-    delete: (src: string, files: File[]): Promise<boolean> => {
-        let toDelete = files.map((file) => path.join(src, file.fullname));
+    delete: (source:string, files: File[]): Promise<boolean> => {
+        let toDelete = files.map((file) => path.join(source, file.fullname));
 
         return new Promise(async (resolve, reject) => {
             try {
@@ -89,21 +97,21 @@ export const FsLocal: FsInterface = {
                 await del(toDelete);
                 resolve(true);
             } catch (err) {
-                reject(false);
+                reject(err);
             }
         });
     },
 
-    rename: (src: File, newName: string): Promise <string> => {
-        const oldPath = path.join(src.dir, src.fullname);
-        const newPath = path.join(src.dir, newName);
+    rename: (source:string, file: File, newName: string): Promise <string> => {
+        const oldPath = path.join(source, file.fullname);
+        const newPath = path.join(source, newName);
 
         if (!newName.match(invalidChars)) {
             console.log('valid !', oldPath, newPath);
             return new Promise((resolve, reject) => {
                 fs.rename(oldPath, newPath, (err) => {
                     if (err) {
-                        reject(src.fullname);
+                        reject(file.fullname);
                     } else {
                         resolve(newName);
                     }
@@ -111,7 +119,7 @@ export const FsLocal: FsInterface = {
             });
         }
         // reject promise with previous name in case of invalid chars
-        return Promise.reject(src.fullname);
+        return Promise.reject(file.fullname);
     },
 
     pathExists: (path: string): Promise<boolean> => {
@@ -125,7 +133,7 @@ export const FsLocal: FsInterface = {
         });
     },
 
-    readDirectory: async (dir: string): Promise<File[]> => {
+    readDirectory: async (/*source:string, */dir: string): Promise<File[]> => {
         console.log('calling readDirectory', dir);
         const pathExists = await FsLocal.pathExists(dir);
 
@@ -170,7 +178,7 @@ export const FsLocal: FsInterface = {
                 });
             });
         } else {
-            return Promise.reject(false);
+            return Promise.reject('Path does not exist');
         }
     }
 };

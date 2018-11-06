@@ -19,6 +19,14 @@ export const FsGeneric: FsInterface = {
         return newPath;
     },
 
+    join: (...paths): string => {
+        return this.join(...paths);
+    },
+
+    joinResolve(...paths): string {
+        return this.resolve(this.join(paths));
+    },
+
     size: (source: string, files: string[]): Promise<number> => {
         console.log('GenericFs.size');
         return Promise.resolve(10);
@@ -49,7 +57,7 @@ export const FsGeneric: FsInterface = {
         return Promise.resolve(true);
     },
 
-    rename: (src: File, newName: string): Promise<string> => {
+    rename: (source: string, file: File, newName: string): Promise<string> => {
         console.log('FsGeneric.rename');
         return Promise.resolve(newName);
     },

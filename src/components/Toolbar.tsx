@@ -155,7 +155,6 @@ export class Toolbar extends React.Component<{}, PathInputState> {
 
     private onSubmit = () => {
         try {
-            // const pathExists = await this.cache.FS.pathExists(this.state.path);
             if (this.cache.path !== this.state.path /*&& pathExists*/) {
                 const { appState } = this.injected;
                 appState.updateCache(this.cache, this.state.path);

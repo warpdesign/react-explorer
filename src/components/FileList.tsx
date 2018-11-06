@@ -4,10 +4,9 @@ import { reaction } from 'mobx';
 import { Classes, Button, ITreeNode, Tooltip, Tree, Intent } from "@blueprintjs/core";
 import { AppState } from "../state/appState";
 import { AppToaster } from './AppToaster';
-// TODO: remove any calls to shell, path
+// TODO: remove any calls to shell
 import { File, Directory, DirectoryType } from "../services/Fs";
 import { shell } from 'electron';
-import * as path from 'path';
 import { Logger } from "./Log";
 
 export interface FileListState {
@@ -16,14 +15,12 @@ export interface FileListState {
     type: DirectoryType
 };
 
-let i = 0;
-
 enum KEYS {
     Escape = 27,
     Enter = 13
 };
 
-const CLICK_DELAY = 200;
+const CLICK_DELAY = 300;
 
 interface FileListProps{
 }
@@ -45,7 +42,6 @@ export class FileList extends React.Component<{}, FileListState> {
     private cache: Directory;
     private editingElement: HTMLElement;
     private editingFile: File;
-    private doubleClick: boolean;
     private clickTimeout: any;
 
     constructor(props: any) {
@@ -113,14 +109,21 @@ export class FileList extends React.Component<{}, FileListState> {
         const data = node.nodeData as File;
         const { appState } = this.injected;
 
-        this.doubleClick = true;
+        console.log('double click');
+
+        // double click: prevent inline rename
+        if (this.clickTimeout) {
+            clearTimeout(this.clickTimeout);
+            this.clickTimeout = 0;
+        }
 
         if ((e.target as HTMLElement) !== this.editingElement) {
             if (data.isDir) {
-                Logger.log('need to read dir', path.resolve(path.join(data.dir, data.fullname)));
-                appState.updateCache(this.cache, path.resolve(path.join(data.dir, data.fullname)));
+                Logger.log('need to read dir', this.cache.FS.joinResolve(data.dir, data.fullname));
+                appState.updateCache(this.cache, this.cache.FS.joinResolve(data.dir, data.fullname));
             } else {
-                shell.openItem(path.join(data.dir, data.fullname));
+                // TODO: if remote, need to download file first
+                shell.openItem(this.cache.FS.join(data.dir, data.fullname));
             }
         }
     }
@@ -177,6 +180,7 @@ export class FileList extends React.Component<{}, FileListState> {
         const originallySelected = nodeData.isSelected;
         const { nodes, selected } = this.state;
         const { fileCache, appState } = this.injected;
+        console.log('click');
         // keep a reference to the target before set setTimeout is called
         // because React set the event to null
         const element = e.target as HTMLElement;
@@ -187,18 +191,20 @@ export class FileList extends React.Component<{}, FileListState> {
 
         let newSelected = selected;
 
-        this.doubleClick = false;
-
         if (!e.shiftKey) {
             newSelected = 0;
             nodes.forEach(n => (n.isSelected = false));
             nodeData.isSelected = true;
             // online toggle rename when clicking on the label, not the icon
-            if (element.classList.contains('bp3-tree-node-label') && originallySelected) {
+            if (element.classList.contains('bp3-tree-node-label')) {
+                if (this.clickTimeout) {
+                    clearTimeout(this.clickTimeout);
+                    this.clickTimeout = 0;
+                }
+
                 this.clickTimeout = setTimeout(() => {
-                    if (!this.doubleClick) {
-                        this.toggleInlineRename(element, originallySelected, nodeData.nodeData as File);
-                    }
+                    console.log('click timeout');
+                    this.toggleInlineRename(element, originallySelected, nodeData.nodeData as File);
                 }, CLICK_DELAY);
             }
         } else {
@@ -242,9 +248,9 @@ export class FileList extends React.Component<{}, FileListState> {
             // restore previous value
             editingElement.innerText = this.editingFile.fullname;
         } else {
-            console.log('renaming value');
+            console.log('renaming value', this.cache.path, this.editingFile);
             // call rename function
-            this.cache.FS.rename(this.editingFile, editingElement.innerText)
+            this.cache.FS.rename(this.editingFile.dir, this.editingFile, editingElement.innerText)
                 .then(() => {
                     this.injected.appState.refreshCache(this.cache);
                 }).catch((oldName) => {
@@ -274,10 +280,6 @@ export class FileList extends React.Component<{}, FileListState> {
     }
 
     public render() {
-        if (this.state.type === DirectoryType.LOCAL) {
-            Logger.log('render', i++);
-        }
-
         let copyToClipboardClasses = 'copy';
         if (this.state.selected > 0) {
             copyToClipboardClasses += " showClipboard";
