@@ -96,6 +96,8 @@ export class Directory {
                     runInAction(() => {
                         console.log('run in actions', this.path);
                         this.files.replace(files);
+                        // clear lister selection as well
+                        this.selected.clear();
                     });
                 });
         }
