@@ -1,6 +1,7 @@
 body{
     margin:0;
     overflow:hidden;
+    height:100vh;
 }
 
 .bp3-dark {
@@ -20,6 +21,22 @@ button.small:hover{
     min-width:10px;
 }
 
+/* auto resize layout */
+.filelist, .sideview{
+    display:flex;
+    flex-direction:column;
+    flex-grow:1;
+}
+
+.sideview > .bp3-control-group{
+    flex-shrink:0;
+}
+
+.filelist > .bp3-tree{
+    overflow:auto;
+    flex-grow:1;
+}
+
 /* inline rename */
 .bp3-tree-node-label[contenteditable]{
     background-color:white;
@@ -37,9 +54,11 @@ button.small:hover{
 #root{
     display:flex;
     justify-content: center;
+    height:100%;
 }
 
 #root > .sideview{
+    min-width:360px;
     margin:10px;
     flex-grow:1;
 }

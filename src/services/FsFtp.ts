@@ -1,4 +1,4 @@
-import { FsInterface, File } from './Fs';
+import { FsApi, File } from './Fs';
 import * as ftp from 'ftp';
 import * as cp from 'cpy';
 
@@ -76,104 +76,116 @@ class Client{
     }
 }
 
-const clients:Array<Client> = [];
+class FtpAPI implements FsApi {
+    type = 1;
+    server = '';
+    connected = false;
 
-function addClient(server: string, options: any = {}) {
-    const client = new Client(server, options);
-    clients.push(client, options);
-    return client;
-}
+    static clients: Array<Client> = [];
 
-function getFreeClient(server: string) {
-    let client = clients.find((client) => client.host === server);
-    if (!client) {
-        client = addClient(server);
+    constructor(path:string) {
+
     }
-    return client;
-}
 
-function getServer(str: string): string {
-    const server = str.replace(/^ftp\:\/\//, '');
-    return server.split('/')[0];
-}
+    serverpart = FsFtp.serverpart;
 
-export const FsFtp: FsInterface = {
-    name: 'ftp',
-    description: 'Fs that just implements fs over ftp',
-    type: 1,
+    addClient(server: string, options: any = {}) {
+        const client = new Client(server, options);
+        FtpAPI.clients.push(client, options);
+        return client;
+    }
 
-    guess: (str: string): boolean => {
-        return !!getServer(str).match(FtpUrl);
-    },
+    getFreeClient(server: string) {
+        let client = FtpAPI.clients.find((client) => client.host === server);
+        if (!client) {
+            client = this.addClient(server);
+        }
+        return client;
+    }
 
-    isDirectoryNameValid: (dirName: string): boolean => {
+    isDirectoryNameValid (dirName: string): boolean {
         console.log('FTP.isDirectoryNameValid');
         return !invalidChars.test(dirName);
-    },
+    };
 
-    resolve: (newPath: string): string => {
+    resolve(newPath: string): string {
         console.warn('TODO: implement resolve');
         return newPath;
-    },
+    };
 
-    join: (...paths): string => {
+    join(...paths:string[]): string {
         return this.join(...paths);
-    },
+    };
 
-    joinResolve(...paths): string {
-        return this.resolve(this.join(paths));
-    },
-
-    size: (source: string, files: string[]): Promise<number> => {
+    size(source: string, files: string[]): Promise<number> {
         console.log('FtpFs.size');
         return Promise.resolve(10);
-    },
+    };
 
-    copy: (source: string, files: string[], dest: string): Promise<void> & cp.ProgressEmitter => {
+    copy(source: string, files: string[], dest: string): Promise<any> & cp.ProgressEmitter {
         console.log('FsFtp.copy');
         const prom: Promise<void> & cp.ProgressEmitter = new Promise((resolve, reject) => {
-            setTimeout(() => {
-                resolve();
-            }, 2000);
+            resolve();
         }) as Promise<void> & cp.ProgressEmitter;
 
         prom.on = (name, handler): Promise<void> => {
-            return this;
+            return prom;
         }
 
         return prom;
-    },
+    };
 
-    makedir: (parent: string, dirName: string): Promise<string> => {
+    makedir(parent: string, name: string): Promise<string> {
         console.log('FsFtp.makedir');
         return Promise.resolve('');
-    },
+    };
 
-    delete: (src: string, files: File[]): Promise<boolean> => {
+    delete(src: string, files: File[]): Promise<number> {
         console.log('FsFtp.delete');
-        return Promise.resolve(true);
-    },
+        return Promise.resolve(0);
+    };
 
-    rename: (source: string, file: File, newName: string): Promise<string> => {
+    rename(source: string, file: File, newName: string): Promise<string> {
         console.log('FsFtp.rename');
         return Promise.resolve(newName);
-    },
+    };
 
-    pathExists: (path: string): Promise<boolean> => {
+    exists(path: string): Promise<boolean> {
         console.log('FsFtp.pathExists');
         return Promise.resolve(true);
-    },
+    };
 
-    readDirectory: (dir: string): Promise<File[]> => {
+    list(dir: string): Promise<File[]> {
         console.log('FsFtp.readDirectory');
-        const server = getServer(dir);
+        const server = FsFtp.serverpart(dir);
 
         // get avaiable client
         console.log('getting free client');
 
-        const client = getFreeClient(server);
+        const client = this.getFreeClient(server);
         return Promise.resolve([
 
         ]);
+    };
+
+    cd(path: string): Promise<string> {
+        return Promise.resolve('');
+    };
+
+    isConnected():boolean {
+        return this.connected;
     }
 };
+
+export const FsFtp = {
+    name: 'ftp',
+    description: 'Fs that just implements fs over ftp',
+    canread(str: string): boolean {
+        return !!this.serverpart(str).match(FtpUrl);
+    },
+    serverpart(str: string): string {
+        const server = str.replace(/^ftp\:\/\//, '');
+        return server.split('/')[0];
+    },
+    API: FtpAPI
+}

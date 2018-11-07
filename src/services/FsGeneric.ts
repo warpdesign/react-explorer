@@ -1,38 +1,36 @@
-import { FsInterface, File } from './Fs';
+import { FsApi, File } from './Fs';
 import * as cp from 'cpy';
 
-export const FsGeneric: FsInterface = {
-    name: 'generic',
-    description: 'Fs that just implements the FsInterface but does nothing',
-    type: 0,
+class GenericApi implements FsApi {
+    type = 0;
 
-    guess: (str: string): boolean => {
-        return true;
-    },
-
-    isDirectoryNameValid: (dirName: string): boolean => {
+    isDirectoryNameValid(dirName: string): boolean {
         console.log('GenericFs.isDirectoryNameValid');
         return true;
-    },
+    }
 
-    resolve: (newPath: string): string => {
+    resolve(newPath: string): string {
         return newPath;
-    },
+    }
 
-    join: (...paths): string => {
+    join(...paths:string[]): string {
         return this.join(...paths);
-    },
+    }
 
-    joinResolve(...paths): string {
-        return this.resolve(this.join(paths));
-    },
+    isConnected(): boolean {
+        return true;
+    }
 
-    size: (source: string, files: string[]): Promise<number> => {
+    cd(path: string) {
+        return Promise.resolve(path);
+    }
+
+    size(source: string, files: string[]): Promise<number> {
         console.log('GenericFs.size');
         return Promise.resolve(10);
-    },
+    }
 
-    copy: (source: string, files: string[], dest: string): Promise<void> & cp.ProgressEmitter => {
+    copy(source: string, files: string[], dest: string): Promise<any> & cp.ProgressEmitter {
         console.log('Generic.copy');
         const prom: Promise<void> & cp.ProgressEmitter = new Promise((resolve, reject) => {
             setTimeout(() => {
@@ -41,35 +39,35 @@ export const FsGeneric: FsInterface = {
         }) as Promise<void> & cp.ProgressEmitter;
 
         prom.on = (name, handler): Promise<void> => {
-            return this;
+            return prom;
         }
 
         return prom;
-    },
+    }
 
-    makedir: (parent: string, dirName: string): Promise<string> => {
+    makedir(parent: string, dirName: string): Promise<string> {
         console.log('FsGeneric.makedir');
         return Promise.resolve('');
-    },
+    }
 
-    delete: (src: string, files: File[]): Promise<boolean> => {
+    delete(src: string, files: File[]): Promise<number> {
         console.log('FsGeneric.delete');
-        return Promise.resolve(true);
-    },
+        return Promise.resolve(files.length);
+    }
 
-    rename: (source: string, file: File, newName: string): Promise<string> => {
+    rename(source: string, file: File, newName: string): Promise<string> {
         console.log('FsGeneric.rename');
         return Promise.resolve(newName);
-    },
+    }
 
-    pathExists: (path: string): Promise<boolean> => {
+    exists(path: string): Promise<boolean> {
         console.log('FsGeneric.pathExists');
         return Promise.resolve(true);
-    },
+    }
 
-    readDirectory: async (dir: string): Promise<File[]> => {
+    async list(dir: string): Promise<File[]> {
         console.log('FsGeneric.readDirectory');
-        const pathExists = await FsGeneric.pathExists(dir);
+        const pathExists = await this.exists(dir);
 
         if (pathExists) {
             return Promise.resolve([ ]);
@@ -78,3 +76,16 @@ export const FsGeneric: FsInterface = {
         }
     }
 };
+
+export const FsGeneric = {
+    name: 'generic',
+    description: 'Fs that just implements the FsInterface but does nothing',
+    canread(str: string): boolean {
+        return true;
+    },
+    serverpart(str: string): string {
+        const server = str.replace(/^ftp\:\/\//, '');
+        return server.split('/')[0];
+    },
+    API: GenericApi
+}

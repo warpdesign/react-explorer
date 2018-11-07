@@ -1,9 +1,9 @@
 import * as React from "react";
-import { reaction } from 'mobx';
-import { inject } from 'mobx-react';
+import { reaction, autorun } from 'mobx';
+import { inject, observer } from 'mobx-react';
 import { InputGroup, ControlGroup, Button, ButtonGroup, Popover, Intent, Alert, ProgressBar, Classes } from '@blueprintjs/core';
 import { AppState } from "../state/appState";
-import { Directory, DirectoryType } from "../services/Fs";
+import { Directory } from "../services/Fs";
 import { debounce } from '../utils/debounce';
 import { FileMenu } from "./FileMenu";
 import { MakedirDialog } from "./MakedirDialog";
@@ -25,7 +25,7 @@ interface PathInputState {
     path: string;
     history: string[];
     current: number;
-    type: DirectoryType;
+    type: string;
     selectedItems: number;
     isOpen: boolean;
     isDeleteOpen: boolean;
@@ -47,7 +47,7 @@ export class Toolbar extends React.Component<{}, PathInputState> {
     private checkPath: (event: React.FormEvent<HTMLElement>) => void = debounce(
         async (event: React.FormEvent<HTMLElement>) => {
             try {
-                const exists = await this.cache.FS.pathExists(this.state.path);
+                const exists = await this.cache.exists(this.state.path);
                 this.setState({ status: exists ? 1 : -1 });
             } catch {
                 this.setState({ status: -1 })
@@ -64,13 +64,16 @@ export class Toolbar extends React.Component<{}, PathInputState> {
             path: '',
             history: new Array(),
             current: -1,
-            type: fileCache.FS.type,
+            type: 'local',
             isOpen: false,
             isDeleteOpen: false,
             selectedItems: 0
         };
 
         this.cache = fileCache;
+
+        // autorun(() => console.log('path modified', this.cache.path));
+        // autorun(() => console.log('files modified', this.cache.files.length));
 
         this.installReactions();
     }
@@ -83,6 +86,7 @@ export class Toolbar extends React.Component<{}, PathInputState> {
         const reaction1 = reaction(
             () => { return this.cache.path },
             path => {
+                console.log('reaction 1');
                 const status = 0;
 
                 if (!this.direction) {
@@ -133,7 +137,9 @@ export class Toolbar extends React.Component<{}, PathInputState> {
         } else {
             const { appState } = this.injected;
             const path = history[current + dir];
-            appState.updateCache(this.cache, path);
+            // appState.updateCache(this.cache, path);
+            console.log('was updateCache');
+            this.cache.cd(path);
         }
     }
 
@@ -157,7 +163,9 @@ export class Toolbar extends React.Component<{}, PathInputState> {
         try {
             if (this.cache.path !== this.state.path /*&& pathExists*/) {
                 const { appState } = this.injected;
-                appState.updateCache(this.cache, this.state.path);
+                console.log('was update cache');
+                this.cache.cd(this.state.path);
+                // appState.updateCache(this.cache, this.state.path);
             }
         } catch(err) {
             console.warn('error submiting: path probably does not exist');
@@ -192,12 +200,17 @@ export class Toolbar extends React.Component<{}, PathInputState> {
         this.setState({isOpen: false});
         Logger.log('yo! lets create a directory :)', dirName, navigate);
         try {
-            const dir = await this.cache.FS.makedir(this.state.path, dirName);
-            const { appState } = this.injected;
+            const dir = await this.cache.makedir(this.state.path, dirName);
+
+            debugger;
             if (!navigate) {
-                appState.refreshCache(this.cache);
+                console.log('need to refresh cache');
+                this.cache.reload();
+                // appState.refreshCache(this.cache);
             } else {
-                appState.updateCache(this.cache, dir);
+                console.log('was update cache');
+                this.cache.cd(dir);
+                // appState.updateCache(this.cache, dir);
             }
         } catch(err) {
             AppToaster.show({
@@ -218,8 +231,10 @@ export class Toolbar extends React.Component<{}, PathInputState> {
         try {
             const { fileCache, appState } = this.injected;
 
-            await this.cache.FS.delete(this.state.path, fileCache.selected);
-            appState.refreshCache(this.cache);
+            await this.cache.delete(this.state.path, fileCache.selected);
+            console.log('need to refresh cache');
+            this.cache.reload();
+            // appState.refreshCache(this.cache);
         } catch(err) {
             AppToaster.show({
                 message: `Error deleting files: ${err}`,
@@ -253,7 +268,7 @@ export class Toolbar extends React.Component<{}, PathInputState> {
             const source = appState.clipboard.source;
             const elements = appState.clipboard.elements.map((el) => el);
             console.log('copying', elements, 'to', this.state.path);
-            const bytes = await this.cache.FS.size(source, elements);
+            const bytes = await this.cache.size(source, elements);
             console.log('size', bytes);
             let key = '';
             // only show toaster if (source=remote or bytes > 50*1024*1024)
@@ -264,7 +279,7 @@ export class Toolbar extends React.Component<{}, PathInputState> {
             }, 1000);
             console.time('copy');
             let i = 0;
-            this.cache.FS.copy(source, elements, this.state.path).on('progress', throttle((data:cpy.ProgressData) => {
+            this.cache.copy(source, elements, this.state.path).on('progress', throttle((data:cpy.ProgressData) => {
                 console.log('progress', i++);
                 console.log('progress', data, 'percent', (data.completedSize * 100) / bytes);
                 if (key) {
@@ -280,7 +295,9 @@ export class Toolbar extends React.Component<{}, PathInputState> {
                 }
                 // do not show toaster if copy doesn't last more than 1 sec
                 clearTimeout(timeout);
-                appState.refreshCache(this.cache);
+                console.log('need to refresh cache');
+                this.cache.reload();
+                // appState.refreshCache(this.cache);
             })
             .catch((err) => {
                 clearTimeout(timeout);
@@ -318,8 +335,10 @@ export class Toolbar extends React.Component<{}, PathInputState> {
         const canGoForward = history.length > 1 && current < history.length - 1;
         // const loadingSpinner = false ? <Spinner size={Icon.SIZE_STANDARD} /> : undefined;
         const reloadButton = <Button className="small" onClick={this.onReload} minimal rightIcon="repeat"></Button>;
-        const icon = type === DirectoryType.LOCAL && 'home' || 'globe';
+        const icon = type === 'local' && 'home' || 'globe';
         const intent = status === -1 ? 'danger' : 'none';
+
+        console.log(fileCache, fileCache.isDirectoryNameValid);
 
         return (
             <ControlGroup>
@@ -340,7 +359,10 @@ export class Toolbar extends React.Component<{}, PathInputState> {
                         intent={intent}
                         inputRef={this.refHandler}
                 />
-                <MakedirDialog isOpen={isOpen} onClose={this.makedir} onValidation={this.cache.FS.isDirectoryNameValid} parentPath={path}></MakedirDialog>
+                {isOpen &&
+                    <MakedirDialog isOpen={isOpen} onClose={this.makedir} onValidation={fileCache.isDirectoryNameValid} parentPath={path}></MakedirDialog>
+                }
+
                 <Alert
                     cancelButtonText="Cancel"
                     confirmButtonText="Delete"

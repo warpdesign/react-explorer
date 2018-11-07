@@ -1,18 +1,18 @@
 import * as React from "react";
 import { inject } from 'mobx-react';
-import { reaction } from 'mobx';
+import { reaction, toJS } from 'mobx';
 import { Classes, Button, ITreeNode, Tooltip, Tree, Intent } from "@blueprintjs/core";
 import { AppState } from "../state/appState";
 import { AppToaster } from './AppToaster';
 // TODO: remove any calls to shell
-import { File, Directory, DirectoryType } from "../services/Fs";
+import { File, Directory } from "../services/Fs";
 import { shell } from 'electron';
 import { Logger } from "./Log";
 
 export interface FileListState {
     nodes: ITreeNode[];
     selected: number;
-    type: DirectoryType
+    type: string
 };
 
 enum KEYS {
@@ -54,7 +54,7 @@ export class FileList extends React.Component<{}, FileListState> {
         this.state = {
             nodes: [],
             selected: 0,
-            type: fileCache.FS.type
+            type: 'local'
         };
 
         this.installReaction();
@@ -66,8 +66,9 @@ export class FileList extends React.Component<{}, FileListState> {
 
     private installReaction() {
         const reaction1 = reaction(
-            () => { return this.cache.files },
+            () => { return toJS(this.cache.files) },
             (files: File[]) => {
+                console.log('++++ reaction files', files);
                 const nodes = this.buildNodes(files);
                 this.setState({ nodes, selected: 0 });
             });
@@ -75,7 +76,7 @@ export class FileList extends React.Component<{}, FileListState> {
 
     // took this from stack overflow: https://stackoverflow.com/questions/15900485/correct-way-to-convert-size-in-bytes-to-kb-mb-gb-in-javascript
     private sizeExtension(bytes:number):string {
-        const i = Math.floor(Math.log2(bytes)/10);
+        const i = bytes > 0 ? Math.floor(Math.log2(bytes)/10) : 0;
         const num = (bytes/Math.pow(1024, i));
 
         return  (i > 0 ? num.toFixed(2) : (num | 0)) + ' ' + ['Bytes','Kb','Mb','Gb','Tb'][i];
@@ -119,11 +120,13 @@ export class FileList extends React.Component<{}, FileListState> {
 
         if ((e.target as HTMLElement) !== this.editingElement) {
             if (data.isDir) {
-                Logger.log('need to read dir', this.cache.FS.joinResolve(data.dir, data.fullname));
-                appState.updateCache(this.cache, this.cache.FS.joinResolve(data.dir, data.fullname));
+                Logger.log('need to read dir', data.dir, data.fullname);
+                this.cache.cd(data.dir, data.fullname);
+                // Logger.log('need to read dir', this.cache.FS.joinResolve(data.dir, data.fullname));
+                // appState.updateCache(this.cache, this.cache.FS.joinResolve(data.dir, data.fullname));
             } else {
                 // TODO: if remote, need to download file first
-                shell.openItem(this.cache.FS.join(data.dir, data.fullname));
+                shell.openItem(this.cache.join(data.dir, data.fullname));
             }
         }
     }
@@ -250,9 +253,10 @@ export class FileList extends React.Component<{}, FileListState> {
         } else {
             console.log('renaming value', this.cache.path, this.editingFile);
             // call rename function
-            this.cache.FS.rename(this.editingFile.dir, this.editingFile, editingElement.innerText)
+            this.cache.rename(this.editingFile.dir, this.editingFile, editingElement.innerText)
                 .then(() => {
-                    this.injected.appState.refreshCache(this.cache);
+                    // this.injected.appState.refreshCache(this.cache);
+                    this.cache.reload();
                 }).catch((oldName) => {
                     editingElement.innerText = oldName;
                 });
@@ -261,7 +265,7 @@ export class FileList extends React.Component<{}, FileListState> {
         this.editingFile = null;
 
         editingElement.blur();
-        editingElement.removeAttribute('contenteditable');        
+        editingElement.removeAttribute('contenteditable');
     }
 
     onKeyUp = (e: React.KeyboardEvent<HTMLElement>) => {
@@ -285,7 +289,8 @@ export class FileList extends React.Component<{}, FileListState> {
             copyToClipboardClasses += " showClipboard";
         }
 
-        return <div onKeyUp={this.onKeyUp} onKeyDown={this.onKeyDown}>
+        return (
+        <div className="filelist" onKeyUp={this.onKeyUp} onKeyDown={this.onKeyDown}>
             <Tree
                 contents={this.state.nodes}
                 className={`${Classes.ELEVATION_0}`}
@@ -293,6 +298,6 @@ export class FileList extends React.Component<{}, FileListState> {
                 onNodeClick={this.onNodeClick}
             />
             <Button icon="duplicate" className={copyToClipboardClasses} onClick={this.onClipboardCopy}>{this.state.selected} element(s)</Button>
-        </div>;
+        </div>);
     }
 }

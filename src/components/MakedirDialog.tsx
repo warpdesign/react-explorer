@@ -18,6 +18,7 @@ interface IMakedirState {
 
 const DEBOUNCE_DELAY = 300;
 const CTRL_KEY = 17;
+const ENTER_KEY = 13;
 
 export class MakedirDialog extends React.Component<IMakedirProps, IMakedirState>{
     constructor(props:any) {
@@ -33,6 +34,8 @@ export class MakedirDialog extends React.Component<IMakedirProps, IMakedirState>
     onKeyUp = (e: KeyboardEvent) => {
         if (e.keyCode === CTRL_KEY) {
             this.setState({ ctrlKey: false });
+        } else if (e.keyCode === ENTER_KEY) {
+            this.onCreate();
         }
     }
 
@@ -43,7 +46,9 @@ export class MakedirDialog extends React.Component<IMakedirProps, IMakedirState>
     }
 
     private isValid(path: string): boolean {
-        return this.props.onValidation(path);
+        const valid = this.props.onValidation(path);
+        console.log('valid', path, valid);
+        return valid;
     }
 
     private checkPath: (path: string) => any = debounce(
@@ -51,7 +56,8 @@ export class MakedirDialog extends React.Component<IMakedirProps, IMakedirState>
             try {
                 const isValid = this.isValid(path);
                 this.setState({ valid: isValid });
-            } catch {
+            } catch(error) {
+                console.log('error', error);
                 this.setState({ valid: false });
             }
         }, DEBOUNCE_DELAY);
@@ -62,7 +68,8 @@ export class MakedirDialog extends React.Component<IMakedirProps, IMakedirState>
     }
 
     private onCreate = () => {
-        console.log('onCloseMakerdirDialog');
+        console.log('onCreate');
+        debugger;
         const { path, ctrlKey } = this.state;
         if (this.isValid(path)) {
             this.props.onClose(path, ctrlKey);
@@ -72,6 +79,7 @@ export class MakedirDialog extends React.Component<IMakedirProps, IMakedirState>
     }
 
     private onPathChange = (event: React.FormEvent<HTMLElement>) => {
+        console.log('path change');
         // 1.Update date
         const path = (event.target as HTMLInputElement).value;
         this.setState({ path });
@@ -79,11 +87,7 @@ export class MakedirDialog extends React.Component<IMakedirProps, IMakedirState>
         this.checkPath(path);
     }
 
-    // private onCheckChange = () => {
-    //     this.setState({ isChecked: !this.state.isChecked });
-    // }
-
-    componentWillMount() {
+    componentDidMount() {
         document.addEventListener('keyup', this.onKeyUp);
         document.addEventListener('keydown', this.onKeyDown);
     }
@@ -124,6 +128,7 @@ export class MakedirDialog extends React.Component<IMakedirProps, IMakedirState>
                         id="directory-input"
                         name="directory-input"
                         intent={intent}
+                        autoFocus
                     />
                 </FormGroup>
             </div>
@@ -131,7 +136,7 @@ export class MakedirDialog extends React.Component<IMakedirProps, IMakedirState>
                 <div className={Classes.DIALOG_FOOTER_ACTIONS}>
                     <Button onClick={this.cancelClose}>Cancel</Button>
 
-                    <Button intent={Intent.PRIMARY} onClick={this.onCreate} disabled={!path.length || !valid}>
+                        <Button intent={Intent.PRIMARY} onClick={this.onCreate} disabled={!path.length || !valid}>
                         {!ctrlKey && 'Create' || 'Create & read folder'}
                     </Button>
                 </div>

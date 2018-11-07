@@ -29,7 +29,9 @@ export class SideView extends React.Component<SideViewProps, SideViewState>{
             fileCache: cache
         };
 
-        appState.updateCache(cache, '.');
+        console.log('was updateCache');
+        cache.cd('.');
+        // appState.updateCache(cache, '.');
     }
 
     private get injected() {

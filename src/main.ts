@@ -23,6 +23,7 @@ function onReady() {
   installReactDevTools();
 
   mainWindow = new BrowserWindow({
+    minWidth: 750,
     width: 800,
     height: 600
   });

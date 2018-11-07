@@ -1,4 +1,4 @@
-import { FsInterface, File } from './Fs';
+import { FsApi, File } from './Fs';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as process from 'process';
@@ -24,32 +24,41 @@ const Parent: File = {
     readonly: true
 };
 
-export const FsLocal: FsInterface = {
-    name: 'local',
-    description: 'Local Filesystem',
-    type: 0,
+class LocalApi implements FsApi {
+    type = 0;
+    // current path
+    path: string;
 
-    guess: (str: string): boolean => {
-        return !!str.match(localStart);
-    },
+    constructor(path:string) {
+        this.path = this.resolve(path);
+    }
 
-    isDirectoryNameValid: (dirName: string): boolean => {
+    // local fs doesn't require login
+    isConnected():boolean {
+        return true;
+    }
+
+    isDirectoryNameValid(dirName: string): boolean {
         return !!!dirName.match(invalidChars);
-    },
+    }
 
-    join: (...paths): string => {
+    join(...paths: string[]): string {
         return path.join(...paths);
-    },
+    }
 
-    resolve: (newPath: string): string => {
+    resolve(newPath: string): string {
         return path.resolve(newPath);
-    },
+    }
 
-    joinResolve(...paths): string {
-        return this.resolve(this.join(...paths));
-    },
+    // TODO: attempts to read the directory, maybe it's not accessible
+    cd(path: string) {
+        const resolved = this.resolve(path);
+        console.warn('TODO: Local.cd', path, resolved);
 
-    size: (source: string, files: string[]): Promise<number> => {
+        return Promise.resolve(resolved);
+    }
+
+    size(source: string, files: string[]): Promise<number> {
         return new Promise(async (resolve, reject) => {
             try {
                 let bytes = 0;
@@ -61,14 +70,14 @@ export const FsLocal: FsInterface = {
                 reject(err);
             }
         });
-    },
+    }
 
-    copy: (source: string, files: string[], dest: string): Promise<void> & cp.ProgressEmitter => {
+    copy(source: string, files: string[], dest: string): Promise<any> & cp.ProgressEmitter {
         console.log('***', files, dest, source);
         return cp(files, dest, { parents: true, cwd: source });
-    },
+    }
 
-    makedir: (source: string, dirName: string): Promise<string> => {
+    makedir(source: string, dirName: string): Promise<string> {
         return new Promise((resolve, reject) => {
             const unixPath = path.join(source, dirName).replace(/\\/g, '/');
             try {
@@ -86,23 +95,23 @@ export const FsLocal: FsInterface = {
                 reject(false);
             }
         });
-    },
+    }
 
-    delete: (source:string, files: File[]): Promise<boolean> => {
+    delete(source:string, files: File[]): Promise<number> {
         let toDelete = files.map((file) => path.join(source, file.fullname));
 
         return new Promise(async (resolve, reject) => {
             try {
                 console.log('delete', toDelete);
                 await del(toDelete);
-                resolve(true);
+                resolve(files.length);
             } catch (err) {
                 reject(err);
             }
         });
-    },
+    }
 
-    rename: (source:string, file: File, newName: string): Promise <string> => {
+    rename(source:string, file: File, newName: string): Promise <string> {
         const oldPath = path.join(source, file.fullname);
         const newPath = path.join(source, newName);
 
@@ -120,9 +129,9 @@ export const FsLocal: FsInterface = {
         }
         // reject promise with previous name in case of invalid chars
         return Promise.reject(file.fullname);
-    },
+    }
 
-    pathExists: (path: string): Promise<boolean> => {
+    exists(path: string): Promise<boolean> {
         return new Promise((resolve, reject) => {
             try {
                 const stat = fs.statSync(path);
@@ -131,11 +140,11 @@ export const FsLocal: FsInterface = {
                 reject(err);
             }
         });
-    },
+    }
 
-    readDirectory: async (/*source:string, */dir: string): Promise<File[]> => {
+    async list(/*source:string, */dir: string): Promise<File[]> {
         console.log('calling readDirectory', dir);
-        const pathExists = await FsLocal.pathExists(dir);
+        const pathExists = await this.exists(dir);
 
         if (pathExists) {
             return new Promise<File[]>((resolve, reject) => {
@@ -182,3 +191,16 @@ export const FsLocal: FsInterface = {
         }
     }
 };
+
+export const FsLocal = {
+    name: 'local',
+    description: 'Local Filesystem',
+    canread(str: string): boolean {
+        return !!str.match(localStart);
+    },
+    serverpart(str: string): string {
+        const server = str.replace(/^ftp\:\/\//, '');
+        return server.split('/')[0];
+    },
+    API: LocalApi
+}
