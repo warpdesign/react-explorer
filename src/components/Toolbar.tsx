@@ -179,13 +179,15 @@ export class Toolbar extends React.Component<{}, PathInputState> {
             // event already has bubbled up so we must stop
             // its immediate propagation
             event.nativeEvent.stopImmediatePropagation();
-            // restore current path from appState
-            this.setState({ path: this.cache.path, status: 0 });
             // lose focus
             this.input.blur();
         } else if (event.keyCode === KEYS.Enter) {
             this.onSubmit();
         }
+    }
+
+    private onBlur = () => {
+        this.setState({ path: this.cache.path, status: 0 });            
     }
 
     private onReload = () => {
@@ -358,6 +360,7 @@ export class Toolbar extends React.Component<{}, PathInputState> {
                         value={path}
                         intent={intent}
                         inputRef={this.refHandler}
+                        onBlur={this.onBlur}
                 />
                 {isOpen &&
                     <MakedirDialog isOpen={isOpen} onClose={this.makedir} onValidation={fileCache.isDirectoryNameValid} parentPath={path}></MakedirDialog>
