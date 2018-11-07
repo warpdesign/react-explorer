@@ -1,6 +1,7 @@
 import * as React from "react";
 import { observer, inject, Provider } from 'mobx-react';
 import { Toolbar } from './Toolbar';
+import { Statusbar } from './Statusbar';
 import { FileList } from './FileList';
 import { AppState } from "../state/appState";
 import { Directory } from "../services/Fs";
@@ -43,7 +44,8 @@ export class SideView extends React.Component<SideViewProps, SideViewState>{
             <Provider fileCache={this.state.fileCache}>
                 <div className="sideview">
                     <Toolbar />
-                    <FileList  />
+                    <FileList />
+                    <Statusbar />
                 </div>
             </Provider>
         );
