@@ -183,12 +183,14 @@ export class FileList extends React.Component<{}, FileListState> {
         const originallySelected = nodeData.isSelected;
         const { nodes, selected } = this.state;
         const { fileCache, appState } = this.injected;
-        console.log('click');
+        const file = nodeData.nodeData as File;
+
         // keep a reference to the target before set setTimeout is called
         // because React set the event to null
         const element = e.target as HTMLElement;
 
-        if (this.editingElement === element) {
+        // do not select parent dir pseudo file
+        if (this.editingElement === element || file.fullname === '..') {
             return;
         }
 
@@ -207,7 +209,7 @@ export class FileList extends React.Component<{}, FileListState> {
 
                 this.clickTimeout = setTimeout(() => {
                     console.log('click timeout');
-                    this.toggleInlineRename(element, originallySelected, nodeData.nodeData as File);
+                    this.toggleInlineRename(element, originallySelected, file);
                 }, CLICK_DELAY);
             }
         } else {
@@ -227,21 +229,6 @@ export class FileList extends React.Component<{}, FileListState> {
 
         appState.updateSelection(fileCache, selection);
     };
-
-    private onClipboardCopy = () => {
-        const { appState } = this.injected;
-        const { nodes, selected } = this.state;
-
-        const elements = nodes.filter((node) => node.isSelected).map((node) => { const nodeData = node.nodeData as File; return nodeData.fullname; });
-
-        appState.setClipboard(this.state.type, this.cache.path, elements);
-
-        AppToaster.show({
-            message: `${selected} element(s) copied to the clipboard`,
-            icon: "tick",
-            intent: Intent.SUCCESS
-        });
-    }
 
     private onInlineEdit(cancel: boolean) {
         const editingElement = this.editingElement;
@@ -284,11 +271,6 @@ export class FileList extends React.Component<{}, FileListState> {
     }
 
     public render() {
-        let copyToClipboardClasses = 'copy';
-        if (this.state.selected > 0) {
-            copyToClipboardClasses += " showClipboard";
-        }
-
         return (
         <div className="filelist" onKeyUp={this.onKeyUp} onKeyDown={this.onKeyDown}>
             <Tree
@@ -297,7 +279,6 @@ export class FileList extends React.Component<{}, FileListState> {
                 onNodeDoubleClick={this.onNodeDoubleClick}
                 onNodeClick={this.onNodeClick}
             />
-            <Button icon="duplicate" className={copyToClipboardClasses} onClick={this.onClipboardCopy}>{this.state.selected} element(s)</Button>
         </div>);
     }
 }

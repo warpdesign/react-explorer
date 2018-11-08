@@ -25,7 +25,6 @@ interface PathInputState {
     path: string;
     history: string[];
     current: number;
-    type: string;
     selectedItems: number;
     isOpen: boolean;
     isDeleteOpen: boolean;
@@ -64,7 +63,6 @@ export class Toolbar extends React.Component<{}, PathInputState> {
             path: '',
             history: new Array(),
             current: -1,
-            type: 'local',
             isOpen: false,
             isDeleteOpen: false,
             selectedItems: 0
@@ -187,7 +185,7 @@ export class Toolbar extends React.Component<{}, PathInputState> {
     }
 
     private onBlur = () => {
-        this.setState({ path: this.cache.path, status: 0 });            
+        this.setState({ path: this.cache.path, status: 0 });
     }
 
     private onReload = () => {
@@ -331,13 +329,12 @@ export class Toolbar extends React.Component<{}, PathInputState> {
     }
 
     public render() {
-        const { current, history, status, path, type, isOpen, isDeleteOpen, selectedItems } = this.state;
+        const { current, history, status, path, isOpen, isDeleteOpen, selectedItems } = this.state;
         const { fileCache } = this.injected;
         const canGoBackward = current > 0;
         const canGoForward = history.length > 1 && current < history.length - 1;
         // const loadingSpinner = false ? <Spinner size={Icon.SIZE_STANDARD} /> : undefined;
         const reloadButton = <Button className="small" onClick={this.onReload} minimal rightIcon="repeat"></Button>;
-        const icon = type === 'local' && 'home' || 'globe';
         const intent = status === -1 ? 'danger' : 'none';
 
         console.log(fileCache, fileCache.isDirectoryNameValid);
@@ -352,7 +349,6 @@ export class Toolbar extends React.Component<{}, PathInputState> {
                     </Popover>
                 </ButtonGroup>
                 <InputGroup
-                        leftIcon={icon}
                         onChange={this.onPathChange}
                         onKeyUp={this.onKeyUp}
                         placeholder="Enter Path to load"

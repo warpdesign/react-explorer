@@ -71,25 +71,6 @@ button.small:hover{
     flex-grow:1;
 }
 
-.copy{
-    position:absolute;
-    bottom:0;
-    right:0;
-    opacity:0;
-    pointer-events: none;
-    transition-property: 'opacity';
-    transition-duration: .8s;
-}
-
-.copy.showClipboard{
-    opacity:.6;
-    pointer-events: all;
-}
-
-.copy.showClipboard:hover{
-    opacity:1;
-}
-
 .sideview{
     position:relative;
 }
