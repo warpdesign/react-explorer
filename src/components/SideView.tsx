@@ -1,10 +1,11 @@
 import * as React from "react";
-import { observer, inject, Provider } from 'mobx-react';
+import { inject, Provider, observer } from 'mobx-react';
 import { Toolbar } from './Toolbar';
 import { Statusbar } from './Statusbar';
 import { FileList } from './FileList';
 import { AppState } from "../state/appState";
 import { Directory } from "../services/Fs";
+import { LoginDialog } from "./LoginDialog";
 
 interface SideViewProps {
 }
@@ -30,19 +31,30 @@ export class SideView extends React.Component<SideViewProps, SideViewState>{
             fileCache: cache
         };
 
-        console.log('was updateCache');
         cache.cd('.');
-        // appState.updateCache(cache, '.');
     }
 
     private get injected() {
         return this.props as InjectedProps;
     }
 
+    private onValidation = (dir:string):boolean => {
+        return true;
+    }
+
+    private onClose = (username: string, password: string) => {
+        // TODO: call login
+        console.log('need to login', username, password);
+    }
+
     render() {
+        const { fileCache } = this.state;
+        const needLogin = fileCache.status === 'login';
+
         return (
-            <Provider fileCache={this.state.fileCache}>
+            <Provider fileCache={fileCache}>
                 <div className="sideview">
+                    {needLogin && <LoginDialog isOpen={needLogin} onValidation={this.onValidation} onClose={this.onClose} />}
                     <Toolbar />
                     <FileList />
                     <Statusbar />

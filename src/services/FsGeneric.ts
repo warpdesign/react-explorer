@@ -45,6 +45,10 @@ class GenericApi implements FsApi {
         return prom;
     }
 
+    login(user: string, password: string):Promise<void> {
+        return Promise.resolve();
+    }
+
     makedir(parent: string, dirName: string): Promise<string> {
         console.log('FsGeneric.makedir');
         return Promise.resolve('');

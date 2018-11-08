@@ -85,22 +85,37 @@ export class Directory {
         // then attempt to read directory ?
         if (!this.api.isConnected()) {
             this.status = 'login';
+            this.path = path;
         } else {
             const joint = path2 ? this.api.join(path, path2) : path;
             return this.api.cd(joint)
                 .then((path) => {
                     this.path = path;
-                    return this.api.list(path);
-                })
-                .then((files: File[]) => {
-                    runInAction(() => {
-                        console.log('run in actions', this.path);
-                        this.files.replace(files);
-                        // clear lister selection as well
-                        this.selected.clear();
-                    });
+                    return this.list(path);
                 });
         }
+    }
+
+    login(user: string, password: string) {
+        return this.api.login(user, password).then(() => {
+            runInAction(() => {
+                this.status = 'ok';
+            })
+        }).catch((err) => {
+            console.log('error while connecting', err);
+        });
+    }
+
+    list(path:string) {
+        return this.api.list(path)
+            .then((files: File[]) => {
+                runInAction(() => {
+                    console.log('run in actions', this.path);
+                    this.files.replace(files);
+                    // clear lister selection as well
+                    this.selected.clear();
+                });
+            });
     }
 
     reload() {
@@ -152,6 +167,7 @@ export interface FsApi {
     exists(path: string): Promise<boolean>;
     resolve(path: string): string;
     size(source: string, files: string[]): Promise<number>;
+    login(user: string, password: string): Promise<void>;
     isConnected(): boolean;
     isDirectoryNameValid(dirName: string): boolean;
 }

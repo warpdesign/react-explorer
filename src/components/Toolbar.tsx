@@ -161,7 +161,7 @@ export class Toolbar extends React.Component<{}, PathInputState> {
         try {
             if (this.cache.path !== this.state.path /*&& pathExists*/) {
                 const { appState } = this.injected;
-                console.log('was update cache');
+                console.log('was update cache', this.state.path);
                 this.cache.cd(this.state.path);
                 // appState.updateCache(this.cache, this.state.path);
             }
@@ -202,15 +202,10 @@ export class Toolbar extends React.Component<{}, PathInputState> {
         try {
             const dir = await this.cache.makedir(this.state.path, dirName);
 
-            debugger;
             if (!navigate) {
-                console.log('need to refresh cache');
                 this.cache.reload();
-                // appState.refreshCache(this.cache);
             } else {
-                console.log('was update cache');
                 this.cache.cd(dir);
-                // appState.updateCache(this.cache, dir);
             }
         } catch(err) {
             AppToaster.show({
@@ -336,8 +331,6 @@ export class Toolbar extends React.Component<{}, PathInputState> {
         // const loadingSpinner = false ? <Spinner size={Icon.SIZE_STANDARD} /> : undefined;
         const reloadButton = <Button className="small" onClick={this.onReload} minimal rightIcon="repeat"></Button>;
         const intent = status === -1 ? 'danger' : 'none';
-
-        console.log(fileCache, fileCache.isDirectoryNameValid);
 
         return (
             <ControlGroup>

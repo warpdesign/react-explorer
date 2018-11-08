@@ -69,7 +69,6 @@ export class MakedirDialog extends React.Component<IMakedirProps, IMakedirState>
 
     private onCreate = () => {
         console.log('onCreate');
-        debugger;
         const { path, ctrlKey } = this.state;
         if (this.isValid(path)) {
             this.props.onClose(path, ctrlKey);

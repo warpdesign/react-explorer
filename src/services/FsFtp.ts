@@ -5,13 +5,26 @@ import * as cp from 'cpy';
 const FtpUrl = /^(ftp\.[a-z]+\.[a-z]{2}|[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})$/;
 const invalidChars = /^[\.]+$/ig;
 
+function join(path:string, path2:string) {
+    let sep = '';
+
+    if (!path.endsWith('/') && !path2.startsWith('/')) {
+        sep = '/';
+    }
+
+    return path + sep + path2;
+}
+
 class Client{
     private client: any;
     public connected: boolean;
     public host: string;
     public status: 'busy' | 'ready' | 'offline' = 'offline';
+    public main = false;
+    private readyResolve: () => any;
+    private readyReject: (err: any) => any;
 
-    constructor(host: string, options: any = {}) {
+    constructor(host: string, options:any = {}) {
         console.log('creating ftp client');
         this.host = host;
         this.connected = false;
@@ -20,8 +33,15 @@ class Client{
         //     console.log('error', error);
         // });
         this.bindEvents();
-        console.log('connecting to', host, 'with options', options);
-        this.client.connect({host, ...options});
+    }
+
+    public login(options: any = {}):Promise<any> {
+        console.log('connecting to', this.host, 'with options', { host: this.host, ...options });
+        return new Promise((resolve, reject) => {
+            this.readyResolve = resolve;
+            this.readyReject = reject;
+            this.client.connect({ host: this.host, ...options });
+        });
     }
 
     private bindEvents() {
@@ -32,7 +52,8 @@ class Client{
     }
 
     private onReady() {
-        console.log(`[${this.host}] close`);
+        console.log(`[${this.host}] ready`);
+        this.readyResolve();
         this.status = 'ready';
     }
 
@@ -49,6 +70,7 @@ class Client{
             // user not logged in (user limit may be reached too)
             case 530:
                 this.status = 'offline';
+                this.readyReject('530');
                 break;
 
             case 550:
@@ -67,8 +89,64 @@ class Client{
         console.log(greeting);
     }
 
-    public list(path: string):File[] {
-        return [];
+    public list(path: string): Promise<File[]> {
+        this.status = 'busy';
+
+        console.log('ftp.client: list', path);
+        return new Promise((resolve, reject) => {
+            const newpath = this.pathpart(path);
+            this.client.list(newpath, (err: Error, list: any[]) => {
+                this.status = 'ready';
+                if (err) {
+                    reject(err);
+                } else {
+                    const files: File[] = list.filter((ftpFile) => !ftpFile.name.match(/^[\.]{1,2}$/)).map((ftpFile) => ({
+                        dir: path,
+                        name: ftpFile.name,
+                        fullname: ftpFile.name,
+                        isDir: ftpFile.type === 'd',
+                        length: parseInt(ftpFile.size, 10),
+                        cDate: new Date(ftpFile.date),
+                        mDate: new Date(ftpFile.date),
+                        extension: '',
+                        mode: 0,
+                        readonly: false
+                    }));
+                    // TODO: build list of files
+                    /*
+                        dir: string;
+                        name: string;
+                        fullname: string;
+                        extension: string;
+                        cDate: Date;
+                        mDate: Date;
+                        length: number;
+                        mode: number;
+                        isDir: boolean;
+                        readonly: boolean;
+                        */
+                    resolve(files);
+                }
+            });
+        });
+    }
+
+    public cd(path: string): Promise<string> {
+        return new Promise((resolve, reject) => {
+            const newpath = this.pathpart(path);
+            this.client.cwd(newpath, (err:any, dir:string) => {
+                if (!err) {
+                    const joint = join(this.host, (dir || newpath));
+                    resolve(joint);
+                } else {
+                    reject(err);
+                }
+            });
+        });
+    }
+
+    public pathpart(path: string): string {
+        return path.replace(this.host, '');
     }
 
     public get(path: string) {
@@ -80,25 +158,28 @@ class FtpAPI implements FsApi {
     type = 1;
     server = '';
     connected = false;
+    // main client: the one which will issue list/cd commands *only*
+    master: Client = null;
 
-    static clients: Array<Client> = [];
+    clients: Array<Client> = [];
 
-    constructor(path:string) {
+    constructor(path: string) {
+        this.server = FsFtp.serverpart(path);
 
+        this.master = new Client(this.server);
     }
 
-    serverpart = FsFtp.serverpart;
-
-    addClient(server: string, options: any = {}) {
-        const client = new Client(server, options);
-        FtpAPI.clients.push(client, options);
+    addClient(options: any = {}) {
+        const client = new Client(this.server, options);
+        this.clients.push(client, options);
         return client;
     }
 
-    getFreeClient(server: string) {
-        let client = FtpAPI.clients.find((client) => client.host === server);
+    // TODO: return promise if client is not connected ??
+    getFreeClient(options = {}) {
+        let client = this.clients.find((client) => client.host === this.server && client.status !== 'busy');
         if (!client) {
-            client = this.addClient(server);
+            client = this.addClient(options);
         }
         return client;
     }
@@ -113,8 +194,8 @@ class FtpAPI implements FsApi {
         return newPath;
     };
 
-    join(...paths:string[]): string {
-        return this.join(...paths);
+    join(path:string, path2:string): string {
+        return join(path, path2);
     };
 
     size(source: string, files: string[]): Promise<number> {
@@ -156,21 +237,27 @@ class FtpAPI implements FsApi {
     };
 
     list(dir: string): Promise<File[]> {
+        // TODO: strip server from here too ?
         console.log('FsFtp.readDirectory');
-        const server = FsFtp.serverpart(dir);
-
-        // get avaiable client
-        console.log('getting free client');
-
-        const client = this.getFreeClient(server);
-        return Promise.resolve([
-
-        ]);
+        return this.master.list(dir);
     };
 
     cd(path: string): Promise<string> {
-        return Promise.resolve('');
+        return this.master.cd(path);
     };
+
+    login(username: string, password: string):Promise<void> {
+        if (!this.master) {
+            return Promise.reject('calling login but no master client set');
+        } else if (this.connected) {
+            console.warn('login: already connected');
+            return Promise.resolve();
+        } else {
+            return this.master.login({ user: username, password }).then(() => {
+                this.connected = true;
+            });
+        }
+    }
 
     isConnected():boolean {
         return this.connected;

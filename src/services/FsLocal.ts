@@ -142,6 +142,10 @@ class LocalApi implements FsApi {
         });
     }
 
+    login(user: string, password: string): Promise<void> {
+        return Promise.resolve();
+    }
+
     async list(/*source:string, */dir: string): Promise<File[]> {
         console.log('calling readDirectory', dir);
         const pathExists = await this.exists(dir);
