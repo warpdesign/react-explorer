@@ -61,7 +61,7 @@ export class Directory {
         let newfs = interfaces.find((filesystem) => filesystem.canread(path));
 
         if (!newfs) {
-             newfs = FsGeneric;
+            newfs = FsGeneric;
         }
 
         // free exiting api
@@ -80,6 +80,12 @@ export class Directory {
     }
 
     @action
+    revertPath() {
+        this.path = this.previousPath;
+        this.status = 'ok';
+    }
+
+    @action
     // changes current path and retrieves file list
     cd(path: string, path2: string = '') {
         // first updates fs (eg. was local fs, is now ftp)
@@ -91,6 +97,7 @@ export class Directory {
         // then attempt to read directory ?
         if (!this.api.isConnected()) {
             this.status = 'login';
+
             this.updatePath(path);
         } else {
             const joint = path2 ? this.api.join(path, path2) : path;

@@ -42,9 +42,11 @@ export class SideView extends React.Component<SideViewProps, SideViewState>{
         return true;
     }
 
-    private onClose = (username: string, password: string) => {
-        // TODO: call login
-        console.log('need to login', username, password);
+    private onClose = () => {
+        // login cancelled
+        const { fileCache } = this.state;
+        // doesn't work: it keeps the previous fs
+        // fileCache.revertPath();
     }
 
     render() {

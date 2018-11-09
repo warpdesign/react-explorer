@@ -107,6 +107,7 @@ export class Toolbar extends React.Component<{}, PathInputState> {
 
     private addPathToHistory(path: string) {
         const { fileCache } = this.injected;
+
         // do not add path during login
         if (fileCache.status === 'login') {
             return;

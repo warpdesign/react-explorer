@@ -2,7 +2,7 @@ import { FsApi, File } from './Fs';
 import * as ftp from 'ftp';
 import * as cp from 'cpy';
 
-const FtpUrl = /^(ftp\.[a-z]+\.[a-z]{2}|[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})$/;
+const FtpUrl = /^(ftp\.[a-z]+\.[a-z]{2}|[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})$/i;
 const invalidChars = /^[\.]+$/ig;
 
 function join(path:string, path2:string) {
@@ -302,7 +302,7 @@ export const FsFtp = {
         return !!this.serverpart(str).match(FtpUrl);
     },
     serverpart(str: string): string {
-        const server = str.replace(/^ftp\:\/\//, '');
+        const server = str.replace(/^ftp\:\/\//i, '').toLowerCase();
         return server.split('/')[0];
     },
     API: FtpAPI
