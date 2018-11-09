@@ -33,6 +33,8 @@ export class Directory {
     @observable
     path: string = '';
 
+    previousPath: string;
+
     readonly files = observable<File>([]);
 
     readonly selected = observable<File>([]);
@@ -72,6 +74,12 @@ export class Directory {
     }
 
     @action
+    private updatePath(path: string) {
+        this.previousPath = this.path;
+        this.path = path;
+    }
+
+    @action
     // changes current path and retrieves file list
     cd(path: string, path2: string = '') {
         // first updates fs (eg. was local fs, is now ftp)
@@ -83,12 +91,12 @@ export class Directory {
         // then attempt to read directory ?
         if (!this.api.isConnected()) {
             this.status = 'login';
-            this.path = path;
+            this.updatePath(path);
         } else {
             const joint = path2 ? this.api.join(path, path2) : path;
             return this.api.cd(joint)
                 .then((path) => {
-                    this.path = path;
+                    this.updatePath(path);
                     return this.list(path);
                 });
         }
@@ -152,6 +160,10 @@ export class Directory {
     size(source: string, files: string[]): Promise<number> {
         return this.api.size(source, files);
     }
+
+    get(path: string, file: string): Promise<string> {
+        return this.api.get(path, file);
+    }
 }
 
 export interface FsApi {
@@ -169,6 +181,7 @@ export interface FsApi {
     login(user: string, password: string): Promise<void>;
     isConnected(): boolean;
     isDirectoryNameValid(dirName: string): boolean;
+    get(path: string, file: string): Promise<string>;
     free(): void;
 }
 

@@ -83,6 +83,10 @@ class GenericApi implements FsApi {
     free() {
 
     }
+
+    get(path: string): Promise<string> {
+        return Promise.resolve(path);
+    }
 };
 
 export const FsGeneric = {

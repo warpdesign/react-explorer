@@ -198,6 +198,10 @@ class LocalApi implements FsApi {
     free() {
 
     }
+
+    get(path: string, file: string): Promise<string> {
+        return Promise.resolve(this.join(path, file));
+    }
 };
 
 export const FsLocal = {

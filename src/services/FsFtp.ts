@@ -79,6 +79,9 @@ class Client{
         console.log(`[${this.host}] close`);
         this.connected = false;
         this.status = 'offline';
+        if (this.api) {
+            this.api.connected = false;
+        }
     }
 
     private onError(error: any) {
@@ -283,6 +286,12 @@ class FtpAPI implements FsApi {
         this.master.api = null;
         // close any connections ?
         // this.master.close();
+    }
+
+    get(path: string, file: string): Promise<string> {
+        console.warn('TODO: download to temp folder and return path');
+        // TODO: get to temp folder, then return path
+        return Promise.resolve(this.join(path, file));
     }
 };
 

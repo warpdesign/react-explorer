@@ -126,7 +126,9 @@ export class FileList extends React.Component<{}, FileListState> {
                 // appState.updateCache(this.cache, this.cache.FS.joinResolve(data.dir, data.fullname));
             } else {
                 // TODO: if remote, need to download file first
-                shell.openItem(this.cache.join(data.dir, data.fullname));
+                this.cache.get(data.dir, data.fullname).then((tmpPath:string) => {
+                    shell.openItem(tmpPath);
+                })
             }
         }
     }
