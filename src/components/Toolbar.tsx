@@ -106,6 +106,12 @@ export class Toolbar extends React.Component<{}, PathInputState> {
     }
 
     private addPathToHistory(path: string) {
+        const { fileCache } = this.injected;
+        // do not add path during login
+        if (fileCache.status === 'login') {
+            return;
+        }
+
         this.setState((state) => {
             {
                 const { history, current } = state;
@@ -133,15 +139,14 @@ export class Toolbar extends React.Component<{}, PathInputState> {
                 current: newCurrent
             });
         } else {
-            const { appState } = this.injected;
             const path = history[current + dir];
-            // appState.updateCache(this.cache, path);
-            console.log('was updateCache');
+            console.log('opening path from history', path);
             this.cache.cd(path);
         }
     }
 
     private onBackward = (event: React.FormEvent<HTMLElement>) => {
+        console.log(this.state.history);
         this.direction = -1;
         this.navHistory(this.direction, true);
     }
@@ -160,10 +165,7 @@ export class Toolbar extends React.Component<{}, PathInputState> {
     private onSubmit = () => {
         try {
             if (this.cache.path !== this.state.path /*&& pathExists*/) {
-                const { appState } = this.injected;
-                console.log('was update cache', this.state.path);
                 this.cache.cd(this.state.path);
-                // appState.updateCache(this.cache, this.state.path);
             }
         } catch(err) {
             console.warn('error submiting: path probably does not exist');

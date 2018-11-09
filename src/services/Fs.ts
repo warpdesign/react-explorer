@@ -97,6 +97,7 @@ export class Directory {
     }
 
     login(user: string, password: string) {
+        console.log('logging in');
         return this.api.login(user, password).then(() => {
             runInAction(() => {
                 this.status = 'ok';
