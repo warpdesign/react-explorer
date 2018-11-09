@@ -79,6 +79,10 @@ class GenericApi implements FsApi {
             Promise.reject('error');
         }
     }
+
+    free() {
+
+    }
 };
 
 export const FsGeneric = {

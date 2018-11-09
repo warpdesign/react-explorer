@@ -20,18 +20,35 @@ class Client{
     public connected: boolean;
     public host: string;
     public status: 'busy' | 'ready' | 'offline' = 'offline';
-    public main = false;
+    public api:FtpAPI = null;
+
     private readyResolve: () => any;
     private readyReject: (err: any) => any;
 
-    constructor(host: string, options:any = {}) {
+    static clients: Array<Client> = [];
+
+    static addClient(server:string, options: any = {}) {
+        const client = new Client(server, options);
+
+        Client.clients.push(client);
+        return client;
+    }
+
+    // TODO: return promise if client is not connected ??
+    static getFreeClient(server: string, options = {}) {
+        let client = Client.clients.find((client) => client.host === server && !client.api && client.status === 'ready');
+        if (!client) {
+            client = Client.addClient(server, options);
+        }
+
+        return client;
+    }
+
+    constructor(host: string, options: any = {}) {
         console.log('creating ftp client');
         this.host = host;
         this.connected = false;
         this.client = new ftp();
-        // this.client.on('error', (error:any) => {
-        //     console.log('error', error);
-        // });
         this.bindEvents();
     }
 
@@ -55,6 +72,7 @@ class Client{
         console.log(`[${this.host}] ready`);
         this.readyResolve();
         this.status = 'ready';
+        this.connected = true;
     }
 
     private onClose() {
@@ -78,8 +96,18 @@ class Client{
                 console.error('Requested action not taken. File unavailable, not found, not accessible');
                 break;
 
+            case 421:
+                // service not available: control connection closed
+                console.error('Service not available, closing connection');
+                this.client.close();
+                break;
+
             default:
                 console.log('unhandled error code:', error.code);
+                // sometimes error.code is undefined
+                if (error.match(/Timeout/)) {
+                    console.log('Connection timeout ?');
+                }
                 break;
         }
     }
@@ -149,7 +177,7 @@ class Client{
         return path.replace(this.host, '');
     }
 
-    public get(path: string) {
+    public get(path: string, dest: string) {
 
     }
 }
@@ -161,27 +189,14 @@ class FtpAPI implements FsApi {
     // main client: the one which will issue list/cd commands *only*
     master: Client = null;
 
-    clients: Array<Client> = [];
-
     constructor(path: string) {
         this.server = FsFtp.serverpart(path);
 
-        this.master = new Client(this.server);
-    }
+        this.master = Client.getFreeClient(this.server);
 
-    addClient(options: any = {}) {
-        const client = new Client(this.server, options);
-        this.clients.push(client, options);
-        return client;
-    }
+        this.master.api = this;
 
-    // TODO: return promise if client is not connected ??
-    getFreeClient(options = {}) {
-        let client = this.clients.find((client) => client.host === this.server && client.status !== 'busy');
-        if (!client) {
-            client = this.addClient(options);
-        }
-        return client;
+        this.connected = this.master.connected;
     }
 
     isDirectoryNameValid (dirName: string): boolean {
@@ -261,6 +276,13 @@ class FtpAPI implements FsApi {
 
     isConnected():boolean {
         return this.connected;
+    }
+
+    free() {
+        // free client
+        this.master.api = null;
+        // close any connections ?
+        // this.master.close();
     }
 };
 

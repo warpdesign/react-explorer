@@ -53,13 +53,6 @@ export class Directory {
     constructor(path: string) {
         this.path = path;
         this.getFS(path);
-
-        // setTimeout(() => {
-        //     console.log('settimeout: modifying element');
-        //     runInAction(() => {
-        //         this.files[0].fullname = 'dtc !!**';
-        //     })
-        // }, 5000);
     }
 
     private getFS(path: string): void{
@@ -67,6 +60,11 @@ export class Directory {
 
         if (!newfs) {
              newfs = FsGeneric;
+        }
+
+        // free exiting api
+        if (this.api) {
+            this.api.free();
         }
 
         this.fs = newfs;
@@ -171,6 +169,7 @@ export interface FsApi {
     login(user: string, password: string): Promise<void>;
     isConnected(): boolean;
     isDirectoryNameValid(dirName: string): boolean;
+    free(): void;
 }
 
 const interfaces: Array<Fs> = new Array();

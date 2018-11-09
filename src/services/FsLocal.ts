@@ -194,6 +194,10 @@ class LocalApi implements FsApi {
             return Promise.reject('Path does not exist');
         }
     }
+
+    free() {
+
+    }
 };
 
 export const FsLocal = {
