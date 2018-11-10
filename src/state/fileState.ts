@@ -55,7 +55,7 @@ export class FileState {
         const path = history[current + dir];
         console.log('opening path from history', path);
         this.cd(path, '', true);
-    }   
+    }
     // /history
 
     /* fs API */
@@ -91,7 +91,7 @@ export class FileState {
 
     @action
     revertPath() {
-        this.path = this.previousPath;
+        this.navHistory(0);
         this.status = 'ok';
     }
 

@@ -46,7 +46,7 @@ export class SideView extends React.Component<SideViewProps, SideViewState>{
         // login cancelled
         const { fileCache } = this.state;
         // doesn't work: it keeps the previous fs
-        // fileCache.revertPath();
+        fileCache.revertPath();
     }
 
     render() {
