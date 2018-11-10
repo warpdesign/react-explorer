@@ -1,8 +1,7 @@
 import * as React from "react";
 import { Dialog, Classes, Intent, Button, InputGroup, FormGroup } from "@blueprintjs/core";
-import { debounce } from "../utils/debounce";
 import { inject } from "mobx-react";
-import { Directory } from "../services/Fs";
+import { FileState } from "../state/fileState";
 
 interface ILoginProps {
     isOpen: boolean;
@@ -11,7 +10,7 @@ interface ILoginProps {
 };
 
 interface InjectedProps extends ILoginProps {
-    fileCache: Directory;
+    fileCache: FileState;
 }
 
 interface ILoginState {

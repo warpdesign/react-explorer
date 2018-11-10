@@ -4,8 +4,8 @@ import { Toolbar } from './Toolbar';
 import { Statusbar } from './Statusbar';
 import { FileList } from './FileList';
 import { AppState } from "../state/appState";
-import { Directory } from "../services/Fs";
 import { LoginDialog } from "./LoginDialog";
+import { FileState } from "../state/fileState";
 
 interface SideViewProps {
 }
@@ -15,7 +15,7 @@ interface InjectedProps extends SideViewProps{
 }
 
 interface SideViewState{
-    fileCache: Directory;
+    fileCache: FileState;
 }
 
 @inject('appState')
@@ -25,7 +25,7 @@ export class SideView extends React.Component<SideViewProps, SideViewState>{
         super(props);
 
         const { appState } = this.injected;
-        const cache: Directory = appState.addCache();
+        const cache: FileState = appState.addCache();
 
         this.state = {
             fileCache: cache

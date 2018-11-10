@@ -1,12 +1,12 @@
 import * as React from "react";
 import { observer, inject } from 'mobx-react';
 import { InputGroup, ControlGroup, Button, ButtonGroup, Popover, Intent, Alert, ProgressBar, Classes, Tooltip } from '@blueprintjs/core';
-import { Directory } from "../services/Fs";
 import { AppState } from "../state/appState";
 import { AppToaster } from "./AppToaster";
+import { FileState } from "../state/fileState";
 
 interface InjectedProps {
-    fileCache: Directory;
+    fileCache: FileState;
     appState: AppState
 }
 

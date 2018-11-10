@@ -1,9 +1,8 @@
 import * as React from "react";
-import { reaction, autorun } from 'mobx';
-import { inject, observer } from 'mobx-react';
+import { reaction } from 'mobx';
+import { inject } from 'mobx-react';
 import { InputGroup, ControlGroup, Button, ButtonGroup, Popover, Intent, Alert, ProgressBar, Classes } from '@blueprintjs/core';
 import { AppState } from "../state/appState";
-import { Directory } from "../services/Fs";
 import { debounce } from '../utils/debounce';
 import { FileMenu } from "./FileMenu";
 import { MakedirDialog } from "./MakedirDialog";
@@ -11,13 +10,14 @@ import { Logger } from "./Log";
 import { AppToaster, IToasterOpts } from "./AppToaster";
 import { throttle } from "../utils/throttle";
 import cpy = require("cpy");
+import { FileState } from "../state/fileState";
 
 interface PathInputProps {
 }
 
 interface InjectedProps extends PathInputProps {
     appState: AppState;
-    fileCache: Directory;
+    fileCache: FileState;
 }
 
 interface PathInputState {
@@ -39,7 +39,7 @@ const DEBOUNCE_DELAY = 400;
 
 @inject('appState', 'fileCache')
 export class Toolbar extends React.Component<{}, PathInputState> {
-    private cache: Directory;
+    private cache: FileState;
     private direction = 0;
     private input: HTMLInputElement | null = null;
 
@@ -297,7 +297,7 @@ export class Toolbar extends React.Component<{}, PathInputState> {
                 this.cache.reload();
                 // appState.refreshCache(this.cache);
             })
-            .catch((err) => {
+            .catch((err:Error) => {
                 clearTimeout(timeout);
                 // show error + log error
             });

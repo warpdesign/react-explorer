@@ -5,9 +5,10 @@ import { Classes, Button, ITreeNode, Tooltip, Tree, Intent } from "@blueprintjs/
 import { AppState } from "../state/appState";
 import { AppToaster } from './AppToaster';
 // TODO: remove any calls to shell
-import { File, Directory } from "../services/Fs";
+import { File } from "../services/Fs";
 import { shell } from 'electron';
 import { Logger } from "./Log";
+import { FileState } from "../state/fileState";
 
 export interface FileListState {
     nodes: ITreeNode[];
@@ -34,12 +35,12 @@ interface FileListProps{
 // see: https://github.com/mobxjs/mobx-react/issues/256
 interface InjectedProps extends FileListProps {
     appState: AppState;
-    fileCache: Directory;
+    fileCache: FileState;
 }
 
 @inject('appState', 'fileCache')
 export class FileList extends React.Component<{}, FileListState> {
-    private cache: Directory;
+    private cache: FileState;
     private editingElement: HTMLElement;
     private editingFile: File;
     private clickTimeout: any;

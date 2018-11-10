@@ -1,5 +1,6 @@
 import { action, observable } from 'mobx';
-import { Directory, File } from '../services/Fs';
+import { File } from '../services/Fs';
+import { FileState } from './fileState';
 
 interface Clipboard {
     type: string;
@@ -9,12 +10,12 @@ interface Clipboard {
 
 export class AppState {
     /** new stuff */
-    caches: Directory[] = new Array();
+    caches: FileState[] = new Array();
 
     @action
     addCache(path: string = '') {
         console.log('addCache');
-        const cache = new Directory(path);
+        const cache = new FileState(path);
         // const cache:Directory = observable({
         //     path,
         //     files: new Array(),
@@ -28,7 +29,7 @@ export class AppState {
     }
 
     @action
-    updateSelection(cache: Directory, newSelection: File[]) {
+    updateSelection(cache: FileState, newSelection: File[]) {
         cache.selected.replace(newSelection);
     }
 
