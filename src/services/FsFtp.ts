@@ -108,7 +108,7 @@ class Client{
             default:
                 console.log('unhandled error code:', error.code);
                 // sometimes error.code is undefined
-                if (error.match(/Timeout/)) {
+                if (error && error.match(/Timeout/)) {
                     console.log('Connection timeout ?');
                 }
                 break;

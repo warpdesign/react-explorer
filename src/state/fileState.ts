@@ -22,6 +22,42 @@ export class FileState {
     @observable
     type: string;
 
+    // history stuff
+    history = observable<string>([]);
+    @observable
+    current: number = -1;
+
+    @action
+    addPathToHistory(path: string) {
+        const keep = this.history.slice(0, this.current + 1);
+        this.history.replace(keep.concat([path]));
+        this.current++;
+        console.log('/// adding path to history');
+    }
+
+    @action
+    navHistory(dir = -1) {
+        const history = this.history;
+        const current = this.current;
+        const length = history.length;
+        let newCurrent = current + dir;
+
+        if (newCurrent < 0) {
+            newCurrent = 0;
+        } else if (newCurrent >= length) {
+            newCurrent = length - 1;
+        }
+
+        console.log('nav history', current, '=>', newCurrent);
+
+        this.current = newCurrent;
+
+        const path = history[current + dir];
+        console.log('opening path from history', path);
+        this.cd(path, '', true);
+    }   
+    // /history
+
     /* fs API */
     private api: FsApi;
     private fs: Fs;
@@ -44,9 +80,13 @@ export class FileState {
     }
 
     @action
-    private updatePath(path: string) {
+    private updatePath(path: string, skipHistory = false) {
         this.previousPath = this.path;
         this.path = path;
+
+        if (!skipHistory && this.status !== 'login') {
+            this.addPathToHistory(path);
+        }
     }
 
     @action
@@ -57,7 +97,7 @@ export class FileState {
 
     @action
     // changes current path and retrieves file list
-    cd(path: string, path2: string = '') {
+    cd(path: string, path2: string = '', skipHistory = false) {
         // first updates fs (eg. was local fs, is now ftp)
         if (this.path.substr(0, 1) !== path.substr(0, 1)) {
             this.getNewFS(path);
@@ -73,7 +113,7 @@ export class FileState {
             const joint = path2 ? this.api.join(path, path2) : path;
             return this.api.cd(joint)
                 .then((path) => {
-                    this.updatePath(path);
+                    this.updatePath(path, skipHistory);
                     return this.list(path);
                 });
         }

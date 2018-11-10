@@ -1,6 +1,6 @@
 import * as React from "react";
 import { reaction } from 'mobx';
-import { inject } from 'mobx-react';
+import { inject, observer } from 'mobx-react';
 import { InputGroup, ControlGroup, Button, ButtonGroup, Popover, Intent, Alert, ProgressBar, Classes } from '@blueprintjs/core';
 import { AppState } from "../state/appState";
 import { debounce } from '../utils/debounce';
@@ -23,9 +23,6 @@ interface InjectedProps extends PathInputProps {
 interface PathInputState {
     status: -1 | 0 | 1;
     path: string;
-    history: string[];
-    current: number;
-    selectedItems: number;
     isOpen: boolean;
     isDeleteOpen: boolean;
 }
@@ -38,9 +35,9 @@ enum KEYS {
 const DEBOUNCE_DELAY = 400;
 
 @inject('appState', 'fileCache')
+@observer
 export class Toolbar extends React.Component<{}, PathInputState> {
     private cache: FileState;
-    private direction = 0;
     private input: HTMLInputElement | null = null;
 
     private checkPath: (event: React.FormEvent<HTMLElement>) => void = debounce(
@@ -61,17 +58,11 @@ export class Toolbar extends React.Component<{}, PathInputState> {
         this.state = {
             status: 0,
             path: '',
-            history: new Array(),
-            current: -1,
             isOpen: false,
-            isDeleteOpen: false,
-            selectedItems: 0
+            isDeleteOpen: false
         };
 
         this.cache = fileCache;
-
-        // autorun(() => console.log('path modified', this.cache.path));
-        // autorun(() => console.log('files modified', this.cache.files.length));
 
         this.installReactions();
     }
@@ -80,81 +71,24 @@ export class Toolbar extends React.Component<{}, PathInputState> {
         return this.props as InjectedProps;
     }
 
+    // reset status once path has been modified from outside this component
     private installReactions() {
         const reaction1 = reaction(
             () => { return this.cache.path },
             path => {
-                console.log('reaction 1');
-                const status = 0;
-
-                if (!this.direction) {
-                    this.addPathToHistory(path);
-                } else {
-                    this.navHistory(this.direction);
-                    this.direction = 0;
-                }
-                this.setState({ path, status });
+                this.setState({ path, status: 0 });
             }
         );
-
-        const reaction2 = reaction(
-        () => { return this.cache.selected.length },
-        selectedItems => {
-            this.setState({ selectedItems });
-            }
-        );
-    }
-
-    private addPathToHistory(path: string) {
-        const { fileCache } = this.injected;
-
-        // do not add path during login
-        if (fileCache.status === 'login') {
-            return;
-        }
-
-        this.setState((state) => {
-            {
-                const { history, current } = state;
-                return {
-                    history: history.slice(0, current + 1).concat([path]),
-                    current: current + 1
-                };
-            }
-        });
-    }
-
-    private navHistory(dir = -1, updatePath = false) {
-        const { history, current } = this.state;
-
-        const length = history.length;
-        let newCurrent = current + dir;
-
-        if (newCurrent < 0) {
-            newCurrent = 0;
-        } else if (newCurrent >= length) {
-            newCurrent = length - 1;
-        }
-        if (!updatePath) {
-            this.setState({
-                current: newCurrent
-            });
-        } else {
-            const path = history[current + dir];
-            console.log('opening path from history', path);
-            this.cache.cd(path);
-        }
     }
 
     private onBackward = (event: React.FormEvent<HTMLElement>) => {
-        console.log(this.state.history);
-        this.direction = -1;
-        this.navHistory(this.direction, true);
+        console.log(this.cache.history);
+        this.cache.navHistory(-1);
     }
 
     private onForward = (event: React.FormEvent<HTMLElement>) => {
-        this.direction = 1;
-        this.navHistory(this.direction, true);
+        console.log(this.cache.history);
+        this.cache.navHistory(1);
     }
 
     private onPathChange = (event: React.FormEvent<HTMLElement>) => {
@@ -192,7 +126,7 @@ export class Toolbar extends React.Component<{}, PathInputState> {
     }
 
     private onReload = () => {
-        this.navHistory(0, true);
+        this.cache.navHistory(0);
     }
 
     private refHandler = (input: HTMLInputElement) => {
@@ -227,7 +161,7 @@ export class Toolbar extends React.Component<{}, PathInputState> {
     private delete = async () => {
         Logger.log('delete selected files');
         try {
-            const { fileCache, appState } = this.injected;
+            const { fileCache } = this.injected;
 
             await this.cache.delete(this.state.path, fileCache.selected);
             console.log('need to refresh cache');
@@ -261,49 +195,43 @@ export class Toolbar extends React.Component<{}, PathInputState> {
 
 
     private copy = async () => {
-        // try {
-            const { appState } = this.injected;
-            const source = appState.clipboard.source;
-            const elements = appState.clipboard.elements.map((el) => el);
-            console.log('copying', elements, 'to', this.state.path);
-            const bytes = await this.cache.size(source, elements);
-            console.log('size', bytes);
-            let key = '';
-            // only show toaster if (source=remote or bytes > 50*1024*1024)
-            const timeout = setTimeout(() => {
-                key = AppToaster.show(
-                    this.renderCopyProgress(0)
-                );
-            }, 1000);
-            console.time('copy');
-            let i = 0;
-            this.cache.copy(source, elements, this.state.path).on('progress', throttle((data:cpy.ProgressData) => {
-                console.log('progress', i++);
-                console.log('progress', data, 'percent', (data.completedSize * 100) / bytes);
-                if (key) {
-                    AppToaster.show(this.renderCopyProgress((data.completedSize * 100) / bytes), key);
-                }
-            }, 400)).then(() => {
-                console.log('copy done');
-                console.timeEnd('copy');
-                if (key) {
-                    // in case copy finishes between two throttles toaster could get stuck
-                    AppToaster.show(this.renderCopyProgress(100), key);
-                    key = '';
-                }
-                // do not show toaster if copy doesn't last more than 1 sec
-                clearTimeout(timeout);
-                console.log('need to refresh cache');
-                this.cache.reload();
-                // appState.refreshCache(this.cache);
-            })
-            .catch((err:Error) => {
-                clearTimeout(timeout);
-                // show error + log error
-            });
-        // } catch(err) {
-        //     console.log('error copying files', err);
-        // }
+        const { appState } = this.injected;
+        const source = appState.clipboard.source;
+        const elements = appState.clipboard.elements.map((el) => el);
+        console.log('copying', elements, 'to', this.state.path);
+        const bytes = await this.cache.size(source, elements);
+        console.log('size', bytes);
+        let key = '';
+        // only show toaster if (source=remote or bytes > 50*1024*1024)
+        const timeout = setTimeout(() => {
+            key = AppToaster.show(
+                this.renderCopyProgress(0)
+            );
+        }, 1000);
+        console.time('copy');
+        let i = 0;
+        this.cache.copy(source, elements, this.state.path).on('progress', throttle((data:cpy.ProgressData) => {
+            console.log('progress', i++);
+            console.log('progress', data, 'percent', (data.completedSize * 100) / bytes);
+            if (key) {
+                AppToaster.show(this.renderCopyProgress((data.completedSize * 100) / bytes), key);
+            }
+        }, 400)).then(() => {
+            console.log('copy done');
+            console.timeEnd('copy');
+            if (key) {
+                // in case copy finishes between two throttles toaster could get stuck
+                AppToaster.show(this.renderCopyProgress(100), key);
+                key = '';
+            }
+            // do not show toaster if copy doesn't last more than 1 sec
+            clearTimeout(timeout);
+            this.cache.reload();
+        })
+        .catch((err:Error) => {
+            clearTimeout(timeout);
+            // show error + log error
+        });
     }
 
     private onFileAction = (action: string) => {
@@ -327,8 +255,10 @@ export class Toolbar extends React.Component<{}, PathInputState> {
     }
 
     public render() {
-        const { current, history, status, path, isOpen, isDeleteOpen, selectedItems } = this.state;
+        const { status, path, isOpen, isDeleteOpen } = this.state;
         const { fileCache } = this.injected;
+        const { selected, history, current } = fileCache;
+
         const canGoBackward = current > 0;
         const canGoForward = history.length > 1 && current < history.length - 1;
         // const loadingSpinner = false ? <Spinner size={Icon.SIZE_STANDARD} /> : undefined;
@@ -340,7 +270,7 @@ export class Toolbar extends React.Component<{}, PathInputState> {
                 <ButtonGroup style={{ minWidth: 120 }}>
                     <Button disabled={!canGoBackward} onClick={this.onBackward} rightIcon="chevron-left"></Button>
                     <Button disabled={!canGoForward} onClick={this.onForward} rightIcon="chevron-right"></Button>
-                    <Popover content={<FileMenu selectedItems={fileCache.selected} onFileAction={this.onFileAction} />}>
+                    <Popover content={<FileMenu selectedItems={selected} onFileAction={this.onFileAction} />}>
                         <Button rightIcon="caret-down" icon="cog" text="" />
                     </Popover>
                 </ButtonGroup>
@@ -368,7 +298,7 @@ export class Toolbar extends React.Component<{}, PathInputState> {
                     onCancel={this.deleteCancel}
                 >
                     <p>
-                        Are you sure you want to delete {`${selectedItems}`} <b>file(s)/folder(s)</b>?<br />This action will <b>permanentaly</b> delete the selected elements.
+                        Are you sure you want to delete {`${selected.length}`} <b>file(s)/folder(s)</b>?<br />This action will <b>permanentaly</b> delete the selected elements.
                     </p>
                 </Alert>
                 <Button rightIcon="arrow-right" disabled={status === -1} onClick={this.onSubmit} intent="primary" />
