@@ -218,6 +218,21 @@ class Client{
             });
         });
     }
+
+    public mkdir(parent: string, name: string): Promise<string> {
+        const path = this.pathpart(parent);
+        const newPath = join(path, name);
+
+        return new Promise((resolve, reject) => {
+            this.client.mkdir(newPath, true, (err: Error) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(join(path, name));
+                }
+            });
+        })
+    }
 }
 
 class FtpAPI implements FsApi {
@@ -271,7 +286,7 @@ class FtpAPI implements FsApi {
 
     makedir(parent: string, name: string): Promise<string> {
         console.log('FsFtp.makedir');
-        return Promise.resolve('');
+        return this.master.mkdir(parent, name);
     };
 
     delete(src: string, files: File[]): Promise<number> {
