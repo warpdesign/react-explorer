@@ -301,7 +301,7 @@ export class Toolbar extends React.Component<{}, PathInputState> {
                         Are you sure you want to delete {`${selected.length}`} <b>file(s)/folder(s)</b>?<br />This action will <b>permanentaly</b> delete the selected elements.
                     </p>
                 </Alert>
-                <Button rightIcon="arrow-right" disabled={status === -1} onClick={this.onSubmit} intent="primary" />
+                <Button rightIcon="arrow-right" disabled={status === -1} onClick={this.onSubmit} />
             </ControlGroup>
         )
     }

@@ -1,5 +1,6 @@
 import { observable, action, runInAction } from "mobx";
 import { FsApi, Fs, getFS, File } from "../services/Fs";
+import { Deferred } from '../utils/deferred';
 import * as cp from 'cpy';
 
 export class FileState {
@@ -61,6 +62,8 @@ export class FileState {
     private api: FsApi;
     private fs: Fs;
 
+    private loginDefer: Deferred<void>;
+
     constructor(path: string) {
         this.path = path;
         this.getNewFS(path);
@@ -95,47 +98,75 @@ export class FileState {
     }
 
     @action
+    waitForConnection() {
+        if (!this.api.isConnected()) {
+            this.status = 'login';
+            this.loginDefer = new Deferred();
+
+            return this.loginDefer.promise;
+        } else {
+            return Promise.resolve();
+        }
+    }
+
+    @action
     // changes current path and retrieves file list
-    cd(path: string, path2: string = '', skipHistory = false) {
+    async cd(path: string, path2: string = '', skipHistory = false) {
         // first updates fs (eg. was local fs, is now ftp)
         if (this.path.substr(0, 1) !== path.substr(0, 1)) {
             this.getNewFS(path);
             this.server = this.fs.serverpart(path);
         }
 
-        // then attempt to read directory ?
-        if (!this.api.isConnected()) {
-            this.status = 'login';
+        await this.waitForConnection();
 
-            this.updatePath(path);
-        } else {
-            const joint = path2 ? this.api.join(path, path2) : path;
-            return this.api.cd(joint)
-                .then((path) => {
-                    this.updatePath(path, skipHistory);
-                    return this.list(path);
-                })
-                .catch(() => {
-                    // TODO: show error ?
-                    console.log('path not valid ?', joint);
-                });
-        }
+        const joint = path2 ? this.api.join(path, path2) : path;
+        return this.api.cd(joint)
+            .then((path) => {
+                this.updatePath(path, skipHistory);
+                return this.list(path);
+            })
+            .catch(() => {
+                // TODO: show error ?
+                console.log('path not valid ?', joint);
+            });
+
+        // then attempt to read directory ?
+        // if (!this.api.isConnected()) {
+        //     this.status = 'login';
+
+        //     this.updatePath(path);
+        // } else {
+        //     const joint = path2 ? this.api.join(path, path2) : path;
+        //     return this.api.cd(joint)
+        //         .then((path) => {
+        //             this.updatePath(path, skipHistory);
+        //             return this.list(path);
+        //         })
+        //         .catch(() => {
+        //             // TODO: show error ?
+        //             console.log('path not valid ?', joint);
+        //         });
+        // }
     }
 
     @action
-    login(user: string, password: string) {
+    doLogin(user: string, password: string) {
         console.log('logging in');
         return this.api.login(user, password).then(() => {
             runInAction(() => {
                 this.status = 'ok';
-            })
+                this.loginDefer.resolve();
+            });
         }).catch((err) => {
             console.log('error while connecting', err);
         });
     }
 
     @action
-    list(path:string) {
+    async list(path: string) {
+        await this.waitForConnection();
+
         return this.api.list(path)
             .then((files: File[]) => {
                 runInAction(() => {
@@ -155,19 +186,23 @@ export class FileState {
         return this.api.join(path, path2);
     }
 
-    rename(source: string, file: File, newName: string): Promise<string> {
+    async rename(source: string, file: File, newName: string): Promise<string> {
+        await this.waitForConnection();
         return this.api.rename(source, file, newName);
     }
 
-    exists(path: string): Promise<boolean> {
+    async exists(path: string): Promise<boolean> {
+        await this.waitForConnection();
         return this.api.exists(path);
     }
 
-    makedir(parent: string, dirName: string): Promise<string> {
+    async makedir(parent: string, dirName: string): Promise<string> {
+        await this.waitForConnection();
         return this.api.makedir(parent, dirName);
     }
 
-    delete(source: string, files: File[]): Promise<number> {
+    async delete(source: string, files: File[]): Promise<number> {
+        await this.waitForConnection();
         return this.api.delete(source, files);
     }
 
@@ -179,11 +214,13 @@ export class FileState {
         return this.api.isDirectoryNameValid(dirName);
     }
 
-    size(source: string, files: string[]): Promise<number> {
+    async size(source: string, files: string[]): Promise<number> {
+        await this.waitForConnection();
         return this.api.size(source, files);
     }
 
-    get(path: string, file: string): Promise<string> {
+    async get(path: string, file: string): Promise<string> {
+        await this.waitForConnection();
         return this.api.get(path, file);
     }
 }

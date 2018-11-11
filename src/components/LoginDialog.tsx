@@ -83,9 +83,10 @@ export class LoginDialog extends React.Component<ILoginProps, ILoginState>{
         const { username, password } = this.state;
         const { fileCache } = this.injected;
         console.log('onLogin', username, password);
-        fileCache.login(username, password).then(() => {
-            fileCache.cd(fileCache.path);
-        });
+        fileCache.doLogin(username, password);
+        // .then(() => {
+        //     fileCache.cd(fileCache.path);
+        // });
         // TODO: display spinner, and remove it on then/catch
         // TODO: fileCache.list() on login success
         // this.props.onClose(username, password);
