@@ -151,6 +151,7 @@ export class LoginDialog extends React.Component<ILoginProps, ILoginState>{
                         id="username"
                         name="username"
                         intent={intent}
+                        leftIcon="person"
                         autoFocus
                     />
                     </FormGroup>
@@ -167,6 +168,7 @@ export class LoginDialog extends React.Component<ILoginProps, ILoginState>{
                             name="password"
                             intent={intent}
                             type="password"
+                            leftIcon="lock"
                         />
                     </FormGroup>
             </div>

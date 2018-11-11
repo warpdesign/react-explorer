@@ -2,7 +2,7 @@ import { FsApi, File } from './Fs';
 import * as ftp from 'ftp';
 import * as cp from 'cpy';
 
-const FtpUrl = /^(ftp\.[a-z]+\.[a-z]{2}|[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})$/i;
+const FtpUrl = /^(ftp\.[a-z]+\.[a-z]{2,3}|[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})$/i;
 const invalidChars = /^[\.]+$/ig;
 
 function join(path:string, path2:string) {
@@ -53,7 +53,7 @@ class Client{
     }
 
     public login(options: any = {}):Promise<any> {
-        console.log('connecting to', this.host, 'with options', { host: this.host, ...options });
+        console.log('connecting to', this.host, 'with options', Object.assign({ host: this.host, ...options }, { password: '****' }));
         return new Promise((resolve, reject) => {
             this.readyResolve = resolve;
             this.readyReject = reject;

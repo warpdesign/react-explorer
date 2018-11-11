@@ -32,7 +32,6 @@ export class FileState {
         const keep = this.history.slice(0, this.current + 1);
         this.history.replace(keep.concat([path]));
         this.current++;
-        console.log('/// adding path to history');
     }
 
     @action
