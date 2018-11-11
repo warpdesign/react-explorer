@@ -19,6 +19,8 @@ interface IMakedirState {
 const DEBOUNCE_DELAY = 300;
 const CTRL_KEY = 17;
 const ENTER_KEY = 13;
+const META_KEY = 91;
+const ReadFolderKey = process.platform === 'darwin' && META_KEY || CTRL_KEY;
 
 export class MakedirDialog extends React.Component<IMakedirProps, IMakedirState>{
     constructor(props:any) {
@@ -32,7 +34,7 @@ export class MakedirDialog extends React.Component<IMakedirProps, IMakedirState>
     }
 
     onKeyUp = (e: KeyboardEvent) => {
-        if (e.keyCode === CTRL_KEY) {
+        if (e.keyCode === ReadFolderKey) {
             this.setState({ ctrlKey: false });
         } else if (e.keyCode === ENTER_KEY) {
             this.onCreate();
@@ -40,7 +42,7 @@ export class MakedirDialog extends React.Component<IMakedirProps, IMakedirState>
     }
 
     onKeyDown = (e: KeyboardEvent) => {
-        if (e.keyCode === CTRL_KEY) {
+        if (e.keyCode === ReadFolderKey) {
             this.setState({ ctrlKey: true });
         }
     }

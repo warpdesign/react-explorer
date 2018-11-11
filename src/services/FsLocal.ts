@@ -50,12 +50,10 @@ class LocalApi implements FsApi {
         return path.resolve(newPath);
     }
 
-    // TODO: attempts to read the directory, maybe it's not accessible
     cd(path: string) {
         const resolved = this.resolve(path);
-        console.warn('TODO: Local.cd', path, resolved);
 
-        return Promise.resolve(resolved);
+        return this.exists(resolved).then(() => resolved);
     }
 
     size(source: string, files: string[]): Promise<number> {

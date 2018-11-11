@@ -114,6 +114,10 @@ export class FileState {
                 .then((path) => {
                     this.updatePath(path, skipHistory);
                     return this.list(path);
+                })
+                .catch(() => {
+                    // TODO: show error ?
+                    console.log('path not valid ?', joint);
                 });
         }
     }
