@@ -201,6 +201,23 @@ class Client{
             });
         });
     }
+
+    public rename(serverPath: string, oldName: string, newName: string): Promise<string> {
+        const path = this.pathpart(serverPath);
+        const oldPath = join(path, oldName);
+        const newPath = join(path, newName);
+
+        console.log('renaming', oldPath, newPath);
+        return new Promise((resolve, reject) => {
+            return this.client.rename(oldPath, newPath, (err: Error) => {
+                if (!err) {
+                    resolve(newName);
+                } else {
+                    reject(oldName);
+                }
+            });
+        });
+    }
 }
 
 class FtpAPI implements FsApi {
@@ -264,12 +281,11 @@ class FtpAPI implements FsApi {
 
     rename(source: string, file: File, newName: string): Promise<string> {
         console.log('FsFtp.rename');
-        return Promise.resolve(newName);
+        return this.master.rename(source, file.fullname, newName);
     };
 
     exists(path: string): Promise<boolean> {
-        debugger;
-        console.log('FsFtp.pathExists');
+        console.warn('FsFtp.pathExists not implemented: always returns true');
         return Promise.resolve(true);
     };
 
