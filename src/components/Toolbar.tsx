@@ -43,6 +43,7 @@ export class Toolbar extends React.Component<{}, PathInputState> {
     private checkPath: (event: React.FormEvent<HTMLElement>) => void = debounce(
         async (event: React.FormEvent<HTMLElement>) => {
             try {
+                debugger;
                 const exists = await this.cache.exists(this.state.path);
                 this.setState({ status: exists ? 1 : -1 });
             } catch {
@@ -94,13 +95,16 @@ export class Toolbar extends React.Component<{}, PathInputState> {
     private onPathChange = (event: React.FormEvent<HTMLElement>) => {
         const path = (event.target as HTMLInputElement).value;
         this.setState({ path });
-        this.checkPath(event);
+        // this.checkPath(event);
     }
 
     private onSubmit = () => {
         try {
-            if (this.cache.path !== this.state.path /*&& pathExists*/) {
-                this.cache.cd(this.state.path);
+            if (this.cache.path !== this.state.path) {
+                this.cache.cd(this.state.path)
+                    .catch(() => {
+                        this.input.blur();
+                    });
             }
         } catch(err) {
             console.warn('error submiting: path probably does not exist');

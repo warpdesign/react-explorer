@@ -1,9 +1,13 @@
 import { FsApi, File } from './Fs';
 import * as ftp from 'ftp';
 import * as cp from 'cpy';
+import * as os from 'os';
+import * as path from 'path';
+import * as fs from 'fs';
 
 const FtpUrl = /^(ftp\.[a-z]+\.[a-z]{2,3}|[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})$/i;
 const invalidChars = /^[\.]+$/ig;
+const TMP_DIR = os.tmpdir();
 
 function join(path:string, path2:string) {
     let sep = '';
@@ -180,8 +184,22 @@ class Client{
         return path.replace(this.host, '');
     }
 
-    public get(path: string, dest: string) {
-
+    public get(path: string, dest: string):Promise<string> {
+        return new Promise((resolve, reject) => {
+            const newpath = this.pathpart(path);
+            console.log('downloading file', newpath, dest);
+            this.client.get(newpath, (err: Error, readStream: fs.ReadStream) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    console.log('creating stream');
+                    const writeStream = fs.createWriteStream(dest);
+                    readStream.once('close', function () { resolve(dest); });
+                    readStream.pipe(writeStream);
+                    readStream.on('data', (chunk) => console.log('data', chunk.length));
+                }
+            });
+        });
     }
 }
 
@@ -250,6 +268,7 @@ class FtpAPI implements FsApi {
     };
 
     exists(path: string): Promise<boolean> {
+        debugger;
         console.log('FsFtp.pathExists');
         return Promise.resolve(true);
     };
@@ -263,6 +282,12 @@ class FtpAPI implements FsApi {
     cd(path: string): Promise<string> {
         return this.master.cd(path);
     };
+
+    get(file_path: string, file: string): Promise<string> {
+        const dest = path.join(TMP_DIR, file);
+        console.log('need to get file', this.join(file_path, file), 'to', dest);
+        return this.master.get(this.join(file_path, file), dest);
+    }
 
     login(username: string, password: string):Promise<void> {
         if (!this.master) {
@@ -286,12 +311,6 @@ class FtpAPI implements FsApi {
         this.master.api = null;
         // close any connections ?
         // this.master.close();
-    }
-
-    get(path: string, file: string): Promise<string> {
-        console.warn('TODO: download to temp folder and return path');
-        // TODO: get to temp folder, then return path
-        return Promise.resolve(this.join(path, file));
     }
 };
 

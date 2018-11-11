@@ -127,8 +127,9 @@ export class FileState {
                 return this.list(path);
             })
             .catch(() => {
-                // TODO: show error ?
-                console.log('path not valid ?', joint);
+                console.log('path not valid ?', joint, 'restoring previous path');
+                this.navHistory(0);
+                return Promise.reject();
             });
 
         // then attempt to read directory ?

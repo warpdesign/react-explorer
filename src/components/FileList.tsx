@@ -126,10 +126,11 @@ export class FileList extends React.Component<{}, FileListState> {
                 // Logger.log('need to read dir', this.cache.FS.joinResolve(data.dir, data.fullname));
                 // appState.updateCache(this.cache, this.cache.FS.joinResolve(data.dir, data.fullname));
             } else {
-                // TODO: if remote, need to download file first
-                this.cache.get(data.dir, data.fullname).then((tmpPath:string) => {
+                console.log('need to open file')
+                this.cache.get(data.dir, data.fullname).then((tmpPath: string) => {
+                    console.log('opening file', tmpPath);
                     shell.openItem(tmpPath);
-                })
+                });
             }
         }
     }
