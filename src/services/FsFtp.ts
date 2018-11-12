@@ -4,12 +4,12 @@ import * as cp from 'cpy';
 import * as os from 'os';
 import * as path from 'path';
 import * as fs from 'fs';
-import { Server } from 'net';
+import { remote } from 'electron';
 
 const FtpUrl = /^(ftp\:\/\/)*(ftp\.[a-z]+\.[a-z]{2,3}|[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})$/i;
 const ServerPart = /^(ftp\:\/\/)*(ftp\.[a-z]+\.[a-z]{2,3}|[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})/i;
 const invalidChars = /^[\.]+$/ig;
-const TMP_DIR = os.tmpdir();
+const TMP_DIR = remote.app.getPath('downloads');
 
 function join(path:string, path2:string) {
     let sep = '';
