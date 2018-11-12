@@ -62,7 +62,7 @@ export class FileState {
     private api: FsApi;
     private fs: Fs;
 
-    private loginDefer: Deferred<void>;
+    private loginDefer: Deferred<any>;
 
     constructor(path: string) {
         this.path = path;
@@ -113,7 +113,8 @@ export class FileState {
     // changes current path and retrieves file list
     async cd(path: string, path2: string = '', skipHistory = false) {
         // first updates fs (eg. was local fs, is now ftp)
-        if (this.path.substr(0, 1) !== path.substr(0, 1)) {
+        // if (this.path.substr(0, 1) !== path.substr(0, 1)) {
+        if (this.path.split('/')[0] !== path.split('/')[0]) {
             this.getNewFS(path);
             this.server = this.fs.serverpart(path);
         }
@@ -126,42 +127,27 @@ export class FileState {
                 this.updatePath(path, skipHistory);
                 return this.list(path);
             })
-            .catch(() => {
+            .catch((err) => {
                 console.log('path not valid ?', joint, 'restoring previous path');
                 this.navHistory(0);
-                return Promise.reject();
+                return Promise.reject(err);
             });
-
-        // then attempt to read directory ?
-        // if (!this.api.isConnected()) {
-        //     this.status = 'login';
-
-        //     this.updatePath(path);
-        // } else {
-        //     const joint = path2 ? this.api.join(path, path2) : path;
-        //     return this.api.cd(joint)
-        //         .then((path) => {
-        //             this.updatePath(path, skipHistory);
-        //             return this.list(path);
-        //         })
-        //         .catch(() => {
-        //             // TODO: show error ?
-        //             console.log('path not valid ?', joint);
-        //         });
-        // }
     }
 
     @action
     doLogin(user: string, password: string) {
         console.log('logging in');
-        return this.api.login(user, password).then(() => {
+        this.api.login(user, password).then(() => {
             runInAction(() => {
                 this.status = 'ok';
                 this.loginDefer.resolve();
             });
         }).catch((err) => {
             console.log('error while connecting', err);
+            this.loginDefer.reject(err);
         });
+
+        return this.loginDefer.promise;
     }
 
     @action

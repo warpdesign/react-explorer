@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Dialog, Classes, Intent, Button, InputGroup, FormGroup } from "@blueprintjs/core";
+import { Dialog, Classes, Intent, Button, InputGroup, FormGroup, Spinner } from "@blueprintjs/core";
 import { inject } from "mobx-react";
 import { FileState } from "../state/fileState";
 
@@ -18,7 +18,8 @@ interface ILoginState {
     password: string;
     connecting: boolean;
     ctrlKey: boolean;
-    valid: boolean;
+    error: string;
+    busy: boolean;
 }
 
 const DEBOUNCE_DELAY = 300;
@@ -35,7 +36,8 @@ export class LoginDialog extends React.Component<ILoginProps, ILoginState>{
             password: '',
             connecting: false,
             ctrlKey: false,
-            valid: true
+            error: '',
+            busy: false
         };
     }
 
@@ -57,44 +59,25 @@ export class LoginDialog extends React.Component<ILoginProps, ILoginState>{
         }
     }
 
-    // private isValid(path: string): boolean {
-    //     const valid = this.props.onValidation(path);
-    //     console.log('valid', path, valid);
-    //     return valid;
-    // }
-
-    // private checkPath: (path: string) => any = debounce(
-    //     (path: string) => {
-    //         try {
-    //             const isValid = this.isValid(path);
-    //             this.setState({ valid: isValid });
-    //         } catch(error) {
-    //             console.log('error', error);
-    //             this.setState({ valid: false });
-    //         }
-    //     }, DEBOUNCE_DELAY);
-
     private cancelClose = () => {
         console.log('handleClose');
-        this.props.onClose("", "");
+        if (!this.state.busy) {
+            this.props.onClose("", "");
+        }
     }
 
     private onLogin = () => {
         const { username, password } = this.state;
         const { fileCache } = this.injected;
         console.log('onLogin', username, '****');
-        fileCache.doLogin(username, password);
-        // .then(() => {
-        //     fileCache.cd(fileCache.path);
-        // });
-        // TODO: display spinner, and remove it on then/catch
-        // TODO: fileCache.list() on login success
-        // this.props.onClose(username, password);
-        // if (this.isValid(username)) {
-        //     this.props.onClose(username, ctrlKey);
-        // } else {
-        //     this.setState({ valid: false });
-        // }
+        this.setState({ busy: true });
+
+        fileCache.doLogin(username, password)
+            .then(() => { debugger; this.setState({ error: '', busy: false }); })
+            .catch((err) => {
+                debugger;
+                this.setState({ error: err, busy: false });
+            });
     }
 
     private onInputChange = (event: React.FormEvent<HTMLElement>) => {
@@ -121,11 +104,9 @@ export class LoginDialog extends React.Component<ILoginProps, ILoginState>{
     }
 
     public render() {
-        const { username, password, connecting, valid, ctrlKey } = this.state;
+        const { username, password, busy, error, ctrlKey } = this.state;
         const { fileCache } = this.injected;
         const server = fileCache.server;
-        const intent = !valid && 'danger' || 'none';
-        const helperText = !valid && (<span>Folder name not valid</span>) || (<span>&nbsp;</span>);
 
         return(
             <Dialog
@@ -138,20 +119,20 @@ export class LoginDialog extends React.Component<ILoginProps, ILoginState>{
             usePortal={true}
             onClose={this.cancelClose}
         >
-            <div className={Classes.DIALOG_BODY}>
+                <div className={Classes.DIALOG_BODY}>
+                    {error && (<h4 className={Classes.INTENT_DANGER}>Login error</h4>)}
                 <FormGroup
-                    helperText={helperText}
                     inline={true}
                     labelFor="username"
                     labelInfo="username"
                 >
                     <InputGroup
                         onChange={this.onInputChange}
-                        placeholder="Enter username"
+                            placeholder="Enter username"
+                            disabled={busy}
                         value={username}
                         id="username"
                         name="username"
-                        intent={intent}
                         leftIcon="person"
                         autoFocus
                     />
@@ -164,10 +145,10 @@ export class LoginDialog extends React.Component<ILoginProps, ILoginState>{
                         <InputGroup
                             onChange={this.onInputChange}
                             placeholder="Enter password"
+                            disabled={busy}
                             value={password}
                             id="password"
                             name="password"
-                            intent={intent}
                             type="password"
                             leftIcon="lock"
                         />
@@ -175,10 +156,9 @@ export class LoginDialog extends React.Component<ILoginProps, ILoginState>{
             </div>
             <div className={Classes.DIALOG_FOOTER}>
                 <div className={Classes.DIALOG_FOOTER_ACTIONS}>
-                    <Button onClick={this.cancelClose}>Cancel</Button>
-
-                        <Button intent={Intent.PRIMARY} onClick={this.onLogin} disabled={!username.length || !password.length}>
-                        {!ctrlKey && 'Login' || 'Create & read folder'}
+                    <Button onClick={this.cancelClose} disabled={busy}>Cancel</Button>
+                        <Button loading={busy} intent={Intent.PRIMARY} onClick={this.onLogin} disabled={busy || !username.length || !password.length}>
+                        {'Login'}
                     </Button>
                 </div>
             </div>

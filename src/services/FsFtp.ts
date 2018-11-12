@@ -1,7 +1,6 @@
 import { FsApi, File } from './Fs';
 import * as ftp from 'ftp';
 import * as cp from 'cpy';
-import * as os from 'os';
 import * as path from 'path';
 import * as fs from 'fs';
 import { remote } from 'electron';
@@ -110,7 +109,7 @@ class Client{
             // user not logged in (user limit may be reached too)
             case 530:
                 this.status = 'offline';
-                this.readyReject('530');
+                this.readyReject(error.toString());
                 break;
 
             case 550:

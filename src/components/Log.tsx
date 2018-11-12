@@ -72,12 +72,16 @@ export class LogUI extends React.Component<any, LogUIState> {
         const tagName = element.tagName.toLowerCase();
 
         if (e.keyCode === ESCAPE_KEY && !tagName.match(/input|textarea/) && (!element || !element.classList.contains('bp3-menu-item')) && !document.body.classList.contains('bp3-overlay-open')) {
+            debugger;
             this.setState({ visible: !this.state.visible });
         }
     }
 
     componentDidMount() {
         document.addEventListener('keyup', this.onKeyUp);
+        document.addEventListener('keydown', (e: KeyboardEvent) => {
+            // console.log(e.target);
+        });
     }
 
     componentWillUnmount() {

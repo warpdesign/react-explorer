@@ -98,20 +98,16 @@ export class Toolbar extends React.Component<{}, PathInputState> {
     }
 
     private onSubmit = () => {
-        try {
-            if (this.cache.path !== this.state.path) {
-                this.cache.cd(this.state.path)
-                    .catch(() => {
-                        this.input.blur();
-                    });
-            }
-        } catch(err) {
-            console.warn('error submiting: path probably does not exist');
+        if (this.cache.path !== this.state.path) {
+            this.cache.cd(this.state.path)
+                .catch((err) => {
+                    this.input.blur();
+                });
         }
     }
 
     private onKeyUp = (event: React.KeyboardEvent<HTMLElement>) => {
-        console.log('path keyup');
+        // console.log('path keyup');
         if (event.keyCode === KEYS.Escape) {
             // since React events are attached to the root document
             // event already has bubbled up so we must stop
