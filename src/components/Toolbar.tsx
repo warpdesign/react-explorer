@@ -43,7 +43,6 @@ export class Toolbar extends React.Component<{}, PathInputState> {
     private checkPath: (event: React.FormEvent<HTMLElement>) => void = debounce(
         async (event: React.FormEvent<HTMLElement>) => {
             try {
-                debugger;
                 const exists = await this.cache.exists(this.state.path);
                 this.setState({ status: exists ? 1 : -1 });
             } catch {

@@ -82,7 +82,7 @@ export class LoginDialog extends React.Component<ILoginProps, ILoginState>{
     private onLogin = () => {
         const { username, password } = this.state;
         const { fileCache } = this.injected;
-        console.log('onLogin', username, password);
+        console.log('onLogin', username, '****');
         fileCache.doLogin(username, password);
         // .then(() => {
         //     fileCache.cd(fileCache.path);

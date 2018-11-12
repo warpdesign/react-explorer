@@ -4,8 +4,10 @@ import * as cp from 'cpy';
 import * as os from 'os';
 import * as path from 'path';
 import * as fs from 'fs';
+import { Server } from 'net';
 
-const FtpUrl = /^(ftp\.[a-z]+\.[a-z]{2,3}|[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})$/i;
+const FtpUrl = /^(ftp\:\/\/)*(ftp\.[a-z]+\.[a-z]{2,3}|[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})$/i;
+const ServerPart = /^(ftp\:\/\/)*(ftp\.[a-z]+\.[a-z]{2,3}|[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})/i;
 const invalidChars = /^[\.]+$/ig;
 const TMP_DIR = os.tmpdir();
 
@@ -181,7 +183,8 @@ class Client{
     }
 
     public pathpart(path: string): string {
-        return path.replace(this.host, '');
+        const server = path.replace(ServerPart, '');
+        return server;
     }
 
     public get(path: string, dest: string):Promise<string> {
@@ -267,12 +270,12 @@ class FtpAPI implements FsApi {
     };
 
     size(source: string, files: string[]): Promise<number> {
-        console.log('FtpFs.size');
+        console.log('TODO: FtpFs.size');
         return Promise.resolve(10);
     };
 
     copy(source: string, files: string[], dest: string): Promise<any> & cp.ProgressEmitter {
-        console.log('FsFtp.copy');
+        console.log('TODO: FsFtp.copy');
         const prom: Promise<void> & cp.ProgressEmitter = new Promise((resolve, reject) => {
             resolve();
         }) as Promise<void> & cp.ProgressEmitter;
@@ -290,7 +293,7 @@ class FtpAPI implements FsApi {
     };
 
     delete(src: string, files: File[]): Promise<number> {
-        console.log('FsFtp.delete');
+        console.log('TODO: FsFtp.delete');
         return Promise.resolve(0);
     };
 
@@ -311,6 +314,7 @@ class FtpAPI implements FsApi {
     };
 
     cd(path: string): Promise<string> {
+        console.log('FsFtp.cd', path);
         return this.master.cd(path);
     };
 
@@ -351,8 +355,8 @@ export const FsFtp = {
     canread(str: string): boolean {
         return !!this.serverpart(str).match(FtpUrl);
     },
-    serverpart(str: string): string {
-        const server = str.replace(/^ftp\:\/\//i, '').toLowerCase();
+    serverpart(str: string, lowerCase = true): string {
+        const server = lowerCase ? str.replace(/^ftp\:\/\//i, '').toLowerCase() : str.replace(/^ftp\:\/\//i, '');
         return server.split('/')[0];
     },
     API: FtpAPI
