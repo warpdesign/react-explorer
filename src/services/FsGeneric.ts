@@ -84,6 +84,10 @@ class GenericApi implements FsApi {
 
     }
 
+    isRoot(path: string): boolean {
+        return path === '/';
+    }
+
     get(path: string): Promise<string> {
         return Promise.resolve(path);
     }

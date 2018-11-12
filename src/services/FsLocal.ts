@@ -161,7 +161,20 @@ class LocalApi implements FsApi {
                         for (var i = 0; i < items.length; i++) {
                             const fullPath = path.join(dirPath, items[i]);
                             const format = path.parse(fullPath);
-                            const stats = fs.statSync(path.join(dirPath, items[i]));
+                            let stats;
+
+                            try {
+                                stats = fs.statSync(path.join(dirPath, items[i]));
+                            } catch (err) {
+                                console.warn('error getting stats for', path.join(dirPath, items[i]), err);
+                                stats = {
+                                    ctime: new Date(),
+                                    mtime: new Date(),
+                                    size: 0,
+                                    isDirectory: () => false,
+                                    mode: 777
+                                }
+                            }
 
                             const file =
                             {
@@ -181,16 +194,23 @@ class LocalApi implements FsApi {
                         }
 
                         // add parent
-                        const parent = { ...Parent, dir: dirPath };
+                        if (!this.isRoot(dir)) {
+                            const parent = { ...Parent, dir: dirPath };
 
-                        // TODO: detect root directory and only append parent if not root
-                        resolve([parent].concat(files));
+                            resolve([parent].concat(files));
+                        } else {
+                            resolve(files);
+                        }
                     }
                 });
             });
         } else {
             return Promise.reject('Path does not exist');
         }
+    }
+
+    isRoot(path: string): boolean {
+        return path === '/';
     }
 
     free() {

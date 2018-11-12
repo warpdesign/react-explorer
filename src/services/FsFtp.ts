@@ -21,6 +21,19 @@ function join(path:string, path2:string) {
     return path + sep + path2;
 }
 
+const Parent: File = {
+    dir: '..',
+    fullname: '..',
+    name: '',
+    extension: '',
+    cDate: new Date(),
+    mDate: new Date(),
+    length: 0,
+    mode: 0,
+    isDir: true,
+    readonly: true
+};
+
 class Client{
     private client: any;
     public connected: boolean;
@@ -162,7 +175,14 @@ class Client{
                         isDir: boolean;
                         readonly: boolean;
                         */
-                    resolve(files);
+                    if (!this.api.isRoot(newpath)) {
+                        const folders = path.split('/');
+                        const parent = { ...Parent, dir: folders.slice(0, folders.length - 1).join('/') };
+
+                        resolve([parent].concat(files));
+                    } else {
+                        resolve(files);
+                    }
                 }
             });
         });
@@ -261,8 +281,7 @@ class FtpAPI implements FsApi {
     };
 
     resolve(newPath: string): string {
-        console.warn('TODO: implement resolve');
-        return newPath;
+        return newPath.replace(/\/\.\.$/, '');
     };
 
     join(path:string, path2:string): string {
@@ -315,7 +334,8 @@ class FtpAPI implements FsApi {
 
     cd(path: string): Promise<string> {
         console.log('FsFtp.cd', path);
-        return this.master.cd(path);
+        const resolved = this.resolve(path);
+        return this.master.cd(resolved);
     };
 
     get(file_path: string, file: string): Promise<string> {
@@ -339,6 +359,10 @@ class FtpAPI implements FsApi {
 
     isConnected():boolean {
         return this.connected;
+    }
+
+    isRoot(path: string): boolean {
+        return path === '/';
     }
 
     free() {

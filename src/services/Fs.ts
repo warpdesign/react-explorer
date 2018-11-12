@@ -44,6 +44,7 @@ export interface FsApi {
     isConnected(): boolean;
     isDirectoryNameValid(dirName: string): boolean;
     get(path: string, file: string): Promise<string>;
+    isRoot(path: string): boolean;
     free(): void;
 }
 
