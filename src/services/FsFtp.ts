@@ -87,10 +87,15 @@ class Client{
     }
 
     private onReady() {
-        console.log(`[${this.host}] ready`);
-        this.readyResolve();
-        this.status = 'ready';
-        this.connected = true;
+        console.log(`[${this.host}] ready, setting transfer mode to binary`);
+        this.client.binary((err: Error) => {
+            if (err) {
+                console.warn('could not set transfer mode to binary');
+            }
+            this.readyResolve();
+            this.status = 'ready';
+            this.connected = true;
+        });
     }
 
     private onClose() {
@@ -343,14 +348,14 @@ class FtpAPI implements FsApi {
         return this.master.get(this.join(file_path, file), dest);
     }
 
-    login(username: string, password: string):Promise<void> {
+    login(username: string, password: string, port: number):Promise<void> {
         if (!this.master) {
             return Promise.reject('calling login but no master client set');
         } else if (this.connected) {
             console.warn('login: already connected');
             return Promise.resolve();
         } else {
-            return this.master.login({ user: username, password }).then(() => {
+            return this.master.login({ user: username, password, port: port }).then(() => {
                 this.connected = true;
             });
         }

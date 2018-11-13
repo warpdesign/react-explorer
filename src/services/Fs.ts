@@ -40,10 +40,12 @@ export interface FsApi {
     exists(path: string): Promise<boolean>;
     resolve(path: string): string;
     size(source: string, files: string[]): Promise<number>;
-    login(user: string, password: string): Promise<void>;
+    login(user: string, password: string, port: number): Promise<void>;
     isConnected(): boolean;
     isDirectoryNameValid(dirName: string): boolean;
     get(path: string, file: string): Promise<string>;
+    // getStream(path: string): ReadableStream;
+    // putStream(stream: ReadableStream, path: string): Promise<any>;
     isRoot(path: string): boolean;
     free(): void;
 }

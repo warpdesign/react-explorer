@@ -52,12 +52,19 @@ button.small:hover{
 }
 
 #root{
-    display:flex;
-    justify-content: center;
+    display: flex;
+    flex-direction: column;
     height:100%;
 }
 
-#root > .sideview{
+#root .main{
+    display:flex;
+    justify-content: center;
+    flex-grow:1;
+    overflow:hidden;
+}
+
+#root .sideview{
     width:50%;
     min-width:360px;
     margin:10px;
@@ -74,4 +81,8 @@ button.small:hover{
 
 .sideview{
     position:relative;
+}
+
+.bp3-navbar .bp3-intent-primary{
+    pointer-events:none;
 }

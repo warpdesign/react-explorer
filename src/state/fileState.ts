@@ -139,9 +139,9 @@ export class FileState {
     }
 
     @action
-    doLogin(user: string, password: string) {
+    doLogin(user: string, password: string, port: number) {
         console.log('logging in');
-        this.api.login(user, password).then(() => {
+        this.api.login(user, password, port).then(() => {
             runInAction(() => {
                 this.status = 'ok';
                 this.loginDefer.resolve();

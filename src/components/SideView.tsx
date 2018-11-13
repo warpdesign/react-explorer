@@ -8,6 +8,7 @@ import { LoginDialog } from "./LoginDialog";
 import { FileState } from "../state/fileState";
 
 interface SideViewProps {
+    hide: boolean;
 }
 
 interface InjectedProps extends SideViewProps{
@@ -21,8 +22,10 @@ interface SideViewState{
 @inject('appState')
 @observer
 export class SideView extends React.Component<SideViewProps, SideViewState>{
-    constructor(props:{}) {
+    constructor(props:SideViewProps) {
         super(props);
+
+
 
         const { appState } = this.injected;
         const cache: FileState = appState.addCache();
@@ -49,18 +52,29 @@ export class SideView extends React.Component<SideViewProps, SideViewState>{
         fileCache.revertPath();
     }
 
-    render() {
+    renderSideView() {
         const { fileCache } = this.state;
         const needLogin = fileCache.status === 'login';
 
+        if (!this.props.hide) {
+            return (<div className="sideview">
+                {needLogin && <LoginDialog isOpen={needLogin} onValidation={this.onValidation} onClose={this.onClose} />}
+                <Toolbar />
+                <FileList />
+                <Statusbar />
+            </div>);
+        } else {
+            return (<div />);
+        }
+    }
+
+    render() {
+
+        const { fileCache } = this.state;
+
         return (
             <Provider fileCache={fileCache}>
-                <div className="sideview">
-                    {needLogin && <LoginDialog isOpen={needLogin} onValidation={this.onValidation} onClose={this.onClose} />}
-                    <Toolbar />
-                    <FileList />
-                    <Statusbar />
-                </div>
+                {this.renderSideView()}
             </Provider>
         );
     }

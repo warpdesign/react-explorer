@@ -1,9 +1,8 @@
 import * as React from "react";
-import { reaction } from 'mobx';
+import { reaction, IReactionDisposer } from 'mobx';
 import { inject, observer } from 'mobx-react';
 import { InputGroup, ControlGroup, Button, ButtonGroup, Popover, Intent, Alert, ProgressBar, Classes } from '@blueprintjs/core';
 import { AppState } from "../state/appState";
-import { debounce } from '../utils/debounce';
 import { FileMenu } from "./FileMenu";
 import { MakedirDialog } from "./MakedirDialog";
 import { Logger } from "./Log";
@@ -32,23 +31,22 @@ enum KEYS {
     Enter = 13
 };
 
-const DEBOUNCE_DELAY = 400;
-
 @inject('appState', 'fileCache')
 @observer
 export class Toolbar extends React.Component<{}, PathInputState> {
     private cache: FileState;
     private input: HTMLInputElement | null = null;
+    private disposer: IReactionDisposer;
 
-    private checkPath: (event: React.FormEvent<HTMLElement>) => void = debounce(
-        async (event: React.FormEvent<HTMLElement>) => {
-            try {
-                const exists = await this.cache.exists(this.state.path);
-                this.setState({ status: exists ? 1 : -1 });
-            } catch {
-                this.setState({ status: -1 })
-            }
-        }, DEBOUNCE_DELAY);
+    // private checkPath: (event: React.FormEvent<HTMLElement>) => void = debounce(
+    //     async (event: React.FormEvent<HTMLElement>) => {
+    //         try {
+    //             const exists = await this.cache.exists(this.state.path);
+    //             this.setState({ status: exists ? 1 : -1 });
+    //         } catch {
+    //             this.setState({ status: -1 })
+    //         }
+    //     }, DEBOUNCE_DELAY);
 
     constructor(props: any) {
         super(props);
@@ -57,7 +55,7 @@ export class Toolbar extends React.Component<{}, PathInputState> {
 
         this.state = {
             status: 0,
-            path: '',
+            path: fileCache.path,
             isOpen: false,
             isDeleteOpen: false
         };
@@ -73,7 +71,7 @@ export class Toolbar extends React.Component<{}, PathInputState> {
 
     // reset status once path has been modified from outside this component
     private installReactions() {
-        const reaction1 = reaction(
+        this.disposer = reaction(
             () => { return this.cache.path },
             path => {
                 this.setState({ path, status: 0 });
@@ -251,6 +249,10 @@ export class Toolbar extends React.Component<{}, PathInputState> {
             default:
                 Logger.warn('action unknown', action);
         }
+    }
+
+    public componentWillUnmount() {
+        this.disposer();
     }
 
     public render() {

@@ -16,13 +16,12 @@ interface InjectedProps extends ILoginProps {
 interface ILoginState {
     username: string;
     password: string;
+    port: number;
     connecting: boolean;
-    ctrlKey: boolean;
     error: string;
     busy: boolean;
 }
 
-const CTRL_KEY = 17;
 const ENTER_KEY = 13;
 
 @inject('fileCache')
@@ -36,9 +35,9 @@ export class LoginDialog extends React.Component<ILoginProps, ILoginState> {
             username: '',
             password: '',
             connecting: false,
-            ctrlKey: false,
             error: '',
-            busy: false
+            busy: false,
+            port: 21
         };
     }
 
@@ -47,16 +46,8 @@ export class LoginDialog extends React.Component<ILoginProps, ILoginState> {
     }
 
     onKeyUp = (e: KeyboardEvent) => {
-        if (e.keyCode === CTRL_KEY) {
-            this.setState({ ctrlKey: false });
-        } else if (e.keyCode === ENTER_KEY) {
+        if (e.keyCode === ENTER_KEY) {
             this.onLogin();
-        }
-    }
-
-    onKeyDown = (e: KeyboardEvent) => {
-        if (e.keyCode === CTRL_KEY) {
-            this.setState({ ctrlKey: true });
         }
     }
 
@@ -68,13 +59,12 @@ export class LoginDialog extends React.Component<ILoginProps, ILoginState> {
     }
 
     private onLogin = () => {
-        const { username, password } = this.state;
+        const { username, password, port } = this.state;
         const { fileCache } = this.injected;
         console.log('onLogin', username, '****');
         this.setState({ busy: true });
 
-        fileCache.doLogin(username, password)
-            .then(() => this.setState({ error: '', busy: false }))
+        fileCache.doLogin(username, password, port)
             .catch((err) => {
                 this.setState({ error: err, busy: false });
                 this.input.focus();
@@ -97,17 +87,16 @@ export class LoginDialog extends React.Component<ILoginProps, ILoginState> {
     }
 
     componentDidMount() {
+        this.setState({ error: '', busy: false });
         document.addEventListener('keyup', this.onKeyUp);
-        document.addEventListener('keydown', this.onKeyDown);
     }
 
     componentWillUnmount() {
         document.removeEventListener('keyup', this.onKeyUp);
-        document.removeEventListener('keydown', this.onKeyDown);
     }
 
     public render() {
-        const { username, password, busy, error, ctrlKey } = this.state;
+        const { username, password, busy, error, port } = this.state;
         const { fileCache } = this.injected;
         const server = fileCache.server;
 
@@ -154,6 +143,21 @@ export class LoginDialog extends React.Component<ILoginProps, ILoginState> {
                             id="password"
                             name="password"
                             type="password"
+                            leftIcon="lock"
+                        />
+                    </FormGroup>
+                    <FormGroup
+                        inline={true}
+                        labelFor="port"
+                        labelInfo="port"
+                    >
+                        <InputGroup
+                            onChange={this.onInputChange}
+                            disabled={busy}
+                            value={port.toString()}
+                            id="port"
+                            name="port"
+                            type="number"
                             leftIcon="lock"
                         />
                     </FormGroup>

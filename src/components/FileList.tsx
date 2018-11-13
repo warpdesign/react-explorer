@@ -1,6 +1,6 @@
 import * as React from "react";
 import { inject } from 'mobx-react';
-import { reaction, toJS } from 'mobx';
+import { reaction, toJS, IReactionDisposer } from 'mobx';
 import { Classes, Button, ITreeNode, Tooltip, Tree, Intent } from "@blueprintjs/core";
 import { AppState } from "../state/appState";
 import { AppToaster } from './AppToaster';
@@ -44,6 +44,7 @@ export class FileList extends React.Component<{}, FileListState> {
     private editingElement: HTMLElement;
     private editingFile: File;
     private clickTimeout: any;
+    private disposer: IReactionDisposer;
 
     constructor(props: any) {
         super(props);
@@ -53,7 +54,7 @@ export class FileList extends React.Component<{}, FileListState> {
         this.cache = fileCache;
 
         this.state = {
-            nodes: [],
+            nodes: this.buildNodes(this.cache.files),
             selected: 0,
             type: 'local'
         };
@@ -66,7 +67,7 @@ export class FileList extends React.Component<{}, FileListState> {
     }
 
     private installReaction() {
-        const reaction1 = reaction(
+        this.disposer = reaction(
             () => { return toJS(this.cache.files) },
             (files: File[]) => {
                 console.log('++++ reaction files', files);
@@ -272,6 +273,10 @@ export class FileList extends React.Component<{}, FileListState> {
         if (this.editingElement && e.keyCode === KEYS.Enter) {
             e.preventDefault();
         }
+    }
+
+    public componentWillUnmount() {
+        this.disposer();
     }
 
     public render() {
