@@ -13,8 +13,6 @@ interface InjectedProps {
 @inject('fileCache', 'appState')
 @observer
 export class Statusbar extends React.Component {
-    private input: HTMLInputElement | null = null;
-
     constructor(props: any) {
         super(props);
     }
@@ -35,10 +33,6 @@ export class Statusbar extends React.Component {
             icon: "tick",
             intent: Intent.SUCCESS
         });
-    }
-
-    private refHandler = (input: HTMLInputElement) => {
-        this.input = input;
     }
 
     public render() {
@@ -66,7 +60,6 @@ export class Statusbar extends React.Component {
                         leftIcon="database"
                         rightElement={pasteButton}
                         value={`${numFiles} File(s), ${numDirs} Folder(s)`}
-                        inputRef={this.refHandler}
                 />
             </ControlGroup>
         )

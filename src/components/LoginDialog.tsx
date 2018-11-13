@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Dialog, Classes, Intent, Button, InputGroup, FormGroup, Spinner } from "@blueprintjs/core";
+import { Dialog, Classes, Intent, Button, InputGroup, FormGroup} from "@blueprintjs/core";
 import { inject } from "mobx-react";
 import { FileState } from "../state/fileState";
 
@@ -22,12 +22,13 @@ interface ILoginState {
     busy: boolean;
 }
 
-const DEBOUNCE_DELAY = 300;
 const CTRL_KEY = 17;
 const ENTER_KEY = 13;
 
 @inject('fileCache')
-export class LoginDialog extends React.Component<ILoginProps, ILoginState>{
+export class LoginDialog extends React.Component<ILoginProps, ILoginState> {
+    private input: HTMLInputElement | null = null;
+
     constructor(props:any) {
         super(props);
 
@@ -73,10 +74,10 @@ export class LoginDialog extends React.Component<ILoginProps, ILoginState>{
         this.setState({ busy: true });
 
         fileCache.doLogin(username, password)
-            .then(() => { debugger; this.setState({ error: '', busy: false }); })
+            .then(() => this.setState({ error: '', busy: false }))
             .catch((err) => {
-                debugger;
                 this.setState({ error: err, busy: false });
+                this.input.focus();
             });
     }
 
@@ -89,8 +90,10 @@ export class LoginDialog extends React.Component<ILoginProps, ILoginState>{
         state[name] = val;
 
         this.setState(state);
-        // // 2. isValid ?
-        // this.checkPath(path);
+    }
+
+    private refHandler = (input: HTMLInputElement) => {
+        this.input = input;
     }
 
     componentDidMount() {
@@ -130,7 +133,8 @@ export class LoginDialog extends React.Component<ILoginProps, ILoginState>{
                         onChange={this.onInputChange}
                             placeholder="Enter username"
                             disabled={busy}
-                        value={username}
+                            value={username}
+                            inputRef={this.refHandler}
                         id="username"
                         name="username"
                         leftIcon="person"

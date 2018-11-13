@@ -111,7 +111,7 @@ export class FileState {
 
     @action
     // changes current path and retrieves file list
-    async cd(path: string, path2: string = '', skipHistory = false) {
+    async cd(path: string, path2: string = '', skipHistory = false):Promise<string> {
         // first updates fs (eg. was local fs, is now ftp)
         // if (this.path.substr(0, 1) !== path.substr(0, 1)) {
         if (this.path.split('/')[0] !== path.split('/')[0]) {
@@ -119,13 +119,17 @@ export class FileState {
             this.server = this.fs.serverpart(path);
         }
 
-        await this.waitForConnection();
+        try {
+            await this.waitForConnection();
+        } catch (err) {
+            return this.cd(path, path2, skipHistory);
+        }
 
         const joint = path2 ? this.api.join(path, path2) : path;
         return this.api.cd(joint)
             .then((path) => {
                 this.updatePath(path, skipHistory);
-                return this.list(path);
+                return this.list(path).then(() => path);
             })
             .catch((err) => {
                 console.log('path not valid ?', joint, 'restoring previous path');
@@ -151,8 +155,12 @@ export class FileState {
     }
 
     @action
-    async list(path: string) {
-        await this.waitForConnection();
+    async list(path: string):Promise<File[]> {
+        try {
+            await this.waitForConnection();
+        } catch (err) {
+            return this.list(path);
+        }
 
         return this.api.list(path)
             .then((files: File[]) => {
@@ -162,6 +170,8 @@ export class FileState {
                     // clear lister selection as well
                     this.selected.clear();
                 });
+
+                return files;
             });
     }
 
@@ -174,7 +184,12 @@ export class FileState {
     }
 
     async rename(source: string, file: File, newName: string): Promise<string> {
-        await this.waitForConnection();
+        try {
+            await this.waitForConnection();
+        } catch (err) {
+            return this.rename(source, file, newName);
+        }
+
         return this.api.rename(source, file, newName);
     }
 
@@ -184,12 +199,22 @@ export class FileState {
     }
 
     async makedir(parent: string, dirName: string): Promise<string> {
-        await this.waitForConnection();
+        try {
+            await this.waitForConnection();
+        } catch (err) {
+            return this.makedir(parent, dirName);
+        }
+
         return this.api.makedir(parent, dirName);
     }
 
     async delete(source: string, files: File[]): Promise<number> {
-        await this.waitForConnection();
+        try {
+            await this.waitForConnection();
+        } catch (err) {
+            return this.delete(source, files);
+        }
+
         return this.api.delete(source, files);
     }
 
@@ -202,12 +227,22 @@ export class FileState {
     }
 
     async size(source: string, files: string[]): Promise<number> {
-        await this.waitForConnection();
+        try {
+            await this.waitForConnection();
+        } catch (err) {
+            return this.size(source, files);
+        }
+
         return this.api.size(source, files);
     }
 
     async get(path: string, file: string): Promise<string> {
-        await this.waitForConnection();
+        try {
+            await this.waitForConnection();
+        } catch (err) {
+            return this.get(path, file);
+        }
+
         return this.api.get(path, file);
     }
 }

@@ -45,6 +45,7 @@ const DEBOUNCE_DELAY = 500;
 @observer
 export class LogUI extends React.Component<any, LogUIState> {
     private consoleDiv: HTMLDivElement;
+    private valid: boolean;
     private lastScrollTop: number = 0;
     private keepScrollPos: boolean = false;
     private checkScroll: (event: React.FormEvent<HTMLElement>) => void = debounce(
@@ -68,24 +69,33 @@ export class LogUI extends React.Component<any, LogUIState> {
     }
 
     onKeyUp = (e: KeyboardEvent) => {
+        if (e.keyCode === ESCAPE_KEY && this.valid) {
+            this.setState({ visible: !this.state.visible });
+        }
+    }
+
+    onKeyDown = (e: KeyboardEvent) => {
         const element = e.target as HTMLElement || null;
         const tagName = element.tagName.toLowerCase();
-
-        if (e.keyCode === ESCAPE_KEY && !tagName.match(/input|textarea/) && (!element || !element.classList.contains('bp3-menu-item')) && !document.body.classList.contains('bp3-overlay-open')) {
-            debugger;
-            this.setState({ visible: !this.state.visible });
+        if (e.keyCode === ESCAPE_KEY &&
+            !tagName.match(/input|textarea/) &&
+            (!element || !element.classList.contains('bp3-menu-item')) &&
+            !document.body.classList.contains('bp3-overlay-open'))
+        {
+            this.valid = true;
+        } else {
+            this.valid = false;
         }
     }
 
     componentDidMount() {
         document.addEventListener('keyup', this.onKeyUp);
-        document.addEventListener('keydown', (e: KeyboardEvent) => {
-            // console.log(e.target);
-        });
+        document.addEventListener('keydown', this.onKeyDown);
     }
 
     componentWillUnmount() {
         document.removeEventListener('keyup', this.onKeyUp);
+        document.removeEventListener('keydown', this.onKeyUp);
     }
 
     componentDidUpdate() {
