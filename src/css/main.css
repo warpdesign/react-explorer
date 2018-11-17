@@ -62,13 +62,18 @@ button.small:hover{
     justify-content: center;
     flex-grow:1;
     overflow:hidden;
+    padding:10px;
 }
 
 #root .sideview{
+    position:relative;
     width:50%;
     min-width:360px;
-    margin:10px;
     flex-grow:1;
+}
+
+#root .sideview:first-child{
+    margin-right:10px;
 }
 
 .bp3-tree-node.isHidden{
@@ -79,10 +84,56 @@ button.small:hover{
     flex-grow:1;
 }
 
-.sideview{
-    position:relative;
-}
-
 .bp3-navbar .bp3-intent-primary{
     pointer-events:none;
+}
+
+.downloads{
+    width: auto;
+    align-self: flex-start;
+    flex-grow:1;
+}
+
+.downloads .bp3-tree-node-content .action{
+    vertical-align:text-bottom;
+    opacity: 0;
+}
+
+.downloads .bp3-tree-node-content:hover .action{
+    opacity: .3;
+    cursor:pointer;
+}
+
+.downloads .bp3-tree-node-content .action:hover{
+    opacity: 1;
+}
+
+/* line height bug ? */
+.bp3-tree-node-caret > span{
+    vertical-align:top;
+}
+
+.bp3-badge{
+    display:inline-block;
+    background-color:#5c7080;
+    color:white;
+    margin: auto 7px;
+    padding: 0 5px;
+    border-radius: 10px;
+}
+
+.bp3-badge.bp3-intent-success{
+    background-color:#0d8050;
+}
+
+.bp3-badge.bp3-intent-danger{
+    background-color:#c23030;
+}
+
+.bp3-badge.bp3-intent-primary{
+    background-color:#106ba3;
+}
+
+.bp3-badge.bp3-intent-warning{
+    background-color:#bf7326;
 }

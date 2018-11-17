@@ -34,11 +34,11 @@ export class FileMenu extends React.Component<IFileMenuProps>{
 
     private onDelete = () => {
         this.props.onFileAction('delete');
-    }    
+    }
 
     public render() {
         const { appState } = this.injected;
-        const clipboardLength = appState.clipboard.elements.length;
+        const clipboardLength = appState.clipboard.files.length;
         const { selectedItems } = this.props;
 
         return (

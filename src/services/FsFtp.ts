@@ -143,7 +143,7 @@ class Client{
         console.log(greeting);
     }
 
-    public list(path: string): Promise<File[]> {
+    public list(path: string, appendParent = true): Promise<File[]> {
         this.status = 'busy';
 
         console.log('ftp.client: list', path);
@@ -179,7 +179,7 @@ class Client{
                         isDir: boolean;
                         readonly: boolean;
                         */
-                    if (!this.api.isRoot(newpath)) {
+                    if (appendParent && !this.api.isRoot(newpath)) {
                         const folders = path.split('/');
                         const parent = { ...Parent, dir: folders.slice(0, folders.length - 1).join('/') };
 

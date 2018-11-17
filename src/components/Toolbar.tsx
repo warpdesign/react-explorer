@@ -192,43 +192,45 @@ export class Toolbar extends React.Component<{}, PathInputState> {
 
 
     private copy = async () => {
-        const { appState } = this.injected;
-        const source = appState.clipboard.source;
-        const elements = appState.clipboard.elements.map((el) => el);
-        console.log('copying', elements, 'to', this.state.path);
-        const bytes = await this.cache.size(source, elements);
-        console.log('size', bytes);
-        let key = '';
-        // only show toaster if (source=remote or bytes > 50*1024*1024)
-        const timeout = setTimeout(() => {
-            key = AppToaster.show(
-                this.renderCopyProgress(0)
-            );
-        }, 1000);
-        console.time('copy');
-        let i = 0;
-        this.cache.copy(source, elements, this.state.path).on('progress', throttle((data:cpy.ProgressData) => {
-            console.log('progress', i++);
-            console.log('progress', data, 'percent', (data.completedSize * 100) / bytes);
-            if (key) {
-                AppToaster.show(this.renderCopyProgress((data.completedSize * 100) / bytes), key);
-            }
-        }, 400)).then(() => {
-            console.log('copy done');
-            console.timeEnd('copy');
-            if (key) {
-                // in case copy finishes between two throttles toaster could get stuck
-                AppToaster.show(this.renderCopyProgress(100), key);
-                key = '';
-            }
-            // do not show toaster if copy doesn't last more than 1 sec
-            clearTimeout(timeout);
-            this.cache.reload();
-        })
-        .catch((err:Error) => {
-            clearTimeout(timeout);
-            // show error + log error
-        });
+        // TODO: attempt to copy
+        const { appState, fileCache } = this.injected;
+        appState.prepareTransfer(fileCache);
+        // const source = appState.clipboard.source;
+        // const elements = appState.clipboard.elements.map((el) => el);
+        // console.log('copying', elements, 'to', this.state.path);
+        // const bytes = await this.cache.size(source, elements);
+        // console.log('size', bytes);
+        // let key = '';
+        // // only show toaster if (source=remote or bytes > 50*1024*1024)
+        // const timeout = setTimeout(() => {
+        //     key = AppToaster.show(
+        //         this.renderCopyProgress(0)
+        //     );
+        // }, 1000);
+        // console.time('copy');
+        // let i = 0;
+        // this.cache.copy(source, elements, this.state.path).on('progress', throttle((data:cpy.ProgressData) => {
+        //     console.log('progress', i++);
+        //     console.log('progress', data, 'percent', (data.completedSize * 100) / bytes);
+        //     if (key) {
+        //         AppToaster.show(this.renderCopyProgress((data.completedSize * 100) / bytes), key);
+        //     }
+        // }, 400)).then(() => {
+        //     console.log('copy done');
+        //     console.timeEnd('copy');
+        //     if (key) {
+        //         // in case copy finishes between two throttles toaster could get stuck
+        //         AppToaster.show(this.renderCopyProgress(100), key);
+        //         key = '';
+        //     }
+        //     // do not show toaster if copy doesn't last more than 1 sec
+        //     clearTimeout(timeout);
+        //     this.cache.reload();
+        // })
+        // .catch((err:Error) => {
+        //     clearTimeout(timeout);
+        //     // show error + log error
+        // });
     }
 
     private onFileAction = (action: string) => {

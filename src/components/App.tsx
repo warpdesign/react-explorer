@@ -7,6 +7,7 @@ import { Navbar, Alignment, Button, Intent } from "@blueprintjs/core";
 import { SideView } from "./SideView";
 import { LogUI } from "./Log";
 import { Downloads } from "./Downloads";
+import { Badge } from "./Badge";
 
 require("@blueprintjs/core/lib/css/blueprint.css");
 require("@blueprintjs/icons/lib/css/blueprint-icons.css");
@@ -45,7 +46,7 @@ export class ReactApp extends React.Component<{}, IState> {
                             <Navbar.Heading>React-ftp</Navbar.Heading>
                             <Navbar.Divider />
                             <Button className="bp3-minimal" icon="home" text="Explorer" onClick={this.navClick} intent={isExplorer ? Intent.PRIMARY : 'none'} />
-                            <Button className="bp3-minimal" icon="download" text="Transfers" onClick={this.navClick} intent={!isExplorer ? Intent.PRIMARY : 'none'} />
+                            <Button className="bp3-minimal" icon="download" onClick={this.navClick} intent={!isExplorer ? Intent.PRIMARY : 'none'}>Transfers<Badge intent="danger" text="2"/></Button>
                         </Navbar.Group>
                         <Navbar.Group align={Alignment.RIGHT}>
                             <Navbar.Divider />

@@ -144,7 +144,7 @@ class LocalApi implements FsApi {
         return Promise.resolve();
     }
 
-    async list(dir: string): Promise<File[]> {
+    async list(dir: string, appendParent = true): Promise<File[]> {
         console.log('calling readDirectory', dir);
         const pathExists = await this.exists(dir);
 
@@ -152,7 +152,7 @@ class LocalApi implements FsApi {
             return new Promise<File[]>((resolve, reject) => {
                 fs.readdir(dir, (err, items) => {
                     if (err) {
-                        reject(`Could not read directory '${path}', reason: ${err}`);
+                        reject(`Could not read directory '${dir}', reason: ${err}`);
                     } else {
                         const dirPath = path.resolve(dir);
 
@@ -194,7 +194,7 @@ class LocalApi implements FsApi {
                         }
 
                         // add parent
-                        if (!this.isRoot(dir)) {
+                        if (appendParent && !this.isRoot(dir)) {
                             const parent = { ...Parent, dir: dirPath };
 
                             resolve([parent].concat(files));
@@ -229,8 +229,9 @@ export const FsLocal = {
         return !!str.match(localStart);
     },
     serverpart(str: string): string {
-        const server = str.replace(/^ftp\:\/\//, '');
-        return server.split('/')[0];
+        // const server = str.replace(/^ftp\:\/\//, '');
+        // return server.split('/')[0];
+        return 'local';
     },
     API: LocalApi
 }

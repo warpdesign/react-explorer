@@ -24,12 +24,10 @@ export class Statusbar extends React.Component {
     private onClipboardCopy = () => {
         const { fileCache, appState } = this.injected;
 
-        const elements = fileCache.selected.map((file) => file.fullname);
-
-        appState.setClipboard('local', fileCache.path, elements);
+        const num = appState.setClipboard(fileCache);
 
         AppToaster.show({
-            message: `${elements.length} element(s) copied to the clipboard`,
+            message: `${num} element(s) copied to the clipboard`,
             icon: "tick",
             intent: Intent.SUCCESS
         });

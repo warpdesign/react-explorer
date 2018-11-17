@@ -1,27 +1,54 @@
-import { action, observable } from 'mobx';
-import { File } from '../services/Fs';
+import { action, observable, trace, computed, runInAction } from 'mobx';
+import { File, FsApi } from '../services/Fs';
 import { FileState } from './fileState';
+import { Batch } from '../transfers/batch';
 
 interface Clipboard {
-    type: string;
-    source: string;
-    elements: string[];
+    srcFs: FsApi;
+    srcPath: string;
+    files: File[];
 }
 
 export class AppState {
-    /** new stuff */
     caches: FileState[] = new Array();
+
+    /* transfers */
+    transfers = observable<Batch>([]);
+
+    prepareTransfer(cache: FileState) {
+        this.addTransfer(this.clipboard.srcFs, cache.getAPI(), this.clipboard.files, this.clipboard.srcPath, cache.path);
+    }
+
+    @action
+    syncCaches(srcCache: FileState) {
+        this.caches.filter((cache) => cache !== srcCache && cache.path === srcCache.path && cache.getFS().name === srcCache.getFS().name).forEach((cache) => cache.reload());
+    }
+
+    @action
+    addTransfer(srcFs: FsApi, dstFs: FsApi, files: File[], srcPath: string, dstPath: string) {
+        console.log('addTransfer', files, srcFs, dstFs, dstPath);
+        debugger;
+        const batch = new Batch(srcFs, dstFs, srcPath, dstPath);
+        this.transfers.push(batch);
+        return batch.setFileList(files).then(() => {
+            console.log('got file list !');
+            // start transfer ?
+            setInterval(() => {
+                runInAction(() => {
+                    console.log('progress up');
+                    batch.setProgress();
+                });
+            }, 1000);
+        }).catch((err) => {
+            debugger;
+        });
+    }
+
+    /* /transfers */
 
     @action
     addCache(path: string = '') {
-        console.log('addCache');
         const cache = new FileState(path);
-        // const cache:Directory = observable({
-        //     path,
-        //     files: new Array(),
-        //     selected: new Array(),
-        //     FS: getFs(path)
-        // });
 
         this.caches.push(cache);
 
@@ -33,63 +60,21 @@ export class AppState {
         cache.selected.replace(newSelection);
     }
 
-    // @action updateFS(cache: Directory, path: string) {
-    //     if (cache.path.substr(0, 5) !== path.substr(0, 5)) {
-    //         cache.FS = getFs(path);
-    //         console.log('updateFS: FS may have changed, new FS:', cache.FS.name);
-    //     }
-    // }
-
-    // @action
-    // updateCache(cache: Directory, newPath: string) {
-    //     this.updateFS(cache, newPath);
-
-    //     cache.FS.readDirectory(newPath)
-    //         .then((files: File[]) => {
-    //             runInAction(() => {
-    //                 cache.files = files;
-    //                 cache.path = cache.FS.resolve(newPath);
-    //                 cache.selected = new Array();
-    //             });
-
-
-    //             // if (forceSync) {
-    //             //     this.refreshCache(cache);
-    //             // }
-    //         })
-    //         .catch((err) => {
-    //             console.log('error reading directory', err);
-    //         });
-    // }
-    /** /new */
-
-    // @action
-    // refreshCache(cache: Directory, sync = false) {
-    //     this.updateCache(cache, cache.path);
-    // }
-
-    // @action syncCaches(source: Directory) {
-    //     for (let cache of this.caches) {
-    //         // only refresh cache that don't have files selected: we don't we to lose
-    //         // the user's selection
-    //         // we could do even better and keep the user's selection while refreshing
-    //         if (source !== cache && cache.path === source.path && !cache.selected.length) {
-    //             this.refreshCache(cache);
-    //         }
-    //     }
-    // }
-
     // global
     @observable
     clipboard: Clipboard = {
-        type: 'local',
-        source: '',
-        elements: []
+        srcPath: '',
+        srcFs: null,
+        files: []
     };
 
     @action
-    setClipboard(type: string, source: string, elements: string[]) {
-        this.clipboard = { source, type, elements };
+    setClipboard(fileState: FileState): number {
+        const files = fileState.selected.slice(0);
+
+        this.clipboard = { srcFs: fileState.getAPI(), srcPath: fileState.path, files };
+
+        return files.length;
     }
 
     constructor() {

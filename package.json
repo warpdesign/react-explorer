@@ -2,7 +2,14 @@
   "name": "react-ftp",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "dist/main.js",
+  "build": {
+    "productName": "React-FTP",
+    "appId": "reactftp",
+    "files": [
+      "./dist/**/*",
+      "./dist/main.js"
+    ]},
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "webpack --watch"
@@ -17,6 +24,7 @@
     "cpy": "^7.0.1",
     "css-loader": "^1.0.0",
     "electron": "^3.0.5",
+    "electron-builder": "^20.34.0",
     "electron-devtools-installer": "^2.2.4",
     "electron-rebuild": "^1.8.2",
     "file-loader": "^2.0.0",

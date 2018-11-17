@@ -81,6 +81,14 @@ export class FileState {
         this.api = new newfs.API(path);
     }
 
+    public getAPI(): FsApi {
+        return this.api;
+    }
+
+    public getFS(): Fs {
+        return this.fs;
+    }
+
     @action
     private updatePath(path: string, skipHistory = false) {
         this.previousPath = this.path;
@@ -111,7 +119,7 @@ export class FileState {
 
     @action
     // changes current path and retrieves file list
-    async cd(path: string, path2: string = '', skipHistory = false):Promise<string> {
+    async cd(path: string, path2: string = '', skipHistory = false): Promise<string> {
         // first updates fs (eg. was local fs, is now ftp)
         // if (this.path.substr(0, 1) !== path.substr(0, 1)) {
         if (this.path.split('/')[0] !== path.split('/')[0]) {
@@ -155,20 +163,21 @@ export class FileState {
     }
 
     @action
-    async list(path: string):Promise<File[]> {
+    async list(path: string, appendParent?:boolean):Promise<File[]> {
         try {
             await this.waitForConnection();
         } catch (err) {
-            return this.list(path);
+            return this.list(path, appendParent);
         }
 
-        return this.api.list(path)
+        return this.api.list(path, appendParent)
             .then((files: File[]) => {
                 runInAction(() => {
                     console.log('run in actions', this.path);
                     this.files.replace(files);
                     // clear lister selection as well
                     this.selected.clear();
+                    // TODO: sync caches ?
                 });
 
                 return files;

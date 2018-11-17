@@ -26,11 +26,22 @@ export interface Fs {
     description: string;
 }
 
-
+export const Parent: File = {
+    dir: '..',
+    fullname: '..',
+    name: '',
+    extension: '',
+    cDate: new Date(),
+    mDate: new Date(),
+    length: 0,
+    mode: 0,
+    isDir: true,
+    readonly: true
+};
 
 export interface FsApi {
     // public API
-    list(dir: string): Promise<File[]>;
+    list(dir: string, appendParent?: boolean): Promise<File[]>;
     cd(path:string): Promise<string>;
     delete(parent: string, files: File[]): Promise<number>;
     copy(parent: string, files: string[], dest: string): Promise<number> & cp.ProgressEmitter;
