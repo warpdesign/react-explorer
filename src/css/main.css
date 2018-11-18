@@ -83,7 +83,7 @@ button.small:hover{
 }
 
 #root .sideview.active:before{
-    box-shadow: 0 0 4px 2px #137cbd82;
+    box-shadow: 0 0 4px 2px inset #137cbd82;
 }
 
 #root .sideview:first-child{
@@ -150,4 +150,13 @@ button.small:hover{
 
 .bp3-badge.bp3-intent-warning{
     background-color:#bf7326;
+}
+
+/* active lister */
+.bp3-tree-node.bp3-tree-node-selected > .bp3-tree-node-content {
+    background-color: #8A9BA8;
+}
+
+.sideview.active .bp3-tree-node.bp3-tree-node-selected > .bp3-tree-node-content {
+    background-color:#137cbd;
 }

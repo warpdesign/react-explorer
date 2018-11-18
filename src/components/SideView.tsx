@@ -9,6 +9,7 @@ import { FileState } from "../state/fileState";
 
 interface SideViewProps {
     hide: boolean;
+    active: boolean;
 }
 
 interface InjectedProps extends SideViewProps{
@@ -17,23 +18,28 @@ interface InjectedProps extends SideViewProps{
 
 interface SideViewState{
     fileCache: FileState;
-    active: boolean;
 }
 
 @inject('appState')
 @observer
 export class SideView extends React.Component<SideViewProps, SideViewState>{
+    static id = 0;
+    viewId = 'view_' + SideView.id++;
+
+    static defaultProps = {
+        active: false
+    }
+
     constructor(props:SideViewProps) {
         super(props);
 
-
+        console.log('**id', this.viewId);
 
         const { appState } = this.injected;
         const cache: FileState = appState.addCache();
 
         this.state = {
-            fileCache: cache,
-            active: false
+            fileCache: cache
         };
 
         cache.cd('.');
@@ -54,17 +60,15 @@ export class SideView extends React.Component<SideViewProps, SideViewState>{
         fileCache.revertPath();
     }
 
-    private handleFocus = () => {
-        console.log('focus');
-    }
-
     renderSideView() {
-        const { fileCache, active } = this.state;
+        const { fileCache } = this.state;
+        const { active } = this.props;
+
         const activeClass = active && ' active' || '';
         const needLogin = fileCache.status === 'login';
 
         if (!this.props.hide) {
-            return (<div onFocus={this.handleFocus} className={`sideview${activeClass}`}>
+            return (<div id={this.viewId} className={`sideview${activeClass}`}>
                 {needLogin && <LoginDialog isOpen={needLogin} onValidation={this.onValidation} onClose={this.onClose} />}
                 <Toolbar />
                 <FileList />

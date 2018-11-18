@@ -37,12 +37,35 @@ export class ReactApp extends React.Component<{}, IState> {
         this.setState({ isExplorer: !this.state.isExplorer });
     }
 
+    parents(elt: HTMLElement, selector: string): HTMLElement {
+        let found:HTMLElement = null;
+        elt = elt.parentElement;
+
+        while (!found && elt.parentElement) {
+            found = elt.matches(selector) && elt;
+            elt = elt.parentElement;
+        }
+
+        return found;
+    }
+
     handleClick = (e: React.MouseEvent) => {
-        console.log(e);
+        const sideview = this.parents((e.target) as HTMLElement, '.sideview');
+        if (sideview) {
+            const num = sideview.id.replace('view_', '');
+            if (this.state.activeView !== parseInt(num, 10)) {
+                console.log('preventing event propagation');
+                e.stopPropagation();
+            }
+
+            this.setState({
+                activeView: parseInt(num, 10)
+            });
+        }
     }
 
     render() {
-        const { isExplorer } = this.state;
+        const { isExplorer, activeView } = this.state;
 
         return (
             <Provider appState={this.appState}>
@@ -59,9 +82,9 @@ export class ReactApp extends React.Component<{}, IState> {
                             <Button className="bp3-minimal" icon="cog" />
                         </Navbar.Group>
                     </Navbar>
-                    <div onClick={this.handleClick} className="main">
-                        <SideView hide={!isExplorer} />
-                        <SideView hide={!isExplorer} />
+                    <div onClickCapture={this.handleClick} className="main">
+                        <SideView active={activeView === 0} hide={!isExplorer} />
+                        <SideView active={activeView === 1} hide={!isExplorer} />
                         <Downloads hide={isExplorer}/>
                     </div>
                     <LogUI></LogUI>
