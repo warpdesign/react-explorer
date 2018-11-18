@@ -27,16 +27,17 @@ export class AppState {
     @action
     addTransfer(srcFs: FsApi, dstFs: FsApi, files: File[], srcPath: string, dstPath: string) {
         console.log('addTransfer', files, srcFs, dstFs, dstPath);
-        debugger;
         const batch = new Batch(srcFs, dstFs, srcPath, dstPath);
         this.transfers.push(batch);
         return batch.setFileList(files).then(() => {
+            batch.calcTotalSize();
+            batch.status = 'stopped';
             console.log('got file list !');
             // start transfer ?
             setInterval(() => {
                 runInAction(() => {
                     console.log('progress up');
-                    batch.setProgress();
+                    batch.updateProgress();
                 });
             }, 1000);
         }).catch((err) => {

@@ -12,6 +12,10 @@ export class Batch {
     public id: number;
     public srcName: string;
     public dstName: string;
+
+    @observable
+    public size: number = 0;
+
     public files = observable<FileTransfer>([]);
 
     @observable
@@ -19,6 +23,8 @@ export class Batch {
 
     @observable
     public progress: number = 0;
+
+    public isExpanded: boolean = false;
 
     constructor(srcFs: FsApi, dstFs: FsApi, srcPath: string, dstPath:string) {
         this.status = 'calculating';
@@ -33,11 +39,24 @@ export class Batch {
     }
 
     @action
-    setProgress() {
+    updateProgress() {
         runInAction(() => {
             this.progress += .01;
             remote.getCurrentWindow().setProgressBar(this.progress);
         });
+    }
+
+    @action
+    calcTotalSize() {
+        let size = 0;
+        for (let fileTransfer of this.files) {
+            size += fileTransfer.file.length;
+        }
+        this.size = size;
+    }
+
+    start() {
+
     }
 
     getLastPathPart(path: string) {
@@ -47,7 +66,7 @@ export class Batch {
         return lastPart;
     }
 
-    async getFileList(srcFiles: File[]):Promise<FileTransfer[]> {
+    async getFileList(srcFiles: File[], subDirectory = ''):Promise<FileTransfer[]> {
         console.log('getting file list');
         const dirs = srcFiles.filter((file) => file.isDir);
         const files = srcFiles.filter((file) => !file.isDir);
@@ -56,23 +75,27 @@ export class Batch {
         // add files
         for (let file of files) {
             transfers.push({
-                file, status: 'todo', progress: 0
+                file,
+                status: 'todo',
+                progress: 0,
+                subDirectory
             });
         }
 
         // dir: need to call list for each directry to get files
         for (let dir of dirs) {
             transfers.push({
-                file: dir, status: 'todo', progress: 0
+                file: dir,
+                status: 'todo',
+                progress: 0,
+                subDirectory
             });
 
             // get directory listing
-            // TODO: join directory ??
-            debugger;
             const currentPath = this.srcFs.join(dir.dir, dir.fullname);
             const subFiles = await this.srcFs.list(currentPath, false);
-
-            transfers = transfers.concat(await this.getFileList(subFiles));
+            const subDir = this.srcFs.join(subDirectory, dir.fullname);
+            transfers = transfers.concat(await this.getFileList(subFiles, subDir));
         }
 
         return Promise.resolve(transfers);
@@ -81,11 +104,9 @@ export class Batch {
     @action
     async setFileList(files: File[]) {
         return this.getFileList(files).then((transfers) => {
-            debugger;
             // get fileStat
             this.files.replace(transfers);
         }).catch((err) => {
-            debugger;
             return Promise.reject(err);
         });
     }

@@ -72,6 +72,20 @@ button.small:hover{
     flex-grow:1;
 }
 
+#root .sideview:before{
+    position: absolute;
+    top: -2px;
+    right: -2px;
+    bottom: -2px;
+    left: -2px;
+    border-radius: 4px;
+    content: "";
+}
+
+#root .sideview.active:before{
+    box-shadow: 0 0 4px 2px #137cbd82;
+}
+
 #root .sideview:first-child{
     margin-right:10px;
 }

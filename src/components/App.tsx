@@ -1,13 +1,14 @@
 import { AppState } from "../state/appState";
 import * as React from "react";
 import * as ReactDOM from "react-dom";
-import { FocusStyleManager } from "@blueprintjs/core";
+import { FocusStyleManager, Icon } from "@blueprintjs/core";
 import { Provider } from "mobx-react";
 import { Navbar, Alignment, Button, Intent } from "@blueprintjs/core";
 import { SideView } from "./SideView";
 import { LogUI } from "./Log";
 import { Downloads } from "./Downloads";
 import { Badge } from "./Badge";
+import { INTENT_PRIMARY } from "@blueprintjs/core/lib/esm/common/classes";
 
 require("@blueprintjs/core/lib/css/blueprint.css");
 require("@blueprintjs/icons/lib/css/blueprint-icons.css");
@@ -15,6 +16,7 @@ require("../css/main.css");
 
 interface IState {
     isExplorer: boolean;
+    activeView: number;
 }
 
 export class ReactApp extends React.Component<{}, IState> {
@@ -23,7 +25,7 @@ export class ReactApp extends React.Component<{}, IState> {
     constructor(props = {}) {
         super(props);
 
-        this.state = { isExplorer: true };
+        this.state = { isExplorer: true, activeView: -1 };
 
         // do not show outlines when using the mouse
         FocusStyleManager.onlyShowFocusOnTabs();
@@ -35,6 +37,10 @@ export class ReactApp extends React.Component<{}, IState> {
         this.setState({ isExplorer: !this.state.isExplorer });
     }
 
+    handleClick = (e: React.MouseEvent) => {
+        console.log(e);
+    }
+
     render() {
         const { isExplorer } = this.state;
 
@@ -43,7 +49,7 @@ export class ReactApp extends React.Component<{}, IState> {
                 <React.Fragment>
                     <Navbar>
                         <Navbar.Group align={Alignment.LEFT}>
-                            <Navbar.Heading>React-ftp</Navbar.Heading>
+                            <Navbar.Heading>React-explorer</Navbar.Heading>
                             <Navbar.Divider />
                             <Button className="bp3-minimal" icon="home" text="Explorer" onClick={this.navClick} intent={isExplorer ? Intent.PRIMARY : 'none'} />
                             <Button className="bp3-minimal" icon="download" onClick={this.navClick} intent={!isExplorer ? Intent.PRIMARY : 'none'}>Transfers<Badge intent="danger" text="2"/></Button>
@@ -53,7 +59,7 @@ export class ReactApp extends React.Component<{}, IState> {
                             <Button className="bp3-minimal" icon="cog" />
                         </Navbar.Group>
                     </Navbar>
-                    <div className="main">
+                    <div onClick={this.handleClick} className="main">
                         <SideView hide={!isExplorer} />
                         <SideView hide={!isExplorer} />
                         <Downloads hide={isExplorer}/>

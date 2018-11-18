@@ -14,8 +14,13 @@ interface InjectedProps extends IProps {
     appState: AppState;
 }
 
+interface expandables {
+    [key: string]: boolean
+}
+
 interface IState {
-    nodes: ITreeNode[]
+    nodes: ITreeNode[],
+    expandedNodes: expandables
 }
 
 @inject('appState')
@@ -29,7 +34,8 @@ export class Downloads extends React.Component<IProps, IState> {
         this.appState = this.injected.appState;
 
         this.state = {
-            nodes: this.getTreeData(this.appState.transfers)
+            nodes: this.getTreeData(this.appState.transfers),
+            expandedNodes: {}
         };
 
         this.installReaction();
@@ -49,11 +55,16 @@ export class Downloads extends React.Component<IProps, IState> {
     }
 
     private handleNodeCollapse = (nodeData: ITreeNode) => {
+        const { expandedNodes } = this.state;
+        expandedNodes[nodeData.id] = false;
         nodeData.isExpanded = false;
+
         this.setState(this.state);
     };
 
     private handleNodeExpand = (nodeData: ITreeNode) => {
+        const { expandedNodes } = this.state;
+        expandedNodes[nodeData.id] = true;
         nodeData.isExpanded = true;
         this.setState(this.state);
     };
@@ -75,23 +86,26 @@ export class Downloads extends React.Component<IProps, IState> {
 
         for (let transfer of transfers) {
             let i = transfer.id;
+            const sizeStr = transfer.status !== 'calculating' && (transfer.size + ' bytes') || '';
+
             const node: ITreeNode =
             {
                 id: i++,
                 hasCaret: true,
-                icon: "folder-close",
+                icon: "duplicate",
                 label: `${transfer.srcName} ⇢ ${transfer.dstName}`,
-                secondaryLabel: (<span>{`${transfer.status} - ${transfer.progress}`} <Icon className="action" intent="danger" icon="small-cross" /></span>),
-                isExpanded: true,
+                secondaryLabel: (<span>{`${transfer.status} - ${transfer.progress} ${sizeStr}`} <Icon className="action" intent="danger" icon="small-cross" /></span>),
+                isExpanded: !!this.state.expandedNodes[transfer.id],
                 childNodes: []
             };
 
             for (let file of transfer.files) {
                 if (!file.file.isDir) {
+                    console.log(file.file.dir.split('/')[file.file.dir.split('/').length -1]);
                     node.childNodes.push({
                         id: i++,
                         icon: 'document',
-                        label: file.file.fullname,
+                        label: file.subDirectory ? (file.subDirectory + '/' + file.file.fullname) : file.file.fullname,
                         secondaryLabel: (<span>{`${file.status} - ${file.progress}`} <Icon className="action" intent="danger" icon="small-cross" /></span>)
                     });
                 }
