@@ -336,6 +336,22 @@ class FtpAPI implements FsApi {
         return this.master.list(dir);
     };
 
+    async stat(fullPath: string): Promise<File> {
+        console.warn('FsFtp.stat: TODO');
+        return Promise.resolve({
+            dir: '',
+            fullname: '',
+            name: '',
+            extension: '',
+            cDate: new Date(),
+            mDate: new Date(),
+            length: 0,
+            mode: 777,
+            isDir: false,
+            readonly: false
+        });
+    }
+
     cd(path: string): Promise<string> {
         console.log('FsFtp.cd', path);
         const resolved = this.resolve(path);
@@ -374,6 +390,21 @@ class FtpAPI implements FsApi {
         this.master.api = null;
         // close any connections ?
         // this.master.close();
+    }
+
+    // TODO
+    async getStream(path: string, file: string): Promise<fs.ReadStream> {
+        try {
+            const stream = fs.createReadStream(this.join(path, file));
+            return Promise.resolve(stream);
+        } catch (err) {
+            console.log('FsLocal.getStream error', err);
+            return Promise.reject(err);
+        };
+    }
+
+    async putStream(readStream: fs.ReadStream, dstPath: string, progress: (bytesRead: number) => void): Promise<void> {
+        return Promise.resolve();
     }
 };
 

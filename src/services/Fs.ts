@@ -2,6 +2,7 @@ import * as cp from 'cpy';
 import { FsLocal } from './FsLocal';
 import { FsGeneric } from './FsGeneric';
 import { FsFtp } from './FsFtp';
+import * as fs from 'fs';
 
 export interface File {
     dir: string;
@@ -48,6 +49,8 @@ export interface FsApi {
     join(...paths: string[]): string;
     makedir(parent: string, name: string): Promise<string>;
     rename(parent: string, file: File, name: string): Promise<string>;
+    stat(path: string): Promise<File>;
+    // DEPRECATED
     exists(path: string): Promise<boolean>;
     resolve(path: string): string;
     size(source: string, files: string[]): Promise<number>;
@@ -55,8 +58,8 @@ export interface FsApi {
     isConnected(): boolean;
     isDirectoryNameValid(dirName: string): boolean;
     get(path: string, file: string): Promise<string>;
-    // getStream(path: string): ReadableStream;
-    // putStream(stream: ReadableStream, path: string): Promise<any>;
+    getStream(path: string, file: string): Promise<fs.ReadStream>;
+    putStream(readStream: fs.ReadStream, dstPath: string, progress: (bytesRead: number) => void): Promise<void>;
     isRoot(path: string): boolean;
     free(): void;
 }

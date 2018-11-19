@@ -1,5 +1,7 @@
 import { FsApi, File } from './Fs';
+import * as fs from 'fs';
 import * as cp from 'cpy';
+const { Transform } = require('stream');
 
 class GenericApi implements FsApi {
     type = 0;
@@ -69,6 +71,21 @@ class GenericApi implements FsApi {
         return Promise.resolve(true);
     }
 
+    async stat(fullPath: string): Promise<File> {
+        return Promise.resolve({
+            dir: '',
+            fullname: '',
+            name: '',
+            extension: '',
+            cDate: new Date(),
+            mDate: new Date(),
+            length: 0,
+            mode: 777,
+            isDir: false,
+            readonly: false
+        });
+    }
+
     async list(dir: string): Promise<File[]> {
         console.log('FsGeneric.readDirectory');
         const pathExists = await this.exists(dir);
@@ -90,6 +107,20 @@ class GenericApi implements FsApi {
 
     get(path: string): Promise<string> {
         return Promise.resolve(path);
+    }
+
+    async getStream(path: string, file: string): Promise<fs.ReadStream> {
+        try {
+            const stream = fs.createReadStream(this.join(path, file));
+            return Promise.resolve(stream);
+        } catch (err) {
+            console.log('FsLocal.getStream error', err);
+            return Promise.reject(err);
+        };
+    }
+
+    async putStream(readStream: fs.ReadStream, dstPath: string, progress: (bytesRead: number) => void): Promise<void> {
+        return Promise.resolve();
     }
 };
 

@@ -38,16 +38,6 @@ export class Toolbar extends React.Component<{}, PathInputState> {
     private input: HTMLInputElement | null = null;
     private disposer: IReactionDisposer;
 
-    // private checkPath: (event: React.FormEvent<HTMLElement>) => void = debounce(
-    //     async (event: React.FormEvent<HTMLElement>) => {
-    //         try {
-    //             const exists = await this.cache.exists(this.state.path);
-    //             this.setState({ status: exists ? 1 : -1 });
-    //         } catch {
-    //             this.setState({ status: -1 })
-    //         }
-    //     }, DEBOUNCE_DELAY);
-
     constructor(props: any) {
         super(props);
 

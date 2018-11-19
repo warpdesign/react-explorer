@@ -31,15 +31,16 @@ export class AppState {
         this.transfers.push(batch);
         return batch.setFileList(files).then(() => {
             batch.calcTotalSize();
-            batch.status = 'stopped';
+            batch.status = 'queued';
             console.log('got file list !');
             // start transfer ?
-            setInterval(() => {
-                runInAction(() => {
-                    console.log('progress up');
-                    batch.updateProgress();
-                });
-            }, 1000);
+            // setInterval(() => {
+            //     runInAction(() => {
+            //         console.log('progress up');
+            //         batch.updateProgress();
+            //     });
+            // }, 1000);
+            batch.start();
         }).catch((err) => {
             debugger;
         });

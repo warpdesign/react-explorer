@@ -6,6 +6,7 @@ import * as mkdir from 'mkdirp';
 import * as del from 'del';
 import * as cp from 'cpy';
 import { size } from '../utils/size';
+const { Transform } = require('stream');
 
 const isWin = process.platform === "win32";
 const invalidChars = isWin && /[\*:<>\?|"]+/ig || /^[\.]+[\/]+(.)*$/ig;
@@ -140,6 +141,32 @@ class LocalApi implements FsApi {
         });
     }
 
+    async stat(fullPath: string): Promise<File> {
+        return new Promise<File>((resolve, reject) => {
+            try {
+                const format = path.parse(fullPath);
+                const stats = fs.statSync(fullPath);
+                const file =
+                {
+                    dir: format.dir,
+                    fullname: format.base,
+                    name: format.name,
+                    extension: format.ext,
+                    cDate: stats.ctime,
+                    mDate: stats.mtime,
+                    length: stats.size,
+                    mode: stats.mode,
+                    isDir: stats.isDirectory(),
+                    readonly: false
+                };
+
+                resolve(file);
+            } catch (err) {
+                reject(err);
+            }
+        });
+    }
+
     login(user: string, password: string): Promise<void> {
         return Promise.resolve();
     }
@@ -219,6 +246,38 @@ class LocalApi implements FsApi {
 
     get(path: string, file: string): Promise<string> {
         return Promise.resolve(this.join(path, file));
+    }
+
+    async getStream(path: string, file: string): Promise<fs.ReadStream> {
+        try {
+            const stream = fs.createReadStream(this.join(path, file));
+            return Promise.resolve(stream);
+        } catch (err) {
+            console.log('FsLocal.getStream error', err);
+            return Promise.reject(err);
+        };
+    }
+
+    async putStream(readStream: fs.ReadStream, dstPath: string, progress: (pourcent: number) => void): Promise<void>{
+        let bytesRead = 0;
+
+        const reportProgress = new Transform({
+            transform(chunk:any, encoding:any, callback:any) {
+                bytesRead += chunk.length;
+                console.log('data', bytesRead / 1024, 'Ko');
+                progress(bytesRead);
+                callback(null, chunk);
+            }
+        });
+
+        const writeStream = fs.createWriteStream(dstPath);
+
+        readStream.pipe(reportProgress)
+            .pipe(writeStream);
+
+        return new Promise((resolve: (val?: any) => void, reject: (val?: any) => void) => {
+            readStream.once('close', () => resolve());
+        });
     }
 };
 

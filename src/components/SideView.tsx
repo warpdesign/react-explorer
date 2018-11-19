@@ -6,6 +6,8 @@ import { FileList } from './FileList';
 import { AppState } from "../state/appState";
 import { LoginDialog } from "./LoginDialog";
 import { FileState } from "../state/fileState";
+import { HotkeysTarget, Hotkeys, Hotkey, Intent } from "@blueprintjs/core";
+import { AppToaster } from "./AppToaster";
 
 interface SideViewProps {
     hide: boolean;
@@ -21,6 +23,7 @@ interface SideViewState{
 }
 
 @inject('appState')
+@HotkeysTarget
 @observer
 export class SideView extends React.Component<SideViewProps, SideViewState>{
     static id = 0;
@@ -58,6 +61,51 @@ export class SideView extends React.Component<SideViewProps, SideViewState>{
         const { fileCache } = this.state;
         // doesn't work: it keeps the previous fs
         fileCache.revertPath();
+    }
+
+    private onCopy = () => {
+        const { hide, active } = this.props;
+
+        if (active && !hide) {
+            const { appState } = this.injected;
+            const { fileCache } = this.state;
+
+            const num = appState.setClipboard(fileCache);
+
+            AppToaster.show({
+                message: `${num} element(s) copied to the clipboard`,
+                icon: "tick",
+                intent: Intent.SUCCESS
+            });
+        }
+    }
+
+    private onPaste = () => {
+        const { hide, active } = this.props;
+
+        if (active && !hide) {
+            const { appState } = this.injected;
+            const { fileCache } = this.state;
+
+            appState.prepareTransfer(fileCache);
+        }
+    }
+
+    public renderHotkeys() {
+        return <Hotkeys>
+            <Hotkey
+                global={true}
+                combo="meta + c"
+                label="Copy selected files to clipboard"
+                onKeyDown={this.onCopy}
+            />
+            <Hotkey
+                global={true}
+                combo="meta + v"
+                label="Paste selected files into current folder"
+                onKeyDown={this.onPaste}
+            />
+        </Hotkeys>;
     }
 
     renderSideView() {

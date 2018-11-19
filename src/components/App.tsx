@@ -8,7 +8,6 @@ import { SideView } from "./SideView";
 import { LogUI } from "./Log";
 import { Downloads } from "./Downloads";
 import { Badge } from "./Badge";
-import { INTENT_PRIMARY } from "@blueprintjs/core/lib/esm/common/classes";
 
 require("@blueprintjs/core/lib/css/blueprint.css");
 require("@blueprintjs/icons/lib/css/blueprint-icons.css");
