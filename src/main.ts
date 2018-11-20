@@ -13,8 +13,8 @@ function installReactDevTools() {
     .catch((err: any) => console.log('An error occurred: ', err));
 }
 
-function installWatcher(path:string, window:BrowserWindow) {
-  watch(path, { recursive: true }, () => {
+function installWatcher(path: string, window: BrowserWindow) {
+    watch(path, { recursive: true }, () => {
     window.webContents.reloadIgnoringCache();
   });
 }

@@ -1,7 +1,6 @@
 import { FsApi, File } from './Fs';
 import * as fs from 'fs';
 import * as cp from 'cpy';
-const { Transform } = require('stream');
 
 class GenericApi implements FsApi {
     type = 0;

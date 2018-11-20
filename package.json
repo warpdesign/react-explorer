@@ -9,7 +9,8 @@
     "files": [
       "./dist/**/*",
       "./dist/main.js"
-    ]},
+    ]
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "webpack --watch"
@@ -43,7 +44,7 @@
     "@types/rimraf": "^2.0.2",
     "del": "^3.0.0",
     "electron-reload": "^1.2.5",
-    "ftp": "^0.3.10",
+    "ftp": "github:warpdesign/node-ftp#master",
     "get-folder-size": "^2.0.0",
     "mkdirp": "^0.5.1",
     "mobx": "^3.2.1",

@@ -1,4 +1,4 @@
-import { action, observable, trace, computed, runInAction } from 'mobx';
+import { action, observable } from 'mobx';
 import { File, FsApi } from '../services/Fs';
 import { FileState } from './fileState';
 import { Batch } from '../transfers/batch';
