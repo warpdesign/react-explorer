@@ -67,6 +67,10 @@ export class FileState {
     constructor(path: string) {
         this.path = path;
         this.getNewFS(path);
+
+        if (path) {
+            this.cd(path);
+        }
     }
 
     private getNewFS(path: string): void{

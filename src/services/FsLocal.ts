@@ -250,6 +250,7 @@ class LocalApi implements FsApi {
 
     async getStream(path: string, file: string): Promise<fs.ReadStream> {
         try {
+            console.log('opening read stream', this.join(path, file));
             const stream = fs.createReadStream(this.join(path, file));
             return Promise.resolve(stream);
         } catch (err) {
@@ -270,6 +271,7 @@ class LocalApi implements FsApi {
             }
         });
 
+        console.log('opening write stream', dstPath);
         const writeStream = fs.createWriteStream(dstPath);
 
         readStream.pipe(reportProgress)
@@ -285,6 +287,7 @@ export const FsLocal = {
     name: 'local',
     description: 'Local Filesystem',
     canread(str: string): boolean {
+        console.log('**canread local', str, !!str.match(localStart));
         return !!str.match(localStart);
     },
     serverpart(str: string): string {

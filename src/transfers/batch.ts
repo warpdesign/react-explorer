@@ -1,4 +1,4 @@
-import { observable, action, runInAction } from "mobx";
+import { observable, action, runInAction, computed } from "mobx";
 import { FsApi, File } from "../services/Fs";
 import { FileTransfer } from "./fileTransfer";
 import { remote } from 'electron';
@@ -38,7 +38,6 @@ export class Batch {
     private transfersDone = 0;
 
     constructor(srcFs: FsApi, dstFs: FsApi, srcPath: string, dstPath: string) {
-        debugger;
         this.status = 'calculating';
         this.srcFs = srcFs;
         this.dstFs = dstFs;
@@ -67,11 +66,9 @@ export class Batch {
             this.transferDef.promise.then(() => {
                 console.log('transfer ended !');
                 this.status = 'done';
-                debugger;
             }).catch((err: Error) => {
                 console.log('error transfer', err);
                 this.status = 'error';
-                debugger;
                 return Promise.reject(err);
             });
 
@@ -84,6 +81,7 @@ export class Batch {
 
     @action
     updateReadyState(subDir: string) {
+        // TODO: add new filename somewhere ?
         const files = this.files.filter((file) => file.subDirectory === subDir);
 
         for (let transfer of files) {
@@ -100,18 +98,9 @@ export class Batch {
 
         for (let i = 0; i < max; ++i) {
             const transfer = this.getNextTransfer();
-            debugger;
-            if (!transfer) {
-                debugger;
-            } else {
+            if (transfer) {
                 this.startTransfer(transfer);
             }
-        }
-
-        debugger;
-        // resolve transferDef
-        if (this.transfersDone === this.files.length) {
-            this.transferDef.resolve();
         }
     }
 
@@ -123,37 +112,48 @@ export class Batch {
         const dstFs = this.dstFs;
         const srcFs = this.srcFs;
         const fullDstPath = dstFs.join(this.dstPath, transfer.subDirectory);
-        const fullSrcPath = srcFs.join(this.srcPath, transfer.file.fullname);
+        const srcPath = srcFs.join(this.srcPath, transfer.subDirectory);
+        let newFilename = '';
 
-        debugger;
-        const newFilename = await this.renameOrCreateDir(transfer, fullDstPath);
-
-        debugger;
+        try {
+            newFilename = await this.renameOrCreateDir(transfer, fullDstPath);
+        } catch (err) {
+            console.log('error creating directory', err);
+            transfer.status = 'error';
+        }
 
         if (!transfer.file.isDir) {
-            const stream = await srcFs.getStream(this.srcPath, newFilename);
-            await dstFs.putStream(stream, fullDstPath, (bytesRead: number) => {
-                console.log('read', bytesRead);
-                this.onData(transfer, bytesRead);
-            });
-            debugger;
-            console.log('finished writing file', newFilename);
+            try {
+                console.log('getting stream', srcPath, newFilename);
+                const stream = await srcFs.getStream(srcPath, newFilename);
+                console.log('sending to stream', dstFs.join(fullDstPath, newFilename));
+                await dstFs.putStream(stream, dstFs.join(fullDstPath, newFilename), (bytesRead: number) => {
+                    console.log('read', bytesRead);
+                    this.onData(transfer, bytesRead);
+                });
+                console.log('finished writing file', newFilename);
+                transfer.status = 'done';
+            } catch (err) {
+                console.log('error with streams', err);
+                transfer.status = 'error';
+            }
+
         } else {
             debugger;
+            transfer.status = 'done';
             // make transfers with this directory ready
-            this.updateReadyState(newFilename);
+            this.updateReadyState(srcFs.join(transfer.subDirectory, newFilename));
         }
 
         this.transfersDone++;
         this.slotsAvailable++;
-        this.queueNextTransfers();
-
-        // const exists = this.dstFs.exists(transfer.);
-        // start transfer:
-        // exists folder ? => create
-        // then copy()
-        // .progress() => this.onDataProgress
-        // then() => slotsAvailavle++ and queueNextTransfers
+        console.log('finished', transfer.file.fullname, 'slotsAvailable', this.slotsAvailable, 'done', this.transfersDone);
+        if (this.transfersDone < this.files.length) {
+            this.queueNextTransfers();
+        } else {
+            console.log('no more transfers !!');
+            this.transferDef.resolve();
+        }
     }
 
     async renameOrCreateDir(transfer: FileTransfer, dstPath: string): Promise<string> {
@@ -168,8 +168,8 @@ export class Batch {
         try {
             stats = await this.dstFs.stat(dirPath);
             exists = true;
-        } catch(err) {
-            debugger;
+        } catch (err) {
+            // TODO: handle permission denied and other errors ?
             exists = false;
         }
 
@@ -209,9 +209,13 @@ export class Batch {
     calcTotalSize() {
         let size = 0;
         for (let fileTransfer of this.files) {
-            size += fileTransfer.file.length;
+            // directory's length is the space used for dir meta data: we don't need (nor copy) that
+            if (!fileTransfer.file.isDir) {
+                size += fileTransfer.file.length;
+            }
         }
         this.size = size;
+        console.log('total transfer size', size);
     }
 
     getLastPathPart(path: string) {

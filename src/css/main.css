@@ -30,6 +30,7 @@ button.small:hover{
 
 .sideview > .bp3-control-group{
     flex-shrink:0;
+    -webkit-user-select: none;
 }
 
 .filelist > .bp3-tree{

@@ -101,7 +101,7 @@ export class Downloads extends React.Component<IProps, IState> {
 
             for (let file of transfer.files) {
                 if (!file.file.isDir) {
-                    console.log(file.file.dir.split('/')[file.file.dir.split('/').length -1]);
+                    // console.log(file.file.dir.split('/')[file.file.dir.split('/').length -1]);
                     node.childNodes.push({
                         id: i++,
                         icon: 'document',
@@ -124,6 +124,8 @@ export class Downloads extends React.Component<IProps, IState> {
     renderTransferTree() {
         console.log('render');
         const { nodes } = this.state;
+
+        console.log('render downloads tree');
 
         if (nodes.length) {
             return (

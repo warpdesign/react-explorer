@@ -16,7 +16,11 @@ export class AppState {
     transfers = observable<Batch>([]);
 
     prepareTransfer(cache: FileState) {
-        this.addTransfer(this.clipboard.srcFs, cache.getAPI(), this.clipboard.files, this.clipboard.srcPath, cache.path);
+        return this.addTransfer(this.clipboard.srcFs, cache.getAPI(), this.clipboard.files, this.clipboard.srcPath, cache.path)
+            .then(() => {
+                // refresh cache
+                cache.reload();
+            });
     }
 
     @action
@@ -40,7 +44,7 @@ export class AppState {
             //         batch.updateProgress();
             //     });
             // }, 1000);
-            batch.start();
+            return batch.start();
         }).catch((err) => {
             debugger;
         });

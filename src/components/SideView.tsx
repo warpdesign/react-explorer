@@ -36,16 +36,12 @@ export class SideView extends React.Component<SideViewProps, SideViewState>{
     constructor(props:SideViewProps) {
         super(props);
 
-        console.log('**id', this.viewId);
-
         const { appState } = this.injected;
-        const cache: FileState = appState.addCache();
+        const cache: FileState = appState.addCache('/tmp/react-explorer');
 
         this.state = {
             fileCache: cache
         };
-
-        cache.cd('.');
     }
 
     private get injected() {

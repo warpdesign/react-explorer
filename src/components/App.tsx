@@ -38,9 +38,8 @@ export class ReactApp extends React.Component<{}, IState> {
 
     parents(elt: HTMLElement, selector: string): HTMLElement {
         let found:HTMLElement = null;
-        elt = elt.parentElement;
 
-        while (!found && elt.parentElement) {
+        while (!found && elt) {
             found = elt.matches(selector) && elt;
             elt = elt.parentElement;
         }
