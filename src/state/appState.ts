@@ -32,7 +32,7 @@ export class AppState {
     addTransfer(srcFs: FsApi, dstFs: FsApi, files: File[], srcPath: string, dstPath: string) {
         console.log('addTransfer', files, srcFs, dstFs, dstPath);
         const batch = new Batch(srcFs, dstFs, srcPath, dstPath);
-        this.transfers.push(batch);
+        this.transfers.unshift(batch);
         return batch.setFileList(files).then(() => {
             batch.calcTotalSize();
             batch.status = 'queued';

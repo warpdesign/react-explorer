@@ -139,7 +139,6 @@ export class Batch {
             }
 
         } else {
-            debugger;
             transfer.status = 'done';
             // make transfers with this directory ready
             this.updateReadyState(srcFs.join(transfer.subDirectory, newFilename));
