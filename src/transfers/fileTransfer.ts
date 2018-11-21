@@ -5,5 +5,6 @@ export interface FileTransfer {
     status: 'started' | 'stopped' | 'error' | 'done' | 'queued';
     progress: number;
     subDirectory: string;
+    newSub: string;
     ready: boolean;
 }

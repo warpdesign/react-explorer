@@ -80,12 +80,28 @@ export class Batch {
     }
 
     @action
-    updateReadyState(subDir: string) {
-        // TODO: add new filename somewhere ?
-        const files = this.files.filter((file) => file.subDirectory === subDir);
+    updatePendingTransfers(subDir: string, newFilename: string) {
+        // TODO: escape '(' & ')' in subDir if needed
+        const regExp = new RegExp('^(' + subDir + ')');
+        const files = this.files.filter((file) => file.subDirectory.match(regExp) !== null);
+        let newPrefix = '';
+        // need to rename
+        if (!subDir.match(new RegExp(newFilename + '$'))) {
+            const parts = subDir.split('/');
+            parts[parts.length - 1] = newFilename;
+            newPrefix = parts.join('/');
+        }
 
         for (let transfer of files) {
-            transfer.ready = true;
+            // enable files inside this directory
+            if (transfer.subDirectory === subDir) {
+                transfer.ready = true;
+            }
+            // for all files (ie. this directory & subdirectories)
+            // rename this part if needed
+            if (newPrefix) {
+                transfer.newSub = transfer.subDirectory.replace(regExp, newPrefix);
+            }
         }
     }
 
@@ -111,8 +127,9 @@ export class Batch {
 
         const dstFs = this.dstFs;
         const srcFs = this.srcFs;
-        const fullDstPath = dstFs.join(this.dstPath, transfer.subDirectory);
+        const fullDstPath = dstFs.join(this.dstPath, transfer.newSub);
         const srcPath = srcFs.join(this.srcPath, transfer.subDirectory);
+        const wantedName = transfer.file.fullname;
         let newFilename = '';
 
         try {
@@ -124,8 +141,8 @@ export class Batch {
 
         if (!transfer.file.isDir) {
             try {
-                console.log('getting stream', srcPath, newFilename);
-                const stream = await srcFs.getStream(srcPath, newFilename);
+                console.log('getting stream', srcPath, wantedName);
+                const stream = await srcFs.getStream(srcPath, wantedName);
                 console.log('sending to stream', dstFs.join(fullDstPath, newFilename));
                 await dstFs.putStream(stream, dstFs.join(fullDstPath, newFilename), (bytesRead: number) => {
                     console.log('read', bytesRead);
@@ -141,7 +158,7 @@ export class Batch {
         } else {
             transfer.status = 'done';
             // make transfers with this directory ready
-            this.updateReadyState(srcFs.join(transfer.subDirectory, newFilename));
+            this.updatePendingTransfers(srcFs.join(transfer.subDirectory, wantedName), newFilename);
         }
 
         this.transfersDone++;
@@ -181,7 +198,7 @@ export class Batch {
                 // TODO: handle error
                 const newDir = await dstFs.makedir(dstPath, newName);
             } else if (!stats.isDir) {
-                // exists but is a file: attempt to rename it
+                // exists but is a file: attempt to create a directory with newName
                 let success = false;
                 while (!success) {
                     newName = wantedName + RENAME_SUFFIX + i++;
@@ -237,6 +254,7 @@ export class Batch {
                 status: 'queued',
                 progress: 0,
                 subDirectory,
+                newSub: subDirectory,
                 ready: subDirectory === ''
             });
         }
@@ -248,6 +266,7 @@ export class Batch {
                 status: 'queued',
                 progress: 0,
                 subDirectory,
+                newSub: subDirectory,
                 ready: subDirectory === ''
             });
 
