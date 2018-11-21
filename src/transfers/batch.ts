@@ -6,7 +6,7 @@ import { Deferred } from "../utils/deferred";
 
 const MAX_TRANSFERS = 2;
 const RENAME_SUFFIX = '_';
-
+const REGEX_EXTENSION = /\.(?=[^0-9])/;
 
 export class Batch {
     static maxId: number = 0;
@@ -211,10 +211,30 @@ export class Batch {
                 }
             }
         } else {
-            while (exists) {
-                newName = wantedName + RENAME_SUFFIX + i++;
-                const tmpPath = dstFs.join(dstPath, newName);
+            if (exists) {
+                newName = await this.getNewName(wantedName, dstPath);
+            }
+        }
+
+        return Promise.resolve(newName);
+    }
+
+    async getNewName(wantedName: string, path: string): Promise<string> {
+        let i = 1;
+        let exists = true;
+        let newName = wantedName;
+
+        // put suffix before the extension, so foo.txt will be renamed foo_1.txt to preserve the extension
+        while (exists) {
+            const split = wantedName.split(REGEX_EXTENSION);
+            split[0] += RENAME_SUFFIX + i;
+            newName = split.join('.');
+            const tmpPath = this.dstFs.join(this.dstPath, newName);
+            try {
                 exists = await this.dstFs.exists(tmpPath);
+            } catch (err) {
+                debugger;
+                exists = false;
             }
         }
 

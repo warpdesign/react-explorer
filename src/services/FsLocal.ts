@@ -54,7 +54,7 @@ class LocalApi implements FsApi {
     cd(path: string) {
         const resolved = this.resolve(path);
 
-        return this.exists(resolved).then(() => resolved);
+        return this.isDir(resolved).then(() => resolved);
     }
 
     size(source: string, files: string[]): Promise<number> {
@@ -130,13 +130,28 @@ class LocalApi implements FsApi {
         return Promise.reject(file.fullname);
     }
 
-    exists(path: string): Promise<boolean> {
+    isDir(path: string): Promise<boolean> {
         return new Promise((resolve, reject) => {
             try {
                 const stat = fs.statSync(path);
                 resolve(stat.isDirectory());
             } catch (err) {
                 reject(err);
+            }
+        });
+    }
+
+    exists(path: string): Promise<boolean> {
+        return new Promise((resolve, reject) => {
+            try {
+                fs.statSync(path);
+                resolve(true);
+            } catch (err) {
+                if (err.code === 'ENOENT') {
+                    resolve(false);
+                } else {
+                    reject(err);
+                }
             }
         });
     }
@@ -173,7 +188,7 @@ class LocalApi implements FsApi {
 
     async list(dir: string, appendParent = true): Promise<File[]> {
         console.log('calling readDirectory', dir);
-        const pathExists = await this.exists(dir);
+        const pathExists = await this.isDir(dir);
 
         if (pathExists) {
             return new Promise<File[]>((resolve, reject) => {

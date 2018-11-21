@@ -206,6 +206,11 @@ export class FileState {
         return this.api.rename(source, file, newName);
     }
 
+    async isDir(path: string): Promise<boolean> {
+        await this.waitForConnection();
+        return this.api.isDir(path);
+    }
+
     async exists(path: string): Promise<boolean> {
         await this.waitForConnection();
         return this.api.exists(path);

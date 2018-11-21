@@ -19,7 +19,7 @@ export class AppState {
         return this.addTransfer(this.clipboard.srcFs, cache.getAPI(), this.clipboard.files, this.clipboard.srcPath, cache.path)
             .then(() => {
                 // refresh cache
-                cache.reload();
+                cache.navHistory(0);
             });
     }
 

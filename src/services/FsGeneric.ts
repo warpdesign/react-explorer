@@ -65,8 +65,13 @@ class GenericApi implements FsApi {
         return Promise.resolve(newName);
     }
 
+    isDir(path: string): Promise<boolean> {
+        console.log('FsGeneric.isDir');
+        return Promise.resolve(true);
+    }
+
     exists(path: string): Promise<boolean> {
-        console.log('FsGeneric.pathExists');
+        console.log('FsGeneric.exists');
         return Promise.resolve(true);
     }
 
@@ -87,7 +92,7 @@ class GenericApi implements FsApi {
 
     async list(dir: string): Promise<File[]> {
         console.log('FsGeneric.readDirectory');
-        const pathExists = await this.exists(dir);
+        const pathExists = await this.isDir(dir);
 
         if (pathExists) {
             return Promise.resolve([ ]);

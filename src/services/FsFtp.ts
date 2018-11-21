@@ -325,10 +325,15 @@ class FtpAPI implements FsApi {
         return this.master.rename(source, file.fullname, newName);
     };
 
-    exists(path: string): Promise<boolean> {
-        console.warn('FsFtp.pathExists not implemented: always returns true');
+    isDir(path: string): Promise<boolean> {
+        console.warn('FsFtp.isDir not implemented: always returns true');
         return Promise.resolve(true);
     };
+
+    exists(path: string): Promise<boolean> {
+        console.warn('FsFtp.exists not implemented: always returns true');
+        return Promise.resolve(true);
+    }
 
     list(dir: string): Promise<File[]> {
         // TODO: strip server from here too ?

@@ -50,7 +50,7 @@ export interface FsApi {
     makedir(parent: string, name: string): Promise<string>;
     rename(parent: string, file: File, name: string): Promise<string>;
     stat(path: string): Promise<File>;
-    // DEPRECATED
+    isDir(path: string): Promise<boolean>;
     exists(path: string): Promise<boolean>;
     resolve(path: string): string;
     size(source: string, files: string[]): Promise<number>;

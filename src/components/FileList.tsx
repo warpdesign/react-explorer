@@ -10,6 +10,8 @@ import { shell } from 'electron';
 import { Logger } from "./Log";
 import { FileState } from "../state/fileState";
 
+const REGEX_EXTENSION = /\.(?=[^0-9])/;
+
 export interface FileListState {
     nodes: ITreeNode[];
     selected: number;
@@ -138,20 +140,10 @@ export class FileList extends React.Component<{}, FileListState> {
 
     private selectLeftPart() {
         const filename = this.editingFile.fullname;
-        const regex = RegExp('\\.', 'g');
-        const matches = filename.match(regex);
+        const selectionLength = filename.split(REGEX_EXTENSION)[0].length;
         const selection = window.getSelection();
         const range = document.createRange();
         const textNode = this.editingElement.childNodes[0];
-
-        let selectionLength = filename.length;
-
-        if (matches) {
-            const pos = filename.lastIndexOf('.');
-            if (pos > 0) {
-                selectionLength = pos;
-            }
-        }
 
         range.setStart(textNode, 0);
         range.setEnd(textNode, selectionLength);
