@@ -1,4 +1,3 @@
-import * as cp from 'cpy';
 import { FsLocal } from './FsLocal';
 import { FsGeneric } from './FsGeneric';
 import { FsFtp } from './FsFtp';
@@ -45,7 +44,7 @@ export interface FsApi {
     list(dir: string, appendParent?: boolean): Promise<File[]>;
     cd(path:string): Promise<string>;
     delete(parent: string, files: File[]): Promise<number>;
-    copy(parent: string, files: string[], dest: string): Promise<number> & cp.ProgressEmitter;
+    // copy(parent: string, files: string[], dest: string): Promise<number> & cp.ProgressEmitter;
     join(...paths: string[]): string;
     makedir(parent: string, name: string): Promise<string>;
     rename(parent: string, file: File, name: string): Promise<string>;

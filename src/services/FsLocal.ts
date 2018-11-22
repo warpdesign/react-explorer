@@ -4,7 +4,6 @@ import * as path from 'path';
 import * as process from 'process';
 import * as mkdir from 'mkdirp';
 import * as del from 'del';
-import * as cp from 'cpy';
 import { size } from '../utils/size';
 import { throttle } from '../utils/throttle';
 const { Transform } = require('stream');
@@ -72,10 +71,10 @@ class LocalApi implements FsApi {
         });
     }
 
-    copy(source: string, files: string[], dest: string): Promise<any> & cp.ProgressEmitter {
-        console.log('***', files, dest, source);
-        return cp(files, dest, { parents: true, cwd: source });
-    }
+    // copy(source: string, files: string[], dest: string): Promise<any> & cp.ProgressEmitter {
+    //     console.log('***', files, dest, source);
+    //     return cp(files, dest, { parents: true, cwd: source });
+    // }
 
     makedir(source: string, dirName: string): Promise<string> {
         return new Promise((resolve, reject) => {
@@ -103,7 +102,7 @@ class LocalApi implements FsApi {
         return new Promise(async (resolve, reject) => {
             try {
                 console.log('delete', toDelete);
-                await del(toDelete);
+                await del(toDelete, {force: true});
                 resolve(files.length);
             } catch (err) {
                 reject(err);
@@ -264,6 +263,7 @@ class LocalApi implements FsApi {
         return Promise.resolve(this.join(path, file));
     }
 
+    // TODO add error handling
     async getStream(path: string, file: string): Promise<fs.ReadStream> {
         try {
             console.log('opening read stream', this.join(path, file));

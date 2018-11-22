@@ -1,7 +1,6 @@
 import { observable, action, runInAction } from "mobx";
 import { FsApi, Fs, getFS, File } from "../services/Fs";
 import { Deferred } from '../utils/deferred';
-import * as cp from 'cpy';
 
 export class FileState {
     /* observable properties start here */
@@ -236,9 +235,9 @@ export class FileState {
         return this.api.delete(source, files);
     }
 
-    copy(source: string, files: string[], dest: string): Promise<number> & cp.ProgressEmitter {
-        return this.api.copy(source, files, dest);
-    }
+    // copy(source: string, files: string[], dest: string): Promise<number> & cp.ProgressEmitter {
+    //     return this.api.copy(source, files, dest);
+    // }
 
     isDirectoryNameValid = (dirName:string) => {
         return this.api.isDirectoryNameValid(dirName);

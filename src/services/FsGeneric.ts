@@ -1,6 +1,5 @@
 import { FsApi, File } from './Fs';
 import * as fs from 'fs';
-import * as cp from 'cpy';
 
 class GenericApi implements FsApi {
     type = 0;
@@ -31,20 +30,20 @@ class GenericApi implements FsApi {
         return Promise.resolve(10);
     }
 
-    copy(source: string, files: string[], dest: string): Promise<any> & cp.ProgressEmitter {
-        console.log('Generic.copy');
-        const prom: Promise<void> & cp.ProgressEmitter = new Promise((resolve, reject) => {
-            setTimeout(() => {
-                resolve();
-            }, 2000);
-        }) as Promise<void> & cp.ProgressEmitter;
+    // copy(source: string, files: string[], dest: string): Promise<any> & cp.ProgressEmitter {
+    //     console.log('Generic.copy');
+    //     const prom: Promise<void> & cp.ProgressEmitter = new Promise((resolve, reject) => {
+    //         setTimeout(() => {
+    //             resolve();
+    //         }, 2000);
+    //     }) as Promise<void> & cp.ProgressEmitter;
 
-        prom.on = (name, handler): Promise<void> => {
-            return prom;
-        }
+    //     prom.on = (name, handler): Promise<void> => {
+    //         return prom;
+    //     }
 
-        return prom;
-    }
+    //     return prom;
+    // }
 
     login(user: string, password: string):Promise<void> {
         return Promise.resolve();

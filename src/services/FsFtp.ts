@@ -1,9 +1,10 @@
 import { FsApi, File } from './Fs';
 import * as ftp from 'ftp';
-import * as cp from 'cpy';
 import * as path from 'path';
 import * as fs from 'fs';
+import { Transform } from 'stream';
 import { remote } from 'electron';
+import { throttle } from '../utils/throttle';
 
 const FtpUrl = /^(ftp\:\/\/)*(ftp\.[a-z]+\.[a-z]{2,3}|[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})$/i;
 const ServerPart = /^(ftp\:\/\/)*(ftp\.[a-z]+\.[a-z]{2,3}|[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})/i;
@@ -53,10 +54,11 @@ class Client{
     }
 
     // TODO: return promise if client is not connected ??
-    static getFreeClient(server: string, options = {}) {
-        let client = Client.clients.find((client) => client.host === server && !client.api && client.status === 'ready');
+    static getFreeClient(server: string, noMaster: boolean = false) {
+        let client = Client.clients.find((client) => client.host === server && /*(!!client.api === !noMaster)*/ !client.api
+            && client.status === 'ready');
         if (!client) {
-            client = Client.addClient(server, options);
+            client = Client.addClient(server, {});
         }
 
         return client;
@@ -229,6 +231,45 @@ class Client{
         });
     }
 
+    public getStream(path: string): Promise<fs.ReadStream> {
+        return new Promise((resolve, reject) => {
+            const newpath = this.pathpart(path);
+            this.client.get(newpath, (err: Error, readStream: fs.ReadStream) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(readStream);
+                }
+            });
+        })
+    }
+
+    public putStream(readStream: fs.ReadStream, path: string, progress: (pourcent: number) => void): Promise<void> {
+        let bytesRead = 0;
+        const throttledProgress = throttle(() => { progress(bytesRead) }, 800);
+
+        readStream.once('close', function () { console.log('get ended!'); });
+        const reportProgress = new Transform({
+            transform(chunk, encoding, callback) {
+                bytesRead += chunk.length;
+                throttledProgress();
+                console.log('data', bytesRead / 1024, 'Ko');
+                callback(null, chunk);
+            }
+        });
+
+        return new Promise((resolve, reject) => {
+            const newpath = this.pathpart(path);
+            this.client.put(readStream.pipe(reportProgress), newpath, (err:Error) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    readStream.once('close', () => resolve());
+                }
+            })
+        })
+    }
+
     public rename(serverPath: string, oldName: string, newName: string): Promise<string> {
         const path = this.pathpart(serverPath);
         const oldPath = join(path, oldName);
@@ -262,12 +303,19 @@ class Client{
     }
 }
 
+interface LoginOptions{
+    username: string;
+    password: string;
+    port: number;
+}
+
 class FtpAPI implements FsApi {
     type = 1;
     server = '';
     connected = false;
     // main client: the one which will issue list/cd commands *only*
     master: Client = null;
+    loginOptions: LoginOptions;
 
     constructor(path: string) {
         this.server = FsFtp.serverpart(path);
@@ -297,18 +345,18 @@ class FtpAPI implements FsApi {
         return Promise.resolve(10);
     };
 
-    copy(source: string, files: string[], dest: string): Promise<any> & cp.ProgressEmitter {
-        console.log('TODO: FsFtp.copy');
-        const prom: Promise<void> & cp.ProgressEmitter = new Promise((resolve, reject) => {
-            resolve();
-        }) as Promise<void> & cp.ProgressEmitter;
+    // copy(source: string, files: string[], dest: string): Promise<any> & cp.ProgressEmitter {
+    //     console.log('TODO: FsFtp.copy');
+    //     const prom: Promise<void> & cp.ProgressEmitter = new Promise((resolve, reject) => {
+    //         resolve();
+    //     }) as Promise<void> & cp.ProgressEmitter;
 
-        prom.on = (name, handler): Promise<void> => {
-            return prom;
-        }
+    //     prom.on = (name, handler): Promise<void> => {
+    //         return prom;
+    //     }
 
-        return prom;
-    };
+    //     return prom;
+    // };
 
     makedir(parent: string, name: string): Promise<string> {
         console.log('FsFtp.makedir');
@@ -369,7 +417,13 @@ class FtpAPI implements FsApi {
         return this.master.get(this.join(file_path, file), dest);
     }
 
-    login(username: string, password: string, port: number):Promise<void> {
+    login(username: string, password: string, port: number): Promise<void> {
+        this.loginOptions = {
+            username,
+            password,
+            port
+        };
+
         if (!this.master) {
             return Promise.reject('calling login but no master client set');
         } else if (this.connected) {
@@ -397,10 +451,17 @@ class FtpAPI implements FsApi {
         // this.master.close();
     }
 
-    // TODO
     async getStream(path: string, file: string): Promise<fs.ReadStream> {
+        console.log('FsFtp.getStream');
         try {
-            const stream = fs.createReadStream(this.join(path, file));
+            // 1. get ready client
+            // 2. if not, add one (or wait ?) => use limit connection
+            console.log('getting client');
+            const client = Client.getFreeClient(this.server);
+            console.log('connecting new client');
+            await client.login(this.loginOptions);
+            console.log('client logged in, creating read stream');
+            const stream = client.getStream(this.join(path, file));
             return Promise.resolve(stream);
         } catch (err) {
             console.log('FsLocal.getStream error', err);
@@ -409,7 +470,21 @@ class FtpAPI implements FsApi {
     }
 
     async putStream(readStream: fs.ReadStream, dstPath: string, progress: (bytesRead: number) => void): Promise<void> {
-        return Promise.resolve();
+        console.log('FsFtp.putStream');
+        try {
+            // 1. get ready client
+            // 2. if not, add one (or wait ?) => use limit connection
+            console.log('getting client');
+            const client = Client.getFreeClient(this.server);
+            console.log('connecting new client');
+            await client.login(this.loginOptions);
+            console.log('client logged in, creating read stream');
+            const stream = client.putStream(readStream, dstPath, progress);
+            return Promise.resolve(stream);
+        } catch (err) {
+            console.log('FsLocal.getStream error', err);
+            return Promise.reject(err);
+        };
     }
 };
 
