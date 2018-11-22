@@ -2,7 +2,7 @@ import { AppState } from "../state/appState";
 import * as React from "react";
 import * as ReactDOM from "react-dom";
 import { FocusStyleManager, Icon } from "@blueprintjs/core";
-import { Provider } from "mobx-react";
+import { Provider, observer } from "mobx-react";
 import { Navbar, Alignment, Button, Intent } from "@blueprintjs/core";
 import { SideView } from "./SideView";
 import { LogUI } from "./Log";
@@ -18,6 +18,7 @@ interface IState {
     activeView: number;
 }
 
+@observer
 export class ReactApp extends React.Component<{}, IState> {
     private appState: AppState;
 
@@ -64,6 +65,9 @@ export class ReactApp extends React.Component<{}, IState> {
 
     render() {
         const { isExplorer, activeView } = this.state;
+        const badgeSize = this.appState.pendingTransfers;
+        const badgeText = badgeSize && (badgeSize + '') || '';
+        const badgeProgress = this.appState.totalTransferProgress;
 
         return (
             <Provider appState={this.appState}>
@@ -73,7 +77,7 @@ export class ReactApp extends React.Component<{}, IState> {
                             <Navbar.Heading>React-explorer</Navbar.Heading>
                             <Navbar.Divider />
                             <Button className="bp3-minimal" icon="home" text="Explorer" onClick={this.navClick} intent={isExplorer ? Intent.PRIMARY : 'none'} />
-                            <Button className="bp3-minimal" icon="download" onClick={this.navClick} intent={!isExplorer ? Intent.PRIMARY : 'none'}>Transfers<Badge intent="danger" text="2"/></Button>
+                            <Button style={{ position: 'relative' }} className="bp3-minimal" icon="download" onClick={this.navClick} intent={!isExplorer ? Intent.PRIMARY : 'none'}>Transfers<Badge intent="none" text={badgeText} progress={badgeProgress} /></Button>
                         </Navbar.Group>
                         <Navbar.Group align={Alignment.RIGHT}>
                             <Navbar.Divider />

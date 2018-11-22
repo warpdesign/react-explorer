@@ -1,4 +1,4 @@
-import { action, observable } from 'mobx';
+import { action, observable, computed } from 'mobx';
 import { File, FsApi } from '../services/Fs';
 import { FileState } from './fileState';
 import { Batch } from '../transfers/batch';
@@ -46,6 +46,26 @@ export class AppState {
     @action
     syncCaches(srcCache: FileState) {
         this.caches.filter((cache) => cache !== srcCache && cache.path === srcCache.path && cache.getFS().name === srcCache.getFS().name).forEach((cache) => cache.reload());
+    }
+
+    @computed
+    get totalTransferProgress(): number {
+        let totalSize = 0;
+        let totalProgress = 0;
+
+        for (let transfer of this.transfers) {
+            totalSize += transfer.size;
+            totalProgress += transfer.progress;
+        }
+
+        return totalSize && (totalProgress / totalSize) || 0;
+    }
+
+    @computed
+    get pendingTransfers(): number {
+        const num = this.transfers.filter((transfer) => transfer.isStarted).length;
+        console.log('++++ pending transfers', num);
+        return num;
     }
 
     @action

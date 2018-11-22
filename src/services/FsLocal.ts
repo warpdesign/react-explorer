@@ -6,6 +6,7 @@ import * as mkdir from 'mkdirp';
 import * as del from 'del';
 import * as cp from 'cpy';
 import { size } from '../utils/size';
+import { throttle } from '../utils/throttle';
 const { Transform } = require('stream');
 
 const isWin = process.platform === "win32";
@@ -266,7 +267,7 @@ class LocalApi implements FsApi {
     async getStream(path: string, file: string): Promise<fs.ReadStream> {
         try {
             console.log('opening read stream', this.join(path, file));
-            const stream = fs.createReadStream(this.join(path, file));
+            const stream = fs.createReadStream(this.join(path, file), { highWaterMark: 64 * 1024 * 10 });
             return Promise.resolve(stream);
         } catch (err) {
             console.log('FsLocal.getStream error', err);
@@ -276,12 +277,13 @@ class LocalApi implements FsApi {
 
     async putStream(readStream: fs.ReadStream, dstPath: string, progress: (pourcent: number) => void): Promise<void>{
         let bytesRead = 0;
+        const throttledProgress = throttle(() => { progress(bytesRead) }, 800);
 
         const reportProgress = new Transform({
             transform(chunk:any, encoding:any, callback:any) {
                 bytesRead += chunk.length;
-                console.log('data', bytesRead / 1024, 'Ko');
-                progress(bytesRead);
+                // console.log('dataChunk', bytesRead / 1024, 'Ko');
+                throttledProgress();
                 callback(null, chunk);
             }
         });

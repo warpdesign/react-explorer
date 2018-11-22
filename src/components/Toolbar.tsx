@@ -7,7 +7,6 @@ import { FileMenu } from "./FileMenu";
 import { MakedirDialog } from "./MakedirDialog";
 import { Logger } from "./Log";
 import { AppToaster, IToasterOpts } from "./AppToaster";
-import cpy = require("cpy");
 import { FileState } from "../state/fileState";
 
 interface IProps {

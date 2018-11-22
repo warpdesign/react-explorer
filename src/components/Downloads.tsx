@@ -4,7 +4,6 @@ import { AppState } from '../state/appState';
 import { inject } from 'mobx-react';
 import { Batch } from '../transfers/batch';
 import { reaction, toJS, IReactionDisposer } from 'mobx';
-import { throws } from 'assert';
 
 interface IProps {
     hide: boolean;

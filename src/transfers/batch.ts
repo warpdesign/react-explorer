@@ -17,6 +17,7 @@ export class Batch {
     public id: number;
     public srcName: string;
     public dstName: string;
+    public startDate: Date;
 
     @observable
     public size: number = 0;
@@ -28,6 +29,10 @@ export class Batch {
 
     @observable
     public progress: number = 0;
+
+    get isStarted():boolean {
+        return !this.status.match(/error|done/);
+    }
 
     public isExpanded: boolean = false;
 
@@ -65,7 +70,7 @@ export class Batch {
             this.status = 'started';
             this.transferDef = new Deferred();
             this.transferDef.promise.then(() => {
-                console.log('transfer ended !');
+                console.log('transfer ended ! duration=', Math.round((new Date().getTime() - this.startDate.getTime()) / 1000), 'sec(s)');
                 this.status = 'done';
             }).catch((err: Error) => {
                 console.log('error transfer', err);
@@ -74,6 +79,7 @@ export class Batch {
             });
 
             this.transfersDone = 0;
+            this.startDate = new Date();
             this.queueNextTransfers();
         }
 
@@ -146,7 +152,7 @@ export class Batch {
                 const stream = await srcFs.getStream(srcPath, wantedName);
                 console.log('sending to stream', dstFs.join(fullDstPath, newFilename));
                 await dstFs.putStream(stream, dstFs.join(fullDstPath, newFilename), (bytesRead: number) => {
-                    console.log('read', bytesRead);
+                    // console.log('read', bytesRead);
                     this.onData(transfer, bytesRead);
                 });
                 console.log('finished writing file', newFilename);
@@ -316,7 +322,9 @@ export class Batch {
 
     @action
     onData(file: FileTransfer, bytesRead: number) {
-        file.progress += bytesRead;
-        this.progress += bytesRead;
+        // console.log('dataThrottled', bytesRead);
+        const previousProgress = file.progress;
+        file.progress = bytesRead;
+        this.progress += previousProgress ? (bytesRead - previousProgress) : bytesRead;
     }
 }
