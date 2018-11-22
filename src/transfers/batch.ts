@@ -59,6 +59,7 @@ export class Batch {
 
     @action
     start(): Promise<void> {
+        console.log('starting batch');
         if (this.status === 'queued') {
             this.slotsAvailable = MAX_TRANSFERS;
             this.status = 'started';
@@ -225,9 +226,10 @@ export class Batch {
         let newName = wantedName;
 
         // put suffix before the extension, so foo.txt will be renamed foo_1.txt to preserve the extension
+        // TODO: avoid endless loop, give up after enough tries
         while (exists) {
             const split = wantedName.split(REGEX_EXTENSION);
-            split[0] += RENAME_SUFFIX + i;
+            split[0] += RENAME_SUFFIX + i++;
             newName = split.join('.');
             const tmpPath = this.dstFs.join(this.dstPath, newName);
             try {
@@ -303,7 +305,8 @@ export class Batch {
     @action
     async setFileList(files: File[]) {
         return this.getFileList(files).then((transfers) => {
-            debugger;
+            // debugger;
+            console.log('got files', transfers);
             // get fileStat
             this.files.replace(transfers);
         }).catch((err) => {

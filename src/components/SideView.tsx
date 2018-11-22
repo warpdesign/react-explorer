@@ -76,14 +76,15 @@ export class SideView extends React.Component<SideViewProps, SideViewState>{
         }
     }
 
-    private onPaste = () => {
+    private onPaste = ():void => {
         const { hide, active } = this.props;
 
         if (active && !hide) {
+            console.log('** onpaste');
             const { appState } = this.injected;
             const { fileCache } = this.state;
 
-            appState.prepareTransfer(fileCache);
+            appState.prepareClipboardTransferTo(fileCache);
         }
     }
 
@@ -114,7 +115,7 @@ export class SideView extends React.Component<SideViewProps, SideViewState>{
         if (!this.props.hide) {
             return (<div id={this.viewId} className={`sideview${activeClass}`}>
                 {needLogin && <LoginDialog isOpen={needLogin} onValidation={this.onValidation} onClose={this.onClose} />}
-                <Toolbar />
+                <Toolbar onPaste={this.onPaste} />
                 <FileList />
                 <Statusbar />
             </div>);

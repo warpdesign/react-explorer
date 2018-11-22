@@ -10,10 +10,11 @@ import { AppToaster, IToasterOpts } from "./AppToaster";
 import cpy = require("cpy");
 import { FileState } from "../state/fileState";
 
-interface PathInputProps {
+interface IProps {
+    onPaste: () => void;
 }
 
-interface InjectedProps extends PathInputProps {
+interface InjectedProps extends IProps {
     appState: AppState;
     fileCache: FileState;
 }
@@ -32,7 +33,7 @@ enum KEYS {
 
 @inject('appState', 'fileCache')
 @observer
-export class Toolbar extends React.Component<{}, PathInputState> {
+export class Toolbar extends React.Component<IProps, PathInputState> {
     private cache: FileState;
     private input: HTMLInputElement | null = null;
     private disposer: IReactionDisposer;
@@ -183,7 +184,7 @@ export class Toolbar extends React.Component<{}, PathInputState> {
     private copy = async () => {
         // TODO: attempt to copy
         const { appState, fileCache } = this.injected;
-        appState.prepareTransfer(fileCache);
+        appState.prepareClipboardTransferTo(fileCache);
         // const source = appState.clipboard.source;
         // const elements = appState.clipboard.elements.map((el) => el);
         // console.log('copying', elements, 'to', this.state.path);
@@ -234,7 +235,7 @@ export class Toolbar extends React.Component<{}, PathInputState> {
                 break;
 
             case 'paste':
-                this.copy();
+                this.props.onPaste();
                 break;
 
             default:
