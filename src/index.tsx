@@ -1,7 +1,7 @@
 import * as React from "react";
 import * as ReactDOM from "react-dom";
 import DevTools from 'mobx-react-devtools';
-
+import * as process from 'process';
 import { remote } from 'electron';
 import { ReactApp } from "./components/App";
 
@@ -18,6 +18,9 @@ const exec = require('child_process').exec;
 exec('/Users/nico/tmp_ftp.sh', (err: Error) => {
     if (err) {
         console.log('error preparing fake folders', err);
+        if (process.platform === "win32") {
+            ReactDOM.render(<ReactApp></ReactApp>, document.getElementById('root'));
+        }
     } else {
         ReactDOM.render(<ReactApp></ReactApp>, document.getElementById('root'));
     }

@@ -7,6 +7,8 @@ import { AppState } from "../state/appState";
 import { LoginDialog } from "./LoginDialog";
 import { FileState } from "../state/fileState";
 import { HotkeysTarget, Hotkeys, Hotkey, Intent } from "@blueprintjs/core";
+import * as process from 'process';
+import { remote } from 'electron';
 import { AppToaster } from "./AppToaster";
 
 interface SideViewProps {
@@ -37,7 +39,7 @@ export class SideView extends React.Component<SideViewProps, SideViewState>{
         super(props);
 
         const { appState } = this.injected;
-        const cache: FileState = appState.addCache('/tmp/react-explorer');
+        const cache: FileState = appState.addCache(process.platform === "win32" ? remote.app.getPath('temp') : '/tmp/react-explorer');
 
         this.state = {
             fileCache: cache

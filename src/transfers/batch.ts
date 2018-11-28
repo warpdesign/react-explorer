@@ -55,14 +55,6 @@ export class Batch {
     }
 
     @action
-    updateProgress() {
-        runInAction(() => {
-            this.progress += .01;
-            remote.getCurrentWindow().setProgressBar(this.progress);
-        });
-    }
-
-    @action
     start(): Promise<void> {
         console.log('starting batch');
         if (this.status === 'queued') {
@@ -159,8 +151,8 @@ export class Batch {
                 transfer.status = 'done';
             } catch (err) {
                 console.log('error with streams', err);
-                return Promise.reject(err);
                 transfer.status = 'error';
+                return Promise.reject(err);
             }
 
         } else {
@@ -312,9 +304,7 @@ export class Batch {
     @action
     async setFileList(files: File[]) {
         return this.getFileList(files).then((transfers) => {
-            // debugger;
             console.log('got files', transfers);
-            // get fileStat
             this.files.replace(transfers);
         }).catch((err) => {
             return Promise.reject(err);
@@ -327,5 +317,7 @@ export class Batch {
         const previousProgress = file.progress;
         file.progress = bytesRead;
         this.progress += previousProgress ? (bytesRead - previousProgress) : bytesRead;
+        console.log('progress', this.progress, this.progress === this.size ? -1 : this.progress/this.size);
+        remote.getCurrentWindow().setProgressBar(this.progress === this.size ? -1 : this.progress/this.size);
     }
 }

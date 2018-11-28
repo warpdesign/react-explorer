@@ -139,6 +139,7 @@ export class FileState {
         const joint = path2 ? this.api.join(path, path2) : path;
         return this.api.cd(joint)
             .then((path) => {
+                debugger;
                 this.updatePath(path, skipHistory);
                 return this.list(path).then(() => path);
             })

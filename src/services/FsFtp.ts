@@ -205,8 +205,15 @@ class Client{
     public cd(path: string): Promise<string> {
         return new Promise((resolve, reject) => {
             const newpath = this.pathpart(path);
+            debugger;
             this.client.cwd(newpath, (err:any, dir:string) => {
                 if (!err) {
+                    // some ftp servers return windows-like paths
+                    // when ran in windows
+                    debugger;
+                    if (dir) {
+                        dir = dir.replace(/\\/g, '/');
+                    }
                     const joint = join(this.host, (dir || newpath));
                     resolve(joint);
                 } else {
@@ -429,6 +436,7 @@ class FtpAPI implements FsApi {
     cd(path: string): Promise<string> {
         console.log('FsFtp.cd', path);
         const resolved = this.resolve(path);
+        console.log('FsFtp.cd resolved', resolved);
         return this.master.cd(resolved);
     };
 
@@ -501,10 +509,9 @@ class FtpAPI implements FsApi {
             console.log('connecting new client');
             await client.login(this.loginOptions);
             console.log('client logged in, creating read stream');
-            const stream = client.putStream(readStream, dstPath, progress);
-            return Promise.resolve(stream);
+            return  client.putStream(readStream, dstPath, progress);
         } catch (err) {
-            console.log('FsLocal.getStream error', err);
+            console.log('FsFtp.putStream error', err);
             return Promise.reject(err);
         };
     }
