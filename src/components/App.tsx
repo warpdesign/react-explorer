@@ -25,7 +25,7 @@ export class ReactApp extends React.Component<{}, IState> {
     constructor(props = {}) {
         super(props);
 
-        this.state = { isExplorer: true, activeView: -1 };
+        this.state = { isExplorer: true, activeView: 0 };
 
         // do not show outlines when using the mouse
         FocusStyleManager.onlyShowFocusOnTabs();
@@ -95,3 +95,4 @@ export class ReactApp extends React.Component<{}, IState> {
         );
     }
 }
+

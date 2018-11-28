@@ -37,7 +37,8 @@ export class MakedirDialog extends React.Component<IMakedirProps, IMakedirState>
         if (e.keyCode === ReadFolderKey) {
             this.setState({ ctrlKey: false });
         } else if (e.keyCode === ENTER_KEY) {
-            this.onCreate();
+            const { valid, path } = this.state;
+            valid && path.length && this.onCreate();
         }
     }
 

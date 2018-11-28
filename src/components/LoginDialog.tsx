@@ -47,7 +47,10 @@ export class LoginDialog extends React.Component<ILoginProps, ILoginState> {
 
     onKeyUp = (e: KeyboardEvent) => {
         if (e.keyCode === ENTER_KEY) {
-            this.onLogin();
+            const { busy, username, password } = this.state;
+            if (!busy && username.length && password.length) {
+                this.onLogin();
+            }
         }
     }
 

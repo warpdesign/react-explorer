@@ -43,6 +43,7 @@ class Client{
 
     private readyResolve: () => any;
     private readyReject: (err: any) => any;
+    private readyPromise: Promise<any>;
 
     static clients: Array<Client> = [];
 
@@ -50,13 +51,15 @@ class Client{
         const client = new Client(server, options);
 
         Client.clients.push(client);
+
         return client;
     }
 
     // TODO: return promise if client is not connected ??
-    static getFreeClient(server: string, noMaster: boolean = false) {
-        let client = Client.clients.find((client) => client.host === server && /*(!!client.api === !noMaster)*/ !client.api
+    static getFreeClient(server: string) {
+        let client = Client.clients.find((client) => client.host === server && !client.api
             && client.status === 'ready');
+
         if (!client) {
             client = Client.addClient(server, {});
         }
@@ -72,13 +75,17 @@ class Client{
         this.bindEvents();
     }
 
-    public login(options: any = {}):Promise<any> {
-        console.log('connecting to', this.host, 'with options', Object.assign({ host: this.host, ...options }, { password: '****' }));
-        return new Promise((resolve, reject) => {
-            this.readyResolve = resolve;
-            this.readyReject = reject;
-            this.client.connect({ host: this.host, ...options });
-        });
+    public login(options: any = {}): Promise<any> {
+        if (!this.connected) {
+            console.log('connecting to', this.host, 'with options', Object.assign({ host: this.host, ...options }, { password: '****' }));
+            this.readyPromise = new Promise((resolve, reject) => {
+                this.readyResolve = resolve;
+                this.readyReject = reject;
+                this.client.connect({ host: this.host, ...options });
+            });
+        }
+
+        return this.readyPromise;
     }
 
     private bindEvents() {
@@ -110,6 +117,7 @@ class Client{
     }
 
     private onError(error: any) {
+        debugger;
         console.error(`[${this.host}] error: ${error}`);
         switch(error.code) {
             // 500 series: command not accepted
@@ -232,9 +240,17 @@ class Client{
     }
 
     public getStream(path: string): Promise<fs.ReadStream> {
+        this.status = 'busy';
+
+        console.log('getting stream', path);
+
         return new Promise((resolve, reject) => {
             const newpath = this.pathpart(path);
+
             this.client.get(newpath, (err: Error, readStream: fs.ReadStream) => {
+                debugger;
+                this.status = 'ready';
+
                 if (err) {
                     reject(err);
                 } else {
@@ -245,6 +261,8 @@ class Client{
     }
 
     public putStream(readStream: fs.ReadStream, path: string, progress: (pourcent: number) => void): Promise<void> {
+        this.status = 'busy';
+
         let bytesRead = 0;
         const throttledProgress = throttle(() => { progress(bytesRead) }, 800);
 
@@ -255,12 +273,15 @@ class Client{
                 throttledProgress();
                 console.log('data', bytesRead / 1024, 'Ko');
                 callback(null, chunk);
-            }
+            },
+            highWaterMark: 16384 * 31
         });
 
         return new Promise((resolve, reject) => {
             const newpath = this.pathpart(path);
-            this.client.put(readStream.pipe(reportProgress), newpath, (err:Error) => {
+            this.client.put(readStream.pipe(reportProgress), newpath, (err: Error) => {
+                this.status = 'ready';
+
                 if (err) {
                     reject(err);
                 } else {
@@ -304,7 +325,7 @@ class Client{
 }
 
 interface LoginOptions{
-    username: string;
+    user: string;
     password: string;
     port: number;
 }
@@ -417,9 +438,9 @@ class FtpAPI implements FsApi {
         return this.master.get(this.join(file_path, file), dest);
     }
 
-    login(username: string, password: string, port: number): Promise<void> {
+    login(user: string, password: string, port: number): Promise<void> {
         this.loginOptions = {
-            username,
+            user,
             password,
             port
         };
@@ -430,7 +451,7 @@ class FtpAPI implements FsApi {
             console.warn('login: already connected');
             return Promise.resolve();
         } else {
-            return this.master.login({ user: username, password, port: port }).then(() => {
+            return this.master.login({ user: user, password, port: port }).then(() => {
                 this.connected = true;
             });
         }
@@ -454,6 +475,7 @@ class FtpAPI implements FsApi {
     async getStream(path: string, file: string): Promise<fs.ReadStream> {
         console.log('FsFtp.getStream');
         try {
+            console.log('*** connecting', this.server, this.loginOptions);
             // 1. get ready client
             // 2. if not, add one (or wait ?) => use limit connection
             console.log('getting client');

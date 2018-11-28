@@ -4,7 +4,7 @@ import { FileTransfer } from "./fileTransfer";
 import { remote } from 'electron';
 import { Deferred } from "../utils/deferred";
 
-const MAX_TRANSFERS = 2;
+const MAX_TRANSFERS = 1;
 const RENAME_SUFFIX = '_';
 const REGEX_EXTENSION = /\.(?=[^0-9])/;
 
@@ -159,6 +159,7 @@ export class Batch {
                 transfer.status = 'done';
             } catch (err) {
                 console.log('error with streams', err);
+                return Promise.reject(err);
                 transfer.status = 'error';
             }
 

@@ -35,7 +35,6 @@ export class AppState {
             .then(() => {
                 // refresh cache: only if same directory ?
                 if (options.dstPath === cache.path && options.dstFsName === cache.getFS().name) {
-                    debugger;
                     cache.navHistory(0);
                 } else {
                     debugger;

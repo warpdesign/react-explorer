@@ -267,7 +267,7 @@ class LocalApi implements FsApi {
     async getStream(path: string, file: string): Promise<fs.ReadStream> {
         try {
             console.log('opening read stream', this.join(path, file));
-            const stream = fs.createReadStream(this.join(path, file), { highWaterMark: 64 * 1024 * 10 });
+            const stream = fs.createReadStream(this.join(path, file), { highWaterMark: 31 * 16384});
             return Promise.resolve(stream);
         } catch (err) {
             console.log('FsLocal.getStream error', err);
@@ -285,11 +285,14 @@ class LocalApi implements FsApi {
                 // console.log('dataChunk', bytesRead / 1024, 'Ko');
                 throttledProgress();
                 callback(null, chunk);
-            }
+            },
+            highWaterMark: 16384 * 31
         });
 
         console.log('opening write stream', dstPath);
-        const writeStream = fs.createWriteStream(dstPath);
+        const writeStream = fs.createWriteStream(dstPath, {
+
+        });
 
         readStream.pipe(reportProgress)
             .pipe(writeStream);

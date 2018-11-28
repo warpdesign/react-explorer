@@ -88,6 +88,7 @@ export class LogUI extends React.Component<any, LogUIState> {
         }
     }
 
+
     componentDidMount() {
         document.addEventListener('keyup', this.onKeyUp);
         document.addEventListener('keydown', this.onKeyDown);
