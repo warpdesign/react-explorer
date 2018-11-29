@@ -63,6 +63,15 @@ export class ReactApp extends React.Component<{}, IState> {
         }
     }
 
+    // shouldComponentUpdate() {
+    //     console.time('App Render');
+    //     return true;
+    // }
+
+    // componentDidUpdate() {
+    //     console.timeEnd('App Render');
+    // }
+
     render() {
         const { isExplorer, activeView } = this.state;
         const badgeSize = this.appState.pendingTransfers;

@@ -205,12 +205,10 @@ class Client{
     public cd(path: string): Promise<string> {
         return new Promise((resolve, reject) => {
             const newpath = this.pathpart(path);
-            debugger;
             this.client.cwd(newpath, (err:any, dir:string) => {
                 if (!err) {
                     // some ftp servers return windows-like paths
                     // when ran in windows
-                    debugger;
                     if (dir) {
                         dir = dir.replace(/\\/g, '/');
                     }
@@ -255,7 +253,6 @@ class Client{
             const newpath = this.pathpart(path);
 
             this.client.get(newpath, (err: Error, readStream: fs.ReadStream) => {
-                debugger;
                 this.status = 'ready';
 
                 if (err) {

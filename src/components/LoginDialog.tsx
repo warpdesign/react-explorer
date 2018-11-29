@@ -98,6 +98,15 @@ export class LoginDialog extends React.Component<ILoginProps, ILoginState> {
         document.removeEventListener('keyup', this.onKeyUp);
     }
 
+    // shouldComponentUpdate() {
+    //     console.time('Login Render');
+    //     return true;
+    // }
+
+    // componentDidUpdate() {
+    //     console.timeEnd('Login Render');
+    // }
+
     public render() {
         const { username, password, busy, error, port } = this.state;
         const { fileCache } = this.injected;

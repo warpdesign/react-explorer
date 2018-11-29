@@ -25,7 +25,9 @@ enum KEYS {
 
 const CLICK_DELAY = 300;
 
-interface FileListProps{
+interface IProps{
+    onUpdate?: () => void;
+    onRender?: () => void;
 }
 
 // Here we extend our props in order to keep the injected props private
@@ -35,20 +37,21 @@ interface FileListProps{
 // it would have to be specified when composing FileList, ie:
 // <FileList ... appState={appState}/> and we don't want that
 // see: https://github.com/mobxjs/mobx-react/issues/256
-interface InjectedProps extends FileListProps {
+interface InjectedProps extends IProps {
     appState: AppState;
     fileCache: FileState;
 }
 
 @inject('appState', 'fileCache')
-export class FileList extends React.Component<{}, FileListState> {
+export class FileList extends React.Component<IProps, FileListState> {
     private cache: FileState;
     private editingElement: HTMLElement;
     private editingFile: File;
     private clickTimeout: any;
     private disposer: IReactionDisposer;
+    private firstRender = true;
 
-    constructor(props: any) {
+    constructor(props: IProps) {
         super(props);
 
         const { fileCache } = this.injected;
@@ -72,8 +75,10 @@ export class FileList extends React.Component<{}, FileListState> {
         this.disposer = reaction(
             () => { return toJS(this.cache.files) },
             (files: File[]) => {
-                console.log('++++ reaction files', files);
+                console.log('got files', files.length);
+                // console.time('building nodes');
                 const nodes = this.buildNodes(files);
+                // console.timeEnd('building nodes');
                 this.setState({ nodes, selected: 0 });
             });
     }
@@ -112,9 +117,6 @@ export class FileList extends React.Component<{}, FileListState> {
 
     private onNodeDoubleClick = (node: ITreeNode, _nodePath: number[], e: React.MouseEvent<HTMLElement>) => {
         const data = node.nodeData as File;
-        const { appState } = this.injected;
-
-        console.log('double click');
 
         // double click: prevent inline rename
         if (this.clickTimeout) {
@@ -271,15 +273,42 @@ export class FileList extends React.Component<{}, FileListState> {
         this.disposer();
     }
 
+    public shouldComponentUpdate() {
+        console.time('FileList Render');
+
+        if (this.props.onRender) {
+            this.props.onRender();
+        }
+
+        return true;
+    }
+
+    public componentDidUpdate() {
+        console.timeEnd('FileList Render');
+        if (this.props.onUpdate) {
+            this.props.onUpdate();
+        }
+    }
+
     public render() {
-        return (
-        <div className="filelist" onKeyUp={this.onKeyUp} onKeyDown={this.onKeyDown}>
-            <Tree
-                contents={this.state.nodes}
-                className={`${Classes.ELEVATION_0}`}
-                onNodeDoubleClick={this.onNodeDoubleClick}
-                onNodeClick={this.onNodeClick}
-            />
-        </div>);
+        // if (this.cache.path.match(/Downloads/)) {
+        //     return (
+        //         <div className="filelist" onKeyUp={this.onKeyUp} onKeyDown={this.onKeyDown}>
+        //             {this.state.nodes.map((node) => (<div key={node.id}><span>{node.label}</span><div>Blah</div></div>))}
+        //             {this.state.nodes.map((node) => (<div key={this.getId(node.id)}><span>{node.label}</span><div>Blew</div></div>))}
+        //             {this.state.nodes.map((node) => (<div key={this.getId(node.id)}><span>{node.label}</span><div>Blew</div></div>))}
+        //         </div>
+        //     );
+        // } else {
+            return (
+                <div className="filelist" onKeyUp={this.onKeyUp} onKeyDown={this.onKeyDown}>
+                    <Tree
+                        contents={this.state.nodes}
+                        className={`${Classes.ELEVATION_0}`}
+                        onNodeDoubleClick={this.onNodeDoubleClick}
+                        onNodeClick={this.onNodeClick}
+                    />
+                </div>);
+        // }
     }
 }

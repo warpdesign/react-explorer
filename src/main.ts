@@ -40,6 +40,13 @@ function onReady() {
   const devtools = new BrowserWindow();
   mainWindow.webContents.setDevToolsWebContents(devtools.webContents);
   mainWindow.webContents.openDevTools({ mode: 'detach' });
+
+  // const window = new BrowserWindow({
+  //   width: 400,
+  //   height: 100
+  // });
+
+  // window.loadURL("data:text/html;charset=utf-8," + encodeURI('<html><body>Hello !</body></html>'));
 }
 
 app.on('ready', () => onReady());

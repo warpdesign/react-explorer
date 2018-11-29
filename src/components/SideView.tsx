@@ -10,6 +10,7 @@ import { HotkeysTarget, Hotkeys, Hotkey, Intent } from "@blueprintjs/core";
 import * as process from 'process';
 import { remote } from 'electron';
 import { AppToaster } from "./AppToaster";
+import { Loader } from "./Loader";
 
 interface SideViewProps {
     hide: boolean;
@@ -34,6 +35,8 @@ export class SideView extends React.Component<SideViewProps, SideViewState>{
     static defaultProps = {
         active: false
     }
+
+    private fileListBusy = false;
 
     constructor(props:SideViewProps) {
         super(props);
@@ -90,6 +93,10 @@ export class SideView extends React.Component<SideViewProps, SideViewState>{
         }
     }
 
+    private onExit = (): void => {
+        console.log('need to handle exit !');
+    }
+
     public renderHotkeys() {
         return <Hotkeys>
             <Hotkey
@@ -104,7 +111,26 @@ export class SideView extends React.Component<SideViewProps, SideViewState>{
                 label="Paste selected files into current folder"
                 onKeyDown={this.onPaste}
             />
+            <Hotkey
+                global={true}
+                combo="meta + q"
+                label="Exits React FTP"
+                onKeyDown={this.onExit}
+                preventDefault={true}
+                stopPropagation={true}
+            />
         </Hotkeys>;
+    }
+
+    onFileRender = () => {
+        // console.log('rendering filelist');
+        // console.time('rendering filelist');
+        this.fileListBusy = true;
+    }
+
+    onFileUpdate = () => {
+        // console.timeEnd('rendering filelist');
+        this.fileListBusy = false;
     }
 
     renderSideView() {
@@ -113,17 +139,33 @@ export class SideView extends React.Component<SideViewProps, SideViewState>{
 
         const activeClass = active && ' active' || '';
         const needLogin = fileCache.status === 'login';
+        // Blueprint's Tree (or React ?) seems to take a long time rendering
+        // the Tree object (1-2secs is needed for a directory of 700 files)
+        // so we make sure to keep the loader while the render is in progress
+        const busy = fileCache.status === 'busy' || this.fileListBusy;
 
         if (!this.props.hide) {
-            return (<div id={this.viewId} className={`sideview${activeClass}`}>
-                {needLogin && <LoginDialog isOpen={needLogin} onValidation={this.onValidation} onClose={this.onClose} />}
-                <Toolbar onPaste={this.onPaste} />
-                <FileList />
-                <Statusbar />
-            </div>);
+            return (
+                <div id={this.viewId} className={`sideview${activeClass}`}>
+                    {needLogin && <LoginDialog isOpen={needLogin} onValidation={this.onValidation} onClose={this.onClose} />}
+                    <Toolbar onPaste={this.onPaste} />
+                    <FileList onRender={this.onFileRender} onUpdate={this.onFileUpdate} />
+                    <Statusbar />
+                    <Loader active={busy}></Loader>
+                </div>
+            );
         } else {
             return (<div />);
         }
+    }
+
+    shouldComponentUpdate() {
+        console.time('SideView Render');
+        return true;
+    }
+
+    componentDidUpdate() {
+        console.timeEnd('SideView Render');
     }
 
     render() {

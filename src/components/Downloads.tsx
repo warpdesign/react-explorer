@@ -146,6 +146,15 @@ export class Downloads extends React.Component<IProps, IState> {
 
     }
 
+    // shouldComponentUpdate() {
+    //     console.time('Downloads Render');
+    //     return true;
+    // }
+
+    // componentDidUpdate() {
+    //     console.timeEnd('Downloads Render');
+    // }
+
     render() {
         if (this.props.hide) {
             return null;

@@ -317,7 +317,7 @@ export class Batch {
         const previousProgress = file.progress;
         file.progress = bytesRead;
         this.progress += previousProgress ? (bytesRead - previousProgress) : bytesRead;
-        console.log('progress', this.progress, this.progress === this.size ? -1 : this.progress/this.size);
+        // console.log('progress', this.progress, this.progress === this.size ? -1 : this.progress/this.size);
         remote.getCurrentWindow().setProgressBar(this.progress === this.size ? -1 : this.progress/this.size);
     }
 }

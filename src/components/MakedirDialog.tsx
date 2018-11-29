@@ -99,6 +99,15 @@ export class MakedirDialog extends React.Component<IMakedirProps, IMakedirState>
         document.removeEventListener('keydown', this.onKeyDown);
     }
 
+    // shouldComponentUpdate() {
+    //     console.time('MakedirDialog Render');
+    //     return true;
+    // }
+
+    // componentDidUpdate() {
+    //     console.timeEnd('MakedirDialog Render');
+    // }
+
     public render() {
         const { path, valid, ctrlKey } = this.state;
         const intent = !valid && 'danger' || 'none';

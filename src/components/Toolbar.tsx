@@ -246,6 +246,15 @@ export class Toolbar extends React.Component<IProps, PathInputState> {
         this.disposer();
     }
 
+    // shouldComponentUpdate() {
+    //     console.time('Toolbar Render');
+    //     return true;
+    // }
+
+    // componentDidUpdate() {
+    //     console.timeEnd('Toolbar Render');
+    // }
+
     public render() {
         const { status, path, isOpen, isDeleteOpen } = this.state;
         const { fileCache } = this.injected;

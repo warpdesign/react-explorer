@@ -33,6 +33,15 @@ export class Statusbar extends React.Component {
         });
     }
 
+    // shouldComponentUpdate() {
+    //     console.time('Statusbar Render');
+    //     return true;
+    // }
+
+    // componentDidUpdate() {
+    //     console.timeEnd('Statusbar Render');
+    // }
+
     public render() {
         const { fileCache } = this.injected;
         const disabled = !fileCache.selected.length;

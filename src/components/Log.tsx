@@ -100,9 +100,15 @@ export class LogUI extends React.Component<any, LogUIState> {
     }
 
     componentDidUpdate() {
+        // console.timeEnd('Log Render');
         // here we keep previous scroll position in case scrolling was anywhere but at the end
         this.consoleDiv.scrollTop = this.keepScrollPos ? this.lastScrollTop : (this.consoleDiv.scrollHeight - this.consoleDiv.clientHeight);
     }
+
+    // shouldComponentUpdate() {
+    //     console.time('Log Render');
+    //     return true;
+    // }
 
     public render() {
         const classes = 'console ' + (this.state.visible && 'visible');

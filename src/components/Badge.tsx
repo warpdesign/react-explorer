@@ -18,10 +18,18 @@ export class Badge extends React.Component<IProps> {
         super(props);
     }
 
+    // shouldComponentUpdate() {
+    //     console.time('Badge Render');
+    //     return true;
+    // }
+
+    // componentDidUpdate() {
+    //     console.timeEnd('Badge Render');
+    // }
+
     render() {
         const { intent, text, progress } = this.props;
 
-        console.log('progress', progress);
         if (text) {
             return (
                 <div className={`bp3-badge bp3-intent-${intent}`}><span className="bp3-badge-content">{text}</span><Spinner size={20} value={progress}></Spinner></div>

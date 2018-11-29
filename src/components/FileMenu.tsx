@@ -36,6 +36,15 @@ export class FileMenu extends React.Component<IFileMenuProps>{
         this.props.onFileAction('delete');
     }
 
+    // shouldComponentUpdate() {
+    //     console.time('FileMenu Render');
+    //     return true;
+    // }
+
+    // componentDidUpdate() {
+    //     console.timeEnd('FileMenu Render');
+    // }
+
     public render() {
         const { appState } = this.injected;
         const clipboardLength = appState.clipboard.files.length;

@@ -2,6 +2,8 @@ import { observable, action, runInAction } from "mobx";
 import { FsApi, Fs, getFS, File } from "../services/Fs";
 import { Deferred } from '../utils/deferred';
 
+type TStatus = 'blank' | 'busy' | 'ok' | 'login';
+
 export class FileState {
     /* observable properties start here */
     @observable
@@ -17,7 +19,7 @@ export class FileState {
     server: string = '';
 
     @observable
-    status: 'blank' | 'busy' | 'ok' | 'login';
+    status: TStatus;
 
     @observable
     type: string;
@@ -26,6 +28,11 @@ export class FileState {
     history = observable<string>([]);
     @observable
     current: number = -1;
+
+    @action
+    setStatus(status: TStatus) {
+        this.status = status;
+    }
 
     @action
     addPathToHistory(path: string) {
@@ -47,7 +54,7 @@ export class FileState {
             newCurrent = length - 1;
         }
 
-        console.log('nav history', current, '=>', newCurrent);
+        // console.log('nav history', current, '=>', newCurrent);
 
         this.current = newCurrent;
 
@@ -116,6 +123,7 @@ export class FileState {
 
             return this.loginDefer.promise;
         } else {
+            this.status = 'busy';
             return Promise.resolve();
         }
     }
@@ -139,7 +147,6 @@ export class FileState {
         const joint = path2 ? this.api.join(path, path2) : path;
         return this.api.cd(joint)
             .then((path) => {
-                debugger;
                 this.updatePath(path, skipHistory);
                 return this.list(path).then(() => path);
             })
@@ -182,6 +189,8 @@ export class FileState {
                     // clear lister selection as well
                     this.selected.clear();
                     // TODO: sync caches ?
+
+                    this.status = 'ok';
                 });
 
                 return files;
@@ -203,7 +212,13 @@ export class FileState {
             return this.rename(source, file, newName);
         }
 
-        return this.api.rename(source, file, newName);
+        return this.api.rename(source, file, newName).then((newName:string) => {
+            runInAction(() => {
+                this.status = 'ok';
+            });
+
+            return newName;
+        })
     }
 
     async isDir(path: string): Promise<boolean> {
@@ -223,7 +238,13 @@ export class FileState {
             return this.makedir(parent, dirName);
         }
 
-        return this.api.makedir(parent, dirName);
+        return this.api.makedir(parent, dirName).then((newDir) => {
+            runInAction(() => {
+                this.status = 'ok';
+            });
+
+            return newDir;
+        });
     }
 
     async delete(source: string, files: File[]): Promise<number> {
@@ -233,7 +254,13 @@ export class FileState {
             return this.delete(source, files);
         }
 
-        return this.api.delete(source, files);
+        return this.api.delete(source, files).then((num) => {
+            runInAction(() => {
+                this.status = 'ok';
+            });
+
+            return num;
+        });
     }
 
     // copy(source: string, files: string[], dest: string): Promise<number> & cp.ProgressEmitter {
