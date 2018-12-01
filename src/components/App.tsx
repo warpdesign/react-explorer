@@ -1,13 +1,14 @@
 import { AppState } from "../state/appState";
 import * as React from "react";
 import * as ReactDOM from "react-dom";
-import { FocusStyleManager, Icon } from "@blueprintjs/core";
+import { FocusStyleManager, Icon, HotkeysTarget, Hotkeys, Hotkey } from "@blueprintjs/core";
 import { Provider, observer } from "mobx-react";
 import { Navbar, Alignment, Button, Intent } from "@blueprintjs/core";
 import { SideView } from "./SideView";
 import { LogUI } from "./Log";
 import { Downloads } from "./Downloads";
 import { Badge } from "./Badge";
+import { ipcRenderer } from "electron";
 
 require("@blueprintjs/core/lib/css/blueprint.css");
 require("@blueprintjs/icons/lib/css/blueprint-icons.css");
@@ -18,9 +19,16 @@ interface IState {
     activeView: number;
 }
 
+const EXIT_DELAY = 1200;
+const KEY_Q = 81;
+const UP_DELAY = 130;
+
 @observer
 export class ReactApp extends React.Component<{}, IState> {
     private appState: AppState;
+    private lastTimeStamp: any = 0;
+    private exitTimeout: any = 0;
+    private exitMode = false;
 
     constructor(props = {}) {
         super(props);
@@ -71,6 +79,36 @@ export class ReactApp extends React.Component<{}, IState> {
     // componentDidUpdate() {
     //     console.timeEnd('App Render');
     // }
+
+    onExitDown = (e: KeyboardEvent) => {
+        if (!this.exitMode && e.keyCode === KEY_Q && e.metaKey) {
+            this.lastTimeStamp = new Date().getTime();
+            ipcRenderer.send('exitWarning');
+
+            this.exitTimeout = setTimeout(() => {
+                const currentTimeout = new Date().getTime();
+                if (this.exitMode && (currentTimeout - this.lastTimeStamp <= UP_DELAY)) {
+                    this.exitMode = false;
+                    ipcRenderer.send('exit');
+                } else {
+                    ipcRenderer.send('endExitWarning');
+                    this.exitMode = false;
+                }
+            }, EXIT_DELAY);
+
+            this.exitMode = true;
+        } else if (e.keyCode === KEY_Q && this.exitMode) {
+            this.lastTimeStamp = new Date().getTime();
+        }
+    }
+
+    componentDidMount() {
+        document.addEventListener('keydown', this.onExitDown);
+    }
+
+    componentWillUnmount() {
+        document.removeEventListener('keydown', this.onExitDown);
+    }
 
     render() {
         const { isExplorer, activeView } = this.state;

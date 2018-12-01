@@ -93,10 +93,6 @@ export class SideView extends React.Component<SideViewProps, SideViewState>{
         }
     }
 
-    private onExit = (): void => {
-        console.log('need to handle exit !');
-    }
-
     public renderHotkeys() {
         return <Hotkeys>
             <Hotkey
@@ -110,14 +106,6 @@ export class SideView extends React.Component<SideViewProps, SideViewState>{
                 combo="meta + v"
                 label="Paste selected files into current folder"
                 onKeyDown={this.onPaste}
-            />
-            <Hotkey
-                global={true}
-                combo="meta + q"
-                label="Exits React FTP"
-                onKeyDown={this.onExit}
-                preventDefault={true}
-                stopPropagation={true}
             />
         </Hotkeys>;
     }
