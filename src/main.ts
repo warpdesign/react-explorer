@@ -3,7 +3,7 @@ import { watch } from 'fs';
 
 declare var __dirname: string
 
-const CLOSE_EXIT_DELAY = 1000;
+const CLOSE_EXIT_DELAY = 2000;
 let mainWindow: Electron.BrowserWindow;
 
 function installReactDevTools() {
@@ -89,6 +89,7 @@ function onReady() {
 
 app.on('ready', () => onReady());
 app.on('before-quit', (e) => {
+    console.log('before quit');
     // prevent cmd+q to exit on macOS
     if (!forceExit) {
         e.preventDefault();

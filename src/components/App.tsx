@@ -1,7 +1,7 @@
 import { AppState } from "../state/appState";
 import * as React from "react";
 import * as ReactDOM from "react-dom";
-import { FocusStyleManager, Icon, HotkeysTarget, Hotkeys, Hotkey } from "@blueprintjs/core";
+import { FocusStyleManager, Icon, HotkeysTarget, Hotkeys, Hotkey, Alert } from "@blueprintjs/core";
 import { Provider, observer } from "mobx-react";
 import { Navbar, Alignment, Button, Intent } from "@blueprintjs/core";
 import { SideView } from "./SideView";
@@ -17,6 +17,7 @@ require("../css/main.css");
 interface IState {
     isExplorer: boolean;
     activeView: number;
+    isExitDialogOpen: boolean;
 }
 
 const EXIT_DELAY = 1200;
@@ -33,12 +34,26 @@ export class ReactApp extends React.Component<{}, IState> {
     constructor(props = {}) {
         super(props);
 
-        this.state = { isExplorer: true, activeView: 0 };
+        this.state = { isExplorer: true, activeView: 0, isExitDialogOpen: false };
 
         // do not show outlines when using the mouse
         FocusStyleManager.onlyShowFocusOnTabs();
 
         this.appState = new AppState();
+    }
+
+    addListeners() {
+        window.addEventListener('beforeunload', this.onExitRequest);
+        document.addEventListener('keydown', this.onExitDown);
+    }
+
+    removeListeners() {
+        window.removeEventListener('beforeunload', this.onExitRequest);
+        document.removeEventListener('keydown', this.onExitDown);
+    }
+
+    showDownloadsTab() {
+        this.setState({ isExplorer: false });
     }
 
     navClick = () => {
@@ -71,6 +86,26 @@ export class ReactApp extends React.Component<{}, IState> {
         }
     }
 
+    onExitRequest = (e?:Event) => {
+        let shouldCancel = false;
+
+        if (e) {
+            e.preventDefault();
+        }
+
+        if (this.appState && this.appState.pendingTransfers) {
+            if (e) {
+                e.returnValue = false;
+            }
+            this.setState({ isExitDialogOpen: true });
+            shouldCancel = true;
+        } else if (e) {
+            ipcRenderer.send('exit');
+        }
+
+        return shouldCancel;
+    }
+
     // shouldComponentUpdate() {
     //     console.time('App Render');
     //     return true;
@@ -82,36 +117,50 @@ export class ReactApp extends React.Component<{}, IState> {
 
     onExitDown = (e: KeyboardEvent) => {
         if (!this.exitMode && e.keyCode === KEY_Q && e.metaKey) {
-            this.lastTimeStamp = new Date().getTime();
-            ipcRenderer.send('exitWarning');
+            const shouldCancel = this.onExitRequest();
 
-            this.exitTimeout = setTimeout(() => {
-                const currentTimeout = new Date().getTime();
-                if (this.exitMode && (currentTimeout - this.lastTimeStamp <= UP_DELAY)) {
-                    this.exitMode = false;
-                    ipcRenderer.send('exit');
-                } else {
-                    ipcRenderer.send('endExitWarning');
-                    this.exitMode = false;
-                }
-            }, EXIT_DELAY);
+            if (!shouldCancel) {
+                // check transfers
+                this.lastTimeStamp = new Date().getTime();
+                ipcRenderer.send('exitWarning');
 
-            this.exitMode = true;
+                this.exitTimeout = setTimeout(() => {
+                    const currentTimeout = new Date().getTime();
+                    if (this.exitMode && (currentTimeout - this.lastTimeStamp <= UP_DELAY)) {
+                        this.exitMode = false;
+                        ipcRenderer.send('exit');
+                    } else {
+                        ipcRenderer.send('endExitWarning');
+                        this.exitMode = false;
+                    }
+                }, EXIT_DELAY);
+
+                this.exitMode = true;
+            }
         } else if (e.keyCode === KEY_Q && this.exitMode) {
             this.lastTimeStamp = new Date().getTime();
         }
     }
 
     componentDidMount() {
-        document.addEventListener('keydown', this.onExitDown);
+        this.addListeners();
     }
 
     componentWillUnmount() {
-        document.removeEventListener('keydown', this.onExitDown);
+        this.removeListeners();
+    }
+
+    onExitDialogClose = (valid:boolean) => {
+        this.setState({ isExitDialogOpen: false });
+        if (!valid) {
+            this.showDownloadsTab();
+        } else {
+            ipcRenderer.send('exit');
+        }
     }
 
     render() {
-        const { isExplorer, activeView } = this.state;
+        const { isExplorer, activeView, isExitDialogOpen } = this.state;
         const badgeSize = this.appState.pendingTransfers;
         const badgeText = badgeSize && (badgeSize + '') || '';
         const badgeProgress = this.appState.totalTransferProgress;
@@ -119,6 +168,18 @@ export class ReactApp extends React.Component<{}, IState> {
         return (
             <Provider appState={this.appState}>
                 <React.Fragment>
+                    <Alert
+                        cancelButtonText="Keep transfers"
+                        confirmButtonText="Exit & Cancel transfers"
+                        icon="warning-sign"
+                        intent={Intent.WARNING}
+                        onClose={this.onExitDialogClose}
+                        isOpen={isExitDialogOpen}
+                    >
+                        <p>
+                            There are <b>{`${badgeSize}`}</b> transfers <b>in progress</b>.<br /><br />Exiting the app now will <b>cancel</b> the downloads:<br /> are you should you want to exit now?
+                    </p>
+                    </Alert>
                     <Navbar>
                         <Navbar.Group align={Alignment.LEFT}>
                             <Navbar.Heading>React-explorer</Navbar.Heading>
