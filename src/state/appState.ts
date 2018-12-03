@@ -23,7 +23,10 @@ export class AppState {
     transfers = observable<Batch>([]);
 
     prepareClipboardTransferTo(cache: FileState) {
-        // return this.addTransfer(this.clipboard.srcFs, cache.getAPI(), this.clipboard.files, this.clipboard.srcPath, cache.path)
+        if (!this.clipboard.files.length) {
+            return;
+        }
+
         const options = {
             clipboard: { ...this.clipboard },
             dstFs: cache.getAPI(),

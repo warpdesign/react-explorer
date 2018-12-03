@@ -92,9 +92,12 @@ app.on('before-quit', (e) => {
     console.log('before quit');
     // prevent cmd+q to exit on macOS
     if (!forceExit) {
+        console.log('prevent default');
         e.preventDefault();
     } else {
         console.log('oops, bye!');
+        // force exit app: filesystem access (transfers in progress) may prevent the app from quiting
+        app.exit();
     }
 });
 

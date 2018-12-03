@@ -25,6 +25,7 @@ const KEY_Q = 81;
 const UP_DELAY = 130;
 
 @observer
+@HotkeysTarget
 export class ReactApp extends React.Component<{}, IState> {
     private appState: AppState;
     private lastTimeStamp: any = 0;
@@ -42,14 +43,16 @@ export class ReactApp extends React.Component<{}, IState> {
         this.appState = new AppState();
     }
 
+
+
     addListeners() {
         window.addEventListener('beforeunload', this.onExitRequest);
-        document.addEventListener('keydown', this.onExitDown);
+        // document.addEventListener('keydown', this.onExitDown);
     }
 
     removeListeners() {
         window.removeEventListener('beforeunload', this.onExitRequest);
-        document.removeEventListener('keydown', this.onExitDown);
+        // document.removeEventListener('keydown', this.onExitDown);
     }
 
     showDownloadsTab() {
@@ -115,7 +118,7 @@ export class ReactApp extends React.Component<{}, IState> {
     //     console.timeEnd('App Render');
     // }
 
-    onExitDown = (e: KeyboardEvent) => {
+    onExitComboDown = (e: KeyboardEvent) => {
         if (!this.exitMode && e.keyCode === KEY_Q && e.metaKey) {
             const shouldCancel = this.onExitRequest();
 
@@ -157,6 +160,23 @@ export class ReactApp extends React.Component<{}, IState> {
         } else {
             ipcRenderer.send('exit');
         }
+    }
+
+    public renderHotkeys() {
+        return <Hotkeys>
+            <Hotkey
+                global={true}
+                combo="q"
+                label="Exit react-ftp"
+                onKeyDown={this.onExitComboDown}
+            />
+            <Hotkey
+                global={true}
+                combo="mod + q"
+                label="Exit react-ftp"
+                onKeyDown={this.onExitComboDown}
+            />
+        </Hotkeys>;
     }
 
     render() {

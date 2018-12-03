@@ -85,7 +85,6 @@ export class SideView extends React.Component<SideViewProps, SideViewState>{
         const { hide, active } = this.props;
 
         if (active && !hide) {
-            console.log('** onpaste');
             const { appState } = this.injected;
             const { fileCache } = this.state;
 
