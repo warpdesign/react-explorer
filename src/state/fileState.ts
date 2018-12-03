@@ -133,6 +133,7 @@ export class FileState {
     async cd(path: string, path2: string = '', skipHistory = false): Promise<string> {
         // first updates fs (eg. was local fs, is now ftp)
         // if (this.path.substr(0, 1) !== path.substr(0, 1)) {
+        console.log('cd', path, this.path);
         if (this.path.split('/')[0] !== path.split('/')[0]) {
             this.getNewFS(path);
             this.server = this.fs.serverpart(path);

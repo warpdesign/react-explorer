@@ -65,6 +65,8 @@ export class SideView extends React.Component<SideViewProps, SideViewState>{
     }
 
     private onCopy = () => {
+        // TODO: do not copy if sideview is busy
+        // fileCache.status === 'busy' || this.fileListBusy
         const { hide, active } = this.props;
 
         if (active && !hide) {
@@ -81,12 +83,13 @@ export class SideView extends React.Component<SideViewProps, SideViewState>{
         }
     }
 
-    private onPaste = ():void => {
+    private onPaste = (): void => {
         const { hide, active } = this.props;
+        const { fileCache } = this.state;
 
-        if (active && !hide) {
+        // do not paste if fileCache or fileList is busy
+        if (active && !hide && fileCache.status === 'ok' && !this.fileListBusy) {
             const { appState } = this.injected;
-            const { fileCache } = this.state;
 
             appState.prepareClipboardTransferTo(fileCache);
         }

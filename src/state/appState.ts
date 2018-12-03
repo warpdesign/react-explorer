@@ -50,6 +50,7 @@ export class AppState {
         // get caches that are showing the same path
         const caches = this.caches.filter((cache) => {
             return (cache !== srcCache &&
+                cache.status === 'ok' &&
                 cache.path === srcCache.path &&
                 cache.getFS().name === srcCache.getFS().name);
         });
@@ -108,7 +109,8 @@ export class AppState {
     @action
     refreshView(viewId:number) {
         const cache = this.caches[viewId];
-        if (cache) {
+        // only refresh view that's ready
+        if (cache && cache.status === 'ok') {
             cache.navHistory(0);
             this.syncCaches(cache);
         }
