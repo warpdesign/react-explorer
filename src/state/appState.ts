@@ -52,7 +52,8 @@ export class AppState {
             return (cache !== srcCache &&
                 cache.status === 'ok' &&
                 cache.path === srcCache.path &&
-                cache.getFS().name === srcCache.getFS().name);
+                cache.getFS().name === srcCache.getFS().name
+            );
         });
 
         for (let cache of caches) {

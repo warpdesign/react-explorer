@@ -138,7 +138,7 @@ export class SideView extends React.Component<SideViewProps, SideViewState>{
             return (
                 <div id={this.viewId} className={`sideview${activeClass}`}>
                     {needLogin && <LoginDialog isOpen={needLogin} onValidation={this.onValidation} onClose={this.onClose} />}
-                    <Toolbar onPaste={this.onPaste} />
+                    <Toolbar active={active && !busy} onPaste={this.onPaste} />
                     <FileList onRender={this.onFileRender} onUpdate={this.onFileUpdate} />
                     <Statusbar />
                     <Loader active={busy}></Loader>
