@@ -46,13 +46,9 @@ export class ReactApp extends React.Component<{}, IState> {
 
 
     addListeners() {
-        window.addEventListener('beforeunload', this.onExitRequest);
-        // document.addEventListener('keydown', this.onExitDown);
-    }
-
-    removeListeners() {
-        window.removeEventListener('beforeunload', this.onExitRequest);
-        // document.removeEventListener('keydown', this.onExitDown);
+        ipcRenderer.on('exitRequest', (e: Event) => {
+            this.onExitRequest();
+        });
     }
 
     showDownloadsTab() {
@@ -89,20 +85,20 @@ export class ReactApp extends React.Component<{}, IState> {
         }
     }
 
-    onExitRequest = (e?:Event) => {
+    onExitRequest = (/*e?:Event*/) => {
         let shouldCancel = false;
 
-        if (e) {
-            e.preventDefault();
-        }
+        // if (e) {
+        //     e.preventDefault();
+        // }
 
         if (this.appState && this.appState.pendingTransfers) {
-            if (e) {
-                e.returnValue = false;
-            }
+            // if (e) {
+            //     e.returnValue = false;
+            // }
             this.setState({ isExitDialogOpen: true });
             shouldCancel = true;
-        } else if (e) {
+        } else /*if (e)*/ {
             ipcRenderer.send('exit');
         }
 
@@ -146,11 +142,8 @@ export class ReactApp extends React.Component<{}, IState> {
     }
 
     componentDidMount() {
+        // listen for events from main process
         this.addListeners();
-    }
-
-    componentWillUnmount() {
-        this.removeListeners();
     }
 
     onExitDialogClose = (valid:boolean) => {
@@ -159,6 +152,15 @@ export class ReactApp extends React.Component<{}, IState> {
             this.showDownloadsTab();
         } else {
             ipcRenderer.send('exit');
+        }
+    }
+
+    onReloadFileView = () => {
+        if (this.state.isExplorer) {
+            console.log('reloading view', this.state.activeView);
+            this.appState.refreshView(this.state.activeView);
+        } else {
+            console.log('downloads active, no refresh');
         }
     }
 
@@ -175,6 +177,13 @@ export class ReactApp extends React.Component<{}, IState> {
                 combo="mod + q"
                 label="Exit react-ftp"
                 onKeyDown={this.onExitComboDown}
+            />
+            <Hotkey
+                global={true}
+                combo="mod + r"
+                label="Reload current view"
+                preventDefault={true}
+                onKeyDown={this.onReloadFileView}
             />
         </Hotkeys>;
     }

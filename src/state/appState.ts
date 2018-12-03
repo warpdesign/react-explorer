@@ -47,7 +47,16 @@ export class AppState {
 
     @action
     syncCaches(srcCache: FileState) {
-        this.caches.filter((cache) => cache !== srcCache && cache.path === srcCache.path && cache.getFS().name === srcCache.getFS().name).forEach((cache) => cache.reload());
+        // get caches that are showing the same path
+        const caches = this.caches.filter((cache) => {
+            return (cache !== srcCache &&
+                cache.path === srcCache.path &&
+                cache.getFS().name === srcCache.getFS().name);
+        });
+
+        for (let cache of caches) {
+            cache.navHistory(0);
+        };
     }
 
     @computed
@@ -95,6 +104,15 @@ export class AppState {
     }
 
     /* /transfers */
+
+    @action
+    refreshView(viewId:number) {
+        const cache = this.caches[viewId];
+        if (cache) {
+            cache.navHistory(0);
+            this.syncCaches(cache);
+        }
+    }
 
     @action
     addCache(path: string = '') {

@@ -85,6 +85,20 @@ function onReady() {
     const devtools = new BrowserWindow();
     mainWindow.webContents.setDevToolsWebContents(devtools.webContents);
     mainWindow.webContents.openDevTools({ mode: 'detach' });
+    mainWindow.webContents.on('will-navigate', () => {
+        console.log('** will navigate!');
+    });
+    mainWindow.webContents.on('will-prevent-unload', (e:Event) => {
+        console.log('** will prevent unload');
+    });
+
+    mainWindow.on('close', (e: Event) => {
+        if (!forceExit) {
+            console.log('exit request and no force: sending back exitRequest');
+            e.preventDefault();
+            mainWindow.webContents.send('exitRequest');
+        }
+    })
 }
 
 app.on('ready', () => onReady());
@@ -92,7 +106,6 @@ app.on('before-quit', (e) => {
     console.log('before quit');
     // prevent cmd+q to exit on macOS
     if (!forceExit) {
-        console.log('prevent default');
         e.preventDefault();
     } else {
         console.log('oops, bye!');
