@@ -10,7 +10,9 @@ const { Transform } = require('stream');
 
 const isWin = process.platform === "win32";
 const invalidChars = isWin && /[\*:<>\?|"]+/ig || /^[\.]+[\/]+(.)*$/ig;
-const localStart = isWin && /^(([a-zA-Z]\:)|(\/|\.))/ || /^(\/|\.)/;
+// since nodeJS will translate unix like paths to windows path, when running under Windows
+// we accept Windows style paths (eg. C:\foo...) and unix paths (eg. /foo or ./foo)
+const localStart = isWin && /^(([a-zA-Z]\:)|([\.]*\/|\.))/ || /^([\.]*\/|\.)/;
 
 const Parent: File = {
     dir: '..',
@@ -307,7 +309,7 @@ export const FsLocal = {
     name: 'local',
     description: 'Local Filesystem',
     canread(str: string): boolean {
-        console.log('**canread local', str, !!str.match(localStart));
+        console.log('FsLocal.canread', str, !!str.match(localStart));
         return !!str.match(localStart);
     },
     serverpart(str: string): string {

@@ -79,16 +79,20 @@ export class FileState {
         }
     }
 
-    private getNewFS(path: string): void{
+    private getNewFS(path: string): Fs {
         let newfs = getFS(path);
 
-        // free exiting api
-        if (this.api) {
-            this.api.free();
+        if (newfs) {
+            // free exiting api
+            if (this.api) {
+                this.api.free();
+            }
+
+            this.fs = newfs;
+            this.api = new newfs.API(path);
         }
 
-        this.fs = newfs;
-        this.api = new newfs.API(path);
+        return newfs;
     }
 
     public getAPI(): FsApi {
@@ -134,9 +138,14 @@ export class FileState {
         // first updates fs (eg. was local fs, is now ftp)
         // if (this.path.substr(0, 1) !== path.substr(0, 1)) {
         console.log('cd', path, this.path);
+
         if (this.path.split('/')[0] !== path.split('/')[0]) {
-            this.getNewFS(path);
-            this.server = this.fs.serverpart(path);
+            if (this.getNewFS(path)) {
+                this.server = this.fs.serverpart(path);
+            } else {
+                this.navHistory(0);
+                return Promise.reject(`No filesystem can read ${path}`);
+            }
         }
 
         try {

@@ -5,6 +5,7 @@ import { InputGroup, ControlGroup, Button, ButtonGroup, Popover, Intent, Alert, 
 import { AppState } from "../state/appState";
 import { FileMenu } from "./FileMenu";
 import { MakedirDialog } from "./MakedirDialog";
+import { AppAlert } from './AppAlert';
 import { Logger } from "./Log";
 import { AppToaster, IToasterOpts } from "./AppToaster";
 import { FileState } from "../state/fileState";
@@ -90,6 +91,7 @@ export class Toolbar extends React.Component<IProps, PathInputState> {
         if (this.cache.path !== this.state.path) {
             this.cache.cd(this.state.path)
                 .catch((err) => {
+                    AppAlert.show({});
                     this.input.blur();
                 });
         }

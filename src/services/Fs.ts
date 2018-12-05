@@ -73,13 +73,13 @@ export function registerFs(fs: Fs): void {
 export function getFS(path: string):Fs {
     let newfs = interfaces.find((filesystem) => filesystem.canread(path));
 
-    if (!newfs) {
-        newfs = FsGeneric;
-    }
+    // if (!newfs) {
+    //     newfs = FsGeneric;
+    // }
 
     return newfs;
 }
 
 registerFs(FsLocal);
 registerFs(FsFtp);
-registerFs(FsGeneric);
+// registerFs(FsGeneric);

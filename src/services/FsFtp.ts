@@ -6,8 +6,8 @@ import { Transform } from 'stream';
 import { remote } from 'electron';
 import { throttle } from '../utils/throttle';
 
-const FtpUrl = /^(ftp\:\/\/)*(ftp\.[a-z]+\.[a-z]{2,3}|[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})$/i;
-const ServerPart = /^(ftp\:\/\/)*(ftp\.[a-z]+\.[a-z]{2,3}|[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})/i;
+const FtpUrl = /^(ftp\:\/\/)(ftp\.[a-z]+\.[a-z]{2,3}|[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})$/i;
+const ServerPart = /^(ftp\:\/\/)(ftp\.[a-z]+\.[a-z]{2,3}|[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})/i;
 const invalidChars = /^[\.]+$/ig;
 const TMP_DIR = remote.app.getPath('downloads');
 
@@ -518,7 +518,9 @@ export const FsFtp = {
     name: 'ftp',
     description: 'Fs that just implements fs over ftp',
     canread(str: string): boolean {
-        return !!this.serverpart(str).match(FtpUrl);
+        const res = !!this.serverpart(str).match(FtpUrl);
+        console.log('FsFtp.canread', str, res);
+        return res;
     },
     serverpart(str: string, lowerCase = true): string {
         const server = lowerCase ? str.replace(/^ftp\:\/\//i, '').toLowerCase() : str.replace(/^ftp\:\/\//i, '');
