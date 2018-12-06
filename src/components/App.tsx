@@ -59,19 +59,9 @@ export class ReactApp extends React.Component<{}, IState> {
         this.setState({ isExplorer: !this.state.isExplorer });
     }
 
-    parents(elt: HTMLElement, selector: string): HTMLElement {
-        let found:HTMLElement = null;
-
-        while (!found && elt) {
-            found = elt.matches(selector) && elt;
-            elt = elt.parentElement;
-        }
-
-        return found;
-    }
-
     handleClick = (e: React.MouseEvent) => {
-        const sideview = this.parents((e.target) as HTMLElement, '.sideview');
+        const sideview = (e.target as HTMLElement).closest('.sideview');
+
         if (sideview) {
             const num = sideview.id.replace('view_', '');
             if (this.state.activeView !== parseInt(num, 10)) {
@@ -85,20 +75,13 @@ export class ReactApp extends React.Component<{}, IState> {
         }
     }
 
-    onExitRequest = (/*e?:Event*/) => {
+    onExitRequest = () => {
         let shouldCancel = false;
 
-        // if (e) {
-        //     e.preventDefault();
-        // }
-
         if (this.appState && this.appState.pendingTransfers) {
-            // if (e) {
-            //     e.returnValue = false;
-            // }
             this.setState({ isExitDialogOpen: true });
             shouldCancel = true;
-        } else /*if (e)*/ {
+        } else {
             ipcRenderer.send('exit');
         }
 

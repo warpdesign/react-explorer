@@ -26,11 +26,7 @@ class Alerter extends React.Component<{}, IAlertProps> {
         const defer = this.defer;
         this.defer = null;
 
-        if (res) {
-            defer.resolve();
-        } else {
-            defer.reject();
-        }
+        defer.resolve(res);
     }
 
     async show(options: Partial<IAlertProps>):Promise<boolean> {
@@ -40,11 +36,9 @@ class Alerter extends React.Component<{}, IAlertProps> {
             this.setState({ ...options, isOpen: true, onClose: this.onClose });
 
             return this.defer.promise;
-        } else try {
+        } else {
             // wait for the previous promise to get resolved
             await this.defer.promise;
-            return this.show(options);
-        } catch {
             return this.show(options);
         }
     }
