@@ -90,8 +90,10 @@ export class Toolbar extends React.Component<IProps, PathInputState> {
     private onSubmit = () => {
         if (this.cache.path !== this.state.path) {
             this.cache.cd(this.state.path)
-                .catch((err) => {
-                    AppAlert.show({});
+                .catch((err:string) => {
+                    AppAlert.show(err, {
+                        intent: 'danger'
+                    });
                     this.input.blur();
                 });
         }

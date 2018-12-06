@@ -4,21 +4,32 @@ import * as ReactDOM from 'react-dom';
 import { Alert, IAlertProps } from '@blueprintjs/core';
 import { Deferred } from '../utils/deferred';
 
-class Alerter extends React.Component<{}, IAlertProps> {
+type Message = React.ReactNode | string;
+
+interface IAlerterState extends IAlertProps {
+    message: Message
+}
+
+class Alerter extends React.Component<{}, IAlerterState> {
     defer: Deferred<boolean> = null;
 
-    constructor(props:IAlertProps) {
+    constructor(props:{}) {
         super(props);
+
+        this.state = {
+            message: '',
+            isOpen: false
+        }
     }
 
-    public static create(props: IAlertProps, container = document.body) {
+    public static create(container = document.body) {
         const containerElement = document.createElement("div");
         container.appendChild(containerElement);
-        const alerter = ReactDOM.render(<Alerter {...props} />, containerElement) as Alerter;
+        const alerter = ReactDOM.render(<Alerter />, containerElement) as Alerter;
         return alerter;
     }
 
-    onClose = (res:boolean) => {
+    onClose = (res: boolean) => {
         this.setState({
             isOpen: false
         });
@@ -29,22 +40,24 @@ class Alerter extends React.Component<{}, IAlertProps> {
         defer.resolve(res);
     }
 
-    async show(options: Partial<IAlertProps>):Promise<boolean> {
+    async show(message: React.ReactNode | string, options: Partial<IAlertProps>):Promise<boolean> {
         if (!this.defer) {
             this.defer = new Deferred();
 
-            this.setState({ ...options, isOpen: true, onClose: this.onClose });
+            this.setState({ message, ...options, isOpen: true, onClose: this.onClose });
 
             return this.defer.promise;
         } else {
             // wait for the previous promise to get resolved
             await this.defer.promise;
-            return this.show(options);
+            return this.show(message, options);
         }
     }
 
     private renderAlert() {
-        return <Alert {...this.state}></Alert>;
+        const { message, ...alertProps } = this.state;
+
+        return <Alert {...alertProps}>{message}</Alert>;
     }
 
     public render() {
@@ -54,12 +67,10 @@ class Alerter extends React.Component<{}, IAlertProps> {
     }
 }
 
-const MyAlerter = Alerter.create({
-    isOpen: false
-});
+const MyAlerter = Alerter.create();
 
 export const AppAlert = {
-    show(props: Partial<IAlertProps>): Promise<boolean> {
-        return MyAlerter.show(props);
+    show(message: React.ReactNode | string, props: Partial<IAlertProps> = {}): Promise<boolean> {
+        return MyAlerter.show(message, props);
     }
 }
