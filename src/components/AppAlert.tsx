@@ -18,7 +18,8 @@ class Alerter extends React.Component<{}, IAlerterState> {
 
         this.state = {
             message: '',
-            isOpen: false
+            isOpen: false,
+            canEscapeKeyCancel: true
         }
     }
 

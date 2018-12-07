@@ -47,8 +47,8 @@ export class LoginDialog extends React.Component<ILoginProps, ILoginState> {
 
     onKeyUp = (e: KeyboardEvent) => {
         if (e.keyCode === ENTER_KEY) {
-            const { busy, username, password } = this.state;
-            if (!busy && username.length && password.length) {
+            // we assume anonymous login if no username specified
+            if (this.canLogin()) {
                 this.onLogin();
             }
         }
@@ -89,6 +89,12 @@ export class LoginDialog extends React.Component<ILoginProps, ILoginState> {
         this.input = input;
     }
 
+    private canLogin = () => {
+        const { busy, username, password } = this.state;
+
+        return !busy && !!(!username.length || (username.length && password.length));
+    }
+
     componentDidMount() {
         this.setState({ error: '', busy: false });
         document.addEventListener('keyup', this.onKeyUp);
@@ -122,6 +128,7 @@ export class LoginDialog extends React.Component<ILoginProps, ILoginState> {
             canEscapeKeyClose={true}
             usePortal={true}
             onClose={this.cancelClose}
+            className="loginDialog"
         >
                 <div className={Classes.DIALOG_BODY}>
                     {error && (<h4 className={Classes.INTENT_DANGER}>Login error</h4>)}
@@ -129,6 +136,7 @@ export class LoginDialog extends React.Component<ILoginProps, ILoginState> {
                     inline={true}
                     labelFor="username"
                     labelInfo="username"
+                    helperText={(<span>Leave empty for <em>anonymous</em> login</span>)}
                 >
                     <InputGroup
                         onChange={this.onInputChange}
@@ -146,6 +154,7 @@ export class LoginDialog extends React.Component<ILoginProps, ILoginState> {
                         inline={true}
                         labelFor="password"
                         labelInfo="password"
+                        helperText="Required for non-anonymous login"
                     >
                         <InputGroup
                             onChange={this.onInputChange}
@@ -177,7 +186,7 @@ export class LoginDialog extends React.Component<ILoginProps, ILoginState> {
             <div className={Classes.DIALOG_FOOTER}>
                 <div className={Classes.DIALOG_FOOTER_ACTIONS}>
                     <Button onClick={this.cancelClose} disabled={busy}>Cancel</Button>
-                        <Button loading={busy} intent={Intent.PRIMARY} onClick={this.onLogin} disabled={busy || !username.length || !password.length}>
+                        <Button loading={busy} intent={Intent.PRIMARY} onClick={this.onLogin} disabled={!this.canLogin()}>
                         {'Login'}
                     </Button>
                 </div>

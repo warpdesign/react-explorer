@@ -144,7 +144,7 @@ export class FileState {
                 this.server = this.fs.serverpart(path);
             } else {
                 this.navHistory(0);
-                return Promise.reject(`No filesystem can read ${path}`);
+                return Promise.reject(`Cannot open ${path}`);
             }
         }
 
@@ -298,6 +298,9 @@ export class FileState {
             return this.get(path, file);
         }
 
-        return this.api.get(path, file);
+        return this.api.get(path, file).then((path) => {
+            this.status = 'ok';
+            return path;
+        });
     }
 }

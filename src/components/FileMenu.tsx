@@ -52,7 +52,7 @@ export class FileMenu extends React.Component<IFileMenuProps>{
 
         return (
         <React.Fragment>
-            <Menu>
+                <Menu>
                 <MenuItem text="New Folder" icon="folder-new" onClick={this.onNewfolder}/>
                 <MenuDivider />
                 <MenuItem text={`Paste ${clipboardLength} item(s)`} icon="duplicate" onClick={this.onPaste} disabled={!clipboardLength} />

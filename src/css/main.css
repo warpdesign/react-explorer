@@ -202,3 +202,9 @@ button.small:hover{
 .bp3-loader.active .bp3-spinner{
     opacity:1;
 }
+
+/* login dialog */
+.loginDialog label.bp3-label {
+    width: 28%;
+    text-align: right;
+}

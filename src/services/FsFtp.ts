@@ -2,12 +2,14 @@ import { FsApi, File } from './Fs';
 import * as ftp from 'ftp';
 import * as path from 'path';
 import * as fs from 'fs';
+import * as url from 'url';
 import { Transform } from 'stream';
 import { remote } from 'electron';
 import { throttle } from '../utils/throttle';
+import { Logger } from "../components/Log";
 
-const FtpUrl = /^(ftp\:\/\/)(ftp\.[a-z]+\.[a-z]{2,3}|[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})$/i;
-const ServerPart = /^(ftp\:\/\/)(ftp\.[a-z]+\.[a-z]{2,3}|[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})/i;
+const FtpUrl = /^(ftp\:\/\/)*(ftp\.[a-z]+\.[a-z]{2,3}|[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})$/i;
+const ServerPart = /^(ftp\:\/\/)*(ftp\.[a-z]+\.[a-z]{2,3}|[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})/i;
 const invalidChars = /^[\.]+$/ig;
 const TMP_DIR = remote.app.getPath('downloads');
 
@@ -47,8 +49,8 @@ class Client{
 
     static clients: Array<Client> = [];
 
-    static addClient(server:string, options: any = {}) {
-        const client = new Client(server, options);
+    static addClient(hostname:string, options: any = {}) {
+        const client = new Client(hostname, options);
 
         Client.clients.push(client);
 
@@ -56,12 +58,12 @@ class Client{
     }
 
     // TODO: return promise if client is not connected ??
-    static getFreeClient(server: string) {
-        let client = Client.clients.find((client) => client.host === server && !client.api
+    static getFreeClient(hostname: string) {
+        let client = Client.clients.find((client) => client.host === hostname && !client.api
             && client.status === 'ready');
 
         if (!client) {
-            client = Client.addClient(server, {});
+            client = Client.addClient(hostname, {});
         }
 
         return client;
@@ -75,9 +77,24 @@ class Client{
         this.bindEvents();
     }
 
+    log(...params: (string | number | boolean)[]) {
+        const args = [`[${this.host}]`, ...params] as (string | number | boolean)[];
+        Logger.log(...args);
+    }
+
+    warn(...params: (string | number | boolean)[]) {
+        const args = [`[${this.host}]`, ...params] as (string | number | boolean)[];
+        Logger.warn(...args);
+    }
+
+    error(...params: (string | number | boolean)[]) {
+        const args = [`[${this.host}]`, ...params] as (string | number | boolean)[];
+        Logger.error(...args);
+    }
+
     public login(options: any = {}): Promise<any> {
         if (!this.connected) {
-            console.log('connecting to', this.host, 'with options', Object.assign({ host: this.host, ...options }, { password: '****' }));
+            this.log('connecting to', this.host, 'with options', Object.assign({ host: this.host, ...options }, { password: '****' }).toString());
             this.readyPromise = new Promise((resolve, reject) => {
                 this.readyResolve = resolve;
                 this.readyReject = reject;
@@ -96,10 +113,10 @@ class Client{
     }
 
     private onReady() {
-        console.log(`[${this.host}] ready, setting transfer mode to binary`);
+        this.log('ready, setting transfer mode to binary');
         this.client.binary((err: Error) => {
             if (err) {
-                console.warn('could not set transfer mode to binary');
+                this.warn('could not set transfer mode to binary');
             }
             this.readyResolve();
             this.status = 'ready';
@@ -108,7 +125,7 @@ class Client{
     }
 
     private onClose() {
-        console.log(`[${this.host}] close`);
+        this.log('close');
         this.connected = false;
         this.status = 'offline';
         if (this.api) {
@@ -118,13 +135,14 @@ class Client{
 
     private onError(error: any) {
         debugger;
-        console.error(`[${this.host}] error: ${error}`);
+        this.error('onError', `${error.code}: ${error.message}`);
         switch(error.code) {
             // 500 series: command not accepted
             // user not logged in (user limit may be reached too)
             case 530:
                 this.status = 'offline';
-                this.readyReject(error.toString());
+                debugger;
+                this.readyReject(error);
                 break;
 
             case 550:
@@ -139,29 +157,29 @@ class Client{
                 break;
 
             default:
-                console.log('unhandled error code:', error.code);
+                this.warn('unhandled error code:', error.code);
                 // sometimes error.code is undefined
                 if (error && error.match(/Timeout/)) {
-                    console.log('Connection timeout ?');
+                    this.warn('Connection timeout ?');
                 }
                 break;
         }
     }
 
     private onGreeting(greeting: string) {
-        console.log(`[${this.host}] greeting`)
-        console.log(greeting);
+        this.log(greeting);
     }
 
     public list(path: string, appendParent = true): Promise<File[]> {
         this.status = 'busy';
 
-        console.log('ftp.client: list', path);
+        this.log('ftp.client: list', path);
         return new Promise((resolve, reject) => {
             const newpath = this.pathpart(path);
             this.client.list(newpath, (err: Error, list: any[]) => {
                 this.status = 'ready';
                 if (err) {
+                    this.error('error calling list for', newpath);
                     reject(err);
                 } else {
                     const files: File[] = list.filter((ftpFile) => !ftpFile.name.match(/^[\.]{1,2}$/)).map((ftpFile) => ({
@@ -203,7 +221,9 @@ class Client{
     }
 
     public cd(path: string): Promise<string> {
+        this.log('cd', path);
         return new Promise((resolve, reject) => {
+            const oldPath = path;
             const newpath = this.pathpart(path);
             this.client.cwd(newpath, (err:any, dir:string) => {
                 if (!err) {
@@ -212,7 +232,8 @@ class Client{
                     if (dir) {
                         dir = dir.replace(/\\/g, '/');
                     }
-                    const joint = join(this.host, (dir || newpath));
+                    // const joint = join(this.host, (dir || newpath));
+                    const joint = newpath === '/' ? join(oldPath, (dir || newpath)) : oldPath;
                     resolve(joint);
                 } else {
                     reject(err);
@@ -222,14 +243,16 @@ class Client{
     }
 
     public pathpart(path: string): string {
-        const server = path.replace(ServerPart, '');
-        return server;
+        const info = url.parse(path);
+        return info.pathname;
+        // const pathPart = path.replace(ServerPart, '');
+        // return pathPart;
     }
 
     public get(path: string, dest: string):Promise<string> {
         return new Promise((resolve, reject) => {
             const newpath = this.pathpart(path);
-            console.log('downloading file', newpath, dest);
+            this.log('downloading file', newpath, dest);
             this.client.get(newpath, (err: Error, readStream: fs.ReadStream) => {
                 if (err) {
                     reject(err);
@@ -300,7 +323,7 @@ class Client{
         const oldPath = join(path, oldName);
         const newPath = join(path, newName);
 
-        console.log('renaming', oldPath, newPath);
+        this.log('rename', oldPath, newPath);
         return new Promise((resolve, reject) => {
             return this.client.rename(oldPath, newPath, (err: Error) => {
                 if (!err) {
@@ -316,6 +339,7 @@ class Client{
         const path = this.pathpart(parent);
         const newPath = join(path, name);
 
+        this.log('mkdir', path, newPath);
         return new Promise((resolve, reject) => {
             this.client.mkdir(newPath, true, (err: Error) => {
                 if (err) {
@@ -336,16 +360,16 @@ interface LoginOptions{
 
 class FtpAPI implements FsApi {
     type = 1;
-    server = '';
+    hostname = '';
     connected = false;
     // main client: the one which will issue list/cd commands *only*
     master: Client = null;
     loginOptions: LoginOptions;
 
-    constructor(path: string) {
-        this.server = FsFtp.serverpart(path);
+    constructor(serverUrl: string) {
+        this.hostname = this.getHostname(serverUrl);
 
-        this.master = Client.getFreeClient(this.server);
+        this.master = Client.getFreeClient(this.hostname);
 
         this.master.api = this;
 
@@ -409,8 +433,8 @@ class FtpAPI implements FsApi {
     }
 
     list(dir: string): Promise<File[]> {
-        // TODO: strip server from here too ?
-        console.log('FsFtp.readDirectory');
+        debugger;
+        console.log('FsFtp.readDirectory', dir);
         return this.master.list(dir);
     };
 
@@ -445,7 +469,7 @@ class FtpAPI implements FsApi {
 
     login(user: string, password: string, port: number): Promise<void> {
         this.loginOptions = {
-            user,
+            user: user || 'anonymous',
             password,
             port
         };
@@ -456,7 +480,7 @@ class FtpAPI implements FsApi {
             console.warn('login: already connected');
             return Promise.resolve();
         } else {
-            return this.master.login({ user: user, password, port: port }).then(() => {
+            return this.master.login(this.loginOptions).then(() => {
                 this.connected = true;
             });
         }
@@ -480,11 +504,11 @@ class FtpAPI implements FsApi {
     async getStream(path: string, file: string): Promise<fs.ReadStream> {
         console.log('FsFtp.getStream');
         try {
-            console.log('*** connecting', this.server, this.loginOptions);
+            console.log('*** connecting', this.hostname, this.loginOptions);
             // 1. get ready client
             // 2. if not, add one (or wait ?) => use limit connection
             console.log('getting client');
-            const client = Client.getFreeClient(this.server);
+            const client = Client.getFreeClient(this.hostname);
             console.log('connecting new client');
             await client.login(this.loginOptions);
             console.log('client logged in, creating read stream');
@@ -502,7 +526,7 @@ class FtpAPI implements FsApi {
             // 1. get ready client
             // 2. if not, add one (or wait ?) => use limit connection
             console.log('getting client');
-            const client = Client.getFreeClient(this.server);
+            const client = Client.getFreeClient(this.hostname);
             console.log('connecting new client');
             await client.login(this.loginOptions);
             console.log('client logged in, creating read stream');
@@ -512,19 +536,32 @@ class FtpAPI implements FsApi {
             return Promise.reject(err);
         };
     }
+
+    getHostname(str: string) {
+        const info = url.parse(str);
+
+        return info.hostname.toLowerCase();
+    }
 };
 
 export const FsFtp = {
     name: 'ftp',
     description: 'Fs that just implements fs over ftp',
     canread(str: string): boolean {
-        const res = !!this.serverpart(str).match(FtpUrl);
-        console.log('FsFtp.canread', str, res);
-        return res;
+        // debugger;
+        // const res = !!this.serverpart(str).match(FtpUrl);
+        // console.log('FsFtp.canread', str, res);
+        // return res;
+        const info = url.parse(str);
+        console.log('FsFtp.canread', str, info.protocol, info.protocol === 'ftp:');
+        return info.protocol === 'ftp:';
     },
     serverpart(str: string, lowerCase = true): string {
-        const server = lowerCase ? str.replace(/^ftp\:\/\//i, '').toLowerCase() : str.replace(/^ftp\:\/\//i, '');
-        return server.split('/')[0];
+        const info = url.parse(str);
+        return `${info.protocol}//${info.hostname}`;
+        // const server = lowerCase ? str.replace(/^ftp\:\/\//i, '').toLowerCase() : str.replace(/^ftp\:\/\//i, '');
+        // console.log('serverpart', str, server.split('/')[0]);
+        // return server.split('/')[0];
     },
     API: FtpAPI
 }

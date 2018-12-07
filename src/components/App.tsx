@@ -5,10 +5,10 @@ import { FocusStyleManager, Icon, HotkeysTarget, Hotkeys, Hotkey, Alert } from "
 import { Provider, observer } from "mobx-react";
 import { Navbar, Alignment, Button, Intent } from "@blueprintjs/core";
 import { SideView } from "./SideView";
-import { LogUI } from "./Log";
+import { LogUI, Logger } from "./Log";
 import { Downloads } from "./Downloads";
 import { Badge } from "./Badge";
-import { ipcRenderer } from "electron";
+import { ipcRenderer, remote } from "electron";
 
 require("@blueprintjs/core/lib/css/blueprint.css");
 require("@blueprintjs/icons/lib/css/blueprint-icons.css");
@@ -41,6 +41,8 @@ export class ReactApp extends React.Component<{}, IState> {
         FocusStyleManager.onlyShowFocusOnTabs();
 
         this.appState = new AppState();
+
+        Logger.log('React-FTP', remote.app.getVersion());
     }
 
 

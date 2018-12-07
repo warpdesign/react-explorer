@@ -222,6 +222,10 @@ export class Toolbar extends React.Component<IProps, PathInputState> {
         }
     }
 
+    public onFocus = () => {
+        this.input.select();
+    }
+
     public componentWillUnmount() {
         this.disposer();
     }
@@ -275,6 +279,7 @@ export class Toolbar extends React.Component<IProps, PathInputState> {
                         intent={intent}
                         inputRef={this.refHandler}
                         onBlur={this.onBlur}
+                        onFocus={this.onFocus}
                 />
                 {isOpen &&
                     <MakedirDialog isOpen={isOpen} onClose={this.makedir} onValidation={fileCache.isDirectoryNameValid} parentPath={path}></MakedirDialog>
