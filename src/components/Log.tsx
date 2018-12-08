@@ -2,23 +2,42 @@ import * as React from 'react';
 import { observer } from 'mobx-react';
 import { observable, runInAction } from 'mobx';
 import { debounce } from '../utils/debounce';
+import { Intent, HotkeysTarget, Hotkeys, Hotkey } from '@blueprintjs/core';
 
 require('../css/log.css');
 
+export interface JSObject extends Object {
+    [key: string]: any;
+}
+
+type Printable = (string | number | boolean | JSObject);
+
+function objectPropsToString(el: Printable) {
+    if ((typeof el).match(/number|string|boolean/)) {
+        return el;
+    } else {
+        const obj = el as JSObject;
+        return Object.keys(el).map((prop) => obj[prop]).join(',');
+    }
+}
+
 export const Logger = {
     logs: observable.array(new Array()),
-    log(...lines: (string | number | boolean)[]) {
-        pushLog(lines, 'none');
+    log(...params: Printable[]) {
+        pushLog(params, 'none');
     },
-    warn(...lines: (string | number | boolean)[]) {
-        pushLog(lines, 'warn');
+    warn(...params: Printable[]) {
+        pushLog(params, 'warning');
     },
-    error(...lines: (string | number | boolean)[]) {
-        pushLog(lines, 'error');
+    success(...params: Printable[]) {
+        pushLog(params, 'success');
+    },
+    error(...params: Printable[]) {
+        pushLog(params, 'danger');
     }
 };
 
-function pushLog(lines: (string|number|boolean)[], intent: 'none' | 'warn' | 'error') {
+function pushLog(lines: Printable[], intent: Intent) {
     // since this method may be called from a render
     // function we wrap it into a setTimeout to
     // be sure the state is modified *outside*
@@ -28,7 +47,7 @@ function pushLog(lines: (string|number|boolean)[], intent: 'none' | 'warn' | 'er
         runInAction(() => {
             Logger.logs.push({
                 date: new Date(),
-                line: lines.join(' '),
+                line: lines.map((line:Printable) => objectPropsToString(line)).join(' '),
                 intent: intent
             });
         });
@@ -42,6 +61,7 @@ interface LogUIState{
 const ESCAPE_KEY = 27;
 const DEBOUNCE_DELAY = 500;
 
+@HotkeysTarget
 @observer
 export class LogUI extends React.Component<any, LogUIState> {
     private consoleDiv: HTMLDivElement;
@@ -88,21 +108,28 @@ export class LogUI extends React.Component<any, LogUIState> {
         }
     }
 
-
-    componentDidMount() {
-        document.addEventListener('keyup', this.onKeyUp);
-        document.addEventListener('keydown', this.onKeyDown);
-    }
-
-    componentWillUnmount() {
-        document.removeEventListener('keyup', this.onKeyUp);
-        document.removeEventListener('keydown', this.onKeyUp);
-    }
-
     componentDidUpdate() {
         // console.timeEnd('Log Render');
         // here we keep previous scroll position in case scrolling was anywhere but at the end
         this.consoleDiv.scrollTop = this.keepScrollPos ? this.lastScrollTop : (this.consoleDiv.scrollHeight - this.consoleDiv.clientHeight);
+    }
+
+    toggleConsole = () => {
+        console.log('escape key down!');
+        this.setState({
+            visible: !this.state.visible
+        });
+    }
+
+    renderHotkeys() {
+        return <Hotkeys>
+                <Hotkey
+                    global={true}
+                    combo="escape"
+                    label="Toggle Logs console"
+                    onKeyDown={this.toggleConsole}>
+                </Hotkey>
+            </Hotkeys>;
     }
 
     // shouldComponentUpdate() {
@@ -115,14 +142,14 @@ export class LogUI extends React.Component<any, LogUIState> {
 
         return (
             <div ref={(el) => { this.consoleDiv = el; }} onScroll={this.checkScroll} className={`${classes}`}>
-            {
-                Logger.logs.map((line, i) => {
-                        return <div key={i} className={`consoleLine ${line.intent}`}>
-                        {/* <span className="consoleDate">{line.date}</span> */}
-                        {line.line}
-                    </div>
-                })
-            }
+                {
+                    Logger.logs.map((line, i) => {
+                            return <div key={i} className={`consoleLine ${line.intent}`}>
+                            {/* <span className="consoleDate">{line.date}</span> */}
+                            {line.line}
+                        </div>
+                    })
+                }
             </div>
         )
     }

@@ -42,10 +42,10 @@ export class ReactApp extends React.Component<{}, IState> {
 
         this.appState = new AppState();
 
-        Logger.log('React-FTP', remote.app.getVersion());
+        Logger.success('React-FTP', remote.app.getVersion());
+        Logger.warn('React-FTP', remote.app.getVersion());
+        Logger.error('React-FTP', remote.app.getVersion());
     }
-
-
 
     addListeners() {
         ipcRenderer.on('exitRequest', (e: Event) => {

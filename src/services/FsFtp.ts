@@ -46,6 +46,7 @@ class Client{
     private readyResolve: () => any;
     private readyReject: (err: any) => any;
     private readyPromise: Promise<any>;
+    private previousError: any;
 
     static clients: Array<Client> = [];
 
@@ -56,6 +57,9 @@ class Client{
 
         return client;
     }
+
+    private instanceId = 0;
+    static id = 0;
 
     // TODO: return promise if client is not connected ??
     static getFreeClient(hostname: string) {
@@ -71,30 +75,37 @@ class Client{
 
     constructor(host: string, options: any = {}) {
         console.log('creating ftp client');
+        this.instanceId = Client.id++;
         this.host = host;
         this.connected = false;
         this.client = new ftp();
         this.bindEvents();
     }
 
+    getLoggerArgs(params: (string | number | boolean)[]): (string | number | boolean)[] {
+        // append host and client instance
+        return [`[${this.host}:${this.instanceId}]`, ...params];
+    }
+
+    success(...params: (string | number | boolean)[]) {
+        Logger.success(...this.getLoggerArgs(params));
+    }
+
     log(...params: (string | number | boolean)[]) {
-        const args = [`[${this.host}]`, ...params] as (string | number | boolean)[];
-        Logger.log(...args);
+        Logger.log(...this.getLoggerArgs(params));
     }
 
     warn(...params: (string | number | boolean)[]) {
-        const args = [`[${this.host}]`, ...params] as (string | number | boolean)[];
-        Logger.warn(...args);
+        Logger.warn(...this.getLoggerArgs(params));
     }
 
     error(...params: (string | number | boolean)[]) {
-        const args = [`[${this.host}]`, ...params] as (string | number | boolean)[];
-        Logger.error(...args);
+        Logger.error(...this.getLoggerArgs(params));
     }
 
     public login(options: any = {}): Promise<any> {
         if (!this.connected) {
-            this.log('connecting to', this.host, 'with options', Object.assign({ host: this.host, ...options }, { password: '****' }).toString());
+            this.log('connecting to', this.host, 'with options', Object.assign({ host: this.host, ...options }, { password: '****' }));
             this.readyPromise = new Promise((resolve, reject) => {
                 this.readyResolve = resolve;
                 this.readyReject = reject;
@@ -113,7 +124,7 @@ class Client{
     }
 
     private onReady() {
-        this.log('ready, setting transfer mode to binary');
+        this.success('ready, setting transfer mode to binary');
         this.client.binary((err: Error) => {
             if (err) {
                 this.warn('could not set transfer mode to binary');
@@ -125,7 +136,7 @@ class Client{
     }
 
     private onClose() {
-        this.log('close');
+        this.warn('close');
         this.connected = false;
         this.status = 'offline';
         if (this.api) {
@@ -133,16 +144,34 @@ class Client{
         }
     }
 
+    private goOffline(error:any) {
+        this.status = 'offline';
+        if (this.readyReject) {
+            if (typeof error.code === 'string') {
+                switch (error.code) {
+                    case 'ENOTFOUND':
+                        error.message = 'Server not found: check hostname';
+                        break;
+
+                    case 'ECONNREFUSED':
+                        error.message = 'Connection refused by the server';
+                        break;
+                }
+            }
+            this.readyReject(error);
+        }
+    }
+
     private onError(error: any) {
-        debugger;
+        console.log(typeof error.code);
         this.error('onError', `${error.code}: ${error.message}`);
         switch(error.code) {
             // 500 series: command not accepted
             // user not logged in (user limit may be reached too)
             case 530:
-                this.status = 'offline';
-                debugger;
-                this.readyReject(error);
+            case 'ENOTFOUND':
+            case 'ECONNREFUSED':
+                this.goOffline(error);
                 break;
 
             case 550:
@@ -157,13 +186,15 @@ class Client{
                 break;
 
             default:
+                // sometimes error.code is undefined or is a string (!!)
                 this.warn('unhandled error code:', error.code);
-                // sometimes error.code is undefined
                 if (error && error.match(/Timeout/)) {
                     this.warn('Connection timeout ?');
                 }
                 break;
         }
+
+        this.previousError = error;
     }
 
     private onGreeting(greeting: string) {
@@ -429,11 +460,10 @@ class FtpAPI implements FsApi {
 
     exists(path: string): Promise<boolean> {
         console.warn('FsFtp.exists not implemented: always returns true');
-        return Promise.resolve(true);
+        return Promise.resolve(false);
     }
 
     list(dir: string): Promise<File[]> {
-        debugger;
         console.log('FsFtp.readDirectory', dir);
         return this.master.list(dir);
     };

@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Dialog, Classes, Intent, Button, InputGroup, FormGroup} from "@blueprintjs/core";
+import { Dialog, Classes, Intent, Button, InputGroup, FormGroup, Colors} from "@blueprintjs/core";
 import { inject } from "mobx-react";
 import { FileState } from "../state/fileState";
 
@@ -13,12 +13,17 @@ interface InjectedProps extends ILoginProps {
     fileCache: FileState;
 }
 
+type Error = {
+    message: string;
+    code: number
+};
+
 interface ILoginState {
     username: string;
     password: string;
     port: number;
     connecting: boolean;
-    error: string;
+    error: Error;
     busy: boolean;
 }
 
@@ -35,7 +40,7 @@ export class LoginDialog extends React.Component<ILoginProps, ILoginState> {
             username: '',
             password: '',
             connecting: false,
-            error: '',
+            error: null,
             busy: false,
             port: 21
         };
@@ -65,7 +70,7 @@ export class LoginDialog extends React.Component<ILoginProps, ILoginState> {
         const { username, password, port } = this.state;
         const { fileCache } = this.injected;
         console.log('onLogin', username, '****');
-        this.setState({ busy: true });
+        this.setState({ busy: true, error: null });
 
         fileCache.doLogin(username, password, port)
             .catch((err) => {
@@ -96,7 +101,7 @@ export class LoginDialog extends React.Component<ILoginProps, ILoginState> {
     }
 
     componentDidMount() {
-        this.setState({ error: '', busy: false });
+        this.setState({ error: null, busy: false });
         document.addEventListener('keyup', this.onKeyUp);
     }
 
@@ -118,6 +123,10 @@ export class LoginDialog extends React.Component<ILoginProps, ILoginState> {
         const { fileCache } = this.injected;
         const server = fileCache.server;
 
+        if (error) {
+            console.log(error.code, error.message);
+        }
+
         return(
             <Dialog
             icon="globe-network"
@@ -131,7 +140,7 @@ export class LoginDialog extends React.Component<ILoginProps, ILoginState> {
             className="loginDialog"
         >
                 <div className={Classes.DIALOG_BODY}>
-                    {error && (<h4 className={Classes.INTENT_DANGER}>Login error</h4>)}
+                    {error && (<p className="error" style={{ backgroundColor: Colors.RED4 }}>{error.message} (code {error.code})</p>)}
                 <FormGroup
                     inline={true}
                     labelFor="username"

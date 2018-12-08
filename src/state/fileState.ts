@@ -60,6 +60,7 @@ export class FileState {
 
         const path = history[current + dir];
         console.log('opening path from history', path);
+
         this.cd(path, '', true);
     }
     // /history
@@ -67,6 +68,9 @@ export class FileState {
     /* fs API */
     private api: FsApi;
     private fs: Fs;
+    private prevFs: Fs;
+    private prevApi: FsApi;
+    private prevServer: string;
 
     private loginDefer: Deferred<any>;
 
@@ -79,6 +83,18 @@ export class FileState {
         }
     }
 
+    private saveContext() {
+        this.prevServer = this.server;
+        this.prevApi = this.api;
+        this.prevFs = this.fs;
+    }
+
+    private restoreContext() {
+        this.api = this.prevApi;
+        this.fs = this.prevFs;
+        this.server = this.prevServer;
+    }
+
     private getNewFS(path: string): Fs {
         let newfs = getFS(path);
 
@@ -87,6 +103,8 @@ export class FileState {
             if (this.api) {
                 this.api.free();
             }
+
+            this.saveContext();
 
             this.fs = newfs;
             this.api = new newfs.API(path);
@@ -115,6 +133,8 @@ export class FileState {
 
     @action
     revertPath() {
+        // first revert fs/path
+        this.restoreContext();
         this.navHistory(0);
         this.status = 'ok';
     }
@@ -136,10 +156,10 @@ export class FileState {
     // changes current path and retrieves file list
     async cd(path: string, path2: string = '', skipHistory = false): Promise<string> {
         // first updates fs (eg. was local fs, is now ftp)
-        // if (this.path.substr(0, 1) !== path.substr(0, 1)) {
         console.log('cd', path, this.path);
 
-        if (this.path.split('/')[0] !== path.split('/')[0]) {
+        // if (this.path.split('/')[0] !== path.split('/')[0]) {
+        if (this.path !== path) {
             if (this.getNewFS(path)) {
                 this.server = this.fs.serverpart(path);
             } else {

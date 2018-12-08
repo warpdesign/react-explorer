@@ -1,18 +1,17 @@
 .console{
-    overflow:auto;
     position:absolute;
+    overflow:auto;
     z-index:9999;
     font-family: sans-serif;
     font-size:13px;
-    background-color:rgba(255,255,255,.9);
-    color:#656565;
+    background-color:rgb(255,255,255);
+    color:rgb(48, 57, 66); /* #656565 */
     padding:0;
     left:0;
     right:0;
     bottom:0;
-    height:200px;
+    height:208px;
     transform:translateY(220px);
-    overflow:auto;
     transition-property:transform;
     transition-timing-function: ease-in-out;
     transition-duration:.3s;
@@ -33,27 +32,84 @@
 .console .consoleLine{
     position:relative;
     padding: 4px 25px;
-    border-bottom:1px solid rgb(232,230,230);
 }
 
-.console .warn{
-    background-color:rgb(247, 247, 205);
-    color:rgb(142, 133, 0)
+.consoleLine{
+    border-top:1px solid rgb(240, 240, 240);
+    border-bottom:1px solid transparent;
 }
 
-.console .error{
+
+.console .warning{
+    background-color:hsl(50, 100%, 95%);
+    color:rgb(101, 95, 3);
+}
+
+.console .danger{
     color:rgb(226, 12, 12);
-    background-color:rgb(255, 230, 230);
+    background-color:hsl(0, 100%, 97%);
 }
 
-.console .warn:before, .console .error:before{
+.console .success:last-child{
+    border-bottom-color:hsl(130, 24%, 61%);
+}
+
+.console .danger:last-child{
+    border-bottom-color:hsl(0, 100%, 92%);
+}
+
+.console .warning:last-child{
+    border-bottom-color:hsl(50, 100%, 88%);
+}
+
+.console .none:last-child{
+    border-bottom-color:rgb(240,240,240);
+}
+
+.console .success + .danger,
+.console .warning + .danger,
+.console .none + .danger,
+.console .danger:first-child,
+.console .danger + .none {
+    border-top-color:hsl(0, 100%, 92%);
+}
+
+.console .success + .warning,
+.console .danger + .warning,
+.console .none + .warning,
+.console .warning:first-child,
+.console .warning + .none {
+    border-top-color:hsl(50, 100%, 88%);
+}
+
+.console .warning + .success,
+.console .danger + .success,
+.console .none + .success,
+.console .success:first-child,
+.console .success + .none {
+    border-top-color:hsl(130, 24%, 61%);
+}
+
+.console .success{
+    color:rgb(9, 146, 60);
+    background-color:rgb(193, 236, 206);
+}
+
+.console .warning:before, .console .danger:before, .console .success:before{
     content: '⚠️';
     position:absolute;
     left:0;
     text-align: center;
     width: 25px;
+    top: 0;
+    bottom: 0;
+    padding:5px 2px;
 }
 
-.console .error:before{
-    content:'❌';
+.console .danger:before{
+    content:'😡';
+}
+
+.console .success:before{
+    content:'👌'
 }

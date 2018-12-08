@@ -207,7 +207,6 @@ export class FileList extends React.Component<IProps, FileListState> {
                 }
 
                 this.clickTimeout = setTimeout(() => {
-                    console.log('click timeout');
                     this.toggleInlineRename(element, originallySelected, file);
                 }, CLICK_DELAY);
             }

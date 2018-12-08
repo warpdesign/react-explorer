@@ -208,3 +208,12 @@ button.small:hover{
     width: 28%;
     text-align: right;
 }
+
+.loginDialog .error{
+    text-align:center;
+    color:white;
+    padding:15px;
+    margin:10px 30px 40px 30px;
+    border-radius:3px;
+    border:1px solid rgba(16,22,26,.2);
+}
