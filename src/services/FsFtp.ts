@@ -13,14 +13,15 @@ const ServerPart = /^(ftp\:\/\/)*(ftp\.[a-z]+\.[a-z]{2,3}|[0-9]{1,3}\.[0-9]{1,3}
 const invalidChars = /^[\.]+$/ig;
 const TMP_DIR = remote.app.getPath('downloads');
 
-function join(path:string, path2:string) {
-    let sep = '';
+function join(path1: string, path2: string) {
+    let prefix = '';
 
-    if (!path.endsWith('/') && !path2.startsWith('/')) {
-        sep = '/';
+    if (path1.match(/^ftp:\/\//)) {
+        prefix = 'ftp://';
+        path1 = path1.replace('ftp://', '');
     }
 
-    return path + sep + path2;
+    return prefix + path.join(path1, path2);
 }
 
 const Parent: File = {

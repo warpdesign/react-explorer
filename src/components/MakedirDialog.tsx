@@ -1,7 +1,6 @@
 import * as React from "react";
 import { Dialog, Classes, Intent, Button, InputGroup, FormGroup, Label, Checkbox } from "@blueprintjs/core";
 import { debounce } from "../utils/debounce";
-import { sep as separator } from 'path';
 
 interface IMakedirProps {
     isOpen: boolean;
@@ -112,6 +111,18 @@ export class MakedirDialog extends React.Component<IMakedirProps, IMakedirState>
         const { path, valid, ctrlKey } = this.state;
         const intent = !valid && 'danger' || 'none';
         const helperText = !valid && (<span>Folder name not valid</span>) || (<span>&nbsp;</span>);
+        let { parentPath } = this.props;
+
+        let sep = '';
+        if (parentPath.match(/\//)) {
+            sep = '/'
+        } else {
+            sep = '\\';
+        }
+
+        if (!parentPath.endsWith(sep)) {
+            parentPath += sep;
+        }
 
         return(
             <Dialog
@@ -130,7 +141,7 @@ export class MakedirDialog extends React.Component<IMakedirProps, IMakedirState>
                     helperText={helperText}
                     inline={true}
                     labelFor="directory-input"
-                    labelInfo={`${this.props.parentPath}${separator}`}
+                    labelInfo={`${parentPath}`}
                 >
                     <InputGroup
                         onChange={this.onPathChange}

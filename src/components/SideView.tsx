@@ -11,6 +11,7 @@ import * as process from 'process';
 import { remote } from 'electron';
 import { AppToaster } from "./AppToaster";
 import { Loader } from "./Loader";
+import { Logger } from "./Log";
 
 interface SideViewProps {
     hide: boolean;
@@ -95,6 +96,19 @@ export class SideView extends React.Component<SideViewProps, SideViewState>{
         }
     }
 
+    private onShowHistory = () => {
+        const { hide, active } = this.props;
+        const { fileCache } = this.state;
+
+        if (active && !hide && fileCache.status === 'ok') {
+            console.log('showHistory');
+            fileCache.history.forEach((path, i) => {
+                let str = fileCache.current === i && path + ' *' || path;
+                Logger.log(str);
+            });
+        }
+    }
+
     public renderHotkeys() {
         return <Hotkeys>
             <Hotkey
@@ -102,6 +116,13 @@ export class SideView extends React.Component<SideViewProps, SideViewState>{
                 combo="meta + c"
                 label="Copy selected files to clipboard"
                 onKeyDown={this.onCopy}
+            />
+            <Hotkey
+                global={true}
+                combo="mod + h"
+                label="Show view history (Debug)"
+                preventDefault={true}
+                onKeyDown={this.onShowHistory}
             />
             <Hotkey
                 global={true}
