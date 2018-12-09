@@ -286,7 +286,7 @@ export class Toolbar extends React.Component<IProps, PathInputState> {
                         <Button rightIcon="caret-down" icon="cog" text="" />
                     </Popover>
                 </ButtonGroup>
-                <Tooltip content={this.renderTooltip()} position={Position.RIGHT} hoverOpenDelay={1000}>
+                {/* <Tooltip content={this.renderTooltip()} position={Position.RIGHT} hoverOpenDelay={1000}> */}
                 <InputGroup
                         onChange={this.onPathChange}
                         onKeyUp={this.onKeyUp}
@@ -298,7 +298,7 @@ export class Toolbar extends React.Component<IProps, PathInputState> {
                         onBlur={this.onBlur}
                         onFocus={this.onFocus}
                     />
-                </Tooltip>
+                {/* </Tooltip> */}
                 {isOpen &&
                     <MakedirDialog isOpen={isOpen} onClose={this.makedir} onValidation={fileCache.isDirectoryNameValid} parentPath={path}></MakedirDialog>
                 }

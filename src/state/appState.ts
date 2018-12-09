@@ -39,8 +39,6 @@ export class AppState {
                 // refresh cache: only if same directory ?
                 if (options.dstPath === cache.path && options.dstFsName === cache.getFS().name) {
                     cache.navHistory(0);
-                } else {
-                    debugger;
                 }
             });
     }

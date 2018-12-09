@@ -343,10 +343,11 @@ class Client{
                 if (err) {
                     reject(err);
                 } else {
-                    readStream.once('close', () => resolve());
+                    // readStream.once('close', () => resolve());
+                    resolve();
                 }
-            })
-        })
+            });
+        });
     }
 
     public rename(serverPath: string, oldName: string, newName: string): Promise<string> {
@@ -463,9 +464,9 @@ class FtpAPI implements FsApi {
         return Promise.resolve(false);
     }
 
-    list(dir: string): Promise<File[]> {
+    list(dir: string, appendParent = true): Promise<File[]> {
         console.log('FsFtp.readDirectory', dir);
-        return this.master.list(dir);
+        return this.master.list(dir, appendParent);
     };
 
     async stat(fullPath: string): Promise<File> {

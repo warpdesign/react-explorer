@@ -277,6 +277,7 @@ class LocalApi implements FsApi {
         };
     }
 
+    // TODO: handle stream error
     async putStream(readStream: fs.ReadStream, dstPath: string, progress: (pourcent: number) => void): Promise<void>{
         let bytesRead = 0;
         const throttledProgress = throttle(() => { progress(bytesRead) }, 800);
@@ -292,15 +293,16 @@ class LocalApi implements FsApi {
         });
 
         console.log('opening write stream', dstPath);
-        const writeStream = fs.createWriteStream(dstPath, {
-
-        });
+        const writeStream = fs.createWriteStream(dstPath);
 
         readStream.pipe(reportProgress)
             .pipe(writeStream);
 
         return new Promise((resolve: (val?: any) => void, reject: (val?: any) => void) => {
-            readStream.once('close', () => resolve());
+            // readStream.once('close', () => resolve());
+            writeStream.once('finish', () => {
+                resolve();
+            });
         });
     }
 };
