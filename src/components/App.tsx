@@ -49,7 +49,7 @@ export class ReactApp extends React.Component<{}, IState> {
 
     addListeners() {
         ipcRenderer.on('exitRequest', (e: Event) => {
-            this.onExitRequest();
+            this.onExitRequest(true);
         });
     }
 
@@ -77,13 +77,13 @@ export class ReactApp extends React.Component<{}, IState> {
         }
     }
 
-    onExitRequest = () => {
+    onExitRequest = (winClosed = false) => {
         let shouldCancel = false;
 
         if (this.appState && this.appState.pendingTransfers) {
             this.setState({ isExitDialogOpen: true });
             shouldCancel = true;
-        } else {
+        }  else if (winClosed) {
             ipcRenderer.send('exit');
         }
 

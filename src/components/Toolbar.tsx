@@ -1,7 +1,7 @@
 import * as React from "react";
 import { reaction, IReactionDisposer } from 'mobx';
 import { inject, observer } from 'mobx-react';
-import { InputGroup, ControlGroup, Button, ButtonGroup, Popover, Intent, Alert, ProgressBar, Classes, HotkeysTarget, Hotkeys, Hotkey } from '@blueprintjs/core';
+import { InputGroup, ControlGroup, Button, ButtonGroup, Popover, Intent, Alert, ProgressBar, Classes, HotkeysTarget, Hotkeys, Hotkey, Tooltip, Position } from '@blueprintjs/core';
 import { AppState } from "../state/appState";
 import { FileMenu } from "./FileMenu";
 import { MakedirDialog } from "./MakedirDialog";
@@ -250,6 +250,22 @@ export class Toolbar extends React.Component<IProps, PathInputState> {
         </Hotkeys>;
     }
 
+    private renderTooltip() {
+        return (
+            <div>
+                <p>
+                    Enter any local or <em>remote</em> path to show its content.<br /><br />
+                Supported types:
+                </p>
+                <ul>
+                    <li>/Users/nico/</li>
+                    <li>ftp://ftp.foo.net</li>
+                    <li>ftp://user@pass:ftp.foo.net:21</li>
+                </ul>
+            </div>
+        )
+    }
+
     public render() {
         const { status, path, isOpen, isDeleteOpen } = this.state;
         const { fileCache } = this.injected;
@@ -270,6 +286,7 @@ export class Toolbar extends React.Component<IProps, PathInputState> {
                         <Button rightIcon="caret-down" icon="cog" text="" />
                     </Popover>
                 </ButtonGroup>
+                <Tooltip content={this.renderTooltip()} position={Position.RIGHT} hoverOpenDelay={1000}>
                 <InputGroup
                         onChange={this.onPathChange}
                         onKeyUp={this.onKeyUp}
@@ -280,7 +297,8 @@ export class Toolbar extends React.Component<IProps, PathInputState> {
                         inputRef={this.refHandler}
                         onBlur={this.onBlur}
                         onFocus={this.onFocus}
-                />
+                    />
+                </Tooltip>
                 {isOpen &&
                     <MakedirDialog isOpen={isOpen} onClose={this.makedir} onValidation={fileCache.isDirectoryNameValid} parentPath={path}></MakedirDialog>
                 }
