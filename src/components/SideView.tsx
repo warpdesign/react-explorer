@@ -13,6 +13,8 @@ import { AppToaster } from "./AppToaster";
 import { Loader } from "./Loader";
 import { Logger } from "./Log";
 
+declare var ENV: any;
+
 interface SideViewProps {
     hide: boolean;
     active: boolean;
@@ -43,7 +45,9 @@ export class SideView extends React.Component<SideViewProps, SideViewState>{
         super(props);
 
         const { appState } = this.injected;
-        const cache: FileState = appState.addCache(process.platform === "win32" ? remote.app.getPath('temp') : '/tmp/react-explorer');
+        // TODO: pass start path as prop ?
+        const path = process.platform === "win32" ? remote.app.getPath('temp') : '/tmp/react-explorer';
+        const cache: FileState = appState.addCache(ENV.CY && '' || '');
 
         this.state = {
             fileCache: cache

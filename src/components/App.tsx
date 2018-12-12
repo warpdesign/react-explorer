@@ -24,6 +24,14 @@ const EXIT_DELAY = 1200;
 const KEY_Q = 81;
 const UP_DELAY = 130;
 
+declare var ENV: any;
+
+declare global {
+    interface Window {
+        appState: AppState;
+    }
+}
+
 @observer
 @HotkeysTarget
 export class ReactApp extends React.Component<{}, IState> {
@@ -42,9 +50,13 @@ export class ReactApp extends React.Component<{}, IState> {
 
         this.appState = new AppState();
 
-        Logger.success('React-FTP', remote.app.getVersion());
-        Logger.warn('React-FTP', remote.app.getVersion());
-        Logger.error('React-FTP', remote.app.getVersion());
+        if (ENV.CY) {
+            window.appState = this.appState;
+        }
+
+        Logger.success(`React-FTP - CY: ${ENV.CY} NODE_ENV: ${ENV.NODE_ENV}`);
+        // Logger.warn('React-FTP', remote.app.getVersion());
+        // Logger.error('React-FTP', remote.app.getVersion());
     }
 
     addListeners() {

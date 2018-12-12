@@ -3,6 +3,8 @@ import { FsGeneric } from './FsGeneric';
 import { FsFtp } from './FsFtp';
 import * as fs from 'fs';
 
+declare var ENV: any;
+
 export interface File {
     dir: string;
     name: string;
@@ -80,6 +82,9 @@ export function getFS(path: string):Fs {
     return newfs;
 }
 
+// in test environment, load the generic fs as first one
+// if (ENV.CY) {
+//     registerFs(FsGeneric);
+// }
 registerFs(FsLocal);
 registerFs(FsFtp);
-// registerFs(FsGeneric);

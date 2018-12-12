@@ -54,8 +54,6 @@ export class FileState {
             newCurrent = length - 1;
         }
 
-        // console.log('nav history', current, '=>', newCurrent);
-
         this.current = newCurrent;
 
         const path = history[current + dir];

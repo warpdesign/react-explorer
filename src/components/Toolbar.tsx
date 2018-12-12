@@ -89,31 +89,35 @@ export class Toolbar extends React.Component<IProps, PathInputState> {
 
     private onSubmit = () => {
         if (this.cache.path !== this.state.path) {
+            this.input.blur();
             this.cache.cd(this.state.path)
                 .catch((err:string) => {
                     AppAlert.show(err, {
                         intent: 'danger'
                     });
-                    this.input.blur();
+                    this.input.focus();
                 });
         }
     }
 
     private onKeyUp = (event: React.KeyboardEvent<HTMLElement>) => {
-        // console.log('path keyup');
+        console.log('path keyup', event.keyCode);
         if (event.keyCode === KEYS.Escape) {
             // since React events are attached to the root document
             // event already has bubbled up so we must stop
             // its immediate propagation
             event.nativeEvent.stopImmediatePropagation();
             // lose focus
-            this.input.blur();
+            // this.input.blur();
+            // workaround for Cypress bug https://github.com/cypress-io/cypress/issues/1176
+            this.onBlur();
         } else if (event.keyCode === KEYS.Enter) {
             this.onSubmit();
         }
     }
 
     private onBlur = () => {
+        console.log('onblur');
         this.setState({ path: this.cache.path, status: 0 });
     }
 
@@ -280,14 +284,15 @@ export class Toolbar extends React.Component<IProps, PathInputState> {
         return (
             <ControlGroup>
                 <ButtonGroup style={{ minWidth: 120 }}>
-                    <Button disabled={!canGoBackward} onClick={this.onBackward} rightIcon="chevron-left"></Button>
-                    <Button disabled={!canGoForward} onClick={this.onForward} rightIcon="chevron-right"></Button>
+                    <Button data-cy-backward disabled={!canGoBackward} onClick={this.onBackward} rightIcon="chevron-left"></Button>
+                    <Button data-cy-forward disabled={!canGoForward} onClick={this.onForward} rightIcon="chevron-right"></Button>
                     <Popover content={<FileMenu selectedItems={selected} onFileAction={this.onFileAction} />}>
                         <Button rightIcon="caret-down" icon="cog" text="" />
                     </Popover>
                 </ButtonGroup>
                 {/* <Tooltip content={this.renderTooltip()} position={Position.RIGHT} hoverOpenDelay={1000}> */}
                 <InputGroup
+                        data-cy-path
                         onChange={this.onPathChange}
                         onKeyUp={this.onKeyUp}
                         placeholder="Enter Path to load"

@@ -129,9 +129,9 @@ button.small:hover{
 }
 
 .bp3-badge{
-    position: absolute;
-    left: 100%;
-    top: 6px;
+    display: inline-block;
+    margin-left: 10px;
+    position: relative;
 }
 
 .bp3-badge .bp3-spinner svg {
@@ -139,14 +139,18 @@ button.small:hover{
 }
 
 .bp3-badge-content{
-    position:absolute;
+    position: absolute;
     left: 0;
-    color:#106ba3;
+    color: #106ba3;
     font-size: 11px;
     font-weight: bold;
     line-height: 19px;
     right: 0;
     text-align: center;
+}
+
+.bp3-badge .bp3-spinner{
+    display:inline-block;
 }
 
 .bp3-badge.bp3-intent-success{

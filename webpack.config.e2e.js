@@ -4,8 +4,17 @@ const webpack = require('webpack');
 
 const baseConfig = {
     output: {
-        path: path.resolve(__dirname, 'dist'),
+        path: path.resolve(__dirname, 'dist-e2e'),
         filename: '[name].js'
+    },
+    externals: {
+        "process": '{process: "dtc"}',
+        "electron": '{ipcRenderer: {send: function() {}, on: function() {}}, remote: { app: { getPath: function(str) { return "**ci**"; } } } }',
+        "child_process": '{exec: function(str, cb) { cb(); }}',
+        "fs": '{}',
+        "path": '{}',
+        "net": '{}',
+        "tls": '{}'
     },
     node: {
         __dirname: false
@@ -17,11 +26,7 @@ const baseConfig = {
         // Add '.ts' and '.tsx' as resolvable extensions.
         extensions: [".ts", ".tsx", ".js", ".json", ".css"]
     },
-    resolveLoader: {
-        alias: {
-            'data-cy-loader': path.join(__dirname, 'data-cy-loader.js')
-        }
-    },
+
     module: {
         rules: [
             // All files with a '.ts' or '.tsx' extension will be handled by 'awesome-typescript-loader'.
@@ -44,12 +49,7 @@ const baseConfig = {
                         outputPath: 'fonts/'
                     }
                 }]
-            }/*,
-            // remove cypress attributes
-            {
-                test: /\.html$/,
-                use: ['data-cy-loader']
-            }*/
+            }
         ]
     },
 
@@ -66,13 +66,7 @@ const baseConfig = {
 module.exports = [
     Object.assign(
         {
-            target: 'electron-main',
-            entry: { main: './src/main.ts' }
-        },
-        baseConfig),
-    Object.assign(
-        {
-            target: 'electron-renderer',
+            target: 'web',
             entry: { gui: './src/index.tsx' },
             plugins: [
                 new HtmlWebpackPlugin({
@@ -80,10 +74,9 @@ module.exports = [
                     template: 'index.html'
                 }),
                 new webpack.DefinePlugin({
-                    'ENV.CY': false,
+                    'ENV.CY': true,
                     'ENV.NODE_ENV': JSON.stringify(baseConfig.mode)
-                })
-            ]
+                })]
         },
         baseConfig)
 ];
