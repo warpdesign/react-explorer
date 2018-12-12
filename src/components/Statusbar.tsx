@@ -51,7 +51,8 @@ export class Statusbar extends React.Component {
 
         const pasteButton = (
             <Tooltip content={`Copy ${numSelected} file(s) to the clipboard`} disabled={disabled}>
-            <Button
+                <Button
+                data-cy-paste-bt
                 disabled={disabled}
                 icon="clipboard"
                 intent={!disabled && Intent.PRIMARY || Intent.NONE}

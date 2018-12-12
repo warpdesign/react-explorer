@@ -1,0 +1,62 @@
+[
+    {
+        "dir": "/tmp/react-explorer",
+        "fullname": "..",
+        "name": "",
+        "extension": "",
+        "cDate": "2018-12-12T10:01:38.212Z",
+        "mDate": "2018-12-12T10:01:38.212Z",
+        "length": 0,
+        "mode": 0,
+        "isDir": true,
+        "readonly": true
+    },
+    {
+        "dir": "/tmp/react-explorer",
+        "fullname": "foo",
+        "name": "foo",
+        "extension": "",
+        "cDate": "2018-12-12T10:01:38.502Z",
+        "mDate": "2018-12-12T10:01:38.502Z",
+        "length": 160,
+        "mode": 16877,
+        "isDir": true,
+        "readonly": false
+    },
+    {
+        "dir": "/tmp/react-explorer",
+        "fullname": "racine.txt",
+        "name": "racine",
+        "extension": ".txt",
+        "cDate": "2018-12-12T10:01:38.493Z",
+        "mDate": "2018-12-12T10:01:38.493Z",
+        "length": 0,
+        "mode": 33188,
+        "isDir": false,
+        "readonly": false
+    },
+    {
+        "dir": "/tmp/react-explorer",
+        "fullname": "test",
+        "name": "test",
+        "extension": "",
+        "cDate": "2018-12-12T10:01:38.499Z",
+        "mDate": "2018-12-12T10:01:38.499Z",
+        "length": 64,
+        "mode": 16877,
+        "isDir": true,
+        "readonly": false
+    },
+    {
+        "dir": "/tmp/react-explorer",
+        "fullname": "test2",
+        "name": "test2",
+        "extension": "",
+        "cDate": "2018-12-12T10:01:38.508Z",
+        "mDate": "2018-12-12T10:01:38.508Z",
+        "length": 96,
+        "mode": 16877,
+        "isDir": true,
+        "readonly": false
+    }
+]

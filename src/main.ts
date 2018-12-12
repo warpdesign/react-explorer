@@ -1,9 +1,12 @@
 import { app, BrowserWindow, ipcMain } from 'electron';
+import * as process from 'process';
 import { watch } from 'fs';
 
 declare var __dirname: string
 
 const CLOSE_EXIT_DELAY = 2000;
+const ENV_E2E = !!process.env.E2E;
+
 let mainWindow: Electron.BrowserWindow;
 
 function installReactDevTools() {
@@ -22,7 +25,7 @@ function installWatcher(path: string, window: BrowserWindow) {
 
 let forceExit = false;
 
-function installExitKeyListener() {
+function installExitListeners() {
     let exitWindow: BrowserWindow = null;
     let timeout:any = 0;
 
@@ -64,8 +67,10 @@ function installExitKeyListener() {
 }
 
 function onReady() {
-    installReactDevTools();
-    installExitKeyListener();
+    if (!ENV_E2E) {
+        installReactDevTools();
+    }
+    installExitListeners();
 
     mainWindow = new BrowserWindow({
         minWidth: 750,
@@ -73,7 +78,9 @@ function onReady() {
         height: 600
     });
 
-    installWatcher('./dist', mainWindow);
+    if (!ENV_E2E) {
+        installWatcher('./dist', mainWindow);
+    }
 
     const fileName = `file://${__dirname}/index.html`;
 
@@ -82,15 +89,12 @@ function onReady() {
     mainWindow.on('close', () => app.quit());
 
     // devtools
-    const devtools = new BrowserWindow();
-    mainWindow.webContents.setDevToolsWebContents(devtools.webContents);
-    mainWindow.webContents.openDevTools({ mode: 'detach' });
-    mainWindow.webContents.on('will-navigate', () => {
-        console.log('** will navigate!');
-    });
-    mainWindow.webContents.on('will-prevent-unload', (e:Event) => {
-        console.log('** will prevent unload');
-    });
+    // spectron problem if devtools is opened, see https://github.com/electron/spectron/issues/254
+    if (!ENV_E2E) {
+        const devtools = new BrowserWindow();
+        mainWindow.webContents.setDevToolsWebContents(devtools.webContents);
+        mainWindow.webContents.openDevTools({ mode: 'detach' });
+    }
 
     mainWindow.on('close', (e: Event) => {
         if (!forceExit) {

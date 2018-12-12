@@ -5,6 +5,14 @@ import * as process from 'process';
 import { remote } from 'electron';
 import { ReactApp } from "./components/App";
 
+// declare var __PROCESS__: {
+//     env: {
+//         ci: string
+//     }
+// }
+
+declare var ENV: any;
+
 // Devlopment stuff: reload window on file change
 window.addEventListener('load', () => {
     const btn: HTMLButtonElement = document.querySelector('#reload');
@@ -12,6 +20,8 @@ window.addEventListener('load', () => {
         remote.getCurrentWebContents().reloadIgnoringCache();
     });
 });
+
+console.log(ENV.CY);
 
 // Development stuff: create fake directory for testing
 const exec = require('child_process').exec;

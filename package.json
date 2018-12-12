@@ -13,7 +13,9 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "webpack --watch"
+    "build": "webpack --watch",
+    "build:e2e": "webpack --config webpack.config.e2e.js --watch",
+    "server": "http-server ./dist-e2e -p 8080"
   },
   "author": "",
   "license": "ISC",
@@ -29,6 +31,7 @@
     "file-loader": "^2.0.0",
     "ftp-srv": "^3.0.4",
     "html-webpack-plugin": "^3.2.0",
+    "http-server": "^0.11.1",
     "source-map-loader": "^0.2.4",
     "style-loader": "^0.23.0",
     "typescript": "^3.1.1",

@@ -280,8 +280,8 @@ export class Toolbar extends React.Component<IProps, PathInputState> {
         return (
             <ControlGroup>
                 <ButtonGroup style={{ minWidth: 120 }}>
-                    <Button disabled={!canGoBackward} onClick={this.onBackward} rightIcon="chevron-left"></Button>
-                    <Button disabled={!canGoForward} onClick={this.onForward} rightIcon="chevron-right"></Button>
+                    <Button data-cy-backward disabled={!canGoBackward} onClick={this.onBackward} rightIcon="chevron-left"></Button>
+                    <Button data-cy-forward disabled={!canGoForward} onClick={this.onForward} rightIcon="chevron-right"></Button>
                     <Popover content={<FileMenu selectedItems={selected} onFileAction={this.onFileAction} />}>
                         <Button rightIcon="caret-down" icon="cog" text="" />
                     </Popover>
