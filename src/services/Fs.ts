@@ -83,8 +83,8 @@ export function getFS(path: string):Fs {
 }
 
 // in test environment, load the generic fs as first one
-if (ENV.CY) {
-    registerFs(FsGeneric);
-}
+// if (ENV.CY) {
+//     registerFs(FsGeneric);
+// }
 registerFs(FsLocal);
 registerFs(FsFtp);

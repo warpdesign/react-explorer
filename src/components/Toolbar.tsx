@@ -89,31 +89,35 @@ export class Toolbar extends React.Component<IProps, PathInputState> {
 
     private onSubmit = () => {
         if (this.cache.path !== this.state.path) {
+            this.input.blur();
             this.cache.cd(this.state.path)
                 .catch((err:string) => {
                     AppAlert.show(err, {
                         intent: 'danger'
                     });
-                    this.input.blur();
+                    this.input.focus();
                 });
         }
     }
 
     private onKeyUp = (event: React.KeyboardEvent<HTMLElement>) => {
-        // console.log('path keyup');
+        console.log('path keyup', event.keyCode);
         if (event.keyCode === KEYS.Escape) {
             // since React events are attached to the root document
             // event already has bubbled up so we must stop
             // its immediate propagation
             event.nativeEvent.stopImmediatePropagation();
             // lose focus
-            this.input.blur();
+            // this.input.blur();
+            // workaround for Cypress bug https://github.com/cypress-io/cypress/issues/1176
+            this.onBlur();
         } else if (event.keyCode === KEYS.Enter) {
             this.onSubmit();
         }
     }
 
     private onBlur = () => {
+        console.log('onblur');
         this.setState({ path: this.cache.path, status: 0 });
     }
 
@@ -288,6 +292,7 @@ export class Toolbar extends React.Component<IProps, PathInputState> {
                 </ButtonGroup>
                 {/* <Tooltip content={this.renderTooltip()} position={Position.RIGHT} hoverOpenDelay={1000}> */}
                 <InputGroup
+                        data-cy-path
                         onChange={this.onPathChange}
                         onKeyUp={this.onKeyUp}
                         placeholder="Enter Path to load"

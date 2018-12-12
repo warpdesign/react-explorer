@@ -16,5 +16,8 @@
     "ts-loader": "^5.3.1",
     "typescript": "^3.2.2",
     "webpack": "^4.27.1"
+  },
+  "devDependencies": {
+    "@bahmutov/add-typescript-to-cypress": "^2.0.0"
   }
 }

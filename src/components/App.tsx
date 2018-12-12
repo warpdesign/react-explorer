@@ -26,6 +26,12 @@ const UP_DELAY = 130;
 
 declare var ENV: any;
 
+declare global {
+    interface Window {
+        appState: AppState;
+    }
+}
+
 @observer
 @HotkeysTarget
 export class ReactApp extends React.Component<{}, IState> {
@@ -43,6 +49,10 @@ export class ReactApp extends React.Component<{}, IState> {
         FocusStyleManager.onlyShowFocusOnTabs();
 
         this.appState = new AppState();
+
+        if (ENV.CY) {
+            window.appState = this.appState;
+        }
 
         Logger.success(`React-FTP - CY: ${ENV.CY} NODE_ENV: ${ENV.NODE_ENV}`);
         // Logger.warn('React-FTP', remote.app.getVersion());
