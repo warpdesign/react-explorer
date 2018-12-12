@@ -44,9 +44,8 @@ describe('sideview initial state', () => {
         cy.get('#view_0 [data-cy-path]')
             .type('/{esc}')
             .should('have.value', '');
-        // TODO: cd not have been called
-        // expect(stub_cd).to.be.called;
-        //cy.get('@cd').should('be.called');
+
+        cy.get('@cd').should('not.be.called');
     });
 
     it('loads path as root', () => {

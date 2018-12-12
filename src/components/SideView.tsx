@@ -47,7 +47,7 @@ export class SideView extends React.Component<SideViewProps, SideViewState>{
         const { appState } = this.injected;
         // TODO: pass start path as prop ?
         const path = process.platform === "win32" ? remote.app.getPath('temp') : '/tmp/react-explorer';
-        const cache: FileState = appState.addCache(ENV.CY && '' || path);
+        const cache: FileState = appState.addCache(ENV.CY ? '' : path);
 
         this.state = {
             fileCache: cache
