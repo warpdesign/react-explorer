@@ -5,7 +5,7 @@ import { FileState } from "../state/fileState";
 
 interface ILoginProps {
     isOpen: boolean;
-    onClose?: (username: string, password: string) => void
+    onClose?: (user: string, password: string) => void
     onValidation: (dir: string) => boolean
 };
 
@@ -19,8 +19,9 @@ type Error = {
 };
 
 interface ILoginState {
-    username: string;
+    user: string;
     password: string;
+    server: string;
     port: number;
     connecting: boolean;
     error: Error;
@@ -36,14 +37,21 @@ export class LoginDialog extends React.Component<ILoginProps, ILoginState> {
     constructor(props:any) {
         super(props);
 
-        this.state = {
-            username: '',
+        const fileCache = this.injected.fileCache;
+
+        const defaultState = {
+            user: '',
             password: '',
             connecting: false,
-            error: null,
+            server: fileCache.server,
+            error: null as Error,
             busy: false,
             port: 21
         };
+
+        debugger;
+
+        this.state = Object.assign(defaultState, fileCache.credentials);
     }
 
     private get injected() {
@@ -67,12 +75,12 @@ export class LoginDialog extends React.Component<ILoginProps, ILoginState> {
     }
 
     private onLogin = () => {
-        const { username, password, port } = this.state;
+        const { user, password, port, server } = this.state;
         const { fileCache } = this.injected;
-        console.log('onLogin', username, '****');
+        console.log('onLogin', user, '****');
         this.setState({ busy: true, error: null });
 
-        fileCache.doLogin(username, password, port)
+        fileCache.doLogin(server, user, password, port)
             .catch((err) => {
                 this.setState({ error: err, busy: false });
                 this.input.focus();
@@ -80,10 +88,9 @@ export class LoginDialog extends React.Component<ILoginProps, ILoginState> {
     }
 
     private onInputChange = (event: React.FormEvent<HTMLElement>) => {
-        console.log('input change');
-        // 1.Update date
         const val = (event.target as HTMLInputElement).value;
         const name = (event.target as HTMLInputElement).name;
+        console.log('input change', val);
         const state:any = {};
         state[name] = val;
 
@@ -95,9 +102,9 @@ export class LoginDialog extends React.Component<ILoginProps, ILoginState> {
     }
 
     private canLogin = () => {
-        const { busy, username, password } = this.state;
+        const { busy, user, password, server } = this.state;
 
-        return !busy && !!(!username.length || (username.length && password.length));
+        return server.length && !busy && !!(!user.length || (user.length && password.length));
     }
 
     componentDidMount() {
@@ -119,9 +126,7 @@ export class LoginDialog extends React.Component<ILoginProps, ILoginState> {
     // }
 
     public render() {
-        const { username, password, busy, error, port } = this.state;
-        const { fileCache } = this.injected;
-        const server = fileCache.server;
+        const { user, password, busy, error, port, server } = this.state;
 
         if (error) {
             console.log(error.code, error.message);
@@ -141,20 +146,35 @@ export class LoginDialog extends React.Component<ILoginProps, ILoginState> {
         >
                 <div className={Classes.DIALOG_BODY}>
                     {error && (<p className="error" style={{ backgroundColor: Colors.RED4 }}>{error.message} (code {error.code})</p>)}
+                    <FormGroup
+                        inline={true}
+                        labelFor="server"
+                        labelInfo="server"
+                    >
+                        <InputGroup
+                            onChange={this.onInputChange}
+                            placeholder="Enter server"
+                            disabled={busy}
+                            value={server}
+                            id="server"
+                            name="server"
+                            leftIcon="globe"
+                        />
+                    </FormGroup>
                 <FormGroup
                     inline={true}
-                    labelFor="username"
-                    labelInfo="username"
+                    labelFor="user"
+                    labelInfo="user"
                     helperText={(<span>Leave empty for <em>anonymous</em> login</span>)}
                 >
                     <InputGroup
                         onChange={this.onInputChange}
                             placeholder="Enter username"
                             disabled={busy}
-                            value={username}
+                            value={user}
                             inputRef={this.refHandler}
-                        id="username"
-                        name="username"
+                        id="user"
+                        name="user"
                         leftIcon="person"
                         autoFocus
                     />

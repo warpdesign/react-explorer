@@ -1,4 +1,4 @@
-import { FsApi, File } from './Fs';
+import { FsApi, File, ICredentials } from './Fs';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as process from 'process';
@@ -184,7 +184,7 @@ class LocalApi implements FsApi {
         });
     }
 
-    login(user: string, password: string): Promise<void> {
+    login(server: string, user: string, password: string): Promise<void> {
         return Promise.resolve();
     }
 
@@ -318,6 +318,13 @@ export const FsLocal = {
         // const server = str.replace(/^ftp\:\/\//, '');
         // return server.split('/')[0];
         return 'local';
+    },
+    credentials(str: string): ICredentials {
+        return {
+            user: '',
+            password: '',
+            port: 0
+        };
     },
     API: LocalApi
 }

@@ -1,5 +1,5 @@
 import { observable, action, runInAction } from "mobx";
-import { FsApi, Fs, getFS, File } from "../services/Fs";
+import { FsApi, Fs, getFS, File, ICredentials } from "../services/Fs";
 import { Deferred } from '../utils/deferred';
 
 type TStatus = 'blank' | 'busy' | 'ok' | 'login';
@@ -17,6 +17,8 @@ export class FileState {
 
     @observable
     server: string = '';
+
+    credentials: ICredentials;
 
     @observable
     status: TStatus;
@@ -160,6 +162,7 @@ export class FileState {
         if (this.path !== path) {
             if (this.getNewFS(path)) {
                 this.server = this.fs.serverpart(path);
+                this.credentials = this.fs.credentials(path);
             } else {
                 this.navHistory(0);
                 return Promise.reject(`Cannot open ${path}`);
@@ -186,9 +189,10 @@ export class FileState {
     }
 
     @action
-    doLogin(user: string, password: string, port: number) {
+    doLogin(server:string, user: string, password: string, port: number) {
         console.log('logging in');
-        this.api.login(user, password, port).then(() => {
+        this.server = this.fs.serverpart(server);
+        this.api.login(server, user, password, port).then(() => {
             runInAction(() => {
                 this.status = 'ok';
                 this.loginDefer.resolve();

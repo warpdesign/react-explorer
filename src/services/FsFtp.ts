@@ -1,4 +1,4 @@
-import { FsApi, File } from './Fs';
+import { FsApi, File, ICredentials } from './Fs';
 import * as ftp from 'ftp';
 import * as path from 'path';
 import * as fs from 'fs';
@@ -385,22 +385,20 @@ class Client{
     }
 }
 
-interface LoginOptions{
-    user: string;
-    password: string;
-    port: number;
-}
-
 class FtpAPI implements FsApi {
     type = 1;
     hostname = '';
     connected = false;
     // main client: the one which will issue list/cd commands *only*
     master: Client = null;
-    loginOptions: LoginOptions;
+    loginOptions: ICredentials;
 
     constructor(serverUrl: string) {
-        this.hostname = this.getHostname(serverUrl);
+        this.updateServer(serverUrl);
+    }
+
+    updateServer(url:string) {
+        this.hostname = this.getHostname(url);
 
         this.master = Client.getFreeClient(this.hostname);
 
@@ -499,7 +497,10 @@ class FtpAPI implements FsApi {
         return this.master.get(this.join(file_path, file), dest);
     }
 
-    login(user: string, password: string, port: number): Promise<void> {
+    login(server: string, user: string, password: string, port: number): Promise<void> {
+        debugger;
+        this.updateServer(server);
+
         this.loginOptions = {
             user: user || 'anonymous',
             password,
@@ -594,6 +595,17 @@ export const FsFtp = {
         // const server = lowerCase ? str.replace(/^ftp\:\/\//i, '').toLowerCase() : str.replace(/^ftp\:\/\//i, '');
         // console.log('serverpart', str, server.split('/')[0]);
         // return server.split('/')[0];
+    },
+    credentials(str:string): ICredentials {
+        const info = url.parse(str);
+
+        const auth = info.auth && info.auth.split(':') || [""];
+
+        return {
+            port: parseInt(info.port, 10) || 21,
+            password: auth.length > 1 ? auth[1] : '',
+            user: auth[0]
+        };
     },
     API: FtpAPI
 }

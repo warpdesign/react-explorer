@@ -24,6 +24,7 @@ export interface Fs {
     // static members
     canread(str: string): boolean;
     serverpart(str: string): string;
+    credentials(str: string): ICredentials;
     name: string;
     description: string;
 }
@@ -55,7 +56,7 @@ export interface FsApi {
     exists(path: string): Promise<boolean>;
     resolve(path: string): string;
     size(source: string, files: string[]): Promise<number>;
-    login(user: string, password: string, port: number): Promise<void>;
+    login(server: string, user: string, password: string, port: number): Promise<void>;
     isConnected(): boolean;
     isDirectoryNameValid(dirName: string): boolean;
     get(path: string, file: string): Promise<string>;
@@ -66,6 +67,12 @@ export interface FsApi {
 }
 
 const interfaces: Array<Fs> = new Array();
+
+export interface ICredentials {
+    user?: string;
+    password?: string;
+    port?: number;
+}
 
 export function registerFs(fs: Fs): void {
     console.log('Registring Fs', fs.name);
