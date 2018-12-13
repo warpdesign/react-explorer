@@ -21,6 +21,10 @@ function join(path1: string, path2: string) {
         path1 = path1.replace('ftp://', '');
     }
 
+    // if (!path1.match(/\/$/)) {
+    //     path1 += '/';
+    // }
+
     return prefix + path.join(path1, path2);
 }
 
@@ -240,8 +244,7 @@ class Client{
                         readonly: boolean;
                         */
                     if (appendParent && !this.api.isRoot(newpath)) {
-                        const folders = path.split('/');
-                        const parent = { ...Parent, dir: folders.slice(0, folders.length - 1).join('/') };
+                        const parent = { ...Parent, dir: path };
 
                         resolve([parent].concat(files));
                     } else {
@@ -498,7 +501,6 @@ class FtpAPI implements FsApi {
     }
 
     login(server: string, user: string, password: string, port: number): Promise<void> {
-        debugger;
         this.updateServer(server);
 
         this.loginOptions = {

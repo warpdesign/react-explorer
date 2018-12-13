@@ -15,7 +15,8 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "webpack --watch",
     "build:e2e": "webpack --config webpack.config.e2e.js --watch",
-    "server": "http-server ./dist-e2e -p 8080"
+    "server": "http-server ./dist-e2e -p 8080",
+    "ftpd": "ftp-srv ftp://0.0.0.0:9876 --root /tmp/react-explorer -c ./credentials.json"
   },
   "author": "",
   "license": "ISC",

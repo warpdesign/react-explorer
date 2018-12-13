@@ -49,8 +49,6 @@ export class LoginDialog extends React.Component<ILoginProps, ILoginState> {
             port: 21
         };
 
-        debugger;
-
         this.state = Object.assign(defaultState, fileCache.credentials);
     }
 
@@ -164,7 +162,7 @@ export class LoginDialog extends React.Component<ILoginProps, ILoginState> {
                 <FormGroup
                     inline={true}
                     labelFor="user"
-                    labelInfo="user"
+                    labelInfo="username"
                     helperText={(<span>Leave empty for <em>anonymous</em> login</span>)}
                 >
                     <InputGroup

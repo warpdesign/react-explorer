@@ -92,7 +92,6 @@ export class Toolbar extends React.Component<IProps, PathInputState> {
             this.input.blur();
             this.cache.cd(this.state.path)
                 .catch((err: string) => {
-                    debugger;
                     AppAlert.show(err, {
                         intent: 'danger'
                     });
