@@ -214,6 +214,7 @@ class Client{
             const newpath = this.pathpart(path);
             this.client.list(newpath, (err: Error, list: any[]) => {
                 this.status = 'ready';
+                debugger;
                 if (err) {
                     this.error('error calling list for', newpath);
                     reject(err);
@@ -381,7 +382,7 @@ class Client{
                 if (err) {
                     reject(err);
                 } else {
-                    resolve(join(path, name));
+                    resolve(join(parent, name));
                 }
             });
         })

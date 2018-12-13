@@ -47,6 +47,7 @@
     "del": "^3.0.0",
     "electron-reload": "^1.2.5",
     "ftp": "github:warpdesign/node-ftp#master",
+    "ftp-ts": "^1.0.19",
     "get-folder-size": "^2.0.0",
     "mkdirp": "^0.5.1",
     "mobx": "^3.2.1",

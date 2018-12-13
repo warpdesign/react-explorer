@@ -89,10 +89,11 @@ export class Toolbar extends React.Component<IProps, PathInputState> {
 
     private onSubmit = () => {
         if (this.cache.path !== this.state.path) {
+            const wrongPath = this.state.path;
             this.input.blur();
             this.cache.cd(this.state.path)
-                .catch((err: string) => {
-                    AppAlert.show(err, {
+                .catch((err: any) => {
+                    AppAlert.show(`Error reading folder ${wrongPath} (${err.code})`, {
                         intent: 'danger'
                     });
                     this.input.focus();

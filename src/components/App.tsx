@@ -81,11 +81,10 @@ export class ReactApp extends React.Component<{}, IState> {
             if (this.state.activeView !== parseInt(num, 10)) {
                 console.log('preventing event propagation');
                 e.stopPropagation();
+                this.setState({
+                    activeView: parseInt(num, 10)
+                });
             }
-
-            this.setState({
-                activeView: parseInt(num, 10)
-            });
         }
     }
 
