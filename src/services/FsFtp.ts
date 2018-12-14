@@ -214,7 +214,7 @@ class Client{
             const newpath = this.pathpart(path);
             this.client.list(newpath, (err: Error, list: any[]) => {
                 this.status = 'ready';
-                debugger;
+
                 if (err) {
                     this.error('error calling list for', newpath);
                     reject(err);
@@ -420,7 +420,7 @@ class FtpAPI implements FsApi {
         return newPath.replace(/\/\.\.$/, '');
     };
 
-    join(path:string, path2:string): string {
+    join(path: string, path2: string): string {
         return join(path, path2);
     };
 
@@ -577,6 +577,16 @@ class FtpAPI implements FsApi {
         const info = url.parse(str);
 
         return info.hostname.toLowerCase();
+    }
+
+    sanityze(path: string) {
+        // first remove credentials from here
+        const info = url.parse(path);
+        if (info.auth) {
+            path = path.replace(`${info.auth}@`, '');
+        }
+
+        return path;
     }
 };
 

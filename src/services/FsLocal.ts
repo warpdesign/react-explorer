@@ -305,6 +305,10 @@ class LocalApi implements FsApi {
             });
         });
     }
+
+    sanityze(path: string) {
+        return path;
+    }
 };
 
 export const FsLocal = {

@@ -175,7 +175,7 @@ export class FileState {
             return this.cd(path, path2, skipHistory);
         }
 
-        const joint = path2 ? this.api.join(path, path2) : path;
+        const joint = path2 ? this.api.join(path, path2) : this.api.sanityze(path);
         return this.api.cd(joint)
             .then((path) => {
                 this.updatePath(path, skipHistory);

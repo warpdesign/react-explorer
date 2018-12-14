@@ -55,6 +55,7 @@ export interface FsApi {
     isDir(path: string): Promise<boolean>;
     exists(path: string): Promise<boolean>;
     resolve(path: string): string;
+    sanityze(path: string): string;
     size(source: string, files: string[]): Promise<number>;
     login(server: string, user: string, password: string, port: number): Promise<void>;
     isConnected(): boolean;

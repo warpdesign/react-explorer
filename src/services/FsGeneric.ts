@@ -125,6 +125,10 @@ class GenericApi implements FsApi {
     async putStream(readStream: fs.ReadStream, dstPath: string, progress: (bytesRead: number) => void): Promise<void> {
         return Promise.resolve();
     }
+
+    sanityze(path: string) {
+        return path;
+    }
 };
 
 export const FsGeneric = {
