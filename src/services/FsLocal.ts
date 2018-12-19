@@ -1,4 +1,4 @@
-import { FsApi, File, ICredentials } from './Fs';
+import { FsApi, File, ICredentials, Fs } from './Fs';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as process from 'process';
@@ -31,6 +31,7 @@ class LocalApi implements FsApi {
     type = 0;
     // current path
     path: string;
+    loginOptions:ICredentials = null;
 
     constructor(path:string) {
         this.path = this.resolve(path);
@@ -184,7 +185,7 @@ class LocalApi implements FsApi {
         });
     }
 
-    login(server: string, user: string, password: string): Promise<void> {
+    login(server?: string, credentials?:ICredentials): Promise<void> {
         return Promise.resolve();
     }
 
@@ -311,7 +312,8 @@ class LocalApi implements FsApi {
     }
 };
 
-export const FsLocal = {
+export const FsLocal:Fs = {
+    icon: 'database',
     name: 'local',
     description: 'Local Filesystem',
     canread(str: string): boolean {

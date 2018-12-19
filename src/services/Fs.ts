@@ -27,6 +27,7 @@ export interface Fs {
     credentials(str: string): ICredentials;
     name: string;
     description: string;
+    icon: string;
 }
 
 export const Parent: File = {
@@ -57,7 +58,7 @@ export interface FsApi {
     resolve(path: string): string;
     sanityze(path: string): string;
     size(source: string, files: string[]): Promise<number>;
-    login(server: string, user: string, password: string, port: number): Promise<void>;
+    login(server?: string, credentials?:ICredentials): Promise<void>;
     isConnected(): boolean;
     isDirectoryNameValid(dirName: string): boolean;
     get(path: string, file: string): Promise<string>;
@@ -65,6 +66,7 @@ export interface FsApi {
     putStream(readStream: fs.ReadStream, dstPath: string, progress: (bytesRead: number) => void): Promise<void>;
     isRoot(path: string): boolean;
     free(): void;
+    loginOptions: ICredentials;
 }
 
 const interfaces: Array<Fs> = new Array();

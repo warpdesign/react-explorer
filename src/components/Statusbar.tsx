@@ -1,6 +1,6 @@
 import * as React from "react";
 import { observer, inject } from 'mobx-react';
-import { InputGroup, ControlGroup, Button, ButtonGroup, Popover, Intent, Alert, ProgressBar, Classes, Tooltip } from '@blueprintjs/core';
+import { InputGroup, ControlGroup, Button, ButtonGroup, Popover, Intent, Alert, ProgressBar, Classes, Tooltip, IconName } from '@blueprintjs/core';
 import { AppState } from "../state/appState";
 import { AppToaster } from "./AppToaster";
 import { FileState } from "../state/fileState";
@@ -48,6 +48,7 @@ export class Statusbar extends React.Component {
         const numDirs = fileCache.files.filter((file) => file.fullname !== '..' && file.isDir).length;
         const numFiles = fileCache.files.filter((file) => !file.isDir).length;
         const numSelected = fileCache.selected.length;
+        const iconName = fileCache.getFS().icon as IconName;
 
         const pasteButton = (
             <Tooltip content={`Copy ${numSelected} file(s) to the clipboard`} disabled={disabled}>
@@ -65,7 +66,7 @@ export class Statusbar extends React.Component {
             <ControlGroup>
                 <InputGroup
                         disabled
-                        leftIcon="database"
+                        leftIcon={iconName}
                         rightElement={pasteButton}
                         value={`${numFiles} File(s), ${numDirs} Folder(s)`}
                 />

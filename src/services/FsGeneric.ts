@@ -1,8 +1,9 @@
-import { FsApi, File, ICredentials } from './Fs';
+import { FsApi, File, ICredentials, Fs } from './Fs';
 import * as fs from 'fs';
 
 class GenericApi implements FsApi {
     type = 0;
+    loginOptions: ICredentials = null;
 
     isDirectoryNameValid(dirName: string): boolean {
         console.log('GenericFs.isDirectoryNameValid');
@@ -45,7 +46,7 @@ class GenericApi implements FsApi {
     //     return prom;
     // }
 
-    login(server: string, user: string, password: string):Promise<void> {
+    login(server?: string, credentials?:ICredentials):Promise<void> {
         return Promise.resolve();
     }
 
@@ -131,7 +132,8 @@ class GenericApi implements FsApi {
     }
 };
 
-export const FsGeneric = {
+export const FsGeneric:Fs = {
+    icon: 'database',
     name: 'generic',
     description: 'Fs that just implements the FsInterface but does nothing',
     canread(str: string): boolean {

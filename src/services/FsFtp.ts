@@ -1,4 +1,4 @@
-import { FsApi, File, ICredentials } from './Fs';
+import { FsApi, File, ICredentials, Fs } from './Fs';
 import * as ftp from 'ftp';
 import * as path from 'path';
 import * as fs from 'fs';
@@ -188,6 +188,7 @@ class Client{
                 // service not available: control connection closed
                 console.error('Service not available, closing connection');
                 this.client.close();
+                this.goOffline(error);
                 break;
 
             default:
@@ -209,7 +210,7 @@ class Client{
     public list(path: string, appendParent = true): Promise<File[]> {
         this.status = 'busy';
 
-        this.log('ftp.client: list', path);
+        this.log('list', path);
         return new Promise((resolve, reject) => {
             const newpath = this.pathpart(path);
             this.client.list(newpath, (err: Error, list: any[]) => {
@@ -395,7 +396,7 @@ class FtpAPI implements FsApi {
     connected = false;
     // main client: the one which will issue list/cd commands *only*
     master: Client = null;
-    loginOptions: ICredentials;
+    loginOptions: ICredentials = null;
 
     constructor(serverUrl: string) {
         this.updateServer(serverUrl);
@@ -501,14 +502,20 @@ class FtpAPI implements FsApi {
         return this.master.get(this.join(file_path, file), dest);
     }
 
-    login(server: string, user: string, password: string, port: number): Promise<void> {
-        this.updateServer(server);
+    login(server?: string, credentials?: ICredentials): Promise<void> {
+        if (server) {
+            this.updateServer(server);
+            // user: string, password: string, port: number
 
-        this.loginOptions = {
-            user: user || 'anonymous',
-            password,
-            port
-        };
+            this.loginOptions = { ...credentials };
+            this.loginOptions.user = this.loginOptions.user || 'anonymous';
+        //     user: credentials.user || 'anonymous',
+        //     password: credentials.password,
+        //     port
+        // };
+        } else {
+            console.log('FsFtp: attempt to relogin: connection closed ?');
+        }
 
         if (!this.master) {
             return Promise.reject('calling login but no master client set');
@@ -590,14 +597,11 @@ class FtpAPI implements FsApi {
     }
 };
 
-export const FsFtp = {
+export const FsFtp:Fs = {
+    icon: 'globe-network',
     name: 'ftp',
     description: 'Fs that just implements fs over ftp',
     canread(str: string): boolean {
-        // debugger;
-        // const res = !!this.serverpart(str).match(FtpUrl);
-        // console.log('FsFtp.canread', str, res);
-        // return res;
         const info = url.parse(str);
         console.log('FsFtp.canread', str, info.protocol, info.protocol === 'ftp:');
         return info.protocol === 'ftp:';
@@ -605,9 +609,6 @@ export const FsFtp = {
     serverpart(str: string, lowerCase = true): string {
         const info = url.parse(str);
         return `${info.protocol}//${info.hostname}`;
-        // const server = lowerCase ? str.replace(/^ftp\:\/\//i, '').toLowerCase() : str.replace(/^ftp\:\/\//i, '');
-        // console.log('serverpart', str, server.split('/')[0]);
-        // return server.split('/')[0];
     },
     credentials(str:string): ICredentials {
         const info = url.parse(str);

@@ -78,7 +78,7 @@ export class LoginDialog extends React.Component<ILoginProps, ILoginState> {
         console.log('onLogin', user, '****');
         this.setState({ busy: true, error: null });
 
-        fileCache.doLogin(server, user, password, port)
+        fileCache.doLogin(server, { user, password, port })
             .catch((err) => {
                 this.setState({ error: err, busy: false });
                 this.input.focus();

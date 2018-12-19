@@ -142,8 +142,15 @@ export class FileState {
     @action
     waitForConnection() {
         if (!this.api.isConnected()) {
-            this.status = 'login';
             this.loginDefer = new Deferred();
+
+            // automatially reconnect if we got credentials
+            if (this.api.loginOptions) {
+                this.doLogin();
+            } else {
+                // otherwise show login dialog
+                this.status = 'login';
+            }
 
             return this.loginDefer.promise;
         } else {
@@ -189,15 +196,20 @@ export class FileState {
     }
 
     @action
-    doLogin(server:string, user: string, password: string, port: number) {
+    onLoginSuccess() {
+        this.status = 'ok';
+        this.loginDefer.resolve();
+    }
+
+    @action
+    doLogin(server?:string, credentials?:ICredentials) {
         console.log('logging in');
-        this.server = this.fs.serverpart(server);
-        this.api.login(server, user, password, port).then(() => {
-            runInAction(() => {
-                this.status = 'ok';
-                this.loginDefer.resolve();
-            });
-        }).catch((err) => {
+        this.status = 'busy';
+        if (server) {
+            this.server = this.fs.serverpart(server);
+        }
+
+        this.api.login(server, credentials).then(() => this.onLoginSuccess()).catch((err) => {
             console.log('error while connecting', err);
             this.loginDefer.reject(err);
         });
