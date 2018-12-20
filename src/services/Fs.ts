@@ -66,6 +66,7 @@ export interface FsApi {
     putStream(readStream: fs.ReadStream, dstPath: string, progress: (bytesRead: number) => void): Promise<void>;
     isRoot(path: string): boolean;
     free(): void;
+    on(event: string, cb: (data: any) => void): void;
     loginOptions: ICredentials;
 }
 

@@ -130,6 +130,10 @@ class GenericApi implements FsApi {
     sanityze(path: string) {
         return path;
     }
+
+    on(event: string, cb: (data: any) => void): void {
+
+    }
 };
 
 export const FsGeneric:Fs = {

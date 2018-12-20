@@ -2,7 +2,7 @@ import { observable, action, runInAction } from "mobx";
 import { FsApi, Fs, getFS, File, ICredentials } from "../services/Fs";
 import { Deferred } from '../utils/deferred';
 
-type TStatus = 'blank' | 'busy' | 'ok' | 'login';
+type TStatus = 'blank' | 'busy' | 'ok' | 'login' | 'offline';
 
 export class FileState {
     /* observable properties start here */
@@ -108,6 +108,7 @@ export class FileState {
 
             this.fs = newfs;
             this.api = new newfs.API(path);
+            this.api.on('close', () => this.setStatus('offline'))
         }
 
         return newfs;

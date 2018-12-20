@@ -49,6 +49,7 @@ export class Statusbar extends React.Component {
         const numFiles = fileCache.files.filter((file) => !file.isDir).length;
         const numSelected = fileCache.selected.length;
         const iconName = fileCache.getFS().icon as IconName;
+        const offline = fileCache.status === 'offline' && 'offline' || '';
 
         const pasteButton = (
             <Tooltip content={`Copy ${numSelected} file(s) to the clipboard`} disabled={disabled}>
@@ -65,10 +66,11 @@ export class Statusbar extends React.Component {
         return (
             <ControlGroup>
                 <InputGroup
-                        disabled
-                        leftIcon={iconName}
-                        rightElement={pasteButton}
-                        value={`${numFiles} File(s), ${numDirs} Folder(s)`}
+                    disabled
+                    leftIcon={iconName}
+                    rightElement={pasteButton}
+                    value={`${numFiles} File(s), ${numDirs} Folder(s)`}
+                    className={`status-bar ${offline}`}
                 />
             </ControlGroup>
         )

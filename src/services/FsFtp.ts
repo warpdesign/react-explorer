@@ -7,6 +7,7 @@ import { Transform } from 'stream';
 import { remote } from 'electron';
 import { throttle } from '../utils/throttle';
 import { Logger } from "../components/Log";
+import { EventEmitter } from 'events';
 
 const FtpUrl = /^(ftp\:\/\/)*(ftp\.[a-z]+\.[a-z]{2,3}|[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})$/i;
 const ServerPart = /^(ftp\:\/\/)*(ftp\.[a-z]+\.[a-z]{2,3}|[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})/i;
@@ -145,7 +146,7 @@ class Client{
         this.connected = false;
         this.status = 'offline';
         if (this.api) {
-            this.api.connected = false;
+            this.api.onClose();
         }
     }
 
@@ -398,7 +399,11 @@ class FtpAPI implements FsApi {
     master: Client = null;
     loginOptions: ICredentials = null;
 
+    eventList = new Array<string>();
+    emitter: EventEmitter;
+
     constructor(serverUrl: string) {
+        this.emitter = new EventEmitter();
         this.updateServer(serverUrl);
     }
 
@@ -540,6 +545,10 @@ class FtpAPI implements FsApi {
     free() {
         // free client
         this.master.api = null;
+        // remove all listeners
+        for (let event of this.eventList) {
+            this.emitter.removeAllListeners(event);
+        }
         // close any connections ?
         // this.master.close();
     }
@@ -594,6 +603,19 @@ class FtpAPI implements FsApi {
         }
 
         return path;
+    }
+
+    on(event: string, cb: (data: any) => void): void {
+        if (this.eventList.indexOf(event) < 0) {
+            this.eventList.push(event);
+        }
+
+        this.emitter.on(event, cb);
+    }
+
+    onClose() {
+        this.connected = false;
+        this.emitter.emit('close');
     }
 };
 

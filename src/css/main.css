@@ -221,3 +221,14 @@ button.small:hover{
     border-radius:3px;
     border:1px solid rgba(16,22,26,.2);
 }
+
+.status-bar.offline > .bp3-icon:after{
+    border-bottom: 1px solid rgba(255,0,0,.6);
+    content: "";
+    width: 100%;
+    height: 50%;
+    position: absolute;
+    top: 2px;
+    transform: rotateZ(-45deg);
+    left: -2px;
+}
