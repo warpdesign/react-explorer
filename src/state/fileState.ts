@@ -136,8 +136,12 @@ export class FileState {
     revertPath() {
         // first revert fs/path
         this.restoreContext();
-        this.navHistory(0);
-        this.status = 'ok';
+        // only reload directory if connection hasn't been lost otherwise we enter
+        // into an infinite loop
+        if (this.api.isConnected()) {
+            this.navHistory(0);
+            this.status = 'ok';
+        }
     }
 
     @action
@@ -166,7 +170,6 @@ export class FileState {
         // first updates fs (eg. was local fs, is now ftp)
         console.log('cd', path, this.path);
 
-        // if (this.path.split('/')[0] !== path.split('/')[0]) {
         if (this.path !== path) {
             if (this.getNewFS(path)) {
                 this.server = this.fs.serverpart(path);
@@ -205,7 +208,7 @@ export class FileState {
     @action
     doLogin(server?:string, credentials?:ICredentials) {
         console.log('logging in');
-        this.status = 'busy';
+        // this.status = 'busy';
         if (server) {
             this.server = this.fs.serverpart(server);
         }

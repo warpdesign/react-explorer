@@ -6,7 +6,7 @@ import * as url from 'url';
 import { Transform } from 'stream';
 import { remote } from 'electron';
 import { throttle } from '../utils/throttle';
-import { Logger } from "../components/Log";
+import { Logger, JSObject } from "../components/Log";
 import { EventEmitter } from 'events';
 
 const FtpUrl = /^(ftp\:\/\/)*(ftp\.[a-z]+\.[a-z]{2,3}|[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})$/i;
@@ -48,6 +48,7 @@ class Client{
     public host: string;
     public status: 'busy' | 'ready' | 'offline' = 'offline';
     public api:FtpAPI = null;
+    public options: ICredentials;
 
     private readyResolve: () => any;
     private readyReject: (err: any) => any;
@@ -74,6 +75,8 @@ class Client{
 
         if (!client) {
             client = Client.addClient(hostname, {});
+        } else {
+            console.log('using existing client');
         }
 
         return client;
@@ -88,30 +91,31 @@ class Client{
         this.bindEvents();
     }
 
-    getLoggerArgs(params: (string | number | boolean)[]): (string | number | boolean)[] {
+    getLoggerArgs(params: (string | number | boolean | JSObject)[]): (string | number | boolean | JSObject)[] {
         // append host and client instance
         return [`[${this.host}:${this.instanceId}]`, ...params];
     }
 
-    success(...params: (string | number | boolean)[]) {
+    success(...params: (string | number | boolean | JSObject)[]) {
         Logger.success(...this.getLoggerArgs(params));
     }
 
-    log(...params: (string | number | boolean)[]) {
+    log(...params: (string | number | boolean| JSObject)[]) {
         Logger.log(...this.getLoggerArgs(params));
     }
 
-    warn(...params: (string | number | boolean)[]) {
+    warn(...params: (string | number | boolean | JSObject)[]) {
         Logger.warn(...this.getLoggerArgs(params));
     }
 
-    error(...params: (string | number | boolean)[]) {
+    error(...params: (string | number | boolean | JSObject)[]) {
         Logger.error(...this.getLoggerArgs(params));
     }
 
-    public login(options: any = {}): Promise<any> {
+    public login(options: ICredentials): Promise<any> {
         if (!this.connected) {
             this.log('connecting to', this.host, 'with options', Object.assign({ host: this.host, ...options }, { password: '****' }));
+            this.options = options;
             this.readyPromise = new Promise((resolve, reject) => {
                 this.readyResolve = resolve;
                 this.readyReject = reject;
@@ -145,6 +149,7 @@ class Client{
         this.warn('close');
         this.connected = false;
         this.status = 'offline';
+
         if (this.api) {
             this.api.onClose();
         }
@@ -415,6 +420,11 @@ class FtpAPI implements FsApi {
         this.master.api = this;
 
         this.connected = this.master.connected;
+
+        // retrieve options that were used to connect the client
+        if (this.master.options) {
+            this.loginOptions = this.master.options;
+        }
     }
 
     isDirectoryNameValid (dirName: string): boolean {
@@ -543,6 +553,7 @@ class FtpAPI implements FsApi {
     }
 
     free() {
+        console.log('*** free');
         // free client
         this.master.api = null;
         // remove all listeners
