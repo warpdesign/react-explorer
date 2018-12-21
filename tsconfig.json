@@ -10,7 +10,8 @@
             "es2015",
             "dom"
         ],
-        "experimentalDecorators": true
+        "experimentalDecorators": true,
+        "resolveJsonModule": true
     },
     "include": [
         "./src/**/*"

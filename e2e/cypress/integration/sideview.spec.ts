@@ -24,7 +24,9 @@ describe('sideview initial state', () => {
 
     it('left view should be active', () => {
         cy.get('#view_0').should('have.class', 'active');
-        //
+    });
+
+    it('nav buttons are disabled', () => {
         cy.get('#view_0 [data-cy-backward]').should('be.disabled');
         cy.get('#view_0 [data-cy-forward]').should('be.disabled');
         cy.get('#view_0 [data-cy-paste-bt]').should('be.disabled');

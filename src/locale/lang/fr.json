@@ -1,0 +1,10 @@
+{
+    "translations": {
+        "BT_STOP_TRANSFERS_QUIT": "Arrêter & quitter",
+        "BT_KEEP_TRANSFERS": "Ne pas quitter",
+        "SHORTCUT_EXIT": "Quitter react-ftp",
+        "SHORTCUT_RELOAD_VIEW": "Recharger la vue",
+        "Hello": "Salut !",
+        "Toto": "Il y a <1>{{count}}</1> transferts."
+    }
+}

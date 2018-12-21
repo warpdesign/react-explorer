@@ -8,7 +8,8 @@ import { SideView } from "./SideView";
 import { LogUI, Logger } from "./Log";
 import { Downloads } from "./Downloads";
 import { Badge } from "./Badge";
-import { ipcRenderer, remote } from "electron";
+import { ipcRenderer } from "electron";
+import { withNamespaces, WithNamespaces } from 'react-i18next';
 
 require("@blueprintjs/core/lib/css/blueprint.css");
 require("@blueprintjs/icons/lib/css/blueprint-icons.css");
@@ -32,15 +33,16 @@ declare global {
     }
 }
 
+
 @observer
 @HotkeysTarget
-export class ReactApp extends React.Component<{}, IState> {
+class App extends React.Component<WithNamespaces, IState> {
     private appState: AppState;
     private lastTimeStamp: any = 0;
     private exitTimeout: any = 0;
     private exitMode = false;
 
-    constructor(props = {}) {
+    constructor(props: WithNamespaces) {
         super(props);
 
         this.state = { isExplorer: true, activeView: 0, isExitDialogOpen: false };
@@ -161,23 +163,25 @@ export class ReactApp extends React.Component<{}, IState> {
     }
 
     public renderHotkeys() {
+        const t = this.props.t;
+
         return <Hotkeys>
             <Hotkey
                 global={true}
                 combo="q"
-                label="Exit react-ftp"
+                label={t('SHORTCUT_EXIT')}
                 onKeyDown={this.onExitComboDown}
             />
             <Hotkey
                 global={true}
                 combo="mod + q"
-                label="Exit react-ftp"
+                label={t('SHORTCUT_EXIT')}
                 onKeyDown={this.onExitComboDown}
             />
             <Hotkey
                 global={true}
                 combo="mod + r"
-                label="Reload current view"
+                label={t('SHORTCUT_RELOAD_VIEW')}
                 preventDefault={true}
                 onKeyDown={this.onReloadFileView}
             />
@@ -189,13 +193,14 @@ export class ReactApp extends React.Component<{}, IState> {
         const badgeSize = this.appState.pendingTransfers;
         const badgeText = badgeSize && (badgeSize + '') || '';
         const badgeProgress = this.appState.totalTransferProgress;
+        const { t } = this.props;
 
         return (
             <Provider appState={this.appState}>
                 <React.Fragment>
                     <Alert
-                        cancelButtonText="Keep transfers"
-                        confirmButtonText="Exit & Cancel transfers"
+                        cancelButtonText={t('BT_KEEP_TRANSFERS')}
+                        confirmButtonText={t('BT_STOP_TRANSFERS_QUIT')}
                         icon="warning-sign"
                         intent={Intent.WARNING}
                         onClose={this.onExitDialogClose}
@@ -229,3 +234,6 @@ export class ReactApp extends React.Component<{}, IState> {
     }
 }
 
+const ReactApp = withNamespaces()(App);
+
+export { ReactApp }
