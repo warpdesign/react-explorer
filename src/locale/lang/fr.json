@@ -8,8 +8,8 @@
             "QUIT": {
                 "BT_STOP_TRANSFERS": "Arrêter & quitter",
                 "BT_KEEP_TRANSFERS": "Ne pas quitter",
-                "CONTENT": "<1>{{badgeSize}}</1> téléchargement est <3>en cours</3>.<5 /><6 />Quiiter l'application maintenant le <8>stoppera</8>.",
-                "CONTENT_plurarl": "<1>{{badgeSize}}</1> téléchargements sont <3>en cours</3>.<5 /><6 />Quiiter l'application maintenant les <8>arrêtera</8>."
+                "CONTENT": "<1>{{count}}</1> téléchargement est <3>en cours</3>.<5 /><6 />Quiiter l'application maintenant le <8>stoppera</8>.",
+                "CONTENT_plurarl": "<1>{{count}}</1> téléchargements sont <3>en cours</3>.<5 /><6 />Quiiter l'application maintenant les <8>arrêtera</8>."
             }
         },
         "SHORTCUT": {
@@ -17,6 +17,10 @@
                 "QUIT": "Quitter react-ftp",
                 "RELOAD_VIEW": "Recharger la vue"
             }
+        },
+        "STATUS": {
+            "CPTOOLTIP": "Copier {{count}} fichier dans le presse-papiers",
+            "CPTOOLTIP_plural": "Copier {{count}} fichiers dans le presse-papiers"
         },
         "COMMON": {
             "Hello": "Salut !",

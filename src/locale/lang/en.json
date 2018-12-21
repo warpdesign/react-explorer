@@ -8,8 +8,8 @@
             "QUIT": {
                 "BT_STOP_TRANSFERS": "Cancel & quit",
                 "BT_KEEP_TRANSFERS": "Keep transfers",
-                "CONTENT": "There is <1>{{badgeSize}}</1> transfer <3>in progress</3>.<5 /><6 />Exiting the app now will <8>cancel</8> the download.",
-                "CONTENT_plural": "There are <1>{{badgeSize}}</1> transfers <3>in progress</3>.<5 /><6 />Exiting the app now will <8>cancel</8> all downloads."
+                "CONTENT": "There is <1>{{count}}</1> transfer <3>in progress</3>.<5 /><6 />Exiting the app now will <8>cancel</8> the download.",
+                "CONTENT_plural": "There are <1>{{count}}</1> transfers <3>in progress</3>.<5 /><6 />Exiting the app now will <8>cancel</8> all downloads."
             }
         },
         "SHORTCUT": {
@@ -18,11 +18,15 @@
                 "RELOAD_VIEW": "Reload current view"
             }
         },
+        "STATUS": {
+            "CPTOOLTIP": "Copy {{count}} file to the clipboard",
+            "CPTOOLTIP_plural": "Copy {{count}} files to the clipboard"
+        },
         "COMMON": {
             "Hello": "Hey there !",
             "Toto": "There are <1>{{count}}</1> transfers.",
             "SIZE": {
-                "B": "Zero byte",
+                "B": "byte",
                 "B_plural": "bytes",
                 "KB": "Kb",
                 "MB": "Mb",

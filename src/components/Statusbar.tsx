@@ -4,16 +4,21 @@ import { InputGroup, ControlGroup, Button, ButtonGroup, Popover, Intent, Alert, 
 import { AppState } from "../state/appState";
 import { AppToaster } from "./AppToaster";
 import { FileState } from "../state/fileState";
+import { withNamespaces, WithNamespaces } from 'react-i18next';
 
-interface InjectedProps {
+interface IProps extends WithNamespaces{
+
+};
+
+interface InjectedProps extends IProps {
     fileCache: FileState;
     appState: AppState
 }
 
 @inject('fileCache', 'appState')
 @observer
-export class Statusbar extends React.Component {
-    constructor(props: any) {
+export class StatusbarClass extends React.Component<IProps> {
+    constructor(props: IProps) {
         super(props);
     }
 
@@ -50,9 +55,10 @@ export class Statusbar extends React.Component {
         const numSelected = fileCache.selected.length;
         const iconName = fileCache.getFS().icon as IconName;
         const offline = fileCache.status === 'offline' && 'offline' || '';
+        const { t } = this.props;
 
         const pasteButton = (
-            <Tooltip content={`Copy ${numSelected} file(s) to the clipboard`} disabled={disabled}>
+            <Tooltip content={t('STATUS.CPTOOLTIP', { numSelected })} disabled={disabled}>
                 <Button
                 data-cy-paste-bt
                 disabled={disabled}
@@ -76,3 +82,7 @@ export class Statusbar extends React.Component {
         )
     }
 }
+
+const Statusbar = withNamespaces()(StatusbarClass);
+
+export { Statusbar };
