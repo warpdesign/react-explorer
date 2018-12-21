@@ -9,6 +9,7 @@ import { File } from "../services/Fs";
 import { shell } from 'electron';
 import { Logger } from "./Log";
 import { FileState } from "../state/fileState";
+import { withNamespaces, WithNamespaces } from 'react-i18next';
 
 const REGEX_EXTENSION = /\.(?=[^0-9])/;
 
@@ -25,7 +26,7 @@ enum KEYS {
 
 const CLICK_DELAY = 300;
 
-interface IProps{
+interface IProps extends WithNamespaces{
     onUpdate?: () => void;
     onRender?: () => void;
 }
@@ -43,16 +44,20 @@ interface InjectedProps extends IProps {
 }
 
 @inject('appState', 'fileCache')
-export class FileList extends React.Component<IProps, FileListState> {
+export class FileListClass extends React.Component<IProps, FileListState> {
     private cache: FileState;
     private editingElement: HTMLElement;
     private editingFile: File;
     private clickTimeout: any;
     private disposer: IReactionDisposer;
-    private firstRender = true;
+    private ByteSizes = new Array<string>();
 
     constructor(props: IProps) {
         super(props);
+
+        const { t } = this.props;
+        const translations = t('COMMON.SIZE', { returnObjects: true });
+        this.ByteSizes = Object.keys(translations).map((key) => translations[key]);
 
         const { fileCache } = this.injected;
 
@@ -88,7 +93,19 @@ export class FileList extends React.Component<IProps, FileListState> {
         const i = bytes > 0 ? Math.floor(Math.log2(bytes)/10) : 0;
         const num = (bytes/Math.pow(1024, i));
 
+        if (!i) {
+            return num > 1 ? (num + ' ' + this.ByteSizes[1]) : (num + ' ' + this.ByteSizes[0]);
+        } else {
+            return (num.toFixed(2)) + ' ' + this.ByteSizes[i+1];
+        }
+
+        /*
+        const i = bytes > 0 ? Math.floor(Math.log2(bytes)/10) : 0;
+        const num = (bytes/Math.pow(1024, i));
+
+        if
         return  (i > 0 ? num.toFixed(2) : (num | 0)) + ' ' + ['Bytes','Kb','Mb','Gb','Tb'][i];
+        */
     }
 
     private buildNodes = (files:File[]): ITreeNode<{}>[] => {
@@ -311,3 +328,7 @@ export class FileList extends React.Component<IProps, FileListState> {
         // }
     }
 }
+
+const FileList = withNamespaces()(FileListClass);
+
+export { FileList };

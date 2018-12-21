@@ -9,7 +9,7 @@ import { LogUI, Logger } from "./Log";
 import { Downloads } from "./Downloads";
 import { Badge } from "./Badge";
 import { ipcRenderer } from "electron";
-import { withNamespaces, WithNamespaces } from 'react-i18next';
+import { withNamespaces, WithNamespaces, Trans } from 'react-i18next';
 
 require("@blueprintjs/core/lib/css/blueprint.css");
 require("@blueprintjs/icons/lib/css/blueprint-icons.css");
@@ -169,19 +169,19 @@ class App extends React.Component<WithNamespaces, IState> {
             <Hotkey
                 global={true}
                 combo="q"
-                label={t('SHORTCUT_EXIT')}
+                label={t('SHORTCUT.MAIN.QUIT')}
                 onKeyDown={this.onExitComboDown}
             />
             <Hotkey
                 global={true}
                 combo="mod + q"
-                label={t('SHORTCUT_EXIT')}
+                label={t('SHORTCUT.MAIN.QUIT')}
                 onKeyDown={this.onExitComboDown}
             />
             <Hotkey
                 global={true}
                 combo="mod + r"
-                label={t('SHORTCUT_RELOAD_VIEW')}
+                label={t('SHORTCUT.MAIN.RELOAD_VIEW')}
                 preventDefault={true}
                 onKeyDown={this.onReloadFileView}
             />
@@ -199,23 +199,25 @@ class App extends React.Component<WithNamespaces, IState> {
             <Provider appState={this.appState}>
                 <React.Fragment>
                     <Alert
-                        cancelButtonText={t('BT_KEEP_TRANSFERS')}
-                        confirmButtonText={t('BT_STOP_TRANSFERS_QUIT')}
+                        cancelButtonText={t('DIALOG.QUIT.BT_KEEP_TRANSFERS')}
+                        confirmButtonText={t('DIALOG.QUIT.BT_STOP_TRANSFERS')}
                         icon="warning-sign"
                         intent={Intent.WARNING}
                         onClose={this.onExitDialogClose}
                         isOpen={isExitDialogOpen}
                     >
                         <p>
-                            There are <b>{`${badgeSize}`}</b> transfers <b>in progress</b>.<br /><br />Exiting the app now will <b>cancel</b> the downloads:<br /> are you should you want to exit now?
+                            <Trans i18nKey="DIALOG.QUIT.CONTENT">
+                                There are <b>{{ badgeSize }}</b> transfers <b>in progress</b>.<br /><br />Exiting the app now will <b>cancel</b> the downloads.
+                            </Trans>
                     </p>
                     </Alert>
                     <Navbar>
                         <Navbar.Group align={Alignment.LEFT}>
                             <Navbar.Heading>React-explorer</Navbar.Heading>
                             <Navbar.Divider />
-                            <Button className="bp3-minimal" icon="home" text="Explorer" onClick={this.navClick} intent={isExplorer ? Intent.PRIMARY : 'none'} />
-                            <Button style={{ position: 'relative' }} className="bp3-minimal" icon="download" onClick={this.navClick} intent={!isExplorer ? Intent.PRIMARY : 'none'}>Transfers<Badge intent="none" text={badgeText} progress={badgeProgress} /></Button>
+                            <Button className="bp3-minimal" icon="home" text={t('NAV.EXPLORER')} onClick={this.navClick} intent={isExplorer ? Intent.PRIMARY : 'none'} />
+                            <Button style={{ position: 'relative' }} className="bp3-minimal" icon="download" onClick={this.navClick} intent={!isExplorer ? Intent.PRIMARY : 'none'}>{t('NAV.TRANSFERS')}<Badge intent="none" text={badgeText} progress={badgeProgress} /></Button>
                         </Navbar.Group>
                         <Navbar.Group align={Alignment.RIGHT}>
                             <Navbar.Divider />
