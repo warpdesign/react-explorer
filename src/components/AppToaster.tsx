@@ -5,7 +5,7 @@ import { IconName } from "@blueprintjs/icons";
 const TOAST_TIMEOUT = 2000;
 
 const MyToaster = Toaster.create({
-    className: "recipe-toaster",
+    className: "bp3-toaster",
     position: Position.TOP,
 });
 

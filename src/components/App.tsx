@@ -190,15 +190,15 @@ class App extends React.Component<WithNamespaces, IState> {
 
     render() {
         const { isExplorer, activeView, isExitDialogOpen } = this.state;
-        const count = this.appState.pendingTransfers + 1;
+        const count = this.appState.pendingTransfers;
         const badgeText = count && (count + '') || '';
         const badgeProgress = this.appState.totalTransferProgress;
         const { t } = this.props;
         // console.log(t('test', { compteur: 10 }));
         // console.log(t('COMMON2.TEST', { count: 10 }));
-        // console.log(t('STATUS.CPTOOLTIP', { numSelected: 10 }));
+        // console.log(t('COMMON.Toto', { count: 10 }));
         // debugger;
-        // console.log(t('STATUS.CPTOOLTIP', { count: 10 }));
+        // console.log(t('DIALOG.QUIT.CONTENT', { count: 2 }));
         return (
             <Provider appState={this.appState}>
                 <React.Fragment>
@@ -211,7 +211,7 @@ class App extends React.Component<WithNamespaces, IState> {
                         isOpen={isExitDialogOpen}
                     >
                         <p>
-                            <Trans i18nKey="DIALOG.QUIT.CONTENT">
+                            <Trans i18nKey="DIALOG.QUIT.CONTENT" count={count}>
                                 There are <b>{{ count }}</b> transfers <b>in progress</b>.<br /><br />Exiting the app now will <b>cancel</b> the downloads.
                             </Trans>
                     </p>
@@ -242,4 +242,4 @@ class App extends React.Component<WithNamespaces, IState> {
 
 const ReactApp = withNamespaces()(App);
 
-export { ReactApp }
+export { ReactApp };

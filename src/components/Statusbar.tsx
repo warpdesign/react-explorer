@@ -28,11 +28,12 @@ export class StatusbarClass extends React.Component<IProps> {
 
     private onClipboardCopy = () => {
         const { fileCache, appState } = this.injected;
+        const { t } = this.props;
 
         const num = appState.setClipboard(fileCache);
 
         AppToaster.show({
-            message: `${num} element(s) copied to the clipboard`,
+            message: t('COMMON.CP_COPIED', {count: num}),
             icon: "tick",
             intent: Intent.SUCCESS
         });
@@ -58,7 +59,7 @@ export class StatusbarClass extends React.Component<IProps> {
         const { t } = this.props;
 
         const pasteButton = (
-            <Tooltip content={t('STATUS.CPTOOLTIP', { numSelected })} disabled={disabled}>
+            <Tooltip content={t('STATUS.CPTOOLTIP', { count: numSelected })} disabled={disabled}>
                 <Button
                 data-cy-paste-bt
                 disabled={disabled}
@@ -75,7 +76,7 @@ export class StatusbarClass extends React.Component<IProps> {
                     disabled
                     leftIcon={iconName}
                     rightElement={pasteButton}
-                    value={`${numFiles} File(s), ${numDirs} Folder(s)`}
+                    value={`${t('STATUS.FILES', { count: numFiles })}, ${t('STATUS.FOLDERS', { count: numDirs })}`}
                     className={`status-bar ${offline}`}
                 />
             </ControlGroup>

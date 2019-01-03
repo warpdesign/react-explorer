@@ -170,7 +170,7 @@ export class SideView extends React.Component<SideViewProps, SideViewState>{
                 </div>
             );
         } else {
-            return (<div />);
+            return (<React.Fragment></React.Fragment>);
         }
     }
 

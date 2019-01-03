@@ -3,13 +3,13 @@ import { inject } from 'mobx-react';
 import { reaction, toJS, IReactionDisposer } from 'mobx';
 import { Classes, Button, ITreeNode, Tooltip, Tree, Intent } from "@blueprintjs/core";
 import { AppState } from "../state/appState";
-import { AppToaster } from './AppToaster';
 // TODO: remove any calls to shell
 import { File } from "../services/Fs";
 import { shell } from 'electron';
 import { Logger } from "./Log";
 import { FileState } from "../state/fileState";
 import { withNamespaces, WithNamespaces } from 'react-i18next';
+import { formatBytes } from '../utils/formatBytes';
 
 const REGEX_EXTENSION = /\.(?=[^0-9])/;
 
@@ -50,14 +50,11 @@ export class FileListClass extends React.Component<IProps, FileListState> {
     private editingFile: File;
     private clickTimeout: any;
     private disposer: IReactionDisposer;
-    private ByteSizes = new Array<string>();
 
     constructor(props: IProps) {
         super(props);
 
         const { t } = this.props;
-        const translations = t('COMMON.SIZE', { returnObjects: true });
-        this.ByteSizes = Object.keys(translations).map((key) => translations[key]);
 
         const { fileCache } = this.injected;
 
@@ -88,26 +85,6 @@ export class FileListClass extends React.Component<IProps, FileListState> {
             });
     }
 
-    // took this from stack overflow: https://stackoverflow.com/questions/15900485/correct-way-to-convert-size-in-bytes-to-kb-mb-gb-in-javascript
-    private sizeExtension(bytes:number):string {
-        const i = bytes > 0 ? Math.floor(Math.log2(bytes)/10) : 0;
-        const num = (bytes/Math.pow(1024, i));
-
-        if (!i) {
-            return num > 1 ? (num + ' ' + this.ByteSizes[1]) : (num + ' ' + this.ByteSizes[0]);
-        } else {
-            return (num.toFixed(2)) + ' ' + this.ByteSizes[i+1];
-        }
-
-        /*
-        const i = bytes > 0 ? Math.floor(Math.log2(bytes)/10) : 0;
-        const num = (bytes/Math.pow(1024, i));
-
-        if
-        return  (i > 0 ? num.toFixed(2) : (num | 0)) + ' ' + ['Bytes','Kb','Mb','Gb','Tb'][i];
-        */
-    }
-
     private buildNodes = (files:File[]): ITreeNode<{}>[] => {
         return files
             .sort((file1, file2) => {
@@ -126,7 +103,7 @@ export class FileListClass extends React.Component<IProps, FileListState> {
                     label: file.fullname,
                     nodeData: file,
                     className: file.fullname !== '..' && file.fullname.startsWith('.') && 'isHidden',
-                    secondaryLabel: !file.isDir && (<div className="bp3-text-small">{this.sizeExtension(file.length)}</div>) || ''
+                    secondaryLabel: !file.isDir && (<div className="bp3-text-small">{formatBytes(file.length)}</div>) || ''
                 };
             return res;
         });

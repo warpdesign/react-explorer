@@ -20,7 +20,11 @@
         },
         "STATUS": {
             "CPTOOLTIP": "Copy {{count}} file to the clipboard",
-            "CPTOOLTIP_plural": "Copy {{count}} files to the clipboard"
+            "CPTOOLTIP_plural": "Copy {{count}} files to the clipboard",
+            "FILES": "{{count}} file",
+            "FILES_plural": "{{count}} files",
+            "FOLDERS": "{{count}} folder",
+            "FOLDERS_plural": "{{count}} folders"
         },
         "COMMON": {
             "Hello": "Hey there !",
@@ -32,7 +36,19 @@
                 "MB": "Mb",
                 "GB": "Gb",
                 "TB": "Tb"
-            }
+            },
+            "CP_COPIED": "{{count}} element has been copied into the clipboard",
+            "CP_COPIED_plural": "{{count}} elements have been copied into the clipboard",
+            "MAKEDIR": "New Folder"
+        },
+        "FILEMENU": {
+            "PASTE": "Paste {{count}} item",
+            "PASTE_plural": "Paste {{count}} items",
+            "DELETE": "Delete {{count}} item",
+            "DELETE_plural": "Delete {{count}} items"
+        },
+        "DOWNLOADS": {
+            "EMPTY_TITLE": "No download."
         }
     }
 }
