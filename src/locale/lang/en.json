@@ -10,6 +10,26 @@
                 "BT_KEEP_TRANSFERS": "Keep transfers",
                 "CONTENT": "There is <1>{{count}}</1> transfer <3>in progress</3>.<5 /><6 />Exiting the app now will <8>cancel</8> the download.",
                 "CONTENT_plural": "There are <1>{{count}}</1> transfers <3>in progress</3>.<5 /><6 />Exiting the app now will <8>cancel</8> all downloads."
+            },
+            "MAKEDIR": {
+                "NOT_VALID": "Folder name not valid",
+                "TITLE": "Enter a name for the new folder:",
+                "NAME": "Folder name",
+                "CREATE": "Create",
+                "CREATE_READ": "Create & read folderr"
+            },
+            "LOGIN": {
+                "TITLE": "Login to {{server}}",
+                "SERVER_NAME": "Enter server",
+                "SERVER": "server",
+                "USERNAME": "username",
+                "USERINPUT": "Enter username",
+                "HINT_USERNAME": "Leave empty for anonymous login",
+                "PASSWORD": "password",
+                "HINT_PASSWORD": "Required for non-anonymous login",
+                "PASSWORDINPUT": "Enter password",
+                "PORT": "port",
+                "LOGIN": "Login"
             }
         },
         "SHORTCUT": {
@@ -27,8 +47,6 @@
             "FOLDERS_plural": "{{count}} folders"
         },
         "COMMON": {
-            "Hello": "Hey there !",
-            "Toto": "There are <1>{{count}}</1> transfers.",
             "SIZE": {
                 "B": "byte",
                 "B_plural": "bytes",
@@ -39,7 +57,9 @@
             },
             "CP_COPIED": "{{count}} element has been copied into the clipboard",
             "CP_COPIED_plural": "{{count}} elements have been copied into the clipboard",
-            "MAKEDIR": "New Folder"
+            "MAKEDIR": "New Folder",
+            "CANCEL": "Cancel",
+            "OK": "OK"
         },
         "FILEMENU": {
             "PASTE": "Paste {{count}} item",
@@ -49,6 +69,14 @@
         },
         "DOWNLOADS": {
             "EMPTY_TITLE": "No download."
+        },
+        "ERRORS": {
+            "CANNOT_READ_FOLDER": "Cannot open '{{folder}}'",
+            "ENOTFOUND": "Server not found: check hostname",
+            "ECONNREFUSED": "Connection refused by the server",
+            "530": "Login authentication failed",
+            "UNKNOWN": "An error has occured",
+            "GENERIC": "{{message}} (code {{code}})"
         }
     }
 }

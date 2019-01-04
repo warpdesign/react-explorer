@@ -8,6 +8,7 @@ import { remote } from 'electron';
 import { throttle } from '../utils/throttle';
 import { Logger, JSObject } from "../components/Log";
 import { EventEmitter } from 'events';
+import i18next from '../locale/i18n';
 
 const FtpUrl = /^(ftp\:\/\/)*(ftp\.[a-z]+\.[a-z]{2,3}|[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})$/i;
 const ServerPart = /^(ftp\:\/\/)*(ftp\.[a-z]+\.[a-z]{2,3}|[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})/i;
@@ -158,14 +159,22 @@ class Client{
     private goOffline(error:any) {
         this.status = 'offline';
         if (this.readyReject) {
-            if (typeof error.code === 'string') {
+            if (typeof error.code !== 'undefined') {
                 switch (error.code) {
                     case 'ENOTFOUND':
-                        error.message = 'Server not found: check hostname';
+                        error.message = i18next.t('ERRORS.ENOTFOUND');
                         break;
 
                     case 'ECONNREFUSED':
-                        error.message = 'Connection refused by the server';
+                        error.message = i18next.t('ERRORS.ECONNREFUSED');
+                        break;
+
+                    case 530:
+                        error.message = i18next.t('ERRORS.530');
+                        break;
+
+                    default:
+                        error.message = i18next.t('ERRORS.UNKNOWN');
                         break;
                 }
             }

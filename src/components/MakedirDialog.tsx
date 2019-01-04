@@ -1,8 +1,9 @@
 import * as React from "react";
 import { Dialog, Classes, Intent, Button, InputGroup, FormGroup, Label, Checkbox } from "@blueprintjs/core";
 import { debounce } from "../utils/debounce";
+import { withNamespaces, WithNamespaces } from "react-i18next";
 
-interface IMakedirProps {
+interface IMakedirProps extends WithNamespaces {
     isOpen: boolean;
     parentPath: string;
     onClose?: (dirName: string, navigate: boolean) => void
@@ -21,7 +22,7 @@ const ENTER_KEY = 13;
 const META_KEY = 91;
 const ReadFolderKey = process.platform === 'darwin' && META_KEY || CTRL_KEY;
 
-export class MakedirDialog extends React.Component<IMakedirProps, IMakedirState>{
+class MakedirDialogClass extends React.Component<IMakedirProps, IMakedirState>{
     constructor(props:any) {
         super(props);
 
@@ -112,8 +113,10 @@ export class MakedirDialog extends React.Component<IMakedirProps, IMakedirState>
 
     public render() {
         const { path, valid, ctrlKey } = this.state;
+        const { t } = this.props;
+
         const intent = !valid && 'danger' || 'none';
-        const helperText = !valid && (<span>Folder name not valid</span>) || (<span>&nbsp;</span>);
+        const helperText = !valid && (<span>{t('DIALOG.MAKEDIR.NOT_VALID')}</span>) || (<span>&nbsp;</span>);
         let { parentPath } = this.props;
 
         let sep = '';
@@ -130,7 +133,7 @@ export class MakedirDialog extends React.Component<IMakedirProps, IMakedirState>
         return(
             <Dialog
             icon="folder-new"
-            title="New Folder"
+            title={t('COMMON.MAKEDIR')}
             isOpen={this.props.isOpen}
             autoFocus={true}
             enforceFocus={true}
@@ -139,7 +142,7 @@ export class MakedirDialog extends React.Component<IMakedirProps, IMakedirState>
             onClose={this.cancelClose}
         >
             <div className={Classes.DIALOG_BODY}>
-                <p>Enter a name to create a new folder:</p>
+                    <p>{t('DIALOG.MAKEDIR.TITLE')}</p>
                 <FormGroup
                     helperText={helperText}
                     inline={true}
@@ -148,7 +151,7 @@ export class MakedirDialog extends React.Component<IMakedirProps, IMakedirState>
                 >
                     <InputGroup
                         onChange={this.onPathChange}
-                        placeholder="Enter folder name"
+                        placeholder={t('DIALOG.MAKEDIR.NAME')}
                         value={path}
                         id="directory-input"
                         name="directory-input"
@@ -159,10 +162,10 @@ export class MakedirDialog extends React.Component<IMakedirProps, IMakedirState>
             </div>
             <div className={Classes.DIALOG_FOOTER}>
                 <div className={Classes.DIALOG_FOOTER_ACTIONS}>
-                    <Button onClick={this.cancelClose}>Cancel</Button>
+                        <Button onClick={this.cancelClose}>{t('COMMON.CANCEL')}</Button>
 
                         <Button intent={Intent.PRIMARY} onClick={this.onCreate} disabled={!path.length || !valid}>
-                        {!ctrlKey && 'Create' || 'Create & read folder'}
+                            {!ctrlKey && t('DIALOG.MAKEDIR.CREATE') || t('DIALOG.MAKEDIR.CREATE_READ')}
                     </Button>
                 </div>
             </div>
@@ -170,3 +173,7 @@ export class MakedirDialog extends React.Component<IMakedirProps, IMakedirState>
         )
     }
 }
+
+const MakedirDialog = withNamespaces()(MakedirDialogClass);
+
+export { MakedirDialog };

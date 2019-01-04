@@ -56,7 +56,8 @@ export class FileMenuClass extends React.Component<IFileMenuProps>{
                 <Menu>
                 <MenuItem text={t('COMMON.MAKEDIR')} icon="folder-new" onClick={this.onNewfolder}/>
                 <MenuDivider />
-                <MenuItem text={t('FILEMENU.PASTE', {count: clipboardLength})} icon="duplicate" onClick={this.onPaste} disabled={!clipboardLength} />
+                <MenuItem text={t('FILEMENU.PASTE', { count: clipboardLength })} icon="duplicate" onClick={this.onPaste} disabled={!clipboardLength} />
+                <MenuDivider />
                 <MenuItem text={t('FILEMENU.DELETE', { count: selectedItems.length })} onClick={this.onDelete} intent={selectedItems.length && "danger" || "none"} icon="delete" disabled={!selectedItems.length} />
             </Menu>
         </React.Fragment>

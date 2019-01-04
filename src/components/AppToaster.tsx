@@ -16,8 +16,15 @@ export interface IToasterOpts {
     timeout?: number
 }
 
+let lastToast = '';
+
 export const AppToaster = {
-    show: (opts:IToasterOpts, key?:string):string => {
-        return MyToaster.show({timeout: TOAST_TIMEOUT, ...opts}, key);
+    show: (opts: IToasterOpts, key?: string, dismissPrev = false): string => {
+        if (dismissPrev) {
+            MyToaster.dismiss(lastToast);
+        }
+
+        lastToast = MyToaster.show({ timeout: TOAST_TIMEOUT, ...opts }, key);
+        return lastToast;
     }
 }

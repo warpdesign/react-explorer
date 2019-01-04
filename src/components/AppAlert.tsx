@@ -3,6 +3,7 @@ import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import { Alert, IAlertProps } from '@blueprintjs/core';
 import { Deferred } from '../utils/deferred';
+import i18next from '../locale/i18n';
 
 type Message = React.ReactNode | string;
 
@@ -56,6 +57,10 @@ class Alerter extends React.Component<{}, IAlerterState> {
 
     private renderAlert() {
         const { message, ...alertProps } = this.state;
+
+        if (!alertProps.confirmButtonText) {
+            alertProps.confirmButtonText = i18next.t('COMMON.OK');
+        }
 
         return <Alert {...alertProps}>{message}</Alert>;
     }

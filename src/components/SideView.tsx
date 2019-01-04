@@ -84,7 +84,7 @@ export class SideView extends React.Component<SideViewProps, SideViewState>{
                 message: `${num} element(s) copied to the clipboard`,
                 icon: "tick",
                 intent: Intent.SUCCESS
-            });
+            }, undefined, true);
         }
     }
 
