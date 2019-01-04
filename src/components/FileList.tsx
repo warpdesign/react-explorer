@@ -10,6 +10,7 @@ import { Logger } from "./Log";
 import { FileState } from "../state/fileState";
 import { withNamespaces, WithNamespaces } from 'react-i18next';
 import { formatBytes } from '../utils/formatBytes';
+import i18next from '../locale/i18n';
 
 const REGEX_EXTENSION = /\.(?=[^0-9])/;
 
@@ -54,7 +55,7 @@ export class FileListClass extends React.Component<IProps, FileListState> {
     constructor(props: IProps) {
         super(props);
 
-        const { t } = this.props;
+        const { initialLanguage } = this.props;
 
         const { fileCache } = this.injected;
 
@@ -67,6 +68,23 @@ export class FileListClass extends React.Component<IProps, FileListState> {
         };
 
         this.installReaction();
+        // since the nodes are only generated after the files are updated
+        // we re-render them after language has changed otherwise FileList
+        // gets re-rendered with the wrong language after language has been changed
+        this.bindLanguageChange();
+    }
+
+    private bindLanguageChange = () => {
+        i18next.on('languageChanged', this.onLanguageChanged);
+    }
+
+    private unbindLanguageChange = () => {
+        i18next.off('languageChanged', this.onLanguageChanged);
+    }
+
+    public onLanguageChanged = (lang: string) => {
+        const nodes = this.buildNodes(this.cache.files);
+        this.setState({ nodes });
     }
 
     private get injected() {
@@ -264,6 +282,7 @@ export class FileListClass extends React.Component<IProps, FileListState> {
 
     public componentWillUnmount() {
         this.disposer();
+        this.unbindLanguageChange();
     }
 
     public shouldComponentUpdate() {

@@ -10,6 +10,8 @@ import { Downloads } from "./Downloads";
 import { Badge } from "./Badge";
 import { ipcRenderer } from "electron";
 import { withNamespaces, WithNamespaces, Trans } from 'react-i18next';
+import { updateTranslations } from '../utils/formatBytes';
+import i18next from '../locale/i18n';
 
 require("@blueprintjs/core/lib/css/blueprint.css");
 require("@blueprintjs/icons/lib/css/blueprint-icons.css");
@@ -33,7 +35,6 @@ declare global {
     }
 }
 
-
 @observer
 @HotkeysTarget
 class App extends React.Component<WithNamespaces, IState> {
@@ -56,7 +57,7 @@ class App extends React.Component<WithNamespaces, IState> {
             window.appState = this.appState;
         }
 
-        Logger.success(`React-FTP - CY: ${ENV.CY} NODE_ENV: ${ENV.NODE_ENV}`);
+        Logger.success(`React-FTP - CY: ${ENV.CY} - NODE_ENV: ${ENV.NODE_ENV} - lang: ${i18next.language}`);
         // Logger.warn('React-FTP', remote.app.getVersion());
         // Logger.error('React-FTP', remote.app.getVersion());
     }
@@ -188,6 +189,20 @@ class App extends React.Component<WithNamespaces, IState> {
         </Hotkeys>;
     }
 
+    changeLanguage = () => {
+        console.log('changing language to en');
+        i18next.changeLanguage('en', (err, t2) => {
+            if (err) {
+                console.log('oops, error', err);
+            }
+            const { t } = this.props;
+            console.log(t2('NAV.EXPLORER'));
+            console.log(t('NAV.EXPLORER'));
+            console.log(i18next.t('NAV.EXPLORER'));
+            debugger;
+        });
+    }
+
     render() {
         const { isExplorer, activeView, isExitDialogOpen } = this.state;
         const count = this.appState.pendingTransfers;
@@ -225,7 +240,7 @@ class App extends React.Component<WithNamespaces, IState> {
                         </Navbar.Group>
                         <Navbar.Group align={Alignment.RIGHT}>
                             <Navbar.Divider />
-                            <Button className="bp3-minimal" icon="cog" />
+                            <Button className="bp3-minimal" onClick={this.changeLanguage} icon="cog" />
                         </Navbar.Group>
                     </Navbar>
                     <div onClickCapture={this.handleClick} className="main">
