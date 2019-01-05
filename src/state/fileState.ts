@@ -1,6 +1,7 @@
 import { observable, action, runInAction } from "mobx";
 import { FsApi, Fs, getFS, File, ICredentials } from "../services/Fs";
 import { Deferred } from '../utils/deferred';
+import i18next from '../locale/i18n';
 
 type TStatus = 'blank' | 'busy' | 'ok' | 'login' | 'offline';
 
@@ -95,7 +96,7 @@ export class FileState {
         this.server = this.prevServer;
     }
 
-    private getNewFS(path: string): Fs {
+    private getNewFS(path: string, skipContext = false): Fs {
         let newfs = getFS(path);
 
         if (newfs) {
@@ -104,7 +105,7 @@ export class FileState {
                 this.api.free();
             }
 
-            this.saveContext();
+            !skipContext && this.saveContext();
 
             this.fs = newfs;
             this.api = new newfs.API(path);
@@ -171,19 +172,22 @@ export class FileState {
         console.log('cd', path, this.path);
 
         if (this.path !== path) {
-            if (this.getNewFS(path)) {
+            if (this.getNewFS(path, skipHistory)) {
                 this.server = this.fs.serverpart(path);
                 this.credentials = this.fs.credentials(path);
             } else {
                 this.navHistory(0);
-                return Promise.reject(`Cannot open ${path}`);
+                return Promise.reject({
+                    message: i18next.t('ERRORS.CANNOT_READ_FOLDER', { folder: path }),
+                    code: 'NO_FS'
+                });
             }
         }
 
         try {
             await this.waitForConnection();
         } catch (err) {
-            return this.cd(path, path2, skipHistory);
+            return this.cd(path, path2, true);
         }
 
         const joint = path2 ? this.api.join(path, path2) : this.api.sanityze(path);
@@ -246,7 +250,8 @@ export class FileState {
     }
 
     reload() {
-        this.cd(this.path);
+        // this.cd(this.path);
+        this.navHistory(0);
     }
 
     join(path: string, path2: string) {

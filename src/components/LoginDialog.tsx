@@ -2,8 +2,9 @@ import * as React from "react";
 import { Dialog, Classes, Intent, Button, InputGroup, FormGroup, Colors} from "@blueprintjs/core";
 import { inject } from "mobx-react";
 import { FileState } from "../state/fileState";
+import { withNamespaces, WithNamespaces } from "react-i18next";
 
-interface ILoginProps {
+interface ILoginProps extends WithNamespaces {
     isOpen: boolean;
     onClose?: (user: string, password: string) => void
     onValidation: (dir: string) => boolean
@@ -31,7 +32,7 @@ interface ILoginState {
 const ENTER_KEY = 13;
 
 @inject('fileCache')
-export class LoginDialog extends React.Component<ILoginProps, ILoginState> {
+class LoginDialogClass extends React.Component<ILoginProps, ILoginState> {
     private input: HTMLInputElement | null = null;
 
     constructor(props:any) {
@@ -125,6 +126,7 @@ export class LoginDialog extends React.Component<ILoginProps, ILoginState> {
 
     public render() {
         const { user, password, busy, error, port, server } = this.state;
+        const { t } = this.props;
 
         if (error) {
             console.log(error.code, error.message);
@@ -133,7 +135,7 @@ export class LoginDialog extends React.Component<ILoginProps, ILoginState> {
         return(
             <Dialog
             icon="globe-network"
-            title={`Login to ${server}`}
+            title={t('DIALOG.LOGIN.TITLE', {server: server})}
             isOpen={this.props.isOpen}
             autoFocus={true}
             enforceFocus={true}
@@ -143,15 +145,15 @@ export class LoginDialog extends React.Component<ILoginProps, ILoginState> {
             className="loginDialog"
         >
                 <div className={Classes.DIALOG_BODY}>
-                    {error && (<p className="error" style={{ backgroundColor: Colors.RED4 }}>{error.message} (code {error.code})</p>)}
+                    {error && (<p className="error" style={{ backgroundColor: Colors.RED4 }}>{t('ERRORS.GENERIC', { error })}</p>)}
                     <FormGroup
                         inline={true}
                         labelFor="server"
-                        labelInfo="server"
+                        labelInfo={t('DIALOG.LOGIN.SERVER')}
                     >
                         <InputGroup
                             onChange={this.onInputChange}
-                            placeholder="Enter server"
+                            placeholder={t('DIALOG.LOGIN.SERVER_NAME')}
                             disabled={busy}
                             value={server}
                             id="server"
@@ -162,12 +164,12 @@ export class LoginDialog extends React.Component<ILoginProps, ILoginState> {
                 <FormGroup
                     inline={true}
                     labelFor="user"
-                    labelInfo="username"
-                    helperText={(<span>Leave empty for <em>anonymous</em> login</span>)}
+                    labelInfo={t('DIALOG.LOGIN.USERNAME')}
+                        helperText={(<span>{t('DIALOG.LOGIN.HINT_USERNAME')}</span>)}
                 >
                     <InputGroup
                         onChange={this.onInputChange}
-                            placeholder="Enter username"
+                            placeholder={t('DIALOG.LOGIN.USERINPUT')}
                             disabled={busy}
                             value={user}
                             inputRef={this.refHandler}
@@ -180,12 +182,12 @@ export class LoginDialog extends React.Component<ILoginProps, ILoginState> {
                     <FormGroup
                         inline={true}
                         labelFor="password"
-                        labelInfo="password"
-                        helperText="Required for non-anonymous login"
+                        labelInfo={t('DIALOG.LOGIN.PASSWORD')}
+                        helperText={t('DIALOG.LOGIN.HINT_PASSWORD')}
                     >
                         <InputGroup
                             onChange={this.onInputChange}
-                            placeholder="Enter password"
+                            placeholder={t('DIALOG.LOGIN.PASSWORDINPUT')}
                             disabled={busy}
                             value={password}
                             id="password"
@@ -197,7 +199,7 @@ export class LoginDialog extends React.Component<ILoginProps, ILoginState> {
                     <FormGroup
                         inline={true}
                         labelFor="port"
-                        labelInfo="port"
+                        labelInfo={t('DIALOG.LOGIN.PORT')}
                     >
                         <InputGroup
                             onChange={this.onInputChange}
@@ -212,9 +214,9 @@ export class LoginDialog extends React.Component<ILoginProps, ILoginState> {
             </div>
             <div className={Classes.DIALOG_FOOTER}>
                 <div className={Classes.DIALOG_FOOTER_ACTIONS}>
-                    <Button onClick={this.cancelClose} disabled={busy}>Cancel</Button>
+                        <Button onClick={this.cancelClose} disabled={busy}>{t('COMMON.CANCEL')}</Button>
                         <Button loading={busy} intent={Intent.PRIMARY} onClick={this.onLogin} disabled={!this.canLogin()}>
-                        {'Login'}
+                        {t('DIALOG.LOGIN.LOGIN')}
                     </Button>
                 </div>
             </div>
@@ -222,3 +224,7 @@ export class LoginDialog extends React.Component<ILoginProps, ILoginState> {
         )
     }
 }
+
+const LoginDialog = withNamespaces()(LoginDialogClass);
+
+export { LoginDialog };

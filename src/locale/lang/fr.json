@@ -1,0 +1,82 @@
+{
+    "translations": {
+        "NAV": {
+            "EXPLORER": "Explorateur",
+            "TRANSFERS": "Téléchargements"
+        },
+        "DIALOG": {
+            "QUIT": {
+                "BT_STOP_TRANSFERS": "Arrêter & quitter",
+                "BT_KEEP_TRANSFERS": "Ne pas quitter",
+                "CONTENT": "<1>{{count}}</1> téléchargement est <3>en cours</3>.<5 /><6 />Quiiter l'application maintenant le <8>stoppera</8>.",
+                "CONTENT_plural": "<1>{{count}}</1> téléchargements sont <3>en cours</3>.<5 /><6 />Quiiter l'application maintenant les <8>arrêtera</8>."
+            },
+            "MAKEDIR": {
+                "NOT_VALID": "Nom de dossier non valide",
+                "TITLE": "Entrer un nom pour le nouveau dossier:",
+                "NAME": "Nom du dossier",
+                "CREATE": "Créer",
+                "CREATE_READ": "Créer & ouvrir dossier"
+            },
+            "LOGIN": {
+                "TITLE": "Connexion à {{server}}",
+                "SERVER_NAME": "Entrer le serveur",
+                "SERVER": "serveur",
+                "USERNAME": "identifiant",
+                "USERINPUT": "Saisir l'identifiant",
+                "HINT_USERNAME": "Laisser vide pour une connexion anonyme",
+                "PASSWORD": "mot de passe",
+                "HINT_PASSWORD": "Requis si connexion non anonyme",
+                "PASSWORDINPUT": "Saisir le mot de passe",
+                "PORT": "port",
+                "LOGIN": "Connexion"
+            }
+        },
+        "SHORTCUT": {
+            "MAIN": {
+                "QUIT": "Quitter react-ftp",
+                "RELOAD_VIEW": "Recharger la vue"
+            }
+        },
+        "STATUS": {
+            "CPTOOLTIP": "Copier {{count}} fichier dans le presse-papier",
+            "CPTOOLTIP_plural": "Copier {{count}} fichiers dans le presse-papier",
+            "FILES": "{{count}} fichier",
+            "FILES_plural": "{{count}} fichiers",
+            "FOLDERS": "{{count}} dossier",
+            "FOLDERS_plural": "{{count}} dossiers"
+        },
+        "COMMON": {
+            "SIZE": {
+                "B": "octet",
+                "B_plural": "octets",
+                "KB": "Ko",
+                "MB": "Mo",
+                "GB": "Go",
+                "TB": "To"
+            },
+            "CP_COPIED": "{{count}} élément a été copié dans le presse-papier",
+            "CP_COPIED_plural": "{{count}} éléments ont été copiés dans le presse-papier",
+            "MAKEDIR": "Nouveau dossier",
+            "CANCEL": "Annuler",
+            "OK": "OK"
+        },
+        "FILEMENU": {
+            "PASTE": "Coller {{count}} élément",
+            "PASTE_plural": "Coller {{count}} éléments",
+            "DELETE": "Supprimer {{count}} élément",
+            "DELETE_plural": "Supprimer {{count}} éléments"
+        },
+        "DOWNLOADS": {
+            "EMPTY_TITLE": "Aucun téléchargement."
+        },
+        "ERRORS": {
+            "CANNOT_READ_FOLDER": "Impossible d'ouvrir '{{folder}}'",
+            "ENOTFOUND": "Serveur introuvable: vérifier le nom d'hôte",
+            "ECONNREFUSED": "Connexion refusée par le serveur",
+            "530": "Echec de l'authentification",
+            "UNKNOWN": "Une erreur est survenue",
+            "GENERIC": "{{error.message}} (code {{error.code}})"
+        }
+    }
+}

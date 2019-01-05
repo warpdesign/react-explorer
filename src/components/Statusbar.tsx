@@ -4,16 +4,21 @@ import { InputGroup, ControlGroup, Button, ButtonGroup, Popover, Intent, Alert, 
 import { AppState } from "../state/appState";
 import { AppToaster } from "./AppToaster";
 import { FileState } from "../state/fileState";
+import { withNamespaces, WithNamespaces } from 'react-i18next';
 
-interface InjectedProps {
+interface IProps extends WithNamespaces{
+
+};
+
+interface InjectedProps extends IProps {
     fileCache: FileState;
     appState: AppState
 }
 
 @inject('fileCache', 'appState')
 @observer
-export class Statusbar extends React.Component {
-    constructor(props: any) {
+export class StatusbarClass extends React.Component<IProps> {
+    constructor(props: IProps) {
         super(props);
     }
 
@@ -23,11 +28,12 @@ export class Statusbar extends React.Component {
 
     private onClipboardCopy = () => {
         const { fileCache, appState } = this.injected;
+        const { t } = this.props;
 
         const num = appState.setClipboard(fileCache);
 
         AppToaster.show({
-            message: `${num} element(s) copied to the clipboard`,
+            message: t('COMMON.CP_COPIED', {count: num}),
             icon: "tick",
             intent: Intent.SUCCESS
         });
@@ -50,9 +56,10 @@ export class Statusbar extends React.Component {
         const numSelected = fileCache.selected.length;
         const iconName = fileCache.getFS().icon as IconName;
         const offline = fileCache.status === 'offline' && 'offline' || '';
+        const { t } = this.props;
 
         const pasteButton = (
-            <Tooltip content={`Copy ${numSelected} file(s) to the clipboard`} disabled={disabled}>
+            <Tooltip content={t('STATUS.CPTOOLTIP', { count: numSelected })} disabled={disabled}>
                 <Button
                 data-cy-paste-bt
                 disabled={disabled}
@@ -69,10 +76,14 @@ export class Statusbar extends React.Component {
                     disabled
                     leftIcon={iconName}
                     rightElement={pasteButton}
-                    value={`${numFiles} File(s), ${numDirs} Folder(s)`}
+                    value={`${t('STATUS.FILES', { count: numFiles })}, ${t('STATUS.FOLDERS', { count: numDirs })}`}
                     className={`status-bar ${offline}`}
                 />
             </ControlGroup>
         )
     }
 }
+
+const Statusbar = withNamespaces()(StatusbarClass);
+
+export { Statusbar };

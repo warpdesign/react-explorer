@@ -3,8 +3,9 @@ import { Menu, MenuItem, MenuDivider } from "@blueprintjs/core";
 import { observer, inject } from "mobx-react";
 import { AppState } from "../state/appState";
 import { File } from "../services/Fs";
+import { withNamespaces, WithNamespaces } from 'react-i18next';
 
-interface IFileMenuProps {
+interface IFileMenuProps extends WithNamespaces {
     onFileAction: (action: string) => any;
     selectedItems: File[];
 };
@@ -15,7 +16,7 @@ interface InjectedProps extends IFileMenuProps{
 
 @inject('appState')
 @observer
-export class FileMenu extends React.Component<IFileMenuProps>{
+export class FileMenuClass extends React.Component<IFileMenuProps>{
     constructor (props: IFileMenuProps){
         super(props);
     }
@@ -48,17 +49,22 @@ export class FileMenu extends React.Component<IFileMenuProps>{
     public render() {
         const { appState } = this.injected;
         const clipboardLength = appState.clipboard.files.length;
-        const { selectedItems } = this.props;
+        const { selectedItems, t } = this.props;
 
         return (
         <React.Fragment>
                 <Menu>
-                <MenuItem text="New Folder" icon="folder-new" onClick={this.onNewfolder}/>
+                <MenuItem text={t('COMMON.MAKEDIR')} icon="folder-new" onClick={this.onNewfolder}/>
                 <MenuDivider />
-                <MenuItem text={`Paste ${clipboardLength} item(s)`} icon="duplicate" onClick={this.onPaste} disabled={!clipboardLength} />
-                <MenuItem text={`Delete ${selectedItems.length} item(s)`} onClick={this.onDelete} intent={selectedItems.length && "danger" || "none"} icon="delete" disabled={!selectedItems.length} />
+                <MenuItem text={t('FILEMENU.PASTE', { count: clipboardLength })} icon="duplicate" onClick={this.onPaste} disabled={!clipboardLength} />
+                <MenuDivider />
+                <MenuItem text={t('FILEMENU.DELETE', { count: selectedItems.length })} onClick={this.onDelete} intent={selectedItems.length && "danger" || "none"} icon="delete" disabled={!selectedItems.length} />
             </Menu>
         </React.Fragment>
         )
     }
 }
+
+const FileMenu = withNamespaces()(FileMenuClass);
+
+export { FileMenu };

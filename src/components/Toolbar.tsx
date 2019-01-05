@@ -93,7 +93,7 @@ export class Toolbar extends React.Component<IProps, PathInputState> {
             this.input.blur();
             this.cache.cd(this.state.path)
                 .catch((err: any) => {
-                    AppAlert.show(`Error reading folder ${wrongPath} (${err.code})`, {
+                    AppAlert.show(`${err.message} (${err.code})`, {
                         intent: 'danger'
                     });
                     this.input.focus();
@@ -123,7 +123,7 @@ export class Toolbar extends React.Component<IProps, PathInputState> {
     }
 
     private onReload = () => {
-        this.cache.navHistory(0);
+        this.cache.reload();
     }
 
     private refHandler = (input: HTMLInputElement) => {

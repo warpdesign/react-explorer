@@ -4,8 +4,10 @@ import { AppState } from '../state/appState';
 import { inject } from 'mobx-react';
 import { Batch } from '../transfers/batch';
 import { reaction, toJS, IReactionDisposer } from 'mobx';
+import { withNamespaces, WithNamespaces } from 'react-i18next';
+import { formatBytes } from '../utils/formatBytes';
 
-interface IProps {
+interface IProps extends WithNamespaces{
     hide: boolean;
 }
 
@@ -23,7 +25,7 @@ interface IState {
 }
 
 @inject('appState')
-export class Downloads extends React.Component<IProps, IState> {
+class DownloadsClass extends React.Component<IProps, IState> {
     private disposer: IReactionDisposer;
     private appState: AppState;
 
@@ -85,7 +87,7 @@ export class Downloads extends React.Component<IProps, IState> {
 
         for (let transfer of transfers) {
             let i = transfer.id;
-            const sizeStr = transfer.status !== 'calculating' && (transfer.size + ' bytes') || '';
+            const sizeStr = transfer.status !== 'calculating' && formatBytes(transfer.size) || '';
 
             const node: ITreeNode =
             {
@@ -123,6 +125,7 @@ export class Downloads extends React.Component<IProps, IState> {
     renderTransferTree() {
         console.log('render');
         const { nodes } = this.state;
+        const { t } = this.props;
 
         console.log('render downloads tree');
 
@@ -138,9 +141,12 @@ export class Downloads extends React.Component<IProps, IState> {
             );
         } else {
             return (
-                <Callout className="downloads" title="No downloads yet :)" intent="success" icon="tick-circle">
-                    This section will help you monitor <Code>transfers</Code> that are in progress.
-                </Callout>
+                <div className="downloads empty">
+                    <Icon iconSize={80} icon="document" color="#d9dde0"></Icon>
+                    <p>
+                        {t('DOWNLOADS.EMPTY_TITLE')}
+                    </p>
+                </div>
             );
         }
 
@@ -163,3 +169,7 @@ export class Downloads extends React.Component<IProps, IState> {
         }
     }
 }
+
+const Downloads = withNamespaces()(DownloadsClass);
+
+export { Downloads };

@@ -1,0 +1,82 @@
+{
+    "translations": {
+        "NAV": {
+            "EXPLORER": "Explorer",
+            "TRANSFERS": "Transfers"
+        },
+        "DIALOG": {
+            "QUIT": {
+                "BT_STOP_TRANSFERS": "Cancel & quit",
+                "BT_KEEP_TRANSFERS": "Keep transfers",
+                "CONTENT": "There is <1>{{count}}</1> transfer <3>in progress</3>.<5 /><6 />Exiting the app now will <8>cancel</8> the download.",
+                "CONTENT_plural": "There are <1>{{count}}</1> transfers <3>in progress</3>.<5 /><6 />Exiting the app now will <8>cancel</8> all downloads."
+            },
+            "MAKEDIR": {
+                "NOT_VALID": "Folder name not valid",
+                "TITLE": "Enter a name for the new folder:",
+                "NAME": "Folder name",
+                "CREATE": "Create",
+                "CREATE_READ": "Create & read folderr"
+            },
+            "LOGIN": {
+                "TITLE": "Login to {{server}}",
+                "SERVER_NAME": "Enter server",
+                "SERVER": "server",
+                "USERNAME": "username",
+                "USERINPUT": "Enter username",
+                "HINT_USERNAME": "Leave empty for anonymous login",
+                "PASSWORD": "password",
+                "HINT_PASSWORD": "Required for non-anonymous login",
+                "PASSWORDINPUT": "Enter password",
+                "PORT": "port",
+                "LOGIN": "Login"
+            }
+        },
+        "SHORTCUT": {
+            "MAIN": {
+                "QUIT": "Exit react-ftp",
+                "RELOAD_VIEW": "Reload current view"
+            }
+        },
+        "STATUS": {
+            "CPTOOLTIP": "Copy {{count}} file to the clipboard",
+            "CPTOOLTIP_plural": "Copy {{count}} files to the clipboard",
+            "FILES": "{{count}} file",
+            "FILES_plural": "{{count}} files",
+            "FOLDERS": "{{count}} folder",
+            "FOLDERS_plural": "{{count}} folders"
+        },
+        "COMMON": {
+            "SIZE": {
+                "B": "byte",
+                "B_plural": "bytes",
+                "KB": "Kb",
+                "MB": "Mb",
+                "GB": "Gb",
+                "TB": "Tb"
+            },
+            "CP_COPIED": "{{count}} element has been copied into the clipboard",
+            "CP_COPIED_plural": "{{count}} elements have been copied into the clipboard",
+            "MAKEDIR": "New Folder",
+            "CANCEL": "Cancel",
+            "OK": "OK"
+        },
+        "FILEMENU": {
+            "PASTE": "Paste {{count}} item",
+            "PASTE_plural": "Paste {{count}} items",
+            "DELETE": "Delete {{count}} item",
+            "DELETE_plural": "Delete {{count}} items"
+        },
+        "DOWNLOADS": {
+            "EMPTY_TITLE": "No download."
+        },
+        "ERRORS": {
+            "CANNOT_READ_FOLDER": "Cannot open '{{folder}}'",
+            "ENOTFOUND": "Server not found: check hostname",
+            "ECONNREFUSED": "Connection refused by the server",
+            "530": "Login authentication failed",
+            "UNKNOWN": "An error has occured",
+            "GENERIC": "{{message}} (code {{code}})"
+        }
+    }
+}

@@ -154,3 +154,13 @@ export class LogUI extends React.Component<any, LogUIState> {
         )
     }
 }
+
+export function log(target:any, key:string, descriptor:PropertyDescriptor) {
+    const originalMethod = descriptor.value;
+    descriptor.value = function (...args:any[]) {
+        console.log(`${key} was called with:`, ...args);
+        var result = originalMethod.apply(this, arguments);
+        return result;
+    };
+    return descriptor;
+}
