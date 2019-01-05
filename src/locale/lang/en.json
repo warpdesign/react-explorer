@@ -77,6 +77,9 @@
             "530": "Login authentication failed",
             "UNKNOWN": "An error has occured",
             "GENERIC": "{{message}} (code {{code}})"
+        },
+        "MAIN_PROCESS": {
+            "PRESS_TO_EXIT": "Keep pressing ⌘Q to exit"
         }
     }
 }

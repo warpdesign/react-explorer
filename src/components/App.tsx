@@ -114,13 +114,16 @@ class App extends React.Component<WithNamespaces, IState> {
     // }
 
     onExitComboDown = (e: KeyboardEvent) => {
+        const { t } = this.props;
+
         if (!this.exitMode && e.keyCode === KEY_Q && e.metaKey) {
             const shouldCancel = this.onExitRequest();
 
             if (!shouldCancel) {
                 // check transfers
                 this.lastTimeStamp = new Date().getTime();
-                ipcRenderer.send('exitWarning');
+
+                ipcRenderer.send('exitWarning', t('MAIN_PROCESS.PRESS_TO_EXIT'));
 
                 this.exitTimeout = setTimeout(() => {
                     const currentTimeout = new Date().getTime();

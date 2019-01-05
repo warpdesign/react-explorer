@@ -29,8 +29,8 @@ function installExitListeners() {
     let exitWindow: BrowserWindow = null;
     let timeout:any = 0;
 
-    ipcMain.on('exitWarning', () => {
-        console.log('exitWindow');
+    ipcMain.on('exitWarning', (event:Event, exitString:string) => {
+        console.log('exitWindow', exitString);
 
         if (exitWindow) {
             clearTimeout(timeout);
@@ -45,7 +45,7 @@ function installExitListeners() {
                 focusable: false
             });
 
-            exitWindow.loadURL("data:text/html;charset=utf-8," + encodeURI('<html><head><style type="text/css">p{border-radius:4px;padding: 22px 5px;background-color:rgba(80,80,80,.8);color:white;text-shadow:1px 1px 2px rgba(79,79,79,.3);font-size:24px;}body{font-family:Helvetica;text-align:center;background-color:transparent}</style></head><body><p>Maintenez la touche ⌘Q enfoncée pour quitter</p></body></html>'));
+            exitWindow.loadURL("data:text/html;charset=utf-8," + encodeURI(`<html><head><style type="text/css">p{border-radius:4px;padding: 22px 5px;background-color:rgba(80,80,80,.8);color:white;text-shadow:1px 1px 2px rgba(79,79,79,.3);font-size:24px;}body{font-family:Helvetica;text-align:center;background-color:transparent}</style></head><body><p>${exitString}</p></body></html>`));
         }
     });
 
