@@ -123,7 +123,7 @@ export class Toolbar extends React.Component<IProps, PathInputState> {
     }
 
     private onReload = () => {
-        this.cache.navHistory(0);
+        this.cache.reload();
     }
 
     private refHandler = (input: HTMLInputElement) => {

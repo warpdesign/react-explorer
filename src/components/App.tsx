@@ -199,7 +199,6 @@ class App extends React.Component<WithNamespaces, IState> {
             console.log(t2('NAV.EXPLORER'));
             console.log(t('NAV.EXPLORER'));
             console.log(i18next.t('NAV.EXPLORER'));
-            debugger;
         });
     }
 

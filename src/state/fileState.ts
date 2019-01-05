@@ -250,7 +250,8 @@ export class FileState {
     }
 
     reload() {
-        this.cd(this.path);
+        // this.cd(this.path);
+        this.navHistory(0);
     }
 
     join(path: string, path2: string) {
