@@ -8,7 +8,6 @@ i18next.on('languageChanged', updateTranslations);
 export function updateTranslations() {
     translations = i18next.t('COMMON.SIZE', { returnObjects: true });
     byteFormats = Object.keys(translations).map((key) => translations[key]);
-    console.log('byteFormats', byteFormats);
 }
 
     // took this from stack overflow: https://stackoverflow.com/questions/15900485/correct-way-to-convert-size-in-bytes-to-kb-mb-gb-in-javascript

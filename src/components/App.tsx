@@ -193,12 +193,8 @@ class App extends React.Component<WithNamespaces, IState> {
         console.log('changing language to en');
         i18next.changeLanguage('en', (err, t2) => {
             if (err) {
-                console.log('oops, error', err);
+                console.warn('oops, error changing language to en', err);
             }
-            const { t } = this.props;
-            console.log(t2('NAV.EXPLORER'));
-            console.log(t('NAV.EXPLORER'));
-            console.log(i18next.t('NAV.EXPLORER'));
         });
     }
 
@@ -208,11 +204,7 @@ class App extends React.Component<WithNamespaces, IState> {
         const badgeText = count && (count + '') || '';
         const badgeProgress = this.appState.totalTransferProgress;
         const { t } = this.props;
-        // console.log(t('test', { compteur: 10 }));
-        // console.log(t('COMMON2.TEST', { count: 10 }));
-        // console.log(t('COMMON.Toto', { count: 10 }));
-        // debugger;
-        // console.log(t('DIALOG.QUIT.CONTENT', { count: 2 }));
+
         return (
             <Provider appState={this.appState}>
                 <React.Fragment>
