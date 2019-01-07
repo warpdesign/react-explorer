@@ -223,7 +223,7 @@ export class FileListClass extends React.Component<IProps, FileListState> {
                 }, CLICK_DELAY);
             }
         } else {
-            nodeData.isSelected = originallySelected == null ? true : !originallySelected;
+            nodeData.isSelected = !nodeData.isSelected;
             this.editingElement = null;
         }
 
