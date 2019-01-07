@@ -3,6 +3,8 @@ import { File, FsApi } from '../services/Fs';
 import { FileState } from './fileState';
 import { Batch } from '../transfers/batch';
 
+declare var ENV: any;
+
 interface Clipboard {
     srcFs: FsApi;
     srcPath: string;
@@ -18,6 +20,9 @@ interface TransferOptions {
 
 export class AppState {
     caches: FileState[] = new Array();
+
+    @observable
+    isExplorer = true;
 
     /* transfers */
     transfers = observable<Batch>([]);
@@ -41,6 +46,12 @@ export class AppState {
                     cache.navHistory(0);
                 }
             });
+    }
+
+    @action setActiveCache(active: number) {
+        for (let i = 0; i < this.caches.length; ++i) {
+            this.caches[i].active = i === active ? true : false;
+        }
     }
 
     @action
@@ -105,9 +116,14 @@ export class AppState {
 
     /* /transfers */
 
+    getActiveCache(): FileState {
+        return this.isExplorer ? this.caches.find((view) => view.active === true) : null;
+    }
+
     @action
-    refreshView(viewId:number) {
-        const cache = this.caches[viewId];
+    refreshActiveView() {
+        const cache = this.getActiveCache();/*[viewId];*/
+        debugger;
         // only refresh view that's ready
         if (cache && cache.status === 'ok') {
             cache.navHistory(0);
@@ -146,6 +162,17 @@ export class AppState {
         return files.length;
     }
 
-    constructor() {
+    constructor(caches: Array<string>) {
+        for (let path of caches) {
+            this.addCache(ENV.CY ? '' : path);
+        }
+        this.caches[0].active = true;
+
+        // // TODO: pass start path as prop ?
+        // const cache: FileState = appState.addCache();
+
+        // this.state = {
+        //     fileCache: cache
+        // };
     }
 }

@@ -35,7 +35,21 @@
         "SHORTCUT": {
             "MAIN": {
                 "QUIT": "Exit react-ftp",
-                "RELOAD_VIEW": "Reload current view"
+                "RELOAD_VIEW": "Reload current view",
+                "NEXT_VIEW": "Activate next view",
+                "PREVIOUS_VIEW": "Activate previous view"
+            },
+            "LOG": {
+                "TOGGLE": "Toggle Logs console"
+            },
+            "ACTIVE_VIEW": {
+                "COPY": "Copy selected items to clipboard",
+                "PASTE": "Paste selected items into current folder",
+                "VIEW_HISTORY": "Show nav history (debug)",
+                "FOCUS_PATH": "Focus address bar"
+            },
+            "GROUP": {
+                "ACTIVE_VIEW": "Active file view"
             }
         },
         "STATUS": {

@@ -10,16 +10,19 @@ import { Downloads } from "./Downloads";
 import { Badge } from "./Badge";
 import { ipcRenderer } from "electron";
 import { withNamespaces, WithNamespaces, Trans } from 'react-i18next';
+import { AppToaster } from "./AppToaster";
 import { updateTranslations } from '../utils/formatBytes';
+import * as process from 'process';
+import { remote } from 'electron';
 import i18next from '../locale/i18n';
+import { FileState } from "../state/fileState";
 
 require("@blueprintjs/core/lib/css/blueprint.css");
 require("@blueprintjs/icons/lib/css/blueprint-icons.css");
 require("../css/main.css");
 
 interface IState {
-    isExplorer: boolean;
-    activeView: number;
+    // activeView: number;
     isExitDialogOpen: boolean;
 }
 
@@ -46,12 +49,14 @@ class App extends React.Component<WithNamespaces, IState> {
     constructor(props: WithNamespaces) {
         super(props);
 
-        this.state = { isExplorer: true, activeView: 0, isExitDialogOpen: false };
+        this.state = { isExitDialogOpen: false };
 
         // do not show outlines when using the mouse
         FocusStyleManager.onlyShowFocusOnTabs();
 
-        this.appState = new AppState();
+        const path = process.platform === "win32" ? remote.app.getPath('temp') : '/tmp/react-explorer';
+
+        this.appState = new AppState([path, path]);
 
         if (ENV.CY) {
             window.appState = this.appState;
@@ -69,24 +74,32 @@ class App extends React.Component<WithNamespaces, IState> {
     }
 
     showDownloadsTab() {
-        this.setState({ isExplorer: false });
+        // this.setState({ isExplorer: false });
+        this.appState.isExplorer = false;
     }
 
     navClick = () => {
-        this.setState({ isExplorer: !this.state.isExplorer });
+        // this.setState({ isExplorer: !this.state.isExplorer });
+        this.appState.isExplorer = !this.appState.isExplorer;
+    }
+
+    setActiveView(view:number) {
+        // this.setState({
+        //     activeView: view
+        // });
+
+        this.appState.setActiveCache(view);
     }
 
     handleClick = (e: React.MouseEvent) => {
         const sideview = (e.target as HTMLElement).closest('.sideview');
 
         if (sideview) {
-            const num = sideview.id.replace('view_', '');
-            if (this.state.activeView !== parseInt(num, 10)) {
+            const num = parseInt(sideview.id.replace('view_', ''), 10);
+            if (this.appState.caches[num].active !== true) {
                 console.log('preventing event propagation');
                 e.stopPropagation();
-                this.setState({
-                    activeView: parseInt(num, 10)
-                });
+                this.setActiveView(num);
             }
         }
     }
@@ -143,6 +156,12 @@ class App extends React.Component<WithNamespaces, IState> {
         }
     }
 
+    onNextView = () => {
+        const nextView = this.appState.caches[0].active ? 1 : 0;
+
+        this.setActiveView(nextView);
+    }
+
     componentDidMount() {
         // listen for events from main process
         this.addListeners();
@@ -158,9 +177,9 @@ class App extends React.Component<WithNamespaces, IState> {
     }
 
     onReloadFileView = () => {
-        if (this.state.isExplorer) {
-            console.log('reloading view', this.state.activeView);
-            this.appState.refreshView(this.state.activeView);
+        if (this.appState.isExplorer) {
+            console.log('reloading view'/*, this.state.activeView*/);
+            this.appState.refreshActiveView(/*this.state.activeView*/);
         } else {
             console.log('downloads active, no refresh');
         }
@@ -189,6 +208,40 @@ class App extends React.Component<WithNamespaces, IState> {
                 preventDefault={true}
                 onKeyDown={this.onReloadFileView}
             />
+            <Hotkey
+                global={true}
+                combo="meta + c"
+                label={t('SHORTCUT.ACTIVE_VIEW.COPY')}
+                onKeyDown={this.onCopy}
+                group={t('SHORTCUT.GROUP.ACTIVE_VIEW')}
+            />
+            <Hotkey
+                global={true}
+                combo="mod + h"
+                label={t('SHORTCUT.ACTIVE_VIEW.VIEW_HISTORY')}
+                preventDefault={true}
+                onKeyDown={this.onShowHistory}
+                group={t('SHORTCUT.GROUP.ACTIVE_VIEW')}
+            />
+            <Hotkey
+                global={true}
+                combo="meta + v"
+                label={t('SHORTCUT.ACTIVE_VIEW.PASTE')}
+                onKeyDown={this.onPaste}
+                group={t('SHORTCUT.GROUP.ACTIVE_VIEW')}
+            />
+            <Hotkey
+                global={true}
+                combo="ctrl + alt + right"
+                label={t('SHORTCUT.MAIN.NEXT_VIEW')}
+                onKeyDown={this.onNextView}
+            />
+            <Hotkey
+                global={true}
+                combo="ctrl+ alt + left"
+                label={t('SHORTCUT.MAIN.PREVIOUS_VIEW')}
+                onKeyDown={this.onNextView}
+            />
         </Hotkeys>;
     }
 
@@ -201,12 +254,53 @@ class App extends React.Component<WithNamespaces, IState> {
         });
     }
 
+    private getActiveFileCache(): FileState {
+        debugger;
+        return this.appState.getActiveCache();
+    }
+
+    private onCopy = () => {
+        const fileCache: FileState = this.getActiveFileCache();
+
+        if (fileCache) {
+            const num = this.appState.setClipboard(fileCache);
+
+            AppToaster.show({
+                message: `${num} element(s) copied to the clipboard`,
+                icon: "tick",
+                intent: Intent.SUCCESS
+            }, undefined, true);
+        }
+    }
+
+    private onPaste = (): void => {
+        const fileCache: FileState = this.getActiveFileCache();
+
+        if (fileCache) {
+            this.appState.prepareClipboardTransferTo(fileCache);
+        }
+    }
+
+    private onShowHistory = () => {
+        const fileCache: FileState = this.getActiveFileCache();
+
+        if (fileCache && fileCache.status === 'ok') {
+            console.log('showHistory');
+            fileCache.history.forEach((path, i) => {
+                let str = fileCache.current === i && path + ' *' || path;
+                Logger.log(str);
+            });
+        }
+    }
+
     render() {
-        const { isExplorer, activeView, isExitDialogOpen } = this.state;
+        const { /*isExplorer,*/ /*activeView,*/ isExitDialogOpen } = this.state;
+        const isExplorer = this.appState.isExplorer;
         const count = this.appState.pendingTransfers;
         const badgeText = count && (count + '') || '';
         const badgeProgress = this.appState.totalTransferProgress;
         const { t } = this.props;
+        const caches = this.appState.caches;
 
         return (
             <Provider appState={this.appState}>
@@ -238,8 +332,8 @@ class App extends React.Component<WithNamespaces, IState> {
                         </Navbar.Group>
                     </Navbar>
                     <div onClickCapture={this.handleClick} className="main">
-                        <SideView active={activeView === 0} hide={!isExplorer} />
-                        <SideView active={activeView === 1} hide={!isExplorer} />
+                        <SideView fileCache={caches[0]} hide={!isExplorer} onPaste={this.onPaste} />
+                        <SideView fileCache={caches[1]} hide={!isExplorer} onPaste={this.onPaste} />
                         <Downloads hide={isExplorer}/>
                     </div>
                     <LogUI></LogUI>

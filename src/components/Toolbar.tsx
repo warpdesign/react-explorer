@@ -9,8 +9,9 @@ import { AppAlert } from './AppAlert';
 import { Logger } from "./Log";
 import { AppToaster, IToasterOpts } from "./AppToaster";
 import { FileState } from "../state/fileState";
+import { withNamespaces, WithNamespaces } from "react-i18next";
 
-interface IProps {
+interface IProps extends WithNamespaces {
     onPaste: () => void;
     active: boolean;
 }
@@ -35,7 +36,7 @@ enum KEYS {
 @inject('appState', 'fileCache')
 @HotkeysTarget
 @observer
-export class Toolbar extends React.Component<IProps, PathInputState> {
+export class ToolbarClass extends React.Component<IProps, PathInputState> {
     private cache: FileState;
     private input: HTMLInputElement | null = null;
     private disposer: IReactionDisposer;
@@ -197,15 +198,31 @@ export class Toolbar extends React.Component<IProps, PathInputState> {
         appState.prepareClipboardTransferTo(fileCache);
     }
 
+    private onMakedir = () => {
+        const { appState, fileCache } = this.injected;
+
+        if (appState.getActiveCache() === fileCache) {
+            this.setState({ isOpen: true });
+        }
+    }
+
+    private onDelete = () => {
+        const { appState, fileCache } = this.injected;
+
+        if (appState.getActiveCache() === fileCache) {
+            this.setState({ isDeleteOpen: true });
+        }
+    }
+
     private onFileAction = (action: string) => {
         switch(action) {
             case 'makedir':
                 Logger.log('Opening new folder dialog');
-                this.setState({isOpen: true});
+                this.onMakedir();
                 break;
 
             case 'delete':
-                this.setState({isDeleteOpen: true});
+                this.onDelete();
                 break;
 
             case 'paste':
@@ -245,12 +262,22 @@ export class Toolbar extends React.Component<IProps, PathInputState> {
     // }
 
     public renderHotkeys() {
+        const { t } = this.props;
+
         return <Hotkeys>
             <Hotkey
                 global={true}
                 combo="mod+l"
-                label="Focus path entry"
+                label={t('SHORTCUT.ACTIVE_VIEW.FOCUS_PATH')}
                 onKeyDown={this.onActivatePath}
+                group={t('SHORTCUT.GROUP.ACTIVE_VIEW')}
+            />
+            <Hotkey
+                global={true}
+                combo="mod+n"
+                label={t('COMMON.MAKEDIR')}
+                onKeyDown={this.onMakedir}
+                group={t('SHORTCUT.GROUP.ACTIVE_VIEW')}
             />
         </Hotkeys>;
     }
@@ -327,3 +354,7 @@ export class Toolbar extends React.Component<IProps, PathInputState> {
         )
     }
 }
+
+const Toolbar = withNamespaces()(ToolbarClass);
+
+export { Toolbar };

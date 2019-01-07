@@ -3,6 +3,7 @@ import { observer } from 'mobx-react';
 import { observable, runInAction } from 'mobx';
 import { debounce } from '../utils/debounce';
 import { Intent, HotkeysTarget, Hotkeys, Hotkey } from '@blueprintjs/core';
+import { WithNamespaces, withNamespaces } from 'react-i18next';
 
 require('../css/log.css');
 
@@ -63,7 +64,7 @@ const DEBOUNCE_DELAY = 500;
 
 @HotkeysTarget
 @observer
-export class LogUI extends React.Component<any, LogUIState> {
+export class LogUIClass extends React.Component<WithNamespaces, LogUIState> {
     private consoleDiv: HTMLDivElement;
     private valid: boolean;
     private lastScrollTop: number = 0;
@@ -81,7 +82,7 @@ export class LogUI extends React.Component<any, LogUIState> {
             this.lastScrollTop = scrollTop;
         }, DEBOUNCE_DELAY);
 
-    constructor(props: {}) {
+    constructor(props: WithNamespaces) {
         super(props);
         this.state = {
             visible: false
@@ -122,11 +123,13 @@ export class LogUI extends React.Component<any, LogUIState> {
     }
 
     renderHotkeys() {
+        const { t } = this.props;
+
         return <Hotkeys>
                 <Hotkey
                     global={true}
                     combo="escape"
-                    label="Toggle Logs console"
+                    label={t('SHORTCUT.LOG.TOGGLE')}
                     onKeyDown={this.toggleConsole}>
                 </Hotkey>
             </Hotkeys>;
@@ -164,3 +167,7 @@ export function log(target:any, key:string, descriptor:PropertyDescriptor) {
     };
     return descriptor;
 }
+
+const LogUI = withNamespaces()(LogUIClass);
+
+export { LogUI };

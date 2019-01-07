@@ -27,6 +27,9 @@ export class FileState {
     @observable
     type: string;
 
+    @observable
+    active = false;
+
     // history stuff
     history = observable<string>([]);
     @observable

@@ -35,7 +35,21 @@
         "SHORTCUT": {
             "MAIN": {
                 "QUIT": "Quitter react-ftp",
-                "RELOAD_VIEW": "Recharger la vue"
+                "RELOAD_VIEW": "Recharger la vue",
+                "NEXT_VIEW": "Activer la vue suivante",
+                "PREVIOUS_VIEW": "Activer la vue précédente"
+            },
+            "LOG": {
+                "TOGGLE": "Afficher/cacher la console"
+            },
+            "ACTIVE_VIEW": {
+                "COPY": "Copier les éléments sélectionnés dans le presse-papier",
+                "PASTE": "Coller les éléments sélectionnés dans le presse-papier",
+                "VIEW_HISTORY": "Afficher l'historique de navigation (debug)",
+                "FOCUS_PATH": "Activer la barre d'adresse"
+            },
+            "GROUP": {
+                "ACTIVE_VIEW": "Vue de dossier active"
             }
         },
         "STATUS": {
