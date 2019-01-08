@@ -1,4 +1,4 @@
-# React-FTP: FTP & local file explorer written in TypeScript & React
+# FTP & local file explorer written in TypeScript & React
 
 ## Features
 
