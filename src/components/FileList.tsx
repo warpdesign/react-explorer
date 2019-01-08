@@ -16,13 +16,18 @@ const REGEX_EXTENSION = /\.(?=[^0-9])/;
 
 export interface FileListState {
     nodes: ITreeNode[];
+    // number of items selected
     selected: number;
-    type: string
+    type: string;
+    // position of last selected element
+    position: number;
 };
 
 enum KEYS {
     Escape = 27,
-    Enter = 13
+    Enter = 13,
+    Down = 40,
+    Up = 38
 };
 
 const CLICK_DELAY = 300;
@@ -55,8 +60,6 @@ export class FileListClass extends React.Component<IProps, FileListState> {
     constructor(props: IProps) {
         super(props);
 
-        const { initialLanguage } = this.props;
-
         const { fileCache } = this.injected;
 
         this.cache = fileCache;
@@ -64,7 +67,8 @@ export class FileListClass extends React.Component<IProps, FileListState> {
         this.state = {
             nodes: this.buildNodes(this.cache.files),
             selected: 0,
-            type: 'local'
+            type: 'local',
+            position: -1
         };
 
         this.installReaction();
@@ -206,11 +210,13 @@ export class FileListClass extends React.Component<IProps, FileListState> {
         }
 
         let newSelected = selected;
+        let position = parseInt(nodeData.id.toString(), 10);
 
         if (!e.shiftKey) {
             newSelected = 0;
             nodes.forEach(n => (n.isSelected = false));
             nodeData.isSelected = true;
+
             // online toggle rename when clicking on the label, not the icon
             if (element.classList.contains('bp3-tree-node-label')) {
                 if (this.clickTimeout) {
@@ -224,6 +230,11 @@ export class FileListClass extends React.Component<IProps, FileListState> {
             }
         } else {
             nodeData.isSelected = !nodeData.isSelected;
+            if (!nodeData.isSelected) {
+                // need to update position with last one
+                // will be -1 if no left selected node is
+                position = nodes.findIndex((node) => node.isSelected);
+            }
             this.editingElement = null;
         }
 
@@ -234,7 +245,7 @@ export class FileListClass extends React.Component<IProps, FileListState> {
             newSelected--;
         }
 
-        this.setState({ nodes, selected: newSelected });
+        this.setState({ nodes, selected: newSelected, position });
         const selection = nodes.filter((node) => node.isSelected).map((node) => node.nodeData) as File[];
 
         appState.updateSelection(fileCache, selection);
@@ -275,13 +286,53 @@ export class FileListClass extends React.Component<IProps, FileListState> {
     }
 
     onKeyDown = (e: React.KeyboardEvent<HTMLElement>) => {
+        console.log('keyDown');
         if (this.editingElement && e.keyCode === KEYS.Enter) {
             e.preventDefault();
         }
     }
 
+    onArrowDown = (e: KeyboardEvent) => {
+        const { fileCache } = this.injected;
+
+        if (fileCache.active && e.keyCode === KEYS.Down) {
+            console.log('down');
+            let { position, selected } = this.state;
+            let { nodes } = this.state;
+            const { appState, fileCache } = this.injected;
+
+            position++;
+            // skip root directory
+            if (!position) {
+                if ((nodes[0].nodeData as File).fullname === '..') {
+                    position++;
+                }
+            }
+
+            if (position <= this.state.nodes.length - 1) {
+                if (e.shiftKey) {
+                    selected++;
+                } else {
+                    // unselect previous one
+                    nodes.forEach(n => (n.isSelected = false));
+                    selected = 1;
+
+                }
+                nodes[position].isSelected = true;
+
+                // move in method to reuse
+                this.setState({ nodes, selected, position });
+
+                const selection = nodes.filter((node) => node.isSelected).map((node) => node.nodeData) as File[];
+
+                appState.updateSelection(fileCache, selection);
+            }
+        }
+    }
+
     public componentWillUnmount() {
         this.disposer();
+        document.removeEventListener('keydown', this.onArrowDown);
         this.unbindLanguageChange();
     }
 
@@ -300,6 +351,10 @@ export class FileListClass extends React.Component<IProps, FileListState> {
         if (this.props.onUpdate) {
             this.props.onUpdate();
         }
+    }
+
+    public componentDidMount() {
+        document.addEventListener('keydown', this.onArrowDown);
     }
 
     public render() {

@@ -9,7 +9,6 @@ import i18next from './locale/i18n';
 
 declare var ENV: any;
 
-console.log(i18next.t('Hello'));
 // Development stuff: create fake directory for testing
 const exec = require('child_process').exec;
 exec('/Users/nico/tmp_ftp.sh', (err: Error) => {
@@ -34,5 +33,3 @@ window.addEventListener('load', () => {
         remote.getCurrentWebContents().reloadIgnoringCache();
     });
 });
-
-console.log(ENV.CY);
