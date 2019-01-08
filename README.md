@@ -1,5 +1,7 @@
 # FTP & local file explorer written in TypeScript & React
 
+![React-FTP](./img/react-ftp.png)
+
 ## Features
 
 - Plugin-based filesystem type: FTP and local supported for now
