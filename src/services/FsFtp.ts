@@ -206,6 +206,10 @@ class Client{
                 this.goOffline(error);
                 break;
 
+            case 'ETIMEDOUT':
+                debugger;
+                break;
+
             default:
                 // sometimes error.code is undefined or is a string (!!)
                 this.warn('unhandled error code:', error.code);
