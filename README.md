@@ -57,8 +57,10 @@ FTP-Electron makes use of the following tools/components:
  - [React](https://reactjs.org)
  - [Electron](https://electron.s.org)
  - [TypeScript](https://typescriptlang.org)
+ - [MobX](https://mobx.js.org)
  - [Blueprintjs](https://blueprintjs.com)
  - [node-ftp](https://github.com/warpdesign/node-ftp)
+ - [i18next](https://i18next.com) & [react-i18n](https://github.com/i18next/react-i18next)
 
  ## Licence
 
