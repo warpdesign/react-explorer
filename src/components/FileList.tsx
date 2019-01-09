@@ -1,7 +1,7 @@
 import * as React from "react";
 import { inject } from 'mobx-react';
 import { reaction, toJS, IReactionDisposer } from 'mobx';
-import { Classes, Button, ITreeNode, Tooltip, Tree, Intent } from "@blueprintjs/core";
+import { Classes, Button, ITreeNode, Tooltip, Tree, Intent, Keys } from "@blueprintjs/core";
 import { AppState } from "../state/appState";
 // TODO: remove any calls to shell
 import { File } from "../services/Fs";
@@ -11,6 +11,7 @@ import { FileState } from "../state/fileState";
 import { withNamespaces, WithNamespaces } from 'react-i18next';
 import { formatBytes } from '../utils/formatBytes';
 import i18next from '../locale/i18n';
+import { KEY } from "@blueprintjs/core/lib/esm/common/classes";
 
 const REGEX_EXTENSION = /\.(?=[^0-9])/;
 
@@ -52,10 +53,11 @@ interface InjectedProps extends IProps {
 @inject('appState', 'fileCache')
 export class FileListClass extends React.Component<IProps, FileListState> {
     private cache: FileState;
-    private editingElement: HTMLElement;
+    private editingElement: HTMLElement = null;
     private editingFile: File;
     private clickTimeout: any;
     private disposer: IReactionDisposer;
+    private treeRef: Tree;
 
     constructor(props: IProps) {
         super(props);
@@ -263,7 +265,6 @@ export class FileListClass extends React.Component<IProps, FileListState> {
             // call rename function
             this.cache.rename(this.editingFile.dir, this.editingFile, editingElement.innerText)
                 .then(() => {
-                    // this.injected.appState.refreshCache(this.cache);
                     this.cache.reload();
                 }).catch((oldName) => {
                     editingElement.innerText = oldName;
@@ -276,63 +277,95 @@ export class FileListClass extends React.Component<IProps, FileListState> {
         editingElement.removeAttribute('contenteditable');
     }
 
-    onKeyUp = (e: React.KeyboardEvent<HTMLElement>) => {
+    onInputKeyUp = (e: React.KeyboardEvent<HTMLElement>) => {
+        // if (this.editingElement) {
+        //     e.nativeEvent.stopImmediatePropagation();
+        //     if (e.keyCode === KEYS.Escape || e.keyCode === KEYS.Enter) {
+        //         console.log('end inline edit');
+        //         this.onInlineEdit(e.keyCode === KEYS.Escape);
+        //     }
+        // }
+    }
+
+    onInputKeyDown = (e: React.KeyboardEvent<HTMLElement>) => {
         if (this.editingElement) {
             e.nativeEvent.stopImmediatePropagation();
             if (e.keyCode === KEYS.Escape || e.keyCode === KEYS.Enter) {
+                if (e.keyCode === KEYS.Enter) {
+                    e.preventDefault();
+                }
+                // console.log('end inline edit');
                 this.onInlineEdit(e.keyCode === KEYS.Escape);
             }
         }
     }
 
-    onKeyDown = (e: React.KeyboardEvent<HTMLElement>) => {
-        console.log('keyDown');
-        if (this.editingElement && e.keyCode === KEYS.Enter) {
-            e.preventDefault();
+    onDocKeyDown = (e: KeyboardEvent) => {
+        const { fileCache } = this.injected;
+
+        if (!fileCache.active) {
+            return;
+        }
+
+        switch (e.keyCode) {
+            case KEYS.Down:
+            case KEYS.Up:
+                if (!this.editingElement && (e.keyCode === KEYS.Down || e.keyCode === KEYS.Up)) {
+                    this.moveSelection(e.keyCode === KEYS.Down ? 1 : -1, e.shiftKey);
+                }
+                break;
+
+            case KEYS.Enter:
+                if (!this.editingElement && this.state.selected > 0) {
+                    const { position, nodes } = this.state;
+                    const node = nodes[position];
+                    const file = nodes[position].nodeData as File;
+                    const element = this.treeRef.getNodeContentElement(position);
+                    const span: HTMLElement = element.querySelector('.bp3-tree-node-label');
+                    e.preventDefault();
+                    this.toggleInlineRename(span, node.isSelected, file);
+                }
+                break;
         }
     }
 
-    onArrowDown = (e: KeyboardEvent) => {
-        const { fileCache } = this.injected;
+    moveSelection(step: number, isShiftDown: boolean) {
+        console.log('down');
+        let { position, selected } = this.state;
+        let { nodes } = this.state;
+        const { appState, fileCache } = this.injected;
 
-        if (fileCache.active && e.keyCode === KEYS.Down) {
-            console.log('down');
-            let { position, selected } = this.state;
-            let { nodes } = this.state;
-            const { appState, fileCache } = this.injected;
+        position += step;
+        // skip root directory
+        if (!position) {
+            if ((nodes[0].nodeData as File).fullname === '..') {
+                position += step;
+            }
+        }
 
-            position++;
-            // skip root directory
-            if (!position) {
-                if ((nodes[0].nodeData as File).fullname === '..') {
-                    position++;
-                }
+        if (position > 0 && position <= this.state.nodes.length - 1) {
+            if (isShiftDown) {
+                selected++;
+            } else {
+                // unselect previous one
+                nodes.forEach(n => (n.isSelected = false));
+                selected = 1;
             }
 
-            if (position <= this.state.nodes.length - 1) {
-                if (e.shiftKey) {
-                    selected++;
-                } else {
-                    // unselect previous one
-                    nodes.forEach(n => (n.isSelected = false));
-                    selected = 1;
+            nodes[position].isSelected = true;
 
-                }
-                nodes[position].isSelected = true;
+            // move in method to reuse
+            this.setState({ nodes, selected, position });
 
-                // move in method to reuse
-                this.setState({ nodes, selected, position });
+            const selection = nodes.filter((node) => node.isSelected).map((node) => node.nodeData) as File[];
 
-                const selection = nodes.filter((node) => node.isSelected).map((node) => node.nodeData) as File[];
-
-                appState.updateSelection(fileCache, selection);
-            }
+            appState.updateSelection(fileCache, selection);
         }
     }
 
     public componentWillUnmount() {
         this.disposer();
-        document.removeEventListener('keydown', this.onArrowDown);
+        document.removeEventListener('keydown', this.onDocKeyDown);
         this.unbindLanguageChange();
     }
 
@@ -354,7 +387,11 @@ export class FileListClass extends React.Component<IProps, FileListState> {
     }
 
     public componentDidMount() {
-        document.addEventListener('keydown', this.onArrowDown);
+        document.addEventListener('keydown', this.onDocKeyDown);
+    }
+
+    public setTreeRef = (ref:Tree) => {
+        this.treeRef = ref;
     }
 
     public render() {
@@ -368,8 +405,9 @@ export class FileListClass extends React.Component<IProps, FileListState> {
         //     );
         // } else {
             return (
-                <div className="filelist" onKeyUp={this.onKeyUp} onKeyDown={this.onKeyDown}>
+                <div className="filelist" onKeyUp={this.onInputKeyUp} onKeyDown={this.onInputKeyDown}>
                     <Tree
+                        ref={this.setTreeRef}
                         contents={this.state.nodes}
                         className={`${Classes.ELEVATION_0}`}
                         onNodeDoubleClick={this.onNodeDoubleClick}
