@@ -38,10 +38,11 @@
                 "RELOAD_VIEW": "Reload current view",
                 "NEXT_VIEW": "Activate next view",
                 "PREVIOUS_VIEW": "Activate previous view",
-                "DOWLOADS_TAB": "Switch to transfers view",
+                "DOWNLOADS_TAB": "Switch to transfers view",
                 "EXPLORER_TAB": "Switch to explorer view",
                 "BACKWARD_HISTORY": "Go Back",
-                "FORWARD_HISTORY": "Go Forward"
+                "FORWARD_HISTORY": "Go Forward",
+                "OPEN_FILE": "Open the selected file/folder"
             },
             "LOG": {
                 "TOGGLE": "Toggle Logs console"

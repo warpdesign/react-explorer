@@ -358,7 +358,6 @@ export class FileState {
             this.cd(file.dir, file.fullname);
         } else {
             console.log('need to open file');
-            debugger;
             this.get(file.dir, file.fullname).then((tmpPath: string) => {
                 console.log('opening file', tmpPath);
                 shell.openItem(tmpPath);

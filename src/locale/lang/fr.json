@@ -38,10 +38,11 @@
                 "RELOAD_VIEW": "Recharger la vue",
                 "NEXT_VIEW": "Activer la vue suivante",
                 "PREVIOUS_VIEW": "Activer la vue précédente",
-                "DOWLOADS_TAB": "Afficher les transfers",
+                "DOWNLOADS_TAB": "Afficher les transfers",
                 "EXPLORER_TAB": "Afficher l'explorateur",
                 "BACKWARD_HISTORY": "Reculer d'un dossier (historique)",
-                "FORWARD_HISTORY": "Avancer d'un dossier (historique)"
+                "FORWARD_HISTORY": "Avancer d'un dossier (historique)",
+                "OPEN_FILE": "Ouvre le fichier/dossier sélectionné"
             },
             "LOG": {
                 "TOGGLE": "Afficher/cacher la console"

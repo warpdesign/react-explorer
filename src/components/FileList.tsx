@@ -87,11 +87,15 @@ export class FileListClass extends React.Component<IProps, FileListState> {
 
     public onLanguageChanged = (lang: string) => {
         const nodes = this.buildNodes(this.cache.files);
-        this.setState({ nodes });
+        this.updateNodes(nodes);
     }
 
     private get injected() {
         return this.props as InjectedProps;
+    }
+
+    private updateNodes(nodes: ITreeNode<{}>[]) {
+        this.setState({ nodes, selected: 0, position: -1 });
     }
 
     private installReaction() {
@@ -101,8 +105,7 @@ export class FileListClass extends React.Component<IProps, FileListState> {
                 console.log('got files', files.length);
                 // console.time('building nodes');
                 const nodes = this.buildNodes(files);
-                // console.timeEnd('building nodes');
-                this.setState({ nodes, selected: 0 });
+                this.updateNodes(nodes);
             });
     }
 
@@ -315,15 +318,21 @@ export class FileListClass extends React.Component<IProps, FileListState> {
                 break;
 
             case KEYS.Backspace:
-                debugger;
-                const { nodes } = this.state;
+                const element = e.target as HTMLElement;
+                const tagName = element.tagName.toLowerCase();
+                // TODO: this is used in Log as well, share the code !
+                if (!tagName.match(/input|textarea/) &&
+                    (!element || !element.classList.contains('bp3-menu-item')) &&
+                    !document.body.classList.contains('bp3-overlay-open')) {
+                    const { nodes } = this.state;
 
-                if (!this.editingElement && nodes.length) {
-                    const node = nodes[0];
-                    const file = node.nodeData as File;
+                    if (!this.editingElement && nodes.length) {
+                        const node = nodes[0];
+                        const file = node.nodeData as File;
 
-                    if (!fileCache.isRoot(file.dir)) {
-                        this.cache.cd(file.dir, '..');
+                        if (!fileCache.isRoot(file.dir)) {
+                            this.cache.cd(file.dir, '..');
+                        }
                     }
                 }
                 break;
