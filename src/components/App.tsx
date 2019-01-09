@@ -73,21 +73,19 @@ class App extends React.Component<WithNamespaces, IState> {
         });
     }
 
-    showDownloadsTab() {
-        // this.setState({ isExplorer: false });
+    showDownloadsTab = () => {
         this.appState.isExplorer = false;
     }
 
+    showExplorerTab = () => {
+        this.appState.isExplorer = true;
+    }
+
     navClick = () => {
-        // this.setState({ isExplorer: !this.state.isExplorer });
         this.appState.isExplorer = !this.appState.isExplorer;
     }
 
     setActiveView(view:number) {
-        // this.setState({
-        //     activeView: view
-        // });
-
         this.appState.setActiveCache(view);
     }
 
@@ -238,11 +236,49 @@ class App extends React.Component<WithNamespaces, IState> {
             />
             <Hotkey
                 global={true}
-                combo="ctrl+ alt + left"
+                combo="ctrl + alt + left"
                 label={t('SHORTCUT.MAIN.PREVIOUS_VIEW')}
                 onKeyDown={this.onNextView}
             />
+            <Hotkey
+                global={true}
+                combo="alt + mod + l"
+                label={t('SHORTCUT.MAIN.DOWNLOADS_TAB')}
+                onKeyDown={this.showDownloadsTab}
+            />
+            <Hotkey
+                global={true}
+                combo="alt + mod + e"
+                label={t('SHORTCUT.MAIN.EXPLORER_TAB')}
+                onKeyDown={this.showExplorerTab}
+            />
+            <Hotkey
+                global={true}
+                combo="alt + left"
+                label={t('SHORTCUT.MAIN.BACKWARD_HISTORY')}
+                onKeyDown={this.backwardHistory}
+            />
+            <Hotkey
+                global={true}
+                combo="alt + right"
+                label={t('SHORTCUT.MAIN.FORWARD_HISTORY')}
+                onKeyDown={this.forwardHistory}
+            />
         </Hotkeys>;
+    }
+
+    backwardHistory = () => {
+        if (this.appState.isExplorer) {
+            const cache = this.getActiveFileCache();
+            cache.navHistory(-1);
+        }
+    }
+
+    forwardHistory = () => {
+        if (this.appState.isExplorer) {
+            const cache = this.getActiveFileCache();
+            cache.navHistory(1);
+        }
     }
 
     changeLanguage = () => {

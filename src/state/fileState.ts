@@ -2,6 +2,7 @@ import { observable, action, runInAction } from "mobx";
 import { FsApi, Fs, getFS, File, ICredentials } from "../services/Fs";
 import { Deferred } from '../utils/deferred';
 import i18next from '../locale/i18n';
+import { shell } from 'electron';
 
 type TStatus = 'blank' | 'busy' | 'ok' | 'login' | 'offline';
 
@@ -349,5 +350,23 @@ export class FileState {
             this.status = 'ok';
             return path;
         });
+    }
+
+    openFile(file: File) {
+        if (file.isDir) {
+            console.log('need to read dir', file.dir, file.fullname);
+            this.cd(file.dir, file.fullname);
+        } else {
+            console.log('need to open file');
+            debugger;
+            this.get(file.dir, file.fullname).then((tmpPath: string) => {
+                console.log('opening file', tmpPath);
+                shell.openItem(tmpPath);
+            });
+        }
+    }
+
+    isRoot(path: string): boolean {
+        return this.api.isRoot(path);
     }
 }

@@ -37,7 +37,11 @@
                 "QUIT": "Exit react-ftp",
                 "RELOAD_VIEW": "Reload current view",
                 "NEXT_VIEW": "Activate next view",
-                "PREVIOUS_VIEW": "Activate previous view"
+                "PREVIOUS_VIEW": "Activate previous view",
+                "DOWLOADS_TAB": "Switch to transfers view",
+                "EXPLORER_TAB": "Switch to explorer view",
+                "BACKWARD_HISTORY": "Go Back",
+                "FORWARD_HISTORY": "Go Forward"
             },
             "LOG": {
                 "TOGGLE": "Toggle Logs console"

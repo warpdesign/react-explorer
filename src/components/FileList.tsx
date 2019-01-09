@@ -1,17 +1,13 @@
 import * as React from "react";
 import { inject } from 'mobx-react';
 import { reaction, toJS, IReactionDisposer } from 'mobx';
-import { Classes, Button, ITreeNode, Tooltip, Tree, Intent, Keys } from "@blueprintjs/core";
+import { Classes, ITreeNode, Tree } from "@blueprintjs/core";
 import { AppState } from "../state/appState";
-// TODO: remove any calls to shell
 import { File } from "../services/Fs";
-import { shell } from 'electron';
-import { Logger } from "./Log";
 import { FileState } from "../state/fileState";
 import { withNamespaces, WithNamespaces } from 'react-i18next';
 import { formatBytes } from '../utils/formatBytes';
 import i18next from '../locale/i18n';
-import { KEY } from "@blueprintjs/core/lib/esm/common/classes";
 
 const REGEX_EXTENSION = /\.(?=[^0-9])/;
 
@@ -25,8 +21,9 @@ export interface FileListState {
 };
 
 enum KEYS {
-    Escape = 27,
+    Backspace = 8,
     Enter = 13,
+    Escape = 27,
     Down = 40,
     Up = 38
 };
@@ -134,7 +131,7 @@ export class FileListClass extends React.Component<IProps, FileListState> {
     }
 
     private onNodeDoubleClick = (node: ITreeNode, _nodePath: number[], e: React.MouseEvent<HTMLElement>) => {
-        const data = node.nodeData as File;
+        const file = node.nodeData as File;
 
         // double click: prevent inline rename
         if (this.clickTimeout) {
@@ -143,18 +140,7 @@ export class FileListClass extends React.Component<IProps, FileListState> {
         }
 
         if ((e.target as HTMLElement) !== this.editingElement) {
-            if (data.isDir) {
-                Logger.log('need to read dir', data.dir, data.fullname);
-                this.cache.cd(data.dir, data.fullname);
-                // Logger.log('need to read dir', this.cache.FS.joinResolve(data.dir, data.fullname));
-                // appState.updateCache(this.cache, this.cache.FS.joinResolve(data.dir, data.fullname));
-            } else {
-                console.log('need to open file')
-                this.cache.get(data.dir, data.fullname).then((tmpPath: string) => {
-                    console.log('opening file', tmpPath);
-                    shell.openItem(tmpPath);
-                });
-            }
+            this.cache.openFile(file);
         }
     }
 
@@ -325,6 +311,20 @@ export class FileListClass extends React.Component<IProps, FileListState> {
                     const span: HTMLElement = element.querySelector('.bp3-tree-node-label');
                     e.preventDefault();
                     this.toggleInlineRename(span, node.isSelected, file);
+                }
+                break;
+
+            case KEYS.Backspace:
+                debugger;
+                const { nodes } = this.state;
+
+                if (!this.editingElement && nodes.length) {
+                    const node = nodes[0];
+                    const file = node.nodeData as File;
+
+                    if (!fileCache.isRoot(file.dir)) {
+                        this.cache.cd(file.dir, '..');
+                    }
                 }
                 break;
         }
