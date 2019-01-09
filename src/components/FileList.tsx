@@ -199,7 +199,6 @@ export class FileListClass extends React.Component<IProps, FileListState> {
     private onNodeClick = (nodeData: ITreeNode, _nodePath: number[], e: React.MouseEvent<HTMLElement>) => {
         const originallySelected = nodeData.isSelected;
         const { nodes, selected } = this.state;
-        const { fileCache, appState } = this.injected;
         const file = nodeData.nodeData as File;
 
         // keep a reference to the target before set setTimeout is called
@@ -248,9 +247,7 @@ export class FileListClass extends React.Component<IProps, FileListState> {
         }
 
         this.setState({ nodes, selected: newSelected, position });
-        const selection = nodes.filter((node) => node.isSelected).map((node) => node.nodeData) as File[];
-
-        appState.updateSelection(fileCache, selection);
+        this.updateSelection();
     };
 
     private onInlineEdit(cancel: boolean) {
@@ -267,6 +264,9 @@ export class FileListClass extends React.Component<IProps, FileListState> {
             // 1. innerText has been updated and is valid
             // 2. File.fullname is also updated, so any subsequent render will get the latest version as well
             this.cache.rename(this.editingFile.dir, this.editingFile, editingElement.innerText)
+                .then(() => {
+                    this.updateSelection();
+                })
                 .catch((oldName) => {
                     editingElement.innerText = oldName;
                 });
@@ -334,7 +334,6 @@ export class FileListClass extends React.Component<IProps, FileListState> {
         console.log('down');
         let { position, selected } = this.state;
         let { nodes } = this.state;
-        const { appState, fileCache } = this.injected;
 
         position += step;
         // skip root directory
@@ -358,10 +357,17 @@ export class FileListClass extends React.Component<IProps, FileListState> {
             // move in method to reuse
             this.setState({ nodes, selected, position });
 
-            const selection = nodes.filter((node) => node.isSelected).map((node) => node.nodeData) as File[];
-
-            appState.updateSelection(fileCache, selection);
+            this.updateSelection();
         }
+    }
+
+    private updateSelection() {
+        const { appState, fileCache } = this.injected;
+        const { nodes } = this.state;
+
+        const selection = nodes.filter((node) => node.isSelected).map((node) => node.nodeData) as File[];
+
+        appState.updateSelection(fileCache, selection);
     }
 
     public componentWillUnmount() {

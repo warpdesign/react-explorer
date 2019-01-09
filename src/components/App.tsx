@@ -255,7 +255,6 @@ class App extends React.Component<WithNamespaces, IState> {
     }
 
     private getActiveFileCache(): FileState {
-        debugger;
         return this.appState.getActiveCache();
     }
 
