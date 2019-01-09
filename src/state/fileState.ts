@@ -268,13 +268,14 @@ export class FileState {
             return this.rename(source, file, newName);
         }
 
-        return this.api.rename(source, file, newName).then((newName:string) => {
+        return this.api.rename(source, file, newName).then((newName: string) => {
             runInAction(() => {
+                file.fullname = newName;
                 this.status = 'ok';
             });
 
             return newName;
-        })
+        });
     }
 
     async isDir(path: string): Promise<boolean> {

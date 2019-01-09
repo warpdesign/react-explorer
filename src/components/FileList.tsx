@@ -262,11 +262,12 @@ export class FileListClass extends React.Component<IProps, FileListState> {
             editingElement.innerText = this.editingFile.fullname;
         } else {
             console.log('renaming value', this.cache.path, this.editingFile);
-            // call rename function
+            // since the File element is modified by the rename FileState.rename method there is
+            // no need to refresh the file cache:
+            // 1. innerText has been updated and is valid
+            // 2. File.fullname is also updated, so any subsequent render will get the latest version as well
             this.cache.rename(this.editingFile.dir, this.editingFile, editingElement.innerText)
-                .then(() => {
-                    this.cache.reload();
-                }).catch((oldName) => {
+                .catch((oldName) => {
                     editingElement.innerText = oldName;
                 });
         }
