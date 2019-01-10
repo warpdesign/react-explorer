@@ -1,12 +1,14 @@
 import * as React from "react";
+import * as ReactDOM from "react-dom";
 import { inject } from 'mobx-react';
 import { reaction, toJS, IReactionDisposer } from 'mobx';
-import { Classes, ITreeNode, Tree } from "@blueprintjs/core";
+import { Classes, ITreeNode, Tree, TreeNode } from "@blueprintjs/core";
 import { AppState } from "../state/appState";
 import { File } from "../services/Fs";
 import { FileState } from "../state/fileState";
 import { withNamespaces, WithNamespaces } from 'react-i18next';
 import { formatBytes } from '../utils/formatBytes';
+import { shouldCatchEvent } from '../utils/dom';
 import i18next from '../locale/i18n';
 
 const REGEX_EXTENSION = /\.(?=[^0-9])/;
@@ -55,6 +57,7 @@ export class FileListClass extends React.Component<IProps, FileListState> {
     private clickTimeout: any;
     private disposer: IReactionDisposer;
     private treeRef: Tree;
+    private newNodes = false;
 
     constructor(props: IProps) {
         super(props);
@@ -110,6 +113,7 @@ export class FileListClass extends React.Component<IProps, FileListState> {
     }
 
     private buildNodes = (files:File[]): ITreeNode<{}>[] => {
+        console.log('** building nodes');
         return files
             .sort((file1, file2) => {
                 if ((file2.isDir && !file1.isDir) ) {
@@ -129,6 +133,9 @@ export class FileListClass extends React.Component<IProps, FileListState> {
                     className: file.fullname !== '..' && file.fullname.startsWith('.') && 'isHidden',
                     secondaryLabel: !file.isDir && (<div className="bp3-text-small">{formatBytes(file.length)}</div>) || ''
                 };
+
+            this.newNodes = true;
+
             return res;
         });
     }
@@ -293,7 +300,7 @@ export class FileListClass extends React.Component<IProps, FileListState> {
     onDocKeyDown = (e: KeyboardEvent) => {
         const { fileCache } = this.injected;
 
-        if (!fileCache.active) {
+        if (!fileCache.active || !shouldCatchEvent(e)) {
             return;
         }
 
@@ -318,21 +325,15 @@ export class FileListClass extends React.Component<IProps, FileListState> {
                 break;
 
             case KEYS.Backspace:
-                const element = e.target as HTMLElement;
-                const tagName = element.tagName.toLowerCase();
                 // TODO: this is used in Log as well, share the code !
-                if (!tagName.match(/input|textarea/) &&
-                    (!element || !element.classList.contains('bp3-menu-item')) &&
-                    !document.body.classList.contains('bp3-overlay-open')) {
-                    const { nodes } = this.state;
+                const { nodes } = this.state;
 
-                    if (!this.editingElement && nodes.length) {
-                        const node = nodes[0];
-                        const file = node.nodeData as File;
+                if (!this.editingElement && nodes.length) {
+                    const node = nodes[0];
+                    const file = node.nodeData as File;
 
-                        if (!fileCache.isRoot(file.dir)) {
-                            this.cache.cd(file.dir, '..');
-                        }
+                    if (!fileCache.isRoot(file.dir)) {
+                        this.cache.cd(file.dir, '..');
                     }
                 }
                 break;
@@ -347,6 +348,7 @@ export class FileListClass extends React.Component<IProps, FileListState> {
         position += step;
         // skip root directory
         if (!position) {
+            // TODO: use isRoot !!
             if ((nodes[0].nodeData as File).fullname === '..') {
                 position += step;
             }
@@ -400,13 +402,20 @@ export class FileListClass extends React.Component<IProps, FileListState> {
         if (this.props.onUpdate) {
             this.props.onUpdate();
         }
+
+        if (this.newNodes) {
+            this.newNodes = false;
+            const node = ReactDOM.findDOMNode(this) as Element;
+            // blueprint bug? sometimes scrollTop doesn't get reset to 0 when rendering a new tree
+            node.querySelector('.bp3-tree').scrollTop = 0;
+        }
     }
 
     public componentDidMount() {
         document.addEventListener('keydown', this.onDocKeyDown);
     }
 
-    public setTreeRef = (ref:Tree) => {
+    public setTreeRef = (ref: Tree) => {
         this.treeRef = ref;
     }
 

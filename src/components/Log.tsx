@@ -4,6 +4,7 @@ import { observable, runInAction } from 'mobx';
 import { debounce } from '../utils/debounce';
 import { Intent, HotkeysTarget, Hotkeys, Hotkey } from '@blueprintjs/core';
 import { WithNamespaces, withNamespaces } from 'react-i18next';
+import { shouldCatchEvent } from '../utils/dom';
 
 require('../css/log.css');
 
@@ -96,13 +97,7 @@ export class LogUIClass extends React.Component<WithNamespaces, LogUIState> {
     }
 
     onKeyDown = (e: KeyboardEvent) => {
-        const element = e.target as HTMLElement || null;
-        const tagName = element.tagName.toLowerCase();
-        if (e.keyCode === ESCAPE_KEY &&
-            !tagName.match(/input|textarea/) &&
-            (!element || !element.classList.contains('bp3-menu-item')) &&
-            !document.body.classList.contains('bp3-overlay-open'))
-        {
+        if (e.keyCode === ESCAPE_KEY && shouldCatchEvent(e)) {
             this.valid = true;
         } else {
             this.valid = false;

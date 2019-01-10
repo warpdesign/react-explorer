@@ -6,11 +6,7 @@ import { FileList } from './FileList';
 import { AppState } from "../state/appState";
 import { LoginDialog } from "./LoginDialog";
 import { FileState } from "../state/fileState";
-import { HotkeysTarget, Hotkeys, Hotkey, Intent } from "@blueprintjs/core";
 import { Loader } from "./Loader";
-import { Logger } from "./Log";
-
-declare var ENV: any;
 
 interface SideViewProps {
     hide: boolean;

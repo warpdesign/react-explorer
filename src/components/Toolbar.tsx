@@ -97,6 +97,7 @@ export class ToolbarClass extends React.Component<IProps, PathInputState> {
                     AppAlert.show(`${err.message} (${err.code})`, {
                         intent: 'danger'
                     });
+                    // TODO 2: mettre le focus sur la fermeture de l'alert + remettre le wrongPath ?
                     this.input.focus();
                 });
         }
@@ -110,9 +111,9 @@ export class ToolbarClass extends React.Component<IProps, PathInputState> {
             // its immediate propagation
             event.nativeEvent.stopImmediatePropagation();
             // lose focus
-            // this.input.blur();
+            this.input.blur();
             // workaround for Cypress bug https://github.com/cypress-io/cypress/issues/1176
-            this.onBlur();
+            // this.onBlur();
         } else if (event.keyCode === KEYS.Enter) {
             this.onSubmit();
         }
