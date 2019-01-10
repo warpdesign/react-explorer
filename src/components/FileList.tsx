@@ -309,6 +309,7 @@ export class FileListClass extends React.Component<IProps, FileListState> {
             case KEYS.Up:
                 if (!this.editingElement && (e.keyCode === KEYS.Down || e.keyCode === KEYS.Up)) {
                     this.moveSelection(e.keyCode === KEYS.Down ? 1 : -1, e.shiftKey);
+                    e.preventDefault();
                 }
                 break;
 
@@ -342,19 +343,21 @@ export class FileListClass extends React.Component<IProps, FileListState> {
 
     moveSelection(step: number, isShiftDown: boolean) {
         console.log('down');
+        const { fileCache } = this.injected;
         let { position, selected } = this.state;
         let { nodes } = this.state;
 
         position += step;
-        // skip root directory
+
+        // skip parent entry (only if this is not the root folder)
         if (!position) {
-            // TODO: use isRoot !!
-            if ((nodes[0].nodeData as File).fullname === '..') {
+            const dir = (nodes[0].nodeData as File).dir;
+            if (!fileCache.isRoot(dir)) {
                 position += step;
             }
         }
 
-        if (position > 0 && position <= this.state.nodes.length - 1) {
+        if (position > -1 && position <= this.state.nodes.length - 1) {
             if (isShiftDown) {
                 selected++;
             } else {
@@ -362,6 +365,8 @@ export class FileListClass extends React.Component<IProps, FileListState> {
                 nodes.forEach(n => (n.isSelected = false));
                 selected = 1;
             }
+
+            console.log('selecting', position);
 
             nodes[position].isSelected = true;
 
@@ -403,11 +408,39 @@ export class FileListClass extends React.Component<IProps, FileListState> {
             this.props.onUpdate();
         }
 
+        const node = ReactDOM.findDOMNode(this) as Element;
+        const tree = node.querySelector('.bp3-tree') as HTMLElement;
+        const { position } = this.state;
+
+        // FileList can be rendered for two reasons:
+        // 1. nodes have changed, in this case we need to reset scrollTop (see below)
+        // 2. selection state has changed, in this case we may need to change scrollTop
+        // so that the selected element is visible
         if (this.newNodes) {
-            this.newNodes = false;
-            const node = ReactDOM.findDOMNode(this) as Element;
+            console.log('new nodes');
             // blueprint bug? sometimes scrollTop doesn't get reset to 0 when rendering a new tree
-            node.querySelector('.bp3-tree').scrollTop = 0;
+            this.newNodes = false;
+            tree.scrollTop = 0;
+        } else if (position > -1) {
+            const treeScrollTop = tree.scrollTop;
+            const element = this.treeRef.getNodeContentElement(position);
+            const elementOffsetTop = element.offsetTop;
+            const elementBottom =  elementOffsetTop + element.offsetHeight;
+            const scrollBottom = tree.offsetHeight + treeScrollTop;
+            let newPos = -1;
+
+            if (treeScrollTop > elementOffsetTop) {
+                // need to scroll up
+                newPos = element.offsetTop;
+            } else if (scrollBottom <= elementBottom) {
+                newPos = treeScrollTop + (elementBottom - scrollBottom);
+            }
+
+            if (newPos > -1) {
+                tree.scrollTop = newPos;
+            }
+        } else {
+            console.log('didupdate');
         }
     }
 
@@ -429,6 +462,7 @@ export class FileListClass extends React.Component<IProps, FileListState> {
         //         </div>
         //     );
         // } else {
+            console.log('**render');
             return (
                 <div className="filelist" onKeyUp={this.onInputKeyUp} onKeyDown={this.onInputKeyDown}>
                     <Tree
