@@ -39,10 +39,7 @@
                 "NEXT_VIEW": "Activer la vue suivante",
                 "PREVIOUS_VIEW": "Activer la vue précédente",
                 "DOWNLOADS_TAB": "Afficher les transfers",
-                "EXPLORER_TAB": "Afficher l'explorateur",
-                "BACKWARD_HISTORY": "Reculer d'un dossier (historique)",
-                "FORWARD_HISTORY": "Avancer d'un dossier (historique)",
-                "OPEN_FILE": "Ouvre le fichier/dossier sélectionné"
+                "EXPLORER_TAB": "Afficher l'explorateur"
             },
             "LOG": {
                 "TOGGLE": "Afficher/cacher la console"
@@ -51,7 +48,12 @@
                 "COPY": "Copier les éléments sélectionnés dans le presse-papier",
                 "PASTE": "Coller les éléments sélectionnés dans le presse-papier",
                 "VIEW_HISTORY": "Afficher l'historique de navigation (debug)",
-                "FOCUS_PATH": "Activer la barre d'adresse"
+                "FOCUS_PATH": "Activer la barre d'adresse",
+                "BACKWARD_HISTORY": "Reculer d'un dossier (historique)",
+                "FORWARD_HISTORY": "Avancer d'un dossier (historique)",
+                "OPEN_FILE": "Ouvre le fichier/dossier sélectionné",
+                "COPY_PATH": "Copier le chemin des éléments sélectionnés",
+                "COPY_FILENAME": "Copier le nom des éléments sélectionnés"
             },
             "GROUP": {
                 "ACTIVE_VIEW": "Vue de dossier active"

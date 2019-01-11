@@ -2,7 +2,7 @@ import * as React from "react";
 import * as ReactDOM from "react-dom";
 import { inject } from 'mobx-react';
 import { reaction, toJS, IReactionDisposer } from 'mobx';
-import { Classes, ITreeNode, Tree, TreeNode } from "@blueprintjs/core";
+import { Classes, ITreeNode, Tree, TreeNode, HotkeysTarget, Hotkeys, Hotkey } from "@blueprintjs/core";
 import { AppState } from "../state/appState";
 import { File } from "../services/Fs";
 import { FileState } from "../state/fileState";
@@ -50,6 +50,7 @@ interface InjectedProps extends IProps {
 }
 
 @inject('appState', 'fileCache')
+@HotkeysTarget
 export class FileListClass extends React.Component<IProps, FileListState> {
     private cache: FileState;
     private editingElement: HTMLElement = null;
@@ -91,6 +92,19 @@ export class FileListClass extends React.Component<IProps, FileListState> {
     public onLanguageChanged = (lang: string) => {
         const nodes = this.buildNodes(this.cache.files);
         this.updateNodes(nodes);
+    }
+
+    renderHotkeys() {
+        const { t } = this.props;
+
+        return <Hotkeys>
+            <Hotkey
+                global={true}
+                combo="mod + o"
+                label={t('SHORTCUT.ACTIVE_VIEW.OPEN_FILE')}
+                onKeyDown={this.onOpenFile}>
+            </Hotkey>
+        </Hotkeys>;
     }
 
     private get injected() {
@@ -138,6 +152,16 @@ export class FileListClass extends React.Component<IProps, FileListState> {
 
             return res;
         });
+    }
+
+    private onOpenFile = () => {
+        const { position, nodes } = this.state;
+        const { fileCache } = this.injected;
+
+        if (fileCache.active && position > -1) {
+            const file = nodes[position].nodeData as File;
+            this.cache.openFile(file);
+        }
     }
 
     private onNodeDoubleClick = (node: ITreeNode, _nodePath: number[], e: React.MouseEvent<HTMLElement>) => {

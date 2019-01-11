@@ -2,6 +2,10 @@ import { action, observable, computed } from 'mobx';
 import { File, FsApi } from '../services/Fs';
 import { FileState } from './fileState';
 import { Batch } from '../transfers/batch';
+import { clipboard } from 'electron';
+import { platform } from 'process';
+
+const LINE_ENDING = platform === 'win32' ? '\r\n' : '\n';
 
 declare var ENV: any;
 
@@ -160,6 +164,20 @@ export class AppState {
         this.clipboard = { srcFs: fileState.getAPI(), srcPath: fileState.path, files };
 
         return files.length;
+    }
+
+    @action
+    copySelectedItemsPath(fileState: FileState, filenameOnly = false):string {
+        const files = fileState.selected;
+        let text = '';
+
+        if (files.length) {
+            const pathnames = files.map((file) => fileState.join(!filenameOnly && file.dir || '', file.fullname));
+            text = pathnames.join(LINE_ENDING);
+            clipboard.writeText(text);
+        }
+
+        return text;
     }
 
     constructor(caches: Array<string>) {

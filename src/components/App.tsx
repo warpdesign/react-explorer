@@ -68,6 +68,8 @@ class App extends React.Component<WithNamespaces, IState> {
     }
 
     addListeners() {
+        // prevent builtin hotkeys dialog from opening: there are numerous prolbems with it
+        // ** document.addEventListener('keydown', (e) => { console.log('keydown99', e.keyCode, e.which, e.shiftKey); if (e.which === 191 && e.shiftKey) { console.log('stopPropagation'); e.stopPropagation(); e.stopImmediatePropagation(); e.preventDefault(); } }, true);
         ipcRenderer.on('exitRequest', (e: Event) => {
             this.onExitRequest(true);
         });
@@ -189,44 +191,16 @@ class App extends React.Component<WithNamespaces, IState> {
         return <Hotkeys>
             <Hotkey
                 global={true}
-                combo="q"
-                label={t('SHORTCUT.MAIN.QUIT')}
-                onKeyDown={this.onExitComboDown}
+                combo="alt + mod + l"
+                label={t('SHORTCUT.MAIN.DOWNLOADS_TAB')}
+                onKeyDown={this.showDownloadsTab}
             />
+
             <Hotkey
                 global={true}
-                combo="mod + q"
-                label={t('SHORTCUT.MAIN.QUIT')}
-                onKeyDown={this.onExitComboDown}
-            />
-            <Hotkey
-                global={true}
-                combo="mod + r"
-                label={t('SHORTCUT.MAIN.RELOAD_VIEW')}
-                preventDefault={true}
-                onKeyDown={this.onReloadFileView}
-            />
-            <Hotkey
-                global={true}
-                combo="meta + c"
-                label={t('SHORTCUT.ACTIVE_VIEW.COPY')}
-                onKeyDown={this.onCopy}
-                group={t('SHORTCUT.GROUP.ACTIVE_VIEW')}
-            />
-            <Hotkey
-                global={true}
-                combo="mod + h"
-                label={t('SHORTCUT.ACTIVE_VIEW.VIEW_HISTORY')}
-                preventDefault={true}
-                onKeyDown={this.onShowHistory}
-                group={t('SHORTCUT.GROUP.ACTIVE_VIEW')}
-            />
-            <Hotkey
-                global={true}
-                combo="meta + v"
-                label={t('SHORTCUT.ACTIVE_VIEW.PASTE')}
-                onKeyDown={this.onPaste}
-                group={t('SHORTCUT.GROUP.ACTIVE_VIEW')}
+                combo="alt + mod + e"
+                label={t('SHORTCUT.MAIN.EXPLORER_TAB')}
+                onKeyDown={this.showExplorerTab}
             />
             <Hotkey
                 global={true}
@@ -242,27 +216,68 @@ class App extends React.Component<WithNamespaces, IState> {
             />
             <Hotkey
                 global={true}
-                combo="alt + mod + l"
-                label={t('SHORTCUT.MAIN.DOWNLOADS_TAB')}
-                onKeyDown={this.showDownloadsTab}
-            />
-            <Hotkey
-                global={true}
-                combo="alt + mod + e"
-                label={t('SHORTCUT.MAIN.EXPLORER_TAB')}
-                onKeyDown={this.showExplorerTab}
+                combo="mod + r"
+                label={t('SHORTCUT.MAIN.RELOAD_VIEW')}
+                preventDefault={true}
+                onKeyDown={this.onReloadFileView}
             />
             <Hotkey
                 global={true}
                 combo="alt + left"
-                label={t('SHORTCUT.MAIN.BACKWARD_HISTORY')}
+                label={t('SHORTCUT.ACTIVE_VIEW.BACKWARD_HISTORY')}
                 onKeyDown={this.backwardHistory}
             />
             <Hotkey
                 global={true}
                 combo="alt + right"
-                label={t('SHORTCUT.MAIN.FORWARD_HISTORY')}
+                label={t('SHORTCUT.ACTIVE_VIEW.FORWARD_HISTORY')}
                 onKeyDown={this.forwardHistory}
+            />
+            <Hotkey
+                global={true}
+                combo="q"
+                label={t('SHORTCUT.MAIN.QUIT')}
+                onKeyDown={this.onExitComboDown}
+            />
+            <Hotkey
+                global={true}
+                combo="mod + q"
+                label={t('SHORTCUT.MAIN.QUIT')}
+                onKeyDown={this.onExitComboDown}
+            />
+            <Hotkey
+                global={true}
+                combo="mod + shift + c"
+                label={t('SHORTCUT.ACTIVE_VIEW.COPY_PATH')}
+                onKeyDown={this.onCopyPath}>
+            </Hotkey>
+            <Hotkey
+                global={true}
+                combo="mod + shift + n"
+                label={t('SHORTCUT.ACTIVE_VIEW.COPY_FILENAME')}
+                onKeyDown={this.onCopyFilename}>
+            </Hotkey>
+            <Hotkey
+                global={true}
+                combo="meta + c"
+                label={t('SHORTCUT.ACTIVE_VIEW.COPY')}
+                onKeyDown={this.onCopy}
+                group={t('SHORTCUT.GROUP.ACTIVE_VIEW')}
+            />
+            <Hotkey
+                global={true}
+                combo="meta + v"
+                label={t('SHORTCUT.ACTIVE_VIEW.PASTE')}
+                onKeyDown={this.onPaste}
+                group={t('SHORTCUT.GROUP.ACTIVE_VIEW')}
+            />
+            <Hotkey
+                global={true}
+                combo="mod + h"
+                label={t('SHORTCUT.ACTIVE_VIEW.VIEW_HISTORY')}
+                preventDefault={true}
+                onKeyDown={this.onShowHistory}
+                group={t('SHORTCUT.GROUP.ACTIVE_VIEW')}
             />
         </Hotkeys>;
     }
@@ -306,6 +321,14 @@ class App extends React.Component<WithNamespaces, IState> {
                 intent: Intent.SUCCESS
             }, undefined, true);
         }
+    }
+
+    private onCopyPath = (): void => {
+        this.appState.copySelectedItemsPath(this.getActiveFileCache());
+    }
+
+    private onCopyFilename = (): void => {
+        this.appState.copySelectedItemsPath(this.getActiveFileCache(), true);
     }
 
     private onPaste = (): void => {
