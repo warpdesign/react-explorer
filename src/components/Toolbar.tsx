@@ -90,21 +90,24 @@ export class ToolbarClass extends React.Component<IProps, PathInputState> {
 
     private onSubmit = () => {
         if (this.cache.path !== this.state.path) {
-            const wrongPath = this.state.path;
             this.input.blur();
+            const path = this.state.path;
             this.cache.cd(this.state.path)
                 .catch((err: any) => {
                     AppAlert.show(`${err.message} (${err.code})`, {
                         intent: 'danger'
+                    }).then(() => {
+                        // we restore the wrong path entered and focus the input:
+                        // in case the user made a simple typo he doesn't want
+                        // to type it again
+                        this.setState({ path });
+                        this.input.focus();
                     });
-                    // TODO 2: mettre le focus sur la fermeture de l'alert + remettre le wrongPath ?
-                    this.input.focus();
                 });
         }
     }
 
     private onKeyUp = (event: React.KeyboardEvent<HTMLElement>) => {
-        console.log('path keyup', event.keyCode);
         if (event.keyCode === KEYS.Escape) {
             // since React events are attached to the root document
             // event already has bubbled up so we must stop
