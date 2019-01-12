@@ -562,7 +562,8 @@ class FtpAPI implements FsApi {
     }
 
     isRoot(path: string): boolean {
-        return path === '/';
+        const parsed = url.parse(path);
+        return parsed.path === '/';
     }
 
     free() {
