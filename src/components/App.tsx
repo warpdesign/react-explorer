@@ -11,7 +11,6 @@ import { Badge } from "./Badge";
 import { ipcRenderer } from "electron";
 import { withNamespaces, WithNamespaces, Trans } from 'react-i18next';
 import { AppToaster } from "./AppToaster";
-import { updateTranslations } from '../utils/formatBytes';
 import * as process from 'process';
 import { remote } from 'electron';
 import i18next from '../locale/i18n';
