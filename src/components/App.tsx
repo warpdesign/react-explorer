@@ -76,6 +76,13 @@ class App extends React.Component<WithNamespaces, IState> {
 
     showDownloadsTab = () => {
         this.appState.isExplorer = false;
+        // right now lister's selection is lost because
+        // switching to downloads destroys the listers
+        // and switching back to explorer view creates
+        // new listers, which in turns creates new nodes
+        // fixing this require a little work so meanwhile
+        // this correctly resets the cache's state
+        this.appState.clearSelections();
     }
 
     showExplorerTab = () => {
@@ -83,7 +90,11 @@ class App extends React.Component<WithNamespaces, IState> {
     }
 
     navClick = () => {
-        this.appState.isExplorer = !this.appState.isExplorer;
+        if (this.appState.isExplorer) {
+            this.showDownloadsTab();
+        } else {
+            this.showExplorerTab();
+        }
     }
 
     setActiveView(view:number) {
@@ -304,6 +315,10 @@ class App extends React.Component<WithNamespaces, IState> {
         });
     }
 
+    toggleDarkMode = () => {
+        document.body.classList.toggle('bp3-dark');
+    }
+
     private getActiveFileCache(ignoreStatus = false): FileState {
         const state = this.appState.getActiveCache();
 
@@ -393,7 +408,7 @@ class App extends React.Component<WithNamespaces, IState> {
                         </Navbar.Group>
                         <Navbar.Group align={Alignment.RIGHT}>
                             <Navbar.Divider />
-                            <Button className="bp3-minimal" onClick={this.changeLanguage} icon="cog" />
+                            <Button className="bp3-minimal" onClick={this.toggleDarkMode} icon="cog" />
                         </Navbar.Group>
                     </Navbar>
                     <div onClickCapture={this.handleClick} className="main">

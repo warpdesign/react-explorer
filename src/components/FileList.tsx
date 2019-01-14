@@ -534,7 +534,10 @@ export class FileListClass extends React.Component<IProps, FileListState> {
         //         </div>
         //     );
         // } else {
-            console.log('**render');
+        console.log('**render FileList');
+        if (this.state.nodes.length) {
+            console.log('node 1 is', this.state.nodes[1].isSelected);
+        }
             return (
                 <div className="filelist" onKeyUp={this.onInputKeyUp} onKeyDown={this.onInputKeyDown}>
                     <Tree

@@ -5,7 +5,8 @@ body{
     user-select: none;
 }
 
-.bp3-dark {
+body.bp3-dark {
+    background-color: #293742;
     color: #f5f8fa;
 }
 
