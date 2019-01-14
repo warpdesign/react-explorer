@@ -304,8 +304,14 @@ class App extends React.Component<WithNamespaces, IState> {
         });
     }
 
-    private getActiveFileCache(): FileState {
-        return this.appState.getActiveCache();
+    private getActiveFileCache(ignoreStatus = false): FileState {
+        const state = this.appState.getActiveCache();
+
+        if (ignoreStatus || !state) {
+            return state;
+        } else {
+            return ignoreStatus ? state : (state.status === 'ok' && state || null);
+        }
     }
 
     private onCopy = () => {
@@ -323,6 +329,7 @@ class App extends React.Component<WithNamespaces, IState> {
     }
 
     private onCopyPath = (): void => {
+
         this.appState.copySelectedItemsPath(this.getActiveFileCache());
     }
 
@@ -331,6 +338,7 @@ class App extends React.Component<WithNamespaces, IState> {
     }
 
     private onPaste = (): void => {
+        // TODO: source cache shouldn't be busy as well
         const fileCache: FileState = this.getActiveFileCache();
 
         if (fileCache) {
@@ -339,7 +347,7 @@ class App extends React.Component<WithNamespaces, IState> {
     }
 
     private onShowHistory = () => {
-        const fileCache: FileState = this.getActiveFileCache();
+        const fileCache: FileState = this.getActiveFileCache(true);
 
         if (fileCache && fileCache.status === 'ok') {
             console.log('showHistory');
