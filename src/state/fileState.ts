@@ -296,15 +296,23 @@ export class FileState {
             return this.makedir(parent, dirName);
         }
 
+        this.status = 'busy';
+
         return this.api.makedir(parent, dirName).then((newDir) => {
             runInAction(() => {
                 this.status = 'ok';
             });
 
             return newDir;
-        });
+        })
+            .catch((err) => {
+                this.status = 'ok';
+                debugger;
+                return Promise.reject(err);
+        })
     }
 
+    @action
     async delete(source: string, files: File[]): Promise<number> {
         try {
             await this.waitForConnection();
@@ -312,13 +320,20 @@ export class FileState {
             return this.delete(source, files);
         }
 
+        this.status = 'busy';
+
         return this.api.delete(source, files).then((num) => {
             runInAction(() => {
                 this.status = 'ok';
             });
 
             return num;
-        });
+        })
+            .catch((err) => {
+                debugger;
+                this.status = 'ok';
+                return Promise.reject(err);
+            });
     }
 
     // copy(source: string, files: string[], dest: string): Promise<number> & cp.ProgressEmitter {

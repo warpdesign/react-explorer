@@ -283,6 +283,13 @@ export class ToolbarClass extends React.Component<IProps, PathInputState> {
                 onKeyDown={this.onMakedir}
                 group={t('SHORTCUT.GROUP.ACTIVE_VIEW')}
             />
+            <Hotkey
+                global={true}
+                combo="mod+d"
+                label={t('SHORTCUT.ACTIVE_VIEW.DELETE')}
+                onKeyDown={this.onDelete}
+                group={t('SHORTCUT.GROUP.ACTIVE_VIEW')}
+            />
         </Hotkeys>;
     }
 

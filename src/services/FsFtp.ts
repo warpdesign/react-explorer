@@ -223,7 +223,9 @@ class Client{
     }
 
     private onGreeting(greeting: string) {
-        this.log(greeting);
+        for (let line of greeting.split('\n')) {
+            this.log(line);
+        }
     }
 
     public list(path: string, appendParent = true): Promise<File[]> {

@@ -53,7 +53,8 @@
                 "FORWARD_HISTORY": "Avancer d'un dossier (historique)",
                 "OPEN_FILE": "Ouvre le fichier/dossier sélectionné",
                 "COPY_PATH": "Copier le chemin des éléments sélectionnés",
-                "COPY_FILENAME": "Copier le nom des éléments sélectionnés"
+                "COPY_FILENAME": "Copier le nom des éléments sélectionnés",
+                "DELETE": "Supprime les éléments sélectionnés"
             },
             "GROUP": {
                 "ACTIVE_VIEW": "Vue de dossier active"
