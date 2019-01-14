@@ -2,7 +2,7 @@ import { AppState } from "../state/appState";
 import * as React from "react";
 import * as ReactDOM from "react-dom";
 import { FocusStyleManager, Icon, HotkeysTarget, Hotkeys, Hotkey, Alert } from "@blueprintjs/core";
-import { Provider, observer } from "mobx-react";
+import { Provider, observer, inject } from "mobx-react";
 import { Navbar, Alignment, Button, Intent } from "@blueprintjs/core";
 import { SideView } from "./SideView";
 import { LogUI, Logger } from "./Log";
@@ -15,6 +15,7 @@ import * as process from 'process';
 import { remote } from 'electron';
 import i18next from '../locale/i18n';
 import { FileState } from "../state/fileState";
+import { SettingsState } from "../state/settingsState";
 
 require("@blueprintjs/core/lib/css/blueprint.css");
 require("@blueprintjs/icons/lib/css/blueprint-icons.css");
@@ -23,6 +24,10 @@ require("../css/main.css");
 interface IState {
     // activeView: number;
     isExitDialogOpen: boolean;
+}
+
+interface InjectedProps extends WithNamespaces{
+    settingsState:SettingsState
 }
 
 const EXIT_DELAY = 1200;
@@ -37,6 +42,7 @@ declare global {
     }
 }
 
+@inject('settingsState')
 @observer
 @HotkeysTarget
 class App extends React.Component<WithNamespaces, IState> {
@@ -45,8 +51,15 @@ class App extends React.Component<WithNamespaces, IState> {
     private exitTimeout: any = 0;
     private exitMode = false;
 
+    private get injected() {
+        return this.props as InjectedProps;
+    }
+
     constructor(props: WithNamespaces) {
         super(props);
+
+        console.log(this.injected.settingsState.lang);
+        debugger;
 
         this.state = { isExitDialogOpen: false };
 
@@ -307,16 +320,14 @@ class App extends React.Component<WithNamespaces, IState> {
     }
 
     changeLanguage = () => {
-        console.log('changing language to en');
-        i18next.changeLanguage('en', (err, t2) => {
-            if (err) {
-                console.warn('oops, error changing language to en', err);
-            }
-        });
+        const { settingsState } = this.injected;
+        settingsState.setLanguage('en');
     }
 
     toggleDarkMode = () => {
-        document.body.classList.toggle('bp3-dark');
+        // document.body.classList.toggle('bp3-dark');
+        const { settingsState } = this.injected;
+        settingsState.darkMode = true;
     }
 
     private getActiveFileCache(ignoreStatus = false): FileState {
