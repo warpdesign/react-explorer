@@ -89,7 +89,6 @@ class LoginDialogClass extends React.Component<ILoginProps, ILoginState> {
     private onInputChange = (event: React.FormEvent<HTMLElement>) => {
         const val = (event.target as HTMLInputElement).value;
         const name = (event.target as HTMLInputElement).name;
-        console.log('input change', val);
         const state:any = {};
         state[name] = val;
 

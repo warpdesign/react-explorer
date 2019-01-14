@@ -206,6 +206,10 @@ class Client{
                 this.goOffline(error);
                 break;
 
+            case 'ETIMEDOUT':
+                debugger;
+                break;
+
             default:
                 // sometimes error.code is undefined or is a string (!!)
                 this.warn('unhandled error code:', error.code);
@@ -219,7 +223,9 @@ class Client{
     }
 
     private onGreeting(greeting: string) {
-        this.log(greeting);
+        for (let line of greeting.split('\n')) {
+            this.log(line);
+        }
     }
 
     public list(path: string, appendParent = true): Promise<File[]> {
@@ -558,7 +564,8 @@ class FtpAPI implements FsApi {
     }
 
     isRoot(path: string): boolean {
-        return path === '/';
+        const parsed = url.parse(path);
+        return parsed.path === '/';
     }
 
     free() {

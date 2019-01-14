@@ -2,6 +2,7 @@ import { observable, action, runInAction } from "mobx";
 import { FsApi, Fs, getFS, File, ICredentials } from "../services/Fs";
 import { Deferred } from '../utils/deferred';
 import i18next from '../locale/i18n';
+import { shell } from 'electron';
 
 type TStatus = 'blank' | 'busy' | 'ok' | 'login' | 'offline';
 
@@ -26,6 +27,9 @@ export class FileState {
 
     @observable
     type: string;
+
+    @observable
+    active = false;
 
     // history stuff
     history = observable<string>([]);
@@ -265,13 +269,14 @@ export class FileState {
             return this.rename(source, file, newName);
         }
 
-        return this.api.rename(source, file, newName).then((newName:string) => {
+        return this.api.rename(source, file, newName).then((newName: string) => {
             runInAction(() => {
+                file.fullname = newName;
                 this.status = 'ok';
             });
 
             return newName;
-        })
+        });
     }
 
     async isDir(path: string): Promise<boolean> {
@@ -291,15 +296,23 @@ export class FileState {
             return this.makedir(parent, dirName);
         }
 
+        this.status = 'busy';
+
         return this.api.makedir(parent, dirName).then((newDir) => {
             runInAction(() => {
                 this.status = 'ok';
             });
 
             return newDir;
-        });
+        })
+            .catch((err) => {
+                this.status = 'ok';
+                debugger;
+                return Promise.reject(err);
+        })
     }
 
+    @action
     async delete(source: string, files: File[]): Promise<number> {
         try {
             await this.waitForConnection();
@@ -307,13 +320,20 @@ export class FileState {
             return this.delete(source, files);
         }
 
+        this.status = 'busy';
+
         return this.api.delete(source, files).then((num) => {
             runInAction(() => {
                 this.status = 'ok';
             });
 
             return num;
-        });
+        })
+            .catch((err) => {
+                debugger;
+                this.status = 'ok';
+                return Promise.reject(err);
+            });
     }
 
     // copy(source: string, files: string[], dest: string): Promise<number> & cp.ProgressEmitter {
@@ -345,5 +365,22 @@ export class FileState {
             this.status = 'ok';
             return path;
         });
+    }
+
+    openFile(file: File) {
+        if (file.isDir) {
+            console.log('need to read dir', file.dir, file.fullname);
+            this.cd(file.dir, file.fullname);
+        } else {
+            console.log('need to open file');
+            this.get(file.dir, file.fullname).then((tmpPath: string) => {
+                console.log('opening file', tmpPath);
+                shell.openItem(tmpPath);
+            });
+        }
+    }
+
+    isRoot(path: string): boolean {
+        return this.api.isRoot(path);
     }
 }

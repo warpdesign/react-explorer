@@ -6,38 +6,32 @@ import { FileList } from './FileList';
 import { AppState } from "../state/appState";
 import { LoginDialog } from "./LoginDialog";
 import { FileState } from "../state/fileState";
-import { HotkeysTarget, Hotkeys, Hotkey, Intent } from "@blueprintjs/core";
-import * as process from 'process';
-import { remote } from 'electron';
-import { AppToaster } from "./AppToaster";
 import { Loader } from "./Loader";
-import { Logger } from "./Log";
-
-declare var ENV: any;
 
 interface SideViewProps {
     hide: boolean;
-    active: boolean;
+    // active: boolean;
+    fileCache: FileState;
+    onPaste: () => void;
 }
 
 interface InjectedProps extends SideViewProps{
     appState: AppState;
 }
 
-interface SideViewState{
-    fileCache: FileState;
-}
+// interface SideViewState{
+//     fileCache: FileState;
+// }
 
 @inject('appState')
-@HotkeysTarget
 @observer
-export class SideView extends React.Component<SideViewProps, SideViewState>{
+export class SideView extends React.Component<SideViewProps/*, SideViewState*/>{
     static id = 0;
     viewId = 'view_' + SideView.id++;
 
-    static defaultProps = {
-        active: false
-    }
+    // static defaultProps = {
+    //     active: false
+    // }
 
     private fileListBusy = false;
 
@@ -45,13 +39,6 @@ export class SideView extends React.Component<SideViewProps, SideViewState>{
         super(props);
 
         const { appState } = this.injected;
-        // TODO: pass start path as prop ?
-        const path = process.platform === "win32" ? remote.app.getPath('temp') : '/tmp/react-explorer';
-        const cache: FileState = appState.addCache(ENV.CY ? '' : path);
-
-        this.state = {
-            fileCache: cache
-        };
     }
 
     private get injected() {
@@ -64,77 +51,9 @@ export class SideView extends React.Component<SideViewProps, SideViewState>{
 
     private onClose = () => {
         // login cancelled
-        const { fileCache } = this.state;
+        const { fileCache } = this.props;
         // doesn't work: it keeps the previous fs
         fileCache.revertPath();
-    }
-
-    private onCopy = () => {
-        // TODO: do not copy if sideview is busy
-        // fileCache.status === 'busy' || this.fileListBusy
-        const { hide, active } = this.props;
-
-        if (active && !hide) {
-            const { appState } = this.injected;
-            const { fileCache } = this.state;
-
-            const num = appState.setClipboard(fileCache);
-
-            AppToaster.show({
-                message: `${num} element(s) copied to the clipboard`,
-                icon: "tick",
-                intent: Intent.SUCCESS
-            }, undefined, true);
-        }
-    }
-
-    private onPaste = (): void => {
-        const { hide, active } = this.props;
-        const { fileCache } = this.state;
-
-        // do not paste if fileCache or fileList is busy
-        if (active && !hide && fileCache.status === 'ok' && !this.fileListBusy) {
-            const { appState } = this.injected;
-
-            appState.prepareClipboardTransferTo(fileCache);
-        }
-    }
-
-    private onShowHistory = () => {
-        const { hide, active } = this.props;
-        const { fileCache } = this.state;
-
-        if (active && !hide && fileCache.status === 'ok') {
-            console.log('showHistory');
-            fileCache.history.forEach((path, i) => {
-                let str = fileCache.current === i && path + ' *' || path;
-                Logger.log(str);
-            });
-        }
-    }
-
-    public renderHotkeys() {
-        return <Hotkeys>
-            <Hotkey
-                global={true}
-                combo="meta + c"
-                label="Copy selected files to clipboard"
-                onKeyDown={this.onCopy}
-            />
-            <Hotkey
-                global={true}
-                combo="mod + h"
-                label="Show view history (Debug)"
-                preventDefault={true}
-                onKeyDown={this.onShowHistory}
-            />
-            <Hotkey
-                global={true}
-                combo="meta + v"
-                label="Paste selected files into current folder"
-                onKeyDown={this.onPaste}
-            />
-        </Hotkeys>;
     }
 
     onFileRender = () => {
@@ -149,8 +68,8 @@ export class SideView extends React.Component<SideViewProps, SideViewState>{
     }
 
     renderSideView() {
-        const { fileCache } = this.state;
-        const { active } = this.props;
+        const { fileCache } = this.props;
+        const active = fileCache.active;
 
         const activeClass = active && ' active' || '';
         const needLogin = fileCache.status === 'login';
@@ -163,7 +82,7 @@ export class SideView extends React.Component<SideViewProps, SideViewState>{
             return (
                 <div id={this.viewId} className={`sideview${activeClass}`}>
                     {needLogin && <LoginDialog isOpen={needLogin} onValidation={this.onValidation} onClose={this.onClose} />}
-                    <Toolbar active={active && !busy} onPaste={this.onPaste} />
+                    <Toolbar active={active && !busy} onPaste={this.props.onPaste} />
                     <FileList onRender={this.onFileRender} onUpdate={this.onFileUpdate} />
                     <Statusbar />
                     <Loader active={busy}></Loader>
@@ -185,7 +104,7 @@ export class SideView extends React.Component<SideViewProps, SideViewState>{
 
     render() {
 
-        const { fileCache } = this.state;
+        const { fileCache } = this.props;
 
         return (
             <Provider fileCache={fileCache}>

@@ -6,6 +6,7 @@ import { Batch } from '../transfers/batch';
 import { reaction, toJS, IReactionDisposer } from 'mobx';
 import { withNamespaces, WithNamespaces } from 'react-i18next';
 import { formatBytes } from '../utils/formatBytes';
+import { getTargetTagName } from '../utils/dom';
 
 interface IProps extends WithNamespaces{
     hide: boolean;
@@ -75,10 +76,10 @@ class DownloadsClass extends React.Component<IProps, IState> {
     };
 
     private handleNodeClick = (nodeData: ITreeNode, nodePath: number[], e: React.MouseEvent<HTMLElement>) => {
-        if ((e.target as HTMLElement).tagName.toLowerCase().match(/svg|path/)) {
+        if (getTargetTagName(e.nativeEvent).match(/svg|path/)) {
             this.handleActionClick(nodeData, nodePath, e);
         } else {
-
+            debugger;
         }
     };
 

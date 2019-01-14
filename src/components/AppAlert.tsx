@@ -11,6 +11,8 @@ interface IAlerterState extends IAlertProps {
     message: Message
 }
 
+const ENTER_KEY = 13;
+
 class Alerter extends React.Component<{}, IAlerterState> {
     defer: Deferred<boolean> = null;
 
@@ -69,6 +71,20 @@ class Alerter extends React.Component<{}, IAlerterState> {
         return (
             <div>{this.renderAlert()}</div>
         );
+    }
+
+    private onKeyUp = (e: KeyboardEvent) => {
+        if (this.state.isOpen && e.keyCode === ENTER_KEY) {
+            this.onClose(true);
+        }
+    }
+
+    public componentWillUnmount() {
+        document.removeEventListener('keyup', this.onKeyUp);
+    }
+
+    public componentDidMount() {
+        document.addEventListener('keyup', this.onKeyUp);
     }
 }
 

@@ -7,24 +7,16 @@ import { ReactApp } from "./components/App";
 import { I18nextProvider } from 'react-i18next';
 import i18next from './locale/i18n';
 
-declare var ENV: any;
-
-console.log(i18next.t('Hello'));
 // Development stuff: create fake directory for testing
 const exec = require('child_process').exec;
 exec('/Users/nico/tmp_ftp.sh', (err: Error) => {
     if (err) {
         console.log('error preparing fake folders', err);
-        if (process.platform === "win32") {
-            ReactDOM.render(
-                <ReactApp></ReactApp>,
-                document.getElementById('root'));
-        }
-    } else {
-        ReactDOM.render(
-            <I18nextProvider i18n={i18next}><ReactApp></ReactApp></I18nextProvider>,
-            document.getElementById('root'));
     }
+
+    ReactDOM.render(
+        <I18nextProvider i18n={i18next}><ReactApp></ReactApp></I18nextProvider>,
+        document.getElementById('root'));    
 });
 
 // Devlopment stuff: reload window on file change
@@ -34,5 +26,3 @@ window.addEventListener('load', () => {
         remote.getCurrentWebContents().reloadIgnoringCache();
     });
 });
-
-console.log(ENV.CY);

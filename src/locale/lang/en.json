@@ -35,7 +35,31 @@
         "SHORTCUT": {
             "MAIN": {
                 "QUIT": "Exit react-ftp",
-                "RELOAD_VIEW": "Reload current view"
+                "RELOAD_VIEW": "Reload current view",
+                "NEXT_VIEW": "Activate next view",
+                "PREVIOUS_VIEW": "Activate previous view",
+                "DOWNLOADS_TAB": "Switch to transfers view",
+                "EXPLORER_TAB": "Switch to explorer view"
+            },
+            "LOG": {
+                "TOGGLE": "Toggle Logs console"
+            },
+            "ACTIVE_VIEW": {
+                "COPY": "Copy selected items to clipboard",
+                "PASTE": "Paste selected items into current folder",
+                "VIEW_HISTORY": "Show nav history (debug)",
+                "FOCUS_PATH": "Focus address bar",
+                "BACKWARD_HISTORY": "Go Back",
+                "FORWARD_HISTORY": "Go Forward",
+                "OPEN_FILE": "Open the selected file/folder",
+                "COPY_PATH": "Copy selected items'path into the clipboard",
+                "COPY_FILENAME": "Copy selected items' filenames into the clipboard",
+                "DELETE": "Delete selected items",
+                "SELECT_ALL": "Select all items",
+                "SELECT_INVERT": "Invert selection"
+            },
+            "GROUP": {
+                "ACTIVE_VIEW": "Active file view"
             }
         },
         "STATUS": {

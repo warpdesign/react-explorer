@@ -13,6 +13,7 @@ const invalidChars = isWin && /[\*:<>\?|"]+/ig || /^[\.]+[\/]+(.)*$/ig;
 // since nodeJS will translate unix like paths to windows path, when running under Windows
 // we accept Windows style paths (eg. C:\foo...) and unix paths (eg. /foo or ./foo)
 const localStart = isWin && /^(([a-zA-Z]\:)|([\.]*\/|\.))/ || /^([\.]*\/|\.)/;
+const isRoot = isWin && /([a-zA-Z]\:)(\\)*$/ || /^\/$/;
 
 const Parent: File = {
     dir: '..',
@@ -255,7 +256,7 @@ class LocalApi implements FsApi {
     }
 
     isRoot(path: string): boolean {
-        return path === '/';
+        return !!path.match(isRoot);
     }
 
     free() {
