@@ -53,7 +53,10 @@
                 "FORWARD_HISTORY": "Go Forward",
                 "OPEN_FILE": "Open the selected file/folder",
                 "COPY_PATH": "Copy selected items'path into the clipboard",
-                "COPY_FILENAME": "Copy selected items' filenames into the clipboard"
+                "COPY_FILENAME": "Copy selected items' filenames into the clipboard",
+                "DELETE": "Delete selected items",
+                "SELECT_ALL": "Select all items",
+                "SELECT_INVERT": "Invert selection"
             },
             "GROUP": {
                 "ACTIVE_VIEW": "Active file view"

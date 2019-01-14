@@ -104,6 +104,18 @@ export class FileListClass extends React.Component<IProps, FileListState> {
                 label={t('SHORTCUT.ACTIVE_VIEW.OPEN_FILE')}
                 onKeyDown={this.onOpenFile}>
             </Hotkey>
+            <Hotkey
+                global={true}
+                combo="mod + a"
+                label={t('SHORTCUT.ACTIVE_VIEW.SELECT_ALL')}
+                onKeyDown={this.onSelectAll}>
+            </Hotkey>
+            <Hotkey
+                global={true}
+                combo="mod + i"
+                label={t('SHORTCUT.ACTIVE_VIEW.SELECT_INVERT')}
+                onKeyDown={this.onInvertSelection}>
+            </Hotkey>
         </Hotkeys>;
     }
 
@@ -399,6 +411,42 @@ export class FileListClass extends React.Component<IProps, FileListState> {
 
             this.updateSelection();
         }
+    }
+
+    onSelectAll = () => {
+        this.selectAll();
+    }
+
+    selectAll(invert = false) {
+        let { position, selected } = this.state;
+        let { nodes } = this.state;
+        const { fileCache } = this.injected;
+
+        if (nodes.length && fileCache.active) {
+            const isRoot = fileCache.isRoot((nodes[0].nodeData as File).dir);
+            selected = 0;
+
+            let i = 0;
+            for (let node of nodes) {
+                // do not select parent dir
+                if (i || isRoot) {
+                    node.isSelected = invert ? !node.isSelected : true;
+                    if (node.isSelected) {
+                        position = i;
+                        selected++;
+                    }
+                }
+                i++;
+            }
+
+            this.setState({ nodes, selected, position });
+
+            this.updateSelection();
+        }
+    }
+
+    onInvertSelection = () => {
+        this.selectAll(true);
     }
 
     private updateSelection() {
