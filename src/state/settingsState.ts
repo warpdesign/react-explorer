@@ -33,10 +33,12 @@ export class SettingsState {
     }
 
     installListeners() {
-        systemPreferences.subscribeNotification(
-            'AppleInterfaceThemeChangedNotification',
-            this.setActiveTheme
-        );
+        if (IS_MOJAVE) {
+            systemPreferences.subscribeNotification(
+                'AppleInterfaceThemeChangedNotification',
+                this.setActiveTheme
+            );
+        }
     }
 
     getParam(name: string):JSObject {
