@@ -19,7 +19,7 @@
     "ftpd": "ftp-srv ftp://0.0.0.0:9876 --root /tmp/react-explorer -c ./credentials.json"
   },
   "author": "",
-  "license": "ISC",
+  "license": "MIT",
   "devDependencies": {
     "@types/del": "^3.0.1",
     "@types/i18next": "^12.1.0",
@@ -52,8 +52,6 @@
     "ftp-ts": "^1.0.19",
     "get-folder-size": "^2.0.0",
     "i18next": "^13.0.0",
-    "i18next-browser-languagedetector": "^2.2.4",
-    "i18next-electron-language-detector": "0.0.10",
     "mkdirp": "^0.5.1",
     "mobx": "^3.2.1",
     "mobx-react": "^4.2.2",
@@ -61,7 +59,6 @@
     "npm": "^6.5.0",
     "react": "^16.5.2",
     "react-dom": "^16.5.2",
-    "react-i18next": "^8.4.0",
-    "uninstall": "0.0.0"
+    "react-i18next": "^8.4.0"
   }
 }

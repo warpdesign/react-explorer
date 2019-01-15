@@ -59,7 +59,6 @@ class App extends React.Component<WithNamespaces, IState> {
         super(props);
 
         console.log(this.injected.settingsState.lang);
-        debugger;
 
         this.state = { isExitDialogOpen: false };
 
@@ -140,15 +139,6 @@ class App extends React.Component<WithNamespaces, IState> {
         return shouldCancel;
     }
 
-    // shouldComponentUpdate() {
-    //     console.time('App Render');
-    //     return true;
-    // }
-
-    // componentDidUpdate() {
-    //     console.timeEnd('App Render');
-    // }
-
     onExitComboDown = (e: KeyboardEvent) => {
         const { t } = this.props;
 
@@ -188,6 +178,11 @@ class App extends React.Component<WithNamespaces, IState> {
     componentDidMount() {
         // listen for events from main process
         this.addListeners();
+        this.setDarkTheme();
+    }
+
+    componentDidUpdate() {
+        this.setDarkTheme();
     }
 
     onExitDialogClose = (valid:boolean) => {
@@ -325,7 +320,7 @@ class App extends React.Component<WithNamespaces, IState> {
     }
 
     toggleDarkMode = () => {
-        // document.body.classList.toggle('bp3-dark');
+        document.body.classList.toggle('bp3-dark');
         const { settingsState } = this.injected;
         settingsState.darkMode = true;
     }
@@ -384,14 +379,30 @@ class App extends React.Component<WithNamespaces, IState> {
         }
     }
 
+    setDarkTheme() {
+        const { settingsState } = this.injected;
+        if (settingsState.isDarkModeActive) {
+            document.body.classList.add('bp3-dark');
+        } else {
+            document.body.classList.remove('bp3-dark');
+        }
+    }
+
     render() {
         const { /*isExplorer,*/ /*activeView,*/ isExitDialogOpen } = this.state;
+        const { settingsState } = this.injected;
         const isExplorer = this.appState.isExplorer;
         const count = this.appState.pendingTransfers;
         const badgeText = count && (count + '') || '';
         const badgeProgress = this.appState.totalTransferProgress;
         const { t } = this.props;
         const caches = this.appState.caches;
+
+        // Access isDarkModeActive without modifying it to make mobx trigger the render
+        // when isDarkModeActive is modified.
+        // We could modify the body's class from here but it's a bad pratice so we
+        // do it in componentDidUpdate/componentDidMount instead
+        settingsState.isDarkModeActive;
 
         return (
             <Provider appState={this.appState}>

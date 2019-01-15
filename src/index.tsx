@@ -49,29 +49,8 @@ class App {
             btn.addEventListener('click', () => {
                 remote.getCurrentWebContents().reloadIgnoringCache();
             });
-
-            if (isDarkMode()) {
-
-            }
         });
     }
 }
 
 const app = new App();
-
-let isDarkMode: () => boolean;
-
-function addOSSpecificStuff() {
-    switch (process.platform) {
-        case 'darwin':
-            addMacHandlers();
-            break;
-    }
-}
-
-function addMacHandlers() {
-    const { systemPreferences } = remote;
-    isDarkMode = function () {
-        return systemPreferences.isDarkMode();
-    }
-}
