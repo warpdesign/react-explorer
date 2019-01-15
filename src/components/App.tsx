@@ -2,7 +2,7 @@ import { AppState } from "../state/appState";
 import * as React from "react";
 import * as ReactDOM from "react-dom";
 import { FocusStyleManager, Icon, HotkeysTarget, Hotkeys, Hotkey, Alert } from "@blueprintjs/core";
-import { Provider, observer } from "mobx-react";
+import { Provider, observer, inject } from "mobx-react";
 import { Navbar, Alignment, Button, Intent } from "@blueprintjs/core";
 import { SideView } from "./SideView";
 import { LogUI, Logger } from "./Log";
@@ -15,6 +15,7 @@ import * as process from 'process';
 import { remote } from 'electron';
 import i18next from '../locale/i18n';
 import { FileState } from "../state/fileState";
+import { SettingsState } from "../state/settingsState";
 
 require("@blueprintjs/core/lib/css/blueprint.css");
 require("@blueprintjs/icons/lib/css/blueprint-icons.css");
@@ -23,6 +24,10 @@ require("../css/main.css");
 interface IState {
     // activeView: number;
     isExitDialogOpen: boolean;
+}
+
+interface InjectedProps extends WithNamespaces{
+    settingsState:SettingsState
 }
 
 const EXIT_DELAY = 1200;
@@ -37,6 +42,7 @@ declare global {
     }
 }
 
+@inject('settingsState')
 @observer
 @HotkeysTarget
 class App extends React.Component<WithNamespaces, IState> {
@@ -45,8 +51,14 @@ class App extends React.Component<WithNamespaces, IState> {
     private exitTimeout: any = 0;
     private exitMode = false;
 
+    private get injected() {
+        return this.props as InjectedProps;
+    }
+
     constructor(props: WithNamespaces) {
         super(props);
+
+        console.log(this.injected.settingsState.lang);
 
         this.state = { isExitDialogOpen: false };
 
@@ -76,6 +88,13 @@ class App extends React.Component<WithNamespaces, IState> {
 
     showDownloadsTab = () => {
         this.appState.isExplorer = false;
+        // right now lister's selection is lost because
+        // switching to downloads destroys the listers
+        // and switching back to explorer view creates
+        // new listers, which in turns creates new nodes
+        // fixing this require a little work so meanwhile
+        // this correctly resets the cache's state
+        this.appState.clearSelections();
     }
 
     showExplorerTab = () => {
@@ -83,7 +102,11 @@ class App extends React.Component<WithNamespaces, IState> {
     }
 
     navClick = () => {
-        this.appState.isExplorer = !this.appState.isExplorer;
+        if (this.appState.isExplorer) {
+            this.showDownloadsTab();
+        } else {
+            this.showExplorerTab();
+        }
     }
 
     setActiveView(view:number) {
@@ -115,15 +138,6 @@ class App extends React.Component<WithNamespaces, IState> {
 
         return shouldCancel;
     }
-
-    // shouldComponentUpdate() {
-    //     console.time('App Render');
-    //     return true;
-    // }
-
-    // componentDidUpdate() {
-    //     console.timeEnd('App Render');
-    // }
 
     onExitComboDown = (e: KeyboardEvent) => {
         const { t } = this.props;
@@ -164,6 +178,11 @@ class App extends React.Component<WithNamespaces, IState> {
     componentDidMount() {
         // listen for events from main process
         this.addListeners();
+        this.setDarkTheme();
+    }
+
+    componentDidUpdate() {
+        this.setDarkTheme();
     }
 
     onExitDialogClose = (valid:boolean) => {
@@ -296,12 +315,14 @@ class App extends React.Component<WithNamespaces, IState> {
     }
 
     changeLanguage = () => {
-        console.log('changing language to en');
-        i18next.changeLanguage('en', (err, t2) => {
-            if (err) {
-                console.warn('oops, error changing language to en', err);
-            }
-        });
+        const { settingsState } = this.injected;
+        settingsState.setLanguage('en');
+    }
+
+    toggleDarkMode = () => {
+        document.body.classList.toggle('bp3-dark');
+        const { settingsState } = this.injected;
+        settingsState.darkMode = true;
     }
 
     private getActiveFileCache(ignoreStatus = false): FileState {
@@ -358,14 +379,30 @@ class App extends React.Component<WithNamespaces, IState> {
         }
     }
 
+    setDarkTheme() {
+        const { settingsState } = this.injected;
+        if (settingsState.isDarkModeActive) {
+            document.body.classList.add('bp3-dark');
+        } else {
+            document.body.classList.remove('bp3-dark');
+        }
+    }
+
     render() {
         const { /*isExplorer,*/ /*activeView,*/ isExitDialogOpen } = this.state;
+        const { settingsState } = this.injected;
         const isExplorer = this.appState.isExplorer;
         const count = this.appState.pendingTransfers;
         const badgeText = count && (count + '') || '';
         const badgeProgress = this.appState.totalTransferProgress;
         const { t } = this.props;
         const caches = this.appState.caches;
+
+        // Access isDarkModeActive without modifying it to make mobx trigger the render
+        // when isDarkModeActive is modified.
+        // We could modify the body's class from here but it's a bad pratice so we
+        // do it in componentDidUpdate/componentDidMount instead
+        settingsState.isDarkModeActive;
 
         return (
             <Provider appState={this.appState}>
@@ -393,7 +430,7 @@ class App extends React.Component<WithNamespaces, IState> {
                         </Navbar.Group>
                         <Navbar.Group align={Alignment.RIGHT}>
                             <Navbar.Divider />
-                            <Button className="bp3-minimal" onClick={this.changeLanguage} icon="cog" />
+                            <Button className="bp3-minimal" onClick={this.toggleDarkMode} icon="cog" />
                         </Navbar.Group>
                     </Navbar>
                     <div onClickCapture={this.handleClick} className="main">

@@ -149,6 +149,13 @@ export class AppState {
         cache.selected.replace(newSelection);
     }
 
+    @action
+    clearSelections() {
+        for (let cache of this.caches) {
+            cache.clearSelection();
+        }
+    }
+
     // global
     @observable
     clipboard: Clipboard = {

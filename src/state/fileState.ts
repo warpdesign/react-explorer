@@ -243,7 +243,7 @@ export class FileState {
                     console.log('run in actions', this.path);
                     this.files.replace(files);
                     // clear lister selection as well
-                    this.selected.clear();
+                    this.clearSelection();
                     // TODO: sync caches ?
 
                     this.status = 'ok';
@@ -251,6 +251,10 @@ export class FileState {
 
                 return files;
             });
+    }
+
+    @action clearSelection() {
+        this.selected.clear();
     }
 
     reload() {

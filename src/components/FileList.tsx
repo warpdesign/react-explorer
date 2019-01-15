@@ -534,7 +534,6 @@ export class FileListClass extends React.Component<IProps, FileListState> {
         //         </div>
         //     );
         // } else {
-            console.log('**render');
             return (
                 <div className="filelist" onKeyUp={this.onInputKeyUp} onKeyDown={this.onInputKeyDown}>
                     <Tree

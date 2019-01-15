@@ -4,10 +4,14 @@
 
 ## Features
 
+**Note**
+React-FTP is still being worked on so this is a work in progress.
+
 - Plugin-based filesystem type: FTP and local supported for now
 - Can be fully keyboard controlled
 - Transfers from Local to FTP, from FTP to FTP and from local to local folders
 - Fully localized (French & English available)
+- DarkMode with automatic detection on macOS Mojave
 
 ## Requirements
 

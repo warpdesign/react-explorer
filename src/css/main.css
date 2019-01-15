@@ -5,7 +5,8 @@ body{
     user-select: none;
 }
 
-.bp3-dark {
+body.bp3-dark {
+    background-color: #293742;
     color: #f5f8fa;
 }
 
@@ -169,6 +170,10 @@ button.small:hover{
     text-align: center;
 }
 
+.bp3-dark .bp3-badge-content {
+    color: #48aff0;
+}
+
 .bp3-badge .bp3-spinner{
     display:inline-block;
 }
@@ -187,6 +192,22 @@ button.small:hover{
 
 .bp3-badge.bp3-intent-warning{
     background-color:#bf7326;
+}
+
+.bp3-dark .bp3-badge.bp3-intent-success{
+    background-color:#0f9960;
+}
+
+.bp3-dark .bp3-badge.bp3-intent-danger{
+    background-color:#db3737;
+}
+
+.bp3-dark .bp3-badge.bp3-intent-primary{
+    background-color:#137cbd;
+}
+
+.bp3-dark .bp3-badge.bp3-intent-warning{
+    background-color:#d9822b;
 }
 
 /* active lister */
