@@ -1,8 +1,13 @@
 {
     "translations": {
+        "LANG": [
+            {"code": "fr", "lang": "Français"},
+            {"code": "en", "lang": "Anglais"}
+        ],
         "NAV": {
             "EXPLORER": "Explorateur",
-            "TRANSFERS": "Téléchargements"
+            "TRANSFERS": "Téléchargements",
+            "PREFS": "Modifier les préfrences"
         },
         "DIALOG": {
             "QUIT": {
@@ -30,6 +35,15 @@
                 "PASSWORDINPUT": "Saisir le mot de passe",
                 "PORT": "port",
                 "LOGIN": "Connexion"
+            },
+            "PREFS": {
+                "TITLE": "Préférences",
+                "SHORTCUTS": "Raccourcis clavier",
+                "DEFAULT_FOLDER": "Chemin par défaut",
+                "LANGUAGE": "Langue",
+                "DARK": "Sombre",
+                "BRIGHT": "Clair",
+                "THEME": "Thème"
             }
         },
         "SHORTCUT": {
@@ -83,7 +97,8 @@
             "CP_COPIED_plural": "{{count}} éléments ont été copiés dans le presse-papier",
             "MAKEDIR": "Nouveau dossier",
             "CANCEL": "Annuler",
-            "OK": "OK"
+            "OK": "OK",
+            "AUTO": "Automatique"
         },
         "FILEMENU": {
             "PASTE": "Coller {{count}} élément",

@@ -36,7 +36,7 @@ export class SettingsState {
         if (IS_MOJAVE) {
             systemPreferences.subscribeNotification(
                 'AppleInterfaceThemeChangedNotification',
-                this.setActiveTheme
+                () => this.setActiveTheme()
             );
         }
     }
@@ -69,14 +69,6 @@ export class SettingsState {
         this.saveSettings();
     }
 
-    @action
-    onThemeChange(isDarkMode: boolean) {
-        // only react to OS theme change if darkMode is set to auto
-        if (this.darkMode === 'auto') {
-            this.isDarkModeActive = isDarkMode;
-        }
-    }
-
     saveSettings() {
         localStorage.setItem('react-ftp', JSON.stringify({
             lang: this.lang,
@@ -103,7 +95,11 @@ export class SettingsState {
     }
 
     @action
-    setActiveTheme = () => {
+    setActiveTheme = (darkMode = this.darkMode) => {
+        if (darkMode !== this.darkMode) {
+            this.darkMode = darkMode;
+        }
+
         if (this.darkMode === 'auto') {
             this.isDarkModeActive = systemPreferences.isDarkMode();
         } else {

@@ -140,6 +140,7 @@ class MakedirDialogClass extends React.Component<IMakedirProps, IMakedirState>{
             canEscapeKeyClose={true}
             usePortal={true}
             onClose={this.cancelClose}
+            className="makedirDialog"
         >
             <div className={Classes.DIALOG_BODY}>
                     <p>{t('DIALOG.MAKEDIR.TITLE')}</p>

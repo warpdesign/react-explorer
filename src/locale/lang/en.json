@@ -1,8 +1,13 @@
 {
     "translations": {
+        "LANG": [
+            {"code": "fr", "lang": "French"},
+            {"code": "en", "lang": "English"}
+        ],
         "NAV": {
             "EXPLORER": "Explorer",
-            "TRANSFERS": "Transfers"
+            "TRANSFERS": "Transfers",
+            "PREFS": "Change preferences"
         },
         "DIALOG": {
             "QUIT": {
@@ -30,6 +35,15 @@
                 "PASSWORDINPUT": "Enter password",
                 "PORT": "port",
                 "LOGIN": "Login"
+            },
+            "PREFS": {
+                "TITLE": "Preferences",
+                "SHORTCUTS": "Keyboard shortcuts",
+                "DEFAULT_FOLDER": "Default folder path",
+                "LANGUAGE": "Language",
+                "DARK": "Dark",
+                "BRIGHT": "Bright",
+                "THEME": "Theme"
             }
         },
         "SHORTCUT": {
@@ -83,7 +97,8 @@
             "CP_COPIED_plural": "{{count}} elements have been copied into the clipboard",
             "MAKEDIR": "New Folder",
             "CANCEL": "Cancel",
-            "OK": "OK"
+            "OK": "OK",
+            "AUTO": "Automatic"
         },
         "FILEMENU": {
             "PASTE": "Paste {{count}} item",

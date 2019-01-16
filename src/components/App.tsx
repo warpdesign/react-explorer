@@ -16,13 +16,14 @@ import { remote } from 'electron';
 import i18next from '../locale/i18n';
 import { FileState } from "../state/fileState";
 import { SettingsState } from "../state/settingsState";
+import { PrefsDialog } from "./dialogs/PrefsDialog";
 
 require("@blueprintjs/core/lib/css/blueprint.css");
 require("@blueprintjs/icons/lib/css/blueprint-icons.css");
 require("../css/main.css");
 
 interface IState {
-    // activeView: number;
+    isPrefsOpen: boolean;
     isExitDialogOpen: boolean;
 }
 
@@ -60,7 +61,7 @@ class App extends React.Component<WithNamespaces, IState> {
 
         console.log(this.injected.settingsState.lang);
 
-        this.state = { isExitDialogOpen: false };
+        this.state = { isExitDialogOpen: false, isPrefsOpen: false };
 
         // do not show outlines when using the mouse
         FocusStyleManager.onlyShowFocusOnTabs();
@@ -319,10 +320,10 @@ class App extends React.Component<WithNamespaces, IState> {
         settingsState.setLanguage('en');
     }
 
-    toggleDarkMode = () => {
-        document.body.classList.toggle('bp3-dark');
-        const { settingsState } = this.injected;
-        settingsState.darkMode = true;
+    togglePrefs = () => {
+        this.setState({
+            isPrefsOpen: !this.state.isPrefsOpen
+        });
     }
 
     private getActiveFileCache(ignoreStatus = false): FileState {
@@ -389,7 +390,7 @@ class App extends React.Component<WithNamespaces, IState> {
     }
 
     render() {
-        const { /*isExplorer,*/ /*activeView,*/ isExitDialogOpen } = this.state;
+        const { /*isExplorer,*/ /*activeView,*/ isPrefsOpen, isExitDialogOpen } = this.state;
         const { settingsState } = this.injected;
         const isExplorer = this.appState.isExplorer;
         const count = this.appState.pendingTransfers;
@@ -421,6 +422,7 @@ class App extends React.Component<WithNamespaces, IState> {
                             </Trans>
                     </p>
                     </Alert>
+                    <PrefsDialog isOpen={isPrefsOpen}></PrefsDialog>
                     <Navbar>
                         <Navbar.Group align={Alignment.LEFT}>
                             <Navbar.Heading>React-explorer</Navbar.Heading>
@@ -430,7 +432,7 @@ class App extends React.Component<WithNamespaces, IState> {
                         </Navbar.Group>
                         <Navbar.Group align={Alignment.RIGHT}>
                             <Navbar.Divider />
-                            <Button className="bp3-minimal" onClick={this.toggleDarkMode} icon="cog" />
+                            <Button className="bp3-minimal" onClick={this.togglePrefs} title={t('NAV.PREFS')} icon="cog" />
                         </Navbar.Group>
                     </Navbar>
                     <div onClickCapture={this.handleClick} className="main">
