@@ -7,7 +7,8 @@
         "NAV": {
             "EXPLORER": "Explorateur",
             "TRANSFERS": "Téléchargements",
-            "PREFS": "Modifier les préfrences"
+            "PREFS": "Préférences",
+            "SHORTCUTS": "Raccourcis clavier"
         },
         "DIALOG": {
             "QUIT": {
@@ -38,7 +39,6 @@
             },
             "PREFS": {
                 "TITLE": "Préférences",
-                "SHORTCUTS": "Raccourcis clavier",
                 "DEFAULT_FOLDER": "Chemin par défaut",
                 "LANGUAGE": "Langue",
                 "DARK": "Sombre",
@@ -73,7 +73,8 @@
                 "SELECT_INVERT": "Inverser la selection"
             },
             "GROUP": {
-                "ACTIVE_VIEW": "Vue de dossier active"
+                "ACTIVE_VIEW": "Vue de dossier active",
+                "GLOBAL": "Raccourcis Globaux"
             }
         },
         "STATUS": {
@@ -98,7 +99,8 @@
             "MAKEDIR": "Nouveau dossier",
             "CANCEL": "Annuler",
             "OK": "OK",
-            "AUTO": "Automatique"
+            "AUTO": "Automatique",
+            "CLOSE": "Fermer"
         },
         "FILEMENU": {
             "PASTE": "Coller {{count}} élément",

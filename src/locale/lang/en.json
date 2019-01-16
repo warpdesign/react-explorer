@@ -7,7 +7,8 @@
         "NAV": {
             "EXPLORER": "Explorer",
             "TRANSFERS": "Transfers",
-            "PREFS": "Change preferences"
+            "PREFS": "Preferences",
+            "SHORTCUTS": "Keyboard shortcuts"
         },
         "DIALOG": {
             "QUIT": {
@@ -38,7 +39,6 @@
             },
             "PREFS": {
                 "TITLE": "Preferences",
-                "SHORTCUTS": "Keyboard shortcuts",
                 "DEFAULT_FOLDER": "Default folder path",
                 "LANGUAGE": "Language",
                 "DARK": "Dark",
@@ -73,7 +73,8 @@
                 "SELECT_INVERT": "Invert selection"
             },
             "GROUP": {
-                "ACTIVE_VIEW": "Active file view"
+                "ACTIVE_VIEW": "Active file view",
+                "GLOBAL": "Global Shortcuts"
             }
         },
         "STATUS": {
@@ -98,7 +99,8 @@
             "MAKEDIR": "New Folder",
             "CANCEL": "Cancel",
             "OK": "OK",
-            "AUTO": "Automatic"
+            "AUTO": "Automatic",
+            "CLOSE": "Close"
         },
         "FILEMENU": {
             "PASTE": "Paste {{count}} item",

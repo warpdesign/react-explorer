@@ -1,7 +1,7 @@
 import { AppState } from "../state/appState";
 import * as React from "react";
 import * as ReactDOM from "react-dom";
-import { FocusStyleManager, Icon, HotkeysTarget, Hotkeys, Hotkey, Alert } from "@blueprintjs/core";
+import { FocusStyleManager, Icon, HotkeysTarget, Hotkeys, Hotkey, Alert, Popover } from "@blueprintjs/core";
 import { Provider, observer, inject } from "mobx-react";
 import { Navbar, Alignment, Button, Intent } from "@blueprintjs/core";
 import { SideView } from "./SideView";
@@ -17,6 +17,8 @@ import i18next from '../locale/i18n';
 import { FileState } from "../state/fileState";
 import { SettingsState } from "../state/settingsState";
 import { PrefsDialog } from "./dialogs/PrefsDialog";
+import { HamburgerMenu } from "./HamburgerMenu";
+import { ShortcutsDialog } from "./dialogs/ShortcutsDialog";
 
 require("@blueprintjs/core/lib/css/blueprint.css");
 require("@blueprintjs/icons/lib/css/blueprint-icons.css");
@@ -24,6 +26,7 @@ require("../css/main.css");
 
 interface IState {
     isPrefsOpen: boolean;
+    isShortcutsOpen: boolean;
     isExitDialogOpen: boolean;
 }
 
@@ -61,7 +64,7 @@ class App extends React.Component<WithNamespaces, IState> {
 
         console.log(this.injected.settingsState.lang);
 
-        this.state = { isExitDialogOpen: false, isPrefsOpen: false };
+        this.state = { isExitDialogOpen: false, isPrefsOpen: false, isShortcutsOpen: false };
 
         // do not show outlines when using the mouse
         FocusStyleManager.onlyShowFocusOnTabs();
@@ -315,17 +318,6 @@ class App extends React.Component<WithNamespaces, IState> {
         }
     }
 
-    changeLanguage = () => {
-        const { settingsState } = this.injected;
-        settingsState.setLanguage('en');
-    }
-
-    togglePrefs = () => {
-        this.setState({
-            isPrefsOpen: !this.state.isPrefsOpen
-        });
-    }
-
     private getActiveFileCache(ignoreStatus = false): FileState {
         const state = this.appState.getActiveCache();
 
@@ -380,6 +372,30 @@ class App extends React.Component<WithNamespaces, IState> {
         }
     }
 
+    onOpenPrefs = () => {
+        this.setState({
+            isPrefsOpen: true
+        });
+    }
+
+    closePrefs = () => {
+        this.setState({
+            isPrefsOpen: false
+        });
+    }
+
+    onOpenShortcuts = () => {
+        this.setState({
+            isShortcutsOpen: true
+        });
+    }
+
+    closeShortcuts = () => {
+        this.setState({
+            isShortcutsOpen: false
+        });
+    }
+
     setDarkTheme() {
         const { settingsState } = this.injected;
         if (settingsState.isDarkModeActive) {
@@ -390,7 +406,7 @@ class App extends React.Component<WithNamespaces, IState> {
     }
 
     render() {
-        const { /*isExplorer,*/ /*activeView,*/ isPrefsOpen, isExitDialogOpen } = this.state;
+        const { isShortcutsOpen, isPrefsOpen, isExitDialogOpen } = this.state;
         const { settingsState } = this.injected;
         const isExplorer = this.appState.isExplorer;
         const count = this.appState.pendingTransfers;
@@ -422,7 +438,8 @@ class App extends React.Component<WithNamespaces, IState> {
                             </Trans>
                     </p>
                     </Alert>
-                    <PrefsDialog isOpen={isPrefsOpen}></PrefsDialog>
+                    <PrefsDialog isOpen={isPrefsOpen} onClose={this.closePrefs}></PrefsDialog>
+                    <ShortcutsDialog isOpen={isShortcutsOpen} onClose={this.closeShortcuts}></ShortcutsDialog>
                     <Navbar>
                         <Navbar.Group align={Alignment.LEFT}>
                             <Navbar.Heading>React-explorer</Navbar.Heading>
@@ -432,7 +449,9 @@ class App extends React.Component<WithNamespaces, IState> {
                         </Navbar.Group>
                         <Navbar.Group align={Alignment.RIGHT}>
                             <Navbar.Divider />
-                            <Button className="bp3-minimal" onClick={this.togglePrefs} title={t('NAV.PREFS')} icon="cog" />
+                            <Popover content={<HamburgerMenu onOpenShortcuts={this.onOpenShortcuts} onOpenPrefs={this.onOpenPrefs} />}>
+                                <Button className="bp3-minimal" icon="menu" />
+                            </Popover>
                         </Navbar.Group>
                     </Navbar>
                     <div onClickCapture={this.handleClick} className="main">
