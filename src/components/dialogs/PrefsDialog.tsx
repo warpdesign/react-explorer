@@ -5,6 +5,7 @@ import { withNamespaces, WithNamespaces } from "react-i18next";
 import { SettingsState } from "../../state/settingsState";
 import { inject } from "mobx-react";
 import { Select, ItemRenderer } from "@blueprintjs/select";
+import { FsLocal, FolderExists } from "../../services/FsLocal";
 
 const DEBOUNCE_DELAY = 300;
 
@@ -21,6 +22,7 @@ interface IState {
     defaultFolder: string;
     darkMode: boolean | 'auto';
     lang: string;
+    isFolderValid: boolean;
 }
 
 interface Language {
@@ -46,7 +48,8 @@ class PrefsDialogClass extends React.Component<IPrefsProps, IState>{
         this.state = {
             lang: settingsState.lang,
             darkMode: settingsState.darkMode,
-            defaultFolder: settingsState.defaultFolder
+            defaultFolder: settingsState.defaultFolder,
+            isFolderValid: FsLocal.canread(settingsState.defaultFolder) && FolderExists(settingsState.defaultFolder)
         };
     }
 
@@ -54,34 +57,31 @@ class PrefsDialogClass extends React.Component<IPrefsProps, IState>{
         return this.props as InjectedProps;
     }
 
-    private isValid(path: string): boolean {
-        return false;
-        // const valid = this.props.onValidation(path);
-        // console.log('valid', path, valid);
-        // return valid;
-    }
-
-    // private checkPath: (path: string) => any = debounce(
-    //     (path: string) => {
-    //         try {
-    //             const isValid = this.isValid(path);
-    //             this.setState({ valid: isValid });
-    //         } catch(error) {
-    //             console.log('error', error);
-    //             this.setState({ valid: false });
-    //         }
-    //     }, DEBOUNCE_DELAY);
+    private checkPath: () => any = debounce(
+        () => {
+            const { defaultFolder } = this.state;
+            const { settingsState } = this.injected;
+            const isFolderValid = FsLocal.canread(defaultFolder) && FolderExists(defaultFolder);
+            if (defaultFolder !== settingsState.defaultFolder) {
+                this.setState({ isFolderValid });
+                // need to save settings
+                if (isFolderValid) {
+                    settingsState.setDefaultFolder(defaultFolder);
+                    settingsState.saveSettings();
+                }
+            }
+        }, DEBOUNCE_DELAY);
 
     private cancelClose = () => {
         console.log('handleClose');
         this.props.onClose();
     }
 
-    onFolderChange = () => {
-        // clear state.error
-        // check path validity
-        // if valid: update settings.defaultFolder
-        // else show error
+    onFolderChange = (event: React.FormEvent<HTMLElement>) => {
+        const path = (event.target as HTMLInputElement).value;
+        // set error since path will be checked async
+        this.setState({ defaultFolder:path });
+        this.checkPath();
     }
 
     renderLanguageItem: ItemRenderer<Language> = (lang, { handleClick, modifiers }) => {
@@ -142,12 +142,14 @@ class PrefsDialogClass extends React.Component<IPrefsProps, IState>{
         const { settingsState } = this.injected;
         this.setState({ lang: newLang.code });
         settingsState.setLanguage(newLang.code);
+        settingsState.saveSettings();
     }
 
     onThemeSelect = (newTheme: Theme) => {
         const { settingsState } = this.injected;
         this.setState({ darkMode: newTheme.code });
         settingsState.setActiveTheme(newTheme.code);
+        settingsState.saveSettings();
     }
 
     onResetPrefs = () => {
@@ -162,12 +164,13 @@ class PrefsDialogClass extends React.Component<IPrefsProps, IState>{
 
     public render() {
         const { t } = this.props;
-        const { defaultFolder, darkMode, lang } = this.state;
+        const { isFolderValid, defaultFolder, darkMode, lang } = this.state;
         const languageItems = this.getSortedLanguages();
-        const selectedLanguage = languageItems.find((language) => language.code === lang);
+        const selectedLanguage = languageItems.find((language:Language) => language.code === lang);
         const themeItems = this.getThemeList();
-        const selectedTheme = themeItems.find((theme) => theme.code === darkMode);
+        const selectedTheme = themeItems.find((theme:Theme) => theme.code === darkMode);
         const activeTheme = this.injected.settingsState.isDarkModeActive ? t('DIALOG.PREFS.DARK') : t('DIALOG.PREFS.BRIGHT');
+        const intent: Intent = isFolderValid ? Intent.NONE : Intent.DANGER;
 
         return(
             <Dialog
@@ -183,22 +186,8 @@ class PrefsDialogClass extends React.Component<IPrefsProps, IState>{
                 <div className={Classes.DIALOG_BODY}>
                     <FormGroup
                         inline={true}
-                        labelFor="default-folder"
-                        labelInfo={t('DIALOG.PREFS.DEFAULT_FOLDER')}
-                    >
-                        <InputGroup
-                            onChange={this.onFolderChange}
-                            value={defaultFolder}
-                            leftIcon="folder-close"
-                            placeholder={t('DIALOG.PREFS.DEFAULT_FOLDER')}
-                            id="default-folder"
-                            name="default-folder"
-                            autoFocus
-                        />
-                    </FormGroup>
-                    <FormGroup
-                        inline={true}
-                        labelInfo={t('DIALOG.PREFS.LANGUAGE')}>
+                        labelInfo={t('DIALOG.PREFS.LANGUAGE')}
+                        >
                         <LanguageSelect filterable={false} activeItem={selectedLanguage} items={languageItems} itemRenderer={this.renderLanguageItem} onItemSelect={this.onLanguageSelect}>
                             <Button
                                 icon="flag"
@@ -218,6 +207,23 @@ class PrefsDialogClass extends React.Component<IPrefsProps, IState>{
                                 text={selectedTheme.code === 'auto' ? `${selectedTheme.name} (${activeTheme})` : `${selectedTheme.name}`}
                             />
                         </ThemeSelect>
+                    </FormGroup>
+
+                    <FormGroup
+                        inline={true}
+                        labelFor="default-folder"
+                        labelInfo={t('DIALOG.PREFS.DEFAULT_FOLDER')}
+                        helperText={isFolderValid ? (<span>&nbsp;</span>) : (<span>{t('DIALOG.PREFS.INVALID_FOLDER')}</span>)}
+                        intent={intent}
+                    >
+                        <InputGroup
+                            onChange={this.onFolderChange}
+                            value={defaultFolder}
+                            leftIcon="folder-close"
+                            placeholder={t('DIALOG.PREFS.DEFAULT_FOLDER')}
+                            id="default-folder"
+                            name="default-folder"
+                        />
                     </FormGroup>
 
                     <FormGroup></FormGroup>

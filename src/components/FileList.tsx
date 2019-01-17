@@ -79,6 +79,8 @@ export class FileListClass extends React.Component<IProps, FileListState> {
         // we re-render them after language has changed otherwise FileList
         // gets re-rendered with the wrong language after language has been changed
         this.bindLanguageChange();
+
+        fileCache.cd(fileCache.path);
     }
 
     private bindLanguageChange = () => {

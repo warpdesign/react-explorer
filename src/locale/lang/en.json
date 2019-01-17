@@ -45,7 +45,8 @@
                 "BRIGHT": "Bright",
                 "THEME": "Theme",
                 "RESET": "Reset Prefs",
-                "RESET_HELP": "Click here to restore the default prefs"
+                "RESET_HELP": "Click here to restore the default prefs",
+                "INVALID_FOLDER": "Invalid folder name or non-existing folder"
             }
         },
         "SHORTCUT": {

@@ -29,16 +29,10 @@ export class SideView extends React.Component<SideViewProps/*, SideViewState*/>{
     static id = 0;
     viewId = 'view_' + SideView.id++;
 
-    // static defaultProps = {
-    //     active: false
-    // }
-
     private fileListBusy = false;
 
     constructor(props:SideViewProps) {
         super(props);
-
-        const { appState } = this.injected;
     }
 
     private get injected() {

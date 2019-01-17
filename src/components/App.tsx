@@ -19,6 +19,7 @@ import { SettingsState } from "../state/settingsState";
 import { PrefsDialog } from "./dialogs/PrefsDialog";
 import { HamburgerMenu } from "./HamburgerMenu";
 import { ShortcutsDialog } from "./dialogs/ShortcutsDialog";
+import { shouldCatchEvent } from "../utils/dom";
 
 require("@blueprintjs/core/lib/css/blueprint.css");
 require("@blueprintjs/icons/lib/css/blueprint-icons.css");
@@ -62,14 +63,14 @@ class App extends React.Component<WithNamespaces, IState> {
     constructor(props: WithNamespaces) {
         super(props);
 
-        console.log(this.injected.settingsState.lang);
+        const { settingsState } = this.injected;
 
         this.state = { isExitDialogOpen: false, isPrefsOpen: false, isShortcutsOpen: false };
 
         // do not show outlines when using the mouse
         FocusStyleManager.onlyShowFocusOnTabs();
 
-        const path = process.platform === "win32" ? remote.app.getPath('temp') : '/tmp/react-explorer';
+        const path = settingsState.defaultFolder;
 
         this.appState = new AppState([path, path]);
 
@@ -78,12 +79,13 @@ class App extends React.Component<WithNamespaces, IState> {
         }
 
         Logger.success(`React-FTP - CY: ${ENV.CY} - NODE_ENV: ${ENV.NODE_ENV} - lang: ${i18next.language}`);
+        Logger.success(`lang=${settingsState.lang}, darkMode=${settingsState.darkMode}, defaultFolder=${settingsState.defaultFolder}`);
         // Logger.warn('React-FTP', remote.app.getVersion());
         // Logger.error('React-FTP', remote.app.getVersion());
     }
 
     onShortcutsCombo = (e: KeyboardEvent) => {
-        if (e.which === 191 && e.shiftKey) {
+        if (shouldCatchEvent(e) && e.which === 191 && e.shiftKey) {
             console.log('stopPropagation');
             e.stopPropagation();
             e.stopImmediatePropagation();

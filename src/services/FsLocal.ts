@@ -57,7 +57,6 @@ class LocalApi implements FsApi {
 
     cd(path: string) {
         const resolved = this.resolve(path);
-
         return this.isDir(resolved).then(() => resolved);
     }
 
@@ -137,7 +136,7 @@ class LocalApi implements FsApi {
     isDir(path: string): Promise<boolean> {
         return new Promise((resolve, reject) => {
             try {
-                const stat = fs.statSync(path);
+                const stat = fs.lstatSync(path);
                 resolve(stat.isDirectory());
             } catch (err) {
                 reject(err);
@@ -316,6 +315,14 @@ class LocalApi implements FsApi {
 
     }
 };
+
+export function FolderExists(path:string) {
+    try {
+        return fs.existsSync(path) && fs.lstatSync(path).isDirectory();
+    } catch (err) {
+        return false;
+    }
+}
 
 export const FsLocal:Fs = {
     icon: 'database',

@@ -5,9 +5,12 @@ import { platform } from 'process';
 import { JSObject } from "../components/Log";
 import i18next from '../locale/i18n';
 
+declare var ENV: any;
+
 const { systemPreferences } = remote;
 
 const APP_STORAGE_KEY = 'react-ftp';
+const DEFAULT_FOLDER = ENV.NODE_ENV === 'production' ? remote.app.getPath('home') : (platform === "win32" ? remote.app.getPath('temp') : '/tmp/react-explorer');
 const IS_MOJAVE = platform === 'darwin' && ((parseInt(release().split('.')[0], 10) - 4) >= 14);
 
 export class SettingsState {
@@ -63,8 +66,6 @@ export class SettingsState {
         console.log('setting language to', lang);
 
         this.lang = askedLang;
-
-        this.saveSettings();
     }
 
     saveSettings() {
@@ -78,20 +79,30 @@ export class SettingsState {
     @action
     loadSettings():void {
         let settings: JSObject;
+        let noData = false;
 
         settings = this.getParam(APP_STORAGE_KEY);
 
         // no settings set: first time the app is run
         if (settings === null) {
             settings = this.getDefaultSettings();
+            noData = true;
         }
 
-        this.lang = settings.lang;
         this.darkMode = settings.darkMode;
-        this.defaultFolder = settings.defaultFolder;
 
         this.setActiveTheme();
-        this.setLanguage(this.lang);
+        this.setLanguage(settings.lang);
+        this.setDefaultFolder(settings.defaultFolder);
+
+        if (noData) {
+            this.saveSettings();
+        }
+    }
+
+    @action
+    setDefaultFolder(folder: string) {
+        this.defaultFolder = folder;
     }
 
     @action
@@ -111,7 +122,7 @@ export class SettingsState {
         return {
             lang: 'auto',
             darkMode: IS_MOJAVE ? 'auto' : false,
-            defaultFolder: platform === "win32" ? remote.app.getPath('temp') : '/tmp/react-explorer'
+            defaultFolder: DEFAULT_FOLDER
         }
     }
 

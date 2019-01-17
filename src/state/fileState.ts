@@ -50,6 +50,10 @@ export class FileState {
 
     @action
     navHistory(dir = -1) {
+        if (!this.history.length) {
+            console.warn('attempting to nav in empty history');
+            return;
+        }
         const history = this.history;
         const current = this.current;
         const length = history.length;
@@ -82,10 +86,9 @@ export class FileState {
     constructor(path: string) {
         this.path = path;
         this.getNewFS(path);
-
-        if (path) {
-            this.cd(path);
-        }
+        // if (path) {
+        //     this.cd(path);
+        // }
     }
 
     private saveContext() {
@@ -202,6 +205,7 @@ export class FileState {
             })
             .catch((err) => {
                 console.log('path not valid ?', joint, 'restoring previous path');
+                this.status = 'ok';
                 this.navHistory(0);
                 return Promise.reject(err);
             });
@@ -313,7 +317,7 @@ export class FileState {
                 this.status = 'ok';
                 debugger;
                 return Promise.reject(err);
-        })
+            });
     }
 
     @action
