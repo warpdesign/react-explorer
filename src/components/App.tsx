@@ -82,9 +82,18 @@ class App extends React.Component<WithNamespaces, IState> {
         // Logger.error('React-FTP', remote.app.getVersion());
     }
 
+    onShortcutsCombo = (e: KeyboardEvent) => {
+        if (e.which === 191 && e.shiftKey) {
+            console.log('stopPropagation');
+            e.stopPropagation();
+            e.stopImmediatePropagation();
+            e.preventDefault();
+        }
+    }
+
     addListeners() {
-        // prevent builtin hotkeys dialog from opening: there are numerous prolbems with it
-        // ** document.addEventListener('keydown', (e) => { console.log('keydown99', e.keyCode, e.which, e.shiftKey); if (e.which === 191 && e.shiftKey) { console.log('stopPropagation'); e.stopPropagation(); e.stopImmediatePropagation(); e.preventDefault(); } }, true);
+        // prevent builtin hotkeys dialog from opening: there are numerous problems with it
+        document.addEventListener('keydown', this.onShortcutsCombo, true);
         ipcRenderer.on('exitRequest', (e: Event) => {
             this.onExitRequest(true);
         });
@@ -183,6 +192,11 @@ class App extends React.Component<WithNamespaces, IState> {
         // listen for events from main process
         this.addListeners();
         this.setDarkTheme();
+    }
+
+    componentWillUnmount() {
+        document.removeEventListener('keydown', this.onShortcutsCombo);
+        ipcRenderer.removeAllListeners('exitRequest');
     }
 
     componentDidUpdate() {
