@@ -271,13 +271,15 @@ class App extends React.Component<WithNamespaces, IState> {
                 global={true}
                 combo="mod + shift + c"
                 label={t('SHORTCUT.ACTIVE_VIEW.COPY_PATH')}
-                onKeyDown={this.onCopyPath}>
+                onKeyDown={this.onCopyPath}
+                group={t('SHORTCUT.GROUP.ACTIVE_VIEW')}>
             </Hotkey>
             <Hotkey
                 global={true}
                 combo="mod + shift + n"
                 label={t('SHORTCUT.ACTIVE_VIEW.COPY_FILENAME')}
-                onKeyDown={this.onCopyFilename}>
+                onKeyDown={this.onCopyFilename}
+                group={t('SHORTCUT.GROUP.ACTIVE_VIEW')}>
             </Hotkey>
             <Hotkey
                 global={true}
