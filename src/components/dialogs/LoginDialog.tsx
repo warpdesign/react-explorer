@@ -1,7 +1,7 @@
 import * as React from "react";
 import { Dialog, Classes, Intent, Button, InputGroup, FormGroup, Colors} from "@blueprintjs/core";
 import { inject } from "mobx-react";
-import { FileState } from "../state/fileState";
+import { FileState } from "../../state/fileState";
 import { withNamespaces, WithNamespaces } from "react-i18next";
 
 interface ILoginProps extends WithNamespaces {

@@ -1,8 +1,14 @@
 {
     "translations": {
+        "LANG": [
+            {"code": "fr", "lang": "Français"},
+            {"code": "en", "lang": "Anglais"}
+        ],
         "NAV": {
             "EXPLORER": "Explorateur",
-            "TRANSFERS": "Téléchargements"
+            "TRANSFERS": "Téléchargements",
+            "PREFS": "Préférences",
+            "SHORTCUTS": "Raccourcis clavier"
         },
         "DIALOG": {
             "QUIT": {
@@ -30,6 +36,17 @@
                 "PASSWORDINPUT": "Saisir le mot de passe",
                 "PORT": "port",
                 "LOGIN": "Connexion"
+            },
+            "PREFS": {
+                "TITLE": "Préférences",
+                "DEFAULT_FOLDER": "Chemin par défaut",
+                "LANGUAGE": "Langue",
+                "DARK": "Sombre",
+                "BRIGHT": "Clair",
+                "THEME": "Thème",
+                "RESET": "Réinitialiser Préférences",
+                "RESET_HELP": "Cliquer ici pour revenir aux préférences d'origine",
+                "INVALID_FOLDER": "Nom de dossier invalide ou introuvable"
             }
         },
         "SHORTCUT": {
@@ -54,12 +71,13 @@
                 "OPEN_FILE": "Ouvre le fichier/dossier sélectionné",
                 "COPY_PATH": "Copier le chemin des éléments sélectionnés",
                 "COPY_FILENAME": "Copier le nom des éléments sélectionnés",
-                "DELETE": "Supprime les éléments sélectionnés",
+                "DELETE": "Supprimer les éléments sélectionnés",
                 "SELECT_ALL": "Selectionner tous les éléments",
                 "SELECT_INVERT": "Inverser la selection"
             },
             "GROUP": {
-                "ACTIVE_VIEW": "Vue de dossier active"
+                "ACTIVE_VIEW": "Vue de dossier active",
+                "GLOBAL": "Raccourcis Globaux"
             }
         },
         "STATUS": {
@@ -83,7 +101,9 @@
             "CP_COPIED_plural": "{{count}} éléments ont été copiés dans le presse-papier",
             "MAKEDIR": "Nouveau dossier",
             "CANCEL": "Annuler",
-            "OK": "OK"
+            "OK": "OK",
+            "AUTO": "Automatique",
+            "CLOSE": "Fermer"
         },
         "FILEMENU": {
             "PASTE": "Coller {{count}} élément",

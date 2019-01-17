@@ -1,11 +1,10 @@
 import i18next from 'i18next';
-import * as LanguageDetector from 'i18next-electron-language-detector';
 import * as en from './lang/en.json';
 import * as fr from './lang/fr.json';
 
     i18next
-    .use(LanguageDetector)
-    .init({
+        .init({
+        lng: 'en',
         // we init with resources
         resources: {
             en: en,

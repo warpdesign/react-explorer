@@ -248,12 +248,18 @@ button.small:hover{
     opacity:1;
 }
 
-/* login dialog */
-.loginDialog label.bp3-label {
+/* properly align labels inside every dialog */
+.bp3-dialog-body label.bp3-label {
     width: 28%;
     text-align: right;
 }
 
+/* special case for makedir: we want to see the dialog */
+.makedirDialog label.bp3-label{
+    width:auto;
+}
+
+/* login dialog */
 .loginDialog .error{
     text-align:center;
     color:white;

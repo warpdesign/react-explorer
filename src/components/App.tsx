@@ -1,7 +1,7 @@
 import { AppState } from "../state/appState";
 import * as React from "react";
 import * as ReactDOM from "react-dom";
-import { FocusStyleManager, Icon, HotkeysTarget, Hotkeys, Hotkey, Alert } from "@blueprintjs/core";
+import { FocusStyleManager, Icon, HotkeysTarget, Hotkeys, Hotkey, Alert, Popover } from "@blueprintjs/core";
 import { Provider, observer, inject } from "mobx-react";
 import { Navbar, Alignment, Button, Intent } from "@blueprintjs/core";
 import { SideView } from "./SideView";
@@ -16,13 +16,18 @@ import { remote } from 'electron';
 import i18next from '../locale/i18n';
 import { FileState } from "../state/fileState";
 import { SettingsState } from "../state/settingsState";
+import { PrefsDialog } from "./dialogs/PrefsDialog";
+import { HamburgerMenu } from "./HamburgerMenu";
+import { ShortcutsDialog } from "./dialogs/ShortcutsDialog";
+import { shouldCatchEvent } from "../utils/dom";
 
 require("@blueprintjs/core/lib/css/blueprint.css");
 require("@blueprintjs/icons/lib/css/blueprint-icons.css");
 require("../css/main.css");
 
 interface IState {
-    // activeView: number;
+    isPrefsOpen: boolean;
+    isShortcutsOpen: boolean;
     isExitDialogOpen: boolean;
 }
 
@@ -58,14 +63,14 @@ class App extends React.Component<WithNamespaces, IState> {
     constructor(props: WithNamespaces) {
         super(props);
 
-        console.log(this.injected.settingsState.lang);
+        const { settingsState } = this.injected;
 
-        this.state = { isExitDialogOpen: false };
+        this.state = { isExitDialogOpen: false, isPrefsOpen: false, isShortcutsOpen: false };
 
         // do not show outlines when using the mouse
         FocusStyleManager.onlyShowFocusOnTabs();
 
-        const path = process.platform === "win32" ? remote.app.getPath('temp') : '/tmp/react-explorer';
+        const path = settingsState.defaultFolder;
 
         this.appState = new AppState([path, path]);
 
@@ -74,13 +79,23 @@ class App extends React.Component<WithNamespaces, IState> {
         }
 
         Logger.success(`React-FTP - CY: ${ENV.CY} - NODE_ENV: ${ENV.NODE_ENV} - lang: ${i18next.language}`);
+        Logger.success(`lang=${settingsState.lang}, darkMode=${settingsState.darkMode}, defaultFolder=${settingsState.defaultFolder}`);
         // Logger.warn('React-FTP', remote.app.getVersion());
         // Logger.error('React-FTP', remote.app.getVersion());
     }
 
+    onShortcutsCombo = (e: KeyboardEvent) => {
+        if (shouldCatchEvent(e) && e.which === 191 && e.shiftKey) {
+            console.log('stopPropagation');
+            e.stopPropagation();
+            e.stopImmediatePropagation();
+            e.preventDefault();
+        }
+    }
+
     addListeners() {
-        // prevent builtin hotkeys dialog from opening: there are numerous prolbems with it
-        // ** document.addEventListener('keydown', (e) => { console.log('keydown99', e.keyCode, e.which, e.shiftKey); if (e.which === 191 && e.shiftKey) { console.log('stopPropagation'); e.stopPropagation(); e.stopImmediatePropagation(); e.preventDefault(); } }, true);
+        // prevent builtin hotkeys dialog from opening: there are numerous problems with it
+        document.addEventListener('keydown', this.onShortcutsCombo, true);
         ipcRenderer.on('exitRequest', (e: Event) => {
             this.onExitRequest(true);
         });
@@ -181,6 +196,11 @@ class App extends React.Component<WithNamespaces, IState> {
         this.setDarkTheme();
     }
 
+    componentWillUnmount() {
+        document.removeEventListener('keydown', this.onShortcutsCombo);
+        ipcRenderer.removeAllListeners('exitRequest');
+    }
+
     componentDidUpdate() {
         this.setDarkTheme();
     }
@@ -267,13 +287,15 @@ class App extends React.Component<WithNamespaces, IState> {
                 global={true}
                 combo="mod + shift + c"
                 label={t('SHORTCUT.ACTIVE_VIEW.COPY_PATH')}
-                onKeyDown={this.onCopyPath}>
+                onKeyDown={this.onCopyPath}
+                group={t('SHORTCUT.GROUP.ACTIVE_VIEW')}>
             </Hotkey>
             <Hotkey
                 global={true}
                 combo="mod + shift + n"
                 label={t('SHORTCUT.ACTIVE_VIEW.COPY_FILENAME')}
-                onKeyDown={this.onCopyFilename}>
+                onKeyDown={this.onCopyFilename}
+                group={t('SHORTCUT.GROUP.ACTIVE_VIEW')}>
             </Hotkey>
             <Hotkey
                 global={true}
@@ -312,17 +334,6 @@ class App extends React.Component<WithNamespaces, IState> {
             const cache = this.getActiveFileCache();
             cache.navHistory(1);
         }
-    }
-
-    changeLanguage = () => {
-        const { settingsState } = this.injected;
-        settingsState.setLanguage('en');
-    }
-
-    toggleDarkMode = () => {
-        document.body.classList.toggle('bp3-dark');
-        const { settingsState } = this.injected;
-        settingsState.darkMode = true;
     }
 
     private getActiveFileCache(ignoreStatus = false): FileState {
@@ -379,6 +390,30 @@ class App extends React.Component<WithNamespaces, IState> {
         }
     }
 
+    onOpenPrefs = () => {
+        this.setState({
+            isPrefsOpen: true
+        });
+    }
+
+    closePrefs = () => {
+        this.setState({
+            isPrefsOpen: false
+        });
+    }
+
+    onOpenShortcuts = () => {
+        this.setState({
+            isShortcutsOpen: true
+        });
+    }
+
+    closeShortcuts = () => {
+        this.setState({
+            isShortcutsOpen: false
+        });
+    }
+
     setDarkTheme() {
         const { settingsState } = this.injected;
         if (settingsState.isDarkModeActive) {
@@ -389,7 +424,7 @@ class App extends React.Component<WithNamespaces, IState> {
     }
 
     render() {
-        const { /*isExplorer,*/ /*activeView,*/ isExitDialogOpen } = this.state;
+        const { isShortcutsOpen, isPrefsOpen, isExitDialogOpen } = this.state;
         const { settingsState } = this.injected;
         const isExplorer = this.appState.isExplorer;
         const count = this.appState.pendingTransfers;
@@ -421,6 +456,8 @@ class App extends React.Component<WithNamespaces, IState> {
                             </Trans>
                     </p>
                     </Alert>
+                    <PrefsDialog isOpen={isPrefsOpen} onClose={this.closePrefs}></PrefsDialog>
+                    <ShortcutsDialog isOpen={isShortcutsOpen} onClose={this.closeShortcuts}></ShortcutsDialog>
                     <Navbar>
                         <Navbar.Group align={Alignment.LEFT}>
                             <Navbar.Heading>React-explorer</Navbar.Heading>
@@ -430,7 +467,9 @@ class App extends React.Component<WithNamespaces, IState> {
                         </Navbar.Group>
                         <Navbar.Group align={Alignment.RIGHT}>
                             <Navbar.Divider />
-                            <Button className="bp3-minimal" onClick={this.toggleDarkMode} icon="cog" />
+                            <Popover content={<HamburgerMenu onOpenShortcuts={this.onOpenShortcuts} onOpenPrefs={this.onOpenPrefs} />}>
+                                <Button className="bp3-minimal" icon="menu" />
+                            </Popover>
                         </Navbar.Group>
                     </Navbar>
                     <div onClickCapture={this.handleClick} className="main">

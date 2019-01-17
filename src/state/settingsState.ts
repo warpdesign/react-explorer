@@ -5,9 +5,12 @@ import { platform } from 'process';
 import { JSObject } from "../components/Log";
 import i18next from '../locale/i18n';
 
+declare var ENV: any;
+
 const { systemPreferences } = remote;
 
 const APP_STORAGE_KEY = 'react-ftp';
+const DEFAULT_FOLDER = ENV.NODE_ENV === 'production' ? remote.app.getPath('home') : (platform === "win32" ? remote.app.getPath('temp') : '/tmp/react-explorer');
 const IS_MOJAVE = platform === 'darwin' && ((parseInt(release().split('.')[0], 10) - 4) >= 14);
 
 export class SettingsState {
@@ -28,15 +31,15 @@ export class SettingsState {
     constructor() {
         this.installListeners();
         this.loadSettings();
-        this.setActiveTheme();
-        this.setLanguage(this.lang);
     }
 
     installListeners() {
-        systemPreferences.subscribeNotification(
-            'AppleInterfaceThemeChangedNotification',
-            this.setActiveTheme
-        );
+        if (IS_MOJAVE) {
+            systemPreferences.subscribeNotification(
+                'AppleInterfaceThemeChangedNotification',
+                () => this.setActiveTheme()
+            );
+        }
     }
 
     getParam(name: string):JSObject {
@@ -63,16 +66,6 @@ export class SettingsState {
         console.log('setting language to', lang);
 
         this.lang = askedLang;
-
-        this.saveSettings();
-    }
-
-    @action
-    onThemeChange(isDarkMode: boolean) {
-        // only react to OS theme change if darkMode is set to auto
-        if (this.darkMode === 'auto') {
-            this.isDarkModeActive = isDarkMode;
-        }
     }
 
     saveSettings() {
@@ -86,22 +79,38 @@ export class SettingsState {
     @action
     loadSettings():void {
         let settings: JSObject;
+        let noData = false;
 
         settings = this.getParam(APP_STORAGE_KEY);
 
         // no settings set: first time the app is run
         if (settings === null) {
             settings = this.getDefaultSettings();
+            noData = true;
         }
 
-        this.lang = settings.lang;
         this.darkMode = settings.darkMode;
+
         this.setActiveTheme();
-        this.defaultFolder = settings.defaultFolder;
+        this.setLanguage(settings.lang);
+        this.setDefaultFolder(settings.defaultFolder);
+
+        if (noData) {
+            this.saveSettings();
+        }
     }
 
     @action
-    setActiveTheme = () => {
+    setDefaultFolder(folder: string) {
+        this.defaultFolder = folder;
+    }
+
+    @action
+    setActiveTheme = (darkMode = this.darkMode) => {
+        if (darkMode !== this.darkMode) {
+            this.darkMode = darkMode;
+        }
+
         if (this.darkMode === 'auto') {
             this.isDarkModeActive = systemPreferences.isDarkMode();
         } else {
@@ -113,12 +122,13 @@ export class SettingsState {
         return {
             lang: 'auto',
             darkMode: IS_MOJAVE ? 'auto' : false,
-            defaultFolder: platform === "win32" ? remote.app.getPath('temp') : '/tmp/react-explorer'
+            defaultFolder: DEFAULT_FOLDER
         }
     }
 
     @action
     resetSettings() {
         localStorage.removeItem(APP_STORAGE_KEY);
+        this.loadSettings();
     }
 }

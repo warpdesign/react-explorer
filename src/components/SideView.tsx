@@ -4,7 +4,7 @@ import { Toolbar } from './Toolbar';
 import { Statusbar } from './Statusbar';
 import { FileList } from './FileList';
 import { AppState } from "../state/appState";
-import { LoginDialog } from "./LoginDialog";
+import { LoginDialog } from "./dialogs/LoginDialog";
 import { FileState } from "../state/fileState";
 import { Loader } from "./Loader";
 
@@ -29,16 +29,10 @@ export class SideView extends React.Component<SideViewProps/*, SideViewState*/>{
     static id = 0;
     viewId = 'view_' + SideView.id++;
 
-    // static defaultProps = {
-    //     active: false
-    // }
-
     private fileListBusy = false;
 
     constructor(props:SideViewProps) {
         super(props);
-
-        const { appState } = this.injected;
     }
 
     private get injected() {

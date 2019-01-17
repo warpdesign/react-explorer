@@ -4,7 +4,7 @@ import { inject, observer } from 'mobx-react';
 import { InputGroup, ControlGroup, Button, ButtonGroup, Popover, Intent, Alert, ProgressBar, Classes, HotkeysTarget, Hotkeys, Hotkey, Tooltip, Position } from '@blueprintjs/core';
 import { AppState } from "../state/appState";
 import { FileMenu } from "./FileMenu";
-import { MakedirDialog } from "./MakedirDialog";
+import { MakedirDialog } from "./dialogs/MakedirDialog";
 import { AppAlert } from './AppAlert';
 import { Logger } from "./Log";
 import { AppToaster, IToasterOpts } from "./AppToaster";

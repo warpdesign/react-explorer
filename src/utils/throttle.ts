@@ -8,4 +8,4 @@ export function throttle(func:any, delay:number):any {
         }, delay)
       }
     }
-  }
+}

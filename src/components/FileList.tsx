@@ -79,6 +79,8 @@ export class FileListClass extends React.Component<IProps, FileListState> {
         // we re-render them after language has changed otherwise FileList
         // gets re-rendered with the wrong language after language has been changed
         this.bindLanguageChange();
+
+        fileCache.cd(fileCache.path);
     }
 
     private bindLanguageChange = () => {
@@ -102,19 +104,22 @@ export class FileListClass extends React.Component<IProps, FileListState> {
                 global={true}
                 combo="mod + o"
                 label={t('SHORTCUT.ACTIVE_VIEW.OPEN_FILE')}
-                onKeyDown={this.onOpenFile}>
+                onKeyDown={this.onOpenFile}
+                group={t('SHORTCUT.GROUP.ACTIVE_VIEW')}>
             </Hotkey>
             <Hotkey
                 global={true}
                 combo="mod + a"
                 label={t('SHORTCUT.ACTIVE_VIEW.SELECT_ALL')}
-                onKeyDown={this.onSelectAll}>
+                onKeyDown={this.onSelectAll}
+                group={t('SHORTCUT.GROUP.ACTIVE_VIEW')}>
             </Hotkey>
             <Hotkey
                 global={true}
                 combo="mod + i"
                 label={t('SHORTCUT.ACTIVE_VIEW.SELECT_INVERT')}
-                onKeyDown={this.onInvertSelection}>
+                onKeyDown={this.onInvertSelection}
+                group={t('SHORTCUT.GROUP.ACTIVE_VIEW')}>
             </Hotkey>
         </Hotkeys>;
     }
