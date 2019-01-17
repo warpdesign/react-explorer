@@ -43,7 +43,9 @@
                 "LANGUAGE": "Language",
                 "DARK": "Dark",
                 "BRIGHT": "Bright",
-                "THEME": "Theme"
+                "THEME": "Theme",
+                "RESET": "Reset Prefs",
+                "RESET_HELP": "Click here to restore the default prefs"
             }
         },
         "SHORTCUT": {

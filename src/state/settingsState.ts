@@ -28,8 +28,6 @@ export class SettingsState {
     constructor() {
         this.installListeners();
         this.loadSettings();
-        this.setActiveTheme();
-        this.setLanguage(this.lang);
     }
 
     installListeners() {
@@ -90,8 +88,10 @@ export class SettingsState {
 
         this.lang = settings.lang;
         this.darkMode = settings.darkMode;
-        this.setActiveTheme();
         this.defaultFolder = settings.defaultFolder;
+
+        this.setActiveTheme();
+        this.setLanguage(this.lang);
     }
 
     @action
@@ -118,5 +118,6 @@ export class SettingsState {
     @action
     resetSettings() {
         localStorage.removeItem(APP_STORAGE_KEY);
+        this.loadSettings();
     }
 }

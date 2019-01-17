@@ -150,6 +150,16 @@ class PrefsDialogClass extends React.Component<IPrefsProps, IState>{
         settingsState.setActiveTheme(newTheme.code);
     }
 
+    onResetPrefs = () => {
+        const { settingsState } = this.injected;
+        settingsState.resetSettings();
+        this.setState({
+            lang: settingsState.lang,
+            darkMode: settingsState.darkMode,
+            defaultFolder: settingsState.defaultFolder
+        });
+    }
+
     public render() {
         const { t } = this.props;
         const { defaultFolder, darkMode, lang } = this.state;
@@ -208,6 +218,19 @@ class PrefsDialogClass extends React.Component<IPrefsProps, IState>{
                                 text={selectedTheme.code === 'auto' ? `${selectedTheme.name} (${activeTheme})` : `${selectedTheme.name}`}
                             />
                         </ThemeSelect>
+                    </FormGroup>
+
+                    <FormGroup></FormGroup>
+
+                    <FormGroup
+                        inline={true}
+                        helperText={t('DIALOG.PREFS.RESET_HELP')}>
+                            <Button
+                                icon="delete"
+                                intent="danger"
+                                text={t('DIALOG.PREFS.RESET')}
+                                onClick={this.onResetPrefs}
+                            />
                     </FormGroup>
             </div>
             <div className={Classes.DIALOG_FOOTER}>
