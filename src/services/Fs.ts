@@ -16,6 +16,7 @@ export interface File {
     mode: number;
     isDir: boolean;
     readonly: boolean;
+    type: FileType;
 }
 
 export interface Fs {
@@ -40,8 +41,48 @@ export const Parent: File = {
     length: 0,
     mode: 0,
     isDir: true,
-    readonly: true
+    readonly: true,
+    type: ''
 };
+
+const Extensions = {
+    'exe': /\.(exe|bat|com|msi|mui|cmd)$/,
+    'img': /\.(png|jpeg|jpg|gif|pcx|tiff|raw|webp|svg|heif|bmp|ilbm|iff|lbm|ppm|pgw|pbm|pnm|psd)$/,
+    'arc': /\.(zip|tar|rar|7zip|dmg|shar|ar|bz2|lz|gz|tgz|lha|lzh|lzx|sz|xz|z|s7z|ace|apk|arp|arj|cab|car|cfs|cso|dar|iso|ice|jar|pak|sea|sfx|sit|sitx|lzma|war|xar|zoo|zipx|img|adf|dms|dmz)$/,
+    'snd': /\.(mp3|wav|mp2|ogg|aac|aiff|mod|flac|m4a|mpc|oga|opus|ra|rm|vox|wma|8svx)$/,
+    'vid': /\.(webm|avi|mpeg|mpg|mp4|mov|mkv|qt|wmv|vob|ogb|m4v|m4p|asf|mts|m2ts|3gp|flv|anim)$/,
+    'cod': /\.(json|js|cpp|c|cxx|java|rb|s|tsx|ts|jsx|lua|as|coffee|ps1|py|r|rexx|spt|sptd|go|rs|sh|bash|vbs|cljs)$/,
+    'doc': /\.(log|last|css|htm|html|rtf|doc|pdf|docx|txt|md|1st|asc|epub|xhtml|xml|amigaguide|info)$/
+};
+const ExeMaskAll = 0o0001;
+const ExeMaskGroup = 0o0010;
+const ExeMaskUser = 0o0100;
+
+export type FileType = 'exe'|'img'|'arc'|'snd'|'vid'|'doc'|'cod'|'';
+
+function isModeExe(mode:number):Boolean {
+    return !!((mode & ExeMaskAll) || (mode & ExeMaskUser) || (mode & ExeMaskGroup));
+}
+
+export function filetype(mode:number, extension:string): FileType {
+    if (isModeExe(mode) || extension.match(Extensions.exe)) {
+        return 'exe';
+    } else if (extension.match(Extensions.img)) {
+        return 'img';
+    } else if (extension.match(Extensions.arc)) {
+        return 'arc';
+    } else if (extension.match(Extensions.snd)) {
+        return 'snd';
+    } else if (extension.match(Extensions.vid)) {
+        return 'vid';
+    } else if (extension.match(Extensions.doc)) {
+        return 'doc';
+    } else if (extension.match(Extensions.cod)) {
+        return 'cod';
+    } else {
+        return ''
+    }
+}
 
 export interface FsApi {
     // public API

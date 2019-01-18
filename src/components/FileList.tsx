@@ -2,7 +2,7 @@ import * as React from "react";
 import * as ReactDOM from "react-dom";
 import { inject } from 'mobx-react';
 import { reaction, toJS, IReactionDisposer } from 'mobx';
-import { Classes, ITreeNode, Tree, TreeNode, HotkeysTarget, Hotkeys, Hotkey } from "@blueprintjs/core";
+import { Classes, ITreeNode, Tree, TreeNode, HotkeysTarget, Hotkeys, Hotkey, Icon, IconName } from "@blueprintjs/core";
 import { AppState } from "../state/appState";
 import { File } from "../services/Fs";
 import { FileState } from "../state/fileState";
@@ -12,6 +12,17 @@ import { shouldCatchEvent } from '../utils/dom';
 import i18next from '../locale/i18n';
 
 const REGEX_EXTENSION = /\.(?=[^0-9])/;
+
+const TYPE_ICONS: {[key: string]: IconName} = {
+    'img': 'media',
+    'any': 'document',
+    'snd': 'music',
+    'vid': 'mobile-video',
+    'exe': 'application',
+    'arc': 'compressed',
+    'doc': 'align-left',
+    'cod': 'code'
+};
 
 export interface FileListState {
     nodes: ITreeNode[];
@@ -156,9 +167,11 @@ export class FileListClass extends React.Component<IProps, FileListState> {
                 }
             })
             .map((file, i) => {
+                const filetype = file.type;
+
                 const res: ITreeNode = {
                     id: i,
-                    icon: file.isDir && "folder-close" || 'document',
+                    icon: file.isDir && "folder-close" || (filetype && TYPE_ICONS[filetype] || TYPE_ICONS['any']),
                     label: file.fullname,
                     nodeData: file,
                     className: file.fullname !== '..' && file.fullname.startsWith('.') && 'isHidden',
