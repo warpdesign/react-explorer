@@ -54,6 +54,7 @@ export class FileState {
             console.warn('attempting to nav in empty history');
             return;
         }
+
         const history = this.history;
         const current = this.current;
         const length = history.length;
@@ -68,9 +69,12 @@ export class FileState {
         this.current = newCurrent;
 
         const path = history[current + dir];
-        console.log('opening path from history', path);
-
-        this.cd(path, '', true);
+        if (path !== this.path) {
+            console.log('opening path from history', path);
+            this.cd(path, '', true);
+        } else {
+            console.warn('preventing endless loop');
+        }
     }
     // /history
 
@@ -254,6 +258,10 @@ export class FileState {
                 });
 
                 return files;
+            })
+            .catch((err) => {
+                debugger;
+                return Promise.reject(err);
             });
     }
 

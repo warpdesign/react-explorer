@@ -86,8 +86,9 @@ class GenericApi implements FsApi {
             length: 0,
             mode: 777,
             isDir: false,
-            readonly: false
-        });
+            readonly: false,
+            type: ''
+        } as File);
     }
 
     async list(dir: string): Promise<File[]> {

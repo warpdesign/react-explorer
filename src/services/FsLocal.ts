@@ -1,4 +1,4 @@
-import { FsApi, File, ICredentials, Fs } from './Fs';
+import { FsApi, File, ICredentials, Fs, Parent, filetype } from './Fs';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as process from 'process';
@@ -10,23 +10,11 @@ const { Transform } = require('stream');
 
 const isWin = process.platform === "win32";
 const invalidChars = isWin && /[\*:<>\?|"]+/ig || /^[\.]+[\/]+(.)*$/ig;
+
 // since nodeJS will translate unix like paths to windows path, when running under Windows
 // we accept Windows style paths (eg. C:\foo...) and unix paths (eg. /foo or ./foo)
 const localStart = isWin && /^(([a-zA-Z]\:)|([\.]*\/|\.))/ || /^([\.]*\/|\.)/;
 const isRoot = isWin && /([a-zA-Z]\:)(\\)*$/ || /^\/$/;
-
-const Parent: File = {
-    dir: '..',
-    fullname: '..',
-    name: '',
-    extension: '',
-    cDate: new Date(),
-    mDate: new Date(),
-    length: 0,
-    mode: 0,
-    isDir: true,
-    readonly: true
-};
 
 class LocalApi implements FsApi {
     type = 0;
@@ -136,8 +124,9 @@ class LocalApi implements FsApi {
     isDir(path: string): Promise<boolean> {
         return new Promise((resolve, reject) => {
             try {
-                const stat = fs.lstatSync(path);
-                resolve(stat.isDirectory());
+                const lstat = fs.lstatSync(path);
+                const stat = fs.statSync(path);
+                resolve(stat.isDirectory() || lstat.isDirectory());
             } catch (err) {
                 reject(err);
             }
@@ -164,18 +153,19 @@ class LocalApi implements FsApi {
             try {
                 const format = path.parse(fullPath);
                 const stats = fs.statSync(fullPath);
-                const file =
+                const file:File =
                 {
                     dir: format.dir,
                     fullname: format.base,
                     name: format.name,
-                    extension: format.ext,
+                    extension: format.ext.toLowerCase(),
                     cDate: stats.ctime,
                     mDate: stats.mtime,
                     length: stats.size,
                     mode: stats.mode,
                     isDir: stats.isDirectory(),
-                    readonly: false
+                    readonly: false,
+                    type: !stats.isDirectory() && filetype(stats.mode, format.ext.toLowerCase()) || ''
                 };
 
                 resolve(file);
@@ -217,22 +207,23 @@ class LocalApi implements FsApi {
                                     mtime: new Date(),
                                     size: 0,
                                     isDirectory: () => false,
-                                    mode: 777
+                                    mode: 0
                                 }
                             }
 
-                            const file =
+                            const file:File =
                             {
                                 dir: format.dir,
                                 fullname: items[i],
                                 name: format.name,
-                                extension: format.ext,
+                                extension: format.ext.toLowerCase(),
                                 cDate: stats.ctime,
                                 mDate: stats.mtime,
                                 length: stats.size,
                                 mode: stats.mode,
                                 isDir: stats.isDirectory(),
-                                readonly: false
+                                readonly: false,
+                                type: !stats.isDirectory() && filetype(stats.mode, format.ext.toLowerCase()) || ''
                             };
 
                             files.push(file);

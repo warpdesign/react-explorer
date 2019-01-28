@@ -112,7 +112,7 @@ export class SettingsState {
         }
 
         if (this.darkMode === 'auto') {
-            this.isDarkModeActive = systemPreferences.isDarkMode();
+            this.isDarkModeActive = IS_MOJAVE ? systemPreferences.isDarkMode() : false;
         } else {
             this.isDarkModeActive = this.darkMode;
         }

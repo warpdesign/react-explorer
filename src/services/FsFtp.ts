@@ -1,4 +1,4 @@
-import { FsApi, File, ICredentials, Fs } from './Fs';
+import { FsApi, File, ICredentials, Fs, Parent } from './Fs';
 import * as ftp from 'ftp';
 import * as path from 'path';
 import * as fs from 'fs';
@@ -29,19 +29,6 @@ function join(path1: string, path2: string) {
 
     return prefix + path.join(path1, path2);
 }
-
-const Parent: File = {
-    dir: '..',
-    fullname: '..',
-    name: '',
-    extension: '',
-    cDate: new Date(),
-    mDate: new Date(),
-    length: 0,
-    mode: 0,
-    isDir: true,
-    readonly: true
-};
 
 class Client{
     private client: any;
@@ -241,6 +228,7 @@ class Client{
                     this.error('error calling list for', newpath);
                     reject(err);
                 } else {
+                    debugger;
                     const files: File[] = list.filter((ftpFile) => !ftpFile.name.match(/^[\.]{1,2}$/)).map((ftpFile) => ({
                         dir: path,
                         name: ftpFile.name,
@@ -251,8 +239,9 @@ class Client{
                         mDate: new Date(ftpFile.date),
                         extension: '',
                         mode: 0,
-                        readonly: false
-                    }));
+                        readonly: false,
+                        type: ''
+                    } as File));
                     // TODO: build list of files
                     /*
                         dir: string;
@@ -515,8 +504,9 @@ class FtpAPI implements FsApi {
             length: 0,
             mode: 777,
             isDir: false,
-            readonly: false
-        });
+            readonly: false,
+            type: ''
+        } as File);
     }
 
     cd(path: string): Promise<string> {
