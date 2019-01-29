@@ -7,6 +7,7 @@ import { AppState } from "../state/appState";
 import { LoginDialog } from "./dialogs/LoginDialog";
 import { FileState } from "../state/fileState";
 import { Loader } from "./Loader";
+import { FileTable } from "./Table";
 
 interface SideViewProps {
     hide: boolean;
@@ -73,15 +74,28 @@ export class SideView extends React.Component<SideViewProps/*, SideViewState*/>{
         const busy = fileCache.status === 'busy' || this.fileListBusy;
 
         if (!this.props.hide) {
-            return (
-                <div id={this.viewId} className={`sideview${activeClass}`}>
-                    {needLogin && <LoginDialog isOpen={needLogin} onValidation={this.onValidation} onClose={this.onClose} />}
-                    <Toolbar active={active && !busy} onPaste={this.props.onPaste} />
-                    <FileList onRender={this.onFileRender} onUpdate={this.onFileUpdate} />
-                    <Statusbar />
-                    <Loader active={busy}></Loader>
-                </div>
-            );
+            if (this.viewId === 'view_0') {
+                return (
+                    <div id={this.viewId} className={`sideview${activeClass}`}>
+                        {needLogin && <LoginDialog isOpen={needLogin} onValidation={this.onValidation} onClose={this.onClose} />}
+                        <Toolbar active={active && !busy} onPaste={this.props.onPaste} />
+                        <FileTable/>
+                        <Statusbar />
+                        <Loader active={busy}></Loader>
+                    </div>
+                );
+            } else {
+                return (
+                    <div id={this.viewId} className={`sideview${activeClass}`}>
+                        {needLogin && <LoginDialog isOpen={needLogin} onValidation={this.onValidation} onClose={this.onClose} />}
+                        <Toolbar active={active && !busy} onPaste={this.props.onPaste} />
+                        <FileList onRender={this.onFileRender} onUpdate={this.onFileUpdate} />
+                        <Statusbar />
+                        <Loader active={busy}></Loader>
+                    </div>
+                );
+            }
+
         } else {
             return (<React.Fragment></React.Fragment>);
         }
