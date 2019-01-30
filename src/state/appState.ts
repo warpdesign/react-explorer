@@ -125,11 +125,10 @@ export class AppState {
 
     @action
     refreshActiveView() {
-        const cache = this.getActiveCache();/*[viewId];*/
-        debugger;
+        const cache = this.getActiveCache();
         // only refresh view that's ready
         if (cache && cache.status === 'ok') {
-            cache.navHistory(0);
+            cache.reload();
             this.syncCaches(cache);
         }
     }

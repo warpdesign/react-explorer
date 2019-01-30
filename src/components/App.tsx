@@ -346,31 +346,47 @@ class App extends React.Component<WithNamespaces, IState> {
         }
     }
 
-    private onCopy = () => {
+    copyTextToClipboard(fileCache: FileState, filesOnly = false) {
+        const length = fileCache.selected.length;
+
+        this.appState.copySelectedItemsPath(fileCache, filesOnly);
+
+        if (length) {
+            const { t } = this.injected;
+            AppToaster.show({
+                message: filesOnly ? t('COMMON.CP_NAMES_COPIED', { count: length }) : t('COMMON.CP_PATHS_COPIED', { count: length }),
+                icon: "tick",
+                intent: Intent.NONE
+            }, undefined, true);
+        }
+    }
+
+    onCopy = () => {
         const fileCache: FileState = this.getActiveFileCache();
+        const { t } = this.injected;
 
         if (fileCache) {
             const num = this.appState.setClipboard(fileCache);
 
             AppToaster.show({
-                message: `${num} element(s) copied to the clipboard`,
+                message: t('COMMON.CP_COPIED', { count: num }),
                 icon: "tick",
-                intent: Intent.SUCCESS
+                intent: Intent.NONE
             }, undefined, true);
         }
     }
 
-    private onCopyPath = (): void => {
-
-        this.appState.copySelectedItemsPath(this.getActiveFileCache());
+    onCopyPath = (): void => {
+        const fileCache = this.getActiveFileCache();
+        this.copyTextToClipboard(fileCache);
     }
 
-    private onCopyFilename = (): void => {
-        this.appState.copySelectedItemsPath(this.getActiveFileCache(), true);
+    onCopyFilename = (): void => {
+        const fileCache = this.getActiveFileCache();
+        this.copyTextToClipboard(fileCache, true);
     }
 
     private onPaste = (): void => {
-        // TODO: source cache shouldn't be busy as well
         const fileCache: FileState = this.getActiveFileCache();
 
         if (fileCache) {

@@ -35,7 +35,7 @@ export class StatusbarClass extends React.Component<IProps> {
         AppToaster.show({
             message: t('COMMON.CP_COPIED', {count: num}),
             icon: "tick",
-            intent: Intent.SUCCESS
+            intent: Intent.NONE
         });
     }
 
