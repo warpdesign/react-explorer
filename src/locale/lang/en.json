@@ -103,7 +103,8 @@
             "CANCEL": "Cancel",
             "OK": "OK",
             "AUTO": "Automatic",
-            "CLOSE": "Close"
+            "CLOSE": "Close",
+            "EMPTY_FOLDER": "Folder is empty."
         },
         "FILEMENU": {
             "PASTE": "Paste {{count}} item",

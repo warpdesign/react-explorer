@@ -103,7 +103,8 @@
             "CANCEL": "Annuler",
             "OK": "OK",
             "AUTO": "Automatique",
-            "CLOSE": "Fermer"
+            "CLOSE": "Fermer",
+            "EMPTY_FOLDER": "Dossier vide."
         },
         "FILEMENU": {
             "PASTE": "Coller {{count}} élément",

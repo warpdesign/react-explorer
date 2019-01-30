@@ -35,12 +35,13 @@ button.small:hover{
     -webkit-user-select: none;
 }
 
+/* inline rename */
+/* REMOVE */
 .filelist > .bp3-tree{
     overflow:auto;
     flex-grow:1;
 }
 
-/* inline rename */
 .bp3-tree-node-label[contenteditable]{
     background-color:white;
     color:black;
@@ -93,6 +94,7 @@ button.small:hover{
     margin-right:10px;
 }
 
+/* REMOVE */
 .bp3-tree-node.isHidden{
     opacity:.8;
 }
@@ -211,6 +213,7 @@ button.small:hover{
 }
 
 /* active lister */
+/** REMOVE */
 .bp3-tree-node.bp3-tree-node-selected > .bp3-tree-node-content {
     background-color: #8A9BA8;
 }

@@ -223,6 +223,7 @@ class PrefsDialogClass extends React.Component<IPrefsProps, IState>{
                             placeholder={t('DIALOG.PREFS.DEFAULT_FOLDER')}
                             id="default-folder"
                             name="default-folder"
+                            title={defaultFolder}
                         />
                     </FormGroup>
 

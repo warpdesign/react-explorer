@@ -195,6 +195,7 @@ export class FileListClass extends React.Component<IProps, FileListState> {
     }
 
     private onNodeDoubleClick = (node: ITreeNode, _nodePath: number[], e: React.MouseEvent<HTMLElement>) => {
+        console.log('node double click');
         const file = node.nodeData as File;
 
         // double click: prevent inline rename
@@ -223,8 +224,10 @@ export class FileListClass extends React.Component<IProps, FileListState> {
 
     private toggleInlineRename(element: HTMLElement, originallySelected: boolean, file: File) {
         // do not activate rename when clicking on parent ('..') entry
+        console.log('toggle inlinerename');
         if (!file.readonly) {
             if (originallySelected) {
+                console.log('activate inline rename!');
                 element.contentEditable = "true";
                 element.focus();
                 this.editingElement = element;
@@ -247,6 +250,7 @@ export class FileListClass extends React.Component<IProps, FileListState> {
     }
 
     private onNodeClick = (nodeData: ITreeNode, _nodePath: number[], e: React.MouseEvent<HTMLElement>) => {
+        console.log('nodeclick');
         const originallySelected = nodeData.isSelected;
         const { nodes, selected } = this.state;
         const file = nodeData.nodeData as File;
