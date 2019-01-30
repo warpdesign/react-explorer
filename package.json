@@ -24,6 +24,7 @@
     "@types/del": "^3.0.1",
     "@types/i18next": "^12.1.0",
     "@types/react-i18next": "^8.1.0",
+    "@types/react-virtualized": "^9.18.12",
     "awesome-typescript-loader": "^5.2.1",
     "aws-sdk": "^2.332.0",
     "css-loader": "^1.0.0",
@@ -60,6 +61,7 @@
     "npm": "^6.5.0",
     "react": "^16.5.2",
     "react-dom": "^16.5.2",
-    "react-i18next": "^8.4.0"
+    "react-i18next": "^8.4.0",
+    "react-virtualized": "^9.21.0"
   }
 }

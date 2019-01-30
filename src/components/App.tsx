@@ -1,7 +1,7 @@
 import { AppState } from "../state/appState";
 import * as React from "react";
 import * as ReactDOM from "react-dom";
-import { FocusStyleManager, Icon, HotkeysTarget, Hotkeys, Hotkey, Alert, Popover } from "@blueprintjs/core";
+import { FocusStyleManager, Icon, HotkeysTarget, Hotkeys, Hotkey, Alert, Popover, Classes } from "@blueprintjs/core";
 import { Provider, observer, inject } from "mobx-react";
 import { Navbar, Alignment, Button, Intent } from "@blueprintjs/core";
 import { SideView } from "./SideView";
@@ -11,8 +11,6 @@ import { Badge } from "./Badge";
 import { ipcRenderer } from "electron";
 import { withNamespaces, WithNamespaces, Trans } from 'react-i18next';
 import { AppToaster } from "./AppToaster";
-import * as process from 'process';
-import { remote } from 'electron';
 import i18next from '../locale/i18n';
 import { FileState } from "../state/fileState";
 import { SettingsState } from "../state/settingsState";
@@ -346,31 +344,47 @@ class App extends React.Component<WithNamespaces, IState> {
         }
     }
 
-    private onCopy = () => {
+    copyTextToClipboard(fileCache: FileState, filesOnly = false) {
+        const length = fileCache.selected.length;
+
+        this.appState.copySelectedItemsPath(fileCache, filesOnly);
+
+        if (length) {
+            const { t } = this.injected;
+            AppToaster.show({
+                message: filesOnly ? t('COMMON.CP_NAMES_COPIED', { count: length }) : t('COMMON.CP_PATHS_COPIED', { count: length }),
+                icon: "tick",
+                intent: Intent.NONE
+            }, undefined, true);
+        }
+    }
+
+    onCopy = () => {
         const fileCache: FileState = this.getActiveFileCache();
+        const { t } = this.injected;
 
         if (fileCache) {
             const num = this.appState.setClipboard(fileCache);
 
             AppToaster.show({
-                message: `${num} element(s) copied to the clipboard`,
+                message: t('COMMON.CP_COPIED', { count: num }),
                 icon: "tick",
-                intent: Intent.SUCCESS
+                intent: Intent.NONE
             }, undefined, true);
         }
     }
 
-    private onCopyPath = (): void => {
-
-        this.appState.copySelectedItemsPath(this.getActiveFileCache());
+    onCopyPath = (): void => {
+        const fileCache = this.getActiveFileCache();
+        this.copyTextToClipboard(fileCache);
     }
 
-    private onCopyFilename = (): void => {
-        this.appState.copySelectedItemsPath(this.getActiveFileCache(), true);
+    onCopyFilename = (): void => {
+        const fileCache = this.getActiveFileCache();
+        this.copyTextToClipboard(fileCache, true);
     }
 
     private onPaste = (): void => {
-        // TODO: source cache shouldn't be busy as well
         const fileCache: FileState = this.getActiveFileCache();
 
         if (fileCache) {
@@ -417,9 +431,9 @@ class App extends React.Component<WithNamespaces, IState> {
     setDarkTheme() {
         const { settingsState } = this.injected;
         if (settingsState.isDarkModeActive) {
-            document.body.classList.add('bp3-dark');
+            document.body.classList.add(Classes.DARK);
         } else {
-            document.body.classList.remove('bp3-dark');
+            document.body.classList.remove(Classes.DARK);
         }
     }
 
@@ -462,13 +476,13 @@ class App extends React.Component<WithNamespaces, IState> {
                         <Navbar.Group align={Alignment.LEFT}>
                             <Navbar.Heading>React-explorer</Navbar.Heading>
                             <Navbar.Divider />
-                            <Button className="bp3-minimal" icon="home" text={t('NAV.EXPLORER')} onClick={this.navClick} intent={isExplorer ? Intent.PRIMARY : 'none'} />
-                            <Button style={{ position: 'relative' }} className="bp3-minimal" icon="download" onClick={this.navClick} intent={!isExplorer ? Intent.PRIMARY : 'none'}>{t('NAV.TRANSFERS')}<Badge intent="none" text={badgeText} progress={badgeProgress} /></Button>
+                            <Button className={Classes.MINIMAL} icon="home" text={t('NAV.EXPLORER')} onClick={this.navClick} intent={isExplorer ? Intent.PRIMARY : 'none'} />
+                            <Button style={{ position: 'relative' }} className={Classes.MINIMAL} icon="download" onClick={this.navClick} intent={!isExplorer ? Intent.PRIMARY : 'none'}>{t('NAV.TRANSFERS')}<Badge intent="none" text={badgeText} progress={badgeProgress} /></Button>
                         </Navbar.Group>
                         <Navbar.Group align={Alignment.RIGHT}>
                             <Navbar.Divider />
                             <Popover content={<HamburgerMenu onOpenShortcuts={this.onOpenShortcuts} onOpenPrefs={this.onOpenPrefs} />}>
-                                <Button className="bp3-minimal" icon="menu" />
+                                <Button className={Classes.MINIMAL} icon="menu" />
                             </Popover>
                         </Navbar.Group>
                     </Navbar>

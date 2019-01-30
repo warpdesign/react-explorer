@@ -35,16 +35,9 @@ button.small:hover{
     -webkit-user-select: none;
 }
 
-.filelist > .bp3-tree{
-    overflow:auto;
-    flex-grow:1;
-}
-
-/* inline rename */
-.bp3-tree-node-label[contenteditable]{
-    background-color:white;
-    color:black;
-    cursor:text;
+.main > .hidden{
+    display:none;
+    pointer-events: none;
 }
 
 #reload{
@@ -91,10 +84,6 @@ button.small:hover{
 
 #root .sideview:first-child{
     margin-right:10px;
-}
-
-.bp3-tree-node.isHidden{
-    opacity:.8;
 }
 
 .bp3-input-group{
@@ -208,15 +197,6 @@ button.small:hover{
 
 .bp3-dark .bp3-badge.bp3-intent-warning{
     background-color:#d9822b;
-}
-
-/* active lister */
-.bp3-tree-node.bp3-tree-node-selected > .bp3-tree-node-content {
-    background-color: #8A9BA8;
-}
-
-.sideview.active .bp3-tree-node.bp3-tree-node-selected > .bp3-tree-node-content {
-    background-color:#137cbd;
 }
 
 .bp3-loader{

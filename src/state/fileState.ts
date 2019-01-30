@@ -49,7 +49,7 @@ export class FileState {
     }
 
     @action
-    navHistory(dir = -1) {
+    navHistory(dir = -1, force = false) {
         if (!this.history.length) {
             console.warn('attempting to nav in empty history');
             return;
@@ -69,7 +69,7 @@ export class FileState {
         this.current = newCurrent;
 
         const path = history[current + dir];
-        if (path !== this.path) {
+        if (path !== this.path || force) {
             console.log('opening path from history', path);
             this.cd(path, '', true);
         } else {
@@ -270,8 +270,7 @@ export class FileState {
     }
 
     reload() {
-        // this.cd(this.path);
-        this.navHistory(0);
+        this.navHistory(0, true);
     }
 
     join(path: string, path2: string) {

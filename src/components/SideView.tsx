@@ -7,6 +7,7 @@ import { AppState } from "../state/appState";
 import { LoginDialog } from "./dialogs/LoginDialog";
 import { FileState } from "../state/fileState";
 import { Loader } from "./Loader";
+import { FileTable } from "./FileTable";
 
 interface SideViewProps {
     hide: boolean;
@@ -19,17 +20,11 @@ interface InjectedProps extends SideViewProps{
     appState: AppState;
 }
 
-// interface SideViewState{
-//     fileCache: FileState;
-// }
-
 @inject('appState')
 @observer
-export class SideView extends React.Component<SideViewProps/*, SideViewState*/>{
+export class SideView extends React.Component<SideViewProps>{
     static id = 0;
     viewId = 'view_' + SideView.id++;
-
-    private fileListBusy = false;
 
     constructor(props:SideViewProps) {
         super(props);
@@ -50,41 +45,28 @@ export class SideView extends React.Component<SideViewProps/*, SideViewState*/>{
         fileCache.revertPath();
     }
 
-    onFileRender = () => {
-        // console.log('rendering filelist');
-        // console.time('rendering filelist');
-        this.fileListBusy = true;
-    }
-
-    onFileUpdate = () => {
-        // console.timeEnd('rendering filelist');
-        this.fileListBusy = false;
-    }
-
     renderSideView() {
         const { fileCache } = this.props;
         const active = fileCache.active;
 
-        const activeClass = active && ' active' || '';
-        const needLogin = fileCache.status === 'login';
-        // Blueprint's Tree (or React ?) seems to take a long time rendering
-        // the Tree object (1-2secs is needed for a directory of 700 files)
-        // so we make sure to keep the loader while the render is in progress
-        const busy = fileCache.status === 'busy' || this.fileListBusy;
+        let activeClass = active && ' active' || '';
 
-        if (!this.props.hide) {
-            return (
-                <div id={this.viewId} className={`sideview${activeClass}`}>
-                    {needLogin && <LoginDialog isOpen={needLogin} onValidation={this.onValidation} onClose={this.onClose} />}
-                    <Toolbar active={active && !busy} onPaste={this.props.onPaste} />
-                    <FileList onRender={this.onFileRender} onUpdate={this.onFileUpdate} />
-                    <Statusbar />
-                    <Loader active={busy}></Loader>
-                </div>
-            );
-        } else {
-            return (<React.Fragment></React.Fragment>);
+        const needLogin = fileCache.status === 'login';
+        const busy = fileCache.status === 'busy';
+
+        if (this.props.hide) {
+            activeClass += ' hidden';
         }
+
+        return (
+            <div id={this.viewId} className={`sideview${activeClass}`}>
+                {needLogin && <LoginDialog isOpen={needLogin} onValidation={this.onValidation} onClose={this.onClose} />}
+                <Toolbar active={active && !busy} onPaste={this.props.onPaste} />
+                <FileTable hide={this.props.hide}/>
+                <Statusbar />
+                <Loader active={busy}></Loader>
+            </div>
+        );
     }
 
     shouldComponentUpdate() {

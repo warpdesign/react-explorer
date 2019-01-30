@@ -99,11 +99,16 @@
             },
             "CP_COPIED": "{{count}} element has been copied into the clipboard",
             "CP_COPIED_plural": "{{count}} elements have been copied into the clipboard",
+            "CP_NAMES_COPIED": "Selected element's name has been copied into the clipboard",
+            "CP_NAMES_COPIED_plural": "{{count}} elements' name have been copied into the clipboard",
+            "CP_PATHS_COPIED": "Selected element's path has been copied into the clipboard",
+            "CP_PATHS_COPIED_plural": "{{count}} elements' path have been copied into the clipboard",
             "MAKEDIR": "New Folder",
             "CANCEL": "Cancel",
             "OK": "OK",
             "AUTO": "Automatic",
-            "CLOSE": "Close"
+            "CLOSE": "Close",
+            "EMPTY_FOLDER": "Folder is empty."
         },
         "FILEMENU": {
             "PASTE": "Paste {{count}} item",

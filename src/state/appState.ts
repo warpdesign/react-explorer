@@ -45,9 +45,8 @@ export class AppState {
 
         return this.addTransfer(options)
             .then(() => {
-                // refresh cache: only if same directory ?
                 if (options.dstPath === cache.path && options.dstFsName === cache.getFS().name) {
-                    cache.navHistory(0);
+                    cache.reload();
                 }
             });
     }
@@ -126,11 +125,10 @@ export class AppState {
 
     @action
     refreshActiveView() {
-        const cache = this.getActiveCache();/*[viewId];*/
-        debugger;
+        const cache = this.getActiveCache();
         // only refresh view that's ready
         if (cache && cache.status === 'ok') {
-            cache.navHistory(0);
+            cache.reload();
             this.syncCaches(cache);
         }
     }

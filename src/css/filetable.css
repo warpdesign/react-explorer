@@ -1,0 +1,67 @@
+.fileListSizerWrapper{
+    display:flex;
+    flex-grow:1;
+}
+
+.tableRow .size{
+    text-align:right;
+}
+
+.tableRow .name{
+    display:flex;
+    align-items: center;
+}
+
+.tableRow .file-label{
+    flex-grow:1;
+}
+
+/* inline rename */
+.tableRow .file-label[contenteditable]{
+    background-color:white;
+    color:black;
+    cursor:text;
+}
+
+.tableRow.isHidden{
+    opacity:.8;
+}
+
+/* theme-releated */
+.tableRow:hover{
+    background-color: rgba(191, 204, 214, 0.4);
+}
+
+.tableRow.selected{
+    background-color: #8A9BA8;
+}
+
+.sideview.active .tableRow.selected{
+    background-color:#137cbd;
+}
+
+.tableRow .bp3-icon{
+    margin-right:7px;
+    color:#5c7080;
+}
+
+.tableRow.selected, .tableRow.selected .bp3-icon{
+    color:#fff;
+}
+
+/* dark theme */
+body.bp3-dark .tableRow:hover{
+    background-color:rgba(92, 112, 128, 0.3);
+}
+
+body.bp3-dark .tableRow.selected{
+    background-color: rgb(88, 100, 109);
+}
+
+body.bp3-dark .sideview.active .tableRow.selected{
+    background-color: #137cbd;
+}
+
+body.bp3-dark .tableRow .bp3-icon{
+    color:#f5f8fa;
+}

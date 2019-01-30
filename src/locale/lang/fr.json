@@ -99,11 +99,16 @@
             },
             "CP_COPIED": "{{count}} élément a été copié dans le presse-papier",
             "CP_COPIED_plural": "{{count}} éléments ont été copiés dans le presse-papier",
+            "CP_NAMES_COPIED": "Le nom de l'élément sélectionné a été copié dans le presse-papier",
+            "CP_NAMES_COPIED_plural": "Les noms des {{count}} éléments sélectionnés ont été copiés dans le presse-papier",
+            "CP_PATHS_COPIED": "Le chemin vers l'élément sélectionné a été copié dans le presse-papier",
+            "CP_PATHS_COPIED_plural": "Les chemins des {{count}} éléments sélectionnés ont été copiés dans le presse-papier",
             "MAKEDIR": "Nouveau dossier",
             "CANCEL": "Annuler",
             "OK": "OK",
             "AUTO": "Automatique",
-            "CLOSE": "Fermer"
+            "CLOSE": "Fermer",
+            "EMPTY_FOLDER": "Dossier vide."
         },
         "FILEMENU": {
             "PASTE": "Coller {{count}} élément",

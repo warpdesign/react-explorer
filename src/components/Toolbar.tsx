@@ -239,12 +239,8 @@ export class ToolbarClass extends React.Component<IProps, PathInputState> {
     }
 
     public onActivatePath = () => {
-        console.log('shortcut');
         if (this.props.active) {
-            console.log('isactive');
             this.input.focus();
-        } else {
-            console.log('not active');
         }
     }
 
