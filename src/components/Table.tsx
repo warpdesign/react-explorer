@@ -212,7 +212,7 @@ export class FileTableClass extends React.Component<WithNamespaces, IState> {
 
     nameRenderer = (data: any) => {
         const iconName = data.rowData.icon;
-        return (<div className="name"><Icon icon={iconName}></Icon><span className="file-label">{data.cellData}</span></div>);
+        return (<div className="name"><Icon icon={iconName}></Icon><span title={data.cellData} className="file-label">{data.cellData}</span></div>);
     }
 
     rowClassName = (data: any) => {
@@ -235,13 +235,6 @@ export class FileTableClass extends React.Component<WithNamespaces, IState> {
         console.log('nodeclick');
         const { rowData, event, index } = data;
         const { nodes, selected } = this.state;
-        // const { nodes } = this.state;
-        // const element = data.rowData;
-        // element.selected = !element.selected;
-        // this.setState({
-        //     nodes: nodes,
-        //     lastSelected: data.index
-        // });
         const originallySelected = rowData.isSelected;
         const file = rowData.nodeData as File;
 
@@ -523,7 +516,7 @@ export class FileTableClass extends React.Component<WithNamespaces, IState> {
     }
 
     setTableRef = (element:HTMLElement) => {
-        this.gridElement = element.querySelector(`.${TABLE_CLASSNAME}`);
+        this.gridElement = element && element.querySelector(`.${TABLE_CLASSNAME}`) || null;
     }
 
     render() {
