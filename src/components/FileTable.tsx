@@ -11,7 +11,7 @@ import { File } from '../services/Fs';
 import { formatBytes } from '../utils/formatBytes';
 import { shouldCatchEvent } from '../utils/dom';
 require('react-virtualized/styles.css');
-require('../css/table.css');
+require('../css/filetable.css');
 
 const REGEX_EXTENSION = /\.(?=[^0-9])/;
 
@@ -56,6 +56,9 @@ interface IState{
     position: number;
 };
 
+interface IProps extends WithNamespaces{
+    hide: boolean;
+}
 
 // Here we extend our props in order to keep the injected props private
 // and still keep strong typing.
@@ -64,14 +67,14 @@ interface IState{
 // it would have to be specified when composing FileList, ie:
 // <FileList ... appState={appState}/> and we don't want that
 // see: https://github.com/mobxjs/mobx-react/issues/256
-interface InjectedProps extends WithNamespaces {
+interface InjectedProps extends IProps {
     appState: AppState;
     fileCache: FileState;
 }
 
 @inject('appState', 'fileCache')
 @HotkeysTarget
-export class FileTableClass extends React.Component<WithNamespaces, IState> {
+export class FileTableClass extends React.Component<IProps, IState> {
     private cache: FileState;
     private disposer: IReactionDisposer;
     private editingElement: HTMLElement = null;
@@ -79,7 +82,7 @@ export class FileTableClass extends React.Component<WithNamespaces, IState> {
     private clickTimeout: any;
     gridElement: HTMLElement;
 
-    constructor(props: WithNamespaces) {
+    constructor(props: IProps) {
         super(props);
 
         const { fileCache } = this.injected;
@@ -217,10 +220,12 @@ export class FileTableClass extends React.Component<WithNamespaces, IState> {
 
     rowClassName = (data: any) => {
         const file = this.state.nodes[data.index];
+        const className = file && file.className || '';
+
         if (file && file.isSelected) {
-            return 'tableRow selected';
+            return `tableRow selected ${className}`;
         } else {
-            return 'tableRow';
+            return `tableRow ${className}`;
         }
     }
 
@@ -376,7 +381,7 @@ export class FileTableClass extends React.Component<WithNamespaces, IState> {
         let { nodes } = this.state;
         const { fileCache } = this.injected;
 
-        if (nodes.length && fileCache.active) {
+        if (nodes.length && this.isViewActive()) {
             const isRoot = fileCache.isRoot((nodes[0].nodeData as File).dir);
             selected = 0;
 
@@ -403,7 +408,7 @@ export class FileTableClass extends React.Component<WithNamespaces, IState> {
         const { position, nodes } = this.state;
         const { fileCache } = this.injected;
 
-        if (fileCache.active && position > -1) {
+        if (this.isViewActive() && position > -1) {
             const file = nodes[position].nodeData as File;
             this.cache.openFile(file);
         }
@@ -435,10 +440,16 @@ export class FileTableClass extends React.Component<WithNamespaces, IState> {
         return this.gridElement.querySelector(selector);
     }
 
+    isViewActive(): boolean {
+        const { fileCache } = this.injected;
+
+        return fileCache.active && !this.props.hide;
+    }
+
     onDocKeyDown = (e: KeyboardEvent) => {
         const { fileCache } = this.injected;
 
-        if (!fileCache.active || !shouldCatchEvent(e)) {
+        if (!this.isViewActive() || !shouldCatchEvent(e)) {
             return;
         }
 

@@ -23,6 +23,10 @@
     cursor:text;
 }
 
+.tableRow.isHidden{
+    opacity:.8;
+}
+
 /* theme-releated */
 .tableRow:hover{
     background-color: rgba(191, 204, 214, 0.4);
