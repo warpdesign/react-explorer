@@ -64,6 +64,9 @@ class Alerter extends React.Component<{}, IAlerterState> {
             alertProps.confirmButtonText = i18next.t('COMMON.OK');
         }
 
+        alertProps.onOpened = this.addEnterListener;
+        alertProps.onClosing = this.removeEnterListener;
+
         return <Alert {...alertProps}>{message}</Alert>;
     }
 
@@ -79,12 +82,19 @@ class Alerter extends React.Component<{}, IAlerterState> {
         }
     }
 
-    public componentWillUnmount() {
+    addEnterListener = () => {
+        document.addEventListener('keyup', this.onKeyUp);
+    }
+
+    removeEnterListener = () => {
         document.removeEventListener('keyup', this.onKeyUp);
     }
 
-    public componentDidMount() {
-        document.addEventListener('keyup', this.onKeyUp);
+    public componenDidUnmount() {
+        // when this method is called the listener should have already
+        // been removed but we never know: the component could be unmounted
+        // without calling the onClosing prop
+        this.removeEnterListener();
     }
 }
 

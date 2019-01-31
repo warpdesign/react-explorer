@@ -3,6 +3,9 @@ import { FsApi, Fs, getFS, File, ICredentials } from "../services/Fs";
 import { Deferred } from '../utils/deferred';
 import i18next from '../locale/i18n';
 import { shell } from 'electron';
+import * as process from 'process';
+
+const isWin = process.platform === "win32";
 
 type TStatus = 'blank' | 'busy' | 'ok' | 'login' | 'offline';
 
@@ -231,6 +234,7 @@ export class FileState {
 
         this.api.login(server, credentials).then(() => this.onLoginSuccess()).catch((err) => {
             console.log('error while connecting', err);
+            this.setErrorString(err);
             this.loginDefer.reject(err);
         });
 
@@ -259,10 +263,7 @@ export class FileState {
 
                 return files;
             })
-            .catch((err) => {
-                debugger;
-                return Promise.reject(err);
-            });
+            .catch(this.handleError)
     }
 
     @action clearSelection() {
@@ -277,7 +278,52 @@ export class FileState {
         return this.api.join(path, path2);
     }
 
+    setErrorString(error:any) {
+        if (typeof error.code !== 'undefined') {
+            switch (error.code) {
+                case 'ENOTFOUND':
+                    debugger;
+                    error.message = i18next.t('ERRORS.ENOTFOUND');
+                    break;
+
+                case 'ECONNREFUSED':
+                    error.message = i18next.t('ERRORS.ECONNREFUSED');
+                    break;
+
+                case 'ENOENT':
+                    error.message = i18next.t('ERRORS.ENOENT');
+                    break;
+
+                case 'BAD_FILENAME':
+                    const acceptedChars = isWin ? i18next.t('ERRORS.WIN_VALID_FILENAME') : i18next.t('ERRORS.UNIX_VALID_FILENAME');
+
+                    error.message = i18next.t('ERRORS.BAD_FILENAME', { entry: error.newName }) + '. ' + acceptedChars;
+                    break;
+
+                case 530:
+                    error.message = i18next.t('ERRORS.530');
+                    break;
+
+                default:
+                    debugger;
+                    error.message = i18next.t('ERRORS.UNKNOWN');
+                    if (error.code) {
+                        error.message += `(${error.code})`;
+                    }
+                    break;
+            }
+        }
+    }
+
+    handleError = (error: any) => {
+        console.log('handleError', error);
+        this.status = 'ok';
+        this.setErrorString(error);
+        return Promise.reject(error);
+    }
+
     async rename(source: string, file: File, newName: string): Promise<string> {
+        // TODO: check for valid filenames
         try {
             await this.waitForConnection();
         } catch (err) {
@@ -291,7 +337,8 @@ export class FileState {
             });
 
             return newName;
-        });
+        })
+            .catch(this.handleError);
     }
 
     async isDir(path: string): Promise<boolean> {
@@ -320,11 +367,7 @@ export class FileState {
 
             return newDir;
         })
-            .catch((err) => {
-                this.status = 'ok';
-                debugger;
-                return Promise.reject(err);
-            });
+            .catch(this.handleError)
     }
 
     @action
@@ -344,11 +387,7 @@ export class FileState {
 
             return num;
         })
-            .catch((err) => {
-                debugger;
-                this.status = 'ok';
-                return Promise.reject(err);
-            });
+            .catch(this.handleError)
     }
 
     // copy(source: string, files: string[], dest: string): Promise<number> & cp.ProgressEmitter {
@@ -366,7 +405,8 @@ export class FileState {
             return this.size(source, files);
         }
 
-        return this.api.size(source, files);
+        return this.api.size(source, files)
+            .catch(this.handleError)
     }
 
     async get(path: string, file: string): Promise<string> {
@@ -379,7 +419,8 @@ export class FileState {
         return this.api.get(path, file).then((path) => {
             this.status = 'ok';
             return path;
-        });
+        })
+            .catch(this.handleError)
     }
 
     openFile(file: File) {

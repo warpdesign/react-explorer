@@ -10,6 +10,7 @@ import { IReactionDisposer, reaction, toJS } from 'mobx';
 import { File } from '../services/Fs';
 import { formatBytes } from '../utils/formatBytes';
 import { shouldCatchEvent } from '../utils/dom';
+import { AppAlert } from './AppAlert';
 require('react-virtualized/styles.css');
 require('../css/filetable.css');
 
@@ -304,10 +305,18 @@ export class FileTableClass extends React.Component<IProps, IState> {
             // 2. File.fullname is also updated, so any subsequent render will get the latest version as well
             this.cache.rename(this.editingFile.dir, this.editingFile, editingElement.innerText)
                 .then(() => {
+                    // this will not re-sort the files
                     this.updateSelection();
+                    // we could also reload but not very optimal when working on remote files
+                    // const { fileCache } = this.injected;
+                    // fileCache.reload();
+                    // Finder automatically repositions the file but won't automatically scroll the list
+                    // so the file may be invisible after the reposition: not sure this is perfect either
                 })
-                .catch((oldName) => {
-                    editingElement.innerText = oldName;
+                .catch((error) => {
+                    AppAlert.show(error.message).then(() => {
+                        editingElement.innerText = error.oldName;
+                    });
                 });
         }
         this.editingElement = null;

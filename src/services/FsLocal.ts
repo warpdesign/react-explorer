@@ -9,7 +9,8 @@ import { throttle } from '../utils/throttle';
 const { Transform } = require('stream');
 
 const isWin = process.platform === "win32";
-const invalidChars = isWin && /[\*:<>\?|"]+/ig || /^[\.]+[\/]+(.)*$/ig;
+const invalidDirChars = isWin && /[\*:<>\?|"]+/ig || /^[\.]+[\/]+(.)*$/ig;
+const invalidFileChars = isWin && /[\*:<>\?|"]+/ig || /\//;
 
 // since nodeJS will translate unix like paths to windows path, when running under Windows
 // we accept Windows style paths (eg. C:\foo...) and unix paths (eg. /foo or ./foo)
@@ -32,7 +33,7 @@ class LocalApi implements FsApi {
     }
 
     isDirectoryNameValid(dirName: string): boolean {
-        return !!!dirName.match(invalidChars);
+        return !!!dirName.match(invalidDirChars);
     }
 
     join(...paths: string[]): string {
@@ -105,20 +106,30 @@ class LocalApi implements FsApi {
         const oldPath = path.join(source, file.fullname);
         const newPath = path.join(source, newName);
 
-        if (!newName.match(invalidChars)) {
+        if (!newName.match(invalidFileChars)) {
             console.log('valid !', oldPath, newPath);
             return new Promise((resolve, reject) => {
                 fs.rename(oldPath, newPath, (err) => {
                     if (err) {
-                        reject(file.fullname);
+                        reject({
+                            code: err.code,
+                            message: err.message,
+                            newName: newName,
+                            oldName: file.fullname
+                        });
                     } else {
                         resolve(newName);
                     }
                 });
             });
+        } else {
+            // reject promise with previous name in case of invalid chars
+            return Promise.reject({
+                oldName: file.fullname,
+                newName: newName,
+                code: 'BAD_FILENAME'
+            });
         }
-        // reject promise with previous name in case of invalid chars
-        return Promise.reject(file.fullname);
     }
 
     isDir(path: string): Promise<boolean> {

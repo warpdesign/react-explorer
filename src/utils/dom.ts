@@ -3,6 +3,7 @@ export function shouldCatchEvent(e:Event):boolean {
     const tagName = element && element.tagName.toLowerCase() || '';
 
     return (!tagName.match(/input|textarea/) &&
+        (!element || !element.hasAttribute('contenteditable')) &&
         (!element || !element.classList.contains('bp3-menu-item')) &&
         !document.body.classList.contains('bp3-overlay-open'));
 }
