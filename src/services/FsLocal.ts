@@ -33,7 +33,7 @@ class LocalApi implements FsApi {
     }
 
     isDirectoryNameValid(dirName: string): boolean {
-        return !!!dirName.match(invalidDirChars);
+        return !!!dirName.match(invalidDirChars) && dirName !== '/';
     }
 
     join(...paths: string[]): string {
