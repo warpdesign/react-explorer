@@ -46,7 +46,10 @@
                 "THEME": "Thème",
                 "RESET": "Réinitialiser Préférences",
                 "RESET_HELP": "Cliquer ici pour revenir aux préférences d'origine",
-                "INVALID_FOLDER": "Nom de dossier invalide ou introuvable"
+                "INVALID_FOLDER": "Nom de dossier invalide ou introuvable",
+                "DEFAULT_TERMINAL": "Terminal externe",
+                "DEFAULT_TERMINAL_HELP": "Spécifie le type de terminal à lancer",
+                "TEST_TERMINAL": "Cliquez ici pour lancer le terminal specifié"
             }
         },
         "SHORTCUT": {

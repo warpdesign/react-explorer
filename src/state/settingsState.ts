@@ -4,7 +4,6 @@ import { release } from 'os';
 import { platform } from 'process';
 import { JSObject } from "../components/Log";
 import i18next from '../locale/i18n';
-import { THUMBS_DOWN } from "@blueprintjs/icons/lib/esm/generated/iconContents";
 
 declare var ENV: any;
 
@@ -17,9 +16,9 @@ const IS_MOJAVE = IS_MAC && ((parseInt(release().split('.')[0], 10) - 4) >= 14);
 const IS_WIN = platform === 'win32';
 
 const TERMINAL_CMD = {
-    'darwin': 'open -a %cmd %path',
+    'darwin': 'open -a %cmd "%path"',
     'win': '%cmd /K "cd /d %path"',
-    'linux': '%cmd %path'
+    'linux': '%cmd "%path"'
 };
 const DEFAULT_TERMINAL = {
     'darwin': 'Terminal.app',
@@ -106,7 +105,7 @@ export class SettingsState {
     }
 
     getTerminalCommand(path: string) {
-        return this.terminalTemplate.replace('%path', path);
+        return this.terminalTemplate.replace('%path', path.replace(/"/g, '\\"'));
     }
 
     saveSettings() {

@@ -46,7 +46,10 @@
                 "THEME": "Theme",
                 "RESET": "Reset Prefs",
                 "RESET_HELP": "Click here to restore the default prefs",
-                "INVALID_FOLDER": "Invalid folder name or non-existing folder"
+                "INVALID_FOLDER": "Invalid folder name or non-existing folder",
+                "DEFAULT_TERMINAL": "External terminal",
+                "DEFAULT_TERMINAL_HELP": "Customizes what kind of terminal to launch",
+                "TEST_TERMINAL": "Click here to launch the specified external terminal"
             }
         },
         "SHORTCUT": {
