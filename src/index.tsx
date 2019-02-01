@@ -9,11 +9,13 @@ import i18next from './locale/i18n';
 import { SettingsState } from "./state/settingsState";
 import { Provider } from "mobx-react";
 
+declare var ENV: any;
+
 class App {
     settingsState: SettingsState;
 
     constructor() {
-        this.settingsState = new SettingsState();
+        this.settingsState = new SettingsState(ENV.VERSION);
         this.createTestFolder().then(this.renderApp);
     }
 

@@ -76,7 +76,7 @@ class App extends React.Component<WithNamespaces, IState> {
             window.appState = this.appState;
         }
 
-        Logger.success(`React-FTP - CY: ${ENV.CY} - NODE_ENV: ${ENV.NODE_ENV} - lang: ${i18next.language}`);
+        Logger.success(`React-FTP ${ENV.VERSION} - CY: ${ENV.CY} - NODE_ENV: ${ENV.NODE_ENV} - lang: ${i18next.language}`);
         Logger.success(`lang=${settingsState.lang}, darkMode=${settingsState.darkMode}, defaultFolder=${settingsState.defaultFolder}`);
         // Logger.warn('React-FTP', remote.app.getVersion());
         // Logger.error('React-FTP', remote.app.getVersion());
