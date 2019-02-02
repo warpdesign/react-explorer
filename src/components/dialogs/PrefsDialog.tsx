@@ -6,9 +6,10 @@ import { SettingsState } from "../../state/settingsState";
 import { inject } from "mobx-react";
 import { Select, ItemRenderer } from "@blueprintjs/select";
 import { FsLocal, FolderExists } from "../../services/FsLocal";
-import { shell, ipcRenderer } from "electron";
+import { remote, ipcRenderer } from "electron";
 
 const DEBOUNCE_DELAY = 300;
+const HOME_DIR = remote.app.getPath('home');
 
 interface IPrefsProps extends WithNamespaces{
     isOpen: boolean;
@@ -175,7 +176,7 @@ class PrefsDialogClass extends React.Component<IPrefsProps, IState>{
 
     testTerminal = () => {
         const { settingsState } = this.injected;
-        const path = settingsState.getTerminalCommand('');
+        const path = settingsState.getTerminalCommand(HOME_DIR);
         ipcRenderer.send('openTerminal', path);
     }
 

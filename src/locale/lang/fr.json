@@ -76,7 +76,8 @@
                 "COPY_FILENAME": "Copier le nom des éléments sélectionnés",
                 "DELETE": "Supprimer les éléments sélectionnés",
                 "SELECT_ALL": "Selectionner tous les éléments",
-                "SELECT_INVERT": "Inverser la selection"
+                "SELECT_INVERT": "Inverser la selection",
+                "OPEN_TERMINAL": "Ouvre un Terminal dans le dossier courant"
             },
             "GROUP": {
                 "ACTIVE_VIEW": "Vue de dossier active",
