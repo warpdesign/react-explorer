@@ -16,9 +16,9 @@ const IS_MOJAVE = IS_MAC && ((parseInt(release().split('.')[0], 10) - 4) >= 14);
 const IS_WIN = platform === 'win32';
 
 const TERMINAL_CMD = {
-    'darwin': 'open -a %cmd "%path"',
-    'win': '%cmd /K "cd /d %path"',
-    'linux': '%cmd "%path"'
+    'darwin': 'open -a "%cmd" "%path"',
+    'win': '"%cmd" /K "cd /d %path"',
+    'linux': '"%cmd" "%path"'
 };
 const DEFAULT_TERMINAL = {
     'darwin': 'Terminal.app',
@@ -101,7 +101,7 @@ export class SettingsState {
             template = TERMINAL_CMD.darwin
         }
 
-        this.terminalTemplate = template.replace('%cmd', cmd);
+        this.terminalTemplate = template.replace('%cmd', cmd.replace(/"/g, '\\"'));
     }
 
     getTerminalCommand(path: string) {
