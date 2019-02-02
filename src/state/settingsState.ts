@@ -17,7 +17,7 @@ const IS_WIN = platform === 'win32';
 
 const TERMINAL_CMD = {
     'darwin': 'open -a "%cmd" "%path"',
-    'win': '"%cmd" /K "cd /d %path"',
+    'win': 'start /D "%path" "%cd%" "%cmd"',
     'linux': 'cd "%path" && "%cmd"'
 };
 const DEFAULT_TERMINAL = {
