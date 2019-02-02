@@ -434,7 +434,6 @@ export class FileState {
     }
 
     openTerminal(path: string) {
-        debugger;
         if (this.getFS().name === 'local') {
             ipcRenderer.send('openTerminal', path);
         }

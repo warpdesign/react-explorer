@@ -22,7 +22,7 @@ const TERMINAL_CMD = {
 };
 const DEFAULT_TERMINAL = {
     'darwin': 'Terminal.app',
-    'win': 'c:\\Windows\\System32\\cmd.exe',
+    'win': 'C:\\Windows\\System32\\cmd.exe',
     'linux': 'xterm'
 };
 
