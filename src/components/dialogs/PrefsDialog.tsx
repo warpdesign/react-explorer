@@ -172,6 +172,7 @@ class PrefsDialogClass extends React.Component<IPrefsProps, IState>{
         const terminal = (event.target as HTMLInputElement).value;
         this.setState({ defaultTerminal: terminal });
         settingsState.setDefaultTerminal(terminal);
+        settingsState.saveSettings();
     }
 
     testTerminal = () => {
