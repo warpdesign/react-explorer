@@ -46,7 +46,10 @@
                 "THEME": "Thème",
                 "RESET": "Réinitialiser Préférences",
                 "RESET_HELP": "Cliquer ici pour revenir aux préférences d'origine",
-                "INVALID_FOLDER": "Nom de dossier invalide ou introuvable"
+                "INVALID_FOLDER": "Nom de dossier invalide ou introuvable",
+                "DEFAULT_TERMINAL": "Terminal externe",
+                "DEFAULT_TERMINAL_HELP": "Spécifie le type de terminal à lancer",
+                "TEST_TERMINAL": "Cliquez ici pour lancer le terminal specifié"
             }
         },
         "SHORTCUT": {
@@ -73,7 +76,8 @@
                 "COPY_FILENAME": "Copier le nom des éléments sélectionnés",
                 "DELETE": "Supprimer les éléments sélectionnés",
                 "SELECT_ALL": "Selectionner tous les éléments",
-                "SELECT_INVERT": "Inverser la selection"
+                "SELECT_INVERT": "Inverser la selection",
+                "OPEN_TERMINAL": "Ouvre un Terminal dans le dossier courant"
             },
             "GROUP": {
                 "ACTIVE_VIEW": "Vue de dossier active",

@@ -76,7 +76,7 @@ class App extends React.Component<WithNamespaces, IState> {
             window.appState = this.appState;
         }
 
-        Logger.success(`React-FTP - CY: ${ENV.CY} - NODE_ENV: ${ENV.NODE_ENV} - lang: ${i18next.language}`);
+        Logger.success(`React-FTP ${ENV.VERSION} - CY: ${ENV.CY} - NODE_ENV: ${ENV.NODE_ENV} - lang: ${i18next.language}`);
         Logger.success(`lang=${settingsState.lang}, darkMode=${settingsState.darkMode}, defaultFolder=${settingsState.defaultFolder}`);
         // Logger.warn('React-FTP', remote.app.getVersion());
         // Logger.error('React-FTP', remote.app.getVersion());
@@ -271,6 +271,12 @@ class App extends React.Component<WithNamespaces, IState> {
             />
             <Hotkey
                 global={true}
+                combo="mod + k"
+                label={t('SHORTCUT.ACTIVE_VIEW.OPEN_TERMINAL')}
+                onKeyDown={this.onOpenTerminal}
+            />
+            <Hotkey
+                global={true}
                 combo="q"
                 label={t('SHORTCUT.MAIN.QUIT')}
                 onKeyDown={this.onExitComboDown}
@@ -321,16 +327,26 @@ class App extends React.Component<WithNamespaces, IState> {
     }
 
     backwardHistory = () => {
-        if (this.appState.isExplorer) {
-            const cache = this.getActiveFileCache();
+        const cache = this.getActiveFileCache();
+        if (cache) {
             cache.navHistory(-1);
         }
     }
 
     forwardHistory = () => {
-        if (this.appState.isExplorer) {
-            const cache = this.getActiveFileCache();
+        const cache = this.getActiveFileCache();
+        if (cache) {
             cache.navHistory(1);
+        }
+    }
+
+    onOpenTerminal = () => {
+        const cache = this.getActiveFileCache();
+        if (cache) {
+            const resolvedPath = cache.getAPI().resolve(cache.path);
+            const { settingsState } = this.injected;
+            const terminalCmd = settingsState.getTerminalCommand(resolvedPath);
+            cache.openTerminal(terminalCmd);
         }
     }
 
@@ -361,9 +377,9 @@ class App extends React.Component<WithNamespaces, IState> {
 
     onCopy = () => {
         const fileCache: FileState = this.getActiveFileCache();
-        const { t } = this.injected;
 
         if (fileCache) {
+            const { t } = this.injected;
             const num = this.appState.setClipboard(fileCache);
 
             AppToaster.show({
@@ -376,12 +392,16 @@ class App extends React.Component<WithNamespaces, IState> {
 
     onCopyPath = (): void => {
         const fileCache = this.getActiveFileCache();
-        this.copyTextToClipboard(fileCache);
+        if (fileCache) {
+            this.copyTextToClipboard(fileCache);
+        }
     }
 
     onCopyFilename = (): void => {
         const fileCache = this.getActiveFileCache();
-        this.copyTextToClipboard(fileCache, true);
+        if (fileCache) {
+            this.copyTextToClipboard(fileCache, true);
+        }
     }
 
     private onPaste = (): void => {

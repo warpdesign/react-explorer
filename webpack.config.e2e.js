@@ -1,6 +1,7 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const webpack = require('webpack');
+const packageJson = require('./package.json');
 
 const baseConfig = {
     output: {
@@ -75,7 +76,8 @@ module.exports = [
                 }),
                 new webpack.DefinePlugin({
                     'ENV.CY': true,
-                    'ENV.NODE_ENV': JSON.stringify(baseConfig.mode)
+                    'ENV.NODE_ENV': JSON.stringify(baseConfig.mode),
+                    'ENV.VERSION': JSON.stringify(packageJson.version)
                 })]
         },
         baseConfig)

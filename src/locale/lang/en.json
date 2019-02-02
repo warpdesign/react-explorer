@@ -46,7 +46,10 @@
                 "THEME": "Theme",
                 "RESET": "Reset Prefs",
                 "RESET_HELP": "Click here to restore the default prefs",
-                "INVALID_FOLDER": "Invalid folder name or non-existing folder"
+                "INVALID_FOLDER": "Invalid folder name or non-existing folder",
+                "DEFAULT_TERMINAL": "External terminal",
+                "DEFAULT_TERMINAL_HELP": "Customizes what kind of terminal to launch",
+                "TEST_TERMINAL": "Click here to launch the specified external terminal"
             }
         },
         "SHORTCUT": {
@@ -73,7 +76,8 @@
                 "COPY_FILENAME": "Copy selected items' filenames into the clipboard",
                 "DELETE": "Delete selected items",
                 "SELECT_ALL": "Select all items",
-                "SELECT_INVERT": "Invert selection"
+                "SELECT_INVERT": "Invert selection",
+                "OPEN_TERMINAL": "Open Terminal in active folder"
             },
             "GROUP": {
                 "ACTIVE_VIEW": "Active file view",

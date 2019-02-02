@@ -39,7 +39,8 @@ class ShortcutsDialogClass extends React.Component<IShortcutsProps>{
                 { combo: "mod + i", label: t('SHORTCUT.ACTIVE_VIEW.SELECT_INVERT') },
                 { combo: "mod + l", label: t('SHORTCUT.ACTIVE_VIEW.FOCUS_PATH') },
                 { combo: "mod + n", label: t('COMMON.MAKEDIR') },
-                { combo: "mod + d", label: t('SHORTCUT.ACTIVE_VIEW.DELETE') }
+                { combo: "mod + d", label: t('SHORTCUT.ACTIVE_VIEW.DELETE') },
+                { combo: "mod + k", label: t('SHORTCUT.ACTIVE_VIEW.OPEN_TERMINAL') }
             ]
         ]
     }

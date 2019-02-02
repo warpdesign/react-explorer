@@ -1,13 +1,15 @@
 import * as React from "react";
-import { Dialog, Classes, Intent, Button, InputGroup, FormGroup, MenuItem } from "@blueprintjs/core";
+import { Dialog, Classes, Intent, Button, InputGroup, FormGroup, MenuItem, Tooltip } from "@blueprintjs/core";
 import { debounce } from "../../utils/debounce";
 import { withNamespaces, WithNamespaces } from "react-i18next";
 import { SettingsState } from "../../state/settingsState";
 import { inject } from "mobx-react";
 import { Select, ItemRenderer } from "@blueprintjs/select";
 import { FsLocal, FolderExists } from "../../services/FsLocal";
+import { remote, ipcRenderer } from "electron";
 
 const DEBOUNCE_DELAY = 300;
+const HOME_DIR = remote.app.getPath('home');
 
 interface IPrefsProps extends WithNamespaces{
     isOpen: boolean;
@@ -23,6 +25,7 @@ interface IState {
     darkMode: boolean | 'auto';
     lang: string;
     isFolderValid: boolean;
+    defaultTerminal: string;
 }
 
 interface Language {
@@ -49,7 +52,8 @@ class PrefsDialogClass extends React.Component<IPrefsProps, IState>{
             lang: settingsState.lang,
             darkMode: settingsState.darkMode,
             defaultFolder: settingsState.defaultFolder,
-            isFolderValid: FsLocal.canread(settingsState.defaultFolder) && FolderExists(settingsState.defaultFolder)
+            isFolderValid: FsLocal.canread(settingsState.defaultFolder) && FolderExists(settingsState.defaultFolder),
+            defaultTerminal: settingsState.defaultTerminal
         };
     }
 
@@ -158,19 +162,42 @@ class PrefsDialogClass extends React.Component<IPrefsProps, IState>{
         this.setState({
             lang: settingsState.lang,
             darkMode: settingsState.darkMode,
-            defaultFolder: settingsState.defaultFolder
+            defaultFolder: settingsState.defaultFolder,
+            defaultTerminal: settingsState.defaultTerminal
         });
+    }
+
+    onTerminalChange = (event: React.FormEvent<HTMLElement>) => {
+        const { settingsState } = this.injected;
+        const terminal = (event.target as HTMLInputElement).value;
+        this.setState({ defaultTerminal: terminal });
+        settingsState.setDefaultTerminal(terminal);
+        settingsState.saveSettings();
+    }
+
+    testTerminal = () => {
+        const { settingsState } = this.injected;
+        const path = settingsState.getTerminalCommand(HOME_DIR);
+        ipcRenderer.send('openTerminal', path);
     }
 
     public render() {
         const { t } = this.props;
-        const { isFolderValid, defaultFolder, darkMode, lang } = this.state;
+        const { isFolderValid, defaultFolder, defaultTerminal, darkMode, lang } = this.state;
         const languageItems = this.getSortedLanguages();
         const selectedLanguage = languageItems.find((language:Language) => language.code === lang);
         const themeItems = this.getThemeList();
         const selectedTheme = themeItems.find((theme:Theme) => theme.code === darkMode);
         const activeTheme = this.injected.settingsState.isDarkModeActive ? t('DIALOG.PREFS.DARK') : t('DIALOG.PREFS.BRIGHT');
         const intent: Intent = isFolderValid ? Intent.NONE : Intent.DANGER;
+        const testTerminalButton = (<Tooltip content={t('DIALOG.PREFS.TEST_TERMINAL')}>
+            <Button
+                icon="play"
+                intent={Intent.PRIMARY}
+                minimal={true}
+                onClick={this.testTerminal}
+            />
+        </Tooltip>);
 
         return(
             <Dialog
@@ -227,14 +254,33 @@ class PrefsDialogClass extends React.Component<IPrefsProps, IState>{
                         />
                     </FormGroup>
 
+                    <FormGroup
+                        inline={true}
+                        labelFor="default-terminal"
+                        labelInfo={t('DIALOG.PREFS.DEFAULT_TERMINAL')}
+                        helperText={t('DIALOG.PREFS.DEFAULT_TERMINAL_HELP')}
+                    >
+                        <InputGroup
+                            onChange={this.onTerminalChange}
+                            value={defaultTerminal}
+                            rightElement={testTerminalButton}
+                            leftIcon="console"
+                            placeholder={t('DIALOG.PREFS.DEFAULT_TERMINAL')}
+                            id="default-terminal"
+                            name="default-terminal"
+                            title={defaultTerminal}
+                        />
+                    </FormGroup>
+
                     <FormGroup></FormGroup>
 
                     <FormGroup
                         inline={true}
+                        intent="danger"
                         helperText={t('DIALOG.PREFS.RESET_HELP')}>
                             <Button
-                                icon="delete"
-                                intent="danger"
+                                icon="trash"
+                                intent="primary"
                                 text={t('DIALOG.PREFS.RESET')}
                                 onClick={this.onResetPrefs}
                             />

@@ -2,7 +2,7 @@ import { observable, action, runInAction } from "mobx";
 import { FsApi, Fs, getFS, File, ICredentials } from "../services/Fs";
 import { Deferred } from '../utils/deferred';
 import i18next from '../locale/i18n';
-import { shell } from 'electron';
+import { shell, ipcRenderer } from 'electron';
 import * as process from 'process';
 
 const isWin = process.platform === "win32";
@@ -27,9 +27,6 @@ export class FileState {
 
     @observable
     status: TStatus;
-
-    @observable
-    type: string;
 
     @observable
     active = false;
@@ -433,6 +430,12 @@ export class FileState {
                 console.log('opening file', tmpPath);
                 shell.openItem(tmpPath);
             });
+        }
+    }
+
+    openTerminal(path: string) {
+        if (this.getFS().name === 'local') {
+            ipcRenderer.send('openTerminal', path);
         }
     }
 

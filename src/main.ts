@@ -64,6 +64,12 @@ function installExitListeners() {
         console.log('need to exit without warning!');
         app.quit();
     });
+
+    ipcMain.on('openTerminal', (event: Event, cmd: string) => {
+        console.log('running', cmd);
+        const exec = require("child_process").exec;
+        exec(cmd).unref();
+    });
 }
 
 function onReady() {
@@ -102,8 +108,9 @@ function onReady() {
             e.preventDefault();
             mainWindow.webContents.send('exitRequest');
         }
-    })
+    });
 }
+
 
 app.on('ready', () => onReady());
 app.on('before-quit', (e) => {
