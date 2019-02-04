@@ -137,6 +137,25 @@
         },
         "MAIN_PROCESS": {
             "PRESS_TO_EXIT": "Maintenez la touche ⌘Q enfoncée pour quitter"
+        },
+        "APP_MENUS": {
+            "ABOUT": "A propos de",
+            "PREFS": "Préférences",
+            "EXIT": "Quitter",
+            "TITLE_FILE": "Fichier",
+            "TITLE_EDIT": "Editer",
+            "TITLE_VIEW": "Vue",
+            "TITLE_HELP": "Aide",
+            "MAKEDIR": "Nouveau Dossier",
+            "DELETE": "Supprimer",
+            "OPEN_TERMINAL": "Ouvrir un Terminal",
+            "COPY": "Copier",
+            "COPY_PATH": "Copier Chemin",
+            "COPY_FILENAMES": "Copier Nom Fichier",
+            "PASTE": "Coller",
+            "RELOAD_VIEW": "Rcharger Vue Active",
+            "FORCE_RELOAD_APP": "Recharger l'App",
+            "KEYBOARD_SHORTCUTS": "List des Raccourcis"
         }
     }
 }

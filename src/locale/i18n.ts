@@ -1,6 +1,7 @@
 import i18next from 'i18next';
 import * as en from './lang/en.json';
 import * as fr from './lang/fr.json';
+import { ipcRenderer } from 'electron';
 
     i18next
         .init({
@@ -25,5 +26,10 @@ import * as fr from './lang/fr.json';
             wait: true
         }
     });
+
+i18next.on('languageChanged', () => {
+    debugger;
+    ipcRenderer.send('languageChanged', i18next.t('APP_MENUS', { returnObjects: true }));
+});
 
 export default i18next;

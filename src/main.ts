@@ -1,6 +1,7 @@
 import { app, BrowserWindow, ipcMain } from 'electron';
 import * as process from 'process';
 import { watch } from 'fs';
+import { AppMenu, LocaleString } from './appMenus';
 
 declare var __dirname: string
 
@@ -8,6 +9,7 @@ const CLOSE_EXIT_DELAY = 2000;
 const ENV_E2E = !!process.env.E2E;
 
 let mainWindow: Electron.BrowserWindow;
+let appMenu: AppMenu;
 
 function installReactDevTools() {
     const { default: installExtension, REACT_DEVELOPER_TOOLS } = require('electron-devtools-installer');
@@ -70,6 +72,15 @@ function installExitListeners() {
         const exec = require("child_process").exec;
         exec(cmd).unref();
     });
+
+    ipcMain.on('languageChanged', (e: Event, strings: LocaleString) => {
+        if (appMenu) {
+            console.log('creating menu!', strings);
+            appMenu.createMenu(strings);
+        } else {
+            console.log('languageChanged but app not ready :(');
+        }
+    });
 }
 
 function onReady() {
@@ -109,6 +120,8 @@ function onReady() {
             mainWindow.webContents.send('exitRequest');
         }
     });
+
+    appMenu = new AppMenu(mainWindow);
 }
 
 
