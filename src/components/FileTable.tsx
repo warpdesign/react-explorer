@@ -559,7 +559,7 @@ export class FileTableClass extends React.Component<IProps, IState> {
                         rowHeight={30}
                         rowGetter={rowGetter}
                         rowCount={rowCount}
-                        scrollToIndex={position}
+                        scrollToIndex={position < 0 ? 0 : position}
                         width={width}>
                         <Column
                             dataKey="name"
