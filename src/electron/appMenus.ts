@@ -16,8 +16,9 @@ export class AppMenu {
     }
 
     sendComboEvent = (menuItem: MenuItem & { accelerator: string }, data?: any) => {
-        console.log('sending', menuItem.label, menuItem.accelerator);
-        this.win.webContents.send(ACCELERATOR_EVENT, Object.assign({combo: menuItem.accelerator, data }));
+        const accel = menuItem.accelerator || '';
+        console.log('sending', menuItem.label, accel);
+        this.win.webContents.send(ACCELERATOR_EVENT, Object.assign({combo: accel, data }));
     }
 
     sendSelectAll = () => {
@@ -164,12 +165,7 @@ export class AppMenu {
             });
 
             // add exit to file menu
-            (template[0].submenu as MenuItemConstructorOptions[]).push({ type: 'separator' },
-            {
-                label: menuStrings['OPEN_TERMINAL'],
-                accelerator: 'CmdOrCtrl+K',
-                click: this.sendComboEvent
-            },
+            (template[0].submenu as MenuItemConstructorOptions[]).push(
             { type: 'separator' },
             {
                 label: menuStrings['EXIT'],
