@@ -519,7 +519,6 @@ class App extends React.Component<WithNamespaces, IState> {
                             </Trans>
                     </p>
                     </Alert>
-                    <input />
                     <PrefsDialog isOpen={isPrefsOpen} onClose={this.closePrefs}></PrefsDialog>
                     <ShortcutsDialog isOpen={isShortcutsOpen} onClose={this.closeShortcuts}></ShortcutsDialog>
                     <Navbar>
