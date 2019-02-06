@@ -156,7 +156,7 @@
             "COPY_PATH": "Copier Chemin",
             "COPY_FILENAMES": "Copier Nom Fichier",
             "PASTE": "Coller",
-            "RELOAD_VIEW": "Rcharger Vue Active",
+            "RELOAD_VIEW": "Recharger Vue Active",
             "FORCE_RELOAD_APP": "Recharger l'App",
             "KEYBOARD_SHORTCUTS": "List des Raccourcis"
         }
