@@ -5,7 +5,7 @@ import { AppState } from "../state/appState";
 import { AppToaster } from "./AppToaster";
 import { FileState } from "../state/fileState";
 import { withNamespaces, WithNamespaces } from 'react-i18next';
-import { MenuAccelerators } from "./MenuAccelerator";
+import { MenuAccelerators, Accelerator, Accelerators } from "./MenuAccelerator";
 
 interface IProps extends WithNamespaces{
 
@@ -50,8 +50,15 @@ export class StatusbarClass extends React.Component<IProps> {
     //     console.timeEnd('Statusbar Render');
     // }
 
+    onClick = (combo: string) => {
+        console.log('onClickCombo', combo);
+    }
+
     renderMenuAccelerators() {
-        return (<div />);
+        return <Accelerators>
+            <Accelerator combo="CmdOrCtrl+A" onClick={this.onClick}></Accelerator>
+            <Accelerator combo="CmdOrCtrl+," onClick={this.onClick}></Accelerator>
+        </Accelerators>;
     }
 
     public render() {

@@ -11,8 +11,13 @@ export interface IConstructor<T> {
     new(...args: any[]): T;
 }
 
-export interface IAcceleratorProps {
+export interface IAcceleratorsProps {
 
+}
+
+export interface IAcceleratorProps {
+    combo: string;
+    onClick: (combo: string) => any;
 }
 
 export interface IMenuAcceleratorComponent extends React.Component {
@@ -21,27 +26,76 @@ export interface IMenuAcceleratorComponent extends React.Component {
 
     /**
      * Components decorated with the `@MenuAccelerator` decorator must implement
-     * this method, and it must return a `Acelerator` React element.
+     * this method, and it must return a `Accelerator` React element.
      */
-    renderMenuAccelerators(): React.ReactElement<IAcceleratorProps>;
+    renderMenuAccelerators(): React.ReactElement<IAcceleratorsProps>;
+}
+
+
+
+export class Accelerators extends React.PureComponent<IAcceleratorsProps>{
+    render() {
+        return <div></div>;
+    }
+
+    // validateProps(props: IAcceleratorsProps & { children: React.ReactNode }) {
+
+    // }
+}
+
+export class Accelerator extends React.PureComponent<IAcceleratorProps>{
+    render() {
+        return <div></div>;
+    }
+
+    // validateProps(props: IAcceleratorProps & { children: React.ReactNode }) {
+
+    // }
+}
+
+function getDisplayName(ComponentClass: React.ComponentType):string {
+    return ComponentClass.displayName || ComponentClass.name || "Unknown";
 }
 
 export function MenuAccelerators<T extends IConstructor<IMenuAcceleratorComponent>>(WrappedComponent: T) {
     if (typeof WrappedComponent.prototype.renderMenuAccelerators !== 'function') {
-        console.warn('Classes docorated with the @MenuAccelerators must define the renderMenuAccemeratprs method.');
+        console.warn('Classes decorated with the @MenuAccelerators must define the renderMenuAccemeratprs method.');
+    }
+
+    interface Action{
+        combo: string,
+        callback: (combo?:string) => any;
     }
 
     return class MenuAcceleratorsClass extends WrappedComponent {
-        instanceId: number;
-        combos: string[];
+        public static displayName = `MenuAccelerators(${getDisplayName(WrappedComponent)})`;
 
-        onAccelerator = (e:MenuAcceleratorEvent, combo:string) => {
-            // check if combo is valid
-            console.log('received combo', combo, e);
+        actions = new Array<Action>();
+
+        getCallback(combo:string): (combo?:string) => any {
+            const action = this.actions.find((action) => action.combo === combo);
+            return action && action.callback || null;
         }
 
-        setActions(props: { children?: React.ReactNode }) {
+        onAccelerator = (e: MenuAcceleratorEvent, data: { combo: string }) => {
+            // check if combo is valid
+            console.log('received combo', data.combo, e);
+            const callback = this.getCallback(data.combo);
+            if (typeof callback === 'function') {
+                callback(data.combo);
+            } else {
+                console.log('no callback defined for', data.combo);
+            }
+        }
+
+        setActions(props: { children?: React.ReactElement<Accelerator> }) {
             console.log('setting actions');
+            this.actions.length = 0;
+
+            // get result, save events
+            React.Children.forEach(props.children, (child: React.ReactElement<any>) => {
+                this.actions.push({ combo: child.props.combo, callback: child.props.onClick });
+            });
         }
 
         componentDidMount() {
@@ -68,7 +122,8 @@ export function MenuAccelerators<T extends IConstructor<IMenuAcceleratorComponen
             // TODO: call renderMenuAccelerators
             if (typeof this.renderMenuAccelerators === 'function') {
                 const accelerators = this.renderMenuAccelerators();
-                // get result, save events
+
+                this.setActions(accelerators.props);
             }
 
             return element;

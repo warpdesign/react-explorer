@@ -147,6 +147,7 @@
             "TITLE_VIEW": "View",
             "TITLE_HELP": "Help",
             "MAKEDIR": "New Directory",
+            "RENAME": "Rename",
             "DELETE": "Delete",
             "OPEN_TERMINAL": "Open Terminal",
             "COPY": "Copy",

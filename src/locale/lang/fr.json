@@ -148,6 +148,7 @@
             "TITLE_HELP": "Aide",
             "MAKEDIR": "Nouveau Dossier",
             "DELETE": "Supprimer",
+            "RENAME": "Renommer",
             "OPEN_TERMINAL": "Ouvrir un Terminal",
             "COPY": "Copier",
             "COPY_PATH": "Copier Chemin",
