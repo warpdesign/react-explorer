@@ -37,20 +37,12 @@ export class Accelerators extends React.PureComponent<IAcceleratorsProps>{
     render() {
         return <div></div>;
     }
-
-    // validateProps(props: IAcceleratorsProps & { children: React.ReactNode }) {
-
-    // }
 }
 
 export class Accelerator extends React.PureComponent<IAcceleratorProps>{
     render() {
         return <div></div>;
     }
-
-    // validateProps(props: IAcceleratorProps & { children: React.ReactNode }) {
-
-    // }
 }
 
 function getDisplayName(ComponentClass: React.ComponentType):string {
@@ -79,17 +71,13 @@ export function MenuAccelerators<T extends IConstructor<IMenuAcceleratorComponen
 
         onAccelerator = (e: MenuAcceleratorEvent, data: { combo: string }) => {
             // check if combo is valid
-            console.log('received combo', data.combo, e);
             const callback = this.getCallback(data.combo);
             if (typeof callback === 'function') {
                 callback(data.combo);
-            } else {
-                console.log('no callback defined for', data.combo);
             }
         }
 
         setActions(props: { children?: React.ReactElement<Accelerator> }) {
-            console.log('setting actions');
             this.actions.length = 0;
 
             // get result, save events
@@ -103,7 +91,6 @@ export function MenuAccelerators<T extends IConstructor<IMenuAcceleratorComponen
                 super.componentDidMount();
             }
 
-            console.log('adding accelerator listener');
             ipcRenderer.on(ACCELERATOR_EVENT, this.onAccelerator);
         }
 
@@ -112,7 +99,6 @@ export function MenuAccelerators<T extends IConstructor<IMenuAcceleratorComponen
                 super.componentWillUnmount();
             }
 
-            console.log('removing accelerator listener');
             ipcRenderer.removeListener(ACCELERATOR_EVENT, this.onAccelerator);
         }
 

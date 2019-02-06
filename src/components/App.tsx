@@ -18,6 +18,7 @@ import { PrefsDialog } from "./dialogs/PrefsDialog";
 import { HamburgerMenu } from "./HamburgerMenu";
 import { ShortcutsDialog } from "./dialogs/ShortcutsDialog";
 import { shouldCatchEvent } from "../utils/dom";
+import { MenuAccelerators, Accelerators, Accelerator } from "./MenuAccelerator";
 
 require("@blueprintjs/core/lib/css/blueprint.css");
 require("@blueprintjs/icons/lib/css/blueprint-icons.css");
@@ -47,6 +48,7 @@ declare global {
 
 @inject('settingsState')
 @observer
+@MenuAccelerators
 @HotkeysTarget
 class App extends React.Component<WithNamespaces, IState> {
     private appState: AppState;
@@ -91,9 +93,27 @@ class App extends React.Component<WithNamespaces, IState> {
         }
     }
 
+    onCopyEvent = (e: Event) => {
+        console.log('copied event received!');
+        if (shouldCatchEvent(e)) {
+            this.onCopy();
+        }
+    }
+
+    onPasteEvent = (e: Event) => {
+        console.log('paste event received!');
+        if (shouldCatchEvent(e)) {
+            this.onPaste();
+        }
+    }
+
     addListeners() {
         // prevent builtin hotkeys dialog from opening: there are numerous problems with it
         document.addEventListener('keydown', this.onShortcutsCombo, true);
+        // we need to listen to paste event because when selecting the copy/paste menuItem,
+        // Electron won't call the menuItem.onClick event
+        document.addEventListener('copy', this.onCopyEvent);
+        document.addEventListener('paste', this.onPasteEvent);
         ipcRenderer.on('exitRequest', (e: Event) => {
             this.onExitRequest(true);
         });
@@ -196,6 +216,8 @@ class App extends React.Component<WithNamespaces, IState> {
 
     componentWillUnmount() {
         document.removeEventListener('keydown', this.onShortcutsCombo);
+        document.removeEventListener('copy', this.onCopyEvent);
+        document.removeEventListener('paste', this.onPasteEvent);
         ipcRenderer.removeAllListeners('exitRequest');
     }
 
@@ -219,6 +241,13 @@ class App extends React.Component<WithNamespaces, IState> {
         } else {
             console.log('downloads active, no refresh');
         }
+    }
+
+    renderMenuAccelerators() {
+        return <Accelerators>
+            <Accelerator combo="CmdOrCtrl+Shift+C" onClick={this.onCopyPath}></Accelerator>
+            <Accelerator combo="CmdOrCtrl+Shift+N" onClick={this.onCopyFilename}></Accelerator>
+         </Accelerators>;
     }
 
     public renderHotkeys() {
@@ -287,7 +316,7 @@ class App extends React.Component<WithNamespaces, IState> {
                 label={t('SHORTCUT.MAIN.QUIT')}
                 onKeyDown={this.onExitComboDown}
             />
-            <Hotkey
+            {/* <Hotkey
                 global={true}
                 combo="mod + shift + c"
                 label={t('SHORTCUT.ACTIVE_VIEW.COPY_PATH')}
@@ -300,8 +329,8 @@ class App extends React.Component<WithNamespaces, IState> {
                 label={t('SHORTCUT.ACTIVE_VIEW.COPY_FILENAME')}
                 onKeyDown={this.onCopyFilename}
                 group={t('SHORTCUT.GROUP.ACTIVE_VIEW')}>
-            </Hotkey>
-            <Hotkey
+            </Hotkey> */}
+            {/* <Hotkey
                 global={true}
                 combo="meta + c"
                 label={t('SHORTCUT.ACTIVE_VIEW.COPY')}
@@ -314,7 +343,7 @@ class App extends React.Component<WithNamespaces, IState> {
                 label={t('SHORTCUT.ACTIVE_VIEW.PASTE')}
                 onKeyDown={this.onPaste}
                 group={t('SHORTCUT.GROUP.ACTIVE_VIEW')}
-            />
+            /> */}
             <Hotkey
                 global={true}
                 combo="mod + h"
@@ -490,6 +519,7 @@ class App extends React.Component<WithNamespaces, IState> {
                             </Trans>
                     </p>
                     </Alert>
+                    <input />
                     <PrefsDialog isOpen={isPrefsOpen} onClose={this.closePrefs}></PrefsDialog>
                     <ShortcutsDialog isOpen={isShortcutsOpen} onClose={this.closeShortcuts}></ShortcutsDialog>
                     <Navbar>

@@ -9,8 +9,10 @@ import i18next from 'i18next';
 import { IReactionDisposer, reaction, toJS } from 'mobx';
 import { File } from '../services/Fs';
 import { formatBytes } from '../utils/formatBytes';
-import { shouldCatchEvent } from '../utils/dom';
+import { shouldCatchEvent, isEditable } from '../utils/dom';
 import { AppAlert } from './AppAlert';
+import { MenuAccelerators, Accelerators, Accelerator } from './MenuAccelerator';
+import { ipcRenderer } from 'electron';
 require('react-virtualized/styles.css');
 require('../css/filetable.css');
 
@@ -74,6 +76,7 @@ interface InjectedProps extends IProps {
 }
 
 @inject('appState', 'fileCache')
+@MenuAccelerators
 @HotkeysTarget
 export class FileTableClass extends React.Component<IProps, IState> {
     private cache: FileState;
@@ -129,6 +132,12 @@ export class FileTableClass extends React.Component<IProps, IState> {
         document.addEventListener('keydown', this.onDocKeyDown);
     }
 
+    renderMenuAccelerators() {
+        return <Accelerators>
+            <Accelerator combo="CmdOrCtrl+A" onClick={this.onSelectAll}></Accelerator>
+        </Accelerators>;
+    }
+
     renderHotkeys() {
         const { t } = this.props;
 
@@ -140,13 +149,14 @@ export class FileTableClass extends React.Component<IProps, IState> {
                 onKeyDown={this.onOpenFile}
                 group={t('SHORTCUT.GROUP.ACTIVE_VIEW')}>
             </Hotkey>
-            <Hotkey
+            {/* <Hotkey
                 global={true}
                 combo="mod + a"
                 label={t('SHORTCUT.ACTIVE_VIEW.SELECT_ALL')}
                 onKeyDown={this.onSelectAll}
+                allowInInput={true}
                 group={t('SHORTCUT.GROUP.ACTIVE_VIEW')}>
-            </Hotkey>
+            </Hotkey> */}
             <Hotkey
                 global={true}
                 combo="mod + i"
@@ -265,9 +275,12 @@ export class FileTableClass extends React.Component<IProps, IState> {
             if (element.classList.contains(LABEL_CLASSNAME)) {
                 this.clearClickTimeout();
 
-                this.clickTimeout = setTimeout(() => {
-                    this.toggleInlineRename(element, originallySelected, file);
-                }, CLICK_DELAY);
+                // only toggle inline if last selected element was this one
+                if (index === this.state.position && originallySelected) {
+                    this.clickTimeout = setTimeout(() => {
+                        this.toggleInlineRename(element, originallySelected, file);
+                    }, CLICK_DELAY);
+                }
             }
         } else {
             rowData.isSelected = !rowData.isSelected;
@@ -424,7 +437,13 @@ export class FileTableClass extends React.Component<IProps, IState> {
     }
 
     onSelectAll = () => {
-        this.selectAll();
+        console.log('onSelectAll', document.activeElement);
+        // TODO: do not call selectAll if input is active
+        if (!isEditable(document.activeElement)) {
+            this.selectAll();
+        } else {
+            console.log('isEditable');
+        }
     }
 
     onInvertSelection = () => {

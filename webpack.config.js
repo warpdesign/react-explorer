@@ -65,13 +65,20 @@ module.exports = [
     Object.assign(
         {
             target: 'electron-main',
-            entry: { main: './src/main.ts' }
+            entry: { main: './src/electron/main.ts' },
+            plugins: [
+                new webpack.DefinePlugin({
+                    'ENV.CY': false,
+                    'ENV.NODE_ENV': JSON.stringify(baseConfig.mode),
+                    'ENV.VERSION': JSON.stringify(packageJson.version)
+                })
+            ]
         },
         baseConfig),
     Object.assign(
         {
             target: 'electron-renderer',
-            entry: { gui: './src/index.tsx' },
+            entry: { gui: './src/gui/index.tsx' },
             plugins: [
                 new HtmlWebpackPlugin({
                     title: 'React-FTP',

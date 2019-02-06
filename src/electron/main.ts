@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain } from 'electron';
+import { app, BrowserWindow, ipcMain, Menu } from 'electron';
 import * as process from 'process';
 import { watch } from 'fs';
 import { AppMenu, LocaleString } from './appMenus';
@@ -10,6 +10,7 @@ const ENV_E2E = !!process.env.E2E;
 
 let mainWindow: Electron.BrowserWindow;
 let appMenu: AppMenu;
+let hasFocus = true;
 
 function installReactDevTools() {
     const { default: installExtension, REACT_DEVELOPER_TOOLS } = require('electron-devtools-installer');
@@ -75,7 +76,6 @@ function installExitListeners() {
 
     ipcMain.on('languageChanged', (e: Event, strings: LocaleString) => {
         if (appMenu) {
-            console.log('creating menu!', strings);
             appMenu.createMenu(strings);
         } else {
             console.log('languageChanged but app not ready :(');

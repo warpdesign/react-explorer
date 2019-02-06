@@ -123,7 +123,6 @@ export class ToolbarClass extends React.Component<IProps, PathInputState> {
     }
 
     private onBlur = () => {
-        console.log('onblur');
         this.setState({ path: this.cache.path, status: 0 });
     }
 

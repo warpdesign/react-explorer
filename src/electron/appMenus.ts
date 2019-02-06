@@ -1,8 +1,8 @@
 import * as process from 'process';
 import { Menu, BrowserWindow, MenuItemConstructorOptions, MenuItem, app } from 'electron';
+import { isMac } from '../utils/platform';
 
 const ACCELERATOR_EVENT = 'menu_accelerator';
-const IS_MAC = process.platform === 'darwin';
 
 export interface LocaleString {
     [key: string]: string
@@ -18,6 +18,25 @@ export class AppMenu {
     sendComboEvent = (menuItem: MenuItem & { accelerator: string }, data?: any) => {
         console.log('sending', menuItem.label, menuItem.accelerator);
         this.win.webContents.send(ACCELERATOR_EVENT, Object.assign({combo: menuItem.accelerator, data }));
+    }
+
+    sendSelectAll = () => {
+        const activeWindow = BrowserWindow.getFocusedWindow();
+        if (activeWindow) {
+            // do not send select all combo if devtools window is opened
+            console.log('activeWindow', activeWindow.id, this.win === activeWindow);
+            const webContents = activeWindow.webContents;
+            // !webContents.getURL().match(/^chrome-devtools:/)
+            if (activeWindow === this.win && !webContents.isDevToolsFocused()) {
+                console.log('NOT DevTools');
+                this.sendComboEvent({
+                    accelerator: 'CmdOrCtrl+A',
+                    label: 'selectAll'
+                } as MenuItem & { accelerator: string });
+            }
+
+            webContents.selectAll();
+        }
     }
 
     getMenuTemplate(menuStrings: LocaleString):MenuItemConstructorOptions[] {
@@ -61,9 +80,12 @@ export class AppMenu {
                 label: menuStrings['TITLE_EDIT'],
                 submenu: [
                     {
+                        label: menuStrings['CUT'],
+                        role: 'cut'
+                    },
+                    {
                         label: menuStrings['COPY'],
-                        accelerator: 'CmdOrCtrl+C',
-                        click: this.sendComboEvent
+                        role: 'copy'
                     },
                     {
                         label: menuStrings['COPY_PATH'],
@@ -77,8 +99,12 @@ export class AppMenu {
                     },
                     {
                         label: menuStrings['PASTE'],
-                        accelerator: 'CmdOrCtrl+V',
-                        click: this.sendComboEvent
+                        role: 'paste',
+                    },
+                    {
+                        label: menuStrings['SELECT_ALL'],
+                        accelerator: 'CmdOrCtrl+A',
+                        click: this.sendSelectAll
                     }
                 ],
             },
@@ -108,7 +134,7 @@ export class AppMenu {
             }
         ];
 
-        if (IS_MAC) {
+        if (isMac) {
             template.unshift({
                 label: app.getName(),
                 submenu: [
@@ -131,14 +157,14 @@ export class AppMenu {
             });
         } else {
             // add preference to file menu
-            template[0].submenu.unshift({
+            (template[0].submenu as MenuItemConstructorOptions[]).unshift({
                 label: menuStrings['PREFS'],
                 accelerator: 'CmdOrCtrl+,',
                 click: this.sendComboEvent
             });
 
             // add exit to file menu
-            template[0].submenu.push({ type: 'separator' },
+            (template[0].submenu as MenuItemConstructorOptions[]).push({ type: 'separator' },
             {
                 label: menuStrings['OPEN_TERMINAL'],
                 accelerator: 'CmdOrCtrl+K',
@@ -152,7 +178,7 @@ export class AppMenu {
                 });
 
             // add about menuItem
-            template[3].submenu.unshift({
+            (template[3].submenu as MenuItemConstructorOptions[]).unshift({
                 label: menuStrings['ABOUT'],
                 click: this.sendComboEvent
             });
@@ -163,7 +189,7 @@ export class AppMenu {
 
     createMenu(menuStrings: LocaleString) {
         const menuTemplate = this.getMenuTemplate(menuStrings);
-        // TODO: special case for darwin
+
         var menu = Menu.buildFromTemplate(menuTemplate)
 
         Menu.setApplicationMenu(menu);

@@ -5,7 +5,6 @@ import { AppState } from "../state/appState";
 import { AppToaster } from "./AppToaster";
 import { FileState } from "../state/fileState";
 import { withNamespaces, WithNamespaces } from 'react-i18next';
-import { MenuAccelerators, Accelerator, Accelerators } from "./MenuAccelerator";
 
 interface IProps extends WithNamespaces{
 
@@ -18,7 +17,6 @@ interface InjectedProps extends IProps {
 
 @inject('fileCache', 'appState')
 @observer
-@MenuAccelerators
 export class StatusbarClass extends React.Component<IProps> {
     constructor(props: IProps) {
         super(props);
@@ -49,17 +47,6 @@ export class StatusbarClass extends React.Component<IProps> {
     // componentDidUpdate() {
     //     console.timeEnd('Statusbar Render');
     // }
-
-    onClick = (combo: string) => {
-        console.log('onClickCombo', combo);
-    }
-
-    renderMenuAccelerators() {
-        return <Accelerators>
-            <Accelerator combo="CmdOrCtrl+A" onClick={this.onClick}></Accelerator>
-            <Accelerator combo="CmdOrCtrl+," onClick={this.onClick}></Accelerator>
-        </Accelerators>;
-    }
 
     public render() {
         const { fileCache } = this.injected;

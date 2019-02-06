@@ -68,7 +68,7 @@ module.exports = [
     Object.assign(
         {
             target: 'web',
-            entry: { gui: './src/index.tsx' },
+            entry: { gui: './src/gui/index.tsx' },
             plugins: [
                 new HtmlWebpackPlugin({
                     title: 'React-FTP',

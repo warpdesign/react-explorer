@@ -28,7 +28,6 @@ import { ipcRenderer } from 'electron';
     });
 
 i18next.on('languageChanged', () => {
-    debugger;
     ipcRenderer.send('languageChanged', i18next.t('APP_MENUS', { returnObjects: true }));
 });
 

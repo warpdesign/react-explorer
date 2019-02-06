@@ -151,6 +151,8 @@
             "RENAME": "Renommer",
             "OPEN_TERMINAL": "Ouvrir un Terminal",
             "COPY": "Copier",
+            "CUT": "Couper",
+            "SELECT_ALL": "Tout Sélectionner",
             "COPY_PATH": "Copier Chemin",
             "COPY_FILENAMES": "Copier Nom Fichier",
             "PASTE": "Coller",
