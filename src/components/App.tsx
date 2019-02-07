@@ -248,6 +248,7 @@ class App extends React.Component<WithNamespaces, IState> {
             <Accelerator combo="CmdOrCtrl+Shift+C" onClick={this.onCopyPath}></Accelerator>
             <Accelerator combo="CmdOrCtrl+Shift+N" onClick={this.onCopyFilename}></Accelerator>
             <Accelerator combo="CmdOrCtrl+;" onClick={this.onOpenShortcuts}></Accelerator>
+            <Accelerator combo="CmdOrCtrl+," onClick={this.onOpenPrefs}></Accelerator>
             <Accelerator combo="CmdOrCtrl+R" onClick={this.onReloadFileView}></Accelerator>
          </Accelerators>;
     }

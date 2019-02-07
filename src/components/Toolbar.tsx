@@ -10,6 +10,7 @@ import { Logger } from "./Log";
 import { AppToaster, IToasterOpts } from "./AppToaster";
 import { FileState } from "../state/fileState";
 import { withNamespaces, WithNamespaces } from "react-i18next";
+import { MenuAccelerators, Accelerators, Accelerator } from "./MenuAccelerator";
 
 interface IProps extends WithNamespaces {
     onPaste: () => void;
@@ -34,8 +35,9 @@ enum KEYS {
 };
 
 @inject('appState', 'fileCache')
-@HotkeysTarget
 @observer
+@HotkeysTarget
+@MenuAccelerators
 export class ToolbarClass extends React.Component<IProps, PathInputState> {
     private cache: FileState;
     private input: HTMLInputElement | null = null;
@@ -212,7 +214,7 @@ export class ToolbarClass extends React.Component<IProps, PathInputState> {
     private onDelete = () => {
         const { appState, fileCache } = this.injected;
 
-        if (appState.getActiveCache() === fileCache) {
+        if (appState.getActiveCache() === fileCache && fileCache.selected.length) {
             this.setState({ isDeleteOpen: true });
         }
     }
@@ -260,6 +262,13 @@ export class ToolbarClass extends React.Component<IProps, PathInputState> {
     //     console.timeEnd('Toolbar Render');
     // }
 
+    renderMenuAccelerators() {
+        return <Accelerators>
+            <Accelerator combo="CmdOrCtrl+N" onClick={this.onMakedir}></Accelerator>
+            <Accelerator combo="CmdOrCtrl+D" onClick={this.onDelete}></Accelerator>
+        </Accelerators>;
+    }
+
     public renderHotkeys() {
         const { t } = this.props;
 
@@ -271,20 +280,20 @@ export class ToolbarClass extends React.Component<IProps, PathInputState> {
                 onKeyDown={this.onActivatePath}
                 group={t('SHORTCUT.GROUP.ACTIVE_VIEW')}
             />
-            <Hotkey
+            {/* <Hotkey
                 global={true}
                 combo="mod+n"
                 label={t('COMMON.MAKEDIR')}
                 onKeyDown={this.onMakedir}
                 group={t('SHORTCUT.GROUP.ACTIVE_VIEW')}
-            />
-            <Hotkey
+            /> */}
+            {/* <Hotkey
                 global={true}
                 combo="mod+d"
                 label={t('SHORTCUT.ACTIVE_VIEW.DELETE')}
                 onKeyDown={this.onDelete}
                 group={t('SHORTCUT.GROUP.ACTIVE_VIEW')}
-            />
+            /> */}
         </Hotkeys>;
     }
 
