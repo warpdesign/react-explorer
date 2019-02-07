@@ -20,10 +20,14 @@ function installReactDevTools() {
       .catch((err: any) => console.log('An error occurred: ', err));
 }
 
-function installWatcher(path: string, window: BrowserWindow) {
-    watch(path, { recursive: true }, () => {
-    window.webContents.reloadIgnoringCache();
-  });
+function installWatcher(path: string) {
+    watch(path, { recursive: true }, reloadApp);
+}
+
+function reloadApp() {
+    if (mainWindow) {
+        mainWindow.webContents.reloadIgnoringCache();
+    }
 }
 
 let forceExit = false;
@@ -31,6 +35,8 @@ let forceExit = false;
 function installExitListeners() {
     let exitWindow: BrowserWindow = null;
     let timeout:any = 0;
+
+    ipcMain.on('reloadIgnoringCache', reloadApp);
 
     ipcMain.on('exitWarning', (event:Event, exitString:string) => {
         console.log('exitWindow', exitString);
@@ -96,7 +102,7 @@ function onReady() {
     });
 
     if (!ENV_E2E) {
-        installWatcher('./dist', mainWindow);
+        installWatcher('./dist');
     }
 
     const fileName = `file://${__dirname}/index.html`;

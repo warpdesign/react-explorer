@@ -247,6 +247,8 @@ class App extends React.Component<WithNamespaces, IState> {
         return <Accelerators>
             <Accelerator combo="CmdOrCtrl+Shift+C" onClick={this.onCopyPath}></Accelerator>
             <Accelerator combo="CmdOrCtrl+Shift+N" onClick={this.onCopyFilename}></Accelerator>
+            <Accelerator combo="CmdOrCtrl+;" onClick={this.onOpenShortcuts}></Accelerator>
+            <Accelerator combo="CmdOrCtrl+R" onClick={this.onReloadFileView}></Accelerator>
          </Accelerators>;
     }
 
@@ -279,13 +281,13 @@ class App extends React.Component<WithNamespaces, IState> {
                 label={t('SHORTCUT.MAIN.PREVIOUS_VIEW')}
                 onKeyDown={this.onNextView}
             />
-            <Hotkey
+            {/* <Hotkey
                 global={true}
                 combo="mod + r"
                 label={t('SHORTCUT.MAIN.RELOAD_VIEW')}
                 preventDefault={true}
                 onKeyDown={this.onReloadFileView}
-            />
+            /> */}
             <Hotkey
                 global={true}
                 combo="alt + left"

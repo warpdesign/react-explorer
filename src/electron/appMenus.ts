@@ -1,5 +1,4 @@
-import * as process from 'process';
-import { Menu, BrowserWindow, MenuItemConstructorOptions, MenuItem, app } from 'electron';
+import { Menu, BrowserWindow, MenuItemConstructorOptions, MenuItem, app, ipcMain } from 'electron';
 import { isMac } from '../utils/platform';
 
 const ACCELERATOR_EVENT = 'menu_accelerator';
@@ -38,6 +37,10 @@ export class AppMenu {
 
             webContents.selectAll();
         }
+    }
+
+    sendReloadEvent = () => {
+        ipcMain.emit('reloadIgnoringCache');
     }
 
     getMenuTemplate(menuStrings: LocaleString):MenuItemConstructorOptions[] {
@@ -120,7 +123,7 @@ export class AppMenu {
                     {
                         label: menuStrings['FORCE_RELOAD_APP'],
                         accelerator: 'CmdOrCtrl+Shift+R',
-                        click: this.sendComboEvent
+                        click: this.sendReloadEvent
                     }
                 ],
             },
@@ -129,7 +132,8 @@ export class AppMenu {
                 submenu: [
                     {
                         label: menuStrings['KEYBOARD_SHORTCUTS'],
-                        click: this.sendComboEvent
+                        click: this.sendComboEvent,
+                        accelerator: 'CmdOrCtrl+;'
                     }
                 ]
             }
