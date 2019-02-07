@@ -12,7 +12,8 @@ import { formatBytes } from '../utils/formatBytes';
 import { shouldCatchEvent, isEditable } from '../utils/dom';
 import { AppAlert } from './AppAlert';
 import { MenuAccelerators, Accelerators, Accelerator } from './MenuAccelerator';
-import { ipcRenderer } from 'electron';
+import { isWin } from '../utils/platform';
+
 require('react-virtualized/styles.css');
 require('../css/filetable.css');
 
@@ -149,14 +150,13 @@ export class FileTableClass extends React.Component<IProps, IState> {
                 onKeyDown={this.onOpenFile}
                 group={t('SHORTCUT.GROUP.ACTIVE_VIEW')}>
             </Hotkey>
-            {/* <Hotkey
+            {isWin && (<Hotkey
                 global={true}
                 combo="mod + a"
                 label={t('SHORTCUT.ACTIVE_VIEW.SELECT_ALL')}
                 onKeyDown={this.onSelectAll}
-                allowInInput={true}
                 group={t('SHORTCUT.GROUP.ACTIVE_VIEW')}>
-            </Hotkey> */}
+            </Hotkey>)}
             <Hotkey
                 global={true}
                 combo="mod + i"
