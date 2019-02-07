@@ -5,12 +5,11 @@ import { AppMenu, LocaleString } from './appMenus';
 
 declare var __dirname: string
 
-const CLOSE_EXIT_DELAY = 2000;
+// const CLOSE_EXIT_DELAY = 2000;
 const ENV_E2E = !!process.env.E2E;
 
 let mainWindow: Electron.BrowserWindow;
 let appMenu: AppMenu;
-let hasFocus = true;
 
 function installReactDevTools() {
     const { default: installExtension, REACT_DEVELOPER_TOOLS } = require('electron-devtools-installer');
@@ -38,35 +37,35 @@ function installExitListeners() {
 
     ipcMain.on('reloadIgnoringCache', reloadApp);
 
-    ipcMain.on('exitWarning', (event:Event, exitString:string) => {
-        console.log('exitWindow', exitString);
+    // ipcMain.on('exitWarning', (event:Event, exitString:string) => {
+    //     console.log('exitWindow', exitString);
 
-        if (exitWindow) {
-            clearTimeout(timeout);
-            timeout = 0;
-        } else {
-            exitWindow = new BrowserWindow({
-                width: 560,
-                height: 130,
-                transparent: true,
-                frame: false,
-                alwaysOnTop: true,
-                focusable: false
-            });
+    //     if (exitWindow) {
+    //         clearTimeout(timeout);
+    //         timeout = 0;
+    //     } else {
+    //         exitWindow = new BrowserWindow({
+    //             width: 560,
+    //             height: 130,
+    //             transparent: true,
+    //             frame: false,
+    //             alwaysOnTop: true,
+    //             focusable: false
+    //         });
 
-            exitWindow.loadURL("data:text/html;charset=utf-8," + encodeURI(`<html><head><style type="text/css">p{border-radius:4px;padding: 22px 5px;background-color:rgba(80,80,80,.8);color:white;text-shadow:1px 1px 2px rgba(79,79,79,.3);font-size:24px;}body{font-family:Helvetica;text-align:center;background-color:transparent}</style></head><body><p>${exitString}</p></body></html>`));
-        }
-    });
+    //         exitWindow.loadURL("data:text/html;charset=utf-8," + encodeURI(`<html><head><style type="text/css">p{border-radius:4px;padding: 22px 5px;background-color:rgba(80,80,80,.8);color:white;text-shadow:1px 1px 2px rgba(79,79,79,.3);font-size:24px;}body{font-family:Helvetica;text-align:center;background-color:transparent}</style></head><body><p>${exitString}</p></body></html>`));
+    //     }
+    // });
 
-    ipcMain.on('endExitWarning', () => {
-        console.log('endExitWindow');
-        timeout = setTimeout(() => {
-            if (exitWindow) {
-                exitWindow.close();
-                exitWindow = null;
-            }
-        }, CLOSE_EXIT_DELAY);
-    });
+    // ipcMain.on('endExitWarning', () => {
+    //     console.log('endExitWindow');
+    //     timeout = setTimeout(() => {
+    //         if (exitWindow) {
+    //             exitWindow.close();
+    //             exitWindow = null;
+    //         }
+    //     }, CLOSE_EXIT_DELAY);
+    // });
 
     ipcMain.on('exit', () => {
         forceExit = true;
@@ -119,6 +118,7 @@ function onReady() {
         mainWindow.webContents.openDevTools({ mode: 'detach' });
     }
 
+    // Prevent the window from closing in case transfers are in progress
     mainWindow.on('close', (e: Event) => {
         if (!forceExit) {
             console.log('exit request and no force: sending back exitRequest');
@@ -132,9 +132,11 @@ function onReady() {
 
 
 app.on('ready', () => onReady());
+// prevent app from exiting at first request: the user may attempt to exit the app
+// while transfers are in progress so we first send a request to the frontend
+// if no transfers are in progress, exit confirmation is received which makes the app close
 app.on('before-quit', (e) => {
     console.log('before quit');
-    // prevent cmd+q to exit on macOS
     if (!forceExit) {
         e.preventDefault();
     } else {

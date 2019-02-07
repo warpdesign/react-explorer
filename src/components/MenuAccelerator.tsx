@@ -82,7 +82,9 @@ export function MenuAccelerators<T extends IConstructor<IMenuAcceleratorComponen
 
             // get result, save events
             React.Children.forEach(props.children, (child: React.ReactElement<any>) => {
-                this.actions.push({ combo: child.props.combo, callback: child.props.onClick });
+                if (child) {
+                    this.actions.push({ combo: child.props.combo, callback: child.props.onClick });
+                }
             });
         }
 

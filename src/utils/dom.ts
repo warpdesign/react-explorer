@@ -11,8 +11,8 @@ export function shouldCatchEvent(e:Event):boolean {
 export function isEditable(element: Element): boolean {
     const tagName = element && element.tagName.toLowerCase() || '';
 
-    return (!!tagName.match(/input|textarea/) ||
-        (element && element.hasAttribute('contenteditable')));
+    return ((!!tagName.match(/input|textarea/) ||
+        (element && element.hasAttribute('contenteditable'))));
 }
 
 export function getTargetTagName(e: Event): string {

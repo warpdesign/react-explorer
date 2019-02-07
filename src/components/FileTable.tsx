@@ -403,6 +403,8 @@ export class FileTableClass extends React.Component<IProps, IState> {
         let { nodes } = this.state;
         const { fileCache } = this.injected;
 
+        console.log('onSelectAll', document.activeElement);
+
         if (nodes.length && this.isViewActive()) {
             const isRoot = fileCache.isRoot((nodes[0].nodeData as File).dir);
             selected = 0;
@@ -437,9 +439,8 @@ export class FileTableClass extends React.Component<IProps, IState> {
     }
 
     onSelectAll = () => {
-        console.log('onSelectAll', document.activeElement);
-        // TODO: do not call selectAll if input is active
-        if (!isEditable(document.activeElement)) {
+        const isOverlayOpen = document.body.classList.contains('bp3-overlay-open');
+        if (!isOverlayOpen && !isEditable(document.activeElement)) {
             this.selectAll();
         } else {
             console.log('isEditable');

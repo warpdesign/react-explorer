@@ -19,6 +19,7 @@ import { HamburgerMenu } from "./HamburgerMenu";
 import { ShortcutsDialog } from "./dialogs/ShortcutsDialog";
 import { shouldCatchEvent } from "../utils/dom";
 import { MenuAccelerators, Accelerators, Accelerator } from "./MenuAccelerator";
+import { isMac } from '../utils/platform';
 
 require("@blueprintjs/core/lib/css/blueprint.css");
 require("@blueprintjs/icons/lib/css/blueprint-icons.css");
@@ -114,9 +115,8 @@ class App extends React.Component<WithNamespaces, IState> {
         // Electron won't call the menuItem.onClick event
         document.addEventListener('copy', this.onCopyEvent);
         document.addEventListener('paste', this.onPasteEvent);
-        ipcRenderer.on('exitRequest', (e: Event) => {
-            this.onExitRequest(true);
-        });
+        // sent when the window has been closed
+        ipcRenderer.on('exitRequest', (e: Event) => this.onExitRequest());
     }
 
     showDownloadsTab = () => {
@@ -159,48 +159,48 @@ class App extends React.Component<WithNamespaces, IState> {
         }
     }
 
-    onExitRequest = (winClosed = false) => {
-        let shouldCancel = false;
+    onExitComboDown = () => {
+        this.onExitRequest();
+    }
 
+    onExitRequest = () => {
+        console.log('exitRequest');
         if (this.appState && this.appState.pendingTransfers) {
             this.setState({ isExitDialogOpen: true });
-            shouldCancel = true;
-        }  else if (winClosed) {
+        }  else {
             ipcRenderer.send('exit');
         }
-
-        return shouldCancel;
     }
 
-    onExitComboDown = (e: KeyboardEvent) => {
-        const { t } = this.props;
+    // onExitComboDownMac = (e: KeyboardEvent) => {
+    //     const { t } = this.props;
 
-        if (!this.exitMode && e.keyCode === KEY_Q && e.metaKey) {
-            const shouldCancel = this.onExitRequest();
+    //     if (!this.exitMode && e.keyCode === KEY_Q && e.metaKey) {
+    //         const shouldCancel = this.onExitRequest();
 
-            if (!shouldCancel) {
-                // check transfers
-                this.lastTimeStamp = new Date().getTime();
+    //         if (!shouldCancel) {
+    //             // check transfers
+    //             this.lastTimeStamp = new Date().getTime();
 
-                ipcRenderer.send('exitWarning', t('MAIN_PROCESS.PRESS_TO_EXIT'));
+    //             ipcRenderer.send('exitWarning', t('MAIN_PROCESS.PRESS_TO_EXIT'));
 
-                this.exitTimeout = setTimeout(() => {
-                    const currentTimeout = new Date().getTime();
-                    if (this.exitMode && (currentTimeout - this.lastTimeStamp <= UP_DELAY)) {
-                        this.exitMode = false;
-                        ipcRenderer.send('exit');
-                    } else {
-                        ipcRenderer.send('endExitWarning');
-                        this.exitMode = false;
-                    }
-                }, EXIT_DELAY);
+    //             this.exitTimeout = setTimeout(() => {
+    //                 const currentTimeout = new Date().getTime();
+    //                 if (this.exitMode && (currentTimeout - this.lastTimeStamp <= UP_DELAY)) {
+    //                     this.exitMode = false;
+    //                     ipcRenderer.send('exit');
+    //                 } else {
+    //                     ipcRenderer.send('endExitWarning');
+    //                     this.exitMode = false;
+    //                 }
+    //             }, EXIT_DELAY);
 
-                this.exitMode = true;
-            }
-        } else if (e.keyCode === KEY_Q && this.exitMode) {
-            this.lastTimeStamp = new Date().getTime();
-        }
-    }
+    //             this.exitMode = true;
+    //         }
+    //     } else if (e.keyCode === KEY_Q && this.exitMode) {
+    //         this.lastTimeStamp = new Date().getTime();
+    //     }
+    // }
 
     onNextView = () => {
         const nextView = this.appState.caches[0].active ? 1 : 0;
@@ -250,6 +250,7 @@ class App extends React.Component<WithNamespaces, IState> {
             <Accelerator combo="CmdOrCtrl+;" onClick={this.onOpenShortcuts}></Accelerator>
             <Accelerator combo="CmdOrCtrl+," onClick={this.onOpenPrefs}></Accelerator>
             <Accelerator combo="CmdOrCtrl+R" onClick={this.onReloadFileView}></Accelerator>
+            <Accelerator combo="CmdOrCtrl+Q" onClick={this.onExitComboDown}></Accelerator>
          </Accelerators>;
     }
 
@@ -307,18 +308,18 @@ class App extends React.Component<WithNamespaces, IState> {
                 label={t('SHORTCUT.ACTIVE_VIEW.OPEN_TERMINAL')}
                 onKeyDown={this.onOpenTerminal}
             />
-            <Hotkey
+            {/* {isMac && (<Hotkey
                 global={true}
                 combo="q"
                 label={t('SHORTCUT.MAIN.QUIT')}
-                onKeyDown={this.onExitComboDown}
-            />
-            <Hotkey
+                onKeyDown={this.onExitComboDownMac}
+            />)}
+            {isMac && (<Hotkey
                 global={true}
                 combo="mod + q"
                 label={t('SHORTCUT.MAIN.QUIT')}
-                onKeyDown={this.onExitComboDown}
-            />
+                onKeyDown={this.onExitComboDownMac}
+            />)} */}
             {/* <Hotkey
                 global={true}
                 combo="mod + shift + c"
