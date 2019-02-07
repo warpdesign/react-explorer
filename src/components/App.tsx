@@ -17,7 +17,7 @@ import { SettingsState } from "../state/settingsState";
 import { PrefsDialog } from "./dialogs/PrefsDialog";
 import { HamburgerMenu } from "./HamburgerMenu";
 import { ShortcutsDialog } from "./dialogs/ShortcutsDialog";
-import { shouldCatchEvent } from "../utils/dom";
+import { shouldCatchEvent, isEditable } from "../utils/dom";
 import { MenuAccelerators, Accelerators, Accelerator } from "./MenuAccelerator";
 import { isMac } from '../utils/platform';
 
@@ -251,6 +251,7 @@ class App extends React.Component<WithNamespaces, IState> {
             <Accelerator combo="CmdOrCtrl+," onClick={this.onOpenPrefs}></Accelerator>
             <Accelerator combo="CmdOrCtrl+R" onClick={this.onReloadFileView}></Accelerator>
             <Accelerator combo="CmdOrCtrl+Q" onClick={this.onExitComboDown}></Accelerator>
+            <Accelerator combo="CmdOrCtrl+K" onClick={this.onOpenTerminal}></Accelerator>
          </Accelerators>;
     }
 
@@ -302,12 +303,12 @@ class App extends React.Component<WithNamespaces, IState> {
                 label={t('SHORTCUT.ACTIVE_VIEW.FORWARD_HISTORY')}
                 onKeyDown={this.forwardHistory}
             />
-            <Hotkey
+            {/* <Hotkey
                 global={true}
                 combo="mod + k"
                 label={t('SHORTCUT.ACTIVE_VIEW.OPEN_TERMINAL')}
                 onKeyDown={this.onOpenTerminal}
-            />
+            /> */}
             {/* {isMac && (<Hotkey
                 global={true}
                 combo="q"
@@ -375,7 +376,9 @@ class App extends React.Component<WithNamespaces, IState> {
 
     onOpenTerminal = () => {
         const cache = this.getActiveFileCache();
-        if (cache) {
+        const isOverlayOpen = document.body.classList.contains('bp3-overlay-open');
+
+        if (cache && !isOverlayOpen && !isEditable(document.activeElement)) {
             const resolvedPath = cache.getAPI().resolve(cache.path);
             const { settingsState } = this.injected;
             const terminalCmd = settingsState.getTerminalCommand(resolvedPath);
