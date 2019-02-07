@@ -158,7 +158,9 @@
             "PASTE": "Coller",
             "RELOAD_VIEW": "Recharger Vue Active",
             "FORCE_RELOAD_APP": "Recharger l'App",
-            "KEYBOARD_SHORTCUTS": "List des Raccourcis"
+            "KEYBOARD_SHORTCUTS": "List des Raccourcis",
+            "ABOUT_TITLE": "A propos de React-FTP",
+            "ABOUT_CONTENT": "Version ${version}"
         }
     }
 }

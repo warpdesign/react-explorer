@@ -1,4 +1,4 @@
-import { Menu, BrowserWindow, MenuItemConstructorOptions, MenuItem, app, ipcMain } from 'electron';
+import { Menu, BrowserWindow, MenuItemConstructorOptions, MenuItem, app, ipcMain, dialog } from 'electron';
 import { isMac } from '../utils/platform';
 
 const ACCELERATOR_EVENT = 'menu_accelerator';
@@ -9,6 +9,7 @@ export interface LocaleString {
 
 export class AppMenu {
     win: BrowserWindow;
+    menuStrings: LocaleString;
 
     constructor(win:BrowserWindow) {
         this.win = win;
@@ -43,7 +44,20 @@ export class AppMenu {
         ipcMain.emit('reloadIgnoringCache');
     }
 
-    getMenuTemplate(menuStrings: LocaleString):MenuItemConstructorOptions[] {
+    showAboutDialog = () => {
+        const version = app.getVersion();
+
+        dialog.showMessageBox(null, {
+            title: this.menuStrings['ABOUT_TITLE'],
+            type: 'info',
+            message: this.menuStrings['ABOUT_TITLE'],
+            detail: this.menuStrings['ABOUT_CONTENT'].replace('${version}', version)
+        }, result => null);
+    }
+
+    getMenuTemplate(): MenuItemConstructorOptions[] {
+        const menuStrings = this.menuStrings;
+
         const template = [
             {
                 label: menuStrings['TITLE_FILE'],
@@ -140,12 +154,12 @@ export class AppMenu {
         ];
 
         if (isMac) {
-            template.unshift({
+            (template as MenuItemConstructorOptions[]).unshift({
                 label: app.getName(),
                 submenu: [
                     {
                         label: menuStrings['ABOUT'],
-                        click: this.sendComboEvent
+                        role: 'about'
                     },
                     { type: 'separator' },
                     {
@@ -159,6 +173,11 @@ export class AppMenu {
                         accelerator: 'CmdOrCtrl+Q',
                         click: this.sendComboEvent
                     }]
+            });
+
+            app.setAboutPanelOptions({
+                applicationName: 'React-FTP',
+                applicationVersion: app.getVersion()
             });
         } else {
             // add preference to file menu
@@ -180,7 +199,7 @@ export class AppMenu {
             // add about menuItem
             (template[3].submenu as MenuItemConstructorOptions[]).unshift({
                 label: menuStrings['ABOUT'],
-                click: this.sendComboEvent
+                click: this.showAboutDialog
             });
         }
 
@@ -188,7 +207,9 @@ export class AppMenu {
     }
 
     createMenu(menuStrings: LocaleString) {
-        const menuTemplate = this.getMenuTemplate(menuStrings);
+        this.menuStrings = menuStrings;
+
+        const menuTemplate = this.getMenuTemplate();
 
         var menu = Menu.buildFromTemplate(menuTemplate)
 

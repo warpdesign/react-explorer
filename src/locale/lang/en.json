@@ -158,7 +158,9 @@
             "PASTE": "Paste",
             "RELOAD_VIEW": "Reload Active View",
             "FORCE_RELOAD_APP": "Force Reload App",
-            "KEYBOARD_SHORTCUTS": "Keyboard Map"
+            "KEYBOARD_SHORTCUTS": "Keyboard Map",
+            "ABOUT_TITLE": "About React-FTP",
+            "ABOUT_CONTENT": "Version ${version}"
         }
     }
 }
