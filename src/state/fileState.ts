@@ -303,10 +303,10 @@ export class FileState {
 
                 default:
                     debugger;
-                    error.message = i18next.t('ERRORS.UNKNOWN');
-                    if (error.code) {
-                        error.message += `(${error.code})`;
-                    }
+                    error.message = i18next.t('ERRORS.GENERIC', {error: error.code || 'NOCODE' });
+                    // if (error.code) {
+                    //     error.message += `(${error.code})`;
+                    // }
                     break;
             }
         }

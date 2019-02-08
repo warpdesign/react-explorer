@@ -198,7 +198,7 @@ class LocalApi implements FsApi {
             return new Promise<File[]>((resolve, reject) => {
                 fs.readdir(dir, (err, items) => {
                     if (err) {
-                        reject(`Could not read directory '${dir}', reason: ${err}`);
+                        reject(err);
                     } else {
                         const dirPath = path.resolve(dir);
 
