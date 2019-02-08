@@ -3,9 +3,9 @@ import { File, FsApi } from '../services/Fs';
 import { FileState } from './fileState';
 import { Batch } from '../transfers/batch';
 import { clipboard } from 'electron';
-import { platform } from 'process';
+import { isWin } from '../utils/platform';
 
-const LINE_ENDING = platform === 'win32' ? '\r\n' : '\n';
+const LINE_ENDING = isWin ? '\r\n' : '\n';
 
 declare var ENV: any;
 

@@ -7,8 +7,8 @@ import * as del from 'del';
 import { size } from '../utils/size';
 import { throttle } from '../utils/throttle';
 const { Transform } = require('stream');
+import { isWin } from '../utils/platform';
 
-const isWin = process.platform === "win32";
 const invalidDirChars = isWin && /[\*:<>\?|"]+/ig || /^[\.]+[\/]+(.)*$/ig;
 const invalidFileChars = isWin && /[\*:<>\?|"]+/ig || /\//;
 

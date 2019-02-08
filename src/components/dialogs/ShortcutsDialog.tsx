@@ -26,6 +26,8 @@ class ShortcutsDialogClass extends React.Component<IShortcutsProps>{
                 { combo: "alt + left", label: t('SHORTCUT.ACTIVE_VIEW.BACKWARD_HISTORY') },
                 { combo: "alt + right", label: t('SHORTCUT.ACTIVE_VIEW.FORWARD_HISTORY') },
                 { combo: "escape", label: t('SHORTCUT.LOG.TOGGLE') },
+                { combo: "mod + s", label: t('SHORTCUT.MAIN.KEYBOARD_SHORTCUTS') },
+                { combo: "mod + ,", label: t('SHORTCUT.MAIN.PREFERENCES') },
                 { combo: "mod + q", label: t('SHORTCUT.MAIN.QUIT') }
             ],
             // group: t('SHORTCUT.GROUP.ACTIVE_VIEW')

@@ -1,19 +1,13 @@
 import { observable, action } from "mobx";
 import { remote } from 'electron';
-import { release } from 'os';
 import { platform } from 'process';
 import { JSObject } from "../components/Log";
 import i18next from '../locale/i18n';
-
-declare var ENV: any;
+import { isMojave, isWin, isMac, defaultFolder } from '../utils/platform';
 
 const { systemPreferences } = remote;
 
 const APP_STORAGE_KEY = 'react-ftp';
-const DEFAULT_FOLDER = ENV.NODE_ENV === 'production' ? remote.app.getPath('home') : (platform === "win32" ? remote.app.getPath('temp') : '/tmp/react-explorer');
-const IS_MAC = platform === 'darwin';
-const IS_MOJAVE = IS_MAC && ((parseInt(release().split('.')[0], 10) - 4) >= 14);
-const IS_WIN = platform === 'win32';
 
 const TERMINAL_CMD = {
     'darwin': 'open -a "%cmd" "%path"',
@@ -56,7 +50,7 @@ export class SettingsState {
     }
 
     installListeners() {
-        if (IS_MOJAVE) {
+        if (isMojave) {
             systemPreferences.subscribeNotification(
                 'AppleInterfaceThemeChangedNotification',
                 () => this.setActiveTheme()
@@ -95,9 +89,9 @@ export class SettingsState {
         this.defaultTerminal = cmd;
         let template = TERMINAL_CMD.linux;
 
-        if (IS_WIN) {
+        if (isWin) {
             template = TERMINAL_CMD.win;
-        } else if (IS_MAC) {
+        } else if (isMac) {
             template = TERMINAL_CMD.darwin
         }
 
@@ -164,7 +158,7 @@ export class SettingsState {
         }
 
         if (this.darkMode === 'auto') {
-            this.isDarkModeActive = IS_MOJAVE ? systemPreferences.isDarkMode() : false;
+            this.isDarkModeActive = isMojave ? systemPreferences.isDarkMode() : false;
         } else {
             this.isDarkModeActive = this.darkMode;
         }
@@ -173,9 +167,9 @@ export class SettingsState {
     getDefaultSettings() {
         return {
             lang: 'auto',
-            darkMode: IS_MOJAVE ? 'auto' : false,
-            defaultFolder: DEFAULT_FOLDER,
-            defaultTerminal: IS_MAC ? DEFAULT_TERMINAL.darwin : IS_WIN && DEFAULT_TERMINAL.win || DEFAULT_TERMINAL.linux,
+            darkMode: isMojave ? 'auto' : false,
+            defaultFolder: defaultFolder,
+            defaultTerminal: isMac ? DEFAULT_TERMINAL.darwin : isWin && DEFAULT_TERMINAL.win || DEFAULT_TERMINAL.linux,
             version: this.version
         }
     }

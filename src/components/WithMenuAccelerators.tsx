@@ -1,0 +1,120 @@
+import * as React from "react";
+import { ipcRenderer } from 'electron';
+
+const ACCELERATOR_EVENT = 'menu_accelerator';
+
+export interface MenuAcceleratorEvent{
+    combo: string;
+}
+
+export interface IConstructor<T> {
+    new(...args: any[]): T;
+}
+
+export interface IAcceleratorsProps {
+
+}
+
+export interface IAcceleratorProps {
+    combo: string;
+    onClick: (combo: string) => any;
+}
+
+export interface IMenuAcceleratorComponent extends React.Component {
+    /** Components decorated with the `@MenuAccelerator` decorator must implement React's component `render` function. */
+    render(): React.ReactElement<any> | null | undefined;
+
+    /**
+     * Components decorated with the `@MenuAccelerator` decorator must implement
+     * this method, and it must return a `Accelerator` React element.
+     */
+    renderMenuAccelerators(): React.ReactElement<IAcceleratorsProps>;
+}
+
+
+
+export class Accelerators extends React.PureComponent<IAcceleratorsProps>{
+    render() {
+        return <div></div>;
+    }
+}
+
+export class Accelerator extends React.PureComponent<IAcceleratorProps>{
+    render() {
+        return <div></div>;
+    }
+}
+
+function getDisplayName(ComponentClass: React.ComponentType):string {
+    return ComponentClass.displayName || ComponentClass.name || "Unknown";
+}
+
+export function WithMenuAccelerators<T extends IConstructor<IMenuAcceleratorComponent>>(WrappedComponent: T) {
+    if (typeof WrappedComponent.prototype.renderMenuAccelerators !== 'function') {
+        console.warn('Classes decorated with the @MenuAccelerators must define the renderMenuAccemeratprs method.');
+    }
+
+    interface Action{
+        combo: string,
+        callback: (combo?:string) => any;
+    }
+
+    return class MenuAcceleratorsClass extends WrappedComponent {
+        public static displayName = `MenuAccelerators(${getDisplayName(WrappedComponent)})`;
+
+        actions = new Array<Action>();
+
+        getCallback(combo:string): (combo?:string) => any {
+            const action = this.actions.find((action) => action.combo === combo);
+            return action && action.callback || null;
+        }
+
+        onAccelerator = (e: MenuAcceleratorEvent, data: { combo: string }) => {
+            // check if combo is valid
+            const callback = this.getCallback(data.combo);
+            if (typeof callback === 'function') {
+                callback(data.combo);
+            }
+        }
+
+        setActions(props: { children?: React.ReactElement<Accelerator> }) {
+            this.actions.length = 0;
+
+            // get result, save events
+            React.Children.forEach(props.children, (child: React.ReactElement<any>) => {
+                if (child) {
+                    this.actions.push({ combo: child.props.combo, callback: child.props.onClick });
+                }
+            });
+        }
+
+        componentDidMount() {
+            if (super.componentDidMount) {
+                super.componentDidMount();
+            }
+
+            ipcRenderer.on(ACCELERATOR_EVENT, this.onAccelerator);
+        }
+
+        componentWillUnmount() {
+            if (super.componentWillUnmount) {
+                super.componentWillUnmount();
+            }
+
+            ipcRenderer.removeListener(ACCELERATOR_EVENT, this.onAccelerator);
+        }
+
+        render() {
+            const element = super.render() as JSX.Element;
+
+            // TODO: call renderMenuAccelerators
+            if (typeof this.renderMenuAccelerators === 'function') {
+                const accelerators = this.renderMenuAccelerators();
+
+                this.setActions(accelerators.props);
+            }
+
+            return element;
+        }
+    }
+}

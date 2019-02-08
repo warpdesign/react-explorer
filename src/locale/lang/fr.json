@@ -59,7 +59,9 @@
                 "NEXT_VIEW": "Activer la vue suivante",
                 "PREVIOUS_VIEW": "Activer la vue précédente",
                 "DOWNLOADS_TAB": "Afficher les transfers",
-                "EXPLORER_TAB": "Afficher l'explorateur"
+                "EXPLORER_TAB": "Afficher l'explorateur",
+                "KEYBOARD_SHORTCUTS": "Liste des Raccourcis",
+                "PREFERENCES": "Préférences"
             },
             "LOG": {
                 "TOGGLE": "Afficher/cacher la console"
@@ -137,6 +139,30 @@
         },
         "MAIN_PROCESS": {
             "PRESS_TO_EXIT": "Maintenez la touche ⌘Q enfoncée pour quitter"
+        },
+        "APP_MENUS": {
+            "ABOUT": "A propos de",
+            "PREFS": "Préférences",
+            "EXIT": "Quitter",
+            "TITLE_FILE": "Fichier",
+            "TITLE_EDIT": "Editer",
+            "TITLE_VIEW": "Vue",
+            "TITLE_HELP": "Aide",
+            "MAKEDIR": "Nouveau Dossier",
+            "DELETE": "Supprimer",
+            "RENAME": "Renommer",
+            "OPEN_TERMINAL": "Ouvrir un Terminal",
+            "COPY": "Copier",
+            "CUT": "Couper",
+            "SELECT_ALL": "Tout Sélectionner",
+            "COPY_PATH": "Copier Chemin",
+            "COPY_FILENAMES": "Copier Nom Fichier",
+            "PASTE": "Coller",
+            "RELOAD_VIEW": "Recharger Vue Active",
+            "FORCE_RELOAD_APP": "Recharger l'App",
+            "KEYBOARD_SHORTCUTS": "List des Raccourcis",
+            "ABOUT_TITLE": "React-FTP",
+            "ABOUT_CONTENT": "Version ${version}"
         }
     }
 }

@@ -59,7 +59,9 @@
                 "NEXT_VIEW": "Activate next view",
                 "PREVIOUS_VIEW": "Activate previous view",
                 "DOWNLOADS_TAB": "Switch to transfers view",
-                "EXPLORER_TAB": "Switch to explorer view"
+                "EXPLORER_TAB": "Switch to explorer view",
+                "KEYBOARD_SHORTCUTS": "Keyboard Map",
+                "PREFERENCES": "Preferences"
             },
             "LOG": {
                 "TOGGLE": "Toggle Logs console"
@@ -137,6 +139,30 @@
         },
         "MAIN_PROCESS": {
             "PRESS_TO_EXIT": "Keep pressing ⌘Q to exit"
+        },
+        "APP_MENUS": {
+            "ABOUT": "About",
+            "PREFS": "Preferences",
+            "EXIT": "Quit",
+            "TITLE_FILE": "File",
+            "TITLE_EDIT": "Edit",
+            "TITLE_VIEW": "View",
+            "TITLE_HELP": "Help",
+            "MAKEDIR": "New Directory",
+            "RENAME": "Rename",
+            "DELETE": "Delete",
+            "OPEN_TERMINAL": "Open Terminal",
+            "COPY": "Copy",
+            "CUT": "Cut",
+            "SELECT_ALL": "Select All",
+            "COPY_PATH": "Copy Path",
+            "COPY_FILENAMES": "Copy Filenames",
+            "PASTE": "Paste",
+            "RELOAD_VIEW": "Reload Active View",
+            "FORCE_RELOAD_APP": "Force Reload App",
+            "KEYBOARD_SHORTCUTS": "Keyboard Map",
+            "ABOUT_TITLE": "React-FTP",
+            "ABOUT_CONTENT": "Version ${version}"
         }
     }
 }
