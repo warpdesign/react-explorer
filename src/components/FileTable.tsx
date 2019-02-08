@@ -136,6 +136,7 @@ export class FileTableClass extends React.Component<IProps, IState> {
     renderMenuAccelerators() {
         return <Accelerators>
             <Accelerator combo="CmdOrCtrl+A" onClick={this.onSelectAll}></Accelerator>
+            <Accelerator combo="rename" onClick={this.getElementAndToggleRename}></Accelerator>
         </Accelerators>;
     }
 
@@ -475,6 +476,20 @@ export class FileTableClass extends React.Component<IProps, IState> {
         return fileCache.active && !this.props.hide;
     }
 
+    getElementAndToggleRename = (e?:KeyboardEvent|string) => {
+        if (!this.editingElement && this.state.selected > 0) {
+            const { position, nodes } = this.state;
+            const node = nodes[position];
+            const file = nodes[position].nodeData as File;
+            const element = this.getNodeContentElement(position + 1);
+            const span: HTMLElement = element.querySelector(`.${LABEL_CLASSNAME}`);
+            if (e && typeof e !== 'string') {
+                e.preventDefault();
+            }
+            this.toggleInlineRename(span, node.isSelected, file);
+        }
+    }
+
     onDocKeyDown = (e: KeyboardEvent) => {
         const { fileCache } = this.injected;
 
@@ -492,15 +507,7 @@ export class FileTableClass extends React.Component<IProps, IState> {
                 break;
 
             case KEYS.Enter:
-                if (!this.editingElement && this.state.selected > 0) {
-                    const { position, nodes } = this.state;
-                    const node = nodes[position];
-                    const file = nodes[position].nodeData as File;
-                    const element = this.getNodeContentElement(position + 1);
-                    const span: HTMLElement = element.querySelector(`.${LABEL_CLASSNAME}`);
-                    e.preventDefault();
-                    this.toggleInlineRename(span, node.isSelected, file);
-                }
+                this.getElementAndToggleRename(e);
                 break;
 
             case KEYS.Backspace:

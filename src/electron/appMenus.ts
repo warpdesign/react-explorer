@@ -79,7 +79,10 @@ export class AppMenu {
                     },
                     {
                         label: menuStrings['RENAME'],
-                        click: this.sendComboEvent
+                        click: () => {
+                            // send fake combo event because there is no defined accelerator
+                            this.win.webContents.send(ACCELERATOR_EVENT, Object.assign({ combo: 'rename', data: undefined }));
+                        }
                     },
                     {
                         label: menuStrings['DELETE'],
