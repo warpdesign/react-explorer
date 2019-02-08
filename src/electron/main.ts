@@ -131,6 +131,10 @@ function onReady() {
         }
     });
 
+    mainWindow.on('minimize', () => {
+        mainWindow.minimize();
+    });
+
     appMenu = new AppMenu(mainWindow);
 }
 
@@ -147,6 +151,12 @@ app.on('before-quit', (e) => {
         console.log('oops, bye!');
         // force exit app: filesystem access (transfers in progress) may prevent the app from quiting
         app.exit();
+    }
+});
+
+app.on('activate', (e) => {
+    if (mainWindow) {
+        mainWindow.restore();
     }
 });
 
