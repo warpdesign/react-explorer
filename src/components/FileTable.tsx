@@ -13,6 +13,7 @@ import { shouldCatchEvent, isEditable } from '../utils/dom';
 import { AppAlert } from './AppAlert';
 import { MenuAccelerators, Accelerators, Accelerator } from './MenuAccelerator';
 import { isMac } from '../utils/platform';
+import { ipcRenderer } from 'electron';
 
 require('react-virtualized/styles.css');
 require('../css/filetable.css');
@@ -444,7 +445,9 @@ export class FileTableClass extends React.Component<IProps, IState> {
         if (!isOverlayOpen && !isEditable(document.activeElement)) {
             this.selectAll();
         } else {
+            // need to select all text: send message
             console.log('isEditable');
+            ipcRenderer.send('selectAll');
         }
     }
 

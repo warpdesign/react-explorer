@@ -86,6 +86,10 @@ function installExitListeners() {
             console.log('languageChanged but app not ready :(');
         }
     });
+
+    ipcMain.on('selectAll', () => {
+        mainWindow.webContents.selectAll();
+    });
 }
 
 function onReady() {

@@ -34,9 +34,10 @@ export class AppMenu {
                     accelerator: 'CmdOrCtrl+A',
                     label: 'selectAll'
                 } as MenuItem & { accelerator: string });
+            } else {
+                webContents.selectAll();
             }
 
-            webContents.selectAll();
         }
     }
 
