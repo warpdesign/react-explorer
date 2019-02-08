@@ -395,8 +395,9 @@ export class FileTableClass extends React.Component<IProps, IState> {
         const file = rowData.nodeData as File;
 
         if ((event.target as HTMLElement) !== this.editingElement) {
-            this.cache.openFile(file).catch((err: any) => {
-                AppAlert.show(`${err.message} (${err.code})`, {
+            this.cache.openFile(file).catch((error: any) => {
+                const { t } = this.injected;
+                AppAlert.show(t('ERRORS.GENERIC', { error }), {
                     intent: 'danger'
                 });
             });
@@ -435,11 +436,15 @@ export class FileTableClass extends React.Component<IProps, IState> {
 
     onOpenFile = () => {
         const { position, nodes } = this.state;
-        const { fileCache } = this.injected;
 
         if (this.isViewActive() && position > -1) {
             const file = nodes[position].nodeData as File;
-            this.cache.openFile(file);
+            this.cache.openFile(file).catch((error) => {
+                const { t } = this.injected;
+                AppAlert.show(t('ERRORS.GENERIC', { error }), {
+                    intent: 'danger'
+                });
+            })
         }
     }
 

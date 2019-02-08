@@ -275,40 +275,38 @@ export class FileState {
         return this.api.join(path, path2);
     }
 
-    setErrorString(error:any) {
-        if (typeof error.code !== 'undefined') {
-            switch (error.code) {
-                case 'ENOTFOUND':
-                    debugger;
-                    error.message = i18next.t('ERRORS.ENOTFOUND');
-                    break;
+    setErrorString(error: any) {
+        if (typeof error.code === 'undefined') {
+            error.code = 'NOCODE';
+        }
+        switch (error.code) {
+            case 'ENOTFOUND':
+                debugger;
+                error.message = i18next.t('ERRORS.ENOTFOUND');
+                break;
 
-                case 'ECONNREFUSED':
-                    error.message = i18next.t('ERRORS.ECONNREFUSED');
-                    break;
+            case 'ECONNREFUSED':
+                error.message = i18next.t('ERRORS.ECONNREFUSED');
+                break;
 
-                case 'ENOENT':
-                    error.message = i18next.t('ERRORS.ENOENT');
-                    break;
+            case 'ENOENT':
+                error.message = i18next.t('ERRORS.ENOENT');
+                break;
 
-                case 'BAD_FILENAME':
-                    const acceptedChars = isWin ? i18next.t('ERRORS.WIN_VALID_FILENAME') : i18next.t('ERRORS.UNIX_VALID_FILENAME');
+            case 'BAD_FILENAME':
+                const acceptedChars = isWin ? i18next.t('ERRORS.WIN_VALID_FILENAME') : i18next.t('ERRORS.UNIX_VALID_FILENAME');
 
-                    error.message = i18next.t('ERRORS.BAD_FILENAME', { entry: error.newName }) + '. ' + acceptedChars;
-                    break;
+                error.message = i18next.t('ERRORS.BAD_FILENAME', { entry: error.newName }) + '. ' + acceptedChars;
+                break;
 
-                case 530:
-                    error.message = i18next.t('ERRORS.530');
-                    break;
+            case 530:
+                error.message = i18next.t('ERRORS.530');
+                break;
 
-                default:
-                    debugger;
-                    error.message = i18next.t('ERRORS.GENERIC', {error: error.code || 'NOCODE' });
-                    // if (error.code) {
-                    //     error.message += `(${error.code})`;
-                    // }
-                    break;
-            }
+            default:
+                debugger;
+                error.message = i18next.t('ERRORS.UNKNOWN');
+                break;
         }
     }
 
