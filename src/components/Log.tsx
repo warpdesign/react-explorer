@@ -5,6 +5,7 @@ import { debounce } from '../utils/debounce';
 import { Intent, HotkeysTarget, Hotkeys, Hotkey } from '@blueprintjs/core';
 import { WithNamespaces, withNamespaces } from 'react-i18next';
 import { shouldCatchEvent } from '../utils/dom';
+import classnames from 'classnames';
 
 require('../css/log.css');
 
@@ -136,13 +137,14 @@ export class LogUIClass extends React.Component<WithNamespaces, LogUIState> {
     // }
 
     public render() {
-        const classes = 'console ' + (this.state.visible && 'visible');
+        const classes = classnames('console', { visible: this.state.visible });
 
         return (
-            <div ref={(el) => { this.consoleDiv = el; }} onScroll={this.checkScroll} className={`${classes}`}>
+            <div ref={(el) => { this.consoleDiv = el; }} onScroll={this.checkScroll} className={classes}>
                 {
                     Logger.logs.map((line, i) => {
-                            return <div key={i} className={`consoleLine ${line.intent}`}>
+                        const lineClass = classnames('consoleLine', line.intent);
+                            return <div key={i} className={lineClass}>
                             {/* <span className="consoleDate">{line.date}</span> */}
                             {line.line}
                         </div>

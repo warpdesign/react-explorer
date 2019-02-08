@@ -217,7 +217,7 @@ class LocalApi implements FsApi {
                                     ctime: new Date(),
                                     mtime: new Date(),
                                     size: 0,
-                                    isDirectory: () => false,
+                                    isDirectory: () => true,
                                     mode: 0
                                 }
                             }

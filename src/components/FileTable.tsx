@@ -14,6 +14,7 @@ import { AppAlert } from './AppAlert';
 import { WithMenuAccelerators, Accelerators, Accelerator } from './WithMenuAccelerators';
 import { isMac } from '../utils/platform';
 import { ipcRenderer } from 'electron';
+import classnames from 'classnames';
 
 require('react-virtualized/styles.css');
 require('../css/filetable.css');
@@ -233,13 +234,9 @@ export class FileTableClass extends React.Component<IProps, IState> {
 
     rowClassName = (data: any) => {
         const file = this.state.nodes[data.index];
-        const className = file && file.className || '';
+        const error = file && file.nodeData.mode === 0;
 
-        if (file && file.isSelected) {
-            return `tableRow selected ${className}`;
-        } else {
-            return `tableRow ${className}`;
-        }
+        return classnames('tableRow', file.className, { selected: file.isSelected, error: error });
     }
 
     clearClickTimeout() {

@@ -5,6 +5,7 @@ import { AppState } from "../state/appState";
 import { AppToaster } from "./AppToaster";
 import { FileState } from "../state/fileState";
 import { withNamespaces, WithNamespaces } from 'react-i18next';
+import classnames from 'classnames';
 
 interface IProps extends WithNamespaces{
 
@@ -55,7 +56,7 @@ export class StatusbarClass extends React.Component<IProps> {
         const numFiles = fileCache.files.filter((file) => !file.isDir).length;
         const numSelected = fileCache.selected.length;
         const iconName = fileCache.getFS().icon as IconName;
-        const offline = fileCache.status === 'offline' && 'offline' || '';
+        const offline = classnames('status-bar', { offline: fileCache.status === 'offline' });
         const { t } = this.props;
 
         const pasteButton = (
@@ -77,7 +78,7 @@ export class StatusbarClass extends React.Component<IProps> {
                     leftIcon={iconName}
                     rightElement={pasteButton}
                     value={`${t('STATUS.FILES', { count: numFiles })}, ${t('STATUS.FOLDERS', { count: numDirs })}`}
-                    className={`status-bar ${offline}`}
+                    className={offline}
                 />
             </ControlGroup>
         )

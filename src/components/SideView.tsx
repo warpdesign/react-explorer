@@ -7,6 +7,7 @@ import { LoginDialog } from "./dialogs/LoginDialog";
 import { FileState } from "../state/fileState";
 import { Loader } from "./Loader";
 import { FileTable } from "./FileTable";
+import classnames from 'classnames';
 
 interface SideViewProps {
     hide: boolean;
@@ -48,17 +49,13 @@ export class SideView extends React.Component<SideViewProps>{
         const { fileCache } = this.props;
         const active = fileCache.active;
 
-        let activeClass = active && ' active' || '';
+        let activeClass = classnames('sideview', { active: active, hidden: this.props.hide });
 
         const needLogin = fileCache.status === 'login';
         const busy = fileCache.status === 'busy';
 
-        if (this.props.hide) {
-            activeClass += ' hidden';
-        }
-
         return (
-            <div id={this.viewId} className={`sideview${activeClass}`}>
+            <div id={this.viewId} className={activeClass}>
                 {needLogin && <LoginDialog isOpen={needLogin} onValidation={this.onValidation} onClose={this.onClose} />}
                 <Toolbar active={active && !busy} onPaste={this.props.onPaste} />
                 <FileTable hide={this.props.hide}/>
