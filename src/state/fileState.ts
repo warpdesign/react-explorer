@@ -423,10 +423,10 @@ export class FileState {
     openFile(file: File) {
         if (file.isDir) {
             console.log('need to read dir', file.dir, file.fullname);
-            this.cd(file.dir, file.fullname);
+            return this.cd(file.dir, file.fullname);
         } else {
             console.log('need to open file');
-            this.get(file.dir, file.fullname).then((tmpPath: string) => {
+            return this.get(file.dir, file.fullname).then((tmpPath: string) => {
                 console.log('opening file', tmpPath);
                 shell.openItem(tmpPath);
             });

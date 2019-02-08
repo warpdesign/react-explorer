@@ -390,13 +390,16 @@ export class FileTableClass extends React.Component<IProps, IState> {
     }
 
     onRowDoubleClick = (data:any) => {
-        console.log('double click');
         this.clearClickTimeout();
         const { rowData, event } = data;
         const file = rowData.nodeData as File;
 
         if ((event.target as HTMLElement) !== this.editingElement) {
-            this.cache.openFile(file);
+            this.cache.openFile(file).catch((err: any) => {
+                AppAlert.show(`${err.message} (${err.code})`, {
+                    intent: 'danger'
+                });
+            });
         }
     }
 
