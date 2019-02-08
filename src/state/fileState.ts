@@ -293,6 +293,10 @@ export class FileState {
                 error.message = i18next.t('ERRORS.ENOENT');
                 break;
 
+            case 'EPERM':
+                error.message = i18next.t('ERRORS.EPERM');
+                break;
+
             case 'BAD_FILENAME':
                 const acceptedChars = isWin ? i18next.t('ERRORS.WIN_VALID_FILENAME') : i18next.t('ERRORS.UNIX_VALID_FILENAME');
 

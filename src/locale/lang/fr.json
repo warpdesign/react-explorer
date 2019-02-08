@@ -130,6 +130,7 @@
             "ENOTFOUND": "Serveur introuvable: vérifier le nom d'hôte",
             "ECONNREFUSED": "Connexion refusée par le serveur",
             "ENOENT": "Dossier ou fichier introuvable",
+            "EPERM": "Vous n'avez pas la permission d'effectuer cette action",
             "530": "Echec de l'authentification",
             "UNKNOWN": "Une erreur est survenue",
             "GENERIC": "{{error.message}} (code {{error.code}})",
