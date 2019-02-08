@@ -150,7 +150,7 @@ export class AppMenu {
                     {
                         label: menuStrings['KEYBOARD_SHORTCUTS'],
                         click: this.sendComboEvent,
-                        accelerator: 'CmdOrCtrl+;'
+                        accelerator: 'CmdOrCtrl+S'
                     }
                 ]
             }
