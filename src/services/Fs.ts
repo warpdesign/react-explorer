@@ -39,7 +39,7 @@ export const Parent: File = {
     cDate: new Date(),
     mDate: new Date(),
     length: 0,
-    mode: 0,
+    mode: 1,
     isDir: true,
     readonly: true,
     type: ''

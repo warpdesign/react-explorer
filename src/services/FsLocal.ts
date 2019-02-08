@@ -46,7 +46,9 @@ class LocalApi implements FsApi {
 
     cd(path: string) {
         const resolved = this.resolve(path);
-        return this.isDir(resolved).then(() => resolved);
+        return this.isDir(resolved).then(() => resolved).catch((err) => {
+            return Promise.reject(err);
+        });
     }
 
     size(source: string, files: string[]): Promise<number> {

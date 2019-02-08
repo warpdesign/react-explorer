@@ -207,11 +207,12 @@ export class FileState {
                 this.updatePath(path, skipHistory);
                 return this.list(path).then(() => path);
             })
-            .catch((err) => {
+            .catch((error) => {
                 console.log('path not valid ?', joint, 'restoring previous path');
                 this.status = 'ok';
                 this.navHistory(0);
-                return Promise.reject(err);
+                this.setErrorString(error);
+                return Promise.reject(error);
             });
     }
 
@@ -277,6 +278,7 @@ export class FileState {
 
     setErrorString(error: any) {
         if (typeof error.code === 'undefined') {
+            debugger;
             error.code = 'NOCODE';
         }
         switch (error.code) {

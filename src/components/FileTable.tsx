@@ -236,7 +236,7 @@ export class FileTableClass extends React.Component<IProps, IState> {
         const file = this.state.nodes[data.index];
         const error = file && file.nodeData.mode === 0;
 
-        return classnames('tableRow', file.className, { selected: file.isSelected, error: error });
+        return classnames('tableRow', file && file.className, { selected: file && file.isSelected, error: error });
     }
 
     clearClickTimeout() {
