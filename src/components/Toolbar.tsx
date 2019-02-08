@@ -10,7 +10,7 @@ import { Logger } from "./Log";
 import { AppToaster, IToasterOpts } from "./AppToaster";
 import { FileState } from "../state/fileState";
 import { withNamespaces, WithNamespaces } from "react-i18next";
-import { MenuAccelerators, Accelerators, Accelerator } from "./MenuAccelerator";
+import { WithMenuAccelerators, Accelerators, Accelerator } from "./WithMenuAccelerators";
 
 interface IProps extends WithNamespaces {
     onPaste: () => void;
@@ -37,7 +37,7 @@ enum KEYS {
 @inject('appState', 'fileCache')
 @observer
 @HotkeysTarget
-@MenuAccelerators
+@WithMenuAccelerators
 export class ToolbarClass extends React.Component<IProps, PathInputState> {
     private cache: FileState;
     private input: HTMLInputElement | null = null;

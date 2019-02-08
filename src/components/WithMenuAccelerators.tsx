@@ -49,7 +49,7 @@ function getDisplayName(ComponentClass: React.ComponentType):string {
     return ComponentClass.displayName || ComponentClass.name || "Unknown";
 }
 
-export function MenuAccelerators<T extends IConstructor<IMenuAcceleratorComponent>>(WrappedComponent: T) {
+export function WithMenuAccelerators<T extends IConstructor<IMenuAcceleratorComponent>>(WrappedComponent: T) {
     if (typeof WrappedComponent.prototype.renderMenuAccelerators !== 'function') {
         console.warn('Classes decorated with the @MenuAccelerators must define the renderMenuAccemeratprs method.');
     }

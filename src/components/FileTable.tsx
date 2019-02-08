@@ -11,7 +11,7 @@ import { File } from '../services/Fs';
 import { formatBytes } from '../utils/formatBytes';
 import { shouldCatchEvent, isEditable } from '../utils/dom';
 import { AppAlert } from './AppAlert';
-import { MenuAccelerators, Accelerators, Accelerator } from './MenuAccelerator';
+import { WithMenuAccelerators, Accelerators, Accelerator } from './WithMenuAccelerators';
 import { isMac } from '../utils/platform';
 import { ipcRenderer } from 'electron';
 
@@ -78,7 +78,7 @@ interface InjectedProps extends IProps {
 }
 
 @inject('appState', 'fileCache')
-@MenuAccelerators
+@WithMenuAccelerators
 @HotkeysTarget
 export class FileTableClass extends React.Component<IProps, IState> {
     private cache: FileState;

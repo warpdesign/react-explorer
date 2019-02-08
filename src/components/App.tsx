@@ -18,7 +18,7 @@ import { PrefsDialog } from "./dialogs/PrefsDialog";
 import { HamburgerMenu } from "./HamburgerMenu";
 import { ShortcutsDialog } from "./dialogs/ShortcutsDialog";
 import { shouldCatchEvent, isEditable } from "../utils/dom";
-import { MenuAccelerators, Accelerators, Accelerator } from "./MenuAccelerator";
+import { WithMenuAccelerators, Accelerators, Accelerator } from "./WithMenuAccelerators";
 import { isMac } from '../utils/platform';
 
 require("@blueprintjs/core/lib/css/blueprint.css");
@@ -49,7 +49,7 @@ declare global {
 
 @inject('settingsState')
 @observer
-@MenuAccelerators
+@WithMenuAccelerators
 @HotkeysTarget
 class App extends React.Component<WithNamespaces, IState> {
     private appState: AppState;

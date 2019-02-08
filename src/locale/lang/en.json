@@ -59,7 +59,9 @@
                 "NEXT_VIEW": "Activate next view",
                 "PREVIOUS_VIEW": "Activate previous view",
                 "DOWNLOADS_TAB": "Switch to transfers view",
-                "EXPLORER_TAB": "Switch to explorer view"
+                "EXPLORER_TAB": "Switch to explorer view",
+                "KEYBOARD_SHORTCUTS": "Keyboard Map",
+                "PREFERENCES": "Preferences"
             },
             "LOG": {
                 "TOGGLE": "Toggle Logs console"
@@ -159,7 +161,7 @@
             "RELOAD_VIEW": "Reload Active View",
             "FORCE_RELOAD_APP": "Force Reload App",
             "KEYBOARD_SHORTCUTS": "Keyboard Map",
-            "ABOUT_TITLE": "About React-FTP",
+            "ABOUT_TITLE": "React-FTP",
             "ABOUT_CONTENT": "Version ${version}"
         }
     }

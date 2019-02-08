@@ -59,7 +59,9 @@
                 "NEXT_VIEW": "Activer la vue suivante",
                 "PREVIOUS_VIEW": "Activer la vue précédente",
                 "DOWNLOADS_TAB": "Afficher les transfers",
-                "EXPLORER_TAB": "Afficher l'explorateur"
+                "EXPLORER_TAB": "Afficher l'explorateur",
+                "KEYBOARD_SHORTCUTS": "Liste des Raccourcis",
+                "PREFERENCES": "Préférences"
             },
             "LOG": {
                 "TOGGLE": "Afficher/cacher la console"
@@ -159,7 +161,7 @@
             "RELOAD_VIEW": "Recharger Vue Active",
             "FORCE_RELOAD_APP": "Recharger l'App",
             "KEYBOARD_SHORTCUTS": "List des Raccourcis",
-            "ABOUT_TITLE": "A propos de React-FTP",
+            "ABOUT_TITLE": "React-FTP",
             "ABOUT_CONTENT": "Version ${version}"
         }
     }
