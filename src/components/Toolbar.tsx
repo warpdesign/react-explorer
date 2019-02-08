@@ -137,9 +137,13 @@ export class ToolbarClass extends React.Component<IProps, PathInputState> {
     }
 
     private makedir = async (dirName: string, navigate: boolean) => {
-        this.setState({isOpen: false});
-        Logger.log('yo! lets create a directory :)', dirName, navigate);
+        this.setState({ isOpen: false });
+        if (!dirName.length) {
+            return;
+        }
+
         try {
+            Logger.log('Let\'s create a directory :)', dirName, navigate);
             const dir = await this.cache.makedir(this.state.path, dirName);
 
             if (!navigate) {
