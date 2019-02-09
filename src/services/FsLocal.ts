@@ -178,7 +178,8 @@ class LocalApi implements FsApi {
                     mode: stats.mode,
                     isDir: stats.isDirectory(),
                     readonly: false,
-                    type: !stats.isDirectory() && filetype(stats.mode, format.ext.toLowerCase()) || ''
+                    type: !stats.isDirectory() && filetype(stats.mode, format.ext.toLowerCase()) || '',
+                    isSym: stats.isSymbolicLink()
                 };
 
                 resolve(file);
@@ -220,7 +221,8 @@ class LocalApi implements FsApi {
                                     mtime: new Date(),
                                     size: 0,
                                     isDirectory: () => true,
-                                    mode: 0
+                                    mode: -1,
+                                    isSymbolicLink: () => false
                                 }
                             }
 
@@ -236,7 +238,8 @@ class LocalApi implements FsApi {
                                 mode: stats.mode,
                                 isDir: stats.isDirectory(),
                                 readonly: false,
-                                type: !stats.isDirectory() && filetype(stats.mode, format.ext.toLowerCase()) || ''
+                                type: !stats.isDirectory() && filetype(stats.mode, format.ext.toLowerCase()) || '',
+                                isSym: stats.isSymbolicLink()
                             };
 
                             files.push(file);

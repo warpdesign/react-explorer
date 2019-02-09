@@ -17,6 +17,7 @@ export interface File {
     isDir: boolean;
     readonly: boolean;
     type: FileType;
+    isSym: boolean;
 }
 
 export interface Fs {
@@ -42,7 +43,8 @@ export const Parent: File = {
     mode: 1,
     isDir: true,
     readonly: true,
-    type: ''
+    type: '',
+    isSym: false
 };
 
 const Extensions = {

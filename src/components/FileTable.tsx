@@ -234,7 +234,7 @@ export class FileTableClass extends React.Component<IProps, IState> {
 
     rowClassName = (data: any) => {
         const file = this.state.nodes[data.index];
-        const error = file && file.nodeData.mode === 0;
+        const error = file && file.nodeData.mode === -1;
 
         return classnames('tableRow', file && file.className, { selected: file && file.isSelected, error: error });
     }

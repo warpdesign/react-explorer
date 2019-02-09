@@ -1,4 +1,4 @@
-import { FsApi, File, ICredentials, Fs, Parent } from './Fs';
+import { FsApi, File, ICredentials, Fs, Parent, filetype } from './Fs';
 import * as ftp from 'ftp';
 import * as path from 'path';
 import * as fs from 'fs';
@@ -8,6 +8,7 @@ import { remote } from 'electron';
 import { throttle } from '../utils/throttle';
 import { Logger, JSObject } from "../components/Log";
 import { EventEmitter } from 'events';
+import * as nodePath from 'path';
 
 const FtpUrl = /^(ftp\:\/\/)*(ftp\.[a-z]+\.[a-z]{2,3}|[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})$/i;
 const ServerPart = /^(ftp\:\/\/)*(ftp\.[a-z]+\.[a-z]{2,3}|[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})/i;
@@ -208,20 +209,26 @@ class Client{
                     this.error('error calling list for', newpath);
                     reject(err);
                 } else {
-                    debugger;
-                    const files: File[] = list.filter((ftpFile) => !ftpFile.name.match(/^[\.]{1,2}$/)).map((ftpFile) => ({
-                        dir: path,
-                        name: ftpFile.name,
-                        fullname: ftpFile.name,
-                        isDir: ftpFile.type === 'd',
-                        length: parseInt(ftpFile.size, 10),
-                        cDate: new Date(ftpFile.date),
-                        mDate: new Date(ftpFile.date),
-                        extension: '',
-                        mode: 0,
-                        readonly: false,
-                        type: ''
-                    } as File));
+                    const files: File[] = list.filter((ftpFile) => !ftpFile.name.match(/^[\.]{1,2}$/)).map((ftpFile) => {
+                        const format = nodePath.parse(ftpFile.name);
+                        const ext = format.ext.toLowerCase();
+
+                        const file: File = {
+                            dir: path,
+                            name: ftpFile.name,
+                            fullname: ftpFile.name,
+                            isDir: ftpFile.type === 'd',
+                            length: parseInt(ftpFile.size, 10),
+                            cDate: new Date(ftpFile.date),
+                            mDate: new Date(ftpFile.date),
+                            extension: '',
+                            mode: 0,
+                            readonly: false,
+                            type: ftpFile.type !== 'd' && filetype(0, ext) || '',
+                            isSym: false
+                        };
+                        return file;
+                    });
                     // TODO: build list of files
                     /*
                         dir: string;
