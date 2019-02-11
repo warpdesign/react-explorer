@@ -116,5 +116,13 @@ export function WithMenuAccelerators<T extends IConstructor<IMenuAcceleratorComp
 
             return element;
         }
-    }
+    };
+
+    // const WrapperWithRef = React.forwardRef((props, ref) => (
+    //     <MenuAcceleratorsClass {...props} />
+    // ));
+    // //hoistNonReactStatics(WrapperWithRef, Comp);
+    // WrapperWithRef.WrappedComponent = Comp;
+
+    // return WrapperWithRef;
 }

@@ -144,6 +144,7 @@ export class AppState {
 
     @action
     updateSelection(cache: FileState, newSelection: File[]) {
+        console.log('updateSelection', newSelection.length);
         cache.selected.replace(newSelection);
     }
 

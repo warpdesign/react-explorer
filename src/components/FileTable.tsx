@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { IconName, Icon, Classes, HotkeysTarget, Hotkeys, Hotkey } from '@blueprintjs/core';
-import { Column, Table, AutoSizer, Index } from 'react-virtualized';
+import { Column, Table, AutoSizer, Index, TableRowRenderer } from 'react-virtualized';
 import { AppState } from '../state/appState';
 import { FileState } from '../state/fileState';
 import { WithNamespaces, withNamespaces } from 'react-i18next';
@@ -15,6 +15,7 @@ import { WithMenuAccelerators, Accelerators, Accelerator } from './WithMenuAccel
 import { isMac } from '../utils/platform';
 import { ipcRenderer } from 'electron';
 import classnames from 'classnames';
+import { RowRenderer } from './RowRenderer';
 
 require('react-virtualized/styles.css');
 require('../css/filetable.css');
@@ -406,9 +407,8 @@ export class FileTableClass extends React.Component<IProps, IState> {
         let { nodes } = this.state;
         const { fileCache } = this.injected;
 
-        console.log('onSelectAll', document.activeElement);
-
         if (nodes.length && this.isViewActive()) {
+            console.log('onSelectAll', document.activeElement);
             const isRoot = fileCache.isRoot((nodes[0].nodeData as File).dir);
             selected = 0;
 
@@ -574,6 +574,16 @@ export class FileTableClass extends React.Component<IProps, IState> {
         this.gridElement = element && element.querySelector(`.${TABLE_CLASSNAME}`) || null;
     }
 
+    rowRenderer = (props: any) => {
+        const { selected } = this.state;
+        const { fileCache } = this.injected;
+
+        props.selectedCount = selected;
+        props.fileCache = fileCache;
+
+        return RowRenderer(props);
+    }
+
     render() {
         const { position } = this.state;
         const rowGetter = (index:Index) => this.getRow(index.index);
@@ -595,6 +605,7 @@ export class FileTableClass extends React.Component<IProps, IState> {
                         rowGetter={rowGetter}
                         rowCount={rowCount}
                         scrollToIndex={position < 0 ? 0 : position}
+                        rowRenderer={this.rowRenderer}
                         width={width}>
                         <Column
                             dataKey="name"

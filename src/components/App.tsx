@@ -19,7 +19,8 @@ import { HamburgerMenu } from "./HamburgerMenu";
 import { ShortcutsDialog } from "./dialogs/ShortcutsDialog";
 import { shouldCatchEvent, isEditable } from "../utils/dom";
 import { WithMenuAccelerators, Accelerators, Accelerator } from "./WithMenuAccelerators";
-import { isMac } from '../utils/platform';
+import { DragDropContextProvider } from 'react-dnd';
+import HTML5Backend from 'react-dnd-html5-backend';
 
 require("@blueprintjs/core/lib/css/blueprint.css");
 require("@blueprintjs/icons/lib/css/blueprint-icons.css");
@@ -543,8 +544,10 @@ class App extends React.Component<WithNamespaces, IState> {
                         </Navbar.Group>
                     </Navbar>
                     <div onClickCapture={this.handleClick} className="main">
-                        <SideView fileCache={caches[0]} hide={!isExplorer} onPaste={this.onPaste} />
-                        <SideView fileCache={caches[1]} hide={!isExplorer} onPaste={this.onPaste} />
+                        <DragDropContextProvider backend={HTML5Backend}>
+                            <SideView fileCache={caches[0]} hide={!isExplorer} onPaste={this.onPaste} />
+                            <SideView fileCache={caches[1]} hide={!isExplorer} onPaste={this.onPaste} />
+                        </DragDropContextProvider>
                         <Downloads hide={isExplorer}/>
                     </div>
                     <LogUI></LogUI>
