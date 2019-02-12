@@ -46,7 +46,7 @@ enum KEYS {
     Up = 38
 };
 
-interface ITableRow{
+interface ITableRow {
     name: string;
     icon: IconName;
     size: string;
@@ -55,7 +55,7 @@ interface ITableRow{
     className: string;
 }
 
-interface IState{
+interface IState {
     nodes: ITableRow[];
     // number of items selected
     selected: number;
@@ -64,7 +64,7 @@ interface IState{
     position: number;
 };
 
-interface IProps extends WithNamespaces{
+interface IProps extends WithNamespaces {
     hide: boolean;
 }
 
@@ -226,7 +226,7 @@ export class FileTableClass extends React.Component<IProps, IState> {
         this.setState({ nodes, selected: 0, position: -1 });
     }
 
-    getRow(index:number):ITableRow {
+    getRow(index: number): ITableRow {
         return this.state.nodes[index];
     }
 
@@ -389,18 +389,31 @@ export class FileTableClass extends React.Component<IProps, IState> {
         }
     }
 
-    onRowDoubleClick = (data:any) => {
+    onRowDoubleClick = (data: any) => {
         this.clearClickTimeout();
         const { rowData, event } = data;
         const file = rowData.nodeData as File;
 
         if ((event.target as HTMLElement) !== this.editingElement) {
+            this.openFileOrDirectory(file, event);
+        }
+    }
+
+    openFileOrDirectory(file: File, event: KeyboardEvent) {
+        const { appState } = this.injected;
+
+        if (!file.isDir) {
             this.cache.openFile(file).catch((error: any) => {
                 const { t } = this.injected;
                 AppAlert.show(t('ERRORS.GENERIC', { error }), {
                     intent: 'danger'
                 });
             });
+        } else {
+            const isModDown = isMac ? event.metaKey : event.ctrlKey;
+            const cache = isModDown ? appState.getInactiveCache() : this.cache;
+
+            cache.openDirectory(file);
         }
     }
 
@@ -433,17 +446,18 @@ export class FileTableClass extends React.Component<IProps, IState> {
         }
     }
 
-    onOpenFile = () => {
+    onOpenFile = (e: KeyboardEvent) => {
         const { position, nodes } = this.state;
 
         if (this.isViewActive() && position > -1) {
             const file = nodes[position].nodeData as File;
-            this.cache.openFile(file).catch((error) => {
-                const { t } = this.injected;
-                AppAlert.show(t('ERRORS.GENERIC', { error }), {
-                    intent: 'danger'
-                });
-            })
+            // this.cache.openFile(file).catch((error) => {
+            //     const { t } = this.injected;
+            //     AppAlert.show(t('ERRORS.GENERIC', { error }), {
+            //         intent: 'danger'
+            //     });
+            // })
+            this.openFileOrDirectory(file, e);
         }
     }
 
@@ -486,7 +500,7 @@ export class FileTableClass extends React.Component<IProps, IState> {
         return fileCache.active && !this.props.hide;
     }
 
-    getElementAndToggleRename = (e?:KeyboardEvent|string) => {
+    getElementAndToggleRename = (e?: KeyboardEvent | string) => {
         if (!this.editingElement && this.state.selected > 0) {
             const { position, nodes } = this.state;
             const node = nodes[position];
@@ -572,7 +586,7 @@ export class FileTableClass extends React.Component<IProps, IState> {
         }
     }
 
-    setTableRef = (element:HTMLElement) => {
+    setTableRef = (element: HTMLElement) => {
         this.gridElement = element && element.querySelector(`.${TABLE_CLASSNAME}`) || null;
     }
 
@@ -588,7 +602,7 @@ export class FileTableClass extends React.Component<IProps, IState> {
         return RowRenderer(props);
     }
 
-    rowGetter = (index:Index) => this.getRow(index.index);
+    rowGetter = (index: Index) => this.getRow(index.index);
 
     render() {
         const { position } = this.state;
@@ -596,7 +610,7 @@ export class FileTableClass extends React.Component<IProps, IState> {
 
         return (<div ref={this.setTableRef} onKeyDown={this.onInputKeyDown} className={`fileListSizerWrapper ${Classes.ELEVATION_0}`}>
             <AutoSizer>
-            {({ width, height }) => (
+                {({ width, height }) => (
                     <Table
                         disableHeader={true}
                         headerClassName="tableHeader"
@@ -629,8 +643,8 @@ export class FileTableClass extends React.Component<IProps, IState> {
                         />
                     </Table>
                 )
-            }
-        </AutoSizer></div>);
+                }
+            </AutoSizer></div>);
     }
 }
 

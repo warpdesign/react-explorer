@@ -83,6 +83,10 @@ export class AppState {
         }
     }
 
+    getInactiveCache(): FileState {
+        return this.caches[0].active ? this.caches[1] : this.caches[0];
+    }
+
     @action
     syncCaches(srcCache: FileState) {
         // get caches that are showing the same path

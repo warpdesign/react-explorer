@@ -223,7 +223,7 @@ export class FileState {
     }
 
     @action
-    doLogin(server?:string, credentials?:ICredentials) {
+    doLogin(server?: string, credentials?: ICredentials) {
         console.log('logging in');
         // this.status = 'busy';
         if (server) {
@@ -240,7 +240,7 @@ export class FileState {
     }
 
     @action
-    async list(path: string, appendParent?:boolean):Promise<File[]> {
+    async list(path: string, appendParent?: boolean): Promise<File[]> {
         try {
             await this.waitForConnection();
         } catch (err) {
@@ -395,7 +395,7 @@ export class FileState {
     //     return this.api.copy(source, files, dest);
     // }
 
-    isDirectoryNameValid = (dirName:string) => {
+    isDirectoryNameValid = (dirName: string) => {
         return this.api.isDirectoryNameValid(dirName);
     }
 
@@ -425,16 +425,16 @@ export class FileState {
     }
 
     openFile(file: File) {
-        if (file.isDir) {
-            console.log('need to read dir', file.dir, file.fullname);
-            return this.cd(file.dir, file.fullname);
-        } else {
-            console.log('need to open file');
-            return this.get(file.dir, file.fullname).then((tmpPath: string) => {
-                console.log('opening file', tmpPath);
-                shell.openItem(tmpPath);
-            });
-        }
+        console.log('need to open file');
+        return this.get(file.dir, file.fullname).then((tmpPath: string) => {
+            console.log('opening file', tmpPath);
+            shell.openItem(tmpPath);
+        });
+    }
+
+    openDirectory(file: File) {
+        console.log('need to read dir', file.dir, file.fullname);
+        return this.cd(file.dir, file.fullname);
     }
 
     openTerminal(path: string) {

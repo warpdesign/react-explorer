@@ -2,6 +2,7 @@ import * as React from "react";
 import { Dialog, Classes, Intent, Button, InputGroup, FormGroup, Label, Checkbox } from "@blueprintjs/core";
 import { debounce } from "../../utils/debounce";
 import { withNamespaces, WithNamespaces } from "react-i18next";
+import { metaKeyCode } from '../../utils/platform';
 
 interface IMakedirProps extends WithNamespaces {
     isOpen: boolean;
@@ -17,13 +18,11 @@ interface IMakedirState {
 }
 
 const DEBOUNCE_DELAY = 300;
-const CTRL_KEY = 17;
+
 const ENTER_KEY = 13;
-const META_KEY = 91;
-const ReadFolderKey = process.platform === 'darwin' && META_KEY || CTRL_KEY;
 
 class MakedirDialogClass extends React.Component<IMakedirProps, IMakedirState>{
-    constructor(props:any) {
+    constructor(props: any) {
         super(props);
 
         this.state = {
@@ -34,7 +33,7 @@ class MakedirDialogClass extends React.Component<IMakedirProps, IMakedirState>{
     }
 
     onKeyUp = (e: KeyboardEvent) => {
-        if (e.keyCode === ReadFolderKey) {
+        if (e.keyCode === metaKeyCode) {
             this.setState({ ctrlKey: false });
         } else if (e.keyCode === ENTER_KEY) {
             const { valid, path } = this.state;
@@ -43,7 +42,7 @@ class MakedirDialogClass extends React.Component<IMakedirProps, IMakedirState>{
     }
 
     onKeyDown = (e: KeyboardEvent) => {
-        if (e.keyCode === ReadFolderKey) {
+        if (e.keyCode === metaKeyCode) {
             this.setState({ ctrlKey: true });
         } else if (e.keyCode === ENTER_KEY && this.state.ctrlKey) {
             const { valid, path } = this.state;
@@ -62,7 +61,7 @@ class MakedirDialogClass extends React.Component<IMakedirProps, IMakedirState>{
             try {
                 const isValid = this.isValid(path);
                 this.setState({ valid: isValid });
-            } catch(error) {
+            } catch (error) {
                 console.log('error', error);
                 this.setState({ valid: false });
             }
@@ -130,46 +129,46 @@ class MakedirDialogClass extends React.Component<IMakedirProps, IMakedirState>{
             parentPath += sep;
         }
 
-        return(
+        return (
             <Dialog
-            icon="folder-new"
-            title={t('COMMON.MAKEDIR')}
-            isOpen={this.props.isOpen}
-            autoFocus={true}
-            enforceFocus={true}
-            canEscapeKeyClose={true}
-            usePortal={true}
-            onClose={this.cancelClose}
-            className="makedirDialog"
-        >
-            <div className={Classes.DIALOG_BODY}>
+                icon="folder-new"
+                title={t('COMMON.MAKEDIR')}
+                isOpen={this.props.isOpen}
+                autoFocus={true}
+                enforceFocus={true}
+                canEscapeKeyClose={true}
+                usePortal={true}
+                onClose={this.cancelClose}
+                className="makedirDialog"
+            >
+                <div className={Classes.DIALOG_BODY}>
                     <p>{t('DIALOG.MAKEDIR.TITLE')}</p>
-                <FormGroup
-                    helperText={helperText}
-                    inline={true}
-                    labelFor="directory-input"
-                    labelInfo={`${parentPath}`}
-                >
-                    <InputGroup
-                        onChange={this.onPathChange}
-                        placeholder={t('DIALOG.MAKEDIR.NAME')}
-                        value={path}
-                        id="directory-input"
-                        name="directory-input"
-                        intent={intent}
-                        autoFocus
-                    />
-                </FormGroup>
-            </div>
-            <div className={Classes.DIALOG_FOOTER}>
-                <div className={Classes.DIALOG_FOOTER_ACTIONS}>
+                    <FormGroup
+                        helperText={helperText}
+                        inline={true}
+                        labelFor="directory-input"
+                        labelInfo={`${parentPath}`}
+                    >
+                        <InputGroup
+                            onChange={this.onPathChange}
+                            placeholder={t('DIALOG.MAKEDIR.NAME')}
+                            value={path}
+                            id="directory-input"
+                            name="directory-input"
+                            intent={intent}
+                            autoFocus
+                        />
+                    </FormGroup>
+                </div>
+                <div className={Classes.DIALOG_FOOTER}>
+                    <div className={Classes.DIALOG_FOOTER_ACTIONS}>
                         <Button onClick={this.cancelClose}>{t('COMMON.CANCEL')}</Button>
 
                         <Button intent={Intent.PRIMARY} onClick={this.onCreate} disabled={!path.length || !valid}>
                             {!ctrlKey && t('DIALOG.MAKEDIR.CREATE') || t('DIALOG.MAKEDIR.CREATE_READ')}
-                    </Button>
+                        </Button>
+                    </div>
                 </div>
-            </div>
             </Dialog>
         )
     }
