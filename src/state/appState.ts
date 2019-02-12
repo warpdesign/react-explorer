@@ -55,7 +55,7 @@ export class AppState {
             });
     }
 
-    prepareDragDropTransferTo(srcCache: FileState, dstCache: FileState, files:File[]) {
+    prepareDragDropTransferTo(srcCache: FileState, dstCache: FileState, files: File[]) {
         if (!files.length) {
             return;
         }
@@ -74,7 +74,7 @@ export class AppState {
                 if (options.dstPath === dstCache.path && options.dstFsName === dstCache.getFS().name) {
                     dstCache.reload();
                 }
-            });        
+            });
     }
 
     @action setActiveCache(active: number) {
@@ -104,7 +104,9 @@ export class AppState {
         let totalSize = 0;
         let totalProgress = 0;
 
-        for (let transfer of this.transfers) {
+        const runningTransfers = this.transfers.filter(transfer => !transfer.status.match(/error|done/));
+
+        for (let transfer of runningTransfers) {
             totalSize += transfer.size;
             totalProgress += transfer.progress;
         }
@@ -198,7 +200,7 @@ export class AppState {
     }
 
     @action
-    copySelectedItemsPath(fileState: FileState, filenameOnly = false):string {
+    copySelectedItemsPath(fileState: FileState, filenameOnly = false): string {
         const files = fileState.selected;
         let text = '';
 

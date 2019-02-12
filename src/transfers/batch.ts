@@ -30,7 +30,7 @@ export class Batch {
     @observable
     public progress: number = 0;
 
-    get isStarted():boolean {
+    get isStarted(): boolean {
         return !this.status.match(/error|done/);
     }
 
@@ -262,11 +262,11 @@ export class Batch {
         return lastPart;
     }
 
-    async getFileList(srcFiles: File[], subDirectory = ''):Promise<FileTransfer[]> {
+    async getFileList(srcFiles: File[], subDirectory = ''): Promise<FileTransfer[]> {
         console.log('getting file list');
         const dirs = srcFiles.filter((file) => file.isDir);
         const files = srcFiles.filter((file) => !file.isDir);
-        let transfers:FileTransfer[] = [];
+        let transfers: FileTransfer[] = [];
 
         // add files
         for (let file of files) {
@@ -318,6 +318,6 @@ export class Batch {
         file.progress = bytesRead;
         this.progress += previousProgress ? (bytesRead - previousProgress) : bytesRead;
         // console.log('progress', this.progress, this.progress === this.size ? -1 : this.progress/this.size);
-        remote.getCurrentWindow().setProgressBar(this.progress === this.size ? -1 : this.progress/this.size);
+        remote.getCurrentWindow().setProgressBar(this.progress === this.size ? -1 : this.progress / this.size);
     }
 }

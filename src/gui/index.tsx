@@ -22,7 +22,7 @@ class App {
     }
 
     // debug stuff
-    createTestFolder():Promise<any> {
+    createTestFolder(): Promise<any> {
         return new Promise((resolve, reject) => {
             // Development stuff: create fake directory for testing
             const exec = require('child_process').exec;
@@ -38,12 +38,12 @@ class App {
 
     renderApp = () => {
         ReactDOM.render(
-            <DragDropContextProvider backend={HTML5Backend}>            
-            <I18nextProvider i18n={i18next}>
-                <Provider settingsState={this.settingsState}>
-                    <ReactApp></ReactApp>
-                </Provider>
-            </I18nextProvider>
+            <DragDropContextProvider backend={HTML5Backend}>
+                <I18nextProvider i18n={i18next}>
+                    <Provider settingsState={this.settingsState}>
+                        <ReactApp></ReactApp>
+                    </Provider>
+                </I18nextProvider>
             </DragDropContextProvider>,
             document.getElementById('root'));
     }
@@ -60,43 +60,44 @@ class App {
 }
 
 const app = new App();
-const format = function(data: string|number) {
-    let str = data.toString();
-    if (str.length < 15) {
-        const diff = 15 - str.length;
-        for (let i = 0; i < diff; ++i) {
-            str = " " + str;
-        }
-    }
-    return str;
-}
 
-const {webFrame} = require('electron')
-function getMemory() {
-  // `format` omitted  (pads + limits to 15 characters for the output)
-  function logMemDetails(x:any) {
-    function toMb(bytes:any) {
-      return (bytes / (1000.0 * 1000)).toFixed(2)
-    }
+// const format = function(data: string|number) {
+//     let str = data.toString();
+//     if (str.length < 15) {
+//         const diff = 15 - str.length;
+//         for (let i = 0; i < diff; ++i) {
+//             str = " " + str;
+//         }
+//     }
+//     return str;
+// }
 
-    console.log(
-      format(x[0]),
-      format(x[1].count),
-      format(toMb(x[1].size) + "MB"),
-      format(toMb(x[1].liveSize) +"MB")
-    )
-  }
+// const {webFrame} = require('electron')
+// function getMemory() {
+//   // `format` omitted  (pads + limits to 15 characters for the output)
+//   function logMemDetails(x:any) {
+//     function toMb(bytes:any) {
+//       return (bytes / (1000.0 * 1000)).toFixed(2)
+//     }
 
-  console.log(
-    format("object"),
-    format("count"),
-    format("size"),
-    format("liveSize")
-  )
-  const resourceUsage:any = webFrame.getResourceUsage();
+//     console.log(
+//       format(x[0]),
+//       format(x[1].count),
+//       format(toMb(x[1].size) + "MB"),
+//       format(toMb(x[1].liveSize) +"MB")
+//     )
+//   }
 
-  Object.keys(resourceUsage).map((key: string) => [key, resourceUsage[key]]).map(logMemDetails);
-  console.log(format('------'));
-}
+//   console.log(
+//     format("object"),
+//     format("count"),
+//     format("size"),
+//     format("liveSize")
+//   )
+//   const resourceUsage:any = webFrame.getResourceUsage();
 
-setInterval(getMemory, 5000)
+//   Object.keys(resourceUsage).map((key: string) => [key, resourceUsage[key]]).map(logMemDetails);
+//   console.log(format('------'));
+// }
+
+// setInterval(getMemory, 5000)
