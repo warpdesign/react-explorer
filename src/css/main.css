@@ -224,6 +224,10 @@ button.small:hover{
     background-color: rgba(255,255,255,.3);
 }
 
+body.bp3-dark .bp3-loader.active{
+    background-color:rgba(41, 55, 66, 0.9);
+}
+
 .bp3-loader .bp3-spinner{
     flex-grow:1;
     opacity:0;

@@ -16,6 +16,7 @@ import { isMac } from '../utils/platform';
 import { ipcRenderer } from 'electron';
 import classnames from 'classnames';
 import { RowRenderer } from './RowRenderer';
+import { SettingsState } from '../state/settingsState';
 
 require('react-virtualized/styles.css');
 require('../css/filetable.css');
@@ -77,9 +78,10 @@ interface IProps extends WithNamespaces{
 interface InjectedProps extends IProps {
     appState: AppState;
     fileCache: FileState;
+    settingsState: SettingsState;
 }
 
-@inject('appState', 'fileCache')
+@inject('appState', 'fileCache', 'settingsState')
 @WithMenuAccelerators
 @HotkeysTarget
 export class FileTableClass extends React.Component<IProps, IState> {
@@ -576,10 +578,11 @@ export class FileTableClass extends React.Component<IProps, IState> {
 
     rowRenderer = (props: any) => {
         const { selected } = this.state;
-        const { fileCache } = this.injected;
+        const { fileCache, settingsState } = this.injected;
 
         props.selectedCount = selected;
         props.fileCache = fileCache;
+        props.isDarkModeActive = settingsState.isDarkModeActive;
 
         return RowRenderer(props);
     }
