@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { IconName, Icon, Classes, HotkeysTarget, Hotkeys, Hotkey } from '@blueprintjs/core';
-import { Column, Table, AutoSizer, Index } from 'react-virtualized';
+import { Column, Table, AutoSizer, Index, TableRowRenderer } from 'react-virtualized';
 import { AppState } from '../state/appState';
 import { FileState } from '../state/fileState';
 import { WithNamespaces, withNamespaces } from 'react-i18next';
@@ -15,6 +15,8 @@ import { WithMenuAccelerators, Accelerators, Accelerator } from './WithMenuAccel
 import { isMac } from '../utils/platform';
 import { ipcRenderer } from 'electron';
 import classnames from 'classnames';
+import { RowRenderer } from './RowRenderer';
+import { SettingsState } from '../state/settingsState';
 
 require('react-virtualized/styles.css');
 require('../css/filetable.css');
@@ -76,9 +78,10 @@ interface IProps extends WithNamespaces{
 interface InjectedProps extends IProps {
     appState: AppState;
     fileCache: FileState;
+    settingsState: SettingsState;
 }
 
-@inject('appState', 'fileCache')
+@inject('appState', 'fileCache', 'settingsState')
 @WithMenuAccelerators
 @HotkeysTarget
 export class FileTableClass extends React.Component<IProps, IState> {
@@ -406,9 +409,8 @@ export class FileTableClass extends React.Component<IProps, IState> {
         let { nodes } = this.state;
         const { fileCache } = this.injected;
 
-        console.log('onSelectAll', document.activeElement);
-
         if (nodes.length && this.isViewActive()) {
+            console.log('onSelectAll', document.activeElement);
             const isRoot = fileCache.isRoot((nodes[0].nodeData as File).dir);
             selected = 0;
 
@@ -574,9 +576,22 @@ export class FileTableClass extends React.Component<IProps, IState> {
         this.gridElement = element && element.querySelector(`.${TABLE_CLASSNAME}`) || null;
     }
 
+    rowRenderer = (props: any) => {
+        const { selected, nodes } = this.state;
+        const { fileCache, settingsState } = this.injected;
+        const node = nodes[props.index];
+
+        props.selectedCount = node.isSelected ? selected : 0;
+        props.fileCache = fileCache;
+        props.isDarkModeActive = settingsState.isDarkModeActive;
+
+        return RowRenderer(props);
+    }
+
+    rowGetter = (index:Index) => this.getRow(index.index);
+
     render() {
         const { position } = this.state;
-        const rowGetter = (index:Index) => this.getRow(index.index);
         const rowCount = this.state.nodes.length;
 
         return (<div ref={this.setTableRef} onKeyDown={this.onInputKeyDown} className={`fileListSizerWrapper ${Classes.ELEVATION_0}`}>
@@ -592,9 +607,10 @@ export class FileTableClass extends React.Component<IProps, IState> {
                         noRowsRenderer={this._noRowsRenderer}
                         rowClassName={this.rowClassName}
                         rowHeight={30}
-                        rowGetter={rowGetter}
+                        rowGetter={this.rowGetter}
                         rowCount={rowCount}
                         scrollToIndex={position < 0 ? 0 : position}
+                        rowRenderer={this.rowRenderer}
                         width={width}>
                         <Column
                             dataKey="name"

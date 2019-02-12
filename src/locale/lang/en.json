@@ -10,6 +10,9 @@
             "PREFS": "Preferences",
             "SHORTCUTS": "Keyboard shortcuts"
         },
+        "DRAG":{
+            "MULTIPLE": "Copy {{count}} elements"
+        },
         "DIALOG": {
             "QUIT": {
                 "BT_STOP_TRANSFERS": "Cancel & quit",

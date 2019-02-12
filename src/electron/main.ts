@@ -25,7 +25,9 @@ function installWatcher(path: string) {
 
 function reloadApp() {
     if (mainWindow) {
-        mainWindow.webContents.reloadIgnoringCache();
+        mainWindow.webContents.session.clearCache(function(){
+            mainWindow.webContents.reloadIgnoringCache();
+        });
     }
 }
 

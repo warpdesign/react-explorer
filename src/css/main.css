@@ -82,6 +82,14 @@ button.small:hover{
     box-shadow: 0 0 4px 2px inset #137cbd82;
 }
 
+#root .sideview.dropTarget:before{
+    box-shadow: 0 0 4px 2px inset #00b63d82;
+}
+
+#root .sideview.notDropTarget{
+    cursor:no-drop;
+}
+
 #root .sideview:first-child{
     margin-right:10px;
 }
@@ -214,6 +222,10 @@ button.small:hover{
     opacity:1;
     pointer-events:all;
     background-color: rgba(255,255,255,.3);
+}
+
+body.bp3-dark .bp3-loader.active{
+    background-color:rgba(41, 55, 66, 0.9);
 }
 
 .bp3-loader .bp3-spinner{
