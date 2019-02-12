@@ -24,7 +24,7 @@ class App {
         return new Promise((resolve, reject) => {
             // Development stuff: create fake directory for testing
             const exec = require('child_process').exec;
-            exec('/Users/nico/tmp_ftp.sh', (err: Error) => {
+            exec('/Users/leo/tmp_ftp.sh', (err: Error) => {
                 if (err) {
                     console.log('error preparing fake folders', err);
                 }

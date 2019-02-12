@@ -10,9 +10,6 @@ import { FileTable } from "./FileTable";
 import classnames from 'classnames';
 import { DropTargetSpec, DropTargetConnector, DropTargetMonitor, DropTargetCollector, ConnectDropTarget, DropTarget } from "react-dnd";
 
-import { ItemTypes } from './DragLayer';
-import { cpus } from "os";
-
 interface SideViewProps {
     hide: boolean;
     fileCache: FileState;
@@ -73,15 +70,21 @@ export class SideViewClass extends React.Component<InjectedProps>{
     }
 
     renderSideView() {
-        const { fileCache, connectDropTarget } = this.props;
+        const { fileCache, connectDropTarget, canDrop, isOver } = this.props;
         const active = fileCache.active;
+        const dropAndOver = isOver && canDrop;
 
-        let activeClass = classnames('sideview', { active: active, hidden: this.props.hide });
+        let activeClass = classnames('sideview', {
+            active: active,
+            hidden: this.props.hide,
+            dropTarget: dropAndOver,
+            notDropTarget: isOver && !canDrop
+        });
 
         const needLogin = fileCache.status === 'login';
         const busy = fileCache.status === 'busy';
 
-        if (this.props.canDrop && this.props.isOver) {
+        if (dropAndOver) {
             console.log('isOver', this.viewId);
         }
 
@@ -118,4 +121,4 @@ export class SideViewClass extends React.Component<InjectedProps>{
     }
 }
 
-export const SideView = DropTarget<InjectedProps>(ItemTypes.FILE, fileTarget, collect)(SideViewClass);
+export const SideView = DropTarget<InjectedProps>('file', fileTarget, collect)(SideViewClass);

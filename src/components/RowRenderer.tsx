@@ -1,6 +1,5 @@
 import * as React from 'react';
 import { DragSource, DragSourceMonitor, DragSourceConnector, DragSourceSpec } from 'react-dnd';
-import { ItemTypes } from './DragLayer';
 import { createDragPreview } from 'react-dnd-text-dragpreview';
 import { FileState } from '../state/fileState';
 
@@ -18,13 +17,15 @@ function collect(connect: DragSourceConnector, monitor:DragSourceMonitor) {
 interface DraggedObject {
     selectedCount: number;
     fileState: FileState;
+    dragFile: File;
 }
 
 const fileSource: DragSourceSpec<RowRendererParams, DraggedObject> = {
-    beginDrag(props: any) {
+    beginDrag(props: any) {      
         return {
             selectedCount: props.selectedCount,
-            fileState: props.fileCache
+            fileState: props.fileCache,
+            dragFile: props.rowData.nodeData
         };
     },
     canDrag: (props: any, monitor:DragSourceMonitor) => {
@@ -149,7 +150,7 @@ export function RowRendererFn({
       );
 }
 
-const RowRendererDragged = DragSource<RowRendererParams>(ItemTypes.FILE, fileSource, collect)(RowRendererFn);
+const RowRendererDragged = DragSource<RowRendererParams>('file', fileSource, collect)(RowRendererFn);
 
 export function RowRenderer(props:RowRendererParams) {
     return <RowRendererDragged {...props}/>;
