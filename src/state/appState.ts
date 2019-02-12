@@ -16,8 +16,10 @@ interface Clipboard {
 }
 
 interface TransferOptions {
-    clipboard: Clipboard;
+    srcFs: FsApi;
     dstFs: FsApi;
+    files: File[];
+    srcPath: string;
     dstPath: string;
     dstFsName: string;
 }
@@ -37,7 +39,9 @@ export class AppState {
         }
 
         const options = {
-            clipboard: { ...this.clipboard },
+            files: this.clipboard.files,
+            srcFs: this.clipboard.srcFs,
+            srcPath: this.clipboard.srcPath,
             dstFs: cache.getAPI(),
             dstPath: cache.path,
             dstFsName: cache.getFS().name
@@ -49,6 +53,28 @@ export class AppState {
                     cache.reload();
                 }
             });
+    }
+
+    prepareDragDropTransferTo(srcCache: FileState, dstCache: FileState, files:File[]) {
+        if (!files.length) {
+            return;
+        }
+
+        const options = {
+            files: files,
+            srcFs: srcCache.getAPI(),
+            srcPath: srcCache.path,
+            dstFs: dstCache.getAPI(),
+            dstPath: dstCache.path,
+            dstFsName: dstCache.getFS().name
+        };
+
+        return this.addTransfer(options)
+            .then(() => {
+                if (options.dstPath === dstCache.path && options.dstFsName === dstCache.getFS().name) {
+                    dstCache.reload();
+                }
+            });        
     }
 
     @action setActiveCache(active: number) {
@@ -96,11 +122,10 @@ export class AppState {
     @action
     // addTransfer(srcFs: FsApi, dstFs: FsApi, files: File[], srcPath: string, dstPath: string) {
     addTransfer(options: TransferOptions) {
-        const clipboard = options.clipboard;
-        console.log('addTransfer', options.clipboard.files, options.clipboard.srcFs, options.dstFs, options.dstPath);
-        const batch = new Batch(clipboard.srcFs, options.dstFs, clipboard.srcPath, options.dstPath);
+        console.log('addTransfer', options.files, options.srcFs, options.dstFs, options.dstPath);
+        const batch = new Batch(options.srcFs, options.dstFs, options.srcPath, options.dstPath);
         this.transfers.unshift(batch);
-        return batch.setFileList(clipboard.files).then(() => {
+        return batch.setFileList(options.files).then(() => {
             batch.calcTotalSize();
             batch.status = 'queued';
             console.log('got file list !');

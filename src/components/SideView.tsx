@@ -9,6 +9,7 @@ import { Loader } from "./Loader";
 import { FileTable } from "./FileTable";
 import classnames from 'classnames';
 import { DropTargetSpec, DropTargetConnector, DropTargetMonitor, DropTargetCollector, ConnectDropTarget, DropTarget } from "react-dnd";
+import { DraggedObject } from './RowRenderer';
 
 interface SideViewProps {
     hide: boolean;
@@ -29,8 +30,10 @@ const fileTarget: DropTargetSpec<InjectedProps> = {
         return !props.fileCache.active && props.fileCache.status !== 'busy';
     },
     drop(props, monitor, component) {
-        debugger;
-        console.log('dropped element', props);
+        const item = monitor.getItem();
+        const sideView = component.wrappedInstance;
+        sideView.onDrop(item);
+        console.log('dropped element', props, item);
     }
 };
 
@@ -54,15 +57,15 @@ export class SideViewClass extends React.Component<InjectedProps>{
         super(props);
     }
 
-    private get injected() {
+    get injected() {
         return this.props as InjectedProps;
     }
 
-    private onValidation = (dir:string):boolean => {
+    onValidation = (dir:string):boolean => {
         return true;
     }
 
-    private onClose = () => {
+    onClose = () => {
         // login cancelled
         const { fileCache } = this.props;
         // doesn't work: it keeps the previous fs
@@ -98,6 +101,15 @@ export class SideViewClass extends React.Component<InjectedProps>{
                     <Loader active={busy}></Loader>
             </div>)
         );
+    }
+
+    onDrop(item: DraggedObject) {
+        const appState = this.injected.appState;
+        const { fileCache } = this.props;
+        const files = item.selectedCount > 0 ? item.fileState.selected.slice(0) : [item.dragFile];
+
+        // TODO: check both cache are active?
+        appState.prepareDragDropTransferTo(item.fileState, fileCache, files);
     }
 
     shouldComponentUpdate() {

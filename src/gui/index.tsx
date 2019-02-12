@@ -8,7 +8,8 @@ import { I18nextProvider } from 'react-i18next';
 import i18next from '../locale/i18n';
 import { SettingsState } from "../state/settingsState";
 import { Provider } from "mobx-react";
-
+import { DragDropContextProvider } from 'react-dnd';
+import HTML5Backend from 'react-dnd-html5-backend';
 
 declare var ENV: any;
 
@@ -37,11 +38,13 @@ class App {
 
     renderApp = () => {
         ReactDOM.render(
+            <DragDropContextProvider backend={HTML5Backend}>            
             <I18nextProvider i18n={i18next}>
                 <Provider settingsState={this.settingsState}>
                     <ReactApp></ReactApp>
                 </Provider>
-            </I18nextProvider>,
+            </I18nextProvider>
+            </DragDropContextProvider>,
             document.getElementById('root'));
     }
 

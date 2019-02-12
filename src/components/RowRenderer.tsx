@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { DragSource, DragSourceMonitor, DragSourceConnector, DragSourceSpec } from 'react-dnd';
 import { createDragPreview } from 'react-dnd-text-dragpreview';
+import { File } from '../services/Fs';
 import { FileState } from '../state/fileState';
 import i18next from 'i18next';
 
@@ -12,7 +13,7 @@ function collect(connect: DragSourceConnector, monitor:DragSourceMonitor) {
     }
 }
 
-interface DraggedObject {
+export interface DraggedObject {
     selectedCount: number;
     fileState: FileState;
     dragFile: File;
