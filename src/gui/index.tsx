@@ -9,6 +9,7 @@ import i18next from '../locale/i18n';
 import { SettingsState } from "../state/settingsState";
 import { Provider } from "mobx-react";
 
+
 declare var ENV: any;
 
 class App {
@@ -56,3 +57,43 @@ class App {
 }
 
 const app = new App();
+const format = function(data: string|number) {
+    let str = data.toString();
+    if (str.length < 15) {
+        const diff = 15 - str.length;
+        for (let i = 0; i < diff; ++i) {
+            str = " " + str;
+        }
+    }
+    return str;
+}
+
+const {webFrame} = require('electron')
+function getMemory() {
+  // `format` omitted  (pads + limits to 15 characters for the output)
+  function logMemDetails(x:any) {
+    function toMb(bytes:any) {
+      return (bytes / (1000.0 * 1000)).toFixed(2)
+    }
+
+    console.log(
+      format(x[0]),
+      format(x[1].count),
+      format(toMb(x[1].size) + "MB"),
+      format(toMb(x[1].liveSize) +"MB")
+    )
+  }
+
+  console.log(
+    format("object"),
+    format("count"),
+    format("size"),
+    format("liveSize")
+  )
+  const resourceUsage:any = webFrame.getResourceUsage();
+
+  Object.keys(resourceUsage).map((key: string) => [key, resourceUsage[key]]).map(logMemDetails);
+  console.log(format('------'));
+}
+
+setInterval(getMemory, 5000)

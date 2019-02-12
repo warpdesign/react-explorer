@@ -577,19 +577,21 @@ export class FileTableClass extends React.Component<IProps, IState> {
     }
 
     rowRenderer = (props: any) => {
-        const { selected } = this.state;
+        const { selected, nodes } = this.state;
         const { fileCache, settingsState } = this.injected;
+        const node = nodes[props.index];
 
-        props.selectedCount = selected;
+        props.selectedCount = node.isSelected ? selected : 0;
         props.fileCache = fileCache;
         props.isDarkModeActive = settingsState.isDarkModeActive;
 
         return RowRenderer(props);
     }
 
+    rowGetter = (index:Index) => this.getRow(index.index);
+
     render() {
         const { position } = this.state;
-        const rowGetter = (index:Index) => this.getRow(index.index);
         const rowCount = this.state.nodes.length;
 
         return (<div ref={this.setTableRef} onKeyDown={this.onInputKeyDown} className={`fileListSizerWrapper ${Classes.ELEVATION_0}`}>
@@ -605,7 +607,7 @@ export class FileTableClass extends React.Component<IProps, IState> {
                         noRowsRenderer={this._noRowsRenderer}
                         rowClassName={this.rowClassName}
                         rowHeight={30}
-                        rowGetter={rowGetter}
+                        rowGetter={this.rowGetter}
                         rowCount={rowCount}
                         scrollToIndex={position < 0 ? 0 : position}
                         rowRenderer={this.rowRenderer}
