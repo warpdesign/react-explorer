@@ -2,7 +2,7 @@ import * as React from 'react';
 import { observer } from 'mobx-react';
 import { observable, runInAction } from 'mobx';
 import { debounce } from '../utils/debounce';
-import { Intent, HotkeysTarget, Hotkeys, Hotkey } from '@blueprintjs/core';
+import { Intent, HotkeysTarget, Hotkeys, Hotkey, Classes } from '@blueprintjs/core';
 import { WithNamespaces, withNamespaces } from 'react-i18next';
 import { shouldCatchEvent } from '../utils/dom';
 import classnames from 'classnames';
@@ -14,6 +14,9 @@ export interface JSObject extends Object {
 }
 
 type Printable = (string | number | boolean | JSObject);
+
+// 
+const CLASS_OVERLAY_EXIT = 'bp3-overlay-exit';
 
 function objectPropsToString(el: Printable) {
     if ((typeof el).match(/number|string|boolean/)) {
@@ -50,14 +53,14 @@ function pushLog(lines: Printable[], intent: Intent) {
         runInAction(() => {
             Logger.logs.push({
                 date: new Date(),
-                line: lines.map((line:Printable) => objectPropsToString(line)).join(' '),
+                line: lines.map((line: Printable) => objectPropsToString(line)).join(' '),
                 intent: intent
             });
         });
     });
 }
 
-interface LogUIState{
+interface LogUIState {
     visible: boolean;
 }
 
@@ -111,24 +114,26 @@ export class LogUIClass extends React.Component<WithNamespaces, LogUIState> {
         this.consoleDiv.scrollTop = this.keepScrollPos ? this.lastScrollTop : (this.consoleDiv.scrollHeight - this.consoleDiv.clientHeight);
     }
 
-    toggleConsole = () => {
-        console.log('escape key down!');
-        this.setState({
-            visible: !this.state.visible
-        });
+    toggleConsole = (event: KeyboardEvent) => {
+        const element = event.target as HTMLElement;
+
+        if (this.state.visible || !element.className.match(CLASS_OVERLAY_EXIT))
+            this.setState({
+                visible: !this.state.visible
+            });
     }
 
     renderHotkeys() {
         const { t } = this.props;
 
         return <Hotkeys>
-                <Hotkey
-                    global={true}
-                    combo="escape"
-                    label={t('SHORTCUT.LOG.TOGGLE')}
-                    onKeyDown={this.toggleConsole}>
-                </Hotkey>
-            </Hotkeys>;
+            <Hotkey
+                global={true}
+                combo="escape"
+                label={t('SHORTCUT.LOG.TOGGLE')}
+                onKeyDown={this.toggleConsole}>
+            </Hotkey>
+        </Hotkeys>;
     }
 
     // shouldComponentUpdate() {
@@ -144,7 +149,7 @@ export class LogUIClass extends React.Component<WithNamespaces, LogUIState> {
                 {
                     Logger.logs.map((line, i) => {
                         const lineClass = classnames('consoleLine', line.intent);
-                            return <div key={i} className={lineClass}>
+                        return <div key={i} className={lineClass}>
                             {/* <span className="consoleDate">{line.date}</span> */}
                             {line.line}
                         </div>
@@ -155,9 +160,9 @@ export class LogUIClass extends React.Component<WithNamespaces, LogUIState> {
     }
 }
 
-export function log(target:any, key:string, descriptor:PropertyDescriptor) {
+export function log(target: any, key: string, descriptor: PropertyDescriptor) {
     const originalMethod = descriptor.value;
-    descriptor.value = function (...args:any[]) {
+    descriptor.value = function (...args: any[]) {
         console.log(`${key} was called with:`, ...args);
         var result = originalMethod.apply(this, arguments);
         return result;

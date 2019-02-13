@@ -2,12 +2,12 @@ import { FsApi, File, ICredentials, Fs, Parent, filetype } from './Fs';
 import * as ftp from 'ftp';
 import * as path from 'path';
 import * as fs from 'fs';
-import * as url from 'url';
 import { Transform } from 'stream';
 import { remote } from 'electron';
 import { throttle } from '../utils/throttle';
 import { Logger, JSObject } from "../components/Log";
 import { EventEmitter } from 'events';
+import { isWin } from '../utils/platform';
 import * as nodePath from 'path';
 
 const FtpUrl = /^(ftp\:\/\/)*(ftp\.[a-z]+\.[a-z]{2,3}|[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})$/i;
@@ -23,19 +23,21 @@ function join(path1: string, path2: string) {
         path1 = path1.replace('ftp://', '');
     }
 
-    // if (!path1.match(/\/$/)) {
-    //     path1 += '/';
-    // }
-
-    return prefix + path.join(path1, path2);
+    // since under Windows path.join will use '\' as separator
+    // we replace it with '/'
+    if (isWin) {
+        return prefix + path.join(path1, path2).replace(/\\/g, '/');
+    } else {
+        return prefix + path.join(path1, path2);
+    }
 }
 
-class Client{
+class Client {
     private client: any;
     public connected: boolean;
     public host: string;
     public status: 'busy' | 'ready' | 'offline' = 'offline';
-    public api:FtpAPI = null;
+    public api: FtpAPI = null;
     public options: ICredentials;
 
     private readyResolve: () => any;
@@ -45,7 +47,7 @@ class Client{
 
     static clients: Array<Client> = [];
 
-    static addClient(hostname:string, options: any = {}) {
+    static addClient(hostname: string, options: any = {}) {
         const client = new Client(hostname, options);
 
         Client.clients.push(client);
@@ -88,7 +90,7 @@ class Client{
         Logger.success(...this.getLoggerArgs(params));
     }
 
-    log(...params: (string | number | boolean| JSObject)[]) {
+    log(...params: (string | number | boolean | JSObject)[]) {
         Logger.log(...this.getLoggerArgs(params));
     }
 
@@ -143,7 +145,7 @@ class Client{
         }
     }
 
-    private goOffline(error:any) {
+    private goOffline(error: any) {
         this.status = 'offline';
         if (this.readyReject) {
             this.readyReject(error);
@@ -151,9 +153,9 @@ class Client{
     }
 
     private onError(error: any) {
-        console.log(typeof error.code);
+        this.log(typeof error.code);
         this.error('onError', `${error.code}: ${error.message}`);
-        switch(error.code) {
+        switch (error.code) {
             // 500 series: command not accepted
             // user not logged in (user limit may be reached too)
             case 530:
@@ -259,7 +261,8 @@ class Client{
         return new Promise((resolve, reject) => {
             const oldPath = path;
             const newpath = this.pathpart(path);
-            this.client.cwd(newpath, (err:any, dir:string) => {
+
+            this.client.cwd(newpath, (err: any, dir: string) => {
                 if (!err) {
                     // some ftp servers return windows-like paths
                     // when ran in windows
@@ -277,13 +280,15 @@ class Client{
     }
 
     public pathpart(path: string): string {
-        const info = url.parse(path);
-        return info.pathname;
+        // we have to encode any % character other they may be
+        // lost when calling decodeURIComponent
+        const info = new URL(path.replace(/%/g, '%25'));
+        return decodeURIComponent(info.pathname);
         // const pathPart = path.replace(ServerPart, '');
         // return pathPart;
     }
 
-    public get(path: string, dest: string):Promise<string> {
+    public get(path: string, dest: string): Promise<string> {
         return new Promise((resolve, reject) => {
             const newpath = this.pathpart(path);
             this.log('downloading file', newpath, dest);
@@ -408,7 +413,7 @@ class FtpAPI implements FsApi {
         this.updateServer(serverUrl);
     }
 
-    updateServer(url:string) {
+    updateServer(url: string) {
         this.hostname = this.getHostname(url);
 
         this.master = Client.getFreeClient(this.hostname);
@@ -423,7 +428,7 @@ class FtpAPI implements FsApi {
         }
     }
 
-    isDirectoryNameValid (dirName: string): boolean {
+    isDirectoryNameValid(dirName: string): boolean {
         console.log('FTP.isDirectoryNameValid');
         return !invalidChars.test(dirName);
     };
@@ -521,10 +526,10 @@ class FtpAPI implements FsApi {
 
             this.loginOptions = { ...credentials };
             this.loginOptions.user = this.loginOptions.user || 'anonymous';
-        //     user: credentials.user || 'anonymous',
-        //     password: credentials.password,
-        //     port
-        // };
+            //     user: credentials.user || 'anonymous',
+            //     password: credentials.password,
+            //     port
+            // };
         } else {
             console.log('FsFtp: attempt to relogin: connection closed ?');
         }
@@ -541,13 +546,17 @@ class FtpAPI implements FsApi {
         }
     }
 
-    isConnected():boolean {
+    isConnected(): boolean {
         return this.connected;
     }
 
     isRoot(path: string): boolean {
-        const parsed = url.parse(path);
-        return parsed.path === '/';
+        try {
+            const parsed = new URL(path);
+            return parsed.pathname === '/';
+        } catch (err) {
+            return path === '/';
+        }
     }
 
     free() {
@@ -565,7 +574,7 @@ class FtpAPI implements FsApi {
     async getStream(path: string, file: string): Promise<fs.ReadStream> {
         console.log('FsFtp.getStream');
         try {
-            console.log('*** connecting', this.hostname, this.loginOptions);
+            console.log('*** connecting', this.hostname, Object.assign({ ...this.loginOptions }, { password: '***' }));
             // 1. get ready client
             // 2. if not, add one (or wait ?) => use limit connection
             console.log('getting client');
@@ -591,7 +600,7 @@ class FtpAPI implements FsApi {
             console.log('connecting new client');
             await client.login(this.loginOptions);
             console.log('client logged in, creating read stream');
-            return  client.putStream(readStream, dstPath, progress);
+            return client.putStream(readStream, dstPath, progress);
         } catch (err) {
             console.log('FsFtp.putStream error', err);
             return Promise.reject(err);
@@ -599,16 +608,20 @@ class FtpAPI implements FsApi {
     }
 
     getHostname(str: string) {
-        const info = url.parse(str);
+        const info = new URL(str);
 
         return info.hostname.toLowerCase();
     }
 
     sanityze(path: string) {
         // first remove credentials from here
-        const info = url.parse(path);
-        if (info.auth) {
-            path = path.replace(`${info.auth}@`, '');
+        const info = new URL(path);
+        if (info.username) {
+            let str = info.username;
+            if (info.password) {
+                str += `:${info.password}`;
+            }
+            path = path.replace(`${str}@`, '');
         }
 
         return path;
@@ -628,28 +641,26 @@ class FtpAPI implements FsApi {
     }
 };
 
-export const FsFtp:Fs = {
+export const FsFtp: Fs = {
     icon: 'globe-network',
     name: 'ftp',
     description: 'Fs that just implements fs over ftp',
     canread(str: string): boolean {
-        const info = url.parse(str);
+        const info = new URL(str);
         console.log('FsFtp.canread', str, info.protocol, info.protocol === 'ftp:');
         return info.protocol === 'ftp:';
     },
     serverpart(str: string, lowerCase = true): string {
-        const info = url.parse(str);
+        const info = new URL(str);
         return `${info.protocol}//${info.hostname}`;
     },
-    credentials(str:string): ICredentials {
-        const info = url.parse(str);
-
-        const auth = info.auth && info.auth.split(':') || [""];
+    credentials(str: string): ICredentials {
+        const info = new URL(str);
 
         return {
             port: parseInt(info.port, 10) || 21,
-            password: auth.length > 1 ? auth[1] : '',
-            user: auth[0]
+            password: info.password,
+            user: info.username
         };
     },
     API: FtpAPI

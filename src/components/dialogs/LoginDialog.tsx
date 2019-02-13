@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Dialog, Classes, Intent, Button, InputGroup, FormGroup, Colors} from "@blueprintjs/core";
+import { Dialog, Classes, Intent, Button, InputGroup, FormGroup, Colors } from "@blueprintjs/core";
 import { inject } from "mobx-react";
 import { FileState } from "../../state/fileState";
 import { withNamespaces, WithNamespaces } from "react-i18next";
@@ -35,7 +35,7 @@ const ENTER_KEY = 13;
 class LoginDialogClass extends React.Component<ILoginProps, ILoginState> {
     private input: HTMLInputElement | null = null;
 
-    constructor(props:any) {
+    constructor(props: any) {
         super(props);
 
         const fileCache = this.injected.fileCache;
@@ -89,7 +89,7 @@ class LoginDialogClass extends React.Component<ILoginProps, ILoginState> {
     private onInputChange = (event: React.FormEvent<HTMLElement>) => {
         const val = (event.target as HTMLInputElement).value;
         const name = (event.target as HTMLInputElement).name;
-        const state:any = {};
+        const state: any = {};
         state[name] = val;
 
         this.setState(state);
@@ -131,18 +131,18 @@ class LoginDialogClass extends React.Component<ILoginProps, ILoginState> {
             console.log(error.code, error.message);
         }
 
-        return(
+        return (
             <Dialog
-            icon="globe-network"
-            title={t('DIALOG.LOGIN.TITLE', {server: server})}
-            isOpen={this.props.isOpen}
-            autoFocus={true}
-            enforceFocus={true}
-            canEscapeKeyClose={true}
-            usePortal={true}
-            onClose={this.cancelClose}
-            className="loginDialog"
-        >
+                icon="globe-network"
+                title={t('DIALOG.LOGIN.TITLE', { server: server })}
+                isOpen={this.props.isOpen}
+                autoFocus={true}
+                enforceFocus={true}
+                canEscapeKeyClose={true}
+                usePortal={true}
+                onClose={this.cancelClose}
+                className="loginDialog"
+            >
                 <div className={Classes.DIALOG_BODY}>
                     {error && (<p className="error" style={{ backgroundColor: Colors.RED4 }}>{t('ERRORS.GENERIC', { error })}</p>)}
                     <FormGroup
@@ -160,23 +160,23 @@ class LoginDialogClass extends React.Component<ILoginProps, ILoginState> {
                             leftIcon="globe"
                         />
                     </FormGroup>
-                <FormGroup
-                    inline={true}
-                    labelFor="user"
-                    labelInfo={t('DIALOG.LOGIN.USERNAME')}
+                    <FormGroup
+                        inline={true}
+                        labelFor="user"
+                        labelInfo={t('DIALOG.LOGIN.USERNAME')}
                         helperText={(<span>{t('DIALOG.LOGIN.HINT_USERNAME')}</span>)}
-                >
-                    <InputGroup
-                        onChange={this.onInputChange}
+                    >
+                        <InputGroup
+                            onChange={this.onInputChange}
                             placeholder={t('DIALOG.LOGIN.USERINPUT')}
                             disabled={busy}
                             value={user}
                             inputRef={this.refHandler}
-                        id="user"
-                        name="user"
-                        leftIcon="person"
-                        autoFocus
-                    />
+                            id="user"
+                            name="user"
+                            leftIcon="person"
+                            autoFocus
+                        />
                     </FormGroup>
                     <FormGroup
                         inline={true}
@@ -210,15 +210,15 @@ class LoginDialogClass extends React.Component<ILoginProps, ILoginState> {
                             leftIcon="lock"
                         />
                     </FormGroup>
-            </div>
-            <div className={Classes.DIALOG_FOOTER}>
-                <div className={Classes.DIALOG_FOOTER_ACTIONS}>
+                </div>
+                <div className={Classes.DIALOG_FOOTER}>
+                    <div className={Classes.DIALOG_FOOTER_ACTIONS}>
                         <Button onClick={this.cancelClose} disabled={busy}>{t('COMMON.CANCEL')}</Button>
                         <Button loading={busy} intent={Intent.PRIMARY} onClick={this.onLogin} disabled={!this.canLogin()}>
-                        {t('DIALOG.LOGIN.LOGIN')}
-                    </Button>
+                            {t('DIALOG.LOGIN.LOGIN')}
+                        </Button>
+                    </div>
                 </div>
-            </div>
             </Dialog>
         )
     }
