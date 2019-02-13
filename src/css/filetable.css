@@ -3,6 +3,27 @@
     flex-grow:1;
 }
 
+.fileListSizerWrapper .empty{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    height: 100%;
+    text-align: center;
+    color: rgba(92, 112, 128, 0.5);
+}
+
+.fileListSizerWrapper .empty .bp3-icon{
+    margin: 10px auto;
+}
+
+.bp3-dark .fileListSizerWrapper .empty{
+    color:rgba(255, 255, 255, 0.47);
+}
+
+.bp3-dark .fileListSizerWrapper .empty .bp3-icon{
+    color:rgba(92, 112, 128, 0.5);
+}
+
 .tableRow .size{
     text-align:right;
     /* react-virtualized's Column component only allows to set a number for the flex-basis:
@@ -77,3 +98,4 @@ body.bp3-dark .sideview.active .tableRow.selected{
 body.bp3-dark .tableRow .bp3-icon{
     color:#f5f8fa;
 }
+

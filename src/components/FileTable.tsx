@@ -219,7 +219,7 @@ export class FileTableClass extends React.Component<IProps, IState> {
     _noRowsRenderer = () => {
         const { t } = this.injected;
 
-        return (<div>{t('COMMON.EMPTY_FOLDER')}</div>);
+        return (<div className="empty"><Icon icon="tick-circle" iconSize={40} />{t('COMMON.EMPTY_FOLDER')}</div>);
     }
 
     private updateNodes(nodes: ITableRow[]) {
