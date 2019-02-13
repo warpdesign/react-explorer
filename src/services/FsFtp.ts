@@ -150,7 +150,7 @@ class Client {
     }
 
     private onError(error: any) {
-        console.log(typeof error.code);
+        this.log(typeof error.code);
         this.error('onError', `${error.code}: ${error.message}`);
         switch (error.code) {
             // 500 series: command not accepted
