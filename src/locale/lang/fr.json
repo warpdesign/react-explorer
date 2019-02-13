@@ -1,8 +1,14 @@
 {
     "translations": {
         "LANG": [
-            {"code": "fr", "lang": "Français"},
-            {"code": "en", "lang": "Anglais"}
+            {
+                "code": "fr",
+                "lang": "Français"
+            },
+            {
+                "code": "en",
+                "lang": "Anglais"
+            }
         ],
         "NAV": {
             "EXPLORER": "Explorateur",
@@ -10,9 +16,9 @@
             "PREFS": "Préférences",
             "SHORTCUTS": "Raccourcis clavier"
         },
-        "DRAG":{
+        "DRAG": {
             "MULTIPLE": "Copier {{count}} éléments"
-        },        
+        },
         "DIALOG": {
             "QUIT": {
                 "BT_STOP_TRANSFERS": "Arrêter & quitter",
@@ -143,6 +149,17 @@
         },
         "MAIN_PROCESS": {
             "PRESS_TO_EXIT": "Maintenez la touche ⌘Q enfoncée pour quitter"
+        },
+        "TOOLTIP": {
+            "PATH": {
+                "TITLE1": "Entrer le chemin vers un dossier local ou distant pour en afficher le contenu.",
+                "TITLE2": "Exemples:",
+                "EXAMPLE_WIN": "C:\\Users\\Nico",
+                "EXAMPLE_MAC": "/Users/robert/Documents",
+                "EXAMPLE_LINUX": "home/robert",
+                "FTP1": "ftp://ftp.free.fr",
+                "FTP2": "ftp://kylian:mbappe@ftp.psg.fr"
+            }
         },
         "APP_MENUS": {
             "ABOUT": "A propos de",

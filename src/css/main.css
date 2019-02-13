@@ -98,6 +98,14 @@ button.small:hover{
     flex-grow:1;
 }
 
+.bp3-popover-wrapper{
+    flex-grow:1;
+}
+
+.bp3-popover-wrapper .bp3-popover-target{
+    width:100%;
+}
+
 .bp3-navbar .bp3-intent-primary{
     pointer-events:none;
 }

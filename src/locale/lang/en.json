@@ -1,8 +1,14 @@
 {
     "translations": {
         "LANG": [
-            {"code": "fr", "lang": "French"},
-            {"code": "en", "lang": "English"}
+            {
+                "code": "fr",
+                "lang": "French"
+            },
+            {
+                "code": "en",
+                "lang": "English"
+            }
         ],
         "NAV": {
             "EXPLORER": "Explorer",
@@ -10,7 +16,7 @@
             "PREFS": "Preferences",
             "SHORTCUTS": "Keyboard shortcuts"
         },
-        "DRAG":{
+        "DRAG": {
             "MULTIPLE": "Copy {{count}} elements"
         },
         "DIALOG": {
@@ -143,6 +149,17 @@
         },
         "MAIN_PROCESS": {
             "PRESS_TO_EXIT": "Keep pressing ⌘Q to exit"
+        },
+        "TOOLTIP": {
+            "PATH": {
+                "TITLE1": "Enter a local or remote path to show its contents.",
+                "TITLE2": "Examples:",
+                "EXAMPLE_WIN": "C:\\Users\\Jack",
+                "EXAMPLE_MAC": "/Users/jack/Documents",
+                "EXAMPLE_LINUX": "home/jack",
+                "FTP1": "ftp://ftp.online.net",
+                "FTP2": "ftp://jack:bauer@ftp.24hours.net"
+            }
         },
         "APP_MENUS": {
             "ABOUT": "About",

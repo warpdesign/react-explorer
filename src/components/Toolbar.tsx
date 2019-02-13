@@ -11,6 +11,11 @@ import { AppToaster, IToasterOpts } from "./AppToaster";
 import { FileState } from "../state/fileState";
 import { withNamespaces, WithNamespaces } from "react-i18next";
 import { WithMenuAccelerators, Accelerators, Accelerator } from "./WithMenuAccelerators";
+import { throttle } from "../utils/throttle";
+import { isWin, isMac } from "../utils/platform";
+
+const TOOLTIP_DELAY = 1200;
+const MOVE_EVENT_THROTTLE = 300;
 
 interface IProps extends WithNamespaces {
     onPaste: () => void;
@@ -27,6 +32,7 @@ interface PathInputState {
     path: string;
     isOpen: boolean;
     isDeleteOpen: boolean;
+    isTooltipOpen: boolean;
 }
 
 enum KEYS {
@@ -42,6 +48,9 @@ export class ToolbarClass extends React.Component<IProps, PathInputState> {
     private cache: FileState;
     private input: HTMLInputElement | null = null;
     private disposer: IReactionDisposer;
+    private tooltipReady = false;
+    private tooltipTimeout = 0;
+    private canShowTooltip = false;
 
     constructor(props: any) {
         super(props);
@@ -52,7 +61,8 @@ export class ToolbarClass extends React.Component<IProps, PathInputState> {
             status: 0,
             path: fileCache.path,
             isOpen: false,
-            isDeleteOpen: false
+            isDeleteOpen: false,
+            isTooltipOpen: false
         };
 
         this.cache = fileCache;
@@ -110,6 +120,8 @@ export class ToolbarClass extends React.Component<IProps, PathInputState> {
     }
 
     private onKeyUp = (event: React.KeyboardEvent<HTMLElement>) => {
+        this.hideTooltip();
+
         if (event.keyCode === KEYS.Escape) {
             // since React events are attached to the root document
             // event already has bubbled up so we must stop
@@ -125,7 +137,9 @@ export class ToolbarClass extends React.Component<IProps, PathInputState> {
     }
 
     private onBlur = () => {
-        this.setState({ path: this.cache.path, status: 0 });
+        console.log('blur');
+        // this.pathHasFocus = false;
+        this.setState({ path: this.cache.path, status: 0, isTooltipOpen: false });
     }
 
     private onReload = () => {
@@ -151,7 +165,7 @@ export class ToolbarClass extends React.Component<IProps, PathInputState> {
             } else {
                 this.cache.cd(dir);
             }
-        } catch(err) {
+        } catch (err) {
             AppToaster.show({
                 message: `Error creating folder: ${err}`,
                 icon: 'error',
@@ -174,7 +188,7 @@ export class ToolbarClass extends React.Component<IProps, PathInputState> {
             console.log('need to refresh cache');
             this.cache.reload();
             // appState.refreshCache(this.cache);
-        } catch(err) {
+        } catch (err) {
             AppToaster.show({
                 message: `Error deleting files: ${err}`,
                 icon: 'error',
@@ -186,20 +200,19 @@ export class ToolbarClass extends React.Component<IProps, PathInputState> {
         this.setState({ isDeleteOpen: false });
     }
 
-    private renderCopyProgress(percent: number): IToasterOpts {
-            return {
-            icon: "cloud-upload",
-            message: (
-                <ProgressBar
-                    className={percent >= 100 && Classes.PROGRESS_NO_STRIPES}
-                    intent={percent < 100 ? Intent.PRIMARY : Intent.SUCCESS}
-                    value={percent / 100}
-                />
-            ),
-            timeout: percent < 100 ? 0 : 2000
-        }
-    }
-
+    // private renderCopyProgress(percent: number): IToasterOpts {
+    //     return {
+    //         icon: "cloud-upload",
+    //         message: (
+    //             <ProgressBar
+    //                 className={percent >= 100 && Classes.PROGRESS_NO_STRIPES}
+    //                 intent={percent < 100 ? Intent.PRIMARY : Intent.SUCCESS}
+    //                 value={percent / 100}
+    //             />
+    //         ),
+    //         timeout: percent < 100 ? 0 : 2000
+    //     }
+    // }
 
     private copy = async () => {
         // TODO: attempt to copy
@@ -224,7 +237,7 @@ export class ToolbarClass extends React.Component<IProps, PathInputState> {
     }
 
     private onFileAction = (action: string) => {
-        switch(action) {
+        switch (action) {
             case 'makedir':
                 Logger.log('Opening new folder dialog');
                 this.onMakedir();
@@ -249,7 +262,18 @@ export class ToolbarClass extends React.Component<IProps, PathInputState> {
         }
     }
 
+    public hideTooltip() {
+        this.canShowTooltip = false;
+        this.setState({ isTooltipOpen: false });
+    }
+
     public onFocus = () => {
+        console.log('focus');
+        if (this.state.isTooltipOpen) {
+            this.hideTooltip();
+        } else {
+            this.canShowTooltip = false;
+        }
         this.input.select();
     }
 
@@ -301,24 +325,68 @@ export class ToolbarClass extends React.Component<IProps, PathInputState> {
         </Hotkeys>;
     }
 
+
+
+    onPathEnter = (e: React.MouseEvent) => {
+        console.log('path enter');
+        this.tooltipReady = true;
+        this.canShowTooltip = true;
+        this.setTooltipTimeout();
+    }
+
+    onPathLeave = (e: React.MouseEvent) => {
+        console.log('leave');
+        this.tooltipReady = false;
+    }
+
+    onPathMouseMove = throttle((e: React.MouseEvent) => {
+        console.log('throttle');
+        if (this.state.isTooltipOpen) {
+            console.log('isopen');
+            // if tooltip was visible and mouse moves
+            // then it cannot be opened again unless the
+            // user leaves the text input
+            this.canShowTooltip = false;
+            this.setState({ isTooltipOpen: false });
+        } else if (this.canShowTooltip && this.tooltipReady) {
+            console.log('canshow');
+            clearTimeout(this.tooltipTimeout);
+            this.setTooltipTimeout();
+        } else {
+            console.log('cannot show');
+        }
+    }, MOVE_EVENT_THROTTLE);
+
+    setTooltipTimeout() {
+        console.log('starting timeout');
+        this.tooltipTimeout = window.setTimeout(() => {
+            console.log('timeout reached', this.tooltipReady, this.canShowTooltip);
+            if (this.tooltipReady && this.canShowTooltip) {
+                console.log('yeah ! opening');
+                this.setState({ isTooltipOpen: true });
+            }
+        }, TOOLTIP_DELAY);
+    }
+
     private renderTooltip() {
+        const { t } = this.props;
+        let localExample = isWin ? t('TOOLTIP.PATH.EXAMPLE_WIN') : isMac && t('TOOLTIP.PATH.EXAMPLE_MAC') || t('TOOLTIP.PATH.EXAMPLE_UNIX');
+
         return (
             <div>
-                <p>
-                    Enter any local or <em>remote</em> path to show its content.<br /><br />
-                Supported types:
-                </p>
+                <p>{t('TOOLTIP.PATH.TITLE1')}</p>
+                <p>{t('TOOLTIP.PATH.TITLE2')}</p>
                 <ul>
-                    <li>/Users/nico/</li>
-                    <li>ftp://ftp.foo.net</li>
-                    <li>ftp://user@pass:ftp.foo.net:21</li>
+                    <li>{localExample}/</li>
+                    <li>{t('TOOLTIP.PATH.FTP1')}</li>
+                    <li>{t('TOOLTIP.PATH.FTP2')}</li>
                 </ul>
             </div>
         )
     }
 
     public render() {
-        const { status, path, isOpen, isDeleteOpen } = this.state;
+        const { status, path, isOpen, isDeleteOpen, isTooltipOpen } = this.state;
         const { fileCache } = this.injected;
         const { selected, history, current } = fileCache;
 
@@ -337,8 +405,8 @@ export class ToolbarClass extends React.Component<IProps, PathInputState> {
                         <Button rightIcon="caret-down" icon="cog" text="" />
                     </Popover>
                 </ButtonGroup>
-                {/* <Tooltip content={this.renderTooltip()} position={Position.RIGHT} hoverOpenDelay={1000}> */}
-                <InputGroup
+                <Tooltip content={this.renderTooltip()} position={Position.RIGHT} hoverOpenDelay={1500} openOnTargetFocus={false} isOpen={isTooltipOpen}>
+                    <InputGroup
                         data-cy-path
                         onChange={this.onPathChange}
                         onKeyUp={this.onKeyUp}
@@ -349,8 +417,11 @@ export class ToolbarClass extends React.Component<IProps, PathInputState> {
                         inputRef={this.refHandler}
                         onBlur={this.onBlur}
                         onFocus={this.onFocus}
+                        onMouseEnter={this.onPathEnter}
+                        onMouseLeave={this.onPathLeave}
+                        onMouseMove={this.onPathMouseMove}
                     />
-                {/* </Tooltip> */}
+                </Tooltip>
                 {isOpen &&
                     <MakedirDialog isOpen={isOpen} onClose={this.makedir} onValidation={fileCache.isDirectoryNameValid} parentPath={path}></MakedirDialog>
                 }
