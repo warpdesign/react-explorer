@@ -7,6 +7,7 @@ import { remote } from 'electron';
 import { throttle } from '../utils/throttle';
 import { Logger, JSObject } from "../components/Log";
 import { EventEmitter } from 'events';
+import { isWin } from '../utils/platform';
 import * as nodePath from 'path';
 
 const FtpUrl = /^(ftp\:\/\/)*(ftp\.[a-z]+\.[a-z]{2,3}|[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})$/i;
@@ -22,11 +23,13 @@ function join(path1: string, path2: string) {
         path1 = path1.replace('ftp://', '');
     }
 
-    // if (!path1.match(/\/$/)) {
-    //     path1 += '/';
-    // }
-
-    return prefix + path.join(path1, path2);
+    // since under Windows path.join will use '\' as separator
+    // we replace it with '/'
+    if (isWin) {
+        return prefix + path.join(path1, path2).replace(/\\/g, '/');
+    } else {
+        return prefix + path.join(path1, path2);
+    }
 }
 
 class Client {
@@ -258,6 +261,7 @@ class Client {
         return new Promise((resolve, reject) => {
             const oldPath = path;
             const newpath = this.pathpart(path);
+
             this.client.cwd(newpath, (err: any, dir: string) => {
                 if (!err) {
                     // some ftp servers return windows-like paths
@@ -570,7 +574,7 @@ class FtpAPI implements FsApi {
     async getStream(path: string, file: string): Promise<fs.ReadStream> {
         console.log('FsFtp.getStream');
         try {
-            console.log('*** connecting', this.hostname, this.loginOptions);
+            console.log('*** connecting', this.hostname, Object.assign({ ...this.loginOptions }, { password: '***' }));
             // 1. get ready client
             // 2. if not, add one (or wait ?) => use limit connection
             console.log('getting client');
