@@ -71,7 +71,7 @@ export class FileState {
         const path = history[current + dir];
         if (path !== this.path || force) {
             console.log('opening path from history', path);
-            this.cd(path, '', true);
+            this.cd(path, '', true, true);
         } else {
             console.warn('preventing endless loop');
         }
@@ -178,12 +178,12 @@ export class FileState {
 
     @action
     // changes current path and retrieves file list
-    async cd(path: string, path2: string = '', skipHistory = false): Promise<string> {
+    async cd(path: string, path2: string = '', skipHistory = false, skipContext = false): Promise<string> {
         // first updates fs (eg. was local fs, is now ftp)
         console.log('cd', path, this.path);
 
         if (this.path !== path) {
-            if (this.getNewFS(path, skipHistory)) {
+            if (this.getNewFS(path, skipContext)) {
                 this.server = this.fs.serverpart(path);
                 this.credentials = this.fs.credentials(path);
             } else {
@@ -198,7 +198,7 @@ export class FileState {
         try {
             await this.waitForConnection();
         } catch (err) {
-            return this.cd(path, path2, true);
+            return this.cd(path, path2, false, true);
         }
 
         const joint = path2 ? this.api.join(path, path2) : this.api.sanityze(path);

@@ -20,7 +20,7 @@ interface SideViewProps {
     canDrop?: boolean;
 }
 
-interface InjectedProps extends SideViewProps{
+interface InjectedProps extends SideViewProps {
     appState?: AppState;
 }
 
@@ -37,7 +37,7 @@ const fileTarget: DropTargetSpec<InjectedProps> = {
     }
 };
 
-const collect: DropTargetCollector<any> = (connect:DropTargetConnector, monitor:DropTargetMonitor) => {
+const collect: DropTargetCollector<any> = (connect: DropTargetConnector, monitor: DropTargetMonitor) => {
     return {
         connectDropTarget: connect.dropTarget(),
         isOver: monitor.isOver(),
@@ -53,7 +53,7 @@ export class SideViewClass extends React.Component<InjectedProps>{
     // static id = 0;
     viewId = 'view_' + id++;
 
-    constructor(props:InjectedProps) {
+    constructor(props: InjectedProps) {
         super(props);
     }
 
@@ -61,7 +61,7 @@ export class SideViewClass extends React.Component<InjectedProps>{
         return this.props as InjectedProps;
     }
 
-    onValidation = (dir:string):boolean => {
+    onValidation = (dir: string): boolean => {
         return true;
     }
 
@@ -86,6 +86,7 @@ export class SideViewClass extends React.Component<InjectedProps>{
 
         const needLogin = fileCache.status === 'login';
         const busy = fileCache.status === 'busy';
+        console.log('renderSideView, needLogin=', needLogin);
 
         if (dropAndOver) {
             console.log('isOver', this.viewId);
@@ -96,10 +97,10 @@ export class SideViewClass extends React.Component<InjectedProps>{
                 <div id={this.viewId} className={activeClass}>
                     {needLogin && <LoginDialog isOpen={needLogin} onValidation={this.onValidation} onClose={this.onClose} />}
                     <Toolbar active={active && !busy} onPaste={this.props.onPaste} />
-                    <FileTable hide={this.props.hide}/>
+                    <FileTable hide={this.props.hide} />
                     <Statusbar />
                     <Loader active={busy}></Loader>
-            </div>)
+                </div>)
         );
     }
 
