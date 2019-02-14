@@ -232,6 +232,7 @@ export class FileTableClass extends React.Component<IProps, IState> {
 
     nameRenderer = (data: any) => {
         const iconName = data.rowData.icon;
+
         return (<div className="name"><Icon icon={iconName}></Icon><span title={data.cellData} className="file-label">{data.cellData}</span></div>);
     }
 
