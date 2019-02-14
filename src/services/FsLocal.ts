@@ -21,14 +21,14 @@ class LocalApi implements FsApi {
     type = 0;
     // current path
     path: string;
-    loginOptions:ICredentials = null;
+    loginOptions: ICredentials = null;
 
-    constructor(path:string) {
+    constructor(path: string) {
         this.path = this.resolve(path);
     }
 
     // local fs doesn't require login
-    isConnected():boolean {
+    isConnected(): boolean {
         return true;
     }
 
@@ -45,10 +45,17 @@ class LocalApi implements FsApi {
     }
 
     cd(path: string) {
-        const resolved = this.resolve(path);
-        return this.isDir(resolved).then(() => resolved).catch((err) => {
-            return Promise.reject(err);
-        });
+        const resolvedPath = this.resolve(path);
+        return this.isDir(resolvedPath).then((isDir: boolean) => {
+            if (isDir) {
+                return resolvedPath;
+            } else {
+                throw { code: 'NOT_A_DIR' };
+            }
+        })
+            .catch((err) => {
+                return Promise.reject(err);
+            });
     }
 
     size(source: string, files: string[]): Promise<number> {
@@ -90,13 +97,13 @@ class LocalApi implements FsApi {
         });
     }
 
-    delete(source:string, files: File[]): Promise<number> {
+    delete(source: string, files: File[]): Promise<number> {
         let toDelete = files.map((file) => path.join(source, file.fullname));
 
         return new Promise(async (resolve, reject) => {
             try {
                 console.log('delete', toDelete);
-                await del(toDelete, {force: true});
+                await del(toDelete, { force: true });
                 resolve(files.length);
             } catch (err) {
                 reject(err);
@@ -104,7 +111,7 @@ class LocalApi implements FsApi {
         });
     }
 
-    rename(source:string, file: File, newName: string): Promise <string> {
+    rename(source: string, file: File, newName: string): Promise<string> {
         const oldPath = path.join(source, file.fullname);
         const newPath = path.join(source, newName);
 
@@ -166,7 +173,7 @@ class LocalApi implements FsApi {
             try {
                 const format = path.parse(fullPath);
                 const stats = fs.statSync(fullPath);
-                const file:File =
+                const file: File =
                 {
                     dir: format.dir,
                     fullname: format.base,
@@ -189,7 +196,7 @@ class LocalApi implements FsApi {
         });
     }
 
-    login(server?: string, credentials?:ICredentials): Promise<void> {
+    login(server?: string, credentials?: ICredentials): Promise<void> {
         return Promise.resolve();
     }
 
@@ -226,7 +233,7 @@ class LocalApi implements FsApi {
                                 }
                             }
 
-                            const file:File =
+                            const file: File =
                             {
                                 dir: format.dir,
                                 fullname: items[i],
@@ -277,7 +284,7 @@ class LocalApi implements FsApi {
     async getStream(path: string, file: string): Promise<fs.ReadStream> {
         try {
             console.log('opening read stream', this.join(path, file));
-            const stream = fs.createReadStream(this.join(path, file), { highWaterMark: 31 * 16384});
+            const stream = fs.createReadStream(this.join(path, file), { highWaterMark: 31 * 16384 });
             return Promise.resolve(stream);
         } catch (err) {
             console.log('FsLocal.getStream error', err);
@@ -286,12 +293,12 @@ class LocalApi implements FsApi {
     }
 
     // TODO: handle stream error
-    async putStream(readStream: fs.ReadStream, dstPath: string, progress: (pourcent: number) => void): Promise<void>{
+    async putStream(readStream: fs.ReadStream, dstPath: string, progress: (pourcent: number) => void): Promise<void> {
         let bytesRead = 0;
         const throttledProgress = throttle(() => { progress(bytesRead) }, 800);
 
         const reportProgress = new Transform({
-            transform(chunk:any, encoding:any, callback:any) {
+            transform(chunk: any, encoding: any, callback: any) {
                 bytesRead += chunk.length;
                 // console.log('dataChunk', bytesRead / 1024, 'Ko');
                 throttledProgress();
@@ -323,7 +330,7 @@ class LocalApi implements FsApi {
     }
 };
 
-export function FolderExists(path:string) {
+export function FolderExists(path: string) {
     try {
         return fs.existsSync(path) && fs.lstatSync(path).isDirectory();
     } catch (err) {
@@ -331,7 +338,7 @@ export function FolderExists(path:string) {
     }
 }
 
-export const FsLocal:Fs = {
+export const FsLocal: Fs = {
     icon: 'database',
     name: 'local',
     description: 'Local Filesystem',
