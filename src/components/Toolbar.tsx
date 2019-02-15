@@ -385,6 +385,17 @@ export class ToolbarClass extends React.Component<IProps, PathInputState> {
         )
     }
 
+    testStat = () => {
+        const { appState, fileCache } = this.injected;
+
+        if (appState.getActiveCache() === fileCache && fileCache.selected.length) {
+            const file = fileCache.selected[0];
+            const path = fileCache.getAPI().join(file.dir, file.fullname);
+            debugger;
+            fileCache.exists(path);
+        }
+    }
+
     public render() {
         const { status, path, isOpen, isDeleteOpen, isTooltipOpen } = this.state;
         const { fileCache } = this.injected;
@@ -399,6 +410,7 @@ export class ToolbarClass extends React.Component<IProps, PathInputState> {
         return (
             <ControlGroup>
                 <ButtonGroup style={{ minWidth: 120 }}>
+                    {/* <Button text="stat" onClick={this.testStat}></Button> */}
                     <Button data-cy-backward disabled={!canGoBackward} onClick={this.onBackward} rightIcon="chevron-left"></Button>
                     <Button data-cy-forward disabled={!canGoForward} onClick={this.onForward} rightIcon="chevron-right"></Button>
                     <Popover content={<FileMenu selectedItems={selected} onFileAction={this.onFileAction} />}>

@@ -408,7 +408,7 @@ class Client {
                     resolve(join(parent, name));
                 }
             });
-        })
+        });
     }
 
     public delete(ftpPath: string, isDir: boolean) {
@@ -436,6 +436,33 @@ class Client {
                     }
                 });
             }
+        });
+    }
+
+    // TODO: implement it using stat
+    public stat(ftpPath: string): Promise<boolean> {
+        return new Promise((resolve, reject) => {
+            try {
+                this.list(ftpPath);
+                debugger;
+                resolve(true);
+            } catch (err) {
+                debugger;
+                reject(err);
+            }
+        });
+    }
+
+    public size(ftpPath: string): Promise<number> {
+        const path = this.pathpart(ftpPath);
+        return new Promise((resolve, reject) => {
+            this.client.size(path, (err: Error, bytes: number) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(bytes)
+                }
+            });
         });
     }
 }
@@ -485,8 +512,8 @@ class FtpAPI implements FsApi {
     };
 
     size(source: string, files: string[]): Promise<number> {
-        console.log('TODO: FtpFs.size');
-        return Promise.resolve(10);
+        console.warn('FTP.size not implemented');
+        return Promise.resolve(0);
     };
 
     // copy(source: string, files: string[], dest: string): Promise<any> & cp.ProgressEmitter {
@@ -563,7 +590,8 @@ class FtpAPI implements FsApi {
 
     exists(path: string): Promise<boolean> {
         console.warn('FsFtp.exists not implemented: always returns true');
-        return Promise.resolve(false);
+        return this.master.stat(path);
+        // return Promise.resolve(false);
     }
 
     list(dir: string, appendParent = true): Promise<File[]> {

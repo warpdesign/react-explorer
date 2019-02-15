@@ -351,11 +351,19 @@ export class FileState {
         return this.api.isDir(path);
     }
 
+    @action
     async exists(path: string): Promise<boolean> {
         await this.waitForConnection();
-        return this.api.exists(path);
+        return this.api.exists(path).then((exists) => {
+            runInAction(() => {
+                this.status = 'ok';
+            });
+            return exists;
+        })
+            .catch(this.handleError)
     }
 
+    @action
     async makedir(parent: string, dirName: string): Promise<string> {
         try {
             await this.waitForConnection();
