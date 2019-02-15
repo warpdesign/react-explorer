@@ -291,8 +291,14 @@ class Client {
     public pathpart(path: string): string {
         // we have to encode any % character other they may be
         // lost when calling decodeURIComponent
-        const info = new URL(path.replace(/%/g, '%25'));
-        return decodeURIComponent(info.pathname);
+        try {
+            const info = new URL(path.replace(/%/g, '%25'));
+            return decodeURIComponent(info.pathname);
+        } catch (err) {
+            console.error('error getting pathpart for', path);
+            return '';
+        }
+
         // const pathPart = path.replace(ServerPart, '');
         // return pathPart;
     }
@@ -404,6 +410,34 @@ class Client {
             });
         })
     }
+
+    public delete(ftpPath: string, isDir: boolean) {
+        debugger;
+        const path = this.pathpart(ftpPath);
+        return new Promise((resolve, reject) => {
+            if (isDir) {
+                return this.client.rmdir(path, false, (err: Error) => {
+                    if (err) {
+                        debugger;
+                        reject(err);
+                    } else {
+                        debugger;
+                        resolve();
+                    }
+                });
+            } else {
+                this.client.delete(path, (err: Error) => {
+                    if (err) {
+                        debugger;
+                        reject(err);
+                    } else {
+                        debugger;
+                        resolve();
+                    }
+                });
+            }
+        });
+    }
 }
 
 class FtpAPI implements FsApi {
@@ -473,9 +507,48 @@ class FtpAPI implements FsApi {
         return this.master.mkdir(parent, name);
     };
 
-    delete(src: string, files: File[]): Promise<number> {
-        console.log('TODO: FsFtp.delete');
-        return Promise.resolve(0);
+    delete(source: string, files: File[]): Promise<number> {
+        debugger;
+        return new Promise(async (resolve, reject) => {
+            const fileList = files.filter(file => !file.isDir);
+            const dirList = files.filter(file => file.isDir);
+
+            debugger;
+
+            for (let file of fileList) {
+                try {
+                    debugger;
+                    const fullPath = this.join(source, file.fullname);
+                    await this.master.delete(fullPath, false);
+                } catch (err) {
+                    debugger;
+                    reject(err);
+                }
+            }
+
+            for (let dir of dirList) {
+                try {
+                    debugger;
+                    const fullPath = this.join(dir.dir, dir.fullname)
+                    await this.master.cd(fullPath);
+                    debugger;
+                    const files = await this.master.list(fullPath, false);
+                    debugger;
+                    // first delete files found inside the folder
+                    await this.delete(fullPath, files);
+                    // then delete the folder itself
+                    await this.master.delete(fullPath, true);
+                } catch (err) {
+                    debugger;
+                    // list
+                    // delete()
+                    reject(err);
+                }
+            }
+
+            debugger;
+            resolve(fileList.length + dirList.length);
+        });
     };
 
     rename(source: string, file: File, newName: string): Promise<string> {
