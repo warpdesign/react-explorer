@@ -309,6 +309,10 @@ export class FileState {
                 error.message = i18next.t('ERRORS.530');
                 break;
 
+            case 550:
+                error.message = i18next.t('ERRORS.550', { message: error.message });
+                break;
+
             default:
                 debugger;
                 error.message = i18next.t('ERRORS.UNKNOWN');

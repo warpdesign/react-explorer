@@ -109,7 +109,7 @@ class Client {
             this.readyPromise = new Promise((resolve, reject) => {
                 this.readyResolve = resolve;
                 this.readyReject = reject;
-                this.client.connect({ host: this.host, ...options });
+                this.client.connect({ host: this.host, ...options, debug: window.console.log });
             });
         }
 
@@ -204,7 +204,16 @@ class Client {
         this.log('list', path);
         return new Promise((resolve, reject) => {
             const newpath = this.pathpart(path);
-            this.client.list(newpath, (err: Error, list: any[]) => {
+            // Note: since node-ftp only supports the LIST cmd and
+            // some servers do not implement "LIST path" when path
+            // contains a space we send an empty path so list uses
+            // the CWD (and "CWD path") has no problems with a path
+            // containing a space
+            //
+            // We could also use MLSD instead but unfortunately it's
+            // not implemented in node-ftp
+            // see: https://github.com/warpdesign/react-ftp/wiki/FTP-LIST-command
+            this.client.list("", (err: Error, list: any[]) => {
                 this.status = 'ready';
 
                 if (err) {

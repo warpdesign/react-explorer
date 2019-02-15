@@ -141,6 +141,7 @@
             "ENOENT": "No such file or directory",
             "EPERM": "You don't have the permission to do this action",
             "530": "Login authentication failed",
+            "550": "File unavailable, not found, not accessible (server message was: {{message}})",
             "UNKNOWN": "An error has occured",
             "GENERIC": "{{message}} (code {{code}})",
             "BAD_FILENAME": "File or directory name not valid: '{{entry}}'",
