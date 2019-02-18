@@ -109,7 +109,7 @@ class Client {
             this.readyPromise = new Promise((resolve, reject) => {
                 this.readyResolve = resolve;
                 this.readyReject = reject;
-                this.client.connect({ host: this.host, ...options });
+                this.client.connect({ host: this.host, ...options, debug: window.console.log });
             });
         }
 
@@ -204,7 +204,16 @@ class Client {
         this.log('list', path);
         return new Promise((resolve, reject) => {
             const newpath = this.pathpart(path);
-            this.client.list(newpath, (err: Error, list: any[]) => {
+            // Note: since node-ftp only supports the LIST cmd and
+            // some servers do not implement "LIST path" when path
+            // contains a space we send an empty path so list uses
+            // the CWD (and "CWD path") has no problems with a path
+            // containing a space
+            //
+            // We could also use MLSD instead but unfortunately it's
+            // not implemented in node-ftp
+            // see: https://github.com/warpdesign/react-ftp/wiki/FTP-LIST-command
+            this.client.list("", (err: Error, list: any[]) => {
                 this.status = 'ready';
 
                 if (err) {
@@ -282,8 +291,14 @@ class Client {
     public pathpart(path: string): string {
         // we have to encode any % character other they may be
         // lost when calling decodeURIComponent
-        const info = new URL(path.replace(/%/g, '%25'));
-        return decodeURIComponent(info.pathname);
+        try {
+            const info = new URL(path.replace(/%/g, '%25'));
+            return decodeURIComponent(info.pathname);
+        } catch (err) {
+            console.error('error getting pathpart for', path);
+            return '';
+        }
+
         // const pathPart = path.replace(ServerPart, '');
         // return pathPart;
     }
@@ -393,7 +408,62 @@ class Client {
                     resolve(join(parent, name));
                 }
             });
-        })
+        });
+    }
+
+    public delete(ftpPath: string, isDir: boolean) {
+        debugger;
+        const path = this.pathpart(ftpPath);
+        return new Promise((resolve, reject) => {
+            if (isDir) {
+                return this.client.rmdir(path, false, (err: Error) => {
+                    if (err) {
+                        debugger;
+                        reject(err);
+                    } else {
+                        debugger;
+                        resolve();
+                    }
+                });
+            } else {
+                this.client.delete(path, (err: Error) => {
+                    if (err) {
+                        debugger;
+                        reject(err);
+                    } else {
+                        debugger;
+                        resolve();
+                    }
+                });
+            }
+        });
+    }
+
+    // TODO: implement it using stat
+    public stat(ftpPath: string): Promise<boolean> {
+        return new Promise((resolve, reject) => {
+            try {
+                this.list(ftpPath);
+                debugger;
+                resolve(true);
+            } catch (err) {
+                debugger;
+                reject(err);
+            }
+        });
+    }
+
+    public size(ftpPath: string): Promise<number> {
+        const path = this.pathpart(ftpPath);
+        return new Promise((resolve, reject) => {
+            this.client.size(path, (err: Error, bytes: number) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(bytes)
+                }
+            });
+        });
     }
 }
 
@@ -442,8 +512,8 @@ class FtpAPI implements FsApi {
     };
 
     size(source: string, files: string[]): Promise<number> {
-        console.log('TODO: FtpFs.size');
-        return Promise.resolve(10);
+        console.warn('FTP.size not implemented');
+        return Promise.resolve(0);
     };
 
     // copy(source: string, files: string[], dest: string): Promise<any> & cp.ProgressEmitter {
@@ -464,9 +534,48 @@ class FtpAPI implements FsApi {
         return this.master.mkdir(parent, name);
     };
 
-    delete(src: string, files: File[]): Promise<number> {
-        console.log('TODO: FsFtp.delete');
-        return Promise.resolve(0);
+    delete(source: string, files: File[]): Promise<number> {
+        debugger;
+        return new Promise(async (resolve, reject) => {
+            const fileList = files.filter(file => !file.isDir);
+            const dirList = files.filter(file => file.isDir);
+
+            debugger;
+
+            for (let file of fileList) {
+                try {
+                    debugger;
+                    const fullPath = this.join(source, file.fullname);
+                    await this.master.delete(fullPath, false);
+                } catch (err) {
+                    debugger;
+                    reject(err);
+                }
+            }
+
+            for (let dir of dirList) {
+                try {
+                    debugger;
+                    const fullPath = this.join(dir.dir, dir.fullname)
+                    await this.master.cd(fullPath);
+                    debugger;
+                    const files = await this.master.list(fullPath, false);
+                    debugger;
+                    // first delete files found inside the folder
+                    await this.delete(fullPath, files);
+                    // then delete the folder itself
+                    await this.master.delete(fullPath, true);
+                } catch (err) {
+                    debugger;
+                    // list
+                    // delete()
+                    reject(err);
+                }
+            }
+
+            debugger;
+            resolve(fileList.length + dirList.length);
+        });
     };
 
     rename(source: string, file: File, newName: string): Promise<string> {
@@ -481,7 +590,8 @@ class FtpAPI implements FsApi {
 
     exists(path: string): Promise<boolean> {
         console.warn('FsFtp.exists not implemented: always returns true');
-        return Promise.resolve(false);
+        return this.master.stat(path);
+        // return Promise.resolve(false);
     }
 
     list(dir: string, appendParent = true): Promise<File[]> {

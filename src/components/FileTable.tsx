@@ -232,6 +232,7 @@ export class FileTableClass extends React.Component<IProps, IState> {
 
     nameRenderer = (data: any) => {
         const iconName = data.rowData.icon;
+
         return (<div className="name"><Icon icon={iconName}></Icon><span title={data.cellData} className="file-label">{data.cellData}</span></div>);
     }
 
@@ -399,21 +400,23 @@ export class FileTableClass extends React.Component<IProps, IState> {
         }
     }
 
-    openFileOrDirectory(file: File, event: KeyboardEvent) {
+    async openFileOrDirectory(file: File, event: KeyboardEvent) {
         const { appState } = this.injected;
 
-        if (!file.isDir) {
-            this.cache.openFile(file).catch((error: any) => {
-                const { t } = this.injected;
-                AppAlert.show(t('ERRORS.GENERIC', { error }), {
-                    intent: 'danger'
-                });
-            });
-        } else {
-            const isModDown = isMac ? event.metaKey : event.ctrlKey;
-            const cache = isModDown ? appState.getInactiveCache() : this.cache;
+        try {
+            if (!file.isDir) {
+                await this.cache.openFile(file);
+            } else {
+                const isModDown = isMac ? event.metaKey : event.ctrlKey;
+                const cache = isModDown ? appState.getInactiveCache() : this.cache;
 
-            cache.openDirectory(file);
+                await cache.openDirectory(file);
+            }
+        } catch (error) {
+            const { t } = this.injected;
+            AppAlert.show(t('ERRORS.GENERIC', { error }), {
+                intent: 'danger'
+            });
         }
     }
 

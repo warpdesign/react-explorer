@@ -293,6 +293,10 @@ export class Batch {
 
             // get directory listing
             const currentPath = this.srcFs.join(dir.dir, dir.fullname);
+            // note: this is needed for FTP only: since Ftp.list(path) has to ignore the path
+            // and lists the contents of the CWD (which is changed by calling Ftp.cd())
+            await this.srcFs.cd(currentPath);
+            // /note
             const subFiles = await this.srcFs.list(currentPath, false);
             const subDir = this.srcFs.join(subDirectory, dir.fullname);
             transfers = transfers.concat(await this.getFileList(subFiles, subDir));

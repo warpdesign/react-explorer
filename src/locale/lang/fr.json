@@ -141,6 +141,7 @@
             "ENOENT": "Dossier ou fichier introuvable",
             "EPERM": "Vous n'avez pas la permission d'effectuer cette action",
             "530": "Echec de l'authentification",
+            "550": "Fichier non disponible, introuvable ou non accessible. (message du serveur: {{message}})",
             "UNKNOWN": "Une erreur est survenue",
             "GENERIC": "{{error.message}} (code {{error.code}})",
             "BAD_FILENAME": "Nom de fichier ou dossier non valide: '{{entry}}'",

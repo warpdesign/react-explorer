@@ -41,7 +41,7 @@
 .tableRow .file-label{
     flex-grow:1;
     overflow:hidden;
-    white-space: nowrap;
+    white-space: pre;
     text-overflow:ellipsis;
 }
 
