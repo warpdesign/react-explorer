@@ -1,6 +1,7 @@
-import { FsLocal } from './FsLocal';
-import { FsGeneric } from './FsGeneric';
-import { FsFtp } from './FsFtp';
+import { FsLocal } from './plugins/FsLocal';
+import { FsGeneric } from './plugins/FsGeneric';
+import { FsFtp } from './plugins/FsFtp';
+import { FsSimpleFtp } from './plugins/FsSimpleFtp';
 import * as fs from 'fs';
 
 declare var ENV: any;
@@ -22,7 +23,7 @@ export interface File {
 
 export interface Fs {
     // runtime api
-    API: (new (path:string) => FsApi);
+    API: (new (path: string) => FsApi);
     // static members
     canread(str: string): boolean;
     serverpart(str: string): string;
@@ -60,13 +61,13 @@ const ExeMaskAll = 0o0001;
 const ExeMaskGroup = 0o0010;
 const ExeMaskUser = 0o0100;
 
-export type FileType = 'exe'|'img'|'arc'|'snd'|'vid'|'doc'|'cod'|'';
+export type FileType = 'exe' | 'img' | 'arc' | 'snd' | 'vid' | 'doc' | 'cod' | '';
 
-function isModeExe(mode:number):Boolean {
+function isModeExe(mode: number): Boolean {
     return !!((mode & ExeMaskAll) || (mode & ExeMaskUser) || (mode & ExeMaskGroup));
 }
 
-export function filetype(mode:number, extension:string): FileType {
+export function filetype(mode: number, extension: string): FileType {
     if (isModeExe(mode) || extension.match(Extensions.exe)) {
         return 'exe';
     } else if (extension.match(Extensions.img)) {
@@ -89,7 +90,7 @@ export function filetype(mode:number, extension:string): FileType {
 export interface FsApi {
     // public API
     list(dir: string, appendParent?: boolean): Promise<File[]>;
-    cd(path:string): Promise<string>;
+    cd(path: string): Promise<string>;
     delete(parent: string, files: File[]): Promise<number>;
     // copy(parent: string, files: string[], dest: string): Promise<number> & cp.ProgressEmitter;
     join(...paths: string[]): string;
@@ -101,7 +102,7 @@ export interface FsApi {
     resolve(path: string): string;
     sanityze(path: string): string;
     size(source: string, files: string[]): Promise<number>;
-    login(server?: string, credentials?:ICredentials): Promise<void>;
+    login(server?: string, credentials?: ICredentials): Promise<void>;
     isConnected(): boolean;
     isDirectoryNameValid(dirName: string): boolean;
     get(path: string, file: string): Promise<string>;
@@ -126,7 +127,7 @@ export function registerFs(fs: Fs): void {
     interfaces.push(fs);
 };
 
-export function getFS(path: string):Fs {
+export function getFS(path: string): Fs {
     let newfs = interfaces.find((filesystem) => filesystem.canread(path));
 
     // if (!newfs) {
@@ -142,3 +143,4 @@ export function getFS(path: string):Fs {
 // }
 registerFs(FsLocal);
 registerFs(FsFtp);
+registerFs(FsSimpleFtp);

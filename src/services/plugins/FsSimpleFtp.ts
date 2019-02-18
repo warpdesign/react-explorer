@@ -1,7 +1,7 @@
-import { FsApi, File, ICredentials, Fs } from './Fs';
+import { FsApi, File, ICredentials, Fs } from '../Fs';
 import * as fs from 'fs';
 
-class GenericApi implements FsApi {
+class SimpleFtpApi implements FsApi {
     type = 0;
     loginOptions: ICredentials = null;
 
@@ -14,7 +14,7 @@ class GenericApi implements FsApi {
         return newPath;
     }
 
-    join(...paths:string[]): string {
+    join(...paths: string[]): string {
         return this.join(...paths);
     }
 
@@ -46,7 +46,7 @@ class GenericApi implements FsApi {
     //     return prom;
     // }
 
-    login(server?: string, credentials?:ICredentials):Promise<void> {
+    login(server?: string, credentials?: ICredentials): Promise<void> {
         return Promise.resolve();
     }
 
@@ -96,7 +96,7 @@ class GenericApi implements FsApi {
         const pathExists = await this.isDir(dir);
 
         if (pathExists) {
-            return Promise.resolve([ ]);
+            return Promise.resolve([]);
         } else {
             Promise.reject('error');
         }
@@ -137,23 +137,27 @@ class GenericApi implements FsApi {
     }
 };
 
-export const FsGeneric:Fs = {
-    icon: 'database',
-    name: 'generic',
-    description: 'Fs that just implements the FsInterface but does nothing',
+export const FsSimpleFtp: Fs = {
+    icon: 'globe-network',
+    name: 'simple-ftp',
+    description: 'Fs that implements ft connection on top of simple-ftp',
     canread(str: string): boolean {
-        return true;
+        const info = new URL(str);
+        console.log('FsFtp.canread', str, info.protocol, info.protocol === 'ftp:');
+        return info.protocol === 'ftp:';
     },
-    serverpart(str: string): string {
-        const server = str.replace(/^ftp\:\/\//, '');
-        return server.split('/')[0];
+    serverpart(str: string, lowerCase = true): string {
+        const info = new URL(str);
+        return `${info.protocol}//${info.hostname}`;
     },
     credentials(str: string): ICredentials {
+        const info = new URL(str);
+
         return {
-            user: '',
-            password: '',
-            port: 0
+            port: parseInt(info.port, 10) || 21,
+            password: info.password,
+            user: info.username
         };
     },
-    API: GenericApi
+    API: SimpleFtpApi
 }

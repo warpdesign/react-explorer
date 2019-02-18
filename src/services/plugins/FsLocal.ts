@@ -1,13 +1,13 @@
-import { FsApi, File, ICredentials, Fs, Parent, filetype } from './Fs';
+import { FsApi, File, ICredentials, Fs, Parent, filetype } from '../Fs';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as process from 'process';
 import * as mkdir from 'mkdirp';
 import * as del from 'del';
-import { size } from '../utils/size';
-import { throttle } from '../utils/throttle';
+import { size } from '../../utils/size';
+import { throttle } from '../../utils/throttle';
 const { Transform } = require('stream');
-import { isWin } from '../utils/platform';
+import { isWin } from '../../utils/platform';
 
 const invalidDirChars = isWin && /[\*:<>\?|"]+/ig || /^[\.]+[\/]+(.)*$/ig;
 const invalidFileChars = isWin && /[\*:<>\?|"]+/ig || /\//;

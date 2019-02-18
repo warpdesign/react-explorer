@@ -49,6 +49,7 @@
     "@types/mkdirp": "^0.5.2",
     "@types/react": "^16.4.14",
     "@types/react-dom": "^16.0.8",
+    "basic-ftp": "^3.2.2",
     "classnames": "^2.2.6",
     "del": "^3.0.0",
     "electron-reload": "^1.2.5",
