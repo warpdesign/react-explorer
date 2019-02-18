@@ -1,5 +1,5 @@
 import { observable, action, runInAction } from "mobx";
-import { FsApi, Fs, getFS, File, ICredentials } from "../services/Fs";
+import { FsApi, Fs, getFS, File, ICredentials, needsConnection } from "../services/Fs";
 import { Deferred } from '../utils/deferred';
 import i18next from '../locale/i18n';
 import { shell, ipcRenderer } from 'electron';
@@ -71,6 +71,7 @@ export class FileState {
         const path = history[current + dir];
         if (path !== this.path || force) {
             console.log('opening path from history', path);
+            debugger;
             this.cd(path, '', true, true);
         } else {
             console.warn('preventing endless loop');
@@ -90,37 +91,41 @@ export class FileState {
     constructor(path: string) {
         this.path = path;
         this.getNewFS(path);
-        // if (path) {
-        //     this.cd(path);
-        // }
     }
 
     private saveContext() {
         this.prevServer = this.server;
+        this.freeFsEvents();
         this.prevApi = this.api;
         this.prevFs = this.fs;
     }
 
     private restoreContext() {
+        this.freeFsEvents();
         this.api = this.prevApi;
+        this.bindFsEvents();
         this.fs = this.prevFs;
         this.server = this.prevServer;
+    }
+
+    private bindFsEvents() {
+        this.api.on('close', () => this.setStatus('offline'));
+        // this.api.on('connect', () => this.setStatus('ok'));
+    }
+
+    private freeFsEvents() {
+        this.api.off();
     }
 
     private getNewFS(path: string, skipContext = false): Fs {
         let newfs = getFS(path);
 
         if (newfs) {
-            // free exiting api
-            if (this.api) {
-                this.api.free();
-            }
-
-            !skipContext && this.saveContext();
+            !skipContext && this.api && this.saveContext();
 
             this.fs = newfs;
             this.api = new newfs.API(path);
-            this.api.on('close', () => this.setStatus('offline'))
+            this.bindFsEvents();
         }
 
         return newfs;
@@ -163,6 +168,7 @@ export class FileState {
 
             // automatially reconnect if we got credentials
             if (this.api.loginOptions) {
+                debugger;
                 this.doLogin();
             } else {
                 // otherwise show login dialog
@@ -176,45 +182,7 @@ export class FileState {
         }
     }
 
-    @action
-    // changes current path and retrieves file list
-    async cd(path: string, path2: string = '', skipHistory = false, skipContext = false): Promise<string> {
-        // first updates fs (eg. was local fs, is now ftp)
-        console.log('cd', path, this.path);
 
-        if (this.path !== path) {
-            if (this.getNewFS(path, skipContext)) {
-                this.server = this.fs.serverpart(path);
-                this.credentials = this.fs.credentials(path);
-            } else {
-                this.navHistory(0);
-                return Promise.reject({
-                    message: i18next.t('ERRORS.CANNOT_READ_FOLDER', { folder: path }),
-                    code: 'NO_FS'
-                });
-            }
-        }
-
-        try {
-            await this.waitForConnection();
-        } catch (err) {
-            return this.cd(path, path2, false, true);
-        }
-
-        const joint = path2 ? this.api.join(path, path2) : this.api.sanityze(path);
-        return this.api.cd(joint)
-            .then((path) => {
-                this.updatePath(path, skipHistory);
-                return this.list(path).then(() => path);
-            })
-            .catch((error) => {
-                console.log('path not valid ?', joint, 'restoring previous path');
-                this.status = 'ok';
-                this.navHistory(0);
-                this.setErrorString(error);
-                return Promise.reject(error);
-            });
-    }
 
     @action
     onLoginSuccess() {
@@ -223,45 +191,26 @@ export class FileState {
     }
 
     @action
-    doLogin(server?: string, credentials?: ICredentials) {
+    async doLogin(server?: string, credentials?: ICredentials) {
         console.log('logging in');
         // this.status = 'busy';
         if (server) {
             this.server = this.fs.serverpart(server);
         }
 
-        this.api.login(server, credentials).then(() => this.onLoginSuccess()).catch((err) => {
-            console.log('error while connecting', err);
+        try {
+            await this.api.login(server, credentials);
+            this.onLoginSuccess();
+        } catch (err) {
             this.setErrorString(err);
             this.loginDefer.reject(err);
-        });
+        }
+        // .then(() => ).catch((err) => {
+        //     console.log('error while connecting', err);
+
+        // });
 
         return this.loginDefer.promise;
-    }
-
-    @action
-    async list(path: string, appendParent?: boolean): Promise<File[]> {
-        try {
-            await this.waitForConnection();
-        } catch (err) {
-            return this.list(path, appendParent);
-        }
-
-        return this.api.list(path, appendParent)
-            .then((files: File[]) => {
-                runInAction(() => {
-                    console.log('run in actions', this.path);
-                    this.files.replace(files);
-                    // clear lister selection as well
-                    this.clearSelection();
-                    // TODO: sync caches ?
-
-                    this.status = 'ok';
-                });
-
-                return files;
-            })
-            .catch(this.handleError)
     }
 
     @action clearSelection() {
@@ -272,15 +221,13 @@ export class FileState {
         this.navHistory(0, true);
     }
 
-    join(path: string, path2: string) {
-        return this.api.join(path, path2);
-    }
-
     setErrorString(error: any) {
         if (typeof error.code === 'undefined') {
             debugger;
             error.code = 'NOCODE';
         }
+        console.log(error.stack);
+
         switch (error.code) {
             case 'ENOTFOUND':
                 debugger;
@@ -327,14 +274,81 @@ export class FileState {
         return Promise.reject(error);
     }
 
-    async rename(source: string, file: File, newName: string): Promise<string> {
-        // TODO: check for valid filenames
-        try {
-            await this.waitForConnection();
-        } catch (err) {
-            return this.rename(source, file, newName);
+    @action
+    async cd(path: string, path2: string = '', skipHistory = false, skipContext = false): Promise<string> {
+        // first updates fs (eg. was local fs, is now ftp)
+        console.log('cd', path, this.path);
+
+        if (this.path !== path) {
+            debugger;
+            if (this.getNewFS(path, skipContext)) {
+                this.server = this.fs.serverpart(path);
+                this.credentials = this.fs.credentials(path);
+            } else {
+                this.navHistory(0);
+                return Promise.reject({
+                    message: i18next.t('ERRORS.CANNOT_READ_FOLDER', { folder: path }),
+                    code: 'NO_FS'
+                });
+            }
         }
 
+        return this.cwd(path, path2, skipHistory, skipContext);
+    }
+
+    @action
+    @needsConnection
+    // changes current path and retrieves file list
+    async cwd(path: string, path2: string = '', skipHistory = false, skipContext = false): Promise<string> {
+        // try {
+        //     await this.waitForConnection();
+        // } catch (err) {
+        //     return this.cd(path, path2, false, true);
+        // }
+        const joint = path2 ? this.api.join(path, path2) : this.api.sanityze(path);
+        return this.api.cd(joint)
+            .then((path) => {
+                this.updatePath(path, skipHistory);
+                return this.list(path).then(() => path);
+            })
+            .catch((error) => {
+                console.log('path not valid ?', joint, 'restoring previous path');
+                this.status = 'ok';
+                this.navHistory(0);
+                this.setErrorString(error);
+                return Promise.reject(error);
+            });
+    }
+
+    @action
+    @needsConnection
+    async list(path: string, appendParent?: boolean): Promise<File[]> {
+        return this.api.list(path, appendParent)
+            .then((files: File[]) => {
+                runInAction(() => {
+                    console.log('run in actions', this.path);
+                    this.files.replace(files);
+                    // clear lister selection as well
+                    this.clearSelection();
+                    // TODO: sync caches ?
+
+                    this.status = 'ok';
+                });
+
+                return files;
+            })
+            .catch(this.handleError)
+    }
+
+    @action
+    @needsConnection
+    async rename(source: string, file: File, newName: string): Promise<string> {
+        // // TODO: check for valid filenames
+        // try {
+        //     await this.waitForConnection();
+        // } catch (err) {
+        //     return this.rename(source, file, newName);
+        // }
         return this.api.rename(source, file, newName).then((newName: string) => {
             runInAction(() => {
                 file.fullname = newName;
@@ -346,14 +360,10 @@ export class FileState {
             .catch(this.handleError);
     }
 
-    async isDir(path: string): Promise<boolean> {
-        await this.waitForConnection();
-        return this.api.isDir(path);
-    }
-
     @action
+    @needsConnection
     async exists(path: string): Promise<boolean> {
-        await this.waitForConnection();
+        // await this.waitForConnection();
         return this.api.exists(path).then((exists) => {
             runInAction(() => {
                 this.status = 'ok';
@@ -364,15 +374,8 @@ export class FileState {
     }
 
     @action
+    @needsConnection
     async makedir(parent: string, dirName: string): Promise<string> {
-        try {
-            await this.waitForConnection();
-        } catch (err) {
-            return this.makedir(parent, dirName);
-        }
-
-        this.status = 'busy';
-
         return this.api.makedir(parent, dirName).then((newDir) => {
             runInAction(() => {
                 this.status = 'ok';
@@ -384,15 +387,8 @@ export class FileState {
     }
 
     @action
+    @needsConnection
     async delete(source: string, files: File[]): Promise<number> {
-        try {
-            await this.waitForConnection();
-        } catch (err) {
-            return this.delete(source, files);
-        }
-
-        this.status = 'busy';
-
         return this.api.delete(source, files).then((num) => {
             runInAction(() => {
                 this.status = 'ok';
@@ -403,14 +399,7 @@ export class FileState {
             .catch(this.handleError)
     }
 
-    // copy(source: string, files: string[], dest: string): Promise<number> & cp.ProgressEmitter {
-    //     return this.api.copy(source, files, dest);
-    // }
-
-    isDirectoryNameValid = (dirName: string) => {
-        return this.api.isDirectoryNameValid(dirName);
-    }
-
+    @needsConnection
     async size(source: string, files: string[]): Promise<number> {
         try {
             await this.waitForConnection();
@@ -422,6 +411,7 @@ export class FileState {
             .catch(this.handleError)
     }
 
+    @needsConnection
     async get(path: string, file: string): Promise<string> {
         try {
             await this.waitForConnection();
@@ -436,6 +426,19 @@ export class FileState {
             .catch(this.handleError)
     }
 
+    async isDir(path: string): Promise<boolean> {
+        await this.waitForConnection();
+        return this.api.isDir(path);
+    }
+
+    isDirectoryNameValid = (dirName: string) => {
+        return this.api.isDirectoryNameValid(dirName);
+    }
+
+    join(path: string, path2: string) {
+        return this.api.join(path, path2);
+    }
+
     openFile(file: File) {
         console.log('need to open file');
         return this.get(file.dir, file.fullname).then((tmpPath: string) => {
@@ -445,8 +448,9 @@ export class FileState {
     }
 
     openDirectory(file: File) {
+        debugger;
         console.log('need to read dir', file.dir, file.fullname);
-        return this.cd(file.dir, file.fullname);
+        return this.cd(file.dir, file.fullname).catch(this.handleError);
     }
 
     openTerminal(path: string) {

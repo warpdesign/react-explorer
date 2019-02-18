@@ -1,11 +1,69 @@
-import { FsApi, File, ICredentials, Fs } from '../Fs';
+import { FsApi, File, ICredentials, Fs, Parent, filetype } from '../Fs';
+import { Client, FileInfo } from 'basic-ftp';
 import * as fs from 'fs';
+import { EventEmitter } from 'events';
+import * as nodePath from 'path';
+import { isWin } from '../../utils/platform';
+
+function join(path1: string, path2: string) {
+    let prefix = '';
+
+    if (path1.match(/^ftp:\/\//)) {
+        prefix = 'ftp://';
+        path1 = path1.replace('ftp://', '');
+    }
+
+    // since under Windows path.join will use '\' as separator
+    // we replace it with '/'
+    if (isWin) {
+        return prefix + nodePath.join(path1, path2).replace(/\\/g, '/');
+    } else {
+        return prefix + nodePath.join(path1, path2);
+    }
+}
 
 class SimpleFtpApi implements FsApi {
-    type = 0;
+    type = 1;
+    master: Client;
     loginOptions: ICredentials = null;
+    host = '';
+    connected = false;
+
+    // master login promise
+    private readyPromise: Promise<any>;
+
+    // events
+    eventList = new Array<string>();
+    emitter: EventEmitter;
+
+    constructor(serverUrl: string) {
+        debugger;
+        this.emitter = new EventEmitter();
+    }
+
+    public pathpart(path: string): string {
+        // we have to encode any % character other they may be
+        // lost when calling decodeURIComponent
+        try {
+            const info = new URL(path.replace(/%/g, '%25'));
+            return decodeURIComponent(info.pathname);
+        } catch (err) {
+            console.error('error getting pathpart for', path);
+            return '';
+        }
+
+        // const pathPart = path.replace(ServerPart, '');
+        // return pathPart;
+    }
+
+    getHostname(str: string) {
+        const info = new URL(str);
+
+        return info.hostname.toLowerCase();
+    }
 
     isDirectoryNameValid(dirName: string): boolean {
+        debugger;
         console.log('GenericFs.isDirectoryNameValid');
         return true;
     }
@@ -14,16 +72,29 @@ class SimpleFtpApi implements FsApi {
         return newPath;
     }
 
-    join(...paths: string[]): string {
-        return this.join(...paths);
-    }
+    join(path: string, path2: string): string {
+        return join(path, path2);
+    };
 
     isConnected(): boolean {
-        return true;
+        return this.connected;
     }
 
-    cd(path: string) {
-        return Promise.resolve(path);
+    cd(path: string): Promise<string> {
+        return new Promise(async (resolve, reject) => {
+            const newpath = this.pathpart(path);
+            try {
+                const res = await this.master.cd(newpath);
+
+                // if (dir) {
+                //     dir = dir.replace(/\\/g, '/');
+                // }
+                const joint = newpath === '/' ? join(path, newpath) : path;
+                resolve(joint);
+            } catch (err) {
+                reject(err);
+            }
+        });
     }
 
     size(source: string, files: string[]): Promise<number> {
@@ -31,23 +102,23 @@ class SimpleFtpApi implements FsApi {
         return Promise.resolve(10);
     }
 
-    // copy(source: string, files: string[], dest: string): Promise<any> & cp.ProgressEmitter {
-    //     console.log('Generic.copy');
-    //     const prom: Promise<void> & cp.ProgressEmitter = new Promise((resolve, reject) => {
-    //         setTimeout(() => {
-    //             resolve();
-    //         }, 2000);
-    //     }) as Promise<void> & cp.ProgressEmitter;
+    async login(server?: string, credentials?: ICredentials): Promise<any> {
+        if (!this.connected) {
+            // TODO: use existing master ?
+            this.host = this.getHostname(server);
+            const loginOptions = Object.assign(credentials, { host: this.host });
+            console.log('connecting to', this.host, 'user=', loginOptions.user, 'password=', '***');
 
-    //     prom.on = (name, handler): Promise<void> => {
-    //         return prom;
-    //     }
+            // if (!this.master) {
+            this.master = new Client();
+            this.master.ftp.verbose = true;
+            // }
 
-    //     return prom;
-    // }
-
-    login(server?: string, credentials?: ICredentials): Promise<void> {
-        return Promise.resolve();
+            return this.master.access(loginOptions).then(() => {
+                this.loginOptions = loginOptions;
+                this.connected = true;
+            });
+        }
     }
 
     makedir(parent: string, dirName: string): Promise<string> {
@@ -91,23 +162,52 @@ class SimpleFtpApi implements FsApi {
         } as File);
     }
 
-    async list(dir: string): Promise<File[]> {
-        console.log('FsGeneric.readDirectory');
-        const pathExists = await this.isDir(dir);
+    list(path: string, appendParent = true): Promise<File[]> {
+        return new Promise(async (resolve, reject) => {
+            const newpath = this.pathpart(path);
+            try {
+                const ftpFiles: FileInfo[] = await this.master.list();
+                const files = ftpFiles.filter((ftpFile) => !ftpFile.name.match(/^[\.]{1,2}$/)).map((ftpFile) => {
+                    const format = nodePath.parse(ftpFile.name);
+                    const ext = format.ext.toLowerCase();
 
-        if (pathExists) {
-            return Promise.resolve([]);
-        } else {
-            Promise.reject('error');
-        }
-    }
+                    const file: File = {
+                        dir: path,
+                        name: ftpFile.name,
+                        fullname: ftpFile.name,
+                        isDir: ftpFile.isDirectory,
+                        length: ftpFile.size,
+                        cDate: new Date(ftpFile.date),
+                        mDate: new Date(ftpFile.date),
+                        extension: '',
+                        mode: 0,
+                        readonly: false,
+                        type: !ftpFile.isDirectory && filetype(0, ext) || '',
+                        isSym: false
+                    };
+                    return file;
+                });
 
-    free() {
+                if (appendParent && !this.isRoot(newpath)) {
+                    const parent = { ...Parent, dir: path };
 
+                    resolve([parent].concat(files));
+                } else {
+                    resolve(files);
+                }
+            } catch (err) {
+                reject(err);
+            }
+        });
     }
 
     isRoot(path: string): boolean {
-        return path === '/';
+        try {
+            const parsed = new URL(path);
+            return parsed.pathname === '/';
+        } catch (err) {
+            return path === '/';
+        }
     }
 
     get(path: string): Promise<string> {
@@ -115,6 +215,7 @@ class SimpleFtpApi implements FsApi {
     }
 
     async getStream(path: string, file: string): Promise<fs.ReadStream> {
+        debugger;
         try {
             const stream = fs.createReadStream(this.join(path, file));
             return Promise.resolve(stream);
@@ -125,6 +226,7 @@ class SimpleFtpApi implements FsApi {
     }
 
     async putStream(readStream: fs.ReadStream, dstPath: string, progress: (bytesRead: number) => void): Promise<void> {
+        debugger;
         return Promise.resolve();
     }
 
@@ -133,7 +235,23 @@ class SimpleFtpApi implements FsApi {
     }
 
     on(event: string, cb: (data: any) => void): void {
+        if (this.eventList.indexOf(event) < 0) {
+            this.eventList.push(event);
+        }
 
+        this.emitter.on(event, cb);
+    }
+
+    off() {
+        console.log('*** off');
+        // remove all listeners
+        for (let event of this.eventList) {
+            this.emitter.removeAllListeners(event);
+        }
+
+        // TODO: save this.master + this.loginOptions
+        // close any connections ?
+        // this.master.close();
     }
 };
 
@@ -156,7 +274,8 @@ export const FsSimpleFtp: Fs = {
         return {
             port: parseInt(info.port, 10) || 21,
             password: info.password,
-            user: info.username
+            user: info.username,
+            host: info.host
         };
     },
     API: SimpleFtpApi

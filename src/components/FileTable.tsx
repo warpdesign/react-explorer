@@ -189,7 +189,7 @@ export class FileTableClass extends React.Component<IProps, IState> {
     }
 
     private buildNodes = (files: File[]): ITableRow[] => {
-        console.log('** building nodes');
+        console.log('** building nodes', files.length);
         return files
             .sort((file1, file2) => {
                 if ((file2.isDir && !file1.isDir)) {

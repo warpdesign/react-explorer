@@ -669,7 +669,7 @@ class FtpAPI implements FsApi {
         }
     }
 
-    free() {
+    off() {
         console.log('*** free');
         // free client
         this.master.api = null;
@@ -770,7 +770,8 @@ export const FsFtp: Fs = {
         return {
             port: parseInt(info.port, 10) || 21,
             password: info.password,
-            user: info.username
+            user: info.username,
+            host: info.host
         };
     },
     API: FtpAPI

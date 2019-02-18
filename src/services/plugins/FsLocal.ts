@@ -272,7 +272,7 @@ class LocalApi implements FsApi {
         return !!path.match(isRoot);
     }
 
-    free() {
+    off() {
 
     }
 
@@ -355,7 +355,8 @@ export const FsLocal: Fs = {
         return {
             user: '',
             password: '',
-            port: 0
+            port: 0,
+            host: ''
         };
     },
     API: LocalApi

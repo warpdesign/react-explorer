@@ -102,7 +102,7 @@ class GenericApi implements FsApi {
         }
     }
 
-    free() {
+    off() {
 
     }
 
@@ -152,7 +152,8 @@ export const FsGeneric: Fs = {
         return {
             user: '',
             password: '',
-            port: 0
+            port: 0,
+            host: ''
         };
     },
     API: GenericApi

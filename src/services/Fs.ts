@@ -109,14 +109,15 @@ export interface FsApi {
     getStream(path: string, file: string): Promise<fs.ReadStream>;
     putStream(readStream: fs.ReadStream, dstPath: string, progress: (bytesRead: number) => void): Promise<void>;
     isRoot(path: string): boolean;
-    free(): void;
     on(event: string, cb: (data: any) => void): void;
+    off(): void;
     loginOptions: ICredentials;
 }
 
 const interfaces: Array<Fs> = new Array();
 
 export interface ICredentials {
+    host?: string;
     user?: string;
     password?: string;
     port?: number;
@@ -137,10 +138,44 @@ export function getFS(path: string): Fs {
     return newfs;
 }
 
+export function needsConnection(target: any, key: any, descriptor: any) {
+    // save a reference to the original method this way we keep the values currently in the
+    // descriptor and don't overwrite what another decorator might have done to the descriptor.
+    if (descriptor === undefined) {
+        descriptor = Object.getOwnPropertyDescriptor(target, key);
+    }
+    var originalMethod = descriptor.value;
+
+    //editing the descriptor/value parameter
+    descriptor.value = async function decorator(...args: any) {
+        // var args = [];
+        // for (var _i = 0; _i < arguments.length; _i++) {
+        //     args[_i - 0] = arguments[_i];
+        // }
+        // var a = args.map(function (a) { return JSON.stringify(a); }).join();
+        // note usage of originalMethod here
+        try {
+            await this.waitForConnection();
+        } catch (err) {
+            debugger;
+            return decorator.apply(this, args);
+        }
+
+        return originalMethod.apply(this, args);
+        // var result = originalMethod.apply(this, args);
+        // var r = JSON.stringify(result);
+        // console.log("Call: " + key + "(" + a + ") => " + r);
+        // return result;
+    };
+
+    // return edited descriptor as opposed to overwriting the descriptor
+    return descriptor;
+}
+
 // in test environment, load the generic fs as first one
 // if (ENV.CY) {
 //     registerFs(FsGeneric);
 // }
 registerFs(FsLocal);
-registerFs(FsFtp);
+// registerFs(FsFtp);
 registerFs(FsSimpleFtp);
