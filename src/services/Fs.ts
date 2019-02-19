@@ -157,6 +157,7 @@ export function needsConnection(target: any, key: any, descriptor: any) {
         try {
             await this.waitForConnection();
         } catch (err) {
+            console.log(err);
             debugger;
             return decorator.apply(this, args);
         }

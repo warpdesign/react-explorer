@@ -22,6 +22,8 @@ function join(path1: string, path2: string) {
     }
 }
 
+const ALIVE_CHECK = 5000;
+
 class Client {
     static instances = new Array<Client>();
     static getFreeClient(server: string, api: FsApi) {
@@ -38,7 +40,9 @@ class Client {
     static freeClient(client: Client) {
         const index = Client.instances.findIndex((c) => client === c);
         if (index > -1) {
-            Client.instances.splice(index, 1);
+            const removed = Client.instances.splice(index, 1);
+            // remove ref to api to avoid memory leak
+            removed[0].api = null;
         }
     }
     api: FsApi;
@@ -46,6 +50,7 @@ class Client {
     ftpClient: FtpClient;
     loginOptions: ICredentials;
     connected: boolean;
+    checkTimeout = 0;
 
     constructor(server: string, api: FsApi) {
         this.ftpClient = new FtpClient(0);
@@ -53,21 +58,54 @@ class Client {
         this.api = api;
     }
 
+    isConnected() {
+        return !this.ftpClient.closed && this.connected;
+    }
+
     login(server: string, loginOptions: ICredentials): Promise<any> {
         debugger;
-        if (!this.ftpClient.closed) {
+        if (this.ftpClient.closed) {
             debugger;
+            // TODO: get a new client right now!
+            // freeClient()
+            // this ftpClient = new Ftp
         }
         return this.ftpClient.access(loginOptions).then(() => {
-            debugger;
-            this.loginOptions = loginOptions;
-            this.connected = true;
-            this.server = server;
+            this.onLoggedIn(server, loginOptions);
         });
     }
 
-    close() {
+    onLoggedIn(server: string, loginOptions: ICredentials) {
+        this.loginOptions = loginOptions;
+        this.connected = true;
+        this.server = server;
+        // problem: this cannot be called while a task (list/cd/...) is already in progress
+        // this.scheduleNoOp();
+    }
 
+    scheduleNoOp() {
+        this.checkTimeout = window.setTimeout(() => {
+            this.checkConnection();
+        })
+    }
+
+    async checkConnection() {
+        try {
+            console.log('sending noop');
+            await this.ftpClient.send('NOOP');
+            this.scheduleNoOp();
+        } catch (err) {
+            debugger;
+            // TODO: remove client from the list ?
+        }
+    }
+
+    close() {
+        if (this.checkTimeout) {
+            window.clearInterval(this.checkTimeout);
+            this.checkTimeout = 0;
+        }
+        // TODO: remove from the list too ?
     }
 }
 
@@ -127,7 +165,7 @@ class SimpleFtpApi implements FsApi {
     };
 
     isConnected(): boolean {
-        return this.master && this.master.connected;
+        return this.master && this.master.isConnected();
     }
 
     cd(path: string): Promise<string> {
@@ -299,7 +337,7 @@ class SimpleFtpApi implements FsApi {
 
         if (this.master) {
             this.master.api = null;
-            this.master.close();
+            // this.master.close();
         }
         // TODO: save this.master + this.loginOptions
         // close any connections ?
