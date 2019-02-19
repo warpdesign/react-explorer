@@ -1,5 +1,5 @@
 import { FsApi, File, ICredentials, Fs, Parent, filetype } from '../Fs';
-import { Client, FileInfo } from 'basic-ftp';
+import { Client as FtpClient, FileInfo } from 'basic-ftp';
 import * as fs from 'fs';
 import { EventEmitter } from 'events';
 import * as nodePath from 'path';
@@ -22,6 +22,55 @@ function join(path1: string, path2: string) {
     }
 }
 
+class Client {
+    static instances = new Array<Client>();
+    static getFreeClient(server: string, api: FsApi) {
+        let instance = Client.instances.find((client) => client.server === server && !client.api);
+        if (!instance) {
+            instance = new Client(server, api);
+            Client.instances.push(instance);
+        } else {
+            instance.api = api;
+        }
+
+        return instance;
+    };
+    static freeClient(client: Client) {
+        const index = Client.instances.findIndex((c) => client === c);
+        if (index > -1) {
+            Client.instances.splice(index, 1);
+        }
+    }
+    api: FsApi;
+    server: string;
+    ftpClient: FtpClient;
+    loginOptions: ICredentials;
+    connected: boolean;
+
+    constructor(server: string, api: FsApi) {
+        this.ftpClient = new FtpClient(0);
+        this.server = server;
+        this.api = api;
+    }
+
+    login(server: string, loginOptions: ICredentials): Promise<any> {
+        debugger;
+        if (!this.ftpClient.closed) {
+            debugger;
+        }
+        return this.ftpClient.access(loginOptions).then(() => {
+            debugger;
+            this.loginOptions = loginOptions;
+            this.connected = true;
+            this.server = server;
+        });
+    }
+
+    close() {
+
+    }
+}
+
 class SimpleFtpApi implements FsApi {
     type = 1;
     master: Client;
@@ -29,15 +78,16 @@ class SimpleFtpApi implements FsApi {
     host = '';
     connected = false;
 
-    // master login promise
-    private readyPromise: Promise<any>;
-
     // events
     eventList = new Array<string>();
     emitter: EventEmitter;
 
     constructor(serverUrl: string) {
+        const serverpart = FsSimpleFtp.serverpart(serverUrl);
         debugger;
+        this.master = Client.getFreeClient(serverpart, this);
+        // TODO: get master if available
+        // and set connected to true *and* credentials
         this.emitter = new EventEmitter();
     }
 
@@ -77,14 +127,14 @@ class SimpleFtpApi implements FsApi {
     };
 
     isConnected(): boolean {
-        return this.connected;
+        return this.master && this.master.connected;
     }
 
     cd(path: string): Promise<string> {
         return new Promise(async (resolve, reject) => {
             const newpath = this.pathpart(path);
             try {
-                const res = await this.master.cd(newpath);
+                const res = await this.master.ftpClient.cd(newpath);
 
                 // if (dir) {
                 //     dir = dir.replace(/\\/g, '/');
@@ -109,15 +159,13 @@ class SimpleFtpApi implements FsApi {
             const loginOptions = Object.assign(credentials, { host: this.host });
             console.log('connecting to', this.host, 'user=', loginOptions.user, 'password=', '***');
 
+            debugger;
             // if (!this.master) {
-            this.master = new Client();
-            this.master.ftp.verbose = true;
+            // this.master = new Client();
+            // this.master.ftp.verbose = true;
             // }
 
-            return this.master.access(loginOptions).then(() => {
-                this.loginOptions = loginOptions;
-                this.connected = true;
-            });
+            return this.master.login(server, loginOptions);
         }
     }
 
@@ -166,7 +214,7 @@ class SimpleFtpApi implements FsApi {
         return new Promise(async (resolve, reject) => {
             const newpath = this.pathpart(path);
             try {
-                const ftpFiles: FileInfo[] = await this.master.list();
+                const ftpFiles: FileInfo[] = await this.master.ftpClient.list();
                 const files = ftpFiles.filter((ftpFile) => !ftpFile.name.match(/^[\.]{1,2}$/)).map((ftpFile) => {
                     const format = nodePath.parse(ftpFile.name);
                     const ext = format.ext.toLowerCase();
@@ -249,6 +297,10 @@ class SimpleFtpApi implements FsApi {
             this.emitter.removeAllListeners(event);
         }
 
+        if (this.master) {
+            this.master.api = null;
+            this.master.close();
+        }
         // TODO: save this.master + this.loginOptions
         // close any connections ?
         // this.master.close();

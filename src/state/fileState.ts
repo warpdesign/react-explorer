@@ -95,7 +95,6 @@ export class FileState {
 
     private saveContext() {
         this.prevServer = this.server;
-        this.freeFsEvents();
         this.prevApi = this.api;
         this.prevFs = this.fs;
     }
@@ -114,7 +113,9 @@ export class FileState {
     }
 
     private freeFsEvents() {
-        this.api.off();
+        if (this.api) {
+            this.api.off();
+        }
     }
 
     private getNewFS(path: string, skipContext = false): Fs {
@@ -123,6 +124,8 @@ export class FileState {
         if (newfs) {
             !skipContext && this.api && this.saveContext();
 
+            // we need to free events in any case
+            this.freeFsEvents();
             this.fs = newfs;
             this.api = new newfs.API(path);
             this.bindFsEvents();
@@ -401,11 +404,11 @@ export class FileState {
 
     @needsConnection
     async size(source: string, files: string[]): Promise<number> {
-        try {
-            await this.waitForConnection();
-        } catch (err) {
-            return this.size(source, files);
-        }
+        // try {
+        //     await this.waitForConnection();
+        // } catch (err) {
+        //     return this.size(source, files);
+        // }
 
         return this.api.size(source, files)
             .catch(this.handleError)
@@ -413,11 +416,11 @@ export class FileState {
 
     @needsConnection
     async get(path: string, file: string): Promise<string> {
-        try {
-            await this.waitForConnection();
-        } catch (err) {
-            return this.get(path, file);
-        }
+        // try {
+        //     await this.waitForConnection();
+        // } catch (err) {
+        //     return this.get(path, file);
+        // }
 
         return this.api.get(path, file).then((path) => {
             this.status = 'ok';
