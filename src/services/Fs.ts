@@ -117,7 +117,6 @@ export interface FsApi {
 const interfaces: Array<Fs> = new Array();
 
 export interface ICredentials {
-    host?: string;
     user?: string;
     password?: string;
     port?: number;
@@ -148,25 +147,16 @@ export function needsConnection(target: any, key: any, descriptor: any) {
 
     //editing the descriptor/value parameter
     descriptor.value = async function decorator(...args: any) {
-        // var args = [];
-        // for (var _i = 0; _i < arguments.length; _i++) {
-        //     args[_i - 0] = arguments[_i];
-        // }
-        // var a = args.map(function (a) { return JSON.stringify(a); }).join();
-        // note usage of originalMethod here
         try {
             await this.waitForConnection();
         } catch (err) {
             console.log(err);
+            // TODO: do not recall decorator if no internet
             debugger;
             return decorator.apply(this, args);
         }
 
         return originalMethod.apply(this, args);
-        // var result = originalMethod.apply(this, args);
-        // var r = JSON.stringify(result);
-        // console.log("Call: " + key + "(" + a + ") => " + r);
-        // return result;
     };
 
     // return edited descriptor as opposed to overwriting the descriptor

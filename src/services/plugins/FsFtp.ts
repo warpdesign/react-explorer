@@ -770,8 +770,7 @@ export const FsFtp: Fs = {
         return {
             port: parseInt(info.port, 10) || 21,
             password: info.password,
-            user: info.username,
-            host: info.host
+            user: info.username
         };
     },
     API: FtpAPI

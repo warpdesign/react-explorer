@@ -152,8 +152,7 @@ export const FsGeneric: Fs = {
         return {
             user: '',
             password: '',
-            port: 0,
-            host: ''
+            port: 0
         };
     },
     API: GenericApi

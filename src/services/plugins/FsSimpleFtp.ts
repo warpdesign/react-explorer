@@ -22,11 +22,30 @@ function join(path1: string, path2: string) {
     }
 }
 
-const ALIVE_CHECK = 5000;
+function canTimeout(target: any, key: any, descriptor: any) {
+    if (descriptor === undefined) {
+        descriptor = Object.getOwnPropertyDescriptor(target, key);
+    }
+    var originalMethod = descriptor.value;
+
+    descriptor.value = function decorator(...args: any) {
+        return originalMethod.apply(this, args).catch(async (err: Error) => {
+            if (this.ftpClient.closed) {
+                console.warn('timeout detected: attempt to get a new client and reconnect');
+                await this.getNewFtpClient();
+                console.log('after new client', this.ftpClient, this.ftpClient.closed);
+                return decorator.apply(this, args);
+            } else {
+                console.log('caught error but client not closed ?', err);
+                return Promise.reject(err);
+            }
+        });
+    }
+}
 
 class Client {
     static instances = new Array<Client>();
-    static getFreeClient(server: string, api: FsApi) {
+    static getFreeClient(server: string, api: SimpleFtpApi) {
         let instance = Client.instances.find((client) => client.server === server && !client.api);
         if (!instance) {
             instance = new Client(server, api);
@@ -45,34 +64,41 @@ class Client {
             removed[0].api = null;
         }
     }
-    api: FsApi;
+    api: SimpleFtpApi;
     server: string;
     ftpClient: FtpClient;
     loginOptions: ICredentials;
     connected: boolean;
     checkTimeout = 0;
 
-    constructor(server: string, api: FsApi) {
-        this.ftpClient = new FtpClient(0);
+    constructor(server: string, api: SimpleFtpApi) {
+        this.ftpClient = new FtpClient();
+        this.ftpClient.ftp.verbose = true;
         this.server = server;
         this.api = api;
     }
 
     isConnected() {
-        return !this.ftpClient.closed && this.connected;
+        return /*!this.ftpClient.closed && */this.connected;
     }
 
-    login(server: string, loginOptions: ICredentials): Promise<any> {
-        debugger;
-        if (this.ftpClient.closed) {
-            debugger;
-            // TODO: get a new client right now!
-            // freeClient()
-            // this ftpClient = new Ftp
+    async login(server: string, loginOptions: ICredentials): Promise<any> {
+        const host = this.api.getHostname(server);
+        const socketConnected = this.ftpClient.ftp.socket.bytesRead !== 0;
+        console.log('canTimeout/login()', server, loginOptions, socketConnected);
+
+        //     // WORKAROUND: FtpError 530 causes any subsequent call to access
+        //     // to throw a ISCONN error, prevent any login to be successful
+        //     // to avoid that we automatically create and use a new client in this case        
+        // assume there is no connection: we may call access
+        if (!socketConnected) {
+            await this.ftpClient.access(Object.assign(loginOptions, { host }));
+            await this.onLoggedIn(server, loginOptions);
+        } else {
+            await this.ftpClient.login(loginOptions.user, loginOptions.password);
+            await this.ftpClient.useDefaultSettings();
+            await this.onLoggedIn(server, loginOptions);
         }
-        return this.ftpClient.access(loginOptions).then(() => {
-            this.onLoggedIn(server, loginOptions);
-        });
     }
 
     onLoggedIn(server: string, loginOptions: ICredentials) {
@@ -83,29 +109,48 @@ class Client {
         // this.scheduleNoOp();
     }
 
-    scheduleNoOp() {
-        this.checkTimeout = window.setTimeout(() => {
-            this.checkConnection();
-        })
-    }
+    // scheduleNoOp() {
+    //     this.checkTimeout = window.setTimeout(() => {
+    //         this.checkConnection();
+    //     })
+    // }
 
-    async checkConnection() {
-        try {
-            console.log('sending noop');
-            await this.ftpClient.send('NOOP');
-            this.scheduleNoOp();
-        } catch (err) {
-            debugger;
-            // TODO: remove client from the list ?
-        }
-    }
+    // async checkConnection() {
+    //     try {
+    //         console.log('sending noop');
+    //         await this.ftpClient.send('NOOP');
+    //         this.scheduleNoOp();
+    //     } catch (err) {
+    //         debugger;
+    //         // TODO: remove client from the list ?
+    //     }
+    // }
 
     close() {
-        if (this.checkTimeout) {
-            window.clearInterval(this.checkTimeout);
-            this.checkTimeout = 0;
-        }
+        // if (this.checkTimeout) {
+        //     window.clearInterval(this.checkTimeout);
+        //     this.checkTimeout = 0;
+        // }
         // TODO: remove from the list too ?
+    }
+
+    async getNewFtpClient() {
+        this.ftpClient = new FtpClient();
+        this.ftpClient.ftp.verbose = true;
+        return this.login(this.server, this.loginOptions);
+    }
+
+    /* API mirror starts here */
+    @canTimeout
+    list(): Promise<FileInfo[]> {
+        console.log('Client.list()');
+        return this.ftpClient.list();
+    }
+
+    @canTimeout
+    cd(path: string) {
+        console.log('Client.cd()');
+        return this.ftpClient.cd(path);
     }
 }
 
@@ -113,7 +158,7 @@ class SimpleFtpApi implements FsApi {
     type = 1;
     master: Client;
     loginOptions: ICredentials = null;
-    host = '';
+    server = '';
     connected = false;
 
     // events
@@ -122,7 +167,7 @@ class SimpleFtpApi implements FsApi {
 
     constructor(serverUrl: string) {
         const serverpart = FsSimpleFtp.serverpart(serverUrl);
-        debugger;
+
         this.master = Client.getFreeClient(serverpart, this);
         // TODO: get master if available
         // and set connected to true *and* credentials
@@ -165,6 +210,9 @@ class SimpleFtpApi implements FsApi {
     };
 
     isConnected(): boolean {
+        if (!(this.master && this.master.isConnected())) {
+            console.log('not connected');
+        }
         return this.master && this.master.isConnected();
     }
 
@@ -172,7 +220,7 @@ class SimpleFtpApi implements FsApi {
         return new Promise(async (resolve, reject) => {
             const newpath = this.pathpart(path);
             try {
-                const res = await this.master.ftpClient.cd(newpath);
+                const res = await this.master.cd(newpath);
 
                 // if (dir) {
                 //     dir = dir.replace(/\\/g, '/');
@@ -190,20 +238,18 @@ class SimpleFtpApi implements FsApi {
         return Promise.resolve(10);
     }
 
-    async login(server?: string, credentials?: ICredentials): Promise<any> {
+    login(server?: string, credentials?: ICredentials): Promise<any> {
         if (!this.connected) {
             // TODO: use existing master ?
-            this.host = this.getHostname(server);
-            const loginOptions = Object.assign(credentials, { host: this.host });
-            console.log('connecting to', this.host, 'user=', loginOptions.user, 'password=', '***');
+            const loginOptions = credentials || this.loginOptions;
+            const newServer = server || this.server;
+            console.log('connecting to', newServer, 'user=', loginOptions.user, 'password=', '***');
 
-            debugger;
-            // if (!this.master) {
-            // this.master = new Client();
-            // this.master.ftp.verbose = true;
-            // }
-
-            return this.master.login(server, loginOptions);
+            return this.master.login(newServer, loginOptions).then(() => {
+                console.log('connected');
+                this.loginOptions = loginOptions;
+                this.server = newServer;
+            });
         }
     }
 
@@ -251,8 +297,9 @@ class SimpleFtpApi implements FsApi {
     list(path: string, appendParent = true): Promise<File[]> {
         return new Promise(async (resolve, reject) => {
             const newpath = this.pathpart(path);
+
             try {
-                const ftpFiles: FileInfo[] = await this.master.ftpClient.list();
+                const ftpFiles: FileInfo[] = await this.master.list();
                 const files = ftpFiles.filter((ftpFile) => !ftpFile.name.match(/^[\.]{1,2}$/)).map((ftpFile) => {
                     const format = nodePath.parse(ftpFile.name);
                     const ext = format.ext.toLowerCase();
@@ -297,6 +344,7 @@ class SimpleFtpApi implements FsApi {
     }
 
     get(path: string): Promise<string> {
+        debugger;
         return Promise.resolve(path);
     }
 
@@ -364,8 +412,7 @@ export const FsSimpleFtp: Fs = {
         return {
             port: parseInt(info.port, 10) || 21,
             password: info.password,
-            user: info.username,
-            host: info.host
+            user: info.username
         };
     },
     API: SimpleFtpApi

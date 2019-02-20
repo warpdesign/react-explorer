@@ -355,8 +355,7 @@ export const FsLocal: Fs = {
         return {
             user: '',
             password: '',
-            port: 0,
-            host: ''
+            port: 0
         };
     },
     API: LocalApi

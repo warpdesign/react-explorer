@@ -71,7 +71,6 @@ export class FileState {
         const path = history[current + dir];
         if (path !== this.path || force) {
             console.log('opening path from history', path);
-            debugger;
             this.cd(path, '', true, true);
         } else {
             console.warn('preventing endless loop');
@@ -171,7 +170,6 @@ export class FileState {
 
             // automatially reconnect if we got credentials
             if (this.api.loginOptions) {
-                debugger;
                 this.doLogin();
             } else {
                 // otherwise show login dialog
@@ -260,7 +258,7 @@ export class FileState {
                 break;
 
             case 550:
-                error.message = i18next.t('ERRORS.550', { message: error.message });
+                error.message = i18next.t('ERRORS.550');
                 break;
 
             default:
@@ -283,7 +281,6 @@ export class FileState {
         console.log('cd', path, this.path);
 
         if (this.path !== path) {
-            debugger;
             if (this.getNewFS(path, skipContext)) {
                 this.server = this.fs.serverpart(path);
                 this.credentials = this.fs.credentials(path);
@@ -451,7 +448,6 @@ export class FileState {
     }
 
     openDirectory(file: File) {
-        debugger;
         console.log('need to read dir', file.dir, file.fullname);
         return this.cd(file.dir, file.fullname).catch(this.handleError);
     }
