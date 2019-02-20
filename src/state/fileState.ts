@@ -159,7 +159,7 @@ export class FileState {
         // into an infinite loop
         if (this.api.isConnected()) {
             this.navHistory(0);
-            this.status = 'ok';
+            this.setStatus('ok');
         }
     }
 
@@ -173,12 +173,12 @@ export class FileState {
                 this.doLogin();
             } else {
                 // otherwise show login dialog
-                this.status = 'login';
+                this.setStatus('login');
             }
 
             return this.loginDefer.promise;
         } else {
-            this.status = 'busy';
+            this.setStatus('busy');
             return Promise.resolve();
         }
     }
@@ -187,7 +187,7 @@ export class FileState {
 
     @action
     onLoginSuccess() {
-        this.status = 'ok';
+        this.setStatus('ok');
         this.loginDefer.resolve();
     }
 
@@ -203,8 +203,8 @@ export class FileState {
             await this.api.login(server, credentials);
             this.onLoginSuccess();
         } catch (err) {
-            this.setErrorString(err);
-            this.loginDefer.reject(err);
+            const error = this.getLocalizedError(err);
+            this.loginDefer.reject(error);
         }
         // .then(() => ).catch((err) => {
         //     console.log('error while connecting', err);
@@ -222,57 +222,75 @@ export class FileState {
         this.navHistory(0, true);
     }
 
-    setErrorString(error: any) {
+    getLocalizedError(error: any) {
+        let niceError = error;
+
         if (typeof error.code === 'undefined') {
             debugger;
-            error.code = 'NOCODE';
-        }
-        console.log(error.stack);
+            niceError = {};
 
-        switch (error.code) {
+            switch (true) {
+                case /EHOSTDOWN/.test(error):
+                    niceError.code = 'EHOSTDOWN';
+                    break;
+
+                default:
+                    niceError.code = 'NOCODE';
+                    break;
+            }
+        }
+
+        switch (niceError.code) {
             case 'ENOTFOUND':
                 debugger;
-                error.message = i18next.t('ERRORS.ENOTFOUND');
+                niceError.message = i18next.t('ERRORS.ENOTFOUND');
                 break;
 
             case 'ECONNREFUSED':
-                error.message = i18next.t('ERRORS.ECONNREFUSED');
+                niceError.message = i18next.t('ERRORS.ECONNREFUSED');
                 break;
 
             case 'ENOENT':
-                error.message = i18next.t('ERRORS.ENOENT');
+                niceError.message = i18next.t('ERRORS.ENOENT');
                 break;
 
             case 'EPERM':
-                error.message = i18next.t('ERRORS.EPERM');
+                niceError.message = i18next.t('ERRORS.EPERM');
                 break;
 
             case 'BAD_FILENAME':
                 const acceptedChars = isWin ? i18next.t('ERRORS.WIN_VALID_FILENAME') : i18next.t('ERRORS.UNIX_VALID_FILENAME');
 
-                error.message = i18next.t('ERRORS.BAD_FILENAME', { entry: error.newName }) + '. ' + acceptedChars;
+                niceError.message = i18next.t('ERRORS.BAD_FILENAME', { entry: error.newName }) + '. ' + acceptedChars;
+                break;
+
+            case 'EHOSTDOWN':
+                niceError.message = i18next.t('ERRORS.EHOSTDOWN');
                 break;
 
             case 530:
-                error.message = i18next.t('ERRORS.530');
+                niceError.message = i18next.t('ERRORS.530');
                 break;
 
             case 550:
-                error.message = i18next.t('ERRORS.550');
+                niceError.message = i18next.t('ERRORS.550');
                 break;
 
             default:
                 debugger;
-                error.message = i18next.t('ERRORS.UNKNOWN');
+                niceError.message = i18next.t('ERRORS.UNKNOWN');
                 break;
         }
+
+        return niceError;
     }
 
     handleError = (error: any) => {
         console.log('handleError', error);
-        this.status = 'ok';
-        this.setErrorString(error);
-        return Promise.reject(error);
+        this.setStatus('ok');
+        const niceError = this.getLocalizedError(error);
+        console.log('orignalCode', error.code, 'newCode', niceError.code);
+        return Promise.reject(niceError);
     }
 
     @action
@@ -313,10 +331,10 @@ export class FileState {
             })
             .catch((error) => {
                 console.log('path not valid ?', joint, 'restoring previous path');
-                this.status = 'ok';
+                this.setStatus('ok');
                 this.navHistory(0);
-                this.setErrorString(error);
-                return Promise.reject(error);
+                const localizedError = this.getLocalizedError(error);
+                return Promise.reject(localizedError);
             });
     }
 
@@ -332,7 +350,7 @@ export class FileState {
                     this.clearSelection();
                     // TODO: sync caches ?
 
-                    this.status = 'ok';
+                    this.setStatus('ok');
                 });
 
                 return files;
@@ -352,7 +370,7 @@ export class FileState {
         return this.api.rename(source, file, newName).then((newName: string) => {
             runInAction(() => {
                 file.fullname = newName;
-                this.status = 'ok';
+                this.setStatus('ok');
             });
 
             return newName;
@@ -366,7 +384,7 @@ export class FileState {
         // await this.waitForConnection();
         return this.api.exists(path).then((exists) => {
             runInAction(() => {
-                this.status = 'ok';
+                this.setStatus('ok');
             });
             return exists;
         })
@@ -378,7 +396,7 @@ export class FileState {
     async makedir(parent: string, dirName: string): Promise<string> {
         return this.api.makedir(parent, dirName).then((newDir) => {
             runInAction(() => {
-                this.status = 'ok';
+                this.setStatus('ok');
             });
 
             return newDir;
@@ -391,7 +409,7 @@ export class FileState {
     async delete(source: string, files: File[]): Promise<number> {
         return this.api.delete(source, files).then((num) => {
             runInAction(() => {
-                this.status = 'ok';
+                this.setStatus('ok');
             });
 
             return num;
@@ -420,7 +438,7 @@ export class FileState {
         // }
 
         return this.api.get(path, file).then((path) => {
-            this.status = 'ok';
+            this.setStatus('ok');
             return path;
         })
             .catch(this.handleError)

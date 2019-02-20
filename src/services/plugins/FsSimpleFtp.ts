@@ -29,12 +29,24 @@ function canTimeout(target: any, key: any, descriptor: any) {
     var originalMethod = descriptor.value;
 
     descriptor.value = function decorator(...args: any) {
+        console.log('canTimeout:', key, '()');
         return originalMethod.apply(this, args).catch(async (err: Error) => {
+            console.log('key', key);
+            debugger;
             if (this.ftpClient.closed) {
+                const isLogin = key === 'login';
                 console.warn('timeout detected: attempt to get a new client and reconnect');
-                await this.getNewFtpClient();
+                // if we are in the login process, do not attempt to login again, only create a new client
+                await this.getNewFtpClient(!isLogin);
                 console.log('after new client', this.ftpClient, this.ftpClient.closed);
-                return decorator.apply(this, args);
+                // do not recall the login process otherwise we could end up in an infinite loop
+                // in case internet is down or EPIPE error
+                if (!isLogin) {
+                    console.log('calling decorator again');
+                    return decorator.apply(this, args);
+                } else {
+                    return Promise.reject(err);
+                }
             } else {
                 console.log('caught error but client not closed ?', err);
                 return Promise.reject(err);
@@ -69,7 +81,6 @@ class Client {
     ftpClient: FtpClient;
     loginOptions: ICredentials;
     connected: boolean;
-    checkTimeout = 0;
 
     constructor(server: string, api: SimpleFtpApi) {
         this.ftpClient = new FtpClient();
@@ -82,15 +93,17 @@ class Client {
         return /*!this.ftpClient.closed && */this.connected;
     }
 
+    @canTimeout
     async login(server: string, loginOptions: ICredentials): Promise<any> {
         const host = this.api.getHostname(server);
         const socketConnected = this.ftpClient.ftp.socket.bytesRead !== 0;
-        console.log('canTimeout/login()', server, loginOptions, socketConnected);
+        debugger;
+        console.log('canTimeout/login()', server, loginOptions, "socketConnected", socketConnected, "ftp.closed", this.ftpClient.closed);
 
-        //     // WORKAROUND: FtpError 530 causes any subsequent call to access
-        //     // to throw a ISCONN error, prevent any login to be successful
-        //     // to avoid that we automatically create and use a new client in this case        
-        // assume there is no connection: we may call access
+        // WORKAROUND: FtpError 530 causes any subsequent call to access
+        // to throw a ISCONN error, preventing any login to be successful.
+        // To avoid that we detect that the client is already connected
+        // and only call login()/useDefaultSettings() in that case
         if (!socketConnected) {
             await this.ftpClient.access(Object.assign(loginOptions, { host }));
             await this.onLoggedIn(server, loginOptions);
@@ -134,10 +147,15 @@ class Client {
         // TODO: remove from the list too ?
     }
 
-    async getNewFtpClient() {
+    async getNewFtpClient(login = true) {
+        console.log('creating new FtpClient');
         this.ftpClient = new FtpClient();
         this.ftpClient.ftp.verbose = true;
-        return this.login(this.server, this.loginOptions);
+
+        if (login) {
+            console.log('calling login');
+            return this.login(this.server, this.loginOptions);
+        }
     }
 
     /* API mirror starts here */

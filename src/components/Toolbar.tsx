@@ -370,7 +370,7 @@ export class ToolbarClass extends React.Component<IProps, PathInputState> {
 
     private renderTooltip() {
         const { t } = this.props;
-        let localExample = isWin ? t('TOOLTIP.PATH.EXAMPLE_WIN') : isMac && t('TOOLTIP.PATH.EXAMPLE_MAC') || t('TOOLTIP.PATH.EXAMPLE_UNIX');
+        let localExample = isWin ? t('TOOLTIP.PATH.EXAMPLE_WIN') : isMac && t('TOOLTIP.PATH.EXAMPLE_MAC') || t('TOOLTIP.PATH.EXAMPLE_LINUX');
 
         return (
             <div>
@@ -417,7 +417,7 @@ export class ToolbarClass extends React.Component<IProps, PathInputState> {
                         <Button rightIcon="caret-down" icon="cog" text="" />
                     </Popover>
                 </ButtonGroup>
-                <Tooltip content={this.renderTooltip()} position={Position.RIGHT} hoverOpenDelay={1500} openOnTargetFocus={false} isOpen={isTooltipOpen}>
+                <Tooltip content={this.renderTooltip()} position={Position.BOTTOM} hoverOpenDelay={1500} openOnTargetFocus={false} isOpen={isTooltipOpen}>
                     <InputGroup
                         data-cy-path
                         onChange={this.onPathChange}

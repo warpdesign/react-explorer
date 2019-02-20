@@ -15,8 +15,8 @@ function installReactDevTools() {
     const { default: installExtension, REACT_DEVELOPER_TOOLS } = require('electron-devtools-installer');
 
     installExtension(REACT_DEVELOPER_TOOLS)
-      .then((name:any) => console.log(`Added Extension:  ${name}`))
-      .catch((err: any) => console.log('An error occurred: ', err));
+        .then((name: any) => console.log(`Added Extension:  ${name}`))
+        .catch((err: any) => console.log('An error occurred: ', err));
 }
 
 function installWatcher(path: string) {
@@ -25,7 +25,7 @@ function installWatcher(path: string) {
 
 function reloadApp() {
     if (mainWindow) {
-        mainWindow.webContents.session.clearCache(function(){
+        mainWindow.webContents.session.clearCache(function () {
             mainWindow.webContents.reloadIgnoringCache();
         });
     }
@@ -35,7 +35,7 @@ let forceExit = false;
 
 function installExitListeners() {
     let exitWindow: BrowserWindow = null;
-    let timeout:any = 0;
+    let timeout: any = 0;
 
     ipcMain.on('reloadIgnoringCache', reloadApp);
 
