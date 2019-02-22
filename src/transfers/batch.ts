@@ -141,12 +141,12 @@ export class Batch {
         if (!transfer.file.isDir) {
             try {
                 console.log('getting stream', srcPath, wantedName);
-                const stream = await srcFs.getStream(srcPath, wantedName);
+                const stream = await srcFs.getStream(srcPath, wantedName, this.id);
                 console.log('sending to stream', dstFs.join(fullDstPath, newFilename));
                 await dstFs.putStream(stream, dstFs.join(fullDstPath, newFilename), (bytesRead: number) => {
                     // console.log('read', bytesRead);
                     this.onData(transfer, bytesRead);
-                });
+                }), this.id;
                 console.log('finished writing file', newFilename);
                 transfer.status = 'done';
             } catch (err) {
@@ -182,7 +182,7 @@ export class Batch {
         let stats = null;
         let exists = false;
         try {
-            stats = await this.dstFs.stat(dirPath);
+            stats = await this.dstFs.stat(dirPath, this.id);
             exists = true;
         } catch (err) {
             // TODO: handle permission denied and other errors ?
@@ -196,14 +196,14 @@ export class Batch {
             // directory already exists: for now, simply use it
             if (!exists) {
                 // TODO: handle error
-                const newDir = await dstFs.makedir(dstPath, newName);
+                const newDir = await dstFs.makedir(dstPath, newName, this.id);
             } else if (!stats.isDir) {
                 // exists but is a file: attempt to create a directory with newName
                 let success = false;
                 while (!success) {
                     newName = wantedName + RENAME_SUFFIX + i++;
                     try {
-                        await dstFs.makedir(dstPath, newName);
+                        await dstFs.makedir(dstPath, newName, this.id);
                         success = true;
                     } catch (err) {
                         debugger;
@@ -232,7 +232,7 @@ export class Batch {
             newName = split.join('.');
             const tmpPath = this.dstFs.join(this.dstPath, newName);
             try {
-                exists = await this.dstFs.exists(tmpPath);
+                exists = await this.dstFs.exists(tmpPath, this.id);
             } catch (err) {
                 debugger;
                 exists = false;

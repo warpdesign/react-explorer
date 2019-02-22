@@ -57,10 +57,10 @@ function canTimeout(target: any, key: any, descriptor: any) {
 
 class Client {
     static instances = new Array<Client>();
-    static getFreeClient(server: string, api: SimpleFtpApi) {
-        let instance = Client.instances.find((client) => client.server === server && !client.api);
+    static getFreeClient(server: string, api: SimpleFtpApi, transferId = -1) {
+        let instance = Client.instances.find((client) => client.server === server && !client.api && client.transferId === transferId);
         if (!instance) {
-            instance = new Client(server, api);
+            instance = new Client(server, api, transferId);
             Client.instances.push(instance);
         } else {
             instance.api = api;
@@ -78,15 +78,17 @@ class Client {
     }
     api: SimpleFtpApi;
     server: string;
+    transferId: number;
     ftpClient: FtpClient;
     loginOptions: ICredentials;
     connected: boolean;
 
-    constructor(server: string, api: SimpleFtpApi) {
+    constructor(server: string, api: SimpleFtpApi, transferId = -1) {
         this.ftpClient = new FtpClient();
         this.ftpClient.ftp.verbose = true;
         this.server = server;
         this.api = api;
+        this.transferId = transferId;
     }
 
     isConnected() {
@@ -183,6 +185,16 @@ class SimpleFtpApi implements FsApi {
     eventList = new Array<string>();
     emitter: EventEmitter;
 
+    async getClient(transferId = -1) {
+        if (transferId > -1) {
+            const client = Client.getFreeClient(this.master.server, this, transferId);
+            await client.login(this.server, this.loginOptions);
+            return client;
+        } else {
+            return this.master;
+        }
+    }
+
     constructor(serverUrl: string) {
         const serverpart = FsSimpleFtp.serverpart(serverUrl);
 
@@ -234,10 +246,11 @@ class SimpleFtpApi implements FsApi {
         return this.master && this.master.isConnected();
     }
 
-    cd(path: string): Promise<string> {
+    cd(path: string, transferId = -1): Promise<string> {
         return new Promise(async (resolve, reject) => {
             const newpath = this.pathpart(path);
             try {
+                const client = await this.getClient(transferId);
                 const res = await this.master.cd(newpath);
 
                 // if (dir) {
@@ -251,7 +264,7 @@ class SimpleFtpApi implements FsApi {
         });
     }
 
-    size(source: string, files: string[]): Promise<number> {
+    size(source: string, files: string[], transferId = -1): Promise<number> {
         console.log('GenericFs.size');
         return Promise.resolve(10);
     }
@@ -271,32 +284,32 @@ class SimpleFtpApi implements FsApi {
         }
     }
 
-    makedir(parent: string, dirName: string): Promise<string> {
+    makedir(parent: string, dirName: string, transferId = -1): Promise<string> {
         console.log('FsGeneric.makedir');
         return Promise.resolve('');
     }
 
-    delete(src: string, files: File[]): Promise<number> {
+    delete(src: string, files: File[], transferId = -1): Promise<number> {
         console.log('FsGeneric.delete');
         return Promise.resolve(files.length);
     }
 
-    rename(source: string, file: File, newName: string): Promise<string> {
+    rename(source: string, file: File, newName: string, transferId = -1): Promise<string> {
         console.log('FsGeneric.rename');
         return Promise.resolve(newName);
     }
 
-    isDir(path: string): Promise<boolean> {
+    isDir(path: string, transferId = -1): Promise<boolean> {
         console.log('FsGeneric.isDir');
         return Promise.resolve(true);
     }
 
-    exists(path: string): Promise<boolean> {
+    exists(path: string, transferId = -1): Promise<boolean> {
         console.log('FsGeneric.exists');
         return Promise.resolve(true);
     }
 
-    async stat(fullPath: string): Promise<File> {
+    async stat(fullPath: string, transferId = -1): Promise<File> {
         return Promise.resolve({
             dir: '',
             fullname: '',
@@ -312,12 +325,13 @@ class SimpleFtpApi implements FsApi {
         } as File);
     }
 
-    list(path: string, appendParent = true): Promise<File[]> {
+    list(path: string, appendParent = true, transferId = -1): Promise<File[]> {
         return new Promise(async (resolve, reject) => {
             const newpath = this.pathpart(path);
 
             try {
-                const ftpFiles: FileInfo[] = await this.master.list();
+                const client = await this.getClient(transferId);
+                const ftpFiles: FileInfo[] = await client.list();
                 const files = ftpFiles.filter((ftpFile) => !ftpFile.name.match(/^[\.]{1,2}$/)).map((ftpFile) => {
                     const format = nodePath.parse(ftpFile.name);
                     const ext = format.ext.toLowerCase();
@@ -361,12 +375,12 @@ class SimpleFtpApi implements FsApi {
         }
     }
 
-    get(path: string): Promise<string> {
+    get(path: string, file: string, transferId = -1): Promise<string> {
         debugger;
         return Promise.resolve(path);
     }
 
-    async getStream(path: string, file: string): Promise<fs.ReadStream> {
+    async getStream(path: string, file: string, transferId = -1): Promise<fs.ReadStream> {
         debugger;
         try {
             const stream = fs.createReadStream(this.join(path, file));
@@ -377,7 +391,7 @@ class SimpleFtpApi implements FsApi {
         };
     }
 
-    async putStream(readStream: fs.ReadStream, dstPath: string, progress: (bytesRead: number) => void): Promise<void> {
+    async putStream(readStream: fs.ReadStream, dstPath: string, progress: (bytesRead: number) => void, transferId = -1): Promise<void> {
         debugger;
         return Promise.resolve();
     }

@@ -89,25 +89,26 @@ export function filetype(mode: number, extension: string): FileType {
 
 export interface FsApi {
     // public API
-    list(dir: string, appendParent?: boolean): Promise<File[]>;
-    cd(path: string): Promise<string>;
-    delete(parent: string, files: File[]): Promise<number>;
-    // copy(parent: string, files: string[], dest: string): Promise<number> & cp.ProgressEmitter;
-    join(...paths: string[]): string;
-    makedir(parent: string, name: string): Promise<string>;
-    rename(parent: string, file: File, name: string): Promise<string>;
-    stat(path: string): Promise<File>;
-    isDir(path: string): Promise<boolean>;
-    exists(path: string): Promise<boolean>;
+    // async methods that may require server access
+    list(dir: string, appendParent?: boolean, transferId?: number): Promise<File[]>;
+    cd(path: string, transferId?: number): Promise<string>;
+    delete(parent: string, files: File[], transferId?: number): Promise<number>;
+    makedir(parent: string, name: string, transferId?: number): Promise<string>;
+    rename(parent: string, file: File, name: string, transferId?: number): Promise<string>;
+    stat(path: string, transferId?: number): Promise<File>;
+    isDir(path: string, transferId?: number): Promise<boolean>;
+    exists(path: string, transferId?: number): Promise<boolean>;
+    size(source: string, files: string[], transferId?: number): Promise<number>;
+    get(path: string, file: string, transferId?: number): Promise<string>;
+    getStream(path: string, file: string, transferId?: number): Promise<fs.ReadStream>;
+    putStream(readStream: fs.ReadStream, dstPath: string, progress: (bytesRead: number) => void, transferId?: number): Promise<void>;
+
     resolve(path: string): string;
     sanityze(path: string): string;
-    size(source: string, files: string[]): Promise<number>;
+    join(...paths: string[]): string;
     login(server?: string, credentials?: ICredentials): Promise<void>;
     isConnected(): boolean;
     isDirectoryNameValid(dirName: string): boolean;
-    get(path: string, file: string): Promise<string>;
-    getStream(path: string, file: string): Promise<fs.ReadStream>;
-    putStream(readStream: fs.ReadStream, dstPath: string, progress: (bytesRead: number) => void): Promise<void>;
     isRoot(path: string): boolean;
     on(event: string, cb: (data: any) => void): void;
     off(): void;

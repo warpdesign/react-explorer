@@ -22,11 +22,11 @@ class GenericApi implements FsApi {
         return true;
     }
 
-    cd(path: string) {
+    cd(path: string, transferId = -1) {
         return Promise.resolve(path);
     }
 
-    size(source: string, files: string[]): Promise<number> {
+    size(source: string, files: string[], transferId = -1): Promise<number> {
         console.log('GenericFs.size');
         return Promise.resolve(10);
     }
@@ -50,32 +50,32 @@ class GenericApi implements FsApi {
         return Promise.resolve();
     }
 
-    makedir(parent: string, dirName: string): Promise<string> {
+    makedir(parent: string, dirName: string, transferId = -1): Promise<string> {
         console.log('FsGeneric.makedir');
         return Promise.resolve('');
     }
 
-    delete(src: string, files: File[]): Promise<number> {
+    delete(src: string, files: File[], transferId = -1): Promise<number> {
         console.log('FsGeneric.delete');
         return Promise.resolve(files.length);
     }
 
-    rename(source: string, file: File, newName: string): Promise<string> {
+    rename(source: string, file: File, newName: string, transferId = -1): Promise<string> {
         console.log('FsGeneric.rename');
         return Promise.resolve(newName);
     }
 
-    isDir(path: string): Promise<boolean> {
+    isDir(path: string, transferId = -1): Promise<boolean> {
         console.log('FsGeneric.isDir');
         return Promise.resolve(true);
     }
 
-    exists(path: string): Promise<boolean> {
+    exists(path: string, transferId = -1): Promise<boolean> {
         console.log('FsGeneric.exists');
         return Promise.resolve(true);
     }
 
-    async stat(fullPath: string): Promise<File> {
+    stat(fullPath: string, transferId = -1): Promise<File> {
         return Promise.resolve({
             dir: '',
             fullname: '',
@@ -91,7 +91,7 @@ class GenericApi implements FsApi {
         } as File);
     }
 
-    async list(dir: string): Promise<File[]> {
+    async list(dir: string, transferId = -1): Promise<File[]> {
         console.log('FsGeneric.readDirectory');
         const pathExists = await this.isDir(dir);
 
@@ -110,11 +110,11 @@ class GenericApi implements FsApi {
         return path === '/';
     }
 
-    get(path: string): Promise<string> {
+    get(path: string, file: string, transferId = -1): Promise<string> {
         return Promise.resolve(path);
     }
 
-    async getStream(path: string, file: string): Promise<fs.ReadStream> {
+    getStream(path: string, file: string, transferId = -1): Promise<fs.ReadStream> {
         try {
             const stream = fs.createReadStream(this.join(path, file));
             return Promise.resolve(stream);
@@ -124,7 +124,7 @@ class GenericApi implements FsApi {
         };
     }
 
-    async putStream(readStream: fs.ReadStream, dstPath: string, progress: (bytesRead: number) => void): Promise<void> {
+    async putStream(readStream: fs.ReadStream, dstPath: string, progress: (bytesRead: number) => void, transferId = -1): Promise<void> {
         return Promise.resolve();
     }
 
