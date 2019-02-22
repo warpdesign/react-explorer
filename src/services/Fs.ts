@@ -3,6 +3,7 @@ import { FsGeneric } from './plugins/FsGeneric';
 import { FsFtp } from './plugins/FsFtp';
 import { FsSimpleFtp } from './plugins/FsSimpleFtp';
 import * as fs from 'fs';
+import { Readable } from 'stream';
 
 declare var ENV: any;
 
@@ -100,8 +101,8 @@ export interface FsApi {
     exists(path: string, transferId?: number): Promise<boolean>;
     size(source: string, files: string[], transferId?: number): Promise<number>;
     get(path: string, file: string, transferId?: number): Promise<string>;
-    getStream(path: string, file: string, transferId?: number): Promise<fs.ReadStream>;
-    putStream(readStream: fs.ReadStream, dstPath: string, progress: (bytesRead: number) => void, transferId?: number): Promise<void>;
+    getStream(path: string, file: string, transferId?: number): Promise<Readable>;
+    putStream(readStream: Readable, dstPath: string, progress: (bytesRead: number) => void, transferId?: number): Promise<void>;
 
     resolve(path: string): string;
     sanityze(path: string): string;

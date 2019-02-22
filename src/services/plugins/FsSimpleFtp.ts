@@ -1,9 +1,13 @@
 import { FsApi, File, ICredentials, Fs, Parent, filetype } from '../Fs';
-import { Client as FtpClient, FileInfo } from 'basic-ftp';
+import { Client as FtpClient, FileInfo, FTPResponse } from 'basic-ftp';
 import * as fs from 'fs';
+import { remote } from 'electron';
+import { Transform, Readable, Writable } from 'stream';
 import { EventEmitter } from 'events';
 import * as nodePath from 'path';
 import { isWin } from '../../utils/platform';
+
+const TMP_DIR = remote.app.getPath('downloads');
 
 function join(path1: string, path2: string) {
     let prefix = '';
@@ -171,6 +175,17 @@ class Client {
     cd(path: string) {
         console.log('Client.cd()');
         return this.ftpClient.cd(path);
+    }
+
+    @canTimeout
+    getStream(path: string, writeStream: Writable): Promise<Readable> {
+        this.ftpClient.download(writeStream, path);
+        return Promise.resolve(this.ftpClient.ftp.dataSocket);
+    }
+
+    @canTimeout
+    getFile(path: string, writeStream: Writable): Promise<FTPResponse> {
+        return this.ftpClient.download(writeStream, path);
     }
 }
 
@@ -375,18 +390,33 @@ class SimpleFtpApi implements FsApi {
         }
     }
 
-    get(path: string, file: string, transferId = -1): Promise<string> {
-        debugger;
-        return Promise.resolve(path);
+    async get(path: string, file: string, transferId = -1): Promise<string> {
+        try {
+            const joint = this.join(path, file);
+            const client = await this.getClient(transferId);
+            const dest = nodePath.join(TMP_DIR, file);
+            const writableStream = fs.createWriteStream(dest);
+            await client.getFile(this.pathpart(joint), writableStream);
+            return dest;
+        } catch (err) {
+            return Promise.reject(err);
+        }
     }
 
-    async getStream(path: string, file: string, transferId = -1): Promise<fs.ReadStream> {
-        debugger;
+    async getStream(path: string, file: string, transferId = -1): Promise<Readable> {
         try {
-            const stream = fs.createReadStream(this.join(path, file));
-            return Promise.resolve(stream);
+            // create a duplex stream
+            const transform = new Transform({
+                transform(chunk, encoding, callback) {
+                    callback(null, chunk);
+                }
+            });
+            const joint = this.join(path, file);
+            const client = await this.getClient(transferId);
+            client.getStream(this.pathpart(joint), transform);
+            return Promise.resolve(transform);
         } catch (err) {
-            console.log('FsLocal.getStream error', err);
+            console.log('FsSimpleFtp.getStream error', err);
             return Promise.reject(err);
         };
     }
