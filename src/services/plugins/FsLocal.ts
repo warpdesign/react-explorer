@@ -12,10 +12,10 @@ import { isWin } from '../../utils/platform';
 const invalidDirChars = isWin && /[\*:<>\?|"]+/ig || /^[\.]+[\/]+(.)*$/ig;
 const invalidFileChars = isWin && /[\*:<>\?|"]+/ig || /\//;
 
-// since nodeJS will translate unix like paths to windows path, when running under Windows
+// Since nodeJS will translate unix like paths to windows path, when running under Windows
 // we accept Windows style paths (eg. C:\foo...) and unix paths (eg. /foo or ./foo)
-const localStart = isWin && /^(([a-zA-Z]\:)|([\.]*\/|\.))/ || /^([\.]*\/|\.)/;
-const isRoot = isWin && /([a-zA-Z]\:)(\\)*$/ || /^\/$/;
+const localStart = isWin && /^(([a-zA-Z]\:)|([\.]*\/|\.)|(\\\\))/ || /^([\.]*\/|\.)/;
+const isRoot = isWin && /((([a-zA-Z]\:)(\\)*)|(\\\\))$/ || /^\/$/;
 
 class LocalApi implements FsApi {
     type = 0;
