@@ -4,6 +4,7 @@ import { Deferred } from '../utils/deferred';
 import i18next from '../locale/i18n';
 import { shell, ipcRenderer } from 'electron';
 import * as process from 'process';
+import { Batch } from "../transfers/batch";
 
 const isWin = process.platform === "win32";
 
@@ -437,7 +438,7 @@ export class FileState {
         //     return this.get(path, file);
         // }
 
-        return this.api.get(path, file).then((path) => {
+        return this.api.get(path, file, Batch.maxId++).then((path) => {
             this.setStatus('ok');
             return path;
         })
