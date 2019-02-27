@@ -8,8 +8,10 @@ const MAX_TRANSFERS = 1;
 const RENAME_SUFFIX = '_';
 const REGEX_EXTENSION = /\.(?=[^0-9])/;
 
+type Status = 'started' | 'queued' | 'error' | 'done' | 'cancelled' | 'calculating';
+
 export class Batch {
-    static maxId: number = 0;
+    static maxId: number = 1;
     public srcFs: FsApi;
     public dstFs: FsApi;
     public dstPath: string;
@@ -25,7 +27,7 @@ export class Batch {
     public files = observable<FileTransfer>([]);
 
     @observable
-    public status: 'started' | 'queued' | 'error' | 'done' | 'calculating' = 'queued';
+    public status: Status = 'queued';
 
     @observable
     public progress: number = 0;
@@ -55,16 +57,23 @@ export class Batch {
     }
 
     @action
+    onEndTransfer = (status: Status = 'done') => {
+        console.log('transfer ended ! duration=', Math.round((new Date().getTime() - this.startDate.getTime()) / 1000), 'sec(s)');
+        console.log('destroy batch, new maxId', Batch.maxId);
+        Batch.maxId--;
+        this.status = status;
+    }
+
+    @action
     start(): Promise<void> {
         console.log('starting batch');
         if (this.status === 'queued') {
             this.slotsAvailable = MAX_TRANSFERS;
             this.status = 'started';
             this.transferDef = new Deferred();
-            this.transferDef.promise.then(() => {
-                console.log('transfer ended ! duration=', Math.round((new Date().getTime() - this.startDate.getTime()) / 1000), 'sec(s)');
-                this.status = 'done';
-            }).catch((err: Error) => {
+            this.transferDef.promise.then(
+                this.onEndTransfer
+            ).catch((err: Error) => {
                 console.log('error transfer', err);
                 this.status = 'error';
                 return Promise.reject(err);
@@ -108,6 +117,11 @@ export class Batch {
         return this.files.find((file) => file.ready && file.status === 'queued');
     }
 
+    /**
+     * Gets the next transfer(s) and starts them, where:
+     * num transfers = max(MAX_TRANSFERS, slotsAvailable)
+     * 
+     */
     queueNextTransfers() {
         const max = (Math.min(MAX_TRANSFERS, this.slotsAvailable));
 
@@ -120,6 +134,9 @@ export class Batch {
     }
 
     @action
+    /**
+     * Immediately initiates a file transfer, queues the next transfer when it's done
+     */
     async startTransfer(transfer: FileTransfer) {
         this.slotsAvailable--;
         transfer.status = 'started';
@@ -129,6 +146,9 @@ export class Batch {
         const fullDstPath = dstFs.join(this.dstPath, transfer.newSub);
         const srcPath = srcFs.join(this.srcPath, transfer.subDirectory);
         const wantedName = transfer.file.fullname;
+
+        // will be set to true if an error is caught
+        let cancelled = false;
         let newFilename = '';
 
         try {
@@ -150,6 +170,8 @@ export class Batch {
                 console.log('finished writing file', newFilename);
                 transfer.status = 'done';
             } catch (err) {
+                // TODO: catch batch cancel ?
+                debugger;
                 console.log('error with streams', err);
                 transfer.status = 'error';
                 return Promise.reject(err);

@@ -1,20 +1,31 @@
 import { action, observable, computed } from 'mobx';
-import { File, FsApi } from '../services/Fs';
+import { File, FsApi, getFS, DOWNLOADS_DIR } from '../services/Fs';
 import { FileState } from './fileState';
 import { Batch } from '../transfers/batch';
 import { clipboard } from 'electron';
 import { isWin } from '../utils/platform';
+import { promises } from 'fs';
 
 const LINE_ENDING = isWin ? '\r\n' : '\n';
 
 declare var ENV: any;
 
+/**
+ * Interface for a clipboard entry
+ * 
+ * @interface
+ */
 interface Clipboard {
     srcFs: FsApi;
     srcPath: string;
     files: File[];
 }
 
+/**
+ * Interface for a transfer
+ * 
+ * @interface
+ */
 interface TransferOptions {
     srcFs: FsApi;
     dstFs: FsApi;
@@ -24,6 +35,14 @@ interface TransferOptions {
     dstFsName: string;
 }
 
+/**
+ * Maintains global application state:
+ * 
+ * - list of ongoing transfers
+ * - active view: explorer of file view
+ * 
+ * Transfers are also starting from appState
+ */
 export class AppState {
     caches: FileState[] = new Array();
 
@@ -33,6 +52,26 @@ export class AppState {
     /* transfers */
     transfers = observable<Batch>([]);
 
+    /**
+     * Creates the application state
+     * 
+     * @param caches The initial paths of the caches that we want to create
+     */
+    constructor(caches: Array<string>) {
+        for (let path of caches) {
+            this.addCache(ENV.CY ? '' : path);
+        }
+        this.caches[0].active = true;
+    }
+
+    /**
+     * Prepares transferring files from clipboard to specified cache
+     * The source cache is taken from the clipboard
+     * 
+     * @param cache file cache to transfer files to
+     * 
+     * @returns {Promise<FileTransfer[]>}
+     */
     prepareClipboardTransferTo(cache: FileState) {
         if (!this.clipboard.files.length) {
             return;
@@ -55,13 +94,22 @@ export class AppState {
             });
     }
 
-    prepareDragDropTransferTo(srcCache: FileState, dstCache: FileState, files: File[]) {
+    /**
+     * Prepares transferring files from source to destination cache
+     * 
+     * @param srcCache file cache to transfer files from
+     * @param dstCache  file fache to transfer files to
+     * @param files the list of files to transfer
+     * 
+     * @returns {Promise<void>}
+     */
+    prepareTransferTo(srcCache: FileState, dstCache: FileState, files: File[]) {
         if (!files.length) {
             return;
         }
 
         const options = {
-            files: files,
+            files,
             srcFs: srcCache.getAPI(),
             srcPath: srcCache.path,
             dstFs: dstCache.getAPI(),
@@ -77,16 +125,74 @@ export class AppState {
             });
     }
 
-    @action setActiveCache(active: number) {
+    /**
+     * Prepares transferring files from srcCache to temp location
+     * in local filesystem
+     * 
+     * @param srcCacche: cache to trasnfer files from
+     * @param files the list of files to transfer
+     * 
+     * @returns {Promise<FileTransfer[]>}
+     */
+    prepareLocalTransfer(srcCache: FileState, files: File[]): Promise<string> {
+        if (!files.length) {
+            return Promise.resolve('');
+        }
+
+        // simply open the file if src is local FS
+        if (srcCache.getFS().name === 'local') {
+            const api = srcCache.getAPI();
+            return Promise.resolve(api.join(files[0].dir, files[0].fullname));
+        } else {
+            // first we need to get a FS for local
+            const fs = getFS(DOWNLOADS_DIR);
+            const api = new fs.API(DOWNLOADS_DIR);
+
+            const options = {
+                files,
+                srcFs: srcCache.getAPI(),
+                srcPath: srcCache.path,
+                dstFs: api,
+                dstPath: DOWNLOADS_DIR,
+                dstFsName: fs.name
+            };
+
+            // TODO: use a temporary filename for destination file?
+            return this.addTransfer(options).then(() => {
+                return api.join(DOWNLOADS_DIR, files[0].fullname);
+            }).catch((err) => {
+                debugger;
+                return Promise.reject(err);
+            });
+        }
+    }
+
+    /**
+     * Changes the active file cache
+     * 
+     * @param active the number of the cache to be the new active one
+     */
+    @action
+    setActiveCache(active: number) {
         for (let i = 0; i < this.caches.length; ++i) {
             this.caches[i].active = i === active ? true : false;
         }
     }
 
+    /**
+     * Returns the cache that's not active (ie: destination cache)
+     * 
+     * NOTE: this would have no sense if we had more than two file caches
+     */
     getInactiveCache(): FileState {
         return this.caches[0].active ? this.caches[1] : this.caches[0];
     }
 
+    /**
+     * Sync (reload) caches which points to the same directory as srcCache
+     * 
+     * @param srcCache the source cache to base the sync upon
+     */
     @action
     syncCaches(srcCache: FileState) {
         // get caches that are showing the same path
@@ -215,19 +321,5 @@ export class AppState {
         }
 
         return text;
-    }
-
-    constructor(caches: Array<string>) {
-        for (let path of caches) {
-            this.addCache(ENV.CY ? '' : path);
-        }
-        this.caches[0].active = true;
-
-        // // TODO: pass start path as prop ?
-        // const cache: FileState = appState.addCache();
-
-        // this.state = {
-        //     fileCache: cache
-        // };
     }
 }

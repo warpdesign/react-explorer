@@ -4,7 +4,7 @@ import { Deferred } from '../utils/deferred';
 import i18next from '../locale/i18n';
 import { shell, ipcRenderer } from 'electron';
 import * as process from 'process';
-import { Batch } from "../transfers/batch";
+import { AppState } from "./appState";
 
 const isWin = process.platform === "win32";
 
@@ -430,21 +430,6 @@ export class FileState {
             .catch(this.handleError)
     }
 
-    @needsConnection
-    async get(path: string, file: string): Promise<string> {
-        // try {
-        //     await this.waitForConnection();
-        // } catch (err) {
-        //     return this.get(path, file);
-        // }
-
-        return this.api.get(path, file, Batch.maxId++).then((path) => {
-            this.setStatus('ok');
-            return path;
-        })
-            .catch(this.handleError)
-    }
-
     async isDir(path: string): Promise<boolean> {
         await this.waitForConnection();
         return this.api.isDir(path);
@@ -458,12 +443,22 @@ export class FileState {
         return this.api.join(path, path2);
     }
 
-    openFile(file: File) {
-        console.log('need to open file');
-        return this.get(file.dir, file.fullname).then((tmpPath: string) => {
-            console.log('opening file', tmpPath);
-            shell.openItem(tmpPath);
-        });
+    async openFile(appState: AppState, cache: FileState, file: File) {
+        try {
+            const path = await appState.prepareLocalTransfer(cache, [file]);
+            this.shellOpenFile(path);
+        } catch (err) {
+            return Promise.reject(err);
+        }
+    }
+
+    shellOpenFile(path: string) {
+        console.log('need to open file', path);
+        shell.openItem(path);
+        // return this.get(file).then((tmpPath: string) => {
+        //     console.log('opening file', tmpPath);
+        //     shell.openItem(tmpPath);
+        // });
     }
 
     openDirectory(file: File) {

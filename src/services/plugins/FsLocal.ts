@@ -276,10 +276,6 @@ class LocalApi implements FsApi {
 
     }
 
-    get(path: string, file: string, transferId = -1): Promise<string> {
-        return Promise.resolve(this.join(path, file));
-    }
-
     // TODO add error handling
     async getStream(path: string, file: string, transferId = -1): Promise<fs.ReadStream> {
         try {

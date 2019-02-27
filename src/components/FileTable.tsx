@@ -405,7 +405,10 @@ export class FileTableClass extends React.Component<IProps, IState> {
 
         try {
             if (!file.isDir) {
-                await this.cache.openFile(file);
+                // await this.cache.openFile(file);
+                // await appState.getFile(file);
+                await this.cache.openFile(appState, this.cache, file);
+                console.log('** done');
             } else {
                 const isModDown = isMac ? event.metaKey : event.ctrlKey;
                 const cache = isModDown ? appState.getInactiveCache() : this.cache;
@@ -413,6 +416,7 @@ export class FileTableClass extends React.Component<IProps, IState> {
                 await cache.openDirectory(file);
             }
         } catch (error) {
+            debugger;
             const { t } = this.injected;
             AppAlert.show(t('ERRORS.GENERIC', { error }), {
                 intent: 'danger'

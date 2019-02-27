@@ -1,13 +1,13 @@
 import { FsApi, File, ICredentials, Fs, Parent, filetype } from '../Fs';
 import { Client as FtpClient, FileInfo, FTPResponse } from 'basic-ftp';
 import * as fs from 'fs';
-import { remote } from 'electron';
 import { Transform, Readable, Writable } from 'stream';
 import { EventEmitter } from 'events';
 import * as nodePath from 'path';
 import { isWin } from '../../utils/platform';
 
-const TMP_DIR = remote.app.getPath('downloads');
+// DEBUG !!
+declare let window: any;
 
 function join(path1: string, path2: string) {
     let prefix = '';
@@ -387,19 +387,6 @@ class SimpleFtpApi implements FsApi {
             return parsed.pathname === '/';
         } catch (err) {
             return path === '/';
-        }
-    }
-
-    async get(path: string, file: string, transferId = -1): Promise<string> {
-        try {
-            const joint = this.join(path, file);
-            const client = await this.getClient(transferId);
-            const dest = nodePath.join(TMP_DIR, file);
-            const writableStream = fs.createWriteStream(dest);
-            await client.getFile(this.pathpart(joint), writableStream);
-            return dest;
-        } catch (err) {
-            return Promise.reject(err);
         }
     }
 

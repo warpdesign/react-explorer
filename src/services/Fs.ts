@@ -1,8 +1,7 @@
 import { FsLocal } from './plugins/FsLocal';
 import { FsGeneric } from './plugins/FsGeneric';
-import { FsFtp } from './plugins/FsFtp';
 import { FsSimpleFtp } from './plugins/FsSimpleFtp';
-import * as fs from 'fs';
+import { remote } from 'electron';
 import { Readable } from 'stream';
 
 declare var ENV: any;
@@ -100,7 +99,6 @@ export interface FsApi {
     isDir(path: string, transferId?: number): Promise<boolean>;
     exists(path: string, transferId?: number): Promise<boolean>;
     size(source: string, files: string[], transferId?: number): Promise<number>;
-    get(path: string, file: string, transferId?: number): Promise<string>;
     getStream(path: string, file: string, transferId?: number): Promise<Readable>;
     putStream(readStream: Readable, dstPath: string, progress: (bytesRead: number) => void, transferId?: number): Promise<void>;
 
@@ -117,6 +115,8 @@ export interface FsApi {
 }
 
 const interfaces: Array<Fs> = new Array();
+
+export const DOWNLOADS_DIR = remote.app.getPath('downloads');
 
 export interface ICredentials {
     user?: string;

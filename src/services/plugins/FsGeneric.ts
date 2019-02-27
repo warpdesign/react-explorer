@@ -110,10 +110,6 @@ class GenericApi implements FsApi {
         return path === '/';
     }
 
-    get(path: string, file: string, transferId = -1): Promise<string> {
-        return Promise.resolve(path);
-    }
-
     getStream(path: string, file: string, transferId = -1): Promise<fs.ReadStream> {
         try {
             const stream = fs.createReadStream(this.join(path, file));
