@@ -103,7 +103,6 @@ class Client {
     async login(server: string, loginOptions: ICredentials): Promise<any> {
         const host = this.api.getHostname(server);
         const socketConnected = this.ftpClient.ftp.socket.bytesRead !== 0;
-        debugger;
         console.log('canTimeout/login()', server, loginOptions, "socketConnected", socketConnected, "ftp.closed", this.ftpClient.closed);
 
         // WORKAROUND: FtpError 530 causes any subsequent call to access

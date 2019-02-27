@@ -60,7 +60,6 @@ export class Batch {
     onEndTransfer = (status: Status = 'done') => {
         console.log('transfer ended ! duration=', Math.round((new Date().getTime() - this.startDate.getTime()) / 1000), 'sec(s)');
         console.log('destroy batch, new maxId', Batch.maxId);
-        Batch.maxId--;
         this.status = status;
     }
 
@@ -163,6 +162,13 @@ export class Batch {
                 console.log('getting stream', srcPath, wantedName);
                 const stream = await srcFs.getStream(srcPath, wantedName, this.id);
                 console.log('sending to stream', dstFs.join(fullDstPath, newFilename));
+                // we have to listen for errors that may appear during the transfer: socket closed, timeout,...
+                // and throw an error in this case because the putStream won't throw in this case:
+                // it will just stall
+                stream.on('error', (err) => {
+                    debugger;
+                    throw new Error('transfer');
+                });
                 await dstFs.putStream(stream, dstFs.join(fullDstPath, newFilename), (bytesRead: number) => {
                     // console.log('read', bytesRead);
                     this.onData(transfer, bytesRead);
