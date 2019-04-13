@@ -9,7 +9,7 @@ import { AppAlert } from './AppAlert';
 import { Logger } from "./Log";
 import { AppToaster, IToasterOpts } from "./AppToaster";
 import { FileState } from "../state/fileState";
-import { withNamespaces, WithNamespaces } from "react-i18next";
+import { withNamespaces, WithNamespaces, Trans } from "react-i18next";
 import { WithMenuAccelerators, Accelerators, Accelerator } from "./WithMenuAccelerators";
 import { throttle } from "../utils/throttle";
 import { isWin, isMac } from "../utils/platform";
@@ -166,8 +166,10 @@ export class ToolbarClass extends React.Component<IProps, PathInputState> {
                 this.cache.cd(dir);
             }
         } catch (err) {
+            const { t } = this.props;
+
             AppToaster.show({
-                message: `Error creating folder: ${err}`,
+                message: t('ERRORS.CREATE_FOLDER', { message: err }),
                 icon: 'error',
                 intent: Intent.DANGER,
                 timeout: 4000
@@ -189,8 +191,10 @@ export class ToolbarClass extends React.Component<IProps, PathInputState> {
             this.cache.reload();
             // appState.refreshCache(this.cache);
         } catch (err) {
+            const { t } = this.props;
+
             AppToaster.show({
-                message: `Error deleting files: ${err}`,
+                message: t('ERRORS.DELETE', { message: err }),
                 icon: 'error',
                 intent: Intent.DANGER,
                 timeout: 4000
@@ -400,12 +404,14 @@ export class ToolbarClass extends React.Component<IProps, PathInputState> {
         const { status, path, isOpen, isDeleteOpen, isTooltipOpen } = this.state;
         const { fileCache } = this.injected;
         const { selected, history, current } = fileCache;
+        const { t } = this.props;
 
         const canGoBackward = current > 0;
         const canGoForward = history.length > 1 && current < history.length - 1;
         // const loadingSpinner = false ? <Spinner size={Icon.SIZE_STANDARD} /> : undefined;
         const reloadButton = <Button className="small" onClick={this.onReload} minimal rightIcon="repeat"></Button>;
         const intent = status === -1 ? 'danger' : 'none';
+        const count = selected.length;
 
         return (
             <ControlGroup>
@@ -422,7 +428,7 @@ export class ToolbarClass extends React.Component<IProps, PathInputState> {
                         data-cy-path
                         onChange={this.onPathChange}
                         onKeyUp={this.onKeyUp}
-                        placeholder="Enter Path to load"
+                        placeholder={t('COMMON.PATH_PLACEHOLDER')}
                         rightElement={reloadButton}
                         value={path}
                         intent={intent}
@@ -439,8 +445,8 @@ export class ToolbarClass extends React.Component<IProps, PathInputState> {
                 }
 
                 <Alert
-                    cancelButtonText="Cancel"
-                    confirmButtonText="Delete"
+                    cancelButtonText={t('COMMON.CANCEL')}
+                    confirmButtonText={t('APP_MENUS.DELETE')}
                     icon="trash"
                     intent={Intent.DANGER}
                     isOpen={isDeleteOpen}
@@ -448,7 +454,9 @@ export class ToolbarClass extends React.Component<IProps, PathInputState> {
                     onCancel={this.deleteCancel}
                 >
                     <p>
-                        Are you sure you want to delete {`${selected.length}`} <b>file(s)/folder(s)</b>?<br />This action will <b>permanentaly</b> delete the selected elements.
+                        <Trans i18nKey="DIALOG.DELETE.CONFIRM" count={count}>
+                            Are you sure you want to delete <b>{{ count }}</b> file(s)/folder(s)?<br /><br />This action will <b>permanentaly</b> delete the selected elements.
+                        </Trans>
                     </p>
                 </Alert>
                 <Button rightIcon="arrow-right" disabled={status === -1} onClick={this.onSubmit} />

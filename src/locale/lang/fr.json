@@ -59,6 +59,9 @@
                 "DEFAULT_TERMINAL": "Terminal externe",
                 "DEFAULT_TERMINAL_HELP": "Spécifie le type de terminal à lancer",
                 "TEST_TERMINAL": "Cliquez ici pour lancer le terminal specifié"
+            },
+            "DELETE": {
+                "CONFIRM": "Etes-vous sûr de vouloir supprimer <1>{{count}}</1> fichier(s)/dossier(s)?<3 /><4 />Cette action supprimera de manière <6>permanente</6> les éléments sélectionnés."
             }
         },
         "SHORTCUT": {
@@ -123,7 +126,8 @@
             "OK": "OK",
             "AUTO": "Automatique",
             "CLOSE": "Fermer",
-            "EMPTY_FOLDER": "Dossier vide."
+            "EMPTY_FOLDER": "Dossier vide.",
+            "PATH_PLACEHOLDER": "Entrer le chemin à visiter"
         },
         "FILEMENU": {
             "PASTE": "Coller {{count}} élément",
@@ -147,7 +151,9 @@
             "GENERIC": "{{error.message}} (code {{error.code}})",
             "BAD_FILENAME": "Nom de fichier ou dossier non valide: '{{entry}}'",
             "WIN_VALID_FILENAME": "Tous les caractères sauf *:<>\\?| sont acceptés",
-            "UNIX_VALID_FILENAME": "Tous les caractères sauf / sont acceptés"
+            "UNIX_VALID_FILENAME": "Tous les caractères sauf / sont acceptés",
+            "DELETE": "Erreur lors de la suppression des fichiers: {{message}}",
+            "CREATE_FOLDER": "Erreor lors de la création du dossier: {{message}}"
         },
         "MAIN_PROCESS": {
             "PRESS_TO_EXIT": "Maintenez la touche ⌘Q enfoncée pour quitter"
