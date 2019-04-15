@@ -209,6 +209,7 @@ export class Batch {
         let newName = wantedName;
         let stats = null;
         let exists = false;
+
         try {
             stats = await this.dstFs.stat(dirPath, this.id);
             exists = true;

@@ -36,7 +36,7 @@ function canTimeout(target: any, key: any, descriptor: any) {
         console.log('canTimeout:', key, '()');
         return originalMethod.apply(this, args).catch(async (err: Error) => {
             console.log('key', key);
-            debugger;
+
             if (this.ftpClient.closed) {
                 const isLogin = key === 'login';
                 console.warn('timeout detected: attempt to get a new client and reconnect');
@@ -201,8 +201,9 @@ class SimpleFtpApi implements FsApi {
 
     async getClient(transferId = -1) {
         if (transferId > -1) {
-            const client = Client.getFreeClient(this.master.server, this, transferId);
-            await client.login(this.server, this.loginOptions);
+            const client = Client.getFreeClient(this.server || this.master.server, this, transferId);
+
+            await client.login(this.master.server, this.loginOptions || this.master.loginOptions);
             return client;
         } else {
             return this.master;
