@@ -52,6 +52,9 @@ export class AppState {
     /* transfers */
     transfers = observable<Batch>([]);
 
+    // current active transfers
+    activeTransfers = observable<Batch>([]);
+
     /**
      * Creates the application state
      * 
@@ -214,7 +217,8 @@ export class AppState {
         let totalSize = 0;
         let totalProgress = 0;
 
-        const runningTransfers = this.transfers.filter(transfer => !transfer.status.match(/error|done/));
+        const runningTransfers = this.activeTransfers;
+        // .filter(transfer => !transfer.status.match(/error|done/));
 
         for (let transfer of runningTransfers) {
             totalSize += transfer.size;
@@ -248,6 +252,12 @@ export class AppState {
             //         batch.updateProgress();
             //     });
             // }, 1000);
+            const activeTransfers = this.transfers.filter(transfer => !transfer.status.match(/error|done/));
+            if (this.activeTransfers.length === 1) {
+                this.activeTransfers.clear();
+            }
+            this.activeTransfers.push(batch);
+
             return batch.start();
         }).catch((err) => {
             debugger;

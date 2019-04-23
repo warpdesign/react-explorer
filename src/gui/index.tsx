@@ -9,7 +9,12 @@ import i18next from '../locale/i18n';
 import { SettingsState } from "../state/settingsState";
 import { Provider } from "mobx-react";
 import { DragDropContextProvider } from 'react-dnd';
+import { Client as FTPClient } from 'basic-ftp';
+import * as fs from 'fs';
+import * as stream from 'stream';
 import HTML5Backend from 'react-dnd-html5-backend';
+
+const Transform = stream.Transform;
 
 declare var ENV: any;
 
@@ -18,7 +23,9 @@ class App {
 
     constructor() {
         this.settingsState = new SettingsState(ENV.VERSION);
-        this.createTestFolder().then(this.renderApp);
+        this.createTestFolder()
+            //.then(this.testFTP)
+            .then(this.renderApp);
     }
 
     // debug stuff
@@ -34,6 +41,27 @@ class App {
                 resolve();
             });
         })
+    }
+
+    async testFTP(): Promise<any> {
+        console.log('connecting');
+        const client = new FTPClient();
+        await client.access({
+            host: "ftp.warpdesign.fr"
+        });
+        console.log('connected!!');
+        const writeStream = fs.createWriteStream('/tmp/000-12-copy.zip');
+        const reportProgress = new Transform({
+            transform(chunk, encoding, callback) {
+                // console.log('got', chunk.length);
+                callback(null, chunk);
+            }
+        });
+
+        console.log('transfer');
+        await client.download(reportProgress, '/warp_logo35.rar').then(() => {
+            console.log('done!');
+        });
     }
 
     renderApp = () => {

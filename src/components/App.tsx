@@ -19,6 +19,7 @@ import { HamburgerMenu } from "./HamburgerMenu";
 import { ShortcutsDialog } from "./dialogs/ShortcutsDialog";
 import { shouldCatchEvent, isEditable } from "../utils/dom";
 import { WithMenuAccelerators, Accelerators, Accelerator } from "./WithMenuAccelerators";
+import { remote } from 'electron';
 
 require("@blueprintjs/core/lib/css/blueprint.css");
 require("@blueprintjs/icons/lib/css/blueprint-icons.css");
@@ -30,8 +31,8 @@ interface IState {
     isExitDialogOpen: boolean;
 }
 
-interface InjectedProps extends WithNamespaces{
-    settingsState:SettingsState
+interface InjectedProps extends WithNamespaces {
+    settingsState: SettingsState
 }
 
 const EXIT_DELAY = 1200;
@@ -141,7 +142,7 @@ class App extends React.Component<WithNamespaces, IState> {
         }
     }
 
-    setActiveView(view:number) {
+    setActiveView(view: number) {
         this.appState.setActiveCache(view);
     }
 
@@ -166,7 +167,7 @@ class App extends React.Component<WithNamespaces, IState> {
         console.log('exitRequest');
         if (this.appState && this.appState.pendingTransfers) {
             this.setState({ isExitDialogOpen: true });
-        }  else {
+        } else {
             ipcRenderer.send('exit');
         }
     }
@@ -221,10 +222,13 @@ class App extends React.Component<WithNamespaces, IState> {
     }
 
     componentDidUpdate() {
+        const progress = this.appState.pendingTransfers && this.appState.totalTransferProgress || -1;
         this.setDarkTheme();
+        console.log('progress', progress);
+        remote.getCurrentWindow().setProgressBar(progress);
     }
 
-    onExitDialogClose = (valid:boolean) => {
+    onExitDialogClose = (valid: boolean) => {
         this.setState({ isExitDialogOpen: false });
         if (!valid) {
             this.showDownloadsTab();
@@ -251,7 +255,7 @@ class App extends React.Component<WithNamespaces, IState> {
             <Accelerator combo="CmdOrCtrl+R" onClick={this.onReloadFileView}></Accelerator>
             <Accelerator combo="CmdOrCtrl+Q" onClick={this.onExitComboDown}></Accelerator>
             <Accelerator combo="CmdOrCtrl+K" onClick={this.onOpenTerminal}></Accelerator>
-         </Accelerators>;
+        </Accelerators>;
     }
 
     public renderHotkeys() {
@@ -523,7 +527,7 @@ class App extends React.Component<WithNamespaces, IState> {
                             <Trans i18nKey="DIALOG.QUIT.CONTENT" count={count}>
                                 There are <b>{{ count }}</b> transfers <b>in progress</b>.<br /><br />Exiting the app now will <b>cancel</b> the downloads.
                             </Trans>
-                    </p>
+                        </p>
                     </Alert>
                     <PrefsDialog isOpen={isPrefsOpen} onClose={this.closePrefs}></PrefsDialog>
                     <ShortcutsDialog isOpen={isShortcutsOpen} onClose={this.closeShortcuts}></ShortcutsDialog>
@@ -544,7 +548,7 @@ class App extends React.Component<WithNamespaces, IState> {
                     <div onClickCapture={this.handleClick} className="main">
                         <SideView fileCache={caches[0]} hide={!isExplorer} onPaste={this.onPaste} />
                         <SideView fileCache={caches[1]} hide={!isExplorer} onPaste={this.onPaste} />
-                        <Downloads hide={isExplorer}/>
+                        <Downloads hide={isExplorer} />
                     </div>
                     <LogUI></LogUI>
                 </React.Fragment>

@@ -1,7 +1,6 @@
 import { observable, action, runInAction, computed } from "mobx";
 import { FsApi, File } from "../services/Fs";
 import { FileTransfer } from "./fileTransfer";
-import { remote } from 'electron';
 import { Deferred } from "../utils/deferred";
 
 const MAX_TRANSFERS = 1;
@@ -351,6 +350,6 @@ export class Batch {
         file.progress = bytesRead;
         this.progress += previousProgress ? (bytesRead - previousProgress) : bytesRead;
         // console.log('progress', this.progress, this.progress === this.size ? -1 : this.progress/this.size);
-        remote.getCurrentWindow().setProgressBar(this.progress === this.size ? -1 : this.progress / this.size);
+        // remote.getCurrentWindow().setProgressBar(this.progress === this.size ? -1 : this.progress / this.size);
     }
 }
