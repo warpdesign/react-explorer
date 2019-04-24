@@ -4,7 +4,7 @@ import { FileState } from './fileState';
 import { Batch } from '../transfers/batch';
 import { clipboard } from 'electron';
 import { isWin } from '../utils/platform';
-import { promises } from 'fs';
+import { TabDescriptor } from '../components/TabList';
 
 const LINE_ENDING = isWin ? '\r\n' : '\n';
 
@@ -35,6 +35,12 @@ interface TransferOptions {
     dstFsName: string;
 }
 
+export interface ViewDescriptor {
+    viewId: number;
+    caches: FileState[];
+    isActive: boolean;
+}
+
 /**
  * Maintains global application state:
  * 
@@ -45,6 +51,11 @@ interface TransferOptions {
  */
 export class AppState {
     caches: FileState[] = new Array();
+    // two view per window now
+    // we'll need to extend it if we decide
+    // to have multiple windows (which may or may not
+    // have several views)
+    views: ViewDescriptor[] = observable<ViewDescriptor>(new Array(2));
 
     @observable
     isExplorer = true;
@@ -58,13 +69,29 @@ export class AppState {
     /**
      * Creates the application state
      * 
-     * @param caches The initial paths of the caches that we want to create
+     * @param tabs The initial paths of the caches that we want to create
      */
-    constructor(caches: Array<string>) {
-        for (let path of caches) {
-            this.addCache(ENV.CY ? '' : path);
+    constructor(tabs: Array<TabDescriptor>) {
+        for (let tab of tabs) {
+            if (tab.viewId === 1) {
+                tab.path = '/Users';
+            }
+            console.log('adding cache', tab.viewId, tab.path);
+            this.addCache(ENV.CY ? '' : tab.path, tab.viewId);
         }
-        this.caches[0].active = true;
+        this.setViewState();
+    }
+
+    @action
+    setViewState() {
+        this.views[0].isActive = true;
+        for (let view of this.views) {
+            // get and activate the first cache for now
+            const files = view.caches[0];
+            if (files) {
+                files.isVisible = true;
+            }
+        }
     }
 
     /**
@@ -176,10 +203,21 @@ export class AppState {
      * @param active the number of the cache to be the new active one
      */
     @action
-    setActiveCache(active: number) {
-        for (let i = 0; i < this.caches.length; ++i) {
-            this.caches[i].active = i === active ? true : false;
-        }
+    setActiveView(viewId: number) {
+        console.log('setting active view', viewId);
+        const previous = this.getActiveView(true);
+        const next = this.getView(viewId);
+        previous.isActive = false;
+        next.isActive = true;
+    }
+
+    getActiveView(isActive = true): ViewDescriptor {
+        return this.views.find(view => view.isActive === isActive);
+    }
+
+    getViewFromCache(cache: FileState) {
+        const viewId = cache.viewId;
+        return this.getView(viewId);
     }
 
     /**
@@ -187,8 +225,21 @@ export class AppState {
      * 
      * NOTE: this would have no sense if we had more than two file caches
      */
-    getInactiveCache(): FileState {
-        return this.caches[0].active ? this.caches[1] : this.caches[0];
+    getInactiveViewVisibleCache(): FileState {
+        const view = this.getActiveView(false);
+        return view.caches.find(cache => cache.isVisible === true);
+        // this.caches[0].active ? this.caches[1] : this.caches[0];
+    }
+
+    getViewVisibleCache(viewId: number): FileState {
+        const view = this.getView(viewId);
+        return view.caches.find(cache => cache.isVisible === true);
+    }
+
+    getCachesForView(viewId: number) {
+        const view = this.getView(viewId);
+        return view.caches;
+        // return this.caches.filter(cache => cache.viewId === viewId);
     }
 
     /**
@@ -267,7 +318,8 @@ export class AppState {
     /* /transfers */
 
     getActiveCache(): FileState {
-        return this.isExplorer ? this.caches.find((view) => view.active === true) : null;
+        const view = this.getActiveView(true);
+        return this.isExplorer ? view.caches.find((cache) => cache.isVisible === true) : null;
     }
 
     @action
@@ -280,11 +332,31 @@ export class AppState {
         }
     }
 
+    createView(viewId: number) {
+        return {
+            caches: new Array(),
+            viewId: viewId,
+            isActive: false
+        };
+    }
+
+    getView(viewId: number) {
+        return this.views[viewId];
+    }
+
     @action
-    addCache(path: string = '') {
-        const cache = new FileState(path);
+    addCache(path: string = '', viewId = -1) {
+        let view = this.getView(viewId);
+
+        if (!view) {
+            view = this.createView(viewId);
+            this.views[viewId] = view;
+        }
+
+        const cache = new FileState(path, viewId);
 
         this.caches.push(cache);
+        this.views[viewId].caches.push(cache);
 
         return cache;
     }
@@ -296,7 +368,7 @@ export class AppState {
     }
 
     @action
-    clearSelections() {
+    clearAllSelections() {
         for (let cache of this.caches) {
             cache.clearSelection();
         }

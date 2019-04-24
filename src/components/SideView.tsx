@@ -10,6 +10,7 @@ import { FileTable } from "./FileTable";
 import classnames from 'classnames';
 import { DropTargetSpec, DropTargetConnector, DropTargetMonitor, DropTargetCollector, ConnectDropTarget, DropTarget } from "react-dnd";
 import { DraggedObject } from './RowRenderer';
+import { TabListClass } from "./TabList";
 
 interface SideViewProps {
     hide: boolean;
@@ -27,7 +28,9 @@ interface InjectedProps extends SideViewProps {
 const fileTarget: DropTargetSpec<InjectedProps> = {
     canDrop(props: InjectedProps) {
         // prevent drag and drop in same sideview for now
-        return !props.fileCache.active && props.fileCache.status !== 'busy';
+        // return !props.fileCache.active && props.fileCache.status !== 'busy';
+        console.error('TODO: compare source and destination viewId');
+        return props.fileCache.status !== 'busy';
     },
     drop(props, monitor, component) {
         const item = monitor.getItem();
@@ -45,16 +48,16 @@ const collect: DropTargetCollector<any> = (connect: DropTargetConnector, monitor
     };
 }
 
-let id = 0;
-
 @inject('appState')
 @observer
 export class SideViewClass extends React.Component<InjectedProps>{
-    // static id = 0;
-    viewId = 'view_' + id++;
+    static id = 0;
+
+    viewId = 0;
 
     constructor(props: InjectedProps) {
         super(props);
+        this.viewId = SideViewClass.id++;
     }
 
     get injected() {
@@ -74,8 +77,11 @@ export class SideViewClass extends React.Component<InjectedProps>{
 
     renderSideView() {
         const { fileCache, connectDropTarget, canDrop, isOver } = this.props;
-        const active = fileCache.active;
+        const appState = this.injected.appState;
+        const active = appState.getViewFromCache(fileCache).isActive;
+        //  fileCache.active;
         const dropAndOver = isOver && canDrop;
+        const divId = 'view_' + this.viewId;
 
         let activeClass = classnames('sideview', {
             active: active,
@@ -94,8 +100,9 @@ export class SideViewClass extends React.Component<InjectedProps>{
 
         return (
             connectDropTarget(
-                <div id={this.viewId} className={activeClass}>
+                <div id={divId} className={activeClass}>
                     {needLogin && <LoginDialog isOpen={needLogin} onValidation={this.onValidation} onClose={this.onClose} />}
+                    <TabListClass viewId={this.viewId}></TabListClass>
                     <Toolbar active={active && !busy} onPaste={this.props.onPaste} />
                     <FileTable hide={this.props.hide} />
                     <Statusbar />

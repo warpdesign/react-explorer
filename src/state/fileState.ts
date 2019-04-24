@@ -29,8 +29,14 @@ export class FileState {
     @observable
     status: TStatus;
 
+    // @observable
+    // active = false;
+
     @observable
-    active = false;
+    isVisible = false;
+
+    @observable
+    viewId = -1;
 
     // history stuff
     history = observable<string>([]);
@@ -88,7 +94,8 @@ export class FileState {
 
     private loginDefer: Deferred<any>;
 
-    constructor(path: string) {
+    constructor(path: string, viewId = -1) {
+        this.viewId = viewId;
         this.path = path;
         this.getNewFS(path);
     }

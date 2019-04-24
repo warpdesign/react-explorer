@@ -279,3 +279,15 @@ body.bp3-dark .bp3-loader.active{
     transform: rotateZ(-45deg);
     left: -2px;
 }
+
+.tablist button{
+    border-bottom-left-radius:0;
+}
+
+.tablist button:last-child{
+    opacity:.3;
+}
+
+.tablist button:last-child:hover{
+    opacity:1;
+}

@@ -20,6 +20,7 @@ import { ShortcutsDialog } from "./dialogs/ShortcutsDialog";
 import { shouldCatchEvent, isEditable } from "../utils/dom";
 import { WithMenuAccelerators, Accelerators, Accelerator } from "./WithMenuAccelerators";
 import { remote } from 'electron';
+import { TabDescriptor } from "./TabList";
 
 require("@blueprintjs/core/lib/css/blueprint.css");
 require("@blueprintjs/icons/lib/css/blueprint-icons.css");
@@ -72,8 +73,16 @@ class App extends React.Component<WithNamespaces, IState> {
         FocusStyleManager.onlyShowFocusOnTabs();
 
         const path = settingsState.defaultFolder;
+        // this is hardcoded for now but could be saved and restored
+        // each time the app is started
+        // one tab for each view with the same default folder
+        const defaultTabs: Array<TabDescriptor> = [
+            { viewId: 0, path: path },
+            { viewId: 0, path: "/tmp" },
+            { viewId: 1, path: path }
+        ]
 
-        this.appState = new AppState([path, path]);
+        this.appState = new AppState(defaultTabs);
 
         if (ENV.CY) {
             window.appState = this.appState;
@@ -127,7 +136,7 @@ class App extends React.Component<WithNamespaces, IState> {
         // new listers, which in turns creates new nodes
         // fixing this require a little work so meanwhile
         // this correctly resets the cache's state
-        this.appState.clearSelections();
+        this.appState.clearAllSelections();
     }
 
     showExplorerTab = () => {
@@ -143,7 +152,7 @@ class App extends React.Component<WithNamespaces, IState> {
     }
 
     setActiveView(view: number) {
-        this.appState.setActiveCache(view);
+        this.appState.setActiveView(view);
     }
 
     handleClick = (e: React.MouseEvent) => {
@@ -151,7 +160,9 @@ class App extends React.Component<WithNamespaces, IState> {
 
         if (sideview) {
             const num = parseInt(sideview.id.replace('view_', ''), 10);
-            if (this.appState.caches[num].active !== true) {
+            const view = this.appState.getView(num);
+            // if (this.appState.caches[num].active !== true) {
+            if (!view.isActive) {
                 console.log('preventing event propagation');
                 e.stopPropagation();
                 this.setActiveView(num);
@@ -203,9 +214,10 @@ class App extends React.Component<WithNamespaces, IState> {
     // }
 
     onNextView = () => {
-        const nextView = this.appState.caches[0].active ? 1 : 0;
+        const nextView = this.appState.getActiveView(false);
+        // const nextView = this.appState.caches[0].active ? 1 : 0;
 
-        this.setActiveView(nextView);
+        this.setActiveView(nextView.viewId);
     }
 
     componentDidMount() {
@@ -504,7 +516,8 @@ class App extends React.Component<WithNamespaces, IState> {
         const badgeText = count && (count + '') || '';
         const badgeProgress = this.appState.totalTransferProgress;
         const { t } = this.props;
-        const caches = this.appState.caches;
+        const cacheLeft = this.appState.getViewVisibleCache(0);
+        const cacheRight = this.appState.getViewVisibleCache(1);
 
         // Access isDarkModeActive without modifying it to make mobx trigger the render
         // when isDarkModeActive is modified.
@@ -546,8 +559,8 @@ class App extends React.Component<WithNamespaces, IState> {
                         </Navbar.Group>
                     </Navbar>
                     <div onClickCapture={this.handleClick} className="main">
-                        <SideView fileCache={caches[0]} hide={!isExplorer} onPaste={this.onPaste} />
-                        <SideView fileCache={caches[1]} hide={!isExplorer} onPaste={this.onPaste} />
+                        <SideView fileCache={cacheLeft} hide={!isExplorer} onPaste={this.onPaste} />
+                        <SideView fileCache={cacheRight} hide={!isExplorer} onPaste={this.onPaste} />
                         <Downloads hide={isExplorer} />
                     </div>
                     <LogUI></LogUI>

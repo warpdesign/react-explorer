@@ -411,7 +411,7 @@ export class FileTableClass extends React.Component<IProps, IState> {
                 console.log('** done');
             } else {
                 const isModDown = isMac ? event.metaKey : event.ctrlKey;
-                const cache = isModDown ? appState.getInactiveCache() : this.cache;
+                const cache = isModDown ? appState.getInactiveViewVisibleCache() : this.cache;
 
                 await cache.openDirectory(file);
             }
@@ -502,9 +502,10 @@ export class FileTableClass extends React.Component<IProps, IState> {
     }
 
     isViewActive(): boolean {
-        const { fileCache } = this.injected;
+        const { fileCache, appState } = this.injected;
+        const view = appState.getViewFromCache(fileCache);
 
-        return fileCache.active && !this.props.hide;
+        return view.isActive && !this.props.hide;
     }
 
     getElementAndToggleRename = (e?: KeyboardEvent | string) => {
