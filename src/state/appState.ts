@@ -73,9 +73,6 @@ export class AppState {
      */
     constructor(tabs: Array<TabDescriptor>) {
         for (let tab of tabs) {
-            if (tab.viewId === 1) {
-                tab.path = '/Users';
-            }
             console.log('adding cache', tab.viewId, tab.path);
             this.addCache(ENV.CY ? '' : tab.path, tab.viewId);
         }

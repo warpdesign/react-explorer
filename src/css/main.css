@@ -291,3 +291,11 @@ body.bp3-dark .bp3-loader.active{
 .tablist button:last-child:hover{
     opacity:1;
 }
+
+.tablist .closetab{
+    opacity:.3;
+}
+
+.tablist .closetab:hover{
+    opacity:1;
+}

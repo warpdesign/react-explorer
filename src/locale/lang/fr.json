@@ -19,6 +19,9 @@
         "DRAG": {
             "MULTIPLE": "Copier {{count}} éléments"
         },
+        "TABS": {
+            "CLOSE": "Fermer l'onglet"
+        },
         "DIALOG": {
             "QUIT": {
                 "BT_STOP_TRANSFERS": "Arrêter & quitter",

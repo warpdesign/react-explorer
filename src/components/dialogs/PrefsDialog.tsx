@@ -213,7 +213,7 @@ class PrefsDialogClass extends React.Component<IPrefsProps, IState>{
                 <div className={Classes.DIALOG_BODY}>
                     <FormGroup
                         inline={true}
-                        labelInfo={t('DIALOG.PREFS.LANGUAGE')}
+                        label={t('DIALOG.PREFS.LANGUAGE')}
                     >
                         <LanguageSelect filterable={false} activeItem={selectedLanguage} items={languageItems} itemRenderer={this.renderLanguageItem} onItemSelect={this.onLanguageSelect}>
                             <Button
@@ -226,7 +226,7 @@ class PrefsDialogClass extends React.Component<IPrefsProps, IState>{
 
                     <FormGroup
                         inline={true}
-                        labelInfo={t('DIALOG.PREFS.THEME')}>
+                        label={t('DIALOG.PREFS.THEME')}>
                         <ThemeSelect filterable={false} activeItem={selectedTheme} items={themeItems} itemRenderer={this.renderThemeItem} onItemSelect={this.onThemeSelect}>
                             <Button
                                 icon="contrast"
@@ -239,7 +239,7 @@ class PrefsDialogClass extends React.Component<IPrefsProps, IState>{
                     <FormGroup
                         inline={true}
                         labelFor="default-folder"
-                        labelInfo={t('DIALOG.PREFS.DEFAULT_FOLDER')}
+                        label={t('DIALOG.PREFS.DEFAULT_FOLDER')}
                         helperText={isFolderValid ? (<span>&nbsp;</span>) : (<span>{t('DIALOG.PREFS.INVALID_FOLDER')}</span>)}
                         intent={intent}
                     >
@@ -257,7 +257,7 @@ class PrefsDialogClass extends React.Component<IPrefsProps, IState>{
                     <FormGroup
                         inline={true}
                         labelFor="default-terminal"
-                        labelInfo={t('DIALOG.PREFS.DEFAULT_TERMINAL')}
+                        label={t('DIALOG.PREFS.DEFAULT_TERMINAL')}
                         helperText={t('DIALOG.PREFS.DEFAULT_TERMINAL_HELP')}
                     >
                         <InputGroup
@@ -277,7 +277,8 @@ class PrefsDialogClass extends React.Component<IPrefsProps, IState>{
                     <FormGroup
                         inline={true}
                         intent="danger"
-                        helperText={t('DIALOG.PREFS.RESET_HELP')}>
+                        helperText={t('DIALOG.PREFS.RESET_HELP')}
+                        label=" ">
                         <Button
                             icon="trash"
                             intent="primary"

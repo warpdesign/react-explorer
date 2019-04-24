@@ -10,7 +10,7 @@ import { FileTable } from "./FileTable";
 import classnames from 'classnames';
 import { DropTargetSpec, DropTargetConnector, DropTargetMonitor, DropTargetCollector, ConnectDropTarget, DropTarget } from "react-dnd";
 import { DraggedObject } from './RowRenderer';
-import { TabListClass } from "./TabList";
+import { TabList } from "./TabList";
 
 interface SideViewProps {
     hide: boolean;
@@ -26,17 +26,15 @@ interface InjectedProps extends SideViewProps {
 }
 
 const fileTarget: DropTargetSpec<InjectedProps> = {
-    canDrop(props: InjectedProps) {
+    canDrop(props: InjectedProps, monitor) {
         // prevent drag and drop in same sideview for now
-        // return !props.fileCache.active && props.fileCache.status !== 'busy';
-        console.error('TODO: compare source and destination viewId');
-        return props.fileCache.status !== 'busy';
+        const sourceViewId = monitor.getItem().fileState.viewId;
+        return props.fileCache.viewId !== sourceViewId && props.fileCache.status !== 'busy';
     },
     drop(props, monitor, component) {
         const item = monitor.getItem();
         const sideView = component.wrappedInstance;
         sideView.onDrop(item);
-        console.log('dropped element', props, item);
     }
 };
 
@@ -102,7 +100,7 @@ export class SideViewClass extends React.Component<InjectedProps>{
             connectDropTarget(
                 <div id={divId} className={activeClass}>
                     {needLogin && <LoginDialog isOpen={needLogin} onValidation={this.onValidation} onClose={this.onClose} />}
-                    <TabListClass viewId={this.viewId}></TabListClass>
+                    <TabList viewId={this.viewId}></TabList>
                     <Toolbar active={active && !busy} onPaste={this.props.onPaste} />
                     <FileTable hide={this.props.hide} />
                     <Statusbar />

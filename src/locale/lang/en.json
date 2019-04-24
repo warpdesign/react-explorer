@@ -19,6 +19,9 @@
         "DRAG": {
             "MULTIPLE": "Copy {{count}} elements"
         },
+        "TABS": {
+            "CLOSE": "Close tab"
+        },
         "DIALOG": {
             "QUIT": {
                 "BT_STOP_TRANSFERS": "Cancel & quit",
