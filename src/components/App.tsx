@@ -157,14 +157,17 @@ class App extends React.Component<WithNamespaces, IState> {
 
     handleClick = (e: React.MouseEvent) => {
         const sideview = (e.target as HTMLElement).closest('.sideview');
+        const filetable = (e.target as HTMLElement).closest('.fileListSizerWrapper');
 
         if (sideview) {
             const num = parseInt(sideview.id.replace('view_', ''), 10);
             const view = this.appState.getView(num);
-            // if (this.appState.caches[num].active !== true) {
             if (!view.isActive) {
-                console.log('preventing event propagation');
-                e.stopPropagation();
+                // prevent selecting a row when the view gets activated
+                if (filetable) {
+                    console.log('preventing event propagation', e.target);
+                    e.stopPropagation();
+                }
                 this.setActiveView(num);
             }
         }
