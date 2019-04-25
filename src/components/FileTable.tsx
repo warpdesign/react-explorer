@@ -159,6 +159,13 @@ export class FileTableClass extends React.Component<IProps, IState> {
                 onKeyDown={this.onOpenFile}
                 group={t('SHORTCUT.GROUP.ACTIVE_VIEW')}>
             </Hotkey>
+            <Hotkey
+                global={true}
+                combo="mod + shift + o"
+                label={t('SHORTCUT.ACTIVE_VIEW.OPEN_FILE')}
+                onKeyDown={this.onOpenFile}
+                group={t('SHORTCUT.GROUP.ACTIVE_VIEW')}>
+            </Hotkey>
             {!isMac && (<Hotkey
                 global={true}
                 combo="mod + a"
@@ -414,13 +421,12 @@ export class FileTableClass extends React.Component<IProps, IState> {
                 await this.cache.openFile(appState, this.cache, file);
                 console.log('** done');
             } else {
-                const isModDown = isMac ? event.metaKey : event.ctrlKey;
-                const cache = isModDown ? appState.getInactiveViewVisibleCache() : this.cache;
+                const isShiftDown = event.shiftKey;
+                const cache = isShiftDown ? appState.getInactiveViewVisibleCache() : this.cache;
 
                 await cache.openDirectory(file);
             }
         } catch (error) {
-            debugger;
             const { t } = this.injected;
             AppAlert.show(t('ERRORS.GENERIC', { error }), {
                 intent: 'danger'

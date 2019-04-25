@@ -1,6 +1,5 @@
 import { FileState } from "./fileState";
 import { observable, action } from "mobx";
-import { getNextId } from "mobx/lib/utils/utils";
 
 export class ViewState {
     viewId: number;
@@ -8,7 +7,7 @@ export class ViewState {
     caches: FileState[] = observable<FileState>([]);
 
     @observable
-    isActive: boolean;
+    isActive: boolean = false;
 
     constructor(viewId: number) {
         this.viewId = viewId;

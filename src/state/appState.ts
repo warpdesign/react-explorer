@@ -6,7 +6,6 @@ import { clipboard } from 'electron';
 import { isWin } from '../utils/platform';
 import { TabDescriptor } from '../components/TabList';
 import { ViewState } from './viewState';
-import { array } from 'prop-types';
 
 const LINE_ENDING = isWin ? '\r\n' : '\n';
 
