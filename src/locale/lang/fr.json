@@ -20,7 +20,8 @@
             "MULTIPLE": "Copier {{count}} éléments"
         },
         "TABS": {
-            "CLOSE": "Fermer l'onglet"
+            "CLOSE": "Fermer l'onglet",
+            "NEW": "Nouvel onglet"
         },
         "DIALOG": {
             "QUIT": {

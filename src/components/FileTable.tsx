@@ -17,6 +17,7 @@ import { ipcRenderer } from 'electron';
 import classnames from 'classnames';
 import { RowRenderer } from './RowRenderer';
 import { SettingsState } from '../state/settingsState';
+import { ViewState } from '../state/viewState';
 
 require('react-virtualized/styles.css');
 require('../css/filetable.css');
@@ -77,15 +78,15 @@ interface IProps extends WithNamespaces {
 // see: https://github.com/mobxjs/mobx-react/issues/256
 interface InjectedProps extends IProps {
     appState: AppState;
-    fileCache: FileState;
+    viewState: ViewState;
     settingsState: SettingsState;
 }
 
-@inject('appState', 'fileCache', 'settingsState')
+@inject('appState', 'viewState', 'settingsState')
 @WithMenuAccelerators
 @HotkeysTarget
 export class FileTableClass extends React.Component<IProps, IState> {
-    private cache: FileState;
+    private viewState: ViewState;
     private disposer: IReactionDisposer;
     private editingElement: HTMLElement = null;
     private editingFile: File;
@@ -95,9 +96,7 @@ export class FileTableClass extends React.Component<IProps, IState> {
     constructor(props: IProps) {
         super(props);
 
-        const { fileCache } = this.injected;
-
-        this.cache = fileCache;
+        this.viewState = this.injected.viewState;
 
         this.state = {
             nodes: this.buildNodes(this.cache.files),
@@ -112,7 +111,11 @@ export class FileTableClass extends React.Component<IProps, IState> {
         // gets re-rendered with the wrong language after language has been changed
         this.bindLanguageChange();
 
-        fileCache.cd(fileCache.path);
+        this.cache.cd(this.cache.path);
+    }
+
+    get cache() {
+        return this.viewState.getVisibleCache();
     }
 
     private bindLanguageChange = () => {
@@ -343,7 +346,8 @@ export class FileTableClass extends React.Component<IProps, IState> {
     }
 
     updateSelection() {
-        const { appState, fileCache } = this.injected;
+        const { appState } = this.injected;
+        const fileCache = this.cache;
         const { nodes } = this.state;
 
         const selection = nodes.filter((node) => node.isSelected).map((node) => node.nodeData) as File[];
@@ -427,7 +431,7 @@ export class FileTableClass extends React.Component<IProps, IState> {
     selectAll(invert = false) {
         let { position, selected } = this.state;
         let { nodes } = this.state;
-        const { fileCache } = this.injected;
+        const fileCache = this.cache;
 
         if (nodes.length && this.isViewActive()) {
             console.log('onSelectAll', document.activeElement);
@@ -502,10 +506,7 @@ export class FileTableClass extends React.Component<IProps, IState> {
     }
 
     isViewActive(): boolean {
-        const { fileCache, appState } = this.injected;
-        const view = appState.getViewFromCache(fileCache);
-
-        return view.isActive && !this.props.hide;
+        return this.cache.isVisible && !this.props.hide;
     }
 
     getElementAndToggleRename = (e?: KeyboardEvent | string) => {
@@ -523,7 +524,7 @@ export class FileTableClass extends React.Component<IProps, IState> {
     }
 
     onDocKeyDown = (e: KeyboardEvent) => {
-        const { fileCache } = this.injected;
+        const fileCache = this.cache;
 
         if (!this.isViewActive() || !shouldCatchEvent(e)) {
             return;
@@ -560,7 +561,7 @@ export class FileTableClass extends React.Component<IProps, IState> {
 
     moveSelection(step: number, isShiftDown: boolean) {
         console.log('down');
-        const { fileCache } = this.injected;
+        const fileCache = this.cache;
         let { position, selected } = this.state;
         let { nodes } = this.state;
 
@@ -600,7 +601,8 @@ export class FileTableClass extends React.Component<IProps, IState> {
 
     rowRenderer = (props: any) => {
         const { selected, nodes } = this.state;
-        const { fileCache, settingsState } = this.injected;
+        const { settingsState } = this.injected;
+        const fileCache = this.cache;
         const node = nodes[props.index];
 
         props.selectedCount = node.isSelected ? selected : 0;

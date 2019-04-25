@@ -11,10 +11,11 @@ import classnames from 'classnames';
 import { DropTargetSpec, DropTargetConnector, DropTargetMonitor, DropTargetCollector, ConnectDropTarget, DropTarget } from "react-dnd";
 import { DraggedObject } from './RowRenderer';
 import { TabList } from "./TabList";
+import { ViewState } from "../state/viewState";
 
 interface SideViewProps {
     hide: boolean;
-    fileCache: FileState;
+    viewState: ViewState;
     onPaste: () => void;
     connectDropTarget?: ConnectDropTarget;
     isOver?: boolean;
@@ -29,7 +30,9 @@ const fileTarget: DropTargetSpec<InjectedProps> = {
     canDrop(props: InjectedProps, monitor) {
         // prevent drag and drop in same sideview for now
         const sourceViewId = monitor.getItem().fileState.viewId;
-        return props.fileCache.viewId !== sourceViewId && props.fileCache.status !== 'busy';
+        const viewState = props.viewState;
+        const fileCache = viewState.getVisibleCache();
+        return props.viewState.viewId !== sourceViewId && fileCache.status !== 'busy';
     },
     drop(props, monitor, component) {
         const item = monitor.getItem();
@@ -49,13 +52,11 @@ const collect: DropTargetCollector<any> = (connect: DropTargetConnector, monitor
 @inject('appState')
 @observer
 export class SideViewClass extends React.Component<InjectedProps>{
-    static id = 0;
-
-    viewId = 0;
-
     constructor(props: InjectedProps) {
         super(props);
-        this.viewId = SideViewClass.id++;
+        // TODO: get view
+        // this.view = appState.createView(this.viewId);
+        // TODO: add tabs ??
     }
 
     get injected() {
@@ -68,18 +69,20 @@ export class SideViewClass extends React.Component<InjectedProps>{
 
     onClose = () => {
         // login cancelled
-        const { fileCache } = this.props;
+        const { viewState } = this.props;
+        const fileCache = viewState.getVisibleCache();
         // doesn't work: it keeps the previous fs
         fileCache.revertPath();
     }
 
     renderSideView() {
-        const { fileCache, connectDropTarget, canDrop, isOver } = this.props;
+        const { viewState, connectDropTarget, canDrop, isOver } = this.props;
+        const fileCache = viewState.getVisibleCache();
         const appState = this.injected.appState;
         const active = appState.getViewFromCache(fileCache).isActive;
         //  fileCache.active;
         const dropAndOver = isOver && canDrop;
-        const divId = 'view_' + this.viewId;
+        const divId = 'view_' + viewState.viewId;
 
         let activeClass = classnames('sideview', {
             active: active,
@@ -93,14 +96,14 @@ export class SideViewClass extends React.Component<InjectedProps>{
         console.log('renderSideView, needLogin=', needLogin);
 
         if (dropAndOver) {
-            console.log('isOver', this.viewId);
+            console.log('isOver', viewState.viewId);
         }
 
         return (
             connectDropTarget(
                 <div id={divId} className={activeClass}>
                     {needLogin && <LoginDialog isOpen={needLogin} onValidation={this.onValidation} onClose={this.onClose} />}
-                    <TabList viewId={this.viewId}></TabList>
+                    <TabList></TabList>
                     <Toolbar active={active && !busy} onPaste={this.props.onPaste} />
                     <FileTable hide={this.props.hide} />
                     <Statusbar />
@@ -111,7 +114,8 @@ export class SideViewClass extends React.Component<InjectedProps>{
 
     onDrop(item: DraggedObject) {
         const appState = this.injected.appState;
-        const { fileCache } = this.props;
+        const { viewState } = this.props;
+        const fileCache = viewState.getVisibleCache();
         const files = item.selectedCount > 0 ? item.fileState.selected.slice(0) : [item.dragFile];
 
         // TODO: check both cache are active?
@@ -119,20 +123,22 @@ export class SideViewClass extends React.Component<InjectedProps>{
     }
 
     shouldComponentUpdate() {
-        console.time('SideView Render' + this.viewId);
+        const { viewState } = this.props;
+        console.time('SideView Render' + viewState.viewId);
         return true;
     }
 
     componentDidUpdate() {
-        console.timeEnd('SideView Render' + this.viewId);
+        const { viewState } = this.props;
+        console.timeEnd('SideView Render' + viewState.viewId);
     }
 
     render() {
 
-        const { fileCache } = this.props;
+        const { viewState } = this.props;
 
         return (
-            <Provider fileCache={fileCache}>
+            <Provider viewState={viewState}>
                 {this.renderSideView()}
             </Provider>
         );

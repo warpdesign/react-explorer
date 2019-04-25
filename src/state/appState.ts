@@ -5,6 +5,8 @@ import { Batch } from '../transfers/batch';
 import { clipboard } from 'electron';
 import { isWin } from '../utils/platform';
 import { TabDescriptor } from '../components/TabList';
+import { ViewState } from './viewState';
+import { array } from 'prop-types';
 
 const LINE_ENDING = isWin ? '\r\n' : '\n';
 
@@ -35,11 +37,6 @@ interface TransferOptions {
     dstFsName: string;
 }
 
-export interface ViewDescriptor {
-    viewId: number;
-    caches: FileState[];
-    isActive: boolean;
-}
 
 /**
  * Maintains global application state:
@@ -51,11 +48,21 @@ export interface ViewDescriptor {
  */
 export class AppState {
     caches: FileState[] = new Array();
+    // @computed get caches() {
+    //     const arr: Array<FileState> = [];
+    //     this.views.map(view => view.caches).forEach(caches:Array<FileState> => {
+    //         for (cache:FileState of caches) {
+    //             arr.push(cache);
+    //         }
+    //     });
+
+    //     return arr;
+    // }
     // two view per window now
     // we'll need to extend it if we decide
     // to have multiple windows (which may or may not
     // have several views)
-    views: ViewDescriptor[] = observable<ViewDescriptor>(new Array(2));
+    views: ViewState[] = observable<ViewState>([]);
 
     @observable
     isExplorer = true;
@@ -84,10 +91,11 @@ export class AppState {
         this.views[0].isActive = true;
         for (let view of this.views) {
             // get and activate the first cache for now
-            const files = view.caches[0];
-            if (files) {
-                files.isVisible = true;
-            }
+            // const files = view.caches[0];
+            // if (files) {
+            //     files.isVisible = true;
+            // }
+            view.setVisibleCache(0);
         }
     }
 
@@ -208,7 +216,7 @@ export class AppState {
         next.isActive = true;
     }
 
-    getActiveView(isActive = true): ViewDescriptor {
+    getActiveView(isActive = true): ViewState {
         return this.views.find(view => view.isActive === isActive);
     }
 
@@ -225,7 +233,6 @@ export class AppState {
     getInactiveViewVisibleCache(): FileState {
         const view = this.getActiveView(false);
         return view.caches.find(cache => cache.isVisible === true);
-        // this.caches[0].active ? this.caches[1] : this.caches[0];
     }
 
     getViewVisibleCache(viewId: number): FileState {
@@ -236,7 +243,33 @@ export class AppState {
     getCachesForView(viewId: number) {
         const view = this.getView(viewId);
         return view.caches;
-        // return this.caches.filter(cache => cache.viewId === viewId);
+    }
+
+    activateNextTab(index: number) {
+        console.error('this.caches removed');
+        // const newActive = this.caches.length >= index ? this.caches[index] : this.caches[0];
+        // newActive.isVisible = true;
+        // newActive.cd(newActive.path);
+    }
+
+    removeCache(viewId: number, tabIndex: number) {
+        console.error('removed caches');
+        // const view = this.getView(viewId);
+        // const toDelete = view.caches.splice(tabIndex, 1)[0];
+        // const index = this.caches.findIndex((cache) => toDelete === cache);
+        // this.caches.splice(index, 1);
+
+        // return index;
+    }
+
+    closeTab(viewId: number, tabIndex: number) {
+        console.error('appState.closeTab removed');
+        // console.log('closeTab', viewId, tabIndex);
+        // // remove caches
+        // const index = this.removeCache(viewId, tabIndex);
+
+        // // activate next cache
+        // this.activateNextTab(index);
     }
 
     /**
@@ -247,17 +280,18 @@ export class AppState {
     @action
     syncCaches(srcCache: FileState) {
         // get caches that are showing the same path
-        const caches = this.caches.filter((cache) => {
-            return (cache !== srcCache &&
-                cache.status === 'ok' &&
-                cache.path === srcCache.path &&
-                cache.getFS().name === srcCache.getFS().name
-            );
-        });
+        console.error('this.caches removed: we may need this one!');
+        // const caches = this.caches.filter((cache) => {
+        //     return (cache !== srcCache &&
+        //         cache.status === 'ok' &&
+        //         cache.path === srcCache.path &&
+        //         cache.getFS().name === srcCache.getFS().name
+        //     );
+        // });
 
-        for (let cache of caches) {
-            cache.navHistory(0);
-        };
+        // for (let cache of caches) {
+        //     cache.navHistory(0);
+        // };
     }
 
     @computed
@@ -330,19 +364,21 @@ export class AppState {
     }
 
     createView(viewId: number) {
-        return {
-            caches: new Array(),
-            viewId: viewId,
-            isActive: false
-        };
+        // return {
+        //     caches: new Array(),
+        //     viewId: viewId,
+        //     isActive: false
+        // };
+        return new ViewState(viewId);
     }
 
     getView(viewId: number) {
-        return this.views[viewId];
+        return this.views.find(view => view.viewId === viewId);
     }
 
     @action
     addCache(path: string = '', viewId = -1) {
+        // console.error('addCache removed');
         let view = this.getView(viewId);
 
         if (!view) {
@@ -350,12 +386,12 @@ export class AppState {
             this.views[viewId] = view;
         }
 
-        const cache = new FileState(path, viewId);
+        // const cache = new FileState(path, viewId);
+        view.addCache(path);
+        // this.caches.push(cache);
+        // this.views[viewId].caches.push(cache);
 
-        this.caches.push(cache);
-        this.views[viewId].caches.push(cache);
-
-        return cache;
+        // return cache;
     }
 
     @action
@@ -366,9 +402,10 @@ export class AppState {
 
     @action
     clearAllSelections() {
-        for (let cache of this.caches) {
-            cache.clearSelection();
-        }
+        console.error('this.caches removed: we may need this one too!');
+        // for (let cache of this.caches) {
+        //     cache.clearSelection();
+        // }
     }
 
     // global

@@ -293,9 +293,30 @@ body.bp3-dark .bp3-loader.active{
 }
 
 .tablist .closetab{
-    opacity:.3;
+    opacity:0;
+    align-self:flex-end;
 }
 
-.tablist .closetab:hover{
+.tablist .bp3-button:hover .closetab{
     opacity:1;
 }
+
+.tablist .addtab:hover, .bp3-dark .bp3-button.addtab:hover{
+    background:transparent;
+}
+
+.tablist.bp3-button-group.bp3-fill .bp3-button:not(.bp3-fixed) {
+    flex-basis:100%;
+}
+
+.tablist.bp3-button-group.bp3-fill .addtab:not(.bp3-fixed){
+    flex-basis:auto;
+    flex-grow:0;
+}
+/* .tablist .tableRow.selected{
+    background-color: #8A9BA8;
+}
+
+.tablist .sideview.active .tableRow.selected{
+    background-color:#137cbd;
+} */

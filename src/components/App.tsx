@@ -516,8 +516,10 @@ class App extends React.Component<WithNamespaces, IState> {
         const badgeText = count && (count + '') || '';
         const badgeProgress = this.appState.totalTransferProgress;
         const { t } = this.props;
-        const cacheLeft = this.appState.getViewVisibleCache(0);
-        const cacheRight = this.appState.getViewVisibleCache(1);
+        const viewStateLeft = this.appState.views[0];
+        const viewStateRight = this.appState.views[1];
+        // const cacheLeft = this.appState.getViewVisibleCache(0);
+        // const cacheRight = this.appState.getViewVisibleCache(1);
 
         // Access isDarkModeActive without modifying it to make mobx trigger the render
         // when isDarkModeActive is modified.
@@ -559,8 +561,8 @@ class App extends React.Component<WithNamespaces, IState> {
                         </Navbar.Group>
                     </Navbar>
                     <div onClickCapture={this.handleClick} className="main">
-                        <SideView fileCache={cacheLeft} hide={!isExplorer} onPaste={this.onPaste} />
-                        <SideView fileCache={cacheRight} hide={!isExplorer} onPaste={this.onPaste} />
+                        <SideView viewState={viewStateLeft} hide={!isExplorer} onPaste={this.onPaste} />
+                        <SideView viewState={viewStateRight} hide={!isExplorer} onPaste={this.onPaste} />
                         <Downloads hide={isExplorer} />
                     </div>
                     <LogUI></LogUI>

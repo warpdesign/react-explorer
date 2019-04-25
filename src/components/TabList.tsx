@@ -1,23 +1,19 @@
 import * as React from "react";
-import { AppState } from "../state/appState";
 import { ButtonGroup, Button, Icon } from "@blueprintjs/core";
 import { inject, observer } from "mobx-react";
 import { WithNamespaces, withNamespaces } from "react-i18next";
+import { ViewState } from "../state/viewState";
 
 export interface TabDescriptor {
     viewId: number;
     path: string;
 }
 
-interface TabListProps extends WithNamespaces {
-    viewId: number;
+interface InjectedProps extends WithNamespaces {
+    viewState?: ViewState;
 }
 
-interface InjectedProps extends TabListProps {
-    appState?: AppState;
-}
-
-@inject('appState')
+@inject('viewState')
 @observer
 class TabListClass extends React.Component<InjectedProps> {
     constructor(props: InjectedProps) {
@@ -32,25 +28,30 @@ class TabListClass extends React.Component<InjectedProps> {
 
     }
 
-    closeTab = () => {
-        console.log('closetab');
+    closeTab(tabIndex: number) {
+        const { viewState } = this.injected;
+
+        viewState.closeTab(tabIndex);
+        console.log('closetab', tabIndex);
     }
 
     render() {
-        const { appState } = this.injected;
+        const { viewState } = this.injected;
         const { t } = this.props;
-        const viewId = this.props.viewId;
-        const caches = appState.getCachesForView(viewId);
-        const closeButton = caches.length > 1 && <Icon iconSize={12} htmlTitle={t('TABS.CLOSE')} className="closetab" intent="warning" onClick={this.closeTab} icon="cross"></Icon>;
+        const viewId = viewState.viewId;
+        const caches = viewState.caches;
 
         return (
-            <ButtonGroup className="tablist" alignText="left">
+            <ButtonGroup fill className="tablist" alignText="center">
                 {
-                    caches.map((cache, index) => (
-                        <Button key={"" + viewId + index} title={cache.path} intent={!index ? "primary" : "none"} rightIcon={closeButton}>{cache.path}</Button>
-                    ))
+                    caches.map((cache, index) => {
+                        const closeIcon = caches.length > 1 && <Icon iconSize={12} htmlTitle={t('TABS.CLOSE')} className="closetab" intent="warning" onClick={this.closeTab.bind(this, index)} icon="cross"></Icon>;
+                        return (
+                            <Button key={"" + viewId + index} title={cache.path} intent={!index ? "primary" : "none"} rightIcon={closeIcon}>{cache.path.split('/').slice(-1)[0]}</Button>
+                        )
+                    })
                 }
-                <Button icon="add" minimal onClick={this.addTab}></Button>
+                <Button icon="add" className="addtab" minimal title={t('TABS.NEW')} onClick={this.addTab}></Button>
             </ButtonGroup>
         )
     }

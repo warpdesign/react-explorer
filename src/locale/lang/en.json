@@ -20,7 +20,8 @@
             "MULTIPLE": "Copy {{count}} elements"
         },
         "TABS": {
-            "CLOSE": "Close tab"
+            "CLOSE": "Close tab",
+            "NEW": "New tab"
         },
         "DIALOG": {
             "QUIT": {
