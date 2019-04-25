@@ -14,6 +14,7 @@ export class ViewState {
         this.viewId = viewId;
     }
 
+    @action
     addCache(path: string) {
         console.log('viewState/addCache', path);
         const cache = new FileState(path, this.viewId);
@@ -27,6 +28,7 @@ export class ViewState {
         return this.caches.find(cache => cache.isVisible);
     }
 
+    @action
     setVisibleCache(index: number) {
         const previous = this.getVisibleCache();
         const next = this.caches[index];
@@ -36,12 +38,14 @@ export class ViewState {
         next.isVisible = true;
     }
 
+    @action
     removeCache(index: number) {
         // const toDelete = this.caches.splice(index, 1)[0];
 
         this.caches.splice(index, 1);
     }
 
+    @action
     activateNextTab(index: number) {
         const newActive = this.caches.length >= index ? this.caches[index] : this.caches[0];
         newActive.isVisible = true;

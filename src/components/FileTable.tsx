@@ -506,7 +506,8 @@ export class FileTableClass extends React.Component<IProps, IState> {
     }
 
     isViewActive(): boolean {
-        return this.cache.isVisible && !this.props.hide;
+        const { viewState } = this.injected;
+        return viewState.isActive && !this.props.hide;
     }
 
     getElementAndToggleRename = (e?: KeyboardEvent | string) => {
