@@ -20,6 +20,7 @@ import { ShortcutsDialog } from "./dialogs/ShortcutsDialog";
 import { shouldCatchEvent, isEditable } from "../utils/dom";
 import { WithMenuAccelerators, Accelerators, Accelerator } from "./WithMenuAccelerators";
 import { remote } from 'electron';
+import { isPackage } from '../utils/platform';
 import { TabDescriptor } from "./TabList";
 
 require("@blueprintjs/core/lib/css/blueprint.css");
@@ -88,10 +89,9 @@ class App extends React.Component<WithNamespaces, IState> {
             window.appState = this.appState;
         }
 
-        Logger.success(`React-FTP ${ENV.VERSION} - CY: ${ENV.CY} - NODE_ENV: ${ENV.NODE_ENV} - lang: ${i18next.language}`);
+        Logger.success(`React-Explorer ${ENV.VERSION} - CY: ${ENV.CY} - NODE_ENV: ${ENV.NODE_ENV} - lang: ${i18next.language}`);
         Logger.success(`lang=${settingsState.lang}, darkMode=${settingsState.darkMode}, defaultFolder=${settingsState.defaultFolder}`);
-        // Logger.warn('React-FTP', remote.app.getVersion());
-        // Logger.error('React-FTP', remote.app.getVersion());
+        Logger.success(`package=${isPackage}`);
     }
 
     onShortcutsCombo = (e: KeyboardEvent) => {
@@ -551,7 +551,7 @@ class App extends React.Component<WithNamespaces, IState> {
                     <ShortcutsDialog isOpen={isShortcutsOpen} onClose={this.closeShortcuts}></ShortcutsDialog>
                     <Navbar>
                         <Navbar.Group align={Alignment.LEFT}>
-                            <Navbar.Heading>React-explorer</Navbar.Heading>
+                            <Navbar.Heading>{t('APP_MENUS.ABOUT_TITLE')}</Navbar.Heading>
                             <Navbar.Divider />
                             <Button className={Classes.MINIMAL} icon="home" text={t('NAV.EXPLORER')} onClick={this.navClick} intent={isExplorer ? Intent.PRIMARY : 'none'} />
                             <Button style={{ position: 'relative' }} className={Classes.MINIMAL} icon="download" onClick={this.navClick} intent={!isExplorer ? Intent.PRIMARY : 'none'}>{t('NAV.TRANSFERS')}<Badge intent="none" text={badgeText} progress={badgeProgress} /></Button>

@@ -7,7 +7,7 @@ console.log(packageJson.version);
 
 const baseConfig = {
     output: {
-        path: path.resolve(__dirname, 'dist'),
+        path: path.resolve(__dirname, 'build'),
         filename: '[name].js'
     },
     node: {
@@ -81,7 +81,7 @@ module.exports = [
             entry: { gui: './src/gui/index.tsx' },
             plugins: [
                 new HtmlWebpackPlugin({
-                    title: 'React-FTP',
+                    title: 'React-Explorer',
                     template: 'index.html'
                 }),
                 new webpack.DefinePlugin({

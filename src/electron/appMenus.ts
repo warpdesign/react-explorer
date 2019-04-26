@@ -11,14 +11,14 @@ export class AppMenu {
     win: BrowserWindow;
     menuStrings: LocaleString;
 
-    constructor(win:BrowserWindow) {
+    constructor(win: BrowserWindow) {
         this.win = win;
     }
 
     sendComboEvent = (menuItem: MenuItem & { accelerator: string }, data?: any) => {
         const accel = menuItem.accelerator || '';
         console.log('sending', menuItem.label, accel);
-        this.win.webContents.send(ACCELERATOR_EVENT, Object.assign({combo: accel, data }));
+        this.win.webContents.send(ACCELERATOR_EVENT, Object.assign({ combo: accel, data }));
     }
 
     sendSelectAll = () => {
@@ -180,7 +180,7 @@ export class AppMenu {
             });
 
             app.setAboutPanelOptions({
-                applicationName: 'React-FTP',
+                applicationName: 'React-Explorer',
                 applicationVersion: app.getVersion()
             });
         } else {
@@ -193,11 +193,11 @@ export class AppMenu {
 
             // add exit to file menu
             (template[0].submenu as MenuItemConstructorOptions[]).push(
-            { type: 'separator' },
-            {
-                label: menuStrings['EXIT'],
-                accelerator: 'CmdOrCtrl+Q',
-                click: this.sendComboEvent
+                { type: 'separator' },
+                {
+                    label: menuStrings['EXIT'],
+                    accelerator: 'CmdOrCtrl+Q',
+                    click: this.sendComboEvent
                 });
 
             // add about menuItem

@@ -5,7 +5,7 @@ const packageJson = require('./package.json');
 
 const baseConfig = {
     output: {
-        path: path.resolve(__dirname, 'dist-e2e'),
+        path: path.resolve(__dirname, 'build-e2e'),
         filename: '[name].js'
     },
     externals: {
@@ -71,7 +71,7 @@ module.exports = [
             entry: { gui: './src/gui/index.tsx' },
             plugins: [
                 new HtmlWebpackPlugin({
-                    title: 'React-FTP',
+                    title: 'React-Explorer',
                     template: 'index.html'
                 }),
                 new webpack.DefinePlugin({

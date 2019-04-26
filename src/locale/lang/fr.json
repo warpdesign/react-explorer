@@ -70,7 +70,7 @@
         },
         "SHORTCUT": {
             "MAIN": {
-                "QUIT": "Quitter react-ftp",
+                "QUIT": "Quitter React-Explorer",
                 "RELOAD_VIEW": "Recharger la vue",
                 "NEXT_VIEW": "Activer la vue suivante",
                 "PREVIOUS_VIEW": "Activer la vue précédente",
@@ -194,7 +194,7 @@
             "RELOAD_VIEW": "Recharger Vue Active",
             "FORCE_RELOAD_APP": "Recharger l'App",
             "KEYBOARD_SHORTCUTS": "List des Raccourcis",
-            "ABOUT_TITLE": "React-FTP",
+            "ABOUT_TITLE": "React-Explorer",
             "ABOUT_CONTENT": "Version ${version}"
         }
     }

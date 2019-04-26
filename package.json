@@ -1,14 +1,17 @@
 {
-  "name": "react-ftp",
+  "name": "react-explorer",
   "version": "1.4.1",
-  "description": "",
-  "main": "dist/main.js",
+  "description": "Plugin-based file explorer written with React",
+  "main": "build/main.js",
   "build": {
-    "productName": "React-FTP",
-    "appId": "reactftp",
+    "productName": "React-Explorer",
+    "appId": "reactexplorer",
+    "mac": {
+      "darkModeSupport": true
+    },
     "files": [
-      "./dist/**/*",
-      "./dist/main.js"
+      "build/**/*",
+      "build/main.js"
     ]
   },
   "scripts": {
@@ -16,9 +19,10 @@
     "build": "webpack --watch",
     "build:e2e": "webpack --config webpack.config.e2e.js --watch",
     "server": "http-server ./dist-e2e -p 8080",
-    "ftpd": "ftp-srv ftp://0.0.0.0:9876 --root /tmp/react-explorer -c ./credentials.json"
+    "ftpd": "ftp-srv ftp://0.0.0.0:9876 --root /tmp/react-explorer -c ./credentials.json",
+    "dist": "webpack --config webpack.config.production.js && electron-builder"
   },
-  "author": "",
+  "author": "Nicolas Ramz",
   "license": "MIT",
   "devDependencies": {
     "@types/classnames": "^2.2.7",
@@ -30,7 +34,7 @@
     "aws-sdk": "^2.332.0",
     "css-loader": "^1.0.0",
     "electron": "^3.0.5",
-    "electron-builder": "^20.34.0",
+    "electron-builder": "^20.39.0",
     "electron-devtools-installer": "^2.2.4",
     "electron-rebuild": "^1.8.2",
     "file-loader": "^2.0.0",

@@ -2,8 +2,10 @@ import { app, BrowserWindow, ipcMain, Menu } from 'electron';
 import * as process from 'process';
 import { watch } from 'fs';
 import { AppMenu, LocaleString } from './appMenus';
+import { isPackage } from '../utils/platform';
 
 declare var __dirname: string
+declare var ENV: any;
 
 // const CLOSE_EXIT_DELAY = 2000;
 const ENV_E2E = !!process.env.E2E;
@@ -95,7 +97,7 @@ function installExitListeners() {
 }
 
 function onReady() {
-    if (!ENV_E2E) {
+    if (!ENV_E2E && !isPackage) {
         installReactDevTools();
     }
     installExitListeners();
@@ -106,7 +108,11 @@ function onReady() {
         height: 600
     });
 
-    if (!ENV_E2E) {
+    if (!ENV_E2E && !isPackage) {
+        const { dialog } = require('electron');
+        dialog.showMessageBox(null, {
+            message: JSON.stringify(process.env)
+        });
         installWatcher('./dist');
     }
 
@@ -118,7 +124,7 @@ function onReady() {
 
     // devtools
     // spectron problem if devtools is opened, see https://github.com/electron/spectron/issues/254
-    if (!ENV_E2E) {
+    if (!ENV_E2E && !isPackage) {
         const devtools = new BrowserWindow();
         mainWindow.webContents.setDevToolsWebContents(devtools.webContents);
         mainWindow.webContents.openDevTools({ mode: 'detach' });
