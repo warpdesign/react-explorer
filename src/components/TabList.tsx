@@ -28,10 +28,17 @@ class TabListClass extends React.Component<InjectedProps> {
 
     }
 
-    closeTab(tabIndex: number) {
+    selectTab(tabIndex: number) {
+        const { viewState } = this.injected;
+        viewState.setVisibleCache(tabIndex);
+    }
+
+    closeTab(tabIndex: number, e: Event) {
         const { viewState } = this.injected;
 
         viewState.closeTab(tabIndex);
+        // prevent selectTab handler to be called since the tab will get closed
+        e.stopPropagation();
         console.log('closetab', tabIndex);
     }
 
@@ -47,7 +54,7 @@ class TabListClass extends React.Component<InjectedProps> {
                     caches.map((cache, index) => {
                         const closeIcon = caches.length > 1 && <Icon iconSize={12} htmlTitle={t('TABS.CLOSE')} className="closetab" intent="warning" onClick={this.closeTab.bind(this, index)} icon="cross"></Icon>;
                         return (
-                            <Button key={"" + viewId + index} title={cache.path} intent={!index ? "primary" : "none"} rightIcon={closeIcon}>{cache.path.split('/').slice(-1)[0]}</Button>
+                            <Button key={"" + viewId + index} onClick={this.selectTab.bind(this, index)} title={cache.path} intent={cache.isVisible ? "primary" : "none"} rightIcon={closeIcon}>{cache.path.split('/').slice(-1)[0]}</Button>
                         )
                     })
                 }

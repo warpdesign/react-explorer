@@ -136,7 +136,8 @@ class App extends React.Component<WithNamespaces, IState> {
         // new listers, which in turns creates new nodes
         // fixing this require a little work so meanwhile
         // this correctly resets the cache's state
-        this.appState.clearAllSelections();
+        // TODO: do we still need to call this?
+        // this.appState.clearAllSelections();
     }
 
     showExplorerTab = () => {

@@ -31,22 +31,26 @@ export class ViewState {
     setVisibleCache(index: number) {
         const previous = this.getVisibleCache();
         const next = this.caches[index];
-        if (previous) {
-            previous.isVisible = false;
+        // do nothing if previous === next
+        if (previous !== next) {
+            if (previous) {
+                previous.isVisible = false;
+            }
+            next.isVisible = true;
+            next.cd(next.path);
         }
-        next.isVisible = true;
     }
 
     @action
     removeCache(index: number) {
         // const toDelete = this.caches.splice(index, 1)[0];
 
-        this.caches.splice(index, 1);
+        return this.caches.splice(index, 1)[0];
     }
 
     @action
     activateNextTab(index: number) {
-        const newActive = this.caches.length >= index ? this.caches[index] : this.caches[0];
+        const newActive = this.caches.length > index ? this.caches[index] : this.caches[0];
         newActive.isVisible = true;
         newActive.cd(newActive.path);
     }
@@ -54,9 +58,11 @@ export class ViewState {
     @action
     closeTab(index: number) {
         console.log('closeTab', this.viewId, index);
-        this.removeCache(index);
+        const removed = this.removeCache(index);
 
-        // activate next cache
-        this.activateNextTab(index);
+        // only activate next cache if the one removed was the visible one
+        if (removed.isVisible) {
+            this.activateNextTab(index);
+        }
     }
 }

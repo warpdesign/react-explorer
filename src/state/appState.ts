@@ -244,33 +244,6 @@ export class AppState {
         return view.caches;
     }
 
-    activateNextTab(index: number) {
-        console.error('this.caches removed');
-        // const newActive = this.caches.length >= index ? this.caches[index] : this.caches[0];
-        // newActive.isVisible = true;
-        // newActive.cd(newActive.path);
-    }
-
-    removeCache(viewId: number, tabIndex: number) {
-        console.error('removed caches');
-        // const view = this.getView(viewId);
-        // const toDelete = view.caches.splice(tabIndex, 1)[0];
-        // const index = this.caches.findIndex((cache) => toDelete === cache);
-        // this.caches.splice(index, 1);
-
-        // return index;
-    }
-
-    closeTab(viewId: number, tabIndex: number) {
-        console.error('appState.closeTab removed');
-        // console.log('closeTab', viewId, tabIndex);
-        // // remove caches
-        // const index = this.removeCache(viewId, tabIndex);
-
-        // // activate next cache
-        // this.activateNextTab(index);
-    }
-
     /**
      * Sync (reload) caches which points to the same directory as srcCache
      * 
@@ -280,6 +253,13 @@ export class AppState {
     syncCaches(srcCache: FileState) {
         // get caches that are showing the same path
         console.error('this.caches removed: we may need this one!');
+        this.views.map(view => view.caches).forEach(caches => {
+            for (let cache of caches) {
+                if (cache.status === 'ok' && cache !== srcCache && cache.getFS().name === srcCache.getFS().name && cache.isVisible) {
+                    cache.reload();
+                }
+            }
+        });
         // const caches = this.caches.filter((cache) => {
         //     return (cache !== srcCache &&
         //         cache.status === 'ok' &&
@@ -358,7 +338,6 @@ export class AppState {
         // only refresh view that's ready
         if (cache && cache.status === 'ok') {
             cache.reload();
-            this.syncCaches(cache);
         }
     }
 
@@ -377,7 +356,6 @@ export class AppState {
 
     @action
     addCache(path: string = '', viewId = -1) {
-        // console.error('addCache removed');
         let view = this.getView(viewId);
 
         if (!view) {
@@ -402,6 +380,10 @@ export class AppState {
     @action
     clearAllSelections() {
         console.error('this.caches removed: we may need this one too!');
+        for (let view of this.views) {
+            const visibleCache = view.getVisibleCache();
+            visibleCache.clearSelection();
+        }
         // for (let cache of this.caches) {
         //     cache.clearSelection();
         // }

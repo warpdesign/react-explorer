@@ -111,7 +111,7 @@ export class FileTableClass extends React.Component<IProps, IState> {
         // gets re-rendered with the wrong language after language has been changed
         this.bindLanguageChange();
 
-        this.cache.cd(this.cache.path);
+        // this.cache.cd(this.cache.path);
     }
 
     get cache() {
