@@ -37,7 +37,9 @@ export class ViewState {
                 previous.isVisible = false;
             }
             next.isVisible = true;
-            next.cd(next.path);
+            if (!next.history.length) {
+                next.cd(next.path);
+            }
         }
     }
 
@@ -52,7 +54,9 @@ export class ViewState {
     activateNextTab(index: number) {
         const newActive = this.caches.length > index ? this.caches[index] : this.caches[0];
         newActive.isVisible = true;
-        newActive.cd(newActive.path);
+        if (!newActive.history.length) {
+            newActive.cd(newActive.path);
+        }
     }
 
     @action
