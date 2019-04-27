@@ -185,6 +185,7 @@
             "TITLE_EDIT": "Edit",
             "TITLE_VIEW": "View",
             "TITLE_HELP": "Help",
+            "TITLE_WINDOW": "Window",
             "MAKEDIR": "New Directory",
             "RENAME": "Rename",
             "DELETE": "Delete",
