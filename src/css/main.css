@@ -294,7 +294,6 @@ body.bp3-dark .bp3-loader.active{
 
 .tablist .closetab{
     opacity:0;
-    align-self:flex-end;
 }
 
 .tablist .bp3-button:hover .closetab{
@@ -306,17 +305,29 @@ body.bp3-dark .bp3-loader.active{
 }
 
 .tablist.bp3-button-group.bp3-fill .bp3-button:not(.bp3-fixed) {
-    flex-basis:100%;
+    width:13rem;
+    flex-grow:0;
 }
 
 .tablist.bp3-button-group.bp3-fill .addtab:not(.bp3-fixed){
-    flex-basis:auto;
+    width:auto;
     flex-grow:0;
 }
-/* .tablist .tableRow.selected{
+
+.tablist .bp3-button .bp3-button-text{
+    flex-grow: 1;
+    text-align: center;
+}
+
+.sideview:not(.active) .tablist .bp3-intent-primary{
     background-color: #8A9BA8;
 }
 
+.bp3-dark .sideview:not(.active) .tablist .bp3-intent-primary{
+    background-color: rgb(88, 100, 109);
+}
+
+/*
 .tablist .sideview.active .tableRow.selected{
     background-color:#137cbd;
 } */
