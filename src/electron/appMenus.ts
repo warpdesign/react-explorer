@@ -58,20 +58,23 @@ export class AppMenu {
 
     getMenuTemplate(): MenuItemConstructorOptions[] {
         const menuStrings = this.menuStrings;
+        let windowMenuIndex = 3;
 
         const template = [
             {
                 label: menuStrings['TITLE_FILE'],
                 submenu: [
-                    // {
-                    //     label: menuStrings['ABOUT'],
-                    //     click: () => {
-                    //         console.log('click on Menu 1: sending combo !');
-                    //         // this.sendComboEvent('CmdOrCtrl+A')
-                    //     },
-                    //     accelerator: 'CmdOrCtrl+A',
-                    //     role: 'about'
-                    // },
+                    { type: 'separator' },
+                    {
+                        label: menuStrings['NEW_TAB'],
+                        click: this.sendComboEvent,
+                        accelerator: 'CmdOrCtrl+T',
+                    },
+                    {
+                        label: menuStrings['CLOSE_TAB'],
+                        click: this.sendComboEvent,
+                        accelerator: 'CmdOrCtrl+W',
+                    },
                     { type: 'separator' },
                     {
                         label: menuStrings['MAKEDIR'],
@@ -146,6 +149,15 @@ export class AppMenu {
                 ],
             },
             {
+                label: menuStrings['TITLE_WINDOW'],
+                submenu: [
+                    {
+                        label: menuStrings['MINIMIZE'],
+                        role: 'minimize'
+                    },
+                ]
+            },
+            {
                 label: menuStrings['TITLE_HELP'],
                 submenu: [
                     {
@@ -183,6 +195,15 @@ export class AppMenu {
                 applicationName: 'React-Explorer',
                 applicationVersion: app.getVersion()
             });
+
+            windowMenuIndex = 4;
+
+            // add zoom window/role entry
+            (template[4].submenu as MenuItemConstructorOptions[]).push({
+                label: menuStrings['ZOOM'],
+                role: 'zoom'
+            });
+
         } else {
             // add preference to file menu
             (template[0].submenu as MenuItemConstructorOptions[]).unshift({
@@ -206,6 +227,20 @@ export class AppMenu {
                 click: this.showAboutDialog
             });
         }
+
+        // add zoom window/role entry
+        (template[windowMenuIndex].submenu as MenuItemConstructorOptions[]).push(
+            {
+                type: 'separator'
+            }, {
+                label: menuStrings['SELECT_NEXT_TAB'],
+                accelerator: 'Ctrl+Tab',
+                click: this.sendComboEvent
+            }, {
+                label: menuStrings['SELECT_PREVIOUS_TAB'],
+                accelerator: 'Ctrl+Shift+Tab',
+                click: this.sendComboEvent
+            });
 
         return template as MenuItemConstructorOptions[];
     }

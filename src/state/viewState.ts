@@ -1,5 +1,6 @@
 import { FileState } from "./fileState";
 import { observable, action } from "mobx";
+import { runInThisContext } from "vm";
 
 export class ViewState {
     viewId: number;
@@ -25,6 +26,10 @@ export class ViewState {
 
     getVisibleCache() {
         return this.caches.find(cache => cache.isVisible);
+    }
+
+    getVisibleCacheIndex() {
+        return this.caches.findIndex(cache => cache.isVisible);
     }
 
     @action
@@ -60,8 +65,32 @@ export class ViewState {
     }
 
     @action
+    cycleTab(direction: 1 | -1) {
+        const max = this.caches.length - 1;
+
+        // only one tab: do nothing
+        if (!max) {
+            return;
+        }
+
+        let index = this.getVisibleCacheIndex() + direction;
+
+        if (index < 0) {
+            index = max;
+        } else if (index > max) {
+            index = 0;
+        }
+
+        this.setVisibleCache(index);
+    }
+
+    @action
     closeTab(index: number) {
         console.log('closeTab', this.viewId, index);
+        // keep at least one tab for now ?
+        if (this.caches.length < 2) {
+            return;
+        }
         const removed = this.removeCache(index);
 
         // only activate next cache if the one removed was the visible one

@@ -82,6 +82,9 @@
             "LOG": {
                 "TOGGLE": "Afficher/cacher la console"
             },
+            "TABS": {
+                "CLOSE_ACTIVE_TAB": "Fermer l'onglet actif"
+            },
             "ACTIVE_VIEW": {
                 "COPY": "Copier les éléments sélectionnés dans le presse-papier",
                 "PASTE": "Coller les éléments sélectionnés dans le presse-papier",
@@ -99,7 +102,8 @@
             },
             "GROUP": {
                 "ACTIVE_VIEW": "Vue de dossier active",
-                "GLOBAL": "Raccourcis Globaux"
+                "GLOBAL": "Raccourcis Globaux",
+                "TABS": "Onglets"
             }
         },
         "STATUS": {
@@ -181,6 +185,7 @@
             "TITLE_EDIT": "Editer",
             "TITLE_VIEW": "Vue",
             "TITLE_HELP": "Aide",
+            "TITLE_WINDOW": "Fenêtre",
             "MAKEDIR": "Nouveau Dossier",
             "DELETE": "Supprimer",
             "RENAME": "Renommer",
@@ -195,7 +200,13 @@
             "FORCE_RELOAD_APP": "Recharger l'App",
             "KEYBOARD_SHORTCUTS": "List des Raccourcis",
             "ABOUT_TITLE": "React-Explorer",
-            "ABOUT_CONTENT": "Version ${version}"
+            "ABOUT_CONTENT": "Version ${version}",
+            "ZOOM": "Zoom",
+            "MINIMIZE": "Réduire",
+            "SELECT_NEXT_TAB": "Sélectionner l'onglet suivant",
+            "SELECT_PREVIOUS_TAB": "Sélectionner l'onglet précédent",
+            "NEW_TAB": "Nouvel onglet",
+            "CLOSE_TAB": "Fermer l'onglet"
         }
     }
 }

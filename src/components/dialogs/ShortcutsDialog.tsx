@@ -5,10 +5,10 @@ import { withNamespaces, WithNamespaces } from "react-i18next";
 interface IShortcutsProps extends WithNamespaces {
     isOpen: boolean;
     onClose: () => void
- };
+};
 
 class ShortcutsDialogClass extends React.Component<IShortcutsProps>{
-    constructor(props:any) {
+    constructor(props: any) {
         super(props);
     }
 
@@ -43,6 +43,12 @@ class ShortcutsDialogClass extends React.Component<IShortcutsProps>{
                 { combo: "mod + n", label: t('COMMON.MAKEDIR') },
                 { combo: "mod + d", label: t('SHORTCUT.ACTIVE_VIEW.DELETE') },
                 { combo: "mod + k", label: t('SHORTCUT.ACTIVE_VIEW.OPEN_TERMINAL') }
+            ],
+            [
+                { combo: "ctrl + tab", label: t('APP_MENUS.SELECT_NEXT_TAB') },
+                { combo: "ctrl + shift + tab", label: t('APP_MENUS.SELECT_PREVIOUS_TAB') },
+                { combo: "mod + t", label: t('APP_MENUS.NEW_TAB') },
+                { combo: "mod + w", label: t('SHORTCUT.TABS.CLOSE_ACTIVE_TAB') },
             ]
         ]
     }
@@ -55,29 +61,29 @@ class ShortcutsDialogClass extends React.Component<IShortcutsProps>{
         const { t } = this.props;
         const shortcuts = this.buildList();
 
-        return(
+        return (
             <Dialog
-            icon="lightbulb"
-            title={t('NAV.SHORTCUTS')}
-            isOpen={this.props.isOpen}
-            autoFocus={true}
-            enforceFocus={true}
-            canEscapeKeyClose={true}
-            usePortal={true}
-            onClose={this.onClose}
-            className="shortcutsDialog"
-        >
-            <div className={`${Classes.DIALOG_BODY}`}>
-                <div className="bp3-hotkey-column">
-                    <h4 className={Classes.HEADING}>
-                        {t('SHORTCUT.GROUP.GLOBAL')}
-                    </h4>
-                    {shortcuts[0].map((shortcut) => (
-                        <div key={shortcut.combo} className={Classes.HOTKEY}>
-                            <div className={Classes.HOTKEY_LABEL}>{shortcut.label}</div>
-                            <KeyCombo combo={shortcut.combo}></KeyCombo>
-                        </div>
-                    ))}
+                icon="lightbulb"
+                title={t('NAV.SHORTCUTS')}
+                isOpen={this.props.isOpen}
+                autoFocus={true}
+                enforceFocus={true}
+                canEscapeKeyClose={true}
+                usePortal={true}
+                onClose={this.onClose}
+                className="shortcutsDialog"
+            >
+                <div className={`${Classes.DIALOG_BODY}`}>
+                    <div className="bp3-hotkey-column">
+                        <h4 className={Classes.HEADING}>
+                            {t('SHORTCUT.GROUP.GLOBAL')}
+                        </h4>
+                        {shortcuts[0].map((shortcut) => (
+                            <div key={shortcut.combo} className={Classes.HOTKEY}>
+                                <div className={Classes.HOTKEY_LABEL}>{shortcut.label}</div>
+                                <KeyCombo combo={shortcut.combo}></KeyCombo>
+                            </div>
+                        ))}
                         <h4 className={Classes.HEADING}>
                             {t('SHORTCUT.GROUP.ACTIVE_VIEW')}
                         </h4>
@@ -87,15 +93,24 @@ class ShortcutsDialogClass extends React.Component<IShortcutsProps>{
                                 <KeyCombo combo={shortcut.combo}></KeyCombo>
                             </div>
                         ))}
+                        <h4 className={Classes.HEADING}>
+                            {t('SHORTCUT.GROUP.TABS')}
+                        </h4>
+                        {shortcuts[2].map((shortcut) => (
+                            <div key={shortcut.combo} className={Classes.HOTKEY}>
+                                <div className={Classes.HOTKEY_LABEL}>{shortcut.label}</div>
+                                <KeyCombo combo={shortcut.combo}></KeyCombo>
+                            </div>
+                        ))}
+                    </div>
                 </div>
-            </div>
-            <div className={Classes.DIALOG_FOOTER}>
-                <div className={Classes.DIALOG_FOOTER_ACTIONS}>
-                    <Button onClick={this.onClose}>
-                        {t('COMMON.CLOSE')}
-                    </Button>
+                <div className={Classes.DIALOG_FOOTER}>
+                    <div className={Classes.DIALOG_FOOTER_ACTIONS}>
+                        <Button onClick={this.onClose}>
+                            {t('COMMON.CLOSE')}
+                        </Button>
+                    </div>
                 </div>
-            </div>
             </Dialog>
         )
     }

@@ -82,6 +82,9 @@
             "LOG": {
                 "TOGGLE": "Toggle Logs console"
             },
+            "TABS": {
+                "CLOSE_ACTIVE_TAB": "Close active tab"
+            },
             "ACTIVE_VIEW": {
                 "COPY": "Copy selected items to clipboard",
                 "PASTE": "Paste selected items into current folder",
@@ -99,7 +102,8 @@
             },
             "GROUP": {
                 "ACTIVE_VIEW": "Active file view",
-                "GLOBAL": "Global Shortcuts"
+                "GLOBAL": "Global Shortcuts",
+                "TABS": "Tabs"
             }
         },
         "STATUS": {
@@ -195,7 +199,13 @@
             "FORCE_RELOAD_APP": "Force Reload App",
             "KEYBOARD_SHORTCUTS": "Keyboard Map",
             "ABOUT_TITLE": "React-Explorer",
-            "ABOUT_CONTENT": "Version ${version}"
+            "ABOUT_CONTENT": "Version ${version}",
+            "ZOOM": "Zoom",
+            "MINIMIZE": "Minimize",
+            "SELECT_NEXT_TAB": "Select next tab",
+            "SELECT_PREVIOUS_TAB": "Select previous tab",
+            "NEW_TAB": "New tab",
+            "CLOSE_TAB": "Close tab"
         }
     }
 }

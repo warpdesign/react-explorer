@@ -262,6 +262,34 @@ class App extends React.Component<WithNamespaces, IState> {
         }
     }
 
+    onNextTab = () => {
+        if (this.appState.isExplorer) {
+            const viewState = this.appState.getActiveView();
+            viewState.cycleTab(1);
+        }
+    }
+
+    onPreviousTab = () => {
+        if (this.appState.isExplorer) {
+            const viewState = this.appState.getActiveView();
+            viewState.cycleTab(-1);
+        }
+    }
+
+    onNewTab = () => {
+        if (this.appState.isExplorer) {
+            console.log('need to create a new tab');
+        }
+    }
+
+    onCloseTab = () => {
+        if (this.appState.isExplorer) {
+            const viewState = this.appState.getActiveView();
+            const activeTabIndex = viewState.getVisibleCacheIndex();
+            viewState.closeTab(activeTabIndex);
+        }
+    }
+
     renderMenuAccelerators() {
         return <Accelerators>
             <Accelerator combo="CmdOrCtrl+Shift+C" onClick={this.onCopyPath}></Accelerator>
@@ -271,6 +299,10 @@ class App extends React.Component<WithNamespaces, IState> {
             <Accelerator combo="CmdOrCtrl+R" onClick={this.onReloadFileView}></Accelerator>
             <Accelerator combo="CmdOrCtrl+Q" onClick={this.onExitComboDown}></Accelerator>
             <Accelerator combo="CmdOrCtrl+K" onClick={this.onOpenTerminal}></Accelerator>
+            <Accelerator combo="Ctrl+Tab" onClick={this.onNextTab}></Accelerator>
+            <Accelerator combo="Ctrl+Shift+Tab" onClick={this.onPreviousTab}></Accelerator>
+            <Accelerator combo="CmdOrCtrl+T" onClick={this.onNewTab}></Accelerator>
+            <Accelerator combo="CmdOrCtrl+W" onClick={this.onCloseTab}></Accelerator>
         </Accelerators>;
     }
 
