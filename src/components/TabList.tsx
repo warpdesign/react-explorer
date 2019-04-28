@@ -3,6 +3,7 @@ import { ButtonGroup, Button, Icon } from "@blueprintjs/core";
 import { inject, observer } from "mobx-react";
 import { WithNamespaces, withNamespaces } from "react-i18next";
 import { ViewState } from "../state/viewState";
+import { sendFakeCombo } from "./WithMenuAccelerators";
 
 export interface TabDescriptor {
     viewId: number;
@@ -25,7 +26,7 @@ class TabListClass extends React.Component<InjectedProps> {
     }
 
     addTab = () => {
-
+        sendFakeCombo('CmdOrCtrl+T');
     }
 
     selectTab(tabIndex: number) {

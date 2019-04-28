@@ -327,6 +327,12 @@ body.bp3-dark .bp3-loader.active{
     background-color: rgb(88, 100, 109);
 }
 
+.tablist .bp3-button .bp3-button-text{
+    white-space: nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+}
+
 /*
 .tablist .sideview.active .tableRow.selected{
     background-color:#137cbd;

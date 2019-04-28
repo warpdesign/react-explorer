@@ -278,6 +278,9 @@ class App extends React.Component<WithNamespaces, IState> {
 
     onNewTab = () => {
         if (this.appState.isExplorer) {
+            const { settingsState } = this.injected;
+            const viewState = this.appState.getActiveView();
+            viewState.addCache(settingsState.defaultFolder, viewState.getVisibleCacheIndex() + 1, true);
             console.log('need to create a new tab');
         }
     }

@@ -109,10 +109,10 @@ function onReady() {
     });
 
     if (!ENV_E2E && !isPackage) {
-        const { dialog } = require('electron');
-        dialog.showMessageBox(null, {
-            message: JSON.stringify(process.env)
-        });
+        // const { dialog } = require('electron');
+        // dialog.showMessageBox(null, {
+        //     message: JSON.stringify(process.env)
+        // });
         installWatcher('./dist');
     }
 

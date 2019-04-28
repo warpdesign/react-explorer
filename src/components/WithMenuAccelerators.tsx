@@ -1,9 +1,9 @@
 import * as React from "react";
-import { ipcRenderer } from 'electron';
+import { ipcRenderer, remote } from 'electron';
 
 const ACCELERATOR_EVENT = 'menu_accelerator';
 
-export interface MenuAcceleratorEvent{
+export interface MenuAcceleratorEvent {
     combo: string;
 }
 
@@ -31,8 +31,6 @@ export interface IMenuAcceleratorComponent extends React.Component {
     renderMenuAccelerators(): React.ReactElement<IAcceleratorsProps>;
 }
 
-
-
 export class Accelerators extends React.PureComponent<IAcceleratorsProps>{
     render() {
         return <div></div>;
@@ -45,7 +43,13 @@ export class Accelerator extends React.PureComponent<IAcceleratorProps>{
     }
 }
 
-function getDisplayName(ComponentClass: React.ComponentType):string {
+export function sendFakeCombo(combo: string, data?: any) {
+    console.log('sending fake combo');
+    const id = remote.getCurrentWindow().id;
+    ipcRenderer.sendTo(id, ACCELERATOR_EVENT, Object.assign({ combo: combo, data }));
+}
+
+function getDisplayName(ComponentClass: React.ComponentType): string {
     return ComponentClass.displayName || ComponentClass.name || "Unknown";
 }
 
@@ -54,9 +58,9 @@ export function WithMenuAccelerators<T extends IConstructor<IMenuAcceleratorComp
         console.warn('Classes decorated with the @MenuAccelerators must define the renderMenuAccemeratprs method.');
     }
 
-    interface Action{
+    interface Action {
         combo: string,
-        callback: (combo?:string) => any;
+        callback: (combo?: string) => any;
     }
 
     return class MenuAcceleratorsClass extends WrappedComponent {
@@ -64,7 +68,7 @@ export function WithMenuAccelerators<T extends IConstructor<IMenuAcceleratorComp
 
         actions = new Array<Action>();
 
-        getCallback(combo:string): (combo?:string) => any {
+        getCallback(combo: string): (combo?: string) => any {
             const action = this.actions.find((action) => action.combo === combo);
             return action && action.callback || null;
         }

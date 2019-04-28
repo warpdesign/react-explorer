@@ -1,6 +1,5 @@
 import { FileState } from "./fileState";
 import { observable, action } from "mobx";
-import { runInThisContext } from "vm";
 
 export class ViewState {
     viewId: number;
@@ -15,11 +14,19 @@ export class ViewState {
     }
 
     @action
-    addCache(path: string) {
+    addCache(path: string, index = -1, activateNewCache = false) {
         console.log('viewState/addCache', path);
         const cache = new FileState(path, this.viewId);
 
-        this.caches.push(cache);
+        if (index === -1) {
+            this.caches.push(cache);
+        } else {
+            this.caches.splice(index, 0, cache);
+        }
+
+        if (activateNewCache) {
+            this.setVisibleCache(index);
+        }
 
         return cache;
     }
