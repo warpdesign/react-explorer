@@ -90,6 +90,7 @@ class App extends React.Component<WithNamespaces, IState> {
         }
 
         Logger.success(`React-Explorer ${ENV.VERSION} - CY: ${ENV.CY} - NODE_ENV: ${ENV.NODE_ENV} - lang: ${i18next.language}`);
+        Logger.success(`hash=${ENV.HASH}`);
         Logger.success(`lang=${settingsState.lang}, darkMode=${settingsState.darkMode}, defaultFolder=${settingsState.defaultFolder}`);
         Logger.success(`package=${isPackage}`);
     }

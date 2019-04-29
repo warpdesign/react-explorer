@@ -1,7 +1,9 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const CopyPlugin = require('copy-webpack-plugin');
 const webpack = require('webpack');
 const packageJson = require('./package.json');
+const gitHash = require('./scripts/hash');
 
 const baseConfig = {
     output: {
@@ -9,7 +11,7 @@ const baseConfig = {
         filename: '[name].js'
     },
     externals: {
-        "process": '{process: "dtc"}',
+        "process": '{process: "foo"}',
         "electron": '{ipcRenderer: {send: function() {}, on: function() {}}, remote: { app: { getPath: function(str) { return "**ci**"; } } } }',
         "child_process": '{exec: function(str, cb) { cb(); }}',
         "fs": '{}',
@@ -77,8 +79,16 @@ module.exports = [
                 new webpack.DefinePlugin({
                     'ENV.CY': true,
                     'ENV.NODE_ENV': JSON.stringify(baseConfig.mode),
-                    'ENV.VERSION': JSON.stringify(packageJson.version)
-                })]
+                    'ENV.VERSION': JSON.stringify(packageJson.version),
+                    'ENV.HASH': JSON.stringify(gitHash)
+                }),
+                new CopyPlugin([
+                    {
+                        from: 'img/icon-512x512.png',
+                        to: 'icon.png'
+                    }
+                ])
+            ]
         },
         baseConfig)
 ];

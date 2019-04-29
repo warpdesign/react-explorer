@@ -105,7 +105,10 @@ function onReady() {
     mainWindow = new BrowserWindow({
         minWidth: 750,
         width: 800,
-        height: 600
+        height: 600,
+        webPreferences: {
+            enableBlinkFeatures: 'OverlayScrollbars'
+        }
     });
 
     if (!ENV_E2E && !isPackage) {
@@ -113,7 +116,7 @@ function onReady() {
         // dialog.showMessageBox(null, {
         //     message: JSON.stringify(process.env)
         // });
-        installWatcher('./dist');
+        installWatcher('./build');
     }
 
     const fileName = `file://${__dirname}/index.html`;

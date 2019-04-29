@@ -23,9 +23,12 @@ class App {
 
     constructor() {
         this.settingsState = new SettingsState(ENV.VERSION);
-        this.createTestFolder()
-            //.then(this.testFTP)
-            .then(this.renderApp);
+        if (ENV.NODE_ENV !== 'production') {
+            this.createTestFolder()
+                .then(this.renderApp);
+        } else {
+            this.renderApp()
+        }
     }
 
     // debug stuff
@@ -43,28 +46,9 @@ class App {
         })
     }
 
-    async testFTP(): Promise<any> {
-        console.log('connecting');
-        const client = new FTPClient();
-        await client.access({
-            host: "ftp.warpdesign.fr"
-        });
-        console.log('connected!!');
-        const writeStream = fs.createWriteStream('/tmp/000-12-copy.zip');
-        const reportProgress = new Transform({
-            transform(chunk, encoding, callback) {
-                // console.log('got', chunk.length);
-                callback(null, chunk);
-            }
-        });
-
-        console.log('transfer');
-        await client.download(reportProgress, '/warp_logo35.rar').then(() => {
-            console.log('done!');
-        });
-    }
-
     renderApp = () => {
+        document.body.classList.add('loaded');
+
         ReactDOM.render(
             <DragDropContextProvider backend={HTML5Backend}>
                 <I18nextProvider i18n={i18next}>
@@ -75,57 +59,6 @@ class App {
             </DragDropContextProvider>,
             document.getElementById('root'));
     }
-
-    addListeners() {
-        // Devlopment stuff: reload window on file change
-        window.addEventListener('load', () => {
-            const btn: HTMLButtonElement = document.querySelector('#reload');
-            btn.addEventListener('click', () => {
-                remote.getCurrentWebContents().reloadIgnoringCache();
-            });
-        });
-    }
 }
 
 const app = new App();
-
-// const format = function(data: string|number) {
-//     let str = data.toString();
-//     if (str.length < 15) {
-//         const diff = 15 - str.length;
-//         for (let i = 0; i < diff; ++i) {
-//             str = " " + str;
-//         }
-//     }
-//     return str;
-// }
-
-// const {webFrame} = require('electron')
-// function getMemory() {
-//   // `format` omitted  (pads + limits to 15 characters for the output)
-//   function logMemDetails(x:any) {
-//     function toMb(bytes:any) {
-//       return (bytes / (1000.0 * 1000)).toFixed(2)
-//     }
-
-//     console.log(
-//       format(x[0]),
-//       format(x[1].count),
-//       format(toMb(x[1].size) + "MB"),
-//       format(toMb(x[1].liveSize) +"MB")
-//     )
-//   }
-
-//   console.log(
-//     format("object"),
-//     format("count"),
-//     format("size"),
-//     format("liveSize")
-//   )
-//   const resourceUsage:any = webFrame.getResourceUsage();
-
-//   Object.keys(resourceUsage).map((key: string) => [key, resourceUsage[key]]).map(logMemDetails);
-//   console.log(format('------'));
-// }
-
-// setInterval(getMemory, 5000)

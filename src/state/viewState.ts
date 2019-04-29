@@ -26,6 +26,7 @@ export class ViewState {
 
         if (activateNewCache) {
             this.setVisibleCache(index);
+            // setTimeout(() => (document.querySelector('.sideview.active input') as HTMLInputElement).focus());
         }
 
         return cache;
@@ -40,7 +41,7 @@ export class ViewState {
     }
 
     @action
-    setVisibleCache(index: number) {
+    setVisibleCache(index: number, activateInput = false) {
         const previous = this.getVisibleCache();
         const next = this.caches[index];
         // do nothing if previous === next

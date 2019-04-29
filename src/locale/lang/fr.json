@@ -200,7 +200,7 @@
             "FORCE_RELOAD_APP": "Recharger l'App",
             "KEYBOARD_SHORTCUTS": "List des Raccourcis",
             "ABOUT_TITLE": "React-Explorer",
-            "ABOUT_CONTENT": "Version ${version}",
+            "ABOUT_CONTENT": "Version ${version}\n${hash}",
             "ZOOM": "Zoom",
             "MINIMIZE": "Réduire",
             "SELECT_NEXT_TAB": "Sélectionner l'onglet suivant",

@@ -1,6 +1,8 @@
 import { Menu, BrowserWindow, MenuItemConstructorOptions, MenuItem, app, ipcMain, dialog } from 'electron';
 import { isMac } from '../utils/platform';
 
+declare var ENV: any;
+
 const ACCELERATOR_EVENT = 'menu_accelerator';
 
 export interface LocaleString {
@@ -52,7 +54,7 @@ export class AppMenu {
             title: this.menuStrings['ABOUT_TITLE'],
             type: 'info',
             message: this.menuStrings['ABOUT_TITLE'],
-            detail: this.menuStrings['ABOUT_CONTENT'].replace('${version}', version)
+            detail: this.menuStrings['ABOUT_CONTENT'].replace('${version}', version).replace('${hash}', ENV.HASH)
         }, result => null);
     }
 
@@ -193,7 +195,8 @@ export class AppMenu {
 
             app.setAboutPanelOptions({
                 applicationName: 'React-Explorer',
-                applicationVersion: app.getVersion()
+                applicationVersion: app.getVersion(),
+                version: ENV.HASH
             });
 
             windowMenuIndex = 4;

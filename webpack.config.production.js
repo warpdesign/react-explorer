@@ -1,7 +1,9 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const CopyPlugin = require('copy-webpack-plugin');
 const webpack = require('webpack');
 const packageJson = require('./package.json');
+const gitHash = require('./scripts/hash');
 
 console.log(packageJson.version);
 
@@ -68,7 +70,8 @@ module.exports = [
                 new webpack.DefinePlugin({
                     'ENV.CY': false,
                     'ENV.NODE_ENV': JSON.stringify(baseConfig.mode),
-                    'ENV.VERSION': JSON.stringify(packageJson.version)
+                    'ENV.VERSION': JSON.stringify(packageJson.version),
+                    'ENV.HASH': JSON.stringify(gitHash)
                 })
             ]
         },
@@ -85,8 +88,15 @@ module.exports = [
                 new webpack.DefinePlugin({
                     'ENV.CY': false,
                     'ENV.NODE_ENV': JSON.stringify(baseConfig.mode),
-                    'ENV.VERSION': JSON.stringify(packageJson.version)
-                })
+                    'ENV.VERSION': JSON.stringify(packageJson.version),
+                    'ENV.HASH': JSON.stringify(gitHash)
+                }),
+                new CopyPlugin([
+                    {
+                        from: 'img/icon-512x512.png',
+                        to: 'icon.png'
+                    }
+                ])
             ]
         },
         baseConfig)

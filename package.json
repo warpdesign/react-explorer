@@ -7,11 +7,20 @@
     "productName": "React-Explorer",
     "appId": "reactexplorer",
     "mac": {
-      "darkModeSupport": true
+      "darkModeSupport": true,
+      "icon": "icon.png"
+    },
+    "win": {
+      "icon": "icon.png"
+    },
+    "linux": {
+      "synopsis": "React-based FileManager",
+      "description": "Plugin-based file explorer written with React",
+      "category": "FileManager",
+      "target": "AppImage"
     },
     "files": [
-      "build/**/*",
-      "build/main.js"
+      "build/**/*"
     ]
   },
   "scripts": {
@@ -20,7 +29,7 @@
     "build:e2e": "webpack --config webpack.config.e2e.js --watch",
     "server": "http-server ./dist-e2e -p 8080",
     "ftpd": "ftp-srv ftp://0.0.0.0:9876 --root /tmp/react-explorer -c ./credentials.json",
-    "dist": "webpack --config webpack.config.production.js && electron-builder"
+    "dist": "webpack --config webpack.config.production.js && electron-builder -mwl"
   },
   "author": "Nicolas Ramz",
   "license": "MIT",
@@ -32,6 +41,7 @@
     "@types/react-virtualized": "^9.18.12",
     "awesome-typescript-loader": "^5.2.1",
     "aws-sdk": "^2.332.0",
+    "copy-webpack-plugin": "^5.0.3",
     "css-loader": "^1.0.0",
     "electron": "^3.0.5",
     "electron-builder": "^20.39.0",
