@@ -1,9 +1,10 @@
 import { observable, action, runInAction } from "mobx";
-import { FsApi, Fs, getFS, File, ICredentials } from "../services/Fs";
+import { FsApi, Fs, getFS, File, ICredentials, needsConnection } from "../services/Fs";
 import { Deferred } from '../utils/deferred';
 import i18next from '../locale/i18n';
 import { shell, ipcRenderer } from 'electron';
 import * as process from 'process';
+import { AppState } from "./appState";
 
 const isWin = process.platform === "win32";
 
@@ -28,8 +29,14 @@ export class FileState {
     @observable
     status: TStatus;
 
+    // @observable
+    // active = false;
+
     @observable
-    active = false;
+    isVisible = false;
+
+    @observable
+    viewId = -1;
 
     // history stuff
     history = observable<string>([]);
@@ -87,12 +94,10 @@ export class FileState {
 
     private loginDefer: Deferred<any>;
 
-    constructor(path: string) {
+    constructor(path: string, viewId = -1) {
+        this.viewId = viewId;
         this.path = path;
         this.getNewFS(path);
-        // if (path) {
-        //     this.cd(path);
-        // }
     }
 
     private saveContext() {
@@ -102,25 +107,35 @@ export class FileState {
     }
 
     private restoreContext() {
+        this.freeFsEvents();
         this.api = this.prevApi;
+        this.bindFsEvents();
         this.fs = this.prevFs;
         this.server = this.prevServer;
+    }
+
+    private bindFsEvents() {
+        this.api.on('close', () => this.setStatus('offline'));
+        // this.api.on('connect', () => this.setStatus('ok'));
+    }
+
+    private freeFsEvents() {
+        if (this.api) {
+            this.api.off();
+        }
     }
 
     private getNewFS(path: string, skipContext = false): Fs {
         let newfs = getFS(path);
 
         if (newfs) {
-            // free exiting api
-            if (this.api) {
-                this.api.free();
-            }
+            !skipContext && this.api && this.saveContext();
 
-            !skipContext && this.saveContext();
-
+            // we need to free events in any case
+            this.freeFsEvents();
             this.fs = newfs;
             this.api = new newfs.API(path);
-            this.api.on('close', () => this.setStatus('offline'))
+            this.bindFsEvents();
         }
 
         return newfs;
@@ -152,7 +167,7 @@ export class FileState {
         // into an infinite loop
         if (this.api.isConnected()) {
             this.navHistory(0);
-            this.status = 'ok';
+            this.setStatus('ok');
         }
     }
 
@@ -166,18 +181,127 @@ export class FileState {
                 this.doLogin();
             } else {
                 // otherwise show login dialog
-                this.status = 'login';
+                this.setStatus('login');
             }
 
             return this.loginDefer.promise;
         } else {
-            this.status = 'busy';
+            this.setStatus('busy');
             return Promise.resolve();
         }
     }
 
+
+
     @action
-    // changes current path and retrieves file list
+    onLoginSuccess() {
+        this.setStatus('ok');
+        this.loginDefer.resolve();
+    }
+
+    @action
+    async doLogin(server?: string, credentials?: ICredentials) {
+        console.log('logging in');
+        // this.status = 'busy';
+        if (server) {
+            this.server = this.fs.serverpart(server);
+        }
+
+        try {
+            await this.api.login(server, credentials);
+            this.onLoginSuccess();
+        } catch (err) {
+            const error = this.getLocalizedError(err);
+            this.loginDefer.reject(error);
+        }
+        // .then(() => ).catch((err) => {
+        //     console.log('error while connecting', err);
+
+        // });
+
+        return this.loginDefer.promise;
+    }
+
+    @action clearSelection() {
+        this.selected.clear();
+    }
+
+    reload() {
+        this.navHistory(0, true);
+    }
+
+    getLocalizedError(error: any) {
+        let niceError = error;
+
+        if (typeof error.code === 'undefined') {
+            debugger;
+            niceError = {};
+
+            switch (true) {
+                case /EHOSTDOWN/.test(error):
+                    niceError.code = 'EHOSTDOWN';
+                    break;
+
+                default:
+                    niceError.code = 'NOCODE';
+                    break;
+            }
+        }
+
+        switch (niceError.code) {
+            case 'ENOTFOUND':
+                debugger;
+                niceError.message = i18next.t('ERRORS.ENOTFOUND');
+                break;
+
+            case 'ECONNREFUSED':
+                niceError.message = i18next.t('ERRORS.ECONNREFUSED');
+                break;
+
+            case 'ENOENT':
+                niceError.message = i18next.t('ERRORS.ENOENT');
+                break;
+
+            case 'EPERM':
+                niceError.message = i18next.t('ERRORS.EPERM');
+                break;
+
+            case 'BAD_FILENAME':
+                const acceptedChars = isWin ? i18next.t('ERRORS.WIN_VALID_FILENAME') : i18next.t('ERRORS.UNIX_VALID_FILENAME');
+
+                niceError.message = i18next.t('ERRORS.BAD_FILENAME', { entry: error.newName }) + '. ' + acceptedChars;
+                break;
+
+            case 'EHOSTDOWN':
+                niceError.message = i18next.t('ERRORS.EHOSTDOWN');
+                break;
+
+            case 530:
+                niceError.message = i18next.t('ERRORS.530');
+                break;
+
+            case 550:
+                niceError.message = i18next.t('ERRORS.550');
+                break;
+
+            default:
+                debugger;
+                niceError.message = i18next.t('ERRORS.UNKNOWN');
+                break;
+        }
+
+        return niceError;
+    }
+
+    handleError = (error: any) => {
+        console.log('handleError', error);
+        this.setStatus('ok');
+        const niceError = this.getLocalizedError(error);
+        console.log('orignalCode', error.code, 'newCode', niceError.code);
+        return Promise.reject(niceError);
+    }
+
+    @action
     async cd(path: string, path2: string = '', skipHistory = false, skipContext = false): Promise<string> {
         // first updates fs (eg. was local fs, is now ftp)
         console.log('cd', path, this.path);
@@ -195,12 +319,18 @@ export class FileState {
             }
         }
 
-        try {
-            await this.waitForConnection();
-        } catch (err) {
-            return this.cd(path, path2, false, true);
-        }
+        return this.cwd(path, path2, skipHistory, skipContext);
+    }
 
+    @action
+    @needsConnection
+    // changes current path and retrieves file list
+    async cwd(path: string, path2: string = '', skipHistory = false, skipContext = false): Promise<string> {
+        // try {
+        //     await this.waitForConnection();
+        // } catch (err) {
+        //     return this.cd(path, path2, false, true);
+        // }
         const joint = path2 ? this.api.join(path, path2) : this.api.sanityze(path);
         return this.api.cd(joint)
             .then((path) => {
@@ -209,44 +339,16 @@ export class FileState {
             })
             .catch((error) => {
                 console.log('path not valid ?', joint, 'restoring previous path');
-                this.status = 'ok';
+                this.setStatus('ok');
                 this.navHistory(0);
-                this.setErrorString(error);
-                return Promise.reject(error);
+                const localizedError = this.getLocalizedError(error);
+                return Promise.reject(localizedError);
             });
     }
 
     @action
-    onLoginSuccess() {
-        this.status = 'ok';
-        this.loginDefer.resolve();
-    }
-
-    @action
-    doLogin(server?: string, credentials?: ICredentials) {
-        console.log('logging in');
-        // this.status = 'busy';
-        if (server) {
-            this.server = this.fs.serverpart(server);
-        }
-
-        this.api.login(server, credentials).then(() => this.onLoginSuccess()).catch((err) => {
-            console.log('error while connecting', err);
-            this.setErrorString(err);
-            this.loginDefer.reject(err);
-        });
-
-        return this.loginDefer.promise;
-    }
-
-    @action
+    @needsConnection
     async list(path: string, appendParent?: boolean): Promise<File[]> {
-        try {
-            await this.waitForConnection();
-        } catch (err) {
-            return this.list(path, appendParent);
-        }
-
         return this.api.list(path, appendParent)
             .then((files: File[]) => {
                 runInAction(() => {
@@ -256,7 +358,7 @@ export class FileState {
                     this.clearSelection();
                     // TODO: sync caches ?
 
-                    this.status = 'ok';
+                    this.setStatus('ok');
                 });
 
                 return files;
@@ -264,81 +366,19 @@ export class FileState {
             .catch(this.handleError)
     }
 
-    @action clearSelection() {
-        this.selected.clear();
-    }
-
-    reload() {
-        this.navHistory(0, true);
-    }
-
-    join(path: string, path2: string) {
-        return this.api.join(path, path2);
-    }
-
-    setErrorString(error: any) {
-        if (typeof error.code === 'undefined') {
-            debugger;
-            error.code = 'NOCODE';
-        }
-        switch (error.code) {
-            case 'ENOTFOUND':
-                debugger;
-                error.message = i18next.t('ERRORS.ENOTFOUND');
-                break;
-
-            case 'ECONNREFUSED':
-                error.message = i18next.t('ERRORS.ECONNREFUSED');
-                break;
-
-            case 'ENOENT':
-                error.message = i18next.t('ERRORS.ENOENT');
-                break;
-
-            case 'EPERM':
-                error.message = i18next.t('ERRORS.EPERM');
-                break;
-
-            case 'BAD_FILENAME':
-                const acceptedChars = isWin ? i18next.t('ERRORS.WIN_VALID_FILENAME') : i18next.t('ERRORS.UNIX_VALID_FILENAME');
-
-                error.message = i18next.t('ERRORS.BAD_FILENAME', { entry: error.newName }) + '. ' + acceptedChars;
-                break;
-
-            case 530:
-                error.message = i18next.t('ERRORS.530');
-                break;
-
-            case 550:
-                error.message = i18next.t('ERRORS.550', { message: error.message });
-                break;
-
-            default:
-                debugger;
-                error.message = i18next.t('ERRORS.UNKNOWN');
-                break;
-        }
-    }
-
-    handleError = (error: any) => {
-        console.log('handleError', error);
-        this.status = 'ok';
-        this.setErrorString(error);
-        return Promise.reject(error);
-    }
-
+    @action
+    @needsConnection
     async rename(source: string, file: File, newName: string): Promise<string> {
-        // TODO: check for valid filenames
-        try {
-            await this.waitForConnection();
-        } catch (err) {
-            return this.rename(source, file, newName);
-        }
-
+        // // TODO: check for valid filenames
+        // try {
+        //     await this.waitForConnection();
+        // } catch (err) {
+        //     return this.rename(source, file, newName);
+        // }
         return this.api.rename(source, file, newName).then((newName: string) => {
             runInAction(() => {
                 file.fullname = newName;
-                this.status = 'ok';
+                this.setStatus('ok');
             });
 
             return newName;
@@ -346,17 +386,13 @@ export class FileState {
             .catch(this.handleError);
     }
 
-    async isDir(path: string): Promise<boolean> {
-        await this.waitForConnection();
-        return this.api.isDir(path);
-    }
-
     @action
+    @needsConnection
     async exists(path: string): Promise<boolean> {
-        await this.waitForConnection();
+        // await this.waitForConnection();
         return this.api.exists(path).then((exists) => {
             runInAction(() => {
-                this.status = 'ok';
+                this.setStatus('ok');
             });
             return exists;
         })
@@ -364,18 +400,11 @@ export class FileState {
     }
 
     @action
+    @needsConnection
     async makedir(parent: string, dirName: string): Promise<string> {
-        try {
-            await this.waitForConnection();
-        } catch (err) {
-            return this.makedir(parent, dirName);
-        }
-
-        this.status = 'busy';
-
         return this.api.makedir(parent, dirName).then((newDir) => {
             runInAction(() => {
-                this.status = 'ok';
+                this.setStatus('ok');
             });
 
             return newDir;
@@ -384,18 +413,11 @@ export class FileState {
     }
 
     @action
+    @needsConnection
     async delete(source: string, files: File[]): Promise<number> {
-        try {
-            await this.waitForConnection();
-        } catch (err) {
-            return this.delete(source, files);
-        }
-
-        this.status = 'busy';
-
         return this.api.delete(source, files).then((num) => {
             runInAction(() => {
-                this.status = 'ok';
+                this.setStatus('ok');
             });
 
             return num;
@@ -403,50 +425,52 @@ export class FileState {
             .catch(this.handleError)
     }
 
-    // copy(source: string, files: string[], dest: string): Promise<number> & cp.ProgressEmitter {
-    //     return this.api.copy(source, files, dest);
-    // }
-
-    isDirectoryNameValid = (dirName: string) => {
-        return this.api.isDirectoryNameValid(dirName);
-    }
-
+    @needsConnection
     async size(source: string, files: string[]): Promise<number> {
-        try {
-            await this.waitForConnection();
-        } catch (err) {
-            return this.size(source, files);
-        }
+        // try {
+        //     await this.waitForConnection();
+        // } catch (err) {
+        //     return this.size(source, files);
+        // }
 
         return this.api.size(source, files)
             .catch(this.handleError)
     }
 
-    async get(path: string, file: string): Promise<string> {
-        try {
-            await this.waitForConnection();
-        } catch (err) {
-            return this.get(path, file);
-        }
-
-        return this.api.get(path, file).then((path) => {
-            this.status = 'ok';
-            return path;
-        })
-            .catch(this.handleError)
+    async isDir(path: string): Promise<boolean> {
+        await this.waitForConnection();
+        return this.api.isDir(path);
     }
 
-    openFile(file: File) {
-        console.log('need to open file');
-        return this.get(file.dir, file.fullname).then((tmpPath: string) => {
-            console.log('opening file', tmpPath);
-            shell.openItem(tmpPath);
-        });
+    isDirectoryNameValid = (dirName: string) => {
+        return this.api.isDirectoryNameValid(dirName);
+    }
+
+    join(path: string, path2: string) {
+        return this.api.join(path, path2);
+    }
+
+    async openFile(appState: AppState, cache: FileState, file: File) {
+        try {
+            const path = await appState.prepareLocalTransfer(cache, [file]);
+            this.shellOpenFile(path);
+        } catch (err) {
+            return Promise.reject(err);
+        }
+    }
+
+    shellOpenFile(path: string) {
+        console.log('need to open file', path);
+        shell.openItem(path);
+        // return this.get(file).then((tmpPath: string) => {
+        //     console.log('opening file', tmpPath);
+        //     shell.openItem(tmpPath);
+        // });
     }
 
     openDirectory(file: File) {
         console.log('need to read dir', file.dir, file.fullname);
-        return this.cd(file.dir, file.fullname);
+        return this.cd(file.dir, file.fullname).catch(this.handleError);
     }
 
     openTerminal(path: string) {

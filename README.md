@@ -1,17 +1,17 @@
 # FTP & local file explorer written in TypeScript & React
 
-![React-FTP](./img/react-ftp.png)
+![React-Explorer](./img/react-ftp.png)
 
 ## Features
 
 **Note**
-React-FTP is still being worked on so this is a work in progress.
+React-Explorer is still being worked on so this is a work in progress.
 
-- Plugin-based filesystem type: FTP and local supported for now
+- Plugin-based filesystem type: local supported for now
 - Can be fully keyboard controlled
-- Transfers from Local to FTP, from FTP to FTP and from local to local folders
+- Transfers from/to any plugin
 - Fully localized (French & English available)
-- DarkMode with automatic detection on macOS Mojave
+- Dark Mode with automatic detection on macOS Mojave
 
 ## Requirements
 
@@ -21,9 +21,9 @@ React-FTP is still being worked on so this is a work in progress.
 
 ## Building for local development
 
-In order to build React-FTP you need to have installed `nodejs`.
+In order to build React-Explorer you need to have installed `nodejs`.
 
-Once installed, building React-FTP is as easy as typing:
+Once installed, building React-Explorer is as easy as typing:
 
 ```shell
 npm install && npm run build
@@ -38,34 +38,34 @@ npx electron ./dist/main.js
 ```
 
 ## Building binary packages
-TODO
+In order to build binary packages, simply type the following:
 
-### Windows
+```shell
+npm run dist
+```
 
-### macOS
-
-### Linux
+This will build packaged binaries of React Explorer into the `dist` folder.
 
 ## Tests
 
 ## How to develop a new Plugin
 
-React-FTP has been written so that it can easily be extended using plugins.
+React-Explorer has been written so that it can easily be extended using plugins.
 
 TODO
 
 ## Acknowledgments
 
-FTP-Electron makes use of the following tools/components:
+React-Explorer makes use of the following tools/components:
 
  - [React](https://reactjs.org)
  - [Electron](https://electron.s.org)
  - [TypeScript](https://typescriptlang.org)
  - [MobX](https://mobx.js.org)
  - [Blueprintjs](https://blueprintjs.com)
- - [node-ftp](https://github.com/warpdesign/node-ftp)
+ - [basic-ftp](https://github.com/patrickjuchli/basic-ftp)
  - [i18next](https://i18next.com) & [react-i18n](https://github.com/i18next/react-i18next)
 
  ## Licence
 
- React-FTP is licenced under the MIT licence.
+ React-Explorer is licenced under the MIT licence.

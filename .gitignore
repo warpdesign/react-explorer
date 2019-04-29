@@ -2,3 +2,4 @@ node_modules
 dist/
 dist-e2e/
 .DS_Store
+build/

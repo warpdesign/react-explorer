@@ -1,13 +1,13 @@
-import { FsApi, File, ICredentials, Fs, Parent, filetype } from './Fs';
+import { FsApi, File, ICredentials, Fs, Parent, filetype } from '../Fs';
 import * as ftp from 'ftp';
 import * as path from 'path';
 import * as fs from 'fs';
 import { Transform } from 'stream';
 import { remote } from 'electron';
-import { throttle } from '../utils/throttle';
-import { Logger, JSObject } from "../components/Log";
+import { throttle } from '../../utils/throttle';
+import { Logger, JSObject } from "../../components/Log";
 import { EventEmitter } from 'events';
-import { isWin } from '../utils/platform';
+import { isWin } from '../../utils/platform';
 import * as nodePath from 'path';
 
 const FtpUrl = /^(ftp\:\/\/)*(ftp\.[a-z]+\.[a-z]{2,3}|[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})$/i;
@@ -669,7 +669,7 @@ class FtpAPI implements FsApi {
         }
     }
 
-    free() {
+    off() {
         console.log('*** free');
         // free client
         this.master.api = null;

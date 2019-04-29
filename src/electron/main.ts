@@ -2,8 +2,10 @@ import { app, BrowserWindow, ipcMain, Menu } from 'electron';
 import * as process from 'process';
 import { watch } from 'fs';
 import { AppMenu, LocaleString } from './appMenus';
+import { isPackage } from '../utils/platform';
 
 declare var __dirname: string
+declare var ENV: any;
 
 // const CLOSE_EXIT_DELAY = 2000;
 const ENV_E2E = !!process.env.E2E;
@@ -15,8 +17,8 @@ function installReactDevTools() {
     const { default: installExtension, REACT_DEVELOPER_TOOLS } = require('electron-devtools-installer');
 
     installExtension(REACT_DEVELOPER_TOOLS)
-      .then((name:any) => console.log(`Added Extension:  ${name}`))
-      .catch((err: any) => console.log('An error occurred: ', err));
+        .then((name: any) => console.log(`Added Extension:  ${name}`))
+        .catch((err: any) => console.log('An error occurred: ', err));
 }
 
 function installWatcher(path: string) {
@@ -25,7 +27,7 @@ function installWatcher(path: string) {
 
 function reloadApp() {
     if (mainWindow) {
-        mainWindow.webContents.session.clearCache(function(){
+        mainWindow.webContents.session.clearCache(function () {
             mainWindow.webContents.reloadIgnoringCache();
         });
     }
@@ -35,7 +37,7 @@ let forceExit = false;
 
 function installExitListeners() {
     let exitWindow: BrowserWindow = null;
-    let timeout:any = 0;
+    let timeout: any = 0;
 
     ipcMain.on('reloadIgnoringCache', reloadApp);
 
@@ -95,7 +97,7 @@ function installExitListeners() {
 }
 
 function onReady() {
-    if (!ENV_E2E) {
+    if (!ENV_E2E && !isPackage) {
         installReactDevTools();
     }
     installExitListeners();
@@ -103,11 +105,18 @@ function onReady() {
     mainWindow = new BrowserWindow({
         minWidth: 750,
         width: 800,
-        height: 600
+        height: 600,
+        webPreferences: {
+            enableBlinkFeatures: 'OverlayScrollbars'
+        }
     });
 
-    if (!ENV_E2E) {
-        installWatcher('./dist');
+    if (!ENV_E2E && !isPackage) {
+        // const { dialog } = require('electron');
+        // dialog.showMessageBox(null, {
+        //     message: JSON.stringify(process.env)
+        // });
+        installWatcher('./build');
     }
 
     const fileName = `file://${__dirname}/index.html`;
@@ -118,7 +127,7 @@ function onReady() {
 
     // devtools
     // spectron problem if devtools is opened, see https://github.com/electron/spectron/issues/254
-    if (!ENV_E2E) {
+    if (!ENV_E2E && !isPackage) {
         const devtools = new BrowserWindow();
         mainWindow.webContents.setDevToolsWebContents(devtools.webContents);
         mainWindow.webContents.openDevTools({ mode: 'detach' });

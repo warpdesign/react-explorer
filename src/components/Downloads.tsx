@@ -8,7 +8,7 @@ import { withNamespaces, WithNamespaces } from 'react-i18next';
 import { formatBytes } from '../utils/formatBytes';
 import { getTargetTagName } from '../utils/dom';
 
-interface IProps extends WithNamespaces{
+interface IProps extends WithNamespaces {
     hide: boolean;
 }
 
@@ -89,6 +89,7 @@ class DownloadsClass extends React.Component<IProps, IState> {
         for (let transfer of transfers) {
             let i = transfer.id;
             const sizeStr = transfer.status !== 'calculating' && formatBytes(transfer.size) || '';
+            const transferProgress = formatBytes(transfer.progress);
 
             const node: ITreeNode =
             {
@@ -96,19 +97,20 @@ class DownloadsClass extends React.Component<IProps, IState> {
                 hasCaret: true,
                 icon: "duplicate",
                 label: `${transfer.srcName} ⇢ ${transfer.dstName}`,
-                secondaryLabel: (<span>{`${transfer.status} - ${transfer.progress} ${sizeStr}`} <Icon className="action" intent="danger" icon="small-cross" /></span>),
+                secondaryLabel: (<span>{`${transfer.status} - ${transferProgress} ${sizeStr}`} <Icon className="action" intent="danger" icon="small-cross" /></span>),
                 isExpanded: !!this.state.expandedNodes[transfer.id],
                 childNodes: []
             };
 
             for (let file of transfer.files) {
                 if (!file.file.isDir) {
+                    const fileProgress = formatBytes(file.progress);
                     // console.log(file.file.dir.split('/')[file.file.dir.split('/').length -1]);
                     node.childNodes.push({
                         id: i++,
                         icon: 'document',
                         label: file.subDirectory ? (file.subDirectory + '/' + file.file.fullname) : file.file.fullname,
-                        secondaryLabel: (<span>{`${file.status} - ${file.progress}`} <Icon className="action" intent="danger" icon="small-cross" /></span>)
+                        secondaryLabel: (<span>{`${file.status} - ${fileProgress}`} <Icon className="action" intent="danger" icon="small-cross" /></span>)
                     });
                 }
             }

@@ -1,14 +1,26 @@
 {
-  "name": "react-ftp",
-  "version": "1.0.0",
-  "description": "",
-  "main": "dist/main.js",
+  "name": "react-explorer",
+  "version": "1.4.1",
+  "description": "Plugin-based file explorer written with React",
+  "main": "build/main.js",
   "build": {
-    "productName": "React-FTP",
-    "appId": "reactftp",
+    "productName": "React-Explorer",
+    "appId": "reactexplorer",
+    "mac": {
+      "darkModeSupport": true,
+      "icon": "icon.png"
+    },
+    "win": {
+      "icon": "icon.png"
+    },
+    "linux": {
+      "synopsis": "React-based FileManager",
+      "description": "Plugin-based file explorer written with React",
+      "category": "FileManager",
+      "target": "AppImage"
+    },
     "files": [
-      "./dist/**/*",
-      "./dist/main.js"
+      "build/**/*"
     ]
   },
   "scripts": {
@@ -16,9 +28,10 @@
     "build": "webpack --watch",
     "build:e2e": "webpack --config webpack.config.e2e.js --watch",
     "server": "http-server ./dist-e2e -p 8080",
-    "ftpd": "ftp-srv ftp://0.0.0.0:9876 --root /tmp/react-explorer -c ./credentials.json"
+    "ftpd": "ftp-srv ftp://0.0.0.0:9876 --root /tmp/react-explorer -c ./credentials.json",
+    "dist": "webpack --config webpack.config.production.js && electron-builder -mwl"
   },
-  "author": "",
+  "author": "Nicolas Ramz",
   "license": "MIT",
   "devDependencies": {
     "@types/classnames": "^2.2.7",
@@ -28,9 +41,10 @@
     "@types/react-virtualized": "^9.18.12",
     "awesome-typescript-loader": "^5.2.1",
     "aws-sdk": "^2.332.0",
+    "copy-webpack-plugin": "^5.0.3",
     "css-loader": "^1.0.0",
     "electron": "^3.0.5",
-    "electron-builder": "^20.34.0",
+    "electron-builder": "^20.39.0",
     "electron-devtools-installer": "^2.2.4",
     "electron-rebuild": "^1.8.2",
     "file-loader": "^2.0.0",
@@ -44,11 +58,12 @@
     "webpack-cli": "^3.1.2"
   },
   "dependencies": {
-    "@blueprintjs/core": "^3.6.1",
+    "@blueprintjs/core": "^3.10.0",
     "@blueprintjs/select": "^3.5.0",
     "@types/mkdirp": "^0.5.2",
     "@types/react": "^16.4.14",
     "@types/react-dom": "^16.0.8",
+    "basic-ftp": "^3.2.2",
     "classnames": "^2.2.6",
     "del": "^3.0.0",
     "electron-reload": "^1.2.5",

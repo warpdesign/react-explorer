@@ -279,3 +279,61 @@ body.bp3-dark .bp3-loader.active{
     transform: rotateZ(-45deg);
     left: -2px;
 }
+
+.tablist button{
+    border-bottom-left-radius:0;
+}
+
+.tablist button:last-child{
+    opacity:.3;
+}
+
+.tablist button:last-child:hover{
+    opacity:1;
+}
+
+.tablist .closetab{
+    opacity:0;
+}
+
+.tablist .bp3-button:hover .closetab{
+    opacity:1;
+}
+
+.tablist .addtab:hover, .bp3-dark .bp3-button.addtab:hover{
+    background:transparent;
+}
+
+.tablist.bp3-button-group.bp3-fill .bp3-button:not(.bp3-fixed) {
+    width:13rem;
+    flex-grow:0;
+}
+
+.tablist.bp3-button-group.bp3-fill .addtab:not(.bp3-fixed){
+    width:auto;
+    flex-grow:0;
+}
+
+.tablist .bp3-button .bp3-button-text{
+    flex-grow: 1;
+    text-align: center;
+}
+
+.sideview:not(.active) .tablist .bp3-intent-primary{
+    background-color: #8A9BA8;
+}
+
+.bp3-dark .sideview:not(.active) .tablist .bp3-intent-primary{
+    background-color: rgb(88, 100, 109);
+}
+
+.tablist .bp3-button .bp3-button-text{
+    white-space: nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+}
+
+/*
+.tablist .sideview.active .tableRow.selected{
+    background-color:#137cbd;
+} */

@@ -5,7 +5,7 @@ import { File } from '../services/Fs';
 import { FileState } from '../state/fileState';
 import i18next from 'i18next';
 
-function collect(connect: DragSourceConnector, monitor:DragSourceMonitor) {
+function collect(connect: DragSourceConnector, monitor: DragSourceMonitor) {
     return {
         connectDragSource: connect.dragSource(),
         connectDragPreview: connect.dragPreview(),
@@ -20,20 +20,20 @@ export interface DraggedObject {
 }
 
 const fileSource: DragSourceSpec<RowRendererParams, DraggedObject> = {
-    beginDrag(props: any) {      
+    beginDrag(props: any) {
         return {
             selectedCount: props.selectedCount,
             fileState: props.fileCache,
             dragFile: props.rowData.nodeData
         };
     },
-    canDrag: (props: any, monitor:DragSourceMonitor) => {
-        return props.fileCache && props.fileCache.active || false;
+    canDrag: (props: any, monitor: DragSourceMonitor) => {
+        return props.fileCache && props.fileCache.isVisible || false;
     }
 };
 
-function createPreview(size: number, isDarkModeActive:boolean) {
-    const dragText = i18next.t('DRAG.MULTIPLE', {count: size});
+function createPreview(size: number, isDarkModeActive: boolean) {
+    const dragText = i18next.t('DRAG.MULTIPLE', { count: size });
 
     return createDragPreview(dragText, Object.assign({
         backgroundColor: '#efefef',
@@ -65,7 +65,7 @@ interface RowRendererParams {
     style: any;
 };
 
-interface A11yProps{
+interface A11yProps {
     [key: string]: any;
 }
 
@@ -90,7 +90,7 @@ export function RowRendererFn({
     connectDragPreview,
     isDarkModeActive
 }: any) {
-    const a11yProps: A11yProps = { 'aria-rowindex': index + 1};
+    const a11yProps: A11yProps = { 'aria-rowindex': index + 1 };
     if (
         onRowClick ||
         onRowDoubleClick ||
@@ -120,7 +120,7 @@ export function RowRendererFn({
         }
     }
 
-    if (fileCache.active) {
+    if (fileCache.isVisible) {
         if (selectedCount > 1) {
             connectDragPreview(createPreview(selectedCount, isDarkModeActive));
         } else {
@@ -137,11 +137,11 @@ export function RowRendererFn({
             style={style}>
             {columns}
         </div>)
-      );
+    );
 }
 
 const RowRendererDragged = DragSource<RowRendererParams>('file', fileSource, collect)(RowRendererFn);
 
-export function RowRenderer(props:RowRendererParams) {
-    return <RowRendererDragged {...props}/>;
+export function RowRenderer(props: RowRendererParams) {
+    return <RowRendererDragged {...props} />;
 }

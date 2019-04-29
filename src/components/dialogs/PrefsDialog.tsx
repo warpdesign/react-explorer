@@ -5,18 +5,18 @@ import { withNamespaces, WithNamespaces } from "react-i18next";
 import { SettingsState } from "../../state/settingsState";
 import { inject } from "mobx-react";
 import { Select, ItemRenderer } from "@blueprintjs/select";
-import { FsLocal, FolderExists } from "../../services/FsLocal";
+import { FsLocal, FolderExists } from "../../services/plugins/FsLocal";
 import { remote, ipcRenderer } from "electron";
 
 const DEBOUNCE_DELAY = 300;
 const HOME_DIR = remote.app.getPath('home');
 
-interface IPrefsProps extends WithNamespaces{
+interface IPrefsProps extends WithNamespaces {
     isOpen: boolean;
     onClose: Function;
 }
 
-interface InjectedProps extends IPrefsProps{
+interface InjectedProps extends IPrefsProps {
     settingsState: SettingsState;
 }
 
@@ -43,7 +43,7 @@ const ThemeSelect = Select.ofType<Theme>();
 
 @inject('settingsState')
 class PrefsDialogClass extends React.Component<IPrefsProps, IState>{
-    constructor(props:IPrefsProps) {
+    constructor(props: IPrefsProps) {
         super(props);
 
         const { settingsState } = this.injected;
@@ -84,7 +84,7 @@ class PrefsDialogClass extends React.Component<IPrefsProps, IState>{
     onFolderChange = (event: React.FormEvent<HTMLElement>) => {
         const path = (event.target as HTMLInputElement).value;
         // set error since path will be checked async
-        this.setState({ defaultFolder:path });
+        this.setState({ defaultFolder: path });
         this.checkPath();
     }
 
@@ -185,9 +185,9 @@ class PrefsDialogClass extends React.Component<IPrefsProps, IState>{
         const { t } = this.props;
         const { isFolderValid, defaultFolder, defaultTerminal, darkMode, lang } = this.state;
         const languageItems = this.getSortedLanguages();
-        const selectedLanguage = languageItems.find((language:Language) => language.code === lang);
+        const selectedLanguage = languageItems.find((language: Language) => language.code === lang);
         const themeItems = this.getThemeList();
-        const selectedTheme = themeItems.find((theme:Theme) => theme.code === darkMode);
+        const selectedTheme = themeItems.find((theme: Theme) => theme.code === darkMode);
         const activeTheme = this.injected.settingsState.isDarkModeActive ? t('DIALOG.PREFS.DARK') : t('DIALOG.PREFS.BRIGHT');
         const intent: Intent = isFolderValid ? Intent.NONE : Intent.DANGER;
         const testTerminalButton = (<Tooltip content={t('DIALOG.PREFS.TEST_TERMINAL')}>
@@ -199,22 +199,22 @@ class PrefsDialogClass extends React.Component<IPrefsProps, IState>{
             />
         </Tooltip>);
 
-        return(
+        return (
             <Dialog
-            icon="cog"
-            title={t('DIALOG.PREFS.TITLE')}
-            isOpen={this.props.isOpen}
-            autoFocus={true}
-            enforceFocus={true}
-            canEscapeKeyClose={true}
-            usePortal={true}
-            onClose={this.cancelClose}
-        >
+                icon="cog"
+                title={t('DIALOG.PREFS.TITLE')}
+                isOpen={this.props.isOpen}
+                autoFocus={true}
+                enforceFocus={true}
+                canEscapeKeyClose={true}
+                usePortal={true}
+                onClose={this.cancelClose}
+            >
                 <div className={Classes.DIALOG_BODY}>
                     <FormGroup
                         inline={true}
-                        labelInfo={t('DIALOG.PREFS.LANGUAGE')}
-                        >
+                        label={t('DIALOG.PREFS.LANGUAGE')}
+                    >
                         <LanguageSelect filterable={false} activeItem={selectedLanguage} items={languageItems} itemRenderer={this.renderLanguageItem} onItemSelect={this.onLanguageSelect}>
                             <Button
                                 icon="flag"
@@ -226,7 +226,7 @@ class PrefsDialogClass extends React.Component<IPrefsProps, IState>{
 
                     <FormGroup
                         inline={true}
-                        labelInfo={t('DIALOG.PREFS.THEME')}>
+                        label={t('DIALOG.PREFS.THEME')}>
                         <ThemeSelect filterable={false} activeItem={selectedTheme} items={themeItems} itemRenderer={this.renderThemeItem} onItemSelect={this.onThemeSelect}>
                             <Button
                                 icon="contrast"
@@ -239,7 +239,7 @@ class PrefsDialogClass extends React.Component<IPrefsProps, IState>{
                     <FormGroup
                         inline={true}
                         labelFor="default-folder"
-                        labelInfo={t('DIALOG.PREFS.DEFAULT_FOLDER')}
+                        label={t('DIALOG.PREFS.DEFAULT_FOLDER')}
                         helperText={isFolderValid ? (<span>&nbsp;</span>) : (<span>{t('DIALOG.PREFS.INVALID_FOLDER')}</span>)}
                         intent={intent}
                     >
@@ -257,7 +257,7 @@ class PrefsDialogClass extends React.Component<IPrefsProps, IState>{
                     <FormGroup
                         inline={true}
                         labelFor="default-terminal"
-                        labelInfo={t('DIALOG.PREFS.DEFAULT_TERMINAL')}
+                        label={t('DIALOG.PREFS.DEFAULT_TERMINAL')}
                         helperText={t('DIALOG.PREFS.DEFAULT_TERMINAL_HELP')}
                     >
                         <InputGroup
@@ -277,22 +277,23 @@ class PrefsDialogClass extends React.Component<IPrefsProps, IState>{
                     <FormGroup
                         inline={true}
                         intent="danger"
-                        helperText={t('DIALOG.PREFS.RESET_HELP')}>
-                            <Button
-                                icon="trash"
-                                intent="primary"
-                                text={t('DIALOG.PREFS.RESET')}
-                                onClick={this.onResetPrefs}
-                            />
+                        helperText={t('DIALOG.PREFS.RESET_HELP')}
+                        label=" ">
+                        <Button
+                            icon="trash"
+                            intent="primary"
+                            text={t('DIALOG.PREFS.RESET')}
+                            onClick={this.onResetPrefs}
+                        />
                     </FormGroup>
-            </div>
-            <div className={Classes.DIALOG_FOOTER}>
-                <div className={Classes.DIALOG_FOOTER_ACTIONS}>
+                </div>
+                <div className={Classes.DIALOG_FOOTER}>
+                    <div className={Classes.DIALOG_FOOTER_ACTIONS}>
                         <Button onClick={this.cancelClose}>
                             {t('COMMON.CLOSE')}
-                    </Button>
+                        </Button>
+                    </div>
                 </div>
-            </div>
             </Dialog>
         )
     }

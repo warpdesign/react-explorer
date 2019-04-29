@@ -1,18 +1,70 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <meta charset="UTF-8" />
-        <meta http-equiv="Content-Security-Policy" content="script-src 'self'">
-        <title><%= htmlWebpackPlugin.options.title %></title>
-    </head>
-    <body>
-        <div id="root"></div>
-        <button id="reload">Reload!</button>
-        <!-- Dependencies -->
-        <!-- <script src="./node_modules/react/umd/react.development.js"></script>
+
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="Content-Security-Policy" content="script-src 'self'">
+    <title><%= htmlWebpackPlugin.options.title %></title>
+    <style type="text/css">
+        body {
+            margin: 0;
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        #root {
+            opacity: 0;
+            transition-property: opacity;
+            transition-duration: 1s;
+        }
+
+        body.loaded #root {
+            opacity: 1;
+        }
+
+        .splash {
+            position: absolute;
+            z-index: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: .6;
+            transition-property: opacity;
+            transition-duration: 1s;
+            width: 100%;
+            height: 90%;
+        }
+
+        body.loaded .splash {
+            pointer-events: none;
+            opacity: 0;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="splash">
+        <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 40 40"
+            version="1.1" width="128px" height="128px">
+            <g id="surface1">
+                <path style=" fill:#B6DCFE;"
+                    d="M 1.5 35.5 L 1.5 4.5 L 11.792969 4.5 L 14.792969 7.5 L 35.5 7.5 L 35.5 35.5 Z " />
+                <path style=" fill:#4788C7;"
+                    d="M 11.585938 5 L 14.585938 8 L 35 8 L 35 35 L 2 35 L 2 5 L 11.585938 5 M 12 4 L 1 4 L 1 36 L 36 36 L 36 7 L 15 7 Z " />
+                <path style=" fill:#DFF0FE;"
+                    d="M 1.597656 35.5 L 5.417969 14.5 L 16.152344 14.5 L 19.152344 12.5 L 39.410156 12.5 L 35.578125 35.5 Z " />
+                <path style=" fill:#4788C7;"
+                    d="M 38.820313 13 L 35.152344 35 L 2.199219 35 L 5.835938 15 L 16.304688 15 L 16.554688 14.832031 L 19.304688 13 L 38.820313 13 M 40 12 L 19 12 L 16 14 L 5 14 L 1 36 L 36 36 Z " />
+            </g>
+        </svg>
+    </div>
+    <div id="root"></div>
+    <!-- Dependencies -->
+    <!-- <script src="./node_modules/react/umd/react.development.js"></script>
         <script src="./node_modules/react-dom/umd/react-dom.development.js"></script> -->
 
-        <!-- Main -->
-        <!-- <script src="./dist/bundle.js"></script> -->
-    </body>
+    <!-- Main -->
+    <!-- <script src="./dist/bundle.js"></script> -->
+</body>
+
 </html>

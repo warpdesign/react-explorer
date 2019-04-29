@@ -1,7 +1,8 @@
-import { FsLocal } from './FsLocal';
-import { FsGeneric } from './FsGeneric';
-import { FsFtp } from './FsFtp';
-import * as fs from 'fs';
+import { FsLocal } from './plugins/FsLocal';
+import { FsGeneric } from './plugins/FsGeneric';
+import { FsSimpleFtp } from './plugins/FsSimpleFtp';
+import { remote } from 'electron';
+import { Readable } from 'stream';
 
 declare var ENV: any;
 
@@ -22,7 +23,7 @@ export interface File {
 
 export interface Fs {
     // runtime api
-    API: (new (path:string) => FsApi);
+    API: (new (path: string) => FsApi);
     // static members
     canread(str: string): boolean;
     serverpart(str: string): string;
@@ -60,13 +61,13 @@ const ExeMaskAll = 0o0001;
 const ExeMaskGroup = 0o0010;
 const ExeMaskUser = 0o0100;
 
-export type FileType = 'exe'|'img'|'arc'|'snd'|'vid'|'doc'|'cod'|'';
+export type FileType = 'exe' | 'img' | 'arc' | 'snd' | 'vid' | 'doc' | 'cod' | '';
 
-function isModeExe(mode:number):Boolean {
+function isModeExe(mode: number): Boolean {
     return !!((mode & ExeMaskAll) || (mode & ExeMaskUser) || (mode & ExeMaskGroup));
 }
 
-export function filetype(mode:number, extension:string): FileType {
+export function filetype(mode: number, extension: string): FileType {
     if (isModeExe(mode) || extension.match(Extensions.exe)) {
         return 'exe';
     } else if (extension.match(Extensions.img)) {
@@ -88,32 +89,34 @@ export function filetype(mode:number, extension:string): FileType {
 
 export interface FsApi {
     // public API
-    list(dir: string, appendParent?: boolean): Promise<File[]>;
-    cd(path:string): Promise<string>;
-    delete(parent: string, files: File[]): Promise<number>;
-    // copy(parent: string, files: string[], dest: string): Promise<number> & cp.ProgressEmitter;
-    join(...paths: string[]): string;
-    makedir(parent: string, name: string): Promise<string>;
-    rename(parent: string, file: File, name: string): Promise<string>;
-    stat(path: string): Promise<File>;
-    isDir(path: string): Promise<boolean>;
-    exists(path: string): Promise<boolean>;
+    // async methods that may require server access
+    list(dir: string, appendParent?: boolean, transferId?: number): Promise<File[]>;
+    cd(path: string, transferId?: number): Promise<string>;
+    delete(parent: string, files: File[], transferId?: number): Promise<number>;
+    makedir(parent: string, name: string, transferId?: number): Promise<string>;
+    rename(parent: string, file: File, name: string, transferId?: number): Promise<string>;
+    stat(path: string, transferId?: number): Promise<File>;
+    isDir(path: string, transferId?: number): Promise<boolean>;
+    exists(path: string, transferId?: number): Promise<boolean>;
+    size(source: string, files: string[], transferId?: number): Promise<number>;
+    getStream(path: string, file: string, transferId?: number): Promise<Readable>;
+    putStream(readStream: Readable, dstPath: string, progress: (bytesRead: number) => void, transferId?: number): Promise<void>;
+
     resolve(path: string): string;
     sanityze(path: string): string;
-    size(source: string, files: string[]): Promise<number>;
-    login(server?: string, credentials?:ICredentials): Promise<void>;
+    join(...paths: string[]): string;
+    login(server?: string, credentials?: ICredentials): Promise<void>;
     isConnected(): boolean;
     isDirectoryNameValid(dirName: string): boolean;
-    get(path: string, file: string): Promise<string>;
-    getStream(path: string, file: string): Promise<fs.ReadStream>;
-    putStream(readStream: fs.ReadStream, dstPath: string, progress: (bytesRead: number) => void): Promise<void>;
     isRoot(path: string): boolean;
-    free(): void;
     on(event: string, cb: (data: any) => void): void;
+    off(): void;
     loginOptions: ICredentials;
 }
 
 const interfaces: Array<Fs> = new Array();
+
+export const DOWNLOADS_DIR = remote.app.getPath('downloads');
 
 export interface ICredentials {
     user?: string;
@@ -126,7 +129,7 @@ export function registerFs(fs: Fs): void {
     interfaces.push(fs);
 };
 
-export function getFS(path: string):Fs {
+export function getFS(path: string): Fs {
     let newfs = interfaces.find((filesystem) => filesystem.canread(path));
 
     // if (!newfs) {
@@ -136,9 +139,36 @@ export function getFS(path: string):Fs {
     return newfs;
 }
 
+export function needsConnection(target: any, key: any, descriptor: any) {
+    // save a reference to the original method this way we keep the values currently in the
+    // descriptor and don't overwrite what another decorator might have done to the descriptor.
+    if (descriptor === undefined) {
+        descriptor = Object.getOwnPropertyDescriptor(target, key);
+    }
+    var originalMethod = descriptor.value;
+
+    //editing the descriptor/value parameter
+    descriptor.value = async function decorator(...args: any) {
+        try {
+            await this.waitForConnection();
+        } catch (err) {
+            console.log(err);
+            // TODO: do not recall decorator if no internet
+            debugger;
+            return decorator.apply(this, args);
+        }
+
+        return originalMethod.apply(this, args);
+    };
+
+    // return edited descriptor as opposed to overwriting the descriptor
+    return descriptor;
+}
+
 // in test environment, load the generic fs as first one
 // if (ENV.CY) {
 //     registerFs(FsGeneric);
 // }
 registerFs(FsLocal);
-registerFs(FsFtp);
+// registerFs(FsFtp);
+registerFs(FsSimpleFtp);

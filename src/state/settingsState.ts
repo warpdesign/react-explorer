@@ -7,7 +7,7 @@ import { isMojave, isWin, isMac, defaultFolder } from '../utils/platform';
 
 const { systemPreferences } = remote;
 
-const APP_STORAGE_KEY = 'react-ftp';
+const APP_STORAGE_KEY = 'react-explorer';
 
 const TERMINAL_CMD = {
     'darwin': 'open -a "%cmd" "%path"',
@@ -22,11 +22,11 @@ const DEFAULT_TERMINAL = {
 
 export class SettingsState {
     @observable
-    lang:string;
+    lang: string;
 
     @observable
     // this is the asked mode
-    darkMode:boolean | 'auto';
+    darkMode: boolean | 'auto';
 
     // this is the current active mode
     @observable
@@ -58,7 +58,7 @@ export class SettingsState {
         }
     }
 
-    getParam(name: string):JSObject {
+    getParam(name: string): JSObject {
         return JSON.parse(localStorage.getItem(name));
     }
 
@@ -103,7 +103,7 @@ export class SettingsState {
     }
 
     saveSettings() {
-        localStorage.setItem('react-ftp', JSON.stringify({
+        localStorage.setItem(APP_STORAGE_KEY, JSON.stringify({
             lang: this.lang,
             defaultFolder: this.defaultFolder,
             darkMode: this.darkMode,
@@ -129,7 +129,7 @@ export class SettingsState {
     }
 
     @action
-    loadSettings():void {
+    loadSettings(): void {
         let settings: JSObject;
 
         settings = this.loadAndUpgradeSettings();

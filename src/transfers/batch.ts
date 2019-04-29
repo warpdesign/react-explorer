@@ -1,15 +1,16 @@
 import { observable, action, runInAction, computed } from "mobx";
 import { FsApi, File } from "../services/Fs";
 import { FileTransfer } from "./fileTransfer";
-import { remote } from 'electron';
 import { Deferred } from "../utils/deferred";
 
 const MAX_TRANSFERS = 1;
 const RENAME_SUFFIX = '_';
 const REGEX_EXTENSION = /\.(?=[^0-9])/;
 
+type Status = 'started' | 'queued' | 'error' | 'done' | 'cancelled' | 'calculating';
+
 export class Batch {
-    static maxId: number = 0;
+    static maxId: number = 1;
     public srcFs: FsApi;
     public dstFs: FsApi;
     public dstPath: string;
@@ -25,7 +26,7 @@ export class Batch {
     public files = observable<FileTransfer>([]);
 
     @observable
-    public status: 'started' | 'queued' | 'error' | 'done' | 'calculating' = 'queued';
+    public status: Status = 'queued';
 
     @observable
     public progress: number = 0;
@@ -55,16 +56,22 @@ export class Batch {
     }
 
     @action
+    onEndTransfer = (status: Status = 'done') => {
+        console.log('transfer ended ! duration=', Math.round((new Date().getTime() - this.startDate.getTime()) / 1000), 'sec(s)');
+        console.log('destroy batch, new maxId', Batch.maxId);
+        this.status = status;
+    }
+
+    @action
     start(): Promise<void> {
         console.log('starting batch');
         if (this.status === 'queued') {
             this.slotsAvailable = MAX_TRANSFERS;
             this.status = 'started';
             this.transferDef = new Deferred();
-            this.transferDef.promise.then(() => {
-                console.log('transfer ended ! duration=', Math.round((new Date().getTime() - this.startDate.getTime()) / 1000), 'sec(s)');
-                this.status = 'done';
-            }).catch((err: Error) => {
+            this.transferDef.promise.then(
+                this.onEndTransfer
+            ).catch((err: Error) => {
                 console.log('error transfer', err);
                 this.status = 'error';
                 return Promise.reject(err);
@@ -108,6 +115,11 @@ export class Batch {
         return this.files.find((file) => file.ready && file.status === 'queued');
     }
 
+    /**
+     * Gets the next transfer(s) and starts them, where:
+     * num transfers = max(MAX_TRANSFERS, slotsAvailable)
+     * 
+     */
     queueNextTransfers() {
         const max = (Math.min(MAX_TRANSFERS, this.slotsAvailable));
 
@@ -120,6 +132,9 @@ export class Batch {
     }
 
     @action
+    /**
+     * Immediately initiates a file transfer, queues the next transfer when it's done
+     */
     async startTransfer(transfer: FileTransfer) {
         this.slotsAvailable--;
         transfer.status = 'started';
@@ -129,6 +144,9 @@ export class Batch {
         const fullDstPath = dstFs.join(this.dstPath, transfer.newSub);
         const srcPath = srcFs.join(this.srcPath, transfer.subDirectory);
         const wantedName = transfer.file.fullname;
+
+        // will be set to true if an error is caught
+        let cancelled = false;
         let newFilename = '';
 
         try {
@@ -141,15 +159,24 @@ export class Batch {
         if (!transfer.file.isDir) {
             try {
                 console.log('getting stream', srcPath, wantedName);
-                const stream = await srcFs.getStream(srcPath, wantedName);
+                const stream = await srcFs.getStream(srcPath, wantedName, this.id);
                 console.log('sending to stream', dstFs.join(fullDstPath, newFilename));
+                // we have to listen for errors that may appear during the transfer: socket closed, timeout,...
+                // and throw an error in this case because the putStream won't throw in this case:
+                // it will just stall
+                stream.on('error', (err) => {
+                    debugger;
+                    throw new Error('transfer');
+                });
                 await dstFs.putStream(stream, dstFs.join(fullDstPath, newFilename), (bytesRead: number) => {
                     // console.log('read', bytesRead);
                     this.onData(transfer, bytesRead);
-                });
+                }), this.id;
                 console.log('finished writing file', newFilename);
                 transfer.status = 'done';
             } catch (err) {
+                // TODO: catch batch cancel ?
+                debugger;
                 console.log('error with streams', err);
                 transfer.status = 'error';
                 return Promise.reject(err);
@@ -181,8 +208,9 @@ export class Batch {
         let newName = wantedName;
         let stats = null;
         let exists = false;
+
         try {
-            stats = await this.dstFs.stat(dirPath);
+            stats = await this.dstFs.stat(dirPath, this.id);
             exists = true;
         } catch (err) {
             // TODO: handle permission denied and other errors ?
@@ -196,14 +224,14 @@ export class Batch {
             // directory already exists: for now, simply use it
             if (!exists) {
                 // TODO: handle error
-                const newDir = await dstFs.makedir(dstPath, newName);
+                const newDir = await dstFs.makedir(dstPath, newName, this.id);
             } else if (!stats.isDir) {
                 // exists but is a file: attempt to create a directory with newName
                 let success = false;
                 while (!success) {
                     newName = wantedName + RENAME_SUFFIX + i++;
                     try {
-                        await dstFs.makedir(dstPath, newName);
+                        await dstFs.makedir(dstPath, newName, this.id);
                         success = true;
                     } catch (err) {
                         debugger;
@@ -232,7 +260,7 @@ export class Batch {
             newName = split.join('.');
             const tmpPath = this.dstFs.join(this.dstPath, newName);
             try {
-                exists = await this.dstFs.exists(tmpPath);
+                exists = await this.dstFs.exists(tmpPath, this.id);
             } catch (err) {
                 debugger;
                 exists = false;
@@ -322,6 +350,6 @@ export class Batch {
         file.progress = bytesRead;
         this.progress += previousProgress ? (bytesRead - previousProgress) : bytesRead;
         // console.log('progress', this.progress, this.progress === this.size ? -1 : this.progress/this.size);
-        remote.getCurrentWindow().setProgressBar(this.progress === this.size ? -1 : this.progress / this.size);
+        // remote.getCurrentWindow().setProgressBar(this.progress === this.size ? -1 : this.progress / this.size);
     }
 }

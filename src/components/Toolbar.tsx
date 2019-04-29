@@ -8,11 +8,12 @@ import { MakedirDialog } from "./dialogs/MakedirDialog";
 import { AppAlert } from './AppAlert';
 import { Logger } from "./Log";
 import { AppToaster, IToasterOpts } from "./AppToaster";
-import { FileState } from "../state/fileState";
-import { withNamespaces, WithNamespaces } from "react-i18next";
+import { withNamespaces, WithNamespaces, Trans } from "react-i18next";
 import { WithMenuAccelerators, Accelerators, Accelerator } from "./WithMenuAccelerators";
 import { throttle } from "../utils/throttle";
 import { isWin, isMac } from "../utils/platform";
+import { ViewState } from "../state/viewState";
+import { FileState } from "../state/fileState";
 
 const TOOLTIP_DELAY = 1200;
 const MOVE_EVENT_THROTTLE = 300;
@@ -24,7 +25,7 @@ interface IProps extends WithNamespaces {
 
 interface InjectedProps extends IProps {
     appState: AppState;
-    fileCache: FileState;
+    viewState: ViewState;
 }
 
 interface PathInputState {
@@ -40,12 +41,11 @@ enum KEYS {
     Enter = 13
 };
 
-@inject('appState', 'fileCache')
+@inject('appState', 'viewState')
 @observer
 @HotkeysTarget
 @WithMenuAccelerators
 export class ToolbarClass extends React.Component<IProps, PathInputState> {
-    private cache: FileState;
     private input: HTMLInputElement | null = null;
     private disposer: IReactionDisposer;
     private tooltipReady = false;
@@ -55,7 +55,8 @@ export class ToolbarClass extends React.Component<IProps, PathInputState> {
     constructor(props: any) {
         super(props);
 
-        const { fileCache } = this.injected;
+        const { viewState } = this.injected;
+        const fileCache = viewState.getVisibleCache();
 
         this.state = {
             status: 0,
@@ -65,13 +66,16 @@ export class ToolbarClass extends React.Component<IProps, PathInputState> {
             isTooltipOpen: false
         };
 
-        this.cache = fileCache;
-
         this.installReactions();
     }
 
     private get injected() {
         return this.props as InjectedProps;
+    }
+
+    private get cache() {
+        const { viewState } = this.injected;
+        return viewState.getVisibleCache();
     }
 
     // reset status once path has been modified from outside this component
@@ -137,7 +141,7 @@ export class ToolbarClass extends React.Component<IProps, PathInputState> {
     }
 
     private onBlur = () => {
-        console.log('blur');
+        // console.log('blur');
         // this.pathHasFocus = false;
         this.setState({ path: this.cache.path, status: 0, isTooltipOpen: false });
     }
@@ -166,8 +170,10 @@ export class ToolbarClass extends React.Component<IProps, PathInputState> {
                 this.cache.cd(dir);
             }
         } catch (err) {
+            const { t } = this.props;
+
             AppToaster.show({
-                message: `Error creating folder: ${err}`,
+                message: t('ERRORS.CREATE_FOLDER', { message: err }),
                 icon: 'error',
                 intent: Intent.DANGER,
                 timeout: 4000
@@ -182,15 +188,18 @@ export class ToolbarClass extends React.Component<IProps, PathInputState> {
     private delete = async () => {
         Logger.log('delete selected files');
         try {
-            const { fileCache } = this.injected;
+            const { viewState } = this.injected;
+            const fileCache = viewState.getVisibleCache();
 
             await this.cache.delete(this.state.path, fileCache.selected);
             console.log('need to refresh cache');
             this.cache.reload();
             // appState.refreshCache(this.cache);
         } catch (err) {
+            const { t } = this.props;
+
             AppToaster.show({
-                message: `Error deleting files: ${err}`,
+                message: t('ERRORS.DELETE', { message: err }),
                 icon: 'error',
                 intent: Intent.DANGER,
                 timeout: 4000
@@ -216,20 +225,21 @@ export class ToolbarClass extends React.Component<IProps, PathInputState> {
 
     private copy = async () => {
         // TODO: attempt to copy
-        const { appState, fileCache } = this.injected;
-        appState.prepareClipboardTransferTo(fileCache);
+        const { appState, viewState } = this.injected;
+        appState.prepareClipboardTransferTo(viewState.getVisibleCache());
     }
 
     private onMakedir = () => {
-        const { appState, fileCache } = this.injected;
+        const { appState, viewState } = this.injected;
 
-        if (appState.getActiveCache() === fileCache) {
+        if (appState.getActiveCache() === viewState.getVisibleCache()) {
             this.setState({ isOpen: true });
         }
     }
 
     private onDelete = () => {
-        const { appState, fileCache } = this.injected;
+        const { appState, viewState } = this.injected;
+        const fileCache = viewState.getVisibleCache();
 
         if (appState.getActiveCache() === fileCache && fileCache.selected.length) {
             this.setState({ isDeleteOpen: true });
@@ -268,7 +278,6 @@ export class ToolbarClass extends React.Component<IProps, PathInputState> {
     }
 
     public onFocus = () => {
-        console.log('focus');
         if (this.state.isTooltipOpen) {
             this.hideTooltip();
         } else {
@@ -328,41 +337,36 @@ export class ToolbarClass extends React.Component<IProps, PathInputState> {
 
 
     onPathEnter = (e: React.MouseEvent) => {
-        console.log('path enter');
         this.tooltipReady = true;
         this.canShowTooltip = true;
         this.setTooltipTimeout();
     }
 
     onPathLeave = (e: React.MouseEvent) => {
-        console.log('leave');
         this.tooltipReady = false;
     }
 
     onPathMouseMove = throttle((e: React.MouseEvent) => {
-        console.log('throttle');
         if (this.state.isTooltipOpen) {
-            console.log('isopen');
             // if tooltip was visible and mouse moves
             // then it cannot be opened again unless the
             // user leaves the text input
             this.canShowTooltip = false;
             this.setState({ isTooltipOpen: false });
         } else if (this.canShowTooltip && this.tooltipReady) {
-            console.log('canshow');
             clearTimeout(this.tooltipTimeout);
             this.setTooltipTimeout();
-        } else {
-            console.log('cannot show');
         }
+        // else {
+        //     console.log('cannot show');
+        // }
     }, MOVE_EVENT_THROTTLE);
 
     setTooltipTimeout() {
-        console.log('starting timeout');
         this.tooltipTimeout = window.setTimeout(() => {
-            console.log('timeout reached', this.tooltipReady, this.canShowTooltip);
+            // console.log('timeout reached', this.tooltipReady, this.canShowTooltip);
             if (this.tooltipReady && this.canShowTooltip) {
-                console.log('yeah ! opening');
+                // console.log('yeah ! opening');
                 this.setState({ isTooltipOpen: true });
             }
         }, TOOLTIP_DELAY);
@@ -370,7 +374,7 @@ export class ToolbarClass extends React.Component<IProps, PathInputState> {
 
     private renderTooltip() {
         const { t } = this.props;
-        let localExample = isWin ? t('TOOLTIP.PATH.EXAMPLE_WIN') : isMac && t('TOOLTIP.PATH.EXAMPLE_MAC') || t('TOOLTIP.PATH.EXAMPLE_UNIX');
+        let localExample = isWin ? t('TOOLTIP.PATH.EXAMPLE_WIN') : isMac && t('TOOLTIP.PATH.EXAMPLE_MAC') || t('TOOLTIP.PATH.EXAMPLE_LINUX');
 
         return (
             <div>
@@ -386,7 +390,8 @@ export class ToolbarClass extends React.Component<IProps, PathInputState> {
     }
 
     testStat = () => {
-        const { appState, fileCache } = this.injected;
+        const { appState, viewState } = this.injected;
+        const fileCache = viewState.getVisibleCache();
 
         if (appState.getActiveCache() === fileCache && fileCache.selected.length) {
             const file = fileCache.selected[0];
@@ -398,14 +403,17 @@ export class ToolbarClass extends React.Component<IProps, PathInputState> {
 
     public render() {
         const { status, path, isOpen, isDeleteOpen, isTooltipOpen } = this.state;
-        const { fileCache } = this.injected;
+        const { viewState } = this.injected;
+        const fileCache = viewState.getVisibleCache();
         const { selected, history, current } = fileCache;
+        const { t } = this.props;
 
         const canGoBackward = current > 0;
         const canGoForward = history.length > 1 && current < history.length - 1;
         // const loadingSpinner = false ? <Spinner size={Icon.SIZE_STANDARD} /> : undefined;
         const reloadButton = <Button className="small" onClick={this.onReload} minimal rightIcon="repeat"></Button>;
         const intent = status === -1 ? 'danger' : 'none';
+        const count = selected.length;
 
         return (
             <ControlGroup>
@@ -417,12 +425,12 @@ export class ToolbarClass extends React.Component<IProps, PathInputState> {
                         <Button rightIcon="caret-down" icon="cog" text="" />
                     </Popover>
                 </ButtonGroup>
-                <Tooltip content={this.renderTooltip()} position={Position.RIGHT} hoverOpenDelay={1500} openOnTargetFocus={false} isOpen={isTooltipOpen}>
+                <Tooltip content={this.renderTooltip()} position={Position.BOTTOM} hoverOpenDelay={1500} openOnTargetFocus={false} isOpen={isTooltipOpen}>
                     <InputGroup
                         data-cy-path
                         onChange={this.onPathChange}
                         onKeyUp={this.onKeyUp}
-                        placeholder="Enter Path to load"
+                        placeholder={t('COMMON.PATH_PLACEHOLDER')}
                         rightElement={reloadButton}
                         value={path}
                         intent={intent}
@@ -439,8 +447,8 @@ export class ToolbarClass extends React.Component<IProps, PathInputState> {
                 }
 
                 <Alert
-                    cancelButtonText="Cancel"
-                    confirmButtonText="Delete"
+                    cancelButtonText={t('COMMON.CANCEL')}
+                    confirmButtonText={t('APP_MENUS.DELETE')}
                     icon="trash"
                     intent={Intent.DANGER}
                     isOpen={isDeleteOpen}
@@ -448,7 +456,9 @@ export class ToolbarClass extends React.Component<IProps, PathInputState> {
                     onCancel={this.deleteCancel}
                 >
                     <p>
-                        Are you sure you want to delete {`${selected.length}`} <b>file(s)/folder(s)</b>?<br />This action will <b>permanentaly</b> delete the selected elements.
+                        <Trans i18nKey="DIALOG.DELETE.CONFIRM" count={count}>
+                            Are you sure you want to delete <b>{{ count }}</b> file(s)/folder(s)?<br /><br />This action will <b>permanentaly</b> delete the selected elements.
+                        </Trans>
                     </p>
                 </Alert>
                 <Button rightIcon="arrow-right" disabled={status === -1} onClick={this.onSubmit} />

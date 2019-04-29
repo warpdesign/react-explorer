@@ -5,35 +5,30 @@ const webpack = require('webpack');
 const packageJson = require('./package.json');
 const gitHash = require('./scripts/hash');
 
+console.log(packageJson.version);
+
 const baseConfig = {
     output: {
-        path: path.resolve(__dirname, 'build-e2e'),
+        path: path.resolve(__dirname, 'build'),
         filename: '[name].js'
-    },
-    externals: {
-        "process": '{process: "foo"}',
-        "electron": '{ipcRenderer: {send: function() {}, on: function() {}}, remote: { app: { getPath: function(str) { return "**ci**"; } } } }',
-        "child_process": '{exec: function(str, cb) { cb(); }}',
-        "fs": '{}',
-        "path": '{}',
-        "net": '{}',
-        "tls": '{}'
     },
     node: {
         __dirname: false
     },
-    // Enable sourcemaps for debugging webpack's output.
-    devtool: "source-map",
-    mode: "development",
+    mode: "production",
     resolve: {
         // Add '.ts' and '.tsx' as resolvable extensions.
         extensions: [".ts", ".tsx", ".js", ".json", ".css"]
     },
-
+    resolveLoader: {
+        alias: {
+            'data-cy-loader': path.join(__dirname, 'scripts/data-cy-loader.js')
+        }
+    },
     module: {
         rules: [
             // All files with a '.ts' or '.tsx' extension will be handled by 'awesome-typescript-loader'.
-            { test: /\.tsx?$/, loader: "awesome-typescript-loader" },
+            { test: /\.tsx?$/, use: ["awesome-typescript-loader", "data-cy-loader"] },
 
             // All output '.js' files will have any sourcemaps re-processed by 'source-map-loader'.
             { enforce: "pre", test: /\.js$/, loader: "source-map-loader" },
@@ -69,7 +64,21 @@ const baseConfig = {
 module.exports = [
     Object.assign(
         {
-            target: 'web',
+            target: 'electron-main',
+            entry: { main: './src/electron/main.ts' },
+            plugins: [
+                new webpack.DefinePlugin({
+                    'ENV.CY': false,
+                    'ENV.NODE_ENV': JSON.stringify(baseConfig.mode),
+                    'ENV.VERSION': JSON.stringify(packageJson.version),
+                    'ENV.HASH': JSON.stringify(gitHash)
+                })
+            ]
+        },
+        baseConfig),
+    Object.assign(
+        {
+            target: 'electron-renderer',
             entry: { gui: './src/gui/index.tsx' },
             plugins: [
                 new HtmlWebpackPlugin({
@@ -77,7 +86,7 @@ module.exports = [
                     template: 'index.html'
                 }),
                 new webpack.DefinePlugin({
-                    'ENV.CY': true,
+                    'ENV.CY': false,
                     'ENV.NODE_ENV': JSON.stringify(baseConfig.mode),
                     'ENV.VERSION': JSON.stringify(packageJson.version),
                     'ENV.HASH': JSON.stringify(gitHash)

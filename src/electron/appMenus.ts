@@ -1,5 +1,7 @@
-import { Menu, BrowserWindow, MenuItemConstructorOptions, MenuItem, app, ipcMain, dialog } from 'electron';
+import { clipboard, Menu, BrowserWindow, MenuItemConstructorOptions, MenuItem, app, ipcMain, dialog } from 'electron';
 import { isMac } from '../utils/platform';
+
+declare var ENV: any;
 
 const ACCELERATOR_EVENT = 'menu_accelerator';
 
@@ -11,14 +13,14 @@ export class AppMenu {
     win: BrowserWindow;
     menuStrings: LocaleString;
 
-    constructor(win:BrowserWindow) {
+    constructor(win: BrowserWindow) {
         this.win = win;
     }
 
     sendComboEvent = (menuItem: MenuItem & { accelerator: string }, data?: any) => {
         const accel = menuItem.accelerator || '';
         console.log('sending', menuItem.label, accel);
-        this.win.webContents.send(ACCELERATOR_EVENT, Object.assign({combo: accel, data }));
+        this.win.webContents.send(ACCELERATOR_EVENT, Object.assign({ combo: accel, data }));
     }
 
     sendSelectAll = () => {
@@ -47,31 +49,41 @@ export class AppMenu {
 
     showAboutDialog = () => {
         const version = app.getVersion();
+        const detail = this.menuStrings['ABOUT_CONTENT'].replace('${version}', version).replace('${hash}', ENV.HASH);
 
         dialog.showMessageBox(null, {
             title: this.menuStrings['ABOUT_TITLE'],
             type: 'info',
             message: this.menuStrings['ABOUT_TITLE'],
-            detail: this.menuStrings['ABOUT_CONTENT'].replace('${version}', version)
-        }, result => null);
+            detail: detail,
+            buttons: [this.menuStrings['OK'], this.menuStrings['COPY']]
+        }, result => {
+            console.log('result', result);
+            if (result) {
+                clipboard.writeText(detail);
+            }
+        });
     }
 
     getMenuTemplate(): MenuItemConstructorOptions[] {
         const menuStrings = this.menuStrings;
+        let windowMenuIndex = 3;
 
         const template = [
             {
                 label: menuStrings['TITLE_FILE'],
                 submenu: [
-                    // {
-                    //     label: menuStrings['ABOUT'],
-                    //     click: () => {
-                    //         console.log('click on Menu 1: sending combo !');
-                    //         // this.sendComboEvent('CmdOrCtrl+A')
-                    //     },
-                    //     accelerator: 'CmdOrCtrl+A',
-                    //     role: 'about'
-                    // },
+                    { type: 'separator' },
+                    {
+                        label: menuStrings['NEW_TAB'],
+                        click: this.sendComboEvent,
+                        accelerator: 'CmdOrCtrl+T',
+                    },
+                    {
+                        label: menuStrings['CLOSE_TAB'],
+                        click: this.sendComboEvent,
+                        accelerator: 'CmdOrCtrl+W',
+                    },
                     { type: 'separator' },
                     {
                         label: menuStrings['MAKEDIR'],
@@ -146,6 +158,15 @@ export class AppMenu {
                 ],
             },
             {
+                label: menuStrings['TITLE_WINDOW'],
+                submenu: [
+                    {
+                        label: menuStrings['MINIMIZE'],
+                        role: 'minimize'
+                    },
+                ]
+            },
+            {
                 label: menuStrings['TITLE_HELP'],
                 submenu: [
                     {
@@ -180,9 +201,19 @@ export class AppMenu {
             });
 
             app.setAboutPanelOptions({
-                applicationName: 'React-FTP',
-                applicationVersion: app.getVersion()
+                applicationName: 'React-Explorer',
+                applicationVersion: app.getVersion(),
+                version: ENV.HASH
             });
+
+            windowMenuIndex = 4;
+
+            // add zoom window/role entry
+            (template[4].submenu as MenuItemConstructorOptions[]).push({
+                label: menuStrings['ZOOM'],
+                role: 'zoom'
+            });
+
         } else {
             // add preference to file menu
             (template[0].submenu as MenuItemConstructorOptions[]).unshift({
@@ -193,11 +224,11 @@ export class AppMenu {
 
             // add exit to file menu
             (template[0].submenu as MenuItemConstructorOptions[]).push(
-            { type: 'separator' },
-            {
-                label: menuStrings['EXIT'],
-                accelerator: 'CmdOrCtrl+Q',
-                click: this.sendComboEvent
+                { type: 'separator' },
+                {
+                    label: menuStrings['EXIT'],
+                    accelerator: 'CmdOrCtrl+Q',
+                    click: this.sendComboEvent
                 });
 
             // add about menuItem
@@ -206,6 +237,20 @@ export class AppMenu {
                 click: this.showAboutDialog
             });
         }
+
+        // add zoom window/role entry
+        (template[windowMenuIndex].submenu as MenuItemConstructorOptions[]).push(
+            {
+                type: 'separator'
+            }, {
+                label: menuStrings['SELECT_NEXT_TAB'],
+                accelerator: 'Ctrl+Tab',
+                click: this.sendComboEvent
+            }, {
+                label: menuStrings['SELECT_PREVIOUS_TAB'],
+                accelerator: 'Ctrl+Shift+Tab',
+                click: this.sendComboEvent
+            });
 
         return template as MenuItemConstructorOptions[];
     }

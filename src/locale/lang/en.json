@@ -19,6 +19,10 @@
         "DRAG": {
             "MULTIPLE": "Copy {{count}} elements"
         },
+        "TABS": {
+            "CLOSE": "Close tab",
+            "NEW": "New tab"
+        },
         "DIALOG": {
             "QUIT": {
                 "BT_STOP_TRANSFERS": "Cancel & quit",
@@ -59,11 +63,14 @@
                 "DEFAULT_TERMINAL": "External terminal",
                 "DEFAULT_TERMINAL_HELP": "Customizes what kind of terminal to launch",
                 "TEST_TERMINAL": "Click here to launch the specified external terminal"
+            },
+            "DELETE": {
+                "CONFIRM": "Are you sure you want to delete <1>{{count}}</1> file(s)/folder(s)?<3 /><4 />This action will <6>permanentaly</6> delete the selected elements."
             }
         },
         "SHORTCUT": {
             "MAIN": {
-                "QUIT": "Exit react-ftp",
+                "QUIT": "Exit React-Explorer",
                 "RELOAD_VIEW": "Reload current view",
                 "NEXT_VIEW": "Activate next view",
                 "PREVIOUS_VIEW": "Activate previous view",
@@ -74,6 +81,9 @@
             },
             "LOG": {
                 "TOGGLE": "Toggle Logs console"
+            },
+            "TABS": {
+                "CLOSE_ACTIVE_TAB": "Close active tab"
             },
             "ACTIVE_VIEW": {
                 "COPY": "Copy selected items to clipboard",
@@ -92,7 +102,8 @@
             },
             "GROUP": {
                 "ACTIVE_VIEW": "Active file view",
-                "GLOBAL": "Global Shortcuts"
+                "GLOBAL": "Global Shortcuts",
+                "TABS": "Tabs"
             }
         },
         "STATUS": {
@@ -123,7 +134,8 @@
             "OK": "OK",
             "AUTO": "Automatic",
             "CLOSE": "Close",
-            "EMPTY_FOLDER": "Folder is empty."
+            "EMPTY_FOLDER": "Folder is empty.",
+            "PATH_PLACEHOLDER": "Enter path to load"
         },
         "FILEMENU": {
             "PASTE": "Paste {{count}} item",
@@ -140,13 +152,16 @@
             "ECONNREFUSED": "Connection refused by the server",
             "ENOENT": "No such file or directory",
             "EPERM": "You don't have the permission to do this action",
+            "EHOSTDOWN": "Your internet connection appears to be down :(",
             "530": "Login authentication failed",
-            "550": "File unavailable, not found, not accessible (server message was: {{message}})",
+            "550": "File unavailable, not found, not accessible",
             "UNKNOWN": "An error has occured",
             "GENERIC": "{{message}} (code {{code}})",
             "BAD_FILENAME": "File or directory name not valid: '{{entry}}'",
             "WIN_VALID_FILENAME": "All characters except *:<>\\?| can be used",
-            "UNIX_VALID_FILENAME": "All characters except / can be used"
+            "UNIX_VALID_FILENAME": "All characters except / can be used",
+            "DELETE": "Error deleting files: {{message}}",
+            "CREATE_FOLDER": "Error creating folder: {{message}}"
         },
         "MAIN_PROCESS": {
             "PRESS_TO_EXIT": "Keep pressing ⌘Q to exit"
@@ -170,6 +185,7 @@
             "TITLE_EDIT": "Edit",
             "TITLE_VIEW": "View",
             "TITLE_HELP": "Help",
+            "TITLE_WINDOW": "Window",
             "MAKEDIR": "New Directory",
             "RENAME": "Rename",
             "DELETE": "Delete",
@@ -183,8 +199,15 @@
             "RELOAD_VIEW": "Reload Active View",
             "FORCE_RELOAD_APP": "Force Reload App",
             "KEYBOARD_SHORTCUTS": "Keyboard Map",
-            "ABOUT_TITLE": "React-FTP",
-            "ABOUT_CONTENT": "Version ${version}"
+            "ABOUT_TITLE": "React-Explorer",
+            "ABOUT_CONTENT": "Version ${version}\n\n${hash}",
+            "ZOOM": "Zoom",
+            "MINIMIZE": "Minimize",
+            "SELECT_NEXT_TAB": "Select next tab",
+            "SELECT_PREVIOUS_TAB": "Select previous tab",
+            "NEW_TAB": "New tab",
+            "CLOSE_TAB": "Close tab",
+            "OK": "OK"
         }
     }
 }

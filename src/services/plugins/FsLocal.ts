@@ -1,21 +1,21 @@
-import { FsApi, File, ICredentials, Fs, Parent, filetype } from './Fs';
+import { FsApi, File, ICredentials, Fs, Parent, filetype } from '../Fs';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as process from 'process';
 import * as mkdir from 'mkdirp';
 import * as del from 'del';
-import { size } from '../utils/size';
-import { throttle } from '../utils/throttle';
+import { size } from '../../utils/size';
+import { throttle } from '../../utils/throttle';
 const { Transform } = require('stream');
-import { isWin } from '../utils/platform';
+import { isWin } from '../../utils/platform';
 
 const invalidDirChars = isWin && /[\*:<>\?|"]+/ig || /^[\.]+[\/]+(.)*$/ig;
 const invalidFileChars = isWin && /[\*:<>\?|"]+/ig || /\//;
 
-// since nodeJS will translate unix like paths to windows path, when running under Windows
+// Since nodeJS will translate unix like paths to windows path, when running under Windows
 // we accept Windows style paths (eg. C:\foo...) and unix paths (eg. /foo or ./foo)
-const localStart = isWin && /^(([a-zA-Z]\:)|([\.]*\/|\.))/ || /^([\.]*\/|\.)/;
-const isRoot = isWin && /([a-zA-Z]\:)(\\)*$/ || /^\/$/;
+const localStart = isWin && /^(([a-zA-Z]\:)|([\.]*\/|\.)|(\\\\))/ || /^([\.]*\/|\.)/;
+const isRoot = isWin && /((([a-zA-Z]\:)(\\)*)|(\\\\))$/ || /^\/$/;
 
 class LocalApi implements FsApi {
     type = 0;
@@ -44,7 +44,7 @@ class LocalApi implements FsApi {
         return path.resolve(newPath);
     }
 
-    cd(path: string) {
+    cd(path: string, transferId = -1) {
         const resolvedPath = this.resolve(path);
         return this.isDir(resolvedPath).then((isDir: boolean) => {
             if (isDir) {
@@ -58,7 +58,7 @@ class LocalApi implements FsApi {
             });
     }
 
-    size(source: string, files: string[]): Promise<number> {
+    size(source: string, files: string[], transferId = -1): Promise<number> {
         return new Promise(async (resolve, reject) => {
             try {
                 let bytes = 0;
@@ -77,7 +77,7 @@ class LocalApi implements FsApi {
     //     return cp(files, dest, { parents: true, cwd: source });
     // }
 
-    makedir(source: string, dirName: string): Promise<string> {
+    makedir(source: string, dirName: string, transferId = -1): Promise<string> {
         return new Promise((resolve, reject) => {
             const unixPath = path.join(source, dirName).replace(/\\/g, '/');
             try {
@@ -97,7 +97,7 @@ class LocalApi implements FsApi {
         });
     }
 
-    delete(source: string, files: File[]): Promise<number> {
+    delete(source: string, files: File[], transferId = -1): Promise<number> {
         let toDelete = files.map((file) => path.join(source, file.fullname));
 
         return new Promise(async (resolve, reject) => {
@@ -111,7 +111,7 @@ class LocalApi implements FsApi {
         });
     }
 
-    rename(source: string, file: File, newName: string): Promise<string> {
+    rename(source: string, file: File, newName: string, transferId = -1): Promise<string> {
         const oldPath = path.join(source, file.fullname);
         const newPath = path.join(source, newName);
 
@@ -141,7 +141,7 @@ class LocalApi implements FsApi {
         }
     }
 
-    isDir(path: string): Promise<boolean> {
+    isDir(path: string, transferId = -1): Promise<boolean> {
         return new Promise((resolve, reject) => {
             try {
                 const lstat = fs.lstatSync(path);
@@ -153,7 +153,7 @@ class LocalApi implements FsApi {
         });
     }
 
-    exists(path: string): Promise<boolean> {
+    exists(path: string, transferId = -1): Promise<boolean> {
         return new Promise((resolve, reject) => {
             try {
                 fs.statSync(path);
@@ -168,7 +168,7 @@ class LocalApi implements FsApi {
         });
     }
 
-    async stat(fullPath: string): Promise<File> {
+    async stat(fullPath: string, transferId = -1): Promise<File> {
         return new Promise<File>((resolve, reject) => {
             try {
                 const format = path.parse(fullPath);
@@ -200,7 +200,7 @@ class LocalApi implements FsApi {
         return Promise.resolve();
     }
 
-    async list(dir: string, appendParent = true): Promise<File[]> {
+    async list(dir: string, appendParent = true, transferId = -1): Promise<File[]> {
         console.log('calling readDirectory', dir);
         const pathExists = await this.isDir(dir);
 
@@ -272,16 +272,12 @@ class LocalApi implements FsApi {
         return !!path.match(isRoot);
     }
 
-    free() {
+    off() {
 
-    }
-
-    get(path: string, file: string): Promise<string> {
-        return Promise.resolve(this.join(path, file));
     }
 
     // TODO add error handling
-    async getStream(path: string, file: string): Promise<fs.ReadStream> {
+    async getStream(path: string, file: string, transferId = -1): Promise<fs.ReadStream> {
         try {
             console.log('opening read stream', this.join(path, file));
             const stream = fs.createReadStream(this.join(path, file), { highWaterMark: 31 * 16384 });
@@ -293,7 +289,7 @@ class LocalApi implements FsApi {
     }
 
     // TODO: handle stream error
-    async putStream(readStream: fs.ReadStream, dstPath: string, progress: (pourcent: number) => void): Promise<void> {
+    async putStream(readStream: fs.ReadStream, dstPath: string, progress: (pourcent: number) => void, transferId = -1): Promise<void> {
         let bytesRead = 0;
         const throttledProgress = throttle(() => { progress(bytesRead) }, 800);
 

@@ -19,6 +19,10 @@
         "DRAG": {
             "MULTIPLE": "Copier {{count}} éléments"
         },
+        "TABS": {
+            "CLOSE": "Fermer l'onglet",
+            "NEW": "Nouvel onglet"
+        },
         "DIALOG": {
             "QUIT": {
                 "BT_STOP_TRANSFERS": "Arrêter & quitter",
@@ -59,11 +63,14 @@
                 "DEFAULT_TERMINAL": "Terminal externe",
                 "DEFAULT_TERMINAL_HELP": "Spécifie le type de terminal à lancer",
                 "TEST_TERMINAL": "Cliquez ici pour lancer le terminal specifié"
+            },
+            "DELETE": {
+                "CONFIRM": "Etes-vous sûr de vouloir supprimer <1>{{count}}</1> fichier(s)/dossier(s)?<3 /><4 />Cette action supprimera de manière <6>permanente</6> les éléments sélectionnés."
             }
         },
         "SHORTCUT": {
             "MAIN": {
-                "QUIT": "Quitter react-ftp",
+                "QUIT": "Quitter React-Explorer",
                 "RELOAD_VIEW": "Recharger la vue",
                 "NEXT_VIEW": "Activer la vue suivante",
                 "PREVIOUS_VIEW": "Activer la vue précédente",
@@ -74,6 +81,9 @@
             },
             "LOG": {
                 "TOGGLE": "Afficher/cacher la console"
+            },
+            "TABS": {
+                "CLOSE_ACTIVE_TAB": "Fermer l'onglet actif"
             },
             "ACTIVE_VIEW": {
                 "COPY": "Copier les éléments sélectionnés dans le presse-papier",
@@ -92,7 +102,8 @@
             },
             "GROUP": {
                 "ACTIVE_VIEW": "Vue de dossier active",
-                "GLOBAL": "Raccourcis Globaux"
+                "GLOBAL": "Raccourcis Globaux",
+                "TABS": "Onglets"
             }
         },
         "STATUS": {
@@ -123,7 +134,8 @@
             "OK": "OK",
             "AUTO": "Automatique",
             "CLOSE": "Fermer",
-            "EMPTY_FOLDER": "Dossier vide."
+            "EMPTY_FOLDER": "Dossier vide.",
+            "PATH_PLACEHOLDER": "Entrer le chemin à visiter"
         },
         "FILEMENU": {
             "PASTE": "Coller {{count}} élément",
@@ -140,13 +152,16 @@
             "ECONNREFUSED": "Connexion refusée par le serveur",
             "ENOENT": "Dossier ou fichier introuvable",
             "EPERM": "Vous n'avez pas la permission d'effectuer cette action",
+            "EHOSTDOWN": "Houston, on a un problème: il n'y a plus d'internet :(",
             "530": "Echec de l'authentification",
-            "550": "Fichier non disponible, introuvable ou non accessible. (message du serveur: {{message}})",
+            "550": "Fichier non disponible, introuvable ou non accessible.",
             "UNKNOWN": "Une erreur est survenue",
             "GENERIC": "{{error.message}} (code {{error.code}})",
             "BAD_FILENAME": "Nom de fichier ou dossier non valide: '{{entry}}'",
             "WIN_VALID_FILENAME": "Tous les caractères sauf *:<>\\?| sont acceptés",
-            "UNIX_VALID_FILENAME": "Tous les caractères sauf / sont acceptés"
+            "UNIX_VALID_FILENAME": "Tous les caractères sauf / sont acceptés",
+            "DELETE": "Erreur lors de la suppression des fichiers: {{message}}",
+            "CREATE_FOLDER": "Erreor lors de la création du dossier: {{message}}"
         },
         "MAIN_PROCESS": {
             "PRESS_TO_EXIT": "Maintenez la touche ⌘Q enfoncée pour quitter"
@@ -170,6 +185,7 @@
             "TITLE_EDIT": "Editer",
             "TITLE_VIEW": "Vue",
             "TITLE_HELP": "Aide",
+            "TITLE_WINDOW": "Fenêtre",
             "MAKEDIR": "Nouveau Dossier",
             "DELETE": "Supprimer",
             "RENAME": "Renommer",
@@ -183,8 +199,15 @@
             "RELOAD_VIEW": "Recharger Vue Active",
             "FORCE_RELOAD_APP": "Recharger l'App",
             "KEYBOARD_SHORTCUTS": "List des Raccourcis",
-            "ABOUT_TITLE": "React-FTP",
-            "ABOUT_CONTENT": "Version ${version}"
+            "ABOUT_TITLE": "React-Explorer",
+            "ABOUT_CONTENT": "Version ${version}\n\n${hash}",
+            "ZOOM": "Zoom",
+            "MINIMIZE": "Réduire",
+            "SELECT_NEXT_TAB": "Sélectionner l'onglet suivant",
+            "SELECT_PREVIOUS_TAB": "Sélectionner l'onglet précédent",
+            "NEW_TAB": "Nouvel onglet",
+            "CLOSE_TAB": "Fermer l'onglet",
+            "OK": "OK"
         }
     }
 }

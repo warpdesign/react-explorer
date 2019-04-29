@@ -19,6 +19,9 @@ import { HamburgerMenu } from "./HamburgerMenu";
 import { ShortcutsDialog } from "./dialogs/ShortcutsDialog";
 import { shouldCatchEvent, isEditable } from "../utils/dom";
 import { WithMenuAccelerators, Accelerators, Accelerator } from "./WithMenuAccelerators";
+import { remote } from 'electron';
+import { isPackage } from '../utils/platform';
+import { TabDescriptor } from "./TabList";
 
 require("@blueprintjs/core/lib/css/blueprint.css");
 require("@blueprintjs/icons/lib/css/blueprint-icons.css");
@@ -30,8 +33,8 @@ interface IState {
     isExitDialogOpen: boolean;
 }
 
-interface InjectedProps extends WithNamespaces{
-    settingsState:SettingsState
+interface InjectedProps extends WithNamespaces {
+    settingsState: SettingsState
 }
 
 const EXIT_DELAY = 1200;
@@ -71,17 +74,24 @@ class App extends React.Component<WithNamespaces, IState> {
         FocusStyleManager.onlyShowFocusOnTabs();
 
         const path = settingsState.defaultFolder;
+        // this is hardcoded for now but could be saved and restored
+        // each time the app is started
+        // one tab for each view with the same default folder
+        const defaultTabs: Array<TabDescriptor> = [
+            { viewId: 0, path: path },
+            { viewId: 1, path: path }
+        ]
 
-        this.appState = new AppState([path, path]);
+        this.appState = new AppState(defaultTabs);
 
         if (ENV.CY) {
             window.appState = this.appState;
         }
 
-        Logger.success(`React-FTP ${ENV.VERSION} - CY: ${ENV.CY} - NODE_ENV: ${ENV.NODE_ENV} - lang: ${i18next.language}`);
+        Logger.success(`React-Explorer ${ENV.VERSION} - CY: ${ENV.CY} - NODE_ENV: ${ENV.NODE_ENV} - lang: ${i18next.language}`);
+        Logger.success(`hash=${ENV.HASH}`);
         Logger.success(`lang=${settingsState.lang}, darkMode=${settingsState.darkMode}, defaultFolder=${settingsState.defaultFolder}`);
-        // Logger.warn('React-FTP', remote.app.getVersion());
-        // Logger.error('React-FTP', remote.app.getVersion());
+        Logger.success(`package=${isPackage}`);
     }
 
     onShortcutsCombo = (e: KeyboardEvent) => {
@@ -126,7 +136,8 @@ class App extends React.Component<WithNamespaces, IState> {
         // new listers, which in turns creates new nodes
         // fixing this require a little work so meanwhile
         // this correctly resets the cache's state
-        this.appState.clearSelections();
+        // TODO: do we still need to call this?
+        // this.appState.clearAllSelections();
     }
 
     showExplorerTab = () => {
@@ -141,18 +152,23 @@ class App extends React.Component<WithNamespaces, IState> {
         }
     }
 
-    setActiveView(view:number) {
-        this.appState.setActiveCache(view);
+    setActiveView(view: number) {
+        this.appState.setActiveView(view);
     }
 
     handleClick = (e: React.MouseEvent) => {
         const sideview = (e.target as HTMLElement).closest('.sideview');
+        const filetable = (e.target as HTMLElement).closest('.fileListSizerWrapper');
 
         if (sideview) {
             const num = parseInt(sideview.id.replace('view_', ''), 10);
-            if (this.appState.caches[num].active !== true) {
-                console.log('preventing event propagation');
-                e.stopPropagation();
+            const view = this.appState.getView(num);
+            if (!view.isActive) {
+                // prevent selecting a row when the view gets activated
+                if (filetable) {
+                    console.log('preventing event propagation', e.target);
+                    e.stopPropagation();
+                }
                 this.setActiveView(num);
             }
         }
@@ -166,7 +182,7 @@ class App extends React.Component<WithNamespaces, IState> {
         console.log('exitRequest');
         if (this.appState && this.appState.pendingTransfers) {
             this.setState({ isExitDialogOpen: true });
-        }  else {
+        } else {
             ipcRenderer.send('exit');
         }
     }
@@ -202,9 +218,10 @@ class App extends React.Component<WithNamespaces, IState> {
     // }
 
     onNextView = () => {
-        const nextView = this.appState.caches[0].active ? 1 : 0;
+        const nextView = this.appState.getActiveView(false);
+        // const nextView = this.appState.caches[0].active ? 1 : 0;
 
-        this.setActiveView(nextView);
+        this.setActiveView(nextView.viewId);
     }
 
     componentDidMount() {
@@ -221,10 +238,13 @@ class App extends React.Component<WithNamespaces, IState> {
     }
 
     componentDidUpdate() {
+        const progress = this.appState.pendingTransfers && this.appState.totalTransferProgress || -1;
         this.setDarkTheme();
+        console.log('progress', progress);
+        remote.getCurrentWindow().setProgressBar(progress);
     }
 
-    onExitDialogClose = (valid:boolean) => {
+    onExitDialogClose = (valid: boolean) => {
         this.setState({ isExitDialogOpen: false });
         if (!valid) {
             this.showDownloadsTab();
@@ -242,6 +262,37 @@ class App extends React.Component<WithNamespaces, IState> {
         }
     }
 
+    onNextTab = () => {
+        if (this.appState.isExplorer) {
+            const viewState = this.appState.getActiveView();
+            viewState.cycleTab(1);
+        }
+    }
+
+    onPreviousTab = () => {
+        if (this.appState.isExplorer) {
+            const viewState = this.appState.getActiveView();
+            viewState.cycleTab(-1);
+        }
+    }
+
+    onNewTab = () => {
+        if (this.appState.isExplorer) {
+            const { settingsState } = this.injected;
+            const viewState = this.appState.getActiveView();
+            viewState.addCache(settingsState.defaultFolder, viewState.getVisibleCacheIndex() + 1, true);
+            console.log('need to create a new tab');
+        }
+    }
+
+    onCloseTab = () => {
+        if (this.appState.isExplorer) {
+            const viewState = this.appState.getActiveView();
+            const activeTabIndex = viewState.getVisibleCacheIndex();
+            viewState.closeTab(activeTabIndex);
+        }
+    }
+
     renderMenuAccelerators() {
         return <Accelerators>
             <Accelerator combo="CmdOrCtrl+Shift+C" onClick={this.onCopyPath}></Accelerator>
@@ -251,7 +302,11 @@ class App extends React.Component<WithNamespaces, IState> {
             <Accelerator combo="CmdOrCtrl+R" onClick={this.onReloadFileView}></Accelerator>
             <Accelerator combo="CmdOrCtrl+Q" onClick={this.onExitComboDown}></Accelerator>
             <Accelerator combo="CmdOrCtrl+K" onClick={this.onOpenTerminal}></Accelerator>
-         </Accelerators>;
+            <Accelerator combo="Ctrl+Tab" onClick={this.onNextTab}></Accelerator>
+            <Accelerator combo="Ctrl+Shift+Tab" onClick={this.onPreviousTab}></Accelerator>
+            <Accelerator combo="CmdOrCtrl+T" onClick={this.onNewTab}></Accelerator>
+            <Accelerator combo="CmdOrCtrl+W" onClick={this.onCloseTab}></Accelerator>
+        </Accelerators>;
     }
 
     public renderHotkeys() {
@@ -500,7 +555,10 @@ class App extends React.Component<WithNamespaces, IState> {
         const badgeText = count && (count + '') || '';
         const badgeProgress = this.appState.totalTransferProgress;
         const { t } = this.props;
-        const caches = this.appState.caches;
+        const viewStateLeft = this.appState.views[0];
+        const viewStateRight = this.appState.views[1];
+        // const cacheLeft = this.appState.getViewVisibleCache(0);
+        // const cacheRight = this.appState.getViewVisibleCache(1);
 
         // Access isDarkModeActive without modifying it to make mobx trigger the render
         // when isDarkModeActive is modified.
@@ -523,13 +581,13 @@ class App extends React.Component<WithNamespaces, IState> {
                             <Trans i18nKey="DIALOG.QUIT.CONTENT" count={count}>
                                 There are <b>{{ count }}</b> transfers <b>in progress</b>.<br /><br />Exiting the app now will <b>cancel</b> the downloads.
                             </Trans>
-                    </p>
+                        </p>
                     </Alert>
                     <PrefsDialog isOpen={isPrefsOpen} onClose={this.closePrefs}></PrefsDialog>
                     <ShortcutsDialog isOpen={isShortcutsOpen} onClose={this.closeShortcuts}></ShortcutsDialog>
                     <Navbar>
                         <Navbar.Group align={Alignment.LEFT}>
-                            <Navbar.Heading>React-explorer</Navbar.Heading>
+                            <Navbar.Heading>{t('APP_MENUS.ABOUT_TITLE')}</Navbar.Heading>
                             <Navbar.Divider />
                             <Button className={Classes.MINIMAL} icon="home" text={t('NAV.EXPLORER')} onClick={this.navClick} intent={isExplorer ? Intent.PRIMARY : 'none'} />
                             <Button style={{ position: 'relative' }} className={Classes.MINIMAL} icon="download" onClick={this.navClick} intent={!isExplorer ? Intent.PRIMARY : 'none'}>{t('NAV.TRANSFERS')}<Badge intent="none" text={badgeText} progress={badgeProgress} /></Button>
@@ -542,9 +600,9 @@ class App extends React.Component<WithNamespaces, IState> {
                         </Navbar.Group>
                     </Navbar>
                     <div onClickCapture={this.handleClick} className="main">
-                        <SideView fileCache={caches[0]} hide={!isExplorer} onPaste={this.onPaste} />
-                        <SideView fileCache={caches[1]} hide={!isExplorer} onPaste={this.onPaste} />
-                        <Downloads hide={isExplorer}/>
+                        <SideView viewState={viewStateLeft} hide={!isExplorer} onPaste={this.onPaste} />
+                        <SideView viewState={viewStateRight} hide={!isExplorer} onPaste={this.onPaste} />
+                        <Downloads hide={isExplorer} />
                     </div>
                     <LogUI></LogUI>
                 </React.Fragment>

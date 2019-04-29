@@ -1,20 +1,32 @@
 import { action, observable, computed } from 'mobx';
-import { File, FsApi } from '../services/Fs';
+import { File, FsApi, getFS, DOWNLOADS_DIR } from '../services/Fs';
 import { FileState } from './fileState';
 import { Batch } from '../transfers/batch';
 import { clipboard } from 'electron';
 import { isWin } from '../utils/platform';
+import { TabDescriptor } from '../components/TabList';
+import { ViewState } from './viewState';
 
 const LINE_ENDING = isWin ? '\r\n' : '\n';
 
 declare var ENV: any;
 
+/**
+ * Interface for a clipboard entry
+ * 
+ * @interface
+ */
 interface Clipboard {
     srcFs: FsApi;
     srcPath: string;
     files: File[];
 }
 
+/**
+ * Interface for a transfer
+ * 
+ * @interface
+ */
 interface TransferOptions {
     srcFs: FsApi;
     dstFs: FsApi;
@@ -24,8 +36,32 @@ interface TransferOptions {
     dstFsName: string;
 }
 
+
+/**
+ * Maintains global application state:
+ * 
+ * - list of ongoing transfers
+ * - active view: explorer of file view
+ * 
+ * Transfers are also starting from appState
+ */
 export class AppState {
     caches: FileState[] = new Array();
+    // @computed get caches() {
+    //     const arr: Array<FileState> = [];
+    //     this.views.map(view => view.caches).forEach(caches:Array<FileState> => {
+    //         for (cache:FileState of caches) {
+    //             arr.push(cache);
+    //         }
+    //     });
+
+    //     return arr;
+    // }
+    // two view per window now
+    // we'll need to extend it if we decide
+    // to have multiple windows (which may or may not
+    // have several views)
+    views: ViewState[] = observable<ViewState>([]);
 
     @observable
     isExplorer = true;
@@ -33,6 +69,43 @@ export class AppState {
     /* transfers */
     transfers = observable<Batch>([]);
 
+    // current active transfers
+    activeTransfers = observable<Batch>([]);
+
+    /**
+     * Creates the application state
+     * 
+     * @param tabs The initial paths of the caches that we want to create
+     */
+    constructor(tabs: Array<TabDescriptor>) {
+        for (let tab of tabs) {
+            console.log('adding cache', tab.viewId, tab.path);
+            this.addCache(ENV.CY ? '' : tab.path, tab.viewId);
+        }
+        this.setViewState();
+    }
+
+    @action
+    setViewState() {
+        this.views[0].isActive = true;
+        for (let view of this.views) {
+            // get and activate the first cache for now
+            // const files = view.caches[0];
+            // if (files) {
+            //     files.isVisible = true;
+            // }
+            view.setVisibleCache(0);
+        }
+    }
+
+    /**
+     * Prepares transferring files from clipboard to specified cache
+     * The source cache is taken from the clipboard
+     * 
+     * @param cache file cache to transfer files to
+     * 
+     * @returns {Promise<FileTransfer[]>}
+     */
     prepareClipboardTransferTo(cache: FileState) {
         if (!this.clipboard.files.length) {
             return;
@@ -55,13 +128,22 @@ export class AppState {
             });
     }
 
-    prepareDragDropTransferTo(srcCache: FileState, dstCache: FileState, files: File[]) {
+    /**
+     * Prepares transferring files from source to destination cache
+     * 
+     * @param srcCache file cache to transfer files from
+     * @param dstCache  file fache to transfer files to
+     * @param files the list of files to transfer
+     * 
+     * @returns {Promise<void>}
+     */
+    prepareTransferTo(srcCache: FileState, dstCache: FileState, files: File[]) {
         if (!files.length) {
             return;
         }
 
         const options = {
-            files: files,
+            files,
             srcFs: srcCache.getAPI(),
             srcPath: srcCache.path,
             dstFs: dstCache.getAPI(),
@@ -77,30 +159,118 @@ export class AppState {
             });
     }
 
-    @action setActiveCache(active: number) {
-        for (let i = 0; i < this.caches.length; ++i) {
-            this.caches[i].active = i === active ? true : false;
+    /**
+     * Prepares transferring files from srcCache to temp location
+     * in local filesystem
+     * 
+     * @param srcCacche: cache to trasnfer files from
+     * @param files the list of files to transfer
+     * 
+     * @returns {Promise<FileTransfer[]>}
+     */
+    prepareLocalTransfer(srcCache: FileState, files: File[]): Promise<string> {
+        if (!files.length) {
+            return Promise.resolve('');
+        }
+
+        // simply open the file if src is local FS
+        if (srcCache.getFS().name === 'local') {
+            const api = srcCache.getAPI();
+            return Promise.resolve(api.join(files[0].dir, files[0].fullname));
+        } else {
+            // first we need to get a FS for local
+            const fs = getFS(DOWNLOADS_DIR);
+            const api = new fs.API(DOWNLOADS_DIR);
+
+            const options = {
+                files,
+                srcFs: srcCache.getAPI(),
+                srcPath: srcCache.path,
+                dstFs: api,
+                dstPath: DOWNLOADS_DIR,
+                dstFsName: fs.name
+            };
+
+            // TODO: use a temporary filename for destination file?
+            return this.addTransfer(options).then(() => {
+                return api.join(DOWNLOADS_DIR, files[0].fullname);
+            }).catch((err) => {
+                debugger;
+                return Promise.reject(err);
+            });
         }
     }
 
-    getInactiveCache(): FileState {
-        return this.caches[0].active ? this.caches[1] : this.caches[0];
+    /**
+     * Changes the active file cache
+     * 
+     * @param active the number of the cache to be the new active one
+     */
+    @action
+    setActiveView(viewId: number) {
+        console.log('setting active view', viewId);
+        const previous = this.getActiveView(true);
+        const next = this.getView(viewId);
+        previous.isActive = false;
+        next.isActive = true;
     }
 
+    getActiveView(isActive = true): ViewState {
+        return this.views.find(view => view.isActive === isActive);
+    }
+
+    getViewFromCache(cache: FileState) {
+        const viewId = cache.viewId;
+        return this.getView(viewId);
+    }
+
+    /**
+     * Returns the cache that's not active (ie: destination cache)
+     * 
+     * NOTE: this would have no sense if we had more than two file caches
+     */
+    getInactiveViewVisibleCache(): FileState {
+        const view = this.getActiveView(false);
+        return view.caches.find(cache => cache.isVisible === true);
+    }
+
+    getViewVisibleCache(viewId: number): FileState {
+        const view = this.getView(viewId);
+        return view.caches.find(cache => cache.isVisible === true);
+    }
+
+    getCachesForView(viewId: number) {
+        const view = this.getView(viewId);
+        return view.caches;
+    }
+
+    /**
+     * Sync (reload) caches which points to the same directory as srcCache
+     * 
+     * @param srcCache the source cache to base the sync upon
+     */
     @action
     syncCaches(srcCache: FileState) {
         // get caches that are showing the same path
-        const caches = this.caches.filter((cache) => {
-            return (cache !== srcCache &&
-                cache.status === 'ok' &&
-                cache.path === srcCache.path &&
-                cache.getFS().name === srcCache.getFS().name
-            );
+        console.error('this.caches removed: we may need this one!');
+        this.views.map(view => view.caches).forEach(caches => {
+            for (let cache of caches) {
+                if (cache.status === 'ok' && cache !== srcCache && cache.getFS().name === srcCache.getFS().name && cache.isVisible) {
+                    cache.reload();
+                }
+            }
         });
+        // const caches = this.caches.filter((cache) => {
+        //     return (cache !== srcCache &&
+        //         cache.status === 'ok' &&
+        //         cache.path === srcCache.path &&
+        //         cache.getFS().name === srcCache.getFS().name
+        //     );
+        // });
 
-        for (let cache of caches) {
-            cache.navHistory(0);
-        };
+        // for (let cache of caches) {
+        //     cache.navHistory(0);
+        // };
     }
 
     @computed
@@ -108,7 +278,8 @@ export class AppState {
         let totalSize = 0;
         let totalProgress = 0;
 
-        const runningTransfers = this.transfers.filter(transfer => !transfer.status.match(/error|done/));
+        const runningTransfers = this.activeTransfers;
+        // .filter(transfer => !transfer.status.match(/error|done/));
 
         for (let transfer of runningTransfers) {
             totalSize += transfer.size;
@@ -142,6 +313,12 @@ export class AppState {
             //         batch.updateProgress();
             //     });
             // }, 1000);
+            const activeTransfers = this.transfers.filter(transfer => !transfer.status.match(/error|done/));
+            if (this.activeTransfers.length === 1) {
+                this.activeTransfers.clear();
+            }
+            this.activeTransfers.push(batch);
+
             return batch.start();
         }).catch((err) => {
             debugger;
@@ -151,7 +328,8 @@ export class AppState {
     /* /transfers */
 
     getActiveCache(): FileState {
-        return this.isExplorer ? this.caches.find((view) => view.active === true) : null;
+        const view = this.getActiveView(true);
+        return this.isExplorer ? view.caches.find((cache) => cache.isVisible === true) : null;
     }
 
     @action
@@ -160,17 +338,37 @@ export class AppState {
         // only refresh view that's ready
         if (cache && cache.status === 'ok') {
             cache.reload();
-            this.syncCaches(cache);
         }
     }
 
+    createView(viewId: number) {
+        // return {
+        //     caches: new Array(),
+        //     viewId: viewId,
+        //     isActive: false
+        // };
+        return new ViewState(viewId);
+    }
+
+    getView(viewId: number) {
+        return this.views.find(view => view.viewId === viewId);
+    }
+
     @action
-    addCache(path: string = '') {
-        const cache = new FileState(path);
+    addCache(path: string = '', viewId = -1) {
+        let view = this.getView(viewId);
 
-        this.caches.push(cache);
+        if (!view) {
+            view = this.createView(viewId);
+            this.views[viewId] = view;
+        }
 
-        return cache;
+        // const cache = new FileState(path, viewId);
+        view.addCache(path);
+        // this.caches.push(cache);
+        // this.views[viewId].caches.push(cache);
+
+        // return cache;
     }
 
     @action
@@ -180,10 +378,15 @@ export class AppState {
     }
 
     @action
-    clearSelections() {
-        for (let cache of this.caches) {
-            cache.clearSelection();
+    clearAllSelections() {
+        console.error('this.caches removed: we may need this one too!');
+        for (let view of this.views) {
+            const visibleCache = view.getVisibleCache();
+            visibleCache.clearSelection();
         }
+        // for (let cache of this.caches) {
+        //     cache.clearSelection();
+        // }
     }
 
     // global
@@ -215,19 +418,5 @@ export class AppState {
         }
 
         return text;
-    }
-
-    constructor(caches: Array<string>) {
-        for (let path of caches) {
-            this.addCache(ENV.CY ? '' : path);
-        }
-        this.caches[0].active = true;
-
-        // // TODO: pass start path as prop ?
-        // const cache: FileState = appState.addCache();
-
-        // this.state = {
-        //     fileCache: cache
-        // };
     }
 }
