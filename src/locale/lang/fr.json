@@ -200,13 +200,14 @@
             "FORCE_RELOAD_APP": "Recharger l'App",
             "KEYBOARD_SHORTCUTS": "List des Raccourcis",
             "ABOUT_TITLE": "React-Explorer",
-            "ABOUT_CONTENT": "Version ${version}\n${hash}",
+            "ABOUT_CONTENT": "Version ${version}\n\n${hash}",
             "ZOOM": "Zoom",
             "MINIMIZE": "Réduire",
             "SELECT_NEXT_TAB": "Sélectionner l'onglet suivant",
             "SELECT_PREVIOUS_TAB": "Sélectionner l'onglet précédent",
             "NEW_TAB": "Nouvel onglet",
-            "CLOSE_TAB": "Fermer l'onglet"
+            "CLOSE_TAB": "Fermer l'onglet",
+            "OK": "OK"
         }
     }
 }

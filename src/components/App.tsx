@@ -79,7 +79,6 @@ class App extends React.Component<WithNamespaces, IState> {
         // one tab for each view with the same default folder
         const defaultTabs: Array<TabDescriptor> = [
             { viewId: 0, path: path },
-            { viewId: 0, path: "/tmp" },
             { viewId: 1, path: path }
         ]
 

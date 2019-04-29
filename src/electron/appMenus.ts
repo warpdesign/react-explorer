@@ -1,4 +1,4 @@
-import { Menu, BrowserWindow, MenuItemConstructorOptions, MenuItem, app, ipcMain, dialog } from 'electron';
+import { clipboard, Menu, BrowserWindow, MenuItemConstructorOptions, MenuItem, app, ipcMain, dialog } from 'electron';
 import { isMac } from '../utils/platform';
 
 declare var ENV: any;
@@ -49,13 +49,20 @@ export class AppMenu {
 
     showAboutDialog = () => {
         const version = app.getVersion();
+        const detail = this.menuStrings['ABOUT_CONTENT'].replace('${version}', version).replace('${hash}', ENV.HASH);
 
         dialog.showMessageBox(null, {
             title: this.menuStrings['ABOUT_TITLE'],
             type: 'info',
             message: this.menuStrings['ABOUT_TITLE'],
-            detail: this.menuStrings['ABOUT_CONTENT'].replace('${version}', version).replace('${hash}', ENV.HASH)
-        }, result => null);
+            detail: detail,
+            buttons: [this.menuStrings['OK'], this.menuStrings['COPY']]
+        }, result => {
+            console.log('result', result);
+            if (result) {
+                clipboard.writeText(detail);
+            }
+        });
     }
 
     getMenuTemplate(): MenuItemConstructorOptions[] {
