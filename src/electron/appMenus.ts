@@ -1,5 +1,5 @@
 import { clipboard, Menu, BrowserWindow, MenuItemConstructorOptions, MenuItem, app, ipcMain, dialog } from 'electron';
-import { isMac } from '../utils/platform';
+import { isMac, isLinux } from '../utils/platform';
 
 declare var ENV: any;
 
@@ -50,16 +50,20 @@ export class AppMenu {
     showAboutDialog = () => {
         const version = app.getVersion();
         const detail = this.menuStrings['ABOUT_CONTENT'].replace('${version}', version).replace('${hash}', ENV.HASH);
+        const buttons = isLinux ? [this.menuStrings['COPY'], this.menuStrings['OK']] : [this.menuStrings['OK'], this.menuStrings['COPY']];
+        const defaultId = buttons.indexOf(this.menuStrings['OK']);
 
         dialog.showMessageBox(null, {
             title: this.menuStrings['ABOUT_TITLE'],
             type: 'question',
             message: this.menuStrings['ABOUT_TITLE'],
-            detail: detail,
-            buttons: [this.menuStrings['OK'], this.menuStrings['COPY']]
+            detail,
+            buttons,
+            noLink: true,
+            defaultId
         }, result => {
-            console.log('result', result);
-            if (result) {
+            // copy details to clipboard if copy button was pressed
+            if (result !== defaultId) {
                 clipboard.writeText(detail);
             }
         });
