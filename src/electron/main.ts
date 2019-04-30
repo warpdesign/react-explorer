@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, Menu } from 'electron';
+import { app, BrowserWindow, ipcMain, ipcRenderer } from 'electron';
 import * as process from 'process';
 import { watch } from 'fs';
 import { AppMenu, LocaleString } from './appMenus';
@@ -7,168 +7,205 @@ import { isPackage } from '../utils/platform';
 declare var __dirname: string
 declare var ENV: any;
 
-// const CLOSE_EXIT_DELAY = 2000;
 const ENV_E2E = !!process.env.E2E;
+const SOURCE_PATH = './build';
+const HTML_PATH = `file://${__dirname}/index.html`;
+const WINDOW_DEFAULT_SETTINGS = {
+    minWidth: 750,
+    width: 800,
+    height: 600
+};
 
-let mainWindow: Electron.BrowserWindow;
-let appMenu: AppMenu;
-
-function installReactDevTools() {
-    const { default: installExtension, REACT_DEVELOPER_TOOLS } = require('electron-devtools-installer');
-
-    installExtension(REACT_DEVELOPER_TOOLS)
-        .then((name: any) => console.log(`Added Extension:  ${name}`))
-        .catch((err: any) => console.log('An error occurred: ', err));
-}
-
-function installWatcher(path: string) {
-    watch(path, { recursive: true }, reloadApp);
-}
-
-function reloadApp() {
-    if (mainWindow) {
-        mainWindow.webContents.session.clearCache(function () {
-            mainWindow.webContents.reloadIgnoringCache();
+const ElectronApp = {
+    mainWindow: <Electron.BrowserWindow>null,
+    appMenu: <AppMenu>null,
+    cleanupCounter: 0,
+    forceExit: false,
+    /**
+     * Listen to Electron app events
+     */
+    init() {
+        app.on('ready', () => this.onReady());
+        // prevent app from exiting at first request: the user may attempt to exit the app
+        // while transfers are in progress so we first send a request to the frontend
+        // if no transfers are in progress, exit confirmation is received which makes the app close
+        app.on('before-quit', (e) => {
+            console.log('before quit');
+            if (!this.forceExit) {
+                e.preventDefault();
+            } else {
+                this.cleanupAndExit();
+            }
         });
-    }
-}
 
-let forceExit = false;
+        app.on('activate', (e) => {
+            if (this.mainWindow) {
+                this.mainWindow.restore();
+            }
+        });
+    },
+    /**
+     * Create React-Explorer main window and:
+     * - load entry html file
+     * - bind close/minimize events
+     * - create main menu
+     */
+    createMainWindow() {
+        console.log('Create Main Window');
+        this.mainWindow = new BrowserWindow({
+            minWidth: WINDOW_DEFAULT_SETTINGS.minWidth,
+            width: WINDOW_DEFAULT_SETTINGS.width,
+            height: WINDOW_DEFAULT_SETTINGS.height,
+            webPreferences: {
+                enableBlinkFeatures: 'OverlayScrollbars'
+            }
+        });
 
-function installExitListeners() {
-    let exitWindow: BrowserWindow = null;
-    let timeout: any = 0;
+        this.mainWindow.loadURL(HTML_PATH);
 
-    ipcMain.on('reloadIgnoringCache', reloadApp);
+        // this.mainWindow.on('close', () => app.quit());
 
-    // ipcMain.on('exitWarning', (event:Event, exitString:string) => {
-    //     console.log('exitWindow', exitString);
+        // Prevent the window from closing in case transfers are in progress
+        this.mainWindow.on('close', (e: Event) => {
+            if (!this.forceExit) {
+                console.log('exit request and no force: sending back exitRequest');
+                e.preventDefault();
+                this.mainWindow.webContents.send('exitRequest');
+            }
+        });
 
-    //     if (exitWindow) {
-    //         clearTimeout(timeout);
-    //         timeout = 0;
-    //     } else {
-    //         exitWindow = new BrowserWindow({
-    //             width: 560,
-    //             height: 130,
-    //             transparent: true,
-    //             frame: false,
-    //             alwaysOnTop: true,
-    //             focusable: false
-    //         });
+        this.mainWindow.on('minimize', () => {
+            this.mainWindow.minimize();
+        });
 
-    //         exitWindow.loadURL("data:text/html;charset=utf-8," + encodeURI(`<html><head><style type="text/css">p{border-radius:4px;padding: 22px 5px;background-color:rgba(80,80,80,.8);color:white;text-shadow:1px 1px 2px rgba(79,79,79,.3);font-size:24px;}body{font-family:Helvetica;text-align:center;background-color:transparent}</style></head><body><p>${exitString}</p></body></html>`));
-    //     }
-    // });
+        this.appMenu = new AppMenu(this.mainWindow);
+    },
+    /**
+     * Install special React DevTools
+     */
+    installReactDevTools() {
+        console.log('Install React DevTools');
+        const { default: installExtension, REACT_DEVELOPER_TOOLS } = require('electron-devtools-installer');
 
-    // ipcMain.on('endExitWarning', () => {
-    //     console.log('endExitWindow');
-    //     timeout = setTimeout(() => {
-    //         if (exitWindow) {
-    //             exitWindow.close();
-    //             exitWindow = null;
-    //         }
-    //     }, CLOSE_EXIT_DELAY);
-    // });
+        installExtension(REACT_DEVELOPER_TOOLS)
+            .then((name: any) => console.log(`Added Extension:  ${name}`))
+            .catch((err: any) => console.log('An error occurred: ', err));
+    },
+    /**
+     * Install recursive file watcher to reload the app on fs change events
+     * Note that this probably won't work correctly under Linux since fs.watch
+     * doesn't support recrusive watch on this OS.
+     */
+    installWatcher() {
+        if (!ENV_E2E && !isPackage) {
+            console.log('Install Code Change Watcher');
+            watch(SOURCE_PATH, { recursive: true }, () => this.reloadApp());
+        }
+    },
+    /**
+     * Clears the session cache and reloads main window without cache
+     */
+    reloadApp() {
+        const mainWindow = this.mainWindow;
+        if (mainWindow) {
+            mainWindow.webContents.session.clearCache(() => {
+                mainWindow.webContents.reloadIgnoringCache();
+            });
+        }
+    },
+    /**
+     * Install listeners to handle messages coming from the renderer process:
+     * 
+     * - reloadIgnoringCache: need to reload the main window (dev only)
+     * - exit: wants to exit the app
+     * - openTerminal(cmd): should open a new terminal process using specified cmd line
+     * - languageChanged(strings): language has been changed so menus need to be updated
+     * - selectAll: wants to generate a selectAll event
+     */
+    installIpcMainListeners() {
+        console.log('Install ipcMain Listeners');
 
-    ipcMain.on('exit', () => {
-        forceExit = true;
-        console.log('need to exit without warning!');
-        app.quit();
-    });
+        ipcMain.on('reloadIgnoringCache', () => this.reloadApp());
 
-    ipcMain.on('openTerminal', (event: Event, cmd: string) => {
-        console.log('running', cmd);
-        const exec = require("child_process").exec;
-        exec(cmd).unref();
-    });
+        ipcMain.on('readyToExit', () => {
+            this.cleanupAndExit();
+        });
 
-    ipcMain.on('languageChanged', (e: Event, strings: LocaleString) => {
-        if (appMenu) {
-            appMenu.createMenu(strings);
+        ipcMain.on('openTerminal', (event: Event, cmd: string) => {
+            console.log('running', cmd);
+            const exec = require("child_process").exec;
+            exec(cmd).unref();
+        });
+
+        ipcMain.on('languageChanged', (e: Event, strings: LocaleString) => {
+            if (this.appMenu) {
+                this.appMenu.createMenu(strings);
+            } else {
+                console.log('languageChanged but app not ready :(');
+            }
+        });
+
+        ipcMain.on('selectAll', () => {
+            if (this.mainWindow) {
+                this.mainWindow.webContents.selectAll();
+            }
+        });
+
+        ipcMain.on('needsCleanup', () => this.cleanupCounter++);
+        ipcMain.on('cleanedUp', () => this.onCleanUp());
+    },
+
+    /**
+     * Called when the app is ready to exit: this will send cleanup event to renderer process
+     * 
+     */
+    cleanupAndExit() {
+        console.log('cleanupAndExit');
+        if (this.cleanupCounter) {
+            console.log('cleanupCounter non zero');
+            this.mainWindow.webContents.send('cleanup');
         } else {
-            console.log('languageChanged but app not ready :(');
+            console.log('cleanupCount zero: exit');
+            app.exit();
         }
-    });
+    },
+    onCleanUp() {
+        console.log('onCleanup');
+        this.cleanupCounter--;
+        // exit app if everything has been cleaned up
+        // otherwise do nothing and wait for cleanup
+        if (!this.cleanupCounter) {
+            app.exit();
+        }
+    },
+    /**
+     * Open the dev tools window
+     */
+    openDevTools() {
+        // devtools
+        // spectron problem if devtools is opened, see https://github.com/electron/spectron/issues/254
+        if (!ENV_E2E && !isPackage) {
+            console.log('Open Dev Tools');
+            const devtools = new BrowserWindow();
+            this.mainWindow.webContents.setDevToolsWebContents(devtools.webContents);
+            this.mainWindow.webContents.openDevTools({ mode: 'detach' });
+        }
+    },
+    /**
+     * app.ready callback: that's the app's main entry point
+     */
+    onReady() {
+        console.log('App Ready');
+        if (!ENV_E2E && !isPackage) {
+            this.installReactDevTools();
+        }
 
-    ipcMain.on('selectAll', () => {
-        mainWindow.webContents.selectAll();
-    });
+        this.installIpcMainListeners();
+        this.createMainWindow();
+        this.installWatcher();
+        this.openDevTools();
+    }
 }
-
-function onReady() {
-    if (!ENV_E2E && !isPackage) {
-        installReactDevTools();
-    }
-    installExitListeners();
-
-    mainWindow = new BrowserWindow({
-        minWidth: 750,
-        width: 800,
-        height: 600,
-        webPreferences: {
-            enableBlinkFeatures: 'OverlayScrollbars'
-        }
-    });
-
-    if (!ENV_E2E && !isPackage) {
-        // const { dialog } = require('electron');
-        // dialog.showMessageBox(null, {
-        //     message: JSON.stringify(process.env)
-        // });
-        installWatcher('./build');
-    }
-
-    const fileName = `file://${__dirname}/index.html`;
-
-    mainWindow.loadURL(fileName);
-
-    mainWindow.on('close', () => app.quit());
-
-    // devtools
-    // spectron problem if devtools is opened, see https://github.com/electron/spectron/issues/254
-    if (!ENV_E2E && !isPackage) {
-        const devtools = new BrowserWindow();
-        mainWindow.webContents.setDevToolsWebContents(devtools.webContents);
-        mainWindow.webContents.openDevTools({ mode: 'detach' });
-    }
-
-    // Prevent the window from closing in case transfers are in progress
-    mainWindow.on('close', (e: Event) => {
-        if (!forceExit) {
-            console.log('exit request and no force: sending back exitRequest');
-            e.preventDefault();
-            mainWindow.webContents.send('exitRequest');
-        }
-    });
-
-    mainWindow.on('minimize', () => {
-        mainWindow.minimize();
-    });
-
-    appMenu = new AppMenu(mainWindow);
-}
-
-
-app.on('ready', () => onReady());
-// prevent app from exiting at first request: the user may attempt to exit the app
-// while transfers are in progress so we first send a request to the frontend
-// if no transfers are in progress, exit confirmation is received which makes the app close
-app.on('before-quit', (e) => {
-    console.log('before quit');
-    if (!forceExit) {
-        e.preventDefault();
-    } else {
-        console.log('oops, bye!');
-        // force exit app: filesystem access (transfers in progress) may prevent the app from quiting
-        app.exit();
-    }
-});
-
-app.on('activate', (e) => {
-    if (mainWindow) {
-        mainWindow.restore();
-    }
-});
 
 console.log(`Electron Version ${app.getVersion()}`);
+ElectronApp.init();

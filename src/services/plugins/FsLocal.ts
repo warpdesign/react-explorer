@@ -8,6 +8,7 @@ import { size } from '../../utils/size';
 import { throttle } from '../../utils/throttle';
 const { Transform } = require('stream');
 import { isWin } from '../../utils/platform';
+import { LocalWatch, WatcherCB } from './LocalWatch';
 
 const invalidDirChars = isWin && /[\*:<>\?|"]+/ig || /^[\.]+[\/]+(.)*$/ig;
 const invalidFileChars = isWin && /[\*:<>\?|"]+/ig || /\//;
@@ -22,9 +23,11 @@ class LocalApi implements FsApi {
     // current path
     path: string;
     loginOptions: ICredentials = null;
+    onFsChange: (filename: string) => void;
 
-    constructor(path: string) {
-        this.path = this.resolve(path);
+    constructor(path: string, onFsChange: (filename: string) => void) {
+        this.path = '';
+        this.onFsChange = onFsChange;
     }
 
     // local fs doesn't require login
@@ -200,6 +203,17 @@ class LocalApi implements FsApi {
         return Promise.resolve();
     }
 
+    onList(dir: string) {
+        console.log('onList', dir, this.path);
+        if (dir !== this.path) {
+            console.log('stopWatching', this.path);
+            LocalWatch.stopWatchingPath(this.path, this.onFsChange);
+            console.log('watchPath', dir);
+            LocalWatch.watchPath(dir, this.onFsChange);
+            this.path = dir;
+        }
+    }
+
     async list(dir: string, appendParent = true, transferId = -1): Promise<File[]> {
         console.log('calling readDirectory', dir);
         const pathExists = await this.isDir(dir);
@@ -252,6 +266,8 @@ class LocalApi implements FsApi {
                             files.push(file);
                         }
 
+                        this.onList(dirPath);
+
                         // add parent
                         if (appendParent && !this.isRoot(dir)) {
                             const parent = { ...Parent, dir: dirPath };
@@ -273,7 +289,9 @@ class LocalApi implements FsApi {
     }
 
     off() {
-
+        console.log('off', this.path);
+        console.log('stopWatchingPath', this.path);
+        LocalWatch.stopWatchingPath(this.path, this.onFsChange);
     }
 
     // TODO add error handling

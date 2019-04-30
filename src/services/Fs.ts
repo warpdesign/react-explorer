@@ -23,7 +23,7 @@ export interface File {
 
 export interface Fs {
     // runtime api
-    API: (new (path: string) => FsApi);
+    API: (new (path: string, onFsChange: (filename: string) => void) => FsApi);
     // static members
     canread(str: string): boolean;
     serverpart(str: string): string;

@@ -183,7 +183,8 @@ class App extends React.Component<WithNamespaces, IState> {
         if (this.appState && this.appState.pendingTransfers) {
             this.setState({ isExitDialogOpen: true });
         } else {
-            ipcRenderer.send('exit');
+            console.log('sending readyToExit event');
+            ipcRenderer.send('readyToExit');
         }
     }
 
@@ -249,7 +250,7 @@ class App extends React.Component<WithNamespaces, IState> {
         if (!valid) {
             this.showDownloadsTab();
         } else {
-            ipcRenderer.send('exit');
+            ipcRenderer.send('readyToExit');
         }
     }
 

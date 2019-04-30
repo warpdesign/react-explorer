@@ -125,6 +125,11 @@ export class FileState {
         }
     }
 
+    onFSChange = (filename: string): void => {
+        console.log('fsChanged', filename);
+        this.reload();
+    }
+
     private getNewFS(path: string, skipContext = false): Fs {
         let newfs = getFS(path);
 
@@ -134,7 +139,7 @@ export class FileState {
             // we need to free events in any case
             this.freeFsEvents();
             this.fs = newfs;
-            this.api = new newfs.API(path);
+            this.api = new newfs.API(path, this.onFSChange);
             this.bindFsEvents();
         }
 
