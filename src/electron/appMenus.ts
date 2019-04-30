@@ -53,7 +53,7 @@ export class AppMenu {
 
         dialog.showMessageBox(null, {
             title: this.menuStrings['ABOUT_TITLE'],
-            type: 'info',
+            type: 'question',
             message: this.menuStrings['ABOUT_TITLE'],
             detail: detail,
             buttons: [this.menuStrings['OK'], this.menuStrings['COPY']]
@@ -232,7 +232,7 @@ export class AppMenu {
                 });
 
             // add about menuItem
-            (template[3].submenu as MenuItemConstructorOptions[]).unshift({
+            (template[4].submenu as MenuItemConstructorOptions[]).unshift({
                 label: menuStrings['ABOUT'],
                 click: this.showAboutDialog
             });
