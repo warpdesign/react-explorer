@@ -226,6 +226,21 @@ export class FileState {
         this.selected.clear();
     }
 
+    @action
+    updateSelection() {
+        const isSameDir = this.selected.length && this.selected[0].dir === this.path;
+        const newSelection = [];
+        if (isSameDir) {
+            for (let selection of this.selected) {
+                const newFile = this.files.find(file => file.fullname === selection.fullname);
+                if (newFile) {
+                    newSelection.push(newFile);
+                }
+            }
+            this.selected.replace(newSelection);
+        }
+    }
+
     reload() {
         this.navHistory(0, true);
     }
@@ -354,8 +369,9 @@ export class FileState {
                 runInAction(() => {
                     console.log('run in actions', this.path);
                     this.files.replace(files);
-                    // clear lister selection as well
-                    this.clearSelection();
+                    // update the cache's selection, keeping files that were previously selected
+                    this.updateSelection();
+
                     // TODO: sync caches ?
 
                     this.setStatus('ok');

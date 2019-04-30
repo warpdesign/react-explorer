@@ -63,6 +63,8 @@ interface IState {
     type: string;
     // position of last selected element
     position: number;
+    // last path that was used
+    path: string;
 };
 
 interface IProps extends WithNamespaces {
@@ -99,10 +101,11 @@ export class FileTableClass extends React.Component<IProps, IState> {
         this.viewState = this.injected.viewState;
 
         this.state = {
-            nodes: this.buildNodes(this.cache.files),
+            nodes: this.buildNodes(this.cache.files, false),
             selected: 0,
             type: 'local',
-            position: -1
+            position: -1,
+            path: this.cache.path
         };
 
         this.installReaction();
@@ -127,8 +130,7 @@ export class FileTableClass extends React.Component<IProps, IState> {
     }
 
     public onLanguageChanged = (lang: string) => {
-        const nodes = this.buildNodes(this.cache.files);
-        this.updateNodes(nodes);
+        this.updateNodes(this.cache.files);
     }
 
     public componentWillUnmount() {
@@ -191,15 +193,17 @@ export class FileTableClass extends React.Component<IProps, IState> {
         this.disposer = reaction(
             () => { return toJS(this.cache.files) },
             (files: File[]) => {
-                console.log('got files', files.length);
-                // console.time('building nodes');
-                const nodes = this.buildNodes(files);
-                this.updateNodes(nodes);
+                this.updateNodes(files);
             });
     }
 
-    private buildNodes = (files: File[]): ITableRow[] => {
+    private isNodeSelected(name: string) {
+        return !!this.state.nodes.find(node => node.isSelected && node.name === name);
+    }
+
+    private buildNodes = (files: File[], keepSelection = false): ITableRow[] => {
         console.log('** building nodes', files.length);
+
         return files
             .sort((file1, file2) => {
                 if ((file2.isDir && !file1.isDir)) {
@@ -212,13 +216,14 @@ export class FileTableClass extends React.Component<IProps, IState> {
             })
             .map((file, i) => {
                 const filetype = file.type;
+                const isSelected = keepSelection && this.isNodeSelected(file.fullname);
 
                 const res: ITableRow = {
                     icon: file.isDir && "folder-close" || (filetype && TYPE_ICONS[filetype] || TYPE_ICONS['any']),
                     name: file.fullname,
                     nodeData: file,
                     className: file.fullname !== '..' && file.fullname.startsWith('.') && 'isHidden' || '',
-                    isSelected: false,
+                    isSelected: isSelected,
                     size: !file.isDir && formatBytes(file.length) || ''
                 };
 
@@ -232,8 +237,17 @@ export class FileTableClass extends React.Component<IProps, IState> {
         return (<div className="empty"><Icon icon="tick-circle" iconSize={40} />{t('COMMON.EMPTY_FOLDER')}</div>);
     }
 
-    private updateNodes(nodes: ITableRow[]) {
-        this.setState({ nodes, selected: 0, position: -1 });
+    private updateNodes(files: File[]) {
+        // we want to keep selected files when updating the cache
+        const keepSelection = files.length && this.state.path === files[0].dir;
+        console.log('got files', files.length);
+        // console.time('building nodes');
+        const nodes = this.buildNodes(files, keepSelection);
+        this.updateState(nodes, keepSelection);
+    }
+
+    private updateState(nodes: ITableRow[], keepSelection = false) {
+        this.setState({ nodes, selected: keepSelection ? this.state.selected : 0, position: -1 });
     }
 
     getRow(index: number): ITableRow {
