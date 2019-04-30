@@ -247,7 +247,8 @@ export class FileTableClass extends React.Component<IProps, IState> {
     }
 
     private updateState(nodes: ITableRow[], keepSelection = false) {
-        this.setState({ nodes, selected: keepSelection ? this.state.selected : 0, position: -1 });
+        const newPath = nodes.length && nodes[0].nodeData.dir || '';
+        this.setState({ nodes, selected: keepSelection ? this.state.selected : 0, position: -1, path: newPath });
     }
 
     getRow(index: number): ITableRow {
