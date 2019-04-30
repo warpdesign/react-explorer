@@ -58,7 +58,7 @@ npm run dist-win
 
 React-Explorer has been written so that it can easily be extended using plugins.
 
-As a starting point you may use the `FsGeneric` sekelton.
+As a starting point you may use the `FsGeneric` skeleton.
 
 ## Acknowledgments
 
