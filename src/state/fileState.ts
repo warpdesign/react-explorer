@@ -238,6 +238,8 @@ export class FileState {
                 }
             }
             this.selected.replace(newSelection);
+        } else {
+            this.selected.clear();
         }
     }
 
