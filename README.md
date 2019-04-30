@@ -1,4 +1,4 @@
-# FTP & local file explorer written in TypeScript & React
+# File manager written in TypeScript & React
 
 ![React-Explorer](./img/react-ftp.png)
 
@@ -7,15 +7,17 @@
 **Note**
 React-Explorer is still being worked on so this is a work in progress.
 
-- Plugin-based filesystem type: local supported for now
+- Plugin-based: local supported for now, ftp in the works
+- Dual-view window supporting any numbers of tabs
 - Can be fully keyboard controlled
 - Transfers from/to any plugin
 - Fully localized (French & English available)
 - Dark Mode with automatic detection on macOS Mojave
+- Works on Linux, Mac, Windows
 
 ## Requirements
 
-- Windows 7
+- Windows 7/8/10
 - macOS
 - Linux
 
@@ -44,15 +46,19 @@ In order to build binary packages, simply type the following:
 npm run dist
 ```
 
-This will build packaged binaries of React Explorer into the `dist` folder.
+This will build packaged binaries of React Explorer into the `dist` folder for every supported platform.
 
-## Tests
+React-Explorer can also be built for a single patform. For example, to build only the Windows binaries, type:
+
+```shell
+npm run dist-win
+```
 
 ## How to develop a new Plugin
 
 React-Explorer has been written so that it can easily be extended using plugins.
 
-TODO
+As a starting point you may use the `FsGeneric` sekelton.
 
 ## Acknowledgments
 

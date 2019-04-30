@@ -180,7 +180,7 @@ export class AppState {
         } else {
             // first we need to get a FS for local
             const fs = getFS(DOWNLOADS_DIR);
-            const api = new fs.API(DOWNLOADS_DIR);
+            const api = new fs.API(DOWNLOADS_DIR, () => { });
 
             const options = {
                 files,

@@ -70,7 +70,6 @@
     "classnames": "^2.2.6",
     "del": "^3.0.0",
     "electron-reload": "^1.2.5",
-    "ftp": "github:warpdesign/node-ftp#master",
     "get-folder-size": "^2.0.0",
     "i18next": "^13.0.0",
     "mkdirp": "^0.5.1",
