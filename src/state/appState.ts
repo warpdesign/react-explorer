@@ -3,11 +3,9 @@ import { File, FsApi, getFS, DOWNLOADS_DIR } from '../services/Fs';
 import { FileState } from './fileState';
 import { Batch } from '../transfers/batch';
 import { clipboard } from 'electron';
-import { isWin } from '../utils/platform';
+import { lineEnding } from '../utils/platform';
 import { TabDescriptor } from '../components/TabList';
 import { ViewState } from './viewState';
-
-const LINE_ENDING = isWin ? '\r\n' : '\n';
 
 declare var ENV: any;
 
@@ -47,17 +45,7 @@ interface TransferOptions {
  */
 export class AppState {
     caches: FileState[] = new Array();
-    // @computed get caches() {
-    //     const arr: Array<FileState> = [];
-    //     this.views.map(view => view.caches).forEach(caches:Array<FileState> => {
-    //         for (cache:FileState of caches) {
-    //             arr.push(cache);
-    //         }
-    //     });
-
-    //     return arr;
-    // }
-    // two view per window now
+    // two views per window now
     // we'll need to extend it if we decide
     // to have multiple windows (which may or may not
     // have several views)
@@ -90,10 +78,6 @@ export class AppState {
         this.views[0].isActive = true;
         for (let view of this.views) {
             // get and activate the first cache for now
-            // const files = view.caches[0];
-            // if (files) {
-            //     files.isVisible = true;
-            // }
             view.setVisibleCache(0);
         }
     }
@@ -123,6 +107,8 @@ export class AppState {
         return this.addTransfer(options)
             .then(() => {
                 if (options.dstPath === cache.path && options.dstFsName === cache.getFS().name) {
+                    // FIX ME: since watcher has been implemented, there's no need to reload cache
+                    // if destination is local fs
                     cache.reload();
                 }
             });
@@ -244,35 +230,6 @@ export class AppState {
         return view.caches;
     }
 
-    /**
-     * Sync (reload) caches which points to the same directory as srcCache
-     * 
-     * @param srcCache the source cache to base the sync upon
-     */
-    @action
-    syncCaches(srcCache: FileState) {
-        // get caches that are showing the same path
-        console.error('this.caches removed: we may need this one!');
-        this.views.map(view => view.caches).forEach(caches => {
-            for (let cache of caches) {
-                if (cache.status === 'ok' && cache !== srcCache && cache.getFS().name === srcCache.getFS().name && cache.isVisible) {
-                    cache.reload();
-                }
-            }
-        });
-        // const caches = this.caches.filter((cache) => {
-        //     return (cache !== srcCache &&
-        //         cache.status === 'ok' &&
-        //         cache.path === srcCache.path &&
-        //         cache.getFS().name === srcCache.getFS().name
-        //     );
-        // });
-
-        // for (let cache of caches) {
-        //     cache.navHistory(0);
-        // };
-    }
-
     @computed
     get totalTransferProgress(): number {
         let totalSize = 0;
@@ -342,11 +299,6 @@ export class AppState {
     }
 
     createView(viewId: number) {
-        // return {
-        //     caches: new Array(),
-        //     viewId: viewId,
-        //     isActive: false
-        // };
         return new ViewState(viewId);
     }
 
@@ -363,12 +315,7 @@ export class AppState {
             this.views[viewId] = view;
         }
 
-        // const cache = new FileState(path, viewId);
         view.addCache(path);
-        // this.caches.push(cache);
-        // this.views[viewId].caches.push(cache);
-
-        // return cache;
     }
 
     @action
@@ -377,19 +324,6 @@ export class AppState {
         cache.selected.replace(newSelection);
     }
 
-    @action
-    clearAllSelections() {
-        console.error('this.caches removed: we may need this one too!');
-        for (let view of this.views) {
-            const visibleCache = view.getVisibleCache();
-            visibleCache.clearSelection();
-        }
-        // for (let cache of this.caches) {
-        //     cache.clearSelection();
-        // }
-    }
-
-    // global
     @observable
     clipboard: Clipboard = {
         srcPath: '',
@@ -413,7 +347,7 @@ export class AppState {
 
         if (files.length) {
             const pathnames = files.map((file) => fileState.join(!filenameOnly && file.dir || '', file.fullname));
-            text = pathnames.join(LINE_ENDING);
+            text = pathnames.join(lineEnding);
             clipboard.writeText(text);
         }
 

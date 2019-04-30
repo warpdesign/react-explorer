@@ -130,14 +130,6 @@ class App extends React.Component<WithNamespaces, IState> {
 
     showDownloadsTab = () => {
         this.appState.isExplorer = false;
-        // right now lister's selection is lost because
-        // switching to downloads destroys the listers
-        // and switching back to explorer view creates
-        // new listers, which in turns creates new nodes
-        // fixing this require a little work so meanwhile
-        // this correctly resets the cache's state
-        // TODO: do we still need to call this?
-        // this.appState.clearAllSelections();
     }
 
     showExplorerTab = () => {
@@ -412,7 +404,22 @@ class App extends React.Component<WithNamespaces, IState> {
                 onKeyDown={this.onShowHistory}
                 group={t('SHORTCUT.GROUP.ACTIVE_VIEW')}
             />
+            <Hotkey
+                global={true}
+                combo="mod + p"
+                label="view cache"
+                preventDefault={true}
+                onKeyDown={this.onDebugCache}
+                group={t('SHORTCUT.GROUP.ACTIVE_VIEW')}
+            />
         </Hotkeys>;
+    }
+
+    onDebugCache = () => {
+        let i = 0;
+        for (let cache of this.appState.views[0].caches) {
+            console.log('cache', cache.selected.length, cache.selected);
+        }
     }
 
     backwardHistory = () => {

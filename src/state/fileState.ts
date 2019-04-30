@@ -29,6 +29,8 @@ export class FileState {
     @observable
     status: TStatus;
 
+    cmd: string = '';
+
     // @observable
     // active = false;
 
@@ -354,12 +356,15 @@ export class FileState {
         //     return this.cd(path, path2, false, true);
         // }
         const joint = path2 ? this.api.join(path, path2) : this.api.sanityze(path);
+        this.cmd = 'cwd';
+
         return this.api.cd(joint)
             .then((path) => {
                 this.updatePath(path, skipHistory);
-                return this.list(path).then(() => path);
+                return this.list(path).then(() => { this.cmd = ''; return path });
             })
             .catch((error) => {
+                this.cmd = '';
                 console.log('path not valid ?', joint, 'restoring previous path');
                 this.setStatus('ok');
                 this.navHistory(0);

@@ -1,20 +1,13 @@
 import * as React from "react";
 import * as ReactDOM from "react-dom";
 import DevTools from 'mobx-react-devtools';
-import * as process from 'process';
-import { remote } from 'electron';
 import { ReactApp } from "../components/App";
 import { I18nextProvider } from 'react-i18next';
 import i18next from '../locale/i18n';
 import { SettingsState } from "../state/settingsState";
 import { Provider } from "mobx-react";
 import { DragDropContextProvider } from 'react-dnd';
-import { Client as FTPClient } from 'basic-ftp';
-import * as fs from 'fs';
-import * as stream from 'stream';
 import HTML5Backend from 'react-dnd-html5-backend';
-
-const Transform = stream.Transform;
 
 declare var ENV: any;
 

@@ -15,3 +15,4 @@ export const isWin = platform === 'win32';
 export const isLinux = platform === 'linux';
 export const metaKeyCode = isMac && META_KEY || CTRL_KEY;
 export const defaultFolder = ENV.NODE_ENV === 'production' ? appInstance.getPath('home') : (platform === "win32" ? appInstance.getPath('temp') : '/tmp/react-explorer');
+export const lineEnding = isWin ? '\r\n' : '\n';

@@ -1,8 +1,7 @@
 import * as React from 'react';
 import { IconName, Icon, Classes, HotkeysTarget, Hotkeys, Hotkey } from '@blueprintjs/core';
-import { Column, Table, AutoSizer, Index, TableRowRenderer } from 'react-virtualized';
+import { Column, Table, AutoSizer, Index } from 'react-virtualized';
 import { AppState } from '../state/appState';
-import { FileState } from '../state/fileState';
 import { WithNamespaces, withNamespaces } from 'react-i18next';
 import { inject } from 'mobx-react';
 import i18next from 'i18next';
@@ -101,7 +100,7 @@ export class FileTableClass extends React.Component<IProps, IState> {
         this.viewState = this.injected.viewState;
 
         this.state = {
-            nodes: this.buildNodes(this.cache.files, false),
+            nodes: [],// this.buildNodes(this.cache.files, false),
             selected: 0,
             type: 'local',
             position: -1,
@@ -193,7 +192,12 @@ export class FileTableClass extends React.Component<IProps, IState> {
         this.disposer = reaction(
             () => { return toJS(this.cache.files) },
             (files: File[]) => {
-                this.updateNodes(files);
+                const cache = this.cache;
+                if (cache.cmd === 'cwd' || cache.history.length) {
+                    this.updateNodes(files);
+                } else {
+                    console.log('oops');
+                }
             });
     }
 
@@ -201,8 +205,15 @@ export class FileTableClass extends React.Component<IProps, IState> {
         return !!this.state.nodes.find(node => node.isSelected && node.name === name);
     }
 
+    private getSelectedState(name: string) {
+        const cache = this.cache;
+
+        return !!cache.selected.find(file => file.fullname === name);
+    }
+
     private buildNodes = (files: File[], keepSelection = false): ITableRow[] => {
-        console.log('** building nodes', files.length);
+        console.log('** building nodes', files.length, 'cmd=', this.cache.cmd, this.injected.viewState.getVisibleCacheIndex(), this.cache.selected.length, this.cache.selected);
+        console.log(this.injected.viewState.getVisibleCacheIndex());
 
         return files
             .sort((file1, file2) => {
@@ -216,7 +227,7 @@ export class FileTableClass extends React.Component<IProps, IState> {
             })
             .map((file, i) => {
                 const filetype = file.type;
-                const isSelected = keepSelection && this.isNodeSelected(file.fullname);
+                let isSelected = keepSelection && this.getSelectedState(file.fullname) || false;
 
                 const res: ITableRow = {
                     icon: file.isDir && "folder-close" || (filetype && TYPE_ICONS[filetype] || TYPE_ICONS['any']),
