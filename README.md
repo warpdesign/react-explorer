@@ -7,19 +7,17 @@
 **Note**
 React-Explorer is still being worked on so this is a work in progress.
 
-- Plugin-based: local supported for now, ftp in the works
+- Fully keyboard controlled
 - Dual-view window supporting any numbers of tabs
-- Can be fully keyboard controlled
-- Transfers from/to any plugin
 - Fully localized (French & English available)
-- Dark Mode with automatic detection on macOS Mojave
-- Works on Linux, Mac, Windows
+- Dark Mode with automatic detection (macOS Mojave)
+- Open a terminal from any folder
+- Plugin-based: local supported for now, ftp in the works
+- Transfers from/to any plugin
 
 ## Requirements
 
-- Windows 7/8/10
-- macOS
-- Linux
+React-Explorer works on any modern Windows, Mac and Linux computer.
 
 ## Building for local development
 

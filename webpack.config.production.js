@@ -95,6 +95,10 @@ module.exports = [
                     {
                         from: 'img/icon-512x512.png',
                         to: 'icon.png'
+                    },
+                    {
+                        from: 'img/icon-512x512.ico',
+                        to: 'icon.ico'
                     }
                 ])
             ]

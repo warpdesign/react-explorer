@@ -11,7 +11,7 @@
       "icon": "icon.png"
     },
     "win": {
-      "icon": "icon.png"
+      "icon": "icon.ico"
     },
     "linux": {
       "synopsis": "React-based FileManager",
