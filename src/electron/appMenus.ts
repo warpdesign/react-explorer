@@ -236,7 +236,7 @@ export class AppMenu {
                 });
 
             // add about menuItem
-            (template[4].submenu as MenuItemConstructorOptions[]).unshift({
+            (template[4].submenu as MenuItemConstructorOptions[]).push({
                 label: menuStrings['ABOUT'],
                 click: this.showAboutDialog
             });
