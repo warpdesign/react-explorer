@@ -4,7 +4,7 @@ import { observable, action } from "mobx";
 export class ViewState {
     viewId: number;
 
-    caches: FileState[] = observable<FileState>([]);
+    caches = observable<FileState>([]);
 
     @observable
     isActive: boolean = false;
@@ -94,8 +94,21 @@ export class ViewState {
     }
 
     @action
+    closeOthers(keepIndex: number) {
+        console.log('close others', keepIndex);
+        if (this.caches.length > 1) {
+            const keepCache = this.getVisibleCache();
+            const newArray = this.caches.filter((cache, index) => index === keepIndex);
+            this.caches.replace(newArray);
+
+            if (keepCache.isVisible) {
+                this.activateNextTab(keepIndex);
+            }
+        }
+    }
+
+    @action
     closeTab(index: number) {
-        console.log('closeTab', this.viewId, index);
         // keep at least one tab for now ?
         if (this.caches.length < 2) {
             return;

@@ -15,9 +15,14 @@ export interface IAcceleratorsProps {
 
 }
 
+interface Action {
+    combo: string,
+    callback: (combo?: string, data?: any) => any;
+}
+
 export interface IAcceleratorProps {
     combo: string;
-    onClick: (combo: string) => any;
+    onClick: (combo?: string, data?: any) => any;
 }
 
 export interface IMenuAcceleratorComponent extends React.Component {
@@ -58,26 +63,21 @@ export function WithMenuAccelerators<T extends IConstructor<IMenuAcceleratorComp
         console.warn('Classes decorated with the @MenuAccelerators must define the renderMenuAccemeratprs method.');
     }
 
-    interface Action {
-        combo: string,
-        callback: (combo?: string) => any;
-    }
-
     return class MenuAcceleratorsClass extends WrappedComponent {
         public static displayName = `MenuAccelerators(${getDisplayName(WrappedComponent)})`;
 
         actions = new Array<Action>();
 
-        getCallback(combo: string): (combo?: string) => any {
+        getCallback(combo: string): (combo?: string, data?: any) => any {
             const action = this.actions.find((action) => action.combo === combo);
             return action && action.callback || null;
         }
 
-        onAccelerator = (e: MenuAcceleratorEvent, data: { combo: string }) => {
+        onAccelerator = (e: MenuAcceleratorEvent, data: { combo: string, data: any }) => {
             // check if combo is valid
             const callback = this.getCallback(data.combo);
             if (typeof callback === 'function') {
-                callback(data.combo);
+                callback(data.combo, data.data);
             }
         }
 

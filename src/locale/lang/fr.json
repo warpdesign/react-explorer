@@ -21,7 +21,9 @@
         },
         "TABS": {
             "CLOSE": "Fermer l'onglet",
-            "NEW": "Nouvel onglet"
+            "NEW": "Nouvel onglet",
+            "REFRESH": "Actualiser",
+            "CLOSE_OTHERS": "Fermer les autres onglets"
         },
         "DIALOG": {
             "QUIT": {

@@ -436,8 +436,19 @@ class App extends React.Component<WithNamespaces, IState> {
         }
     }
 
-    onOpenTerminal = () => {
-        const cache = this.getActiveFileCache();
+    onOpenTerminal = (combo: string, data: any) => {
+        let cache: FileState;
+
+        if (typeof data.viewId === 'undefined') {
+            cache = this.getActiveFileCache();
+        } else {
+            const view = this.appState.views[data.viewId];
+            cache = view.caches[data.tabIndex];
+            if (cache.status !== 'ok') {
+                cache = null;
+            }
+        }
+
         const isOverlayOpen = document.body.classList.contains('bp3-overlay-open');
 
         if (cache && !isOverlayOpen && !isEditable(document.activeElement)) {

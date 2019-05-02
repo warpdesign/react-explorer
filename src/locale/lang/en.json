@@ -21,7 +21,9 @@
         },
         "TABS": {
             "CLOSE": "Close tab",
-            "NEW": "New tab"
+            "NEW": "New tab",
+            "REFRESH": "Refresh",
+            "CLOSE_OTHERS": "Close other tabs"
         },
         "DIALOG": {
             "QUIT": {
