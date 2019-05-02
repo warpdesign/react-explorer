@@ -28,6 +28,7 @@ export interface Fs {
     canread(str: string): boolean;
     serverpart(str: string): string;
     credentials(str: string): ICredentials;
+    displaypath(str: string): { fullPath: string, shortPath: string };
     name: string;
     description: string;
     icon: string;

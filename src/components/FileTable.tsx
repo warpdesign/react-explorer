@@ -245,14 +245,18 @@ export class FileTableClass extends React.Component<IProps, IState> {
     _noRowsRenderer = () => {
         const { t } = this.injected;
 
-        return (<div className="empty"><Icon icon="tick-circle" iconSize={40} />{t('COMMON.EMPTY_FOLDER')}</div>);
+        // we don't want to show empty + loader at the same time
+        if (this.cache.status !== 'busy') {
+            return (<div className="empty"><Icon icon="tick-circle" iconSize={40} />{t('COMMON.EMPTY_FOLDER')}</div>);
+        } else {
+            return (<div />);
+        }
     }
 
     private updateNodes(files: File[]) {
-        // we want to keep selected files when updating the cache
-        const keepSelection = files.length && this.state.path === files[0].dir;
+        // reselect previously selected file in case of reload/change tab
+        const keepSelection = !!this.cache.selected.length;
         console.log('got files', files.length);
-        // console.time('building nodes');
         const nodes = this.buildNodes(files, keepSelection);
         this.updateState(nodes, keepSelection);
     }

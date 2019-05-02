@@ -34,7 +34,7 @@ This will build a development package.
 In order to run in locally without having to create a native executable, you can then type:
 
 ```shell
-npx electron ./dist/main.js
+npx electron ./build/main.js
 ```
 
 ## Building binary packages

@@ -1,17 +1,17 @@
 import { FsApi, File, ICredentials, Fs, Parent, filetype } from '../Fs';
 import * as fs from 'fs';
 import * as path from 'path';
-import * as process from 'process';
 import * as mkdir from 'mkdirp';
 import * as del from 'del';
 import { size } from '../../utils/size';
 import { throttle } from '../../utils/throttle';
 const { Transform } = require('stream');
-import { isWin } from '../../utils/platform';
-import { LocalWatch, WatcherCB } from './LocalWatch';
+import { isWin, lineEnding } from '../../utils/platform';
+import { LocalWatch } from './LocalWatch';
 
 const invalidDirChars = isWin && /[\*:<>\?|"]+/ig || /^[\.]+[\/]+(.)*$/ig;
 const invalidFileChars = isWin && /[\*:<>\?|"]+/ig || /\//;
+const SEP = path.sep;
 
 // Since nodeJS will translate unix like paths to windows path, when running under Windows
 // we accept Windows style paths (eg. C:\foo...) and unix paths (eg. /foo or ./foo)
@@ -336,7 +336,7 @@ class LocalApi implements FsApi {
     }
 
     sanityze(path: string) {
-        return path;
+        return isWin ? (path.match(/\\$/) ? path : path + '\\') : path;
     }
 
     on(event: string, cb: (data: any) => void): void {
@@ -361,8 +361,6 @@ export const FsLocal: Fs = {
         return !!str.match(localStart);
     },
     serverpart(str: string): string {
-        // const server = str.replace(/^ftp\:\/\//, '');
-        // return server.split('/')[0];
         return 'local';
     },
     credentials(str: string): ICredentials {
@@ -370,6 +368,13 @@ export const FsLocal: Fs = {
             user: '',
             password: '',
             port: 0
+        };
+    },
+    displaypath(str: string) {
+        const split = str.split(SEP);
+        return {
+            fullPath: str,
+            shortPath: split.slice(-1)[0] || str
         };
     },
     API: LocalApi

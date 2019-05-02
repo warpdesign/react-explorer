@@ -382,23 +382,11 @@ export class ToolbarClass extends React.Component<IProps, PathInputState> {
                 <p>{t('TOOLTIP.PATH.TITLE2')}</p>
                 <ul>
                     <li>{localExample}/</li>
-                    <li>{t('TOOLTIP.PATH.FTP1')}</li>
-                    <li>{t('TOOLTIP.PATH.FTP2')}</li>
+                    {/* <li>{t('TOOLTIP.PATH.FTP1')}</li>
+                    <li>{t('TOOLTIP.PATH.FTP2')}</li> */}
                 </ul>
             </div>
         )
-    }
-
-    testStat = () => {
-        const { appState, viewState } = this.injected;
-        const fileCache = viewState.getVisibleCache();
-
-        if (appState.getActiveCache() === fileCache && fileCache.selected.length) {
-            const file = fileCache.selected[0];
-            const path = fileCache.getAPI().join(file.dir, file.fullname);
-            debugger;
-            fileCache.exists(path);
-        }
     }
 
     public render() {
@@ -418,7 +406,6 @@ export class ToolbarClass extends React.Component<IProps, PathInputState> {
         return (
             <ControlGroup>
                 <ButtonGroup style={{ minWidth: 120 }}>
-                    {/* <Button text="stat" onClick={this.testStat}></Button> */}
                     <Button data-cy-backward disabled={!canGoBackward} onClick={this.onBackward} rightIcon="chevron-left"></Button>
                     <Button data-cy-forward disabled={!canGoForward} onClick={this.onForward} rightIcon="chevron-right"></Button>
                     <Popover content={<FileMenu selectedItems={selected} onFileAction={this.onFileAction} />}>

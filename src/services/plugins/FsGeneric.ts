@@ -151,5 +151,13 @@ export const FsGeneric: Fs = {
             port: 0
         };
     },
+    displaypath(str: string) {
+        return {
+            // full path, display in the tab's tooltip
+            fullPath: str,
+            // short path, as displayed in the tab
+            shortPath: str
+        };
+    },
     API: GenericApi
 }

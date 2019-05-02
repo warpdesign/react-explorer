@@ -54,8 +54,11 @@ class TabListClass extends React.Component<InjectedProps> {
                 {
                     caches.map((cache, index) => {
                         const closeIcon = cache.isVisible && caches.length > 1 && <Icon iconSize={12} htmlTitle={t('TABS.CLOSE')} className="closetab" intent="warning" onClick={this.closeTab.bind(this, index)} icon="cross"></Icon>;
+                        const path = cache.path;
+                        const tabInfo = cache.getFS().displaypath(path);
+                        console.log('**tab', tabInfo);
                         return (
-                            <Button key={"" + viewId + index} onClick={this.selectTab.bind(this, index)} title={cache.path} intent={cache.isVisible ? "primary" : "none"} rightIcon={closeIcon}>{cache.path.split('/').slice(-1)[0]}</Button>
+                            <Button key={"" + viewId + index} onClick={this.selectTab.bind(this, index)} title={tabInfo.fullPath} intent={cache.isVisible ? "primary" : "none"} rightIcon={closeIcon}>{tabInfo.shortPath}</Button>
                         )
                     })
                 }

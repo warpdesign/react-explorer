@@ -773,5 +773,13 @@ export const FsFtp: Fs = {
             user: info.username
         };
     },
+    displaypath(str: string) {
+        const info = new URL(str);
+        const split = info.pathname.split('/');
+        return {
+            fullPath: str,
+            shortPath: split.slice(-1)[0] || '/'
+        };
+    },
     API: FtpAPI
 }
