@@ -212,8 +212,8 @@ export class FileTableClass extends React.Component<IProps, IState> {
     }
 
     private buildNodes = (files: File[], keepSelection = false): ITableRow[] => {
-        console.log('** building nodes', files.length, 'cmd=', this.cache.cmd, this.injected.viewState.getVisibleCacheIndex(), this.cache.selected.length, this.cache.selected);
-        console.log(this.injected.viewState.getVisibleCacheIndex());
+        // console.log('** building nodes', files.length, 'cmd=', this.cache.cmd, this.injected.viewState.getVisibleCacheIndex(), this.cache.selected.length, this.cache.selected);
+        // console.log(this.injected.viewState.getVisibleCacheIndex());
 
         return files
             .sort((file1, file2) => {
