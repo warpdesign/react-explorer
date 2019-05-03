@@ -350,6 +350,12 @@ class App extends React.Component<WithNamespaces, IState> {
                 label={t('SHORTCUT.ACTIVE_VIEW.FORWARD_HISTORY')}
                 onKeyDown={this.forwardHistory}
             />
+            <Hotkey
+                global={true}
+                combo="alt + mod + i"
+                label={t('SHORTCUT.OPEN_DEVTOOLS')}
+                onKeyDown={this.openDevTools}
+            />
             {/* <Hotkey
                 global={true}
                 combo="mod + k"
@@ -434,6 +440,10 @@ class App extends React.Component<WithNamespaces, IState> {
         if (cache) {
             cache.navHistory(1);
         }
+    }
+
+    openDevTools = () => {
+        ipcRenderer.send('openDevTools');
     }
 
     onOpenTerminal = (combo: string, data: any) => {

@@ -18,6 +18,7 @@ const WINDOW_DEFAULT_SETTINGS = {
 
 const ElectronApp = {
     mainWindow: <Electron.BrowserWindow>null,
+    devWindow: <Electron.BrowserWindow>null,
     appMenu: <AppMenu>null,
     cleanupCounter: 0,
     forceExit: false,
@@ -57,7 +58,7 @@ const ElectronApp = {
             width: WINDOW_DEFAULT_SETTINGS.width,
             height: WINDOW_DEFAULT_SETTINGS.height,
             webPreferences: {
-                enableBlinkFeatures: 'OverlayScrollbars'
+                enableBlinkFeatures: 'OverlayScrollbars,OverlayScrollbarsFlashAfterScrollUpdate,OverlayScrollbarsFlashWhenMouseEnter'
             }
         });
 
@@ -131,6 +132,11 @@ const ElectronApp = {
             this.cleanupAndExit();
         });
 
+        ipcMain.on('openDevTools', () => {
+            console.log('should open dev tools');
+            this.openDevTools(true);
+        });
+
         ipcMain.on('openTerminal', (event: Event, cmd: string) => {
             console.log('running', cmd);
             const exec = require("child_process").exec;
@@ -181,14 +187,20 @@ const ElectronApp = {
     /**
      * Open the dev tools window
      */
-    openDevTools() {
-        // devtools
+    openDevTools(force = false) {
         // spectron problem if devtools is opened, see https://github.com/electron/spectron/issues/254
-        if (!ENV_E2E && !isPackage) {
-            console.log('Open Dev Tools');
-            const devtools = new BrowserWindow();
-            this.mainWindow.webContents.setDevToolsWebContents(devtools.webContents);
-            this.mainWindow.webContents.openDevTools({ mode: 'detach' });
+        if ((!ENV_E2E && !isPackage) || force) {
+            if (!this.devWindow || this.devWindow.isDestroyed()) {
+                this.devWindow = new BrowserWindow();
+                this.mainWindow.webContents.setDevToolsWebContents(this.devWindow.webContents);
+                this.mainWindow.webContents.openDevTools({ mode: 'detach' });
+            } else {
+                if (this.devWindow.isMinimized()) {
+                    this.devWindow.restore();
+                } else {
+                    this.devWindow.focus();
+                }
+            }
         }
     },
     /**

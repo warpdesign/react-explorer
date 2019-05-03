@@ -71,6 +71,7 @@
             }
         },
         "SHORTCUT": {
+            "OPEN_DEVTOOLS": "Outils de développement",
             "MAIN": {
                 "QUIT": "Quitter React-Explorer",
                 "RELOAD_VIEW": "Recharger la vue",
