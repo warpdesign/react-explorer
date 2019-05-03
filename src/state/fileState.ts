@@ -251,7 +251,9 @@ export class FileState {
     }
 
     reload() {
-        this.navHistory(0, true);
+        if (this.status === 'ok') {
+            this.navHistory(0, true);
+        }
     }
 
     getLocalizedError(error: any) {

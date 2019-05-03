@@ -293,7 +293,7 @@ export class AppState {
     refreshActiveView() {
         const cache = this.getActiveCache();
         // only refresh view that's ready
-        if (cache && cache.status === 'ok') {
+        if (cache) {
             cache.reload();
         }
     }

@@ -73,11 +73,19 @@ class PrefsDialogClass extends React.Component<IPrefsProps, IState>{
                     settingsState.setDefaultFolder(defaultFolder);
                     settingsState.saveSettings();
                 }
+            } else if (!this.state.isFolderValid) {
+                // remove error
+                this.setState({ isFolderValid });
             }
         }, DEBOUNCE_DELAY);
 
     private cancelClose = () => {
         console.log('handleClose');
+        const { defaultFolder } = this.state;
+        const { settingsState } = this.injected;
+        if (defaultFolder !== settingsState.defaultFolder) {
+            this.setState({ defaultFolder: settingsState.defaultFolder, isFolderValid: true });
+        }
         this.props.onClose();
     }
 
@@ -86,6 +94,15 @@ class PrefsDialogClass extends React.Component<IPrefsProps, IState>{
         // set error since path will be checked async
         this.setState({ defaultFolder: path });
         this.checkPath();
+    }
+
+    onFolderBlur = () => {
+        const { isFolderValid } = this.state;
+        const { settingsState } = this.injected;
+
+        if (!isFolderValid) {
+            this.setState({ defaultFolder: settingsState.defaultFolder, isFolderValid: true });
+        }
     }
 
     renderLanguageItem: ItemRenderer<Language> = (lang, { handleClick, modifiers }) => {
@@ -245,6 +262,7 @@ class PrefsDialogClass extends React.Component<IPrefsProps, IState>{
                     >
                         <InputGroup
                             onChange={this.onFolderChange}
+                            onBlur={this.onFolderBlur}
                             value={defaultFolder}
                             leftIcon="folder-close"
                             placeholder={t('DIALOG.PREFS.DEFAULT_FOLDER')}
