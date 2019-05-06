@@ -671,6 +671,10 @@ class FtpAPI implements FsApi {
         }
     }
 
+    getParent(dir: string): File {
+        return { ...Parent, dir }
+    }
+
     off() {
         console.log('*** free');
         // free client

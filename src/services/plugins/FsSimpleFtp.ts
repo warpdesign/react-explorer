@@ -370,13 +370,14 @@ class SimpleFtpApi implements FsApi {
                     return file;
                 });
 
-                if (appendParent && !this.isRoot(newpath)) {
-                    const parent = { ...Parent, dir: path };
+                resolve(files);
+                // if (appendParent && !this.isRoot(newpath)) {
+                //     const parent = { ...Parent, dir: path };
 
-                    resolve([parent].concat(files));
-                } else {
-                    resolve(files);
-                }
+                //     resolve([parent].concat(files));
+                // } else {
+                //     resolve(files);
+                // }
             } catch (err) {
                 reject(err);
             }
@@ -390,6 +391,10 @@ class SimpleFtpApi implements FsApi {
         } catch (err) {
             return path === '/';
         }
+    }
+
+    getParent(dir: string): File {
+        return { ...Parent, dir }
     }
 
     async getStream(path: string, file: string, transferId = -1): Promise<Readable> {

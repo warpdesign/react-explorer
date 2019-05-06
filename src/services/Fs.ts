@@ -110,6 +110,7 @@ export interface FsApi {
     isConnected(): boolean;
     isDirectoryNameValid(dirName: string): boolean;
     isRoot(path: string): boolean;
+    getParent(dir: string): File;
     on(event: string, cb: (data: any) => void): void;
     off(): void;
     loginOptions: ICredentials;

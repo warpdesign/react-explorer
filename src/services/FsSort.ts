@@ -8,6 +8,19 @@ export type ISORT_METHODS = {
     [key in TSORT_METHOD_NAME]: TSORT_METHOD;
 };
 
+export function getSortMethod(method: TSORT_METHOD_NAME, order: TSORT_ORDER): TSORT_METHOD {
+    if (order === 'asc') {
+        return SortMethods[method];
+    } else {
+        return (function (sortMethod) {
+            return function (file1: File, file2: File) {
+                const res = sortMethod(file1, file2);
+                return res !== 0 ? -1 * res : 0;
+            }
+        })(SortMethods[method])
+    }
+}
+
 export const SortMethods: ISORT_METHODS = {
     name: sortName,
     ctime: (file1: File, file2: File) => sortTime(file1.mDate, file2.mDate),
@@ -25,11 +38,5 @@ function sortTime(t1: Date, t2: Date) {
 }
 
 function sortName(file1: File, file2: File) {
-    if ((file2.isDir && !file1.isDir)) {
-        return 1;
-    } else if (!file1.name.length || (file1.isDir && !file2.isDir)) {
-        return -1;
-    } else {
-        return file1.fullname.localeCompare(file2.fullname);
-    }
+    return file1.fullname.localeCompare(file2.fullname);
 }

@@ -6,7 +6,7 @@ import * as del from 'del';
 import { size } from '../../utils/size';
 import { throttle } from '../../utils/throttle';
 const { Transform } = require('stream');
-import { isWin, lineEnding } from '../../utils/platform';
+import { isWin } from '../../utils/platform';
 import { LocalWatch } from './LocalWatch';
 
 const invalidDirChars = isWin && /[\*:<>\?|"]+/ig || /^[\.]+[\/]+(.)*$/ig;
@@ -271,20 +271,26 @@ class LocalApi implements FsApi {
 
                         this.onList(dirPath);
 
+                        resolve(files);
                         // add parent
-                        if (appendParent && !this.isRoot(dir)) {
-                            const parent = { ...Parent, dir: dirPath };
+                        // if (appendParent && !this.isRoot(dir)) {
+                        //     debugger;
+                        //     const parent = { ...Parent, dir: dirPath };
 
-                            resolve([parent].concat(files));
-                        } else {
-                            resolve(files);
-                        }
+                        //     resolve([parent].concat(files));
+                        // } else {
+                        //     resolve(files);
+                        // }
                     }
                 });
             });
         } else {
             return Promise.reject('Path does not exist');
         }
+    }
+
+    getParent(dir: string): File {
+        return { ...Parent, dir: path.resolve(dir) }
     }
 
     isRoot(path: string): boolean {

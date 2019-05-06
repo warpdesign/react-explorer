@@ -18,7 +18,7 @@ import { RowRenderer } from './RowRenderer';
 import { SettingsState } from '../state/settingsState';
 import { ViewState } from '../state/viewState';
 import { debounce } from '../utils/debounce';
-import { SortMethods } from '../services/FsSort';
+import { SortMethods, TSORT_METHOD_NAME, TSORT_ORDER, getSortMethod } from '../services/FsSort';
 
 require('react-virtualized/styles.css');
 require('../css/filetable.css');
@@ -73,6 +73,9 @@ interface IState {
     position: number;
     // last path that was used
     path: string;
+
+    // sortMethod: TSORT_METHOD_NAME;
+    // sortOrder: TSORT_ORDER;
 };
 
 interface IProps extends WithNamespaces {
@@ -227,29 +230,46 @@ export class FileTableClass extends React.Component<IProps, IState> {
         return !!cache.selected.find(file => file.fullname === name);
     }
 
-    private buildNodes = (files: File[], keepSelection = false): ITableRow[] => {
+    buildNodeFromFile(file: File, keepSelection: boolean) {
+        const filetype = file.type;
+        let isSelected = keepSelection && this.getSelectedState(file.fullname) || false;
+
+        const res: ITableRow = {
+            icon: file.isDir && "folder-close" || (filetype && TYPE_ICONS[filetype] || TYPE_ICONS['any']),
+            name: file.fullname,
+            nodeData: file,
+            className: file.fullname !== '..' && file.fullname.startsWith('.') && 'isHidden' || '',
+            isSelected: isSelected,
+            size: !file.isDir && formatBytes(file.length) || '--'
+        };
+
+        return res;
+    }
+
+    private buildNodes = (list: File[], keepSelection = false): ITableRow[] => {
         // console.log('** building nodes', files.length, 'cmd=', this.cache.cmd, this.injected.viewState.getVisibleCacheIndex(), this.cache.selected.length, this.cache.selected);
         // console.log(this.injected.viewState.getVisibleCacheIndex());
+        console.time('buildingNodes');
+        const SortFn = getSortMethod('name', 'asc');
+        const dirs = list.filter(file => file.isDir);
+        const files = list.filter(file => !file.isDir);
 
-        const SortFn = SortMethods['name'];
+        const nodes = dirs.sort(SortFn)
+            .concat(files.sort(SortFn))
+            .map((file, i) => this.buildNodeFromFile(file, keepSelection));
 
-        return files
-            .sort(SortFn)
-            .map((file, i) => {
-                const filetype = file.type;
-                let isSelected = keepSelection && this.getSelectedState(file.fullname) || false;
+        // append parent element
+        const path = this.cache.path;
 
-                const res: ITableRow = {
-                    icon: file.isDir && "folder-close" || (filetype && TYPE_ICONS[filetype] || TYPE_ICONS['any']),
-                    name: file.fullname,
-                    nodeData: file,
-                    className: file.fullname !== '..' && file.fullname.startsWith('.') && 'isHidden' || '',
-                    isSelected: isSelected,
-                    size: !file.isDir && formatBytes(file.length) || '--'
-                };
+        // TODO: when enabling ftp again, there may be something wrong
+        // with the dir of the parent element added here
+        if (!this.cache.isRoot(path)) {
+            const node = this.buildNodeFromFile(this.cache.getParent(path), keepSelection);
+            nodes.unshift(node);
+        }
+        console.timeEnd('buildingNodes');
 
-                return res;
-            });
+        return nodes;
     }
 
     _noRowsRenderer = () => {

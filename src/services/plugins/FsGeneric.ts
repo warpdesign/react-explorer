@@ -1,4 +1,4 @@
-import { FsApi, File, ICredentials, Fs } from '../Fs';
+import { FsApi, File, ICredentials, Fs, Parent } from '../Fs';
 import * as fs from 'fs';
 
 class GenericApi implements FsApi {
@@ -100,6 +100,10 @@ class GenericApi implements FsApi {
         } else {
             Promise.reject('error');
         }
+    }
+
+    getParent(dir: string) {
+        return { ...Parent };
     }
 
     off() {

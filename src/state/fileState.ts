@@ -500,6 +500,10 @@ export class FileState {
         return this.api.join(path, path2);
     }
 
+    getParent(dir: string): File {
+        return this.api.getParent(dir);
+    }
+
     async openFile(appState: AppState, cache: FileState, file: File) {
         try {
             const path = await appState.prepareLocalTransfer(cache, [file]);
