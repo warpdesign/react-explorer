@@ -32,7 +32,7 @@ export const LocalWatch = {
     createCallback(path: string) {
         console.log('LocalWatch.createCallback', path);
         return debounce((eventType: string, filename: string | Buffer) => {
-            console.log('changeCallback');
+            console.log('changeCallback', eventType, filename);
             const callbacks = this.getCallbacks(path);
             for (let cb of callbacks) {
                 cb(filename);
