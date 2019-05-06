@@ -140,6 +140,10 @@
             "EMPTY_FOLDER": "Dossier vide.",
             "PATH_PLACEHOLDER": "Entrer le chemin à visiter"
         },
+        "FILETABLE": {
+            "COL_NAME": "Nom",
+            "COL_SIZE": "Taille"
+        },
         "FILEMENU": {
             "PASTE": "Coller {{count}} élément",
             "PASTE_plural": "Coller {{count}} éléments",

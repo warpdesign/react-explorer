@@ -4,8 +4,6 @@ import { FsSimpleFtp } from './plugins/FsSimpleFtp';
 import { remote } from 'electron';
 import { Readable } from 'stream';
 
-declare var ENV: any;
-
 export interface File {
     dir: string;
     name: string;
@@ -13,6 +11,7 @@ export interface File {
     extension: string;
     cDate: Date;
     mDate: Date;
+    bDate: Date;
     length: number;
     mode: number;
     isDir: boolean;
@@ -41,6 +40,7 @@ export const Parent: File = {
     extension: '',
     cDate: new Date(),
     mDate: new Date(),
+    bDate: new Date(),
     length: 0,
     mode: 1,
     isDir: true,

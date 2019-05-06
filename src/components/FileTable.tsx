@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { IconName, Icon, Classes, HotkeysTarget, Hotkeys, Hotkey } from '@blueprintjs/core';
-import { Column, Table, AutoSizer, Index } from 'react-virtualized';
+import { Column, Table, AutoSizer, Index, HeaderMouseEventHandlerParams } from 'react-virtualized';
 import { AppState } from '../state/appState';
 import { WithNamespaces, withNamespaces } from 'react-i18next';
 import { inject } from 'mobx-react';
@@ -18,6 +18,7 @@ import { RowRenderer } from './RowRenderer';
 import { SettingsState } from '../state/settingsState';
 import { ViewState } from '../state/viewState';
 import { debounce } from '../utils/debounce';
+import { SortMethods } from '../services/FsSort';
 
 require('react-virtualized/styles.css');
 require('../css/filetable.css');
@@ -230,16 +231,10 @@ export class FileTableClass extends React.Component<IProps, IState> {
         // console.log('** building nodes', files.length, 'cmd=', this.cache.cmd, this.injected.viewState.getVisibleCacheIndex(), this.cache.selected.length, this.cache.selected);
         // console.log(this.injected.viewState.getVisibleCacheIndex());
 
+        const SortFn = SortMethods['name'];
+
         return files
-            .sort((file1, file2) => {
-                if ((file2.isDir && !file1.isDir)) {
-                    return 1;
-                } else if (!file1.name.length || (file1.isDir && !file2.isDir)) {
-                    return -1;
-                } else {
-                    return file1.fullname.localeCompare(file2.fullname);
-                }
-            })
+            .sort(SortFn)
             .map((file, i) => {
                 const filetype = file.type;
                 let isSelected = keepSelection && this.getSelectedState(file.fullname) || false;
@@ -292,11 +287,37 @@ export class FileTableClass extends React.Component<IProps, IState> {
         return (<div className="name"><Icon icon={iconName}></Icon><span title={data.cellData} className="file-label">{data.cellData}</span></div>);
     }
 
+    /*
+    {
+        columnData,
+        dataKey,
+        disableSort,
+        label,
+        sortBy,
+        sortDirection
+      }
+    */
+    headerRenderer = (data: any) => {
+        // TOOD: hardcoded for now, should store the column size/list
+        // and use it here instead
+        const hasResize = data.columnData.index < 1;
+        return (<React.Fragment key={data.dataKey}>
+            <div className="ReactVirtualized__Table__headerTruncatedText">
+                {data.label}
+            </div>
+            <div className="sort">^</div>
+            {hasResize && (
+                <Icon className="resizeHandle" icon="drag-handle-vertical"></Icon>
+            )}
+        </React.Fragment>);
+    }
+
     rowClassName = (data: any) => {
         const file = this.state.nodes[data.index];
         const error = file && file.nodeData.mode === -1;
+        const mainClass = data.index === - 1 ? 'headerRow' : 'tableRow';
 
-        return classnames('tableRow', file && file.className, { selected: file && file.isSelected, error: error });
+        return classnames(mainClass, file && file.className, { selected: file && file.isSelected, error: error, headerRow: data.index === -1 });
     }
 
     clearClickTimeout() {
@@ -304,6 +325,13 @@ export class FileTableClass extends React.Component<IProps, IState> {
             clearTimeout(this.clickTimeout);
             this.clickTimeout = 0;
         }
+    }
+
+    /*
+    { columnData: any, dataKey: string, event: Event }
+    */
+    onHeaderClick = ({ columnData, dataKey }: HeaderMouseEventHandlerParams) => {
+        console.log('column click', columnData, dataKey);
     }
 
     onRowClick = (data: any) => {
@@ -669,6 +697,7 @@ export class FileTableClass extends React.Component<IProps, IState> {
     rowGetter = (index: Index) => this.getRow(index.index);
 
     render() {
+        const { t } = this.injected;
         const { position } = this.state;
         const rowCount = this.state.nodes.length;
         const scrollTop = position === -1 && this.cache.scrollTop || undefined;
@@ -678,12 +707,12 @@ export class FileTableClass extends React.Component<IProps, IState> {
             <AutoSizer>
                 {({ width, height }) => (
                     <Table
-                        disableHeader={false}
                         headerClassName="tableHeader"
                         headerHeight={ROW_HEIGHT}
                         height={height}
                         onRowClick={this.onRowClick}
                         onRowDoubleClick={this.onRowDoubleClick}
+                        onHeaderClick={this.onHeaderClick}
                         noRowsRenderer={this._noRowsRenderer}
                         rowClassName={this.rowClassName}
                         rowHeight={ROW_HEIGHT}
@@ -696,18 +725,21 @@ export class FileTableClass extends React.Component<IProps, IState> {
                         width={width}>
                         <Column
                             dataKey="name"
-                            label="Name"
+                            label={t('FILETABLE.COL_NAME')}
                             cellRenderer={this.nameRenderer}
+                            headerRenderer={this.headerRenderer}
                             width={NAME_COLUMN_WIDTH}
                             flexGrow={1}
+                            columnData={{ 'index': 0 }}
                         />
                         <Column
                             className="size bp3-text-small"
                             width={SIZE_COLUMN_WITDH}
-                            disableSort
-                            label="Size"
+                            label={t('FILETABLE.COL_SIZE')}
+                            headerRenderer={this.headerRenderer}
                             dataKey="size"
                             flexShrink={1}
+                            columnData={{ 'index': 1 }}
                         />
                     </Table>
                 )

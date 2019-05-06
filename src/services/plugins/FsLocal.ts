@@ -184,6 +184,7 @@ class LocalApi implements FsApi {
                     extension: format.ext.toLowerCase(),
                     cDate: stats.ctime,
                     mDate: stats.mtime,
+                    bDate: stats.birthtime,
                     length: stats.size,
                     mode: stats.mode,
                     isDir: stats.isDirectory(),
@@ -240,6 +241,7 @@ class LocalApi implements FsApi {
                                 stats = {
                                     ctime: new Date(),
                                     mtime: new Date(),
+                                    birthtime: new Date(),
                                     size: 0,
                                     isDirectory: () => true,
                                     mode: -1,
@@ -255,6 +257,7 @@ class LocalApi implements FsApi {
                                 extension: format.ext.toLowerCase(),
                                 cDate: stats.ctime,
                                 mDate: stats.mtime,
+                                bDate: stats.birthtime,
                                 length: stats.size,
                                 mode: stats.mode,
                                 isDir: stats.isDirectory(),

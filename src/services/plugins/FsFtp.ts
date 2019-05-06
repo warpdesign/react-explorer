@@ -223,6 +223,7 @@ class Client {
                     const files: File[] = list.filter((ftpFile) => !ftpFile.name.match(/^[\.]{1,2}$/)).map((ftpFile) => {
                         const format = nodePath.parse(ftpFile.name);
                         const ext = format.ext.toLowerCase();
+                        const mDate = new Date(ftpFile.date);
 
                         const file: File = {
                             dir: path,
@@ -230,8 +231,9 @@ class Client {
                             fullname: ftpFile.name,
                             isDir: ftpFile.type === 'd',
                             length: parseInt(ftpFile.size, 10),
-                            cDate: new Date(ftpFile.date),
-                            mDate: new Date(ftpFile.date),
+                            cDate: mDate,
+                            mDate: mDate,
+                            bDate: mDate,
                             extension: '',
                             mode: 0,
                             readonly: false,

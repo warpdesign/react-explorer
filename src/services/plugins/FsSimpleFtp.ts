@@ -350,6 +350,7 @@ class SimpleFtpApi implements FsApi {
                 const files = ftpFiles.filter((ftpFile) => !ftpFile.name.match(/^[\.]{1,2}$/)).map((ftpFile) => {
                     const format = nodePath.parse(ftpFile.name);
                     const ext = format.ext.toLowerCase();
+                    const mDate = new Date(ftpFile.date);
 
                     const file: File = {
                         dir: path,
@@ -357,8 +358,9 @@ class SimpleFtpApi implements FsApi {
                         fullname: ftpFile.name,
                         isDir: ftpFile.isDirectory,
                         length: ftpFile.size,
-                        cDate: new Date(ftpFile.date),
-                        mDate: new Date(ftpFile.date),
+                        cDate: mDate,
+                        mDate: mDate,
+                        bDate: mDate,
                         extension: '',
                         mode: 0,
                         readonly: false,

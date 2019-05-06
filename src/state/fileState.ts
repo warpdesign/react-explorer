@@ -8,7 +8,9 @@ import { AppState } from "./appState";
 
 const isWin = process.platform === "win32";
 
-type TStatus = 'blank' | 'busy' | 'ok' | 'login' | 'offline';
+export type TStatus = 'blank' | 'busy' | 'ok' | 'login' | 'offline';
+export type TSort = 'name' | 'cdate' | 'bdate';
+export type TSortDir = 'asc' | 'desc';
 
 export class FileState {
     /* observable properties start here */
@@ -27,6 +29,12 @@ export class FileState {
 
     // the last cursor position
     position = -1;
+
+    @observable
+    sortBy: TSort = 'name';
+
+    @observable
+    sortDirection: TSortDir = 'asc';
 
     @observable
     server: string = '';
