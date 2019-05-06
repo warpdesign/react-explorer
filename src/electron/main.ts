@@ -3,6 +3,7 @@ import * as process from 'process';
 import { watch } from 'fs';
 import { AppMenu, LocaleString } from './appMenus';
 import { isPackage } from '../utils/platform';
+import * as windowStateKeeper from 'electron-window-state';
 
 declare var __dirname: string
 declare var ENV: any;
@@ -15,6 +16,7 @@ const WINDOW_DEFAULT_SETTINGS = {
     width: 800,
     height: 600
 };
+const WIN_STATE_TPL = 'win.%s.state.json';
 
 const ElectronApp = {
     mainWindow: <Electron.BrowserWindow>null,
@@ -53,14 +55,25 @@ const ElectronApp = {
      */
     createMainWindow() {
         console.log('Create Main Window');
+
+        const winState = windowStateKeeper({
+            defaultWidth: WINDOW_DEFAULT_SETTINGS.width,
+            defaultHeight: WINDOW_DEFAULT_SETTINGS.height,
+            file: WIN_STATE_TPL.replace('%s', "0")
+        });
+
         this.mainWindow = new BrowserWindow({
             minWidth: WINDOW_DEFAULT_SETTINGS.minWidth,
-            width: WINDOW_DEFAULT_SETTINGS.width,
-            height: WINDOW_DEFAULT_SETTINGS.height,
+            width: winState.width,
+            height: winState.height,
+            x: winState.x,
+            y: winState.y,
             webPreferences: {
                 enableBlinkFeatures: 'OverlayScrollbars,OverlayScrollbarsFlashAfterScrollUpdate,OverlayScrollbarsFlashWhenMouseEnter'
             }
         });
+
+        winState.manage(this.mainWindow);
 
         this.mainWindow.loadURL(HTML_PATH);
 
@@ -191,7 +204,20 @@ const ElectronApp = {
         // spectron problem if devtools is opened, see https://github.com/electron/spectron/issues/254
         if ((!ENV_E2E && !isPackage) || force) {
             if (!this.devWindow || this.devWindow.isDestroyed()) {
-                this.devWindow = new BrowserWindow();
+                const winState = windowStateKeeper({
+                    defaultWidth: WINDOW_DEFAULT_SETTINGS.width,
+                    defaultHeight: WINDOW_DEFAULT_SETTINGS.height,
+                    file: WIN_STATE_TPL.replace('%s', "devtools")
+                });
+
+                this.devWindow = new BrowserWindow({
+                    width: winState.width,
+                    height: winState.height,
+                    x: winState.x,
+                    y: winState.y,
+                });
+                winState.manage(this.devWindow);
+
                 this.mainWindow.webContents.setDevToolsWebContents(this.devWindow.webContents);
                 this.mainWindow.webContents.openDevTools({ mode: 'detach' });
             } else {
