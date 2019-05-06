@@ -99,3 +99,31 @@ body.bp3-dark .tableRow .bp3-icon{
     color:#f5f8fa;
 }
 
+/* header stuff */
+.ReactVirtualized__Table{
+    font-size:12px;
+}
+
+.ReactVirtualized__Table__headerRow{
+    -webkit-box-shadow: inset 0 0 0 1px rgba(16, 22, 26, 0.2), inset 0 -1px 0 rgba(16, 22, 26, 0.1);
+    box-shadow: inset 0 0 0 1px rgba(16, 22, 26, 0.2), inset 0 -1px 0 rgba(16, 22, 26, 0.1);
+    /* background-color: #f5f8fa; */
+    background-color:rgb(231, 236, 239);
+    /* background-image: -webkit-gradient(linear, left top, left bottom, from(rgba(255, 255, 255, 0.8)), to(rgba(255, 255, 255, 0)));
+    background-image: linear-gradient(to bottom, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0)); */
+    color: #182026;
+    font-weight:normal;
+    text-transform:none;
+}
+
+.ReactVirtualized__Table__headerTruncatedText{
+    vertical-align:bottom;
+}
+
+.tableHeader{
+    border-right: 1px solid #ccc;
+}
+
+.tableHeader:last-child{
+    border:none;
+}

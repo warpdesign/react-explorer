@@ -21,6 +21,13 @@ export class FileState {
 
     readonly selected = observable<File>([]);
 
+    // scroll position of fileCache: we need to restore it on
+    // cache reload
+    scrollTop = -1;
+
+    // the last cursor position
+    position = -1;
+
     @observable
     server: string = '';
 
@@ -163,6 +170,8 @@ export class FileState {
 
         if (!skipHistory && this.status !== 'login') {
             this.addPathToHistory(path);
+            this.scrollTop = 0;
+            this.position = -1;
         }
     }
 
@@ -363,7 +372,10 @@ export class FileState {
         return this.api.cd(joint)
             .then((path) => {
                 this.updatePath(path, skipHistory);
-                return this.list(path).then(() => { this.cmd = ''; return path });
+                return this.list(path).then(() => {
+                    this.cmd = '';
+                    return path
+                });
             })
             .catch((error) => {
                 this.cmd = '';

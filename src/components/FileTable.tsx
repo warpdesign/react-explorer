@@ -17,6 +17,7 @@ import classnames from 'classnames';
 import { RowRenderer } from './RowRenderer';
 import { SettingsState } from '../state/settingsState';
 import { ViewState } from '../state/viewState';
+import { debounce } from '../utils/debounce';
 
 require('react-virtualized/styles.css');
 require('../css/filetable.css');
@@ -24,6 +25,13 @@ require('../css/filetable.css');
 const REGEX_EXTENSION = /\.(?=[^0-9])/;
 
 const CLICK_DELAY = 300;
+const SCROLL_DEBOUNCE = 50;
+const ROW_HEIGHT = 28;
+const SIZE_COLUMN_WITDH = 70;
+// this is just some small enough value: column will grow
+// automatically to make the name visible
+const NAME_COLUMN_WIDTH = 10;
+
 const LABEL_CLASSNAME = 'file-label';
 const TABLE_CLASSNAME = 'ReactVirtualized__Table__Grid';
 
@@ -93,6 +101,7 @@ export class FileTableClass extends React.Component<IProps, IState> {
     private editingFile: File;
     private clickTimeout: any;
     gridElement: HTMLElement;
+    tableRef: React.RefObject<Table> = React.createRef();
 
     constructor(props: IProps) {
         super(props);
@@ -103,7 +112,7 @@ export class FileTableClass extends React.Component<IProps, IState> {
             nodes: [],// this.buildNodes(this.cache.files, false),
             selected: 0,
             type: 'local',
-            position: -1,
+            position: this.cache.position,
             path: this.cache.path
         };
 
@@ -140,6 +149,15 @@ export class FileTableClass extends React.Component<IProps, IState> {
 
     public componentDidMount() {
         document.addEventListener('keydown', this.onDocKeyDown);
+    }
+
+    public componentDidUpdate() {
+        const scrollTop = this.state.position === -1 && this.cache.scrollTop || undefined;
+        if (scrollTop > 0) {
+            this.tableRef.current.scrollToPosition(scrollTop);
+        }
+
+        this.cache.position = this.state.position;
     }
 
     renderMenuAccelerators() {
@@ -193,16 +211,13 @@ export class FileTableClass extends React.Component<IProps, IState> {
             () => { return toJS(this.cache.files) },
             (files: File[]) => {
                 const cache = this.cache;
+                // when cache is being (re)loaded, cache.files is empty:
+                // we don't want to show "empty folder" placeholder in that
+                // that case, only when cache is loaded and there are no files
                 if (cache.cmd === 'cwd' || cache.history.length) {
                     this.updateNodes(files);
-                } else {
-                    console.log('oops');
                 }
             });
-    }
-
-    private isNodeSelected(name: string) {
-        return !!this.state.nodes.find(node => node.isSelected && node.name === name);
     }
 
     private getSelectedState(name: string) {
@@ -235,7 +250,7 @@ export class FileTableClass extends React.Component<IProps, IState> {
                     nodeData: file,
                     className: file.fullname !== '..' && file.fullname.startsWith('.') && 'isHidden' || '',
                     isSelected: isSelected,
-                    size: !file.isDir && formatBytes(file.length) || ''
+                    size: !file.isDir && formatBytes(file.length) || '--'
                 };
 
                 return res;
@@ -262,8 +277,9 @@ export class FileTableClass extends React.Component<IProps, IState> {
     }
 
     private updateState(nodes: ITableRow[], keepSelection = false) {
+        const cache = this.cache;
         const newPath = nodes.length && nodes[0].nodeData.dir || '';
-        this.setState({ nodes, selected: keepSelection ? this.state.selected : 0, position: -1, path: newPath });
+        this.setState({ nodes, selected: keepSelection ? this.state.selected : 0, position: keepSelection ? cache.position : -1, path: newPath });
     }
 
     getRow(index: number): ITableRow {
@@ -597,7 +613,6 @@ export class FileTableClass extends React.Component<IProps, IState> {
     }
 
     moveSelection(step: number, isShiftDown: boolean) {
-        console.log('down');
         const fileCache = this.cache;
         let { position, selected } = this.state;
         let { nodes } = this.state;
@@ -620,8 +635,6 @@ export class FileTableClass extends React.Component<IProps, IState> {
                 nodes.forEach(n => (n.isSelected = false));
                 selected = 1;
             }
-
-            console.log('selecting', position);
 
             nodes[position].isSelected = true;
 
@@ -649,40 +662,48 @@ export class FileTableClass extends React.Component<IProps, IState> {
         return RowRenderer(props);
     }
 
+    onScroll = debounce(({ scrollTop }: any) => {
+        this.cache.scrollTop = scrollTop;
+    }, SCROLL_DEBOUNCE);
+
     rowGetter = (index: Index) => this.getRow(index.index);
 
     render() {
         const { position } = this.state;
         const rowCount = this.state.nodes.length;
+        const scrollTop = position === -1 && this.cache.scrollTop || undefined;
+        console.log('scrollTop', scrollTop, position);
 
         return (<div ref={this.setTableRef} onKeyDown={this.onInputKeyDown} className={`fileListSizerWrapper ${Classes.ELEVATION_0}`}>
             <AutoSizer>
                 {({ width, height }) => (
                     <Table
-                        disableHeader={true}
+                        disableHeader={false}
                         headerClassName="tableHeader"
-                        headerHeight={30}
+                        headerHeight={ROW_HEIGHT}
                         height={height}
                         onRowClick={this.onRowClick}
                         onRowDoubleClick={this.onRowDoubleClick}
                         noRowsRenderer={this._noRowsRenderer}
                         rowClassName={this.rowClassName}
-                        rowHeight={30}
+                        rowHeight={ROW_HEIGHT}
                         rowGetter={this.rowGetter}
                         rowCount={rowCount}
-                        scrollToIndex={position < 0 ? 0 : position}
+                        scrollToIndex={position < 0 ? undefined : position}
+                        onScroll={this.onScroll}
                         rowRenderer={this.rowRenderer}
+                        ref={this.tableRef}
                         width={width}>
                         <Column
                             dataKey="name"
                             label="Name"
                             cellRenderer={this.nameRenderer}
-                            width={10}
+                            width={NAME_COLUMN_WIDTH}
                             flexGrow={1}
                         />
                         <Column
                             className="size bp3-text-small"
-                            width={90}
+                            width={SIZE_COLUMN_WITDH}
                             disableSort
                             label="Size"
                             dataKey="size"
