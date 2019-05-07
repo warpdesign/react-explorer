@@ -100,6 +100,7 @@ export interface FsApi {
     size(source: string, files: string[], transferId?: number): Promise<number>;
     getStream(path: string, file: string, transferId?: number): Promise<Readable>;
     putStream(readStream: Readable, dstPath: string, progress: (bytesRead: number) => void, transferId?: number): Promise<void>;
+    getParentTree(dir: string): Array<{ dir: string, fullname: string }>;
 
     resolve(path: string): string;
     sanityze(path: string): string;

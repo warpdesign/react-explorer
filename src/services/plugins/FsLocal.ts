@@ -344,6 +344,39 @@ class LocalApi implements FsApi {
         });
     }
 
+    getParentTree(dir: string): Array<{ dir: string, fullname: string, name: string }> {
+        // TODO: handle Windows special case
+        const parts = dir.split('/');
+        const max = parts.length - 1;
+        let fullname = '';
+
+        if (dir.length === 1) {
+            return [{
+                dir,
+                fullname: '',
+                name: dir
+            }]
+        } else {
+            const folders = [];
+
+            for (let i = 0; i <= max; ++i) {
+                folders.push({
+                    dir,
+                    fullname,
+                    name: parts[max - i] || SEP
+                });
+
+                if (!i) {
+                    fullname += '..';
+                } else {
+                    fullname += '/..'
+                }
+            }
+
+            return folders;
+        }
+    }
+
     sanityze(path: string) {
         return isWin ? (path.match(/\\$/) ? path : path + '\\') : path;
     }

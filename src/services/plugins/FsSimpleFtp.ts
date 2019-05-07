@@ -420,6 +420,16 @@ class SimpleFtpApi implements FsApi {
         return Promise.resolve();
     }
 
+    getParentTree(dir: string): Array<{ dir: string, fullname: string }> {
+        console.error('TODO: implement me');
+        const numParts = dir.replace(/^\//, '').split('/').length;
+        const folders = [];
+        for (let i = 0; i < numParts; ++i) {
+
+        }
+        return [];
+    }
+
     sanityze(path: string) {
         return path;
     }
