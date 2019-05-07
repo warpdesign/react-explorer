@@ -1,4 +1,4 @@
-import { FsApi, File, ICredentials, Fs, Parent, filetype } from '../Fs';
+import { FsApi, File, ICredentials, Fs, filetype } from '../Fs';
 import * as ftp from 'ftp';
 import * as path from 'path';
 import * as fs from 'fs';
@@ -259,13 +259,14 @@ class Client {
                         isDir: boolean;
                         readonly: boolean;
                         */
-                    if (appendParent && !this.api.isRoot(newpath)) {
-                        const parent = { ...Parent, dir: path };
+                    resolve(files);
+                    // if (appendParent && !this.api.isRoot(newpath)) {
+                    //     const parent = { ...Parent, dir: path };
 
-                        resolve([parent].concat(files));
-                    } else {
-                        resolve(files);
-                    }
+                    //     resolve([parent].concat(files));
+                    // } else {
+                    //     resolve(files);
+                    // }
                 }
             });
         });
@@ -673,10 +674,6 @@ class FtpAPI implements FsApi {
         } catch (err) {
             return path === '/';
         }
-    }
-
-    getParent(dir: string): File {
-        return { ...Parent, dir }
     }
 
     off() {

@@ -103,6 +103,12 @@ class TabListClass extends React.Component<InjectedProps> {
         }
     }
 
+    onFolderContextMenu = (e: React.MouseEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        // TODO: get path entries
+    }
+
     render() {
         const { viewState } = this.injected;
         const { t } = this.props;
@@ -159,7 +165,7 @@ class TabListClass extends React.Component<InjectedProps> {
                         const tabInfo = cache.getFS().displaypath(path);
 
                         return (
-                            <Button key={"" + viewId + index} onContextMenu={() => this.onContextMenu(index)} onClick={this.selectTab.bind(this, index)} title={tabInfo.fullPath} intent={cache.isVisible ? "primary" : "none"} rightIcon={closeIcon}>{tabInfo.shortPath}</Button>
+                            <Button key={"" + viewId + index} onContextMenu={() => this.onContextMenu(index)} onClick={this.selectTab.bind(this, index)} title={tabInfo.fullPath} intent={cache.isVisible ? "primary" : "none"} rightIcon={closeIcon}><Icon onContextMenu={this.onFolderContextMenu} className="folder" icon="folder-close"></Icon>{tabInfo.shortPath}</Button>
                         )
                     })
                 }

@@ -13,7 +13,6 @@ import { WithMenuAccelerators, Accelerators, Accelerator } from "./WithMenuAccel
 import { throttle } from "../utils/throttle";
 import { isWin, isMac } from "../utils/platform";
 import { ViewState } from "../state/viewState";
-import { FileState } from "../state/fileState";
 
 const TOOLTIP_DELAY = 1200;
 const MOVE_EVENT_THROTTLE = 300;
@@ -372,6 +371,12 @@ export class ToolbarClass extends React.Component<IProps, PathInputState> {
         }, TOOLTIP_DELAY);
     }
 
+    onParent = (e: React.MouseEvent) => {
+        const { viewState } = this.injected;
+        const fileCache = viewState.getVisibleCache();
+        fileCache.openParentDirectory();
+    }
+
     private renderTooltip() {
         const { t } = this.props;
         let localExample = isWin ? t('TOOLTIP.PATH.EXAMPLE_WIN') : isMac && t('TOOLTIP.PATH.EXAMPLE_MAC') || t('TOOLTIP.PATH.EXAMPLE_LINUX');
@@ -402,12 +407,14 @@ export class ToolbarClass extends React.Component<IProps, PathInputState> {
         const reloadButton = <Button className="small" onClick={this.onReload} minimal rightIcon="repeat"></Button>;
         const intent = status === -1 ? 'danger' : 'none';
         const count = selected.length;
+        const isRoot = fileCache.isRoot(fileCache.path);
 
         return (
             <ControlGroup>
                 <ButtonGroup style={{ minWidth: 120 }}>
-                    <Button data-cy-backward disabled={!canGoBackward} onClick={this.onBackward} rightIcon="chevron-left"></Button>
-                    <Button data-cy-forward disabled={!canGoForward} onClick={this.onForward} rightIcon="chevron-right"></Button>
+                    <Button title={t('TOOLBAR.BACK')} data-cy-backward disabled={!canGoBackward} onClick={this.onBackward} rightIcon="chevron-left"></Button>
+                    <Button title={t('TOOLBAR.FORWARD')} data-cy-forward disabled={!canGoForward} onClick={this.onForward} rightIcon="chevron-right"></Button>
+                    <Button title={t('TOOLBAR.PARENT')} disabled={isRoot} onClick={this.onParent} rightIcon="arrow-up"></Button>
                     <Popover content={<FileMenu selectedItems={selected} onFileAction={this.onFileAction} />}>
                         <Button rightIcon="caret-down" icon="cog" text="" />
                     </Popover>

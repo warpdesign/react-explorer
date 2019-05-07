@@ -236,7 +236,7 @@ export class FileTableClass extends React.Component<IProps, IState> {
             icon: file.isDir && "folder-close" || (filetype && TYPE_ICONS[filetype] || TYPE_ICONS['any']),
             name: file.fullname,
             nodeData: file,
-            className: file.fullname !== '..' && file.fullname.startsWith('.') && 'isHidden' || '',
+            className: file.fullname.startsWith('.') && 'isHidden' || '',
             isSelected: isSelected,
             size: !file.isDir && formatBytes(file.length) || '--'
         };
@@ -260,10 +260,10 @@ export class FileTableClass extends React.Component<IProps, IState> {
 
         // TODO: when enabling ftp again, there may be something wrong
         // with the dir of the parent element added here
-        if (!this.cache.isRoot(path)) {
-            const node = this.buildNodeFromFile(this.cache.getParent(path), keepSelection);
-            nodes.unshift(node);
-        }
+        // if (!this.cache.isRoot(path)) {
+        //     const node = this.buildNodeFromFile(this.cache.getParent(path), keepSelection);
+        //     nodes.unshift(node);
+        // }
         console.timeEnd('buildingNodes');
 
         return nodes;
@@ -387,7 +387,7 @@ export class FileTableClass extends React.Component<IProps, IState> {
         const element = event.target as HTMLElement;
 
         // do not select parent dir pseudo file
-        if (this.editingElement === element || file.fullname === '..') {
+        if (this.editingElement === element) {
             return;
         }
 
@@ -681,7 +681,7 @@ export class FileTableClass extends React.Component<IProps, IState> {
                     const file = node.nodeData as File;
 
                     if (!fileCache.isRoot(file.dir)) {
-                        this.cache.cd(file.dir, '..');
+                        this.cache.openParentDirectory();
                     }
                 }
                 break;
@@ -696,12 +696,12 @@ export class FileTableClass extends React.Component<IProps, IState> {
         position += step;
 
         // skip parent entry (only if this is not the root folder)
-        if (!position) {
-            const dir = (nodes[0].nodeData as File).dir;
-            if (!fileCache.isRoot(dir)) {
-                position += step;
-            }
-        }
+        // if (!position) {
+        //     const dir = (nodes[0].nodeData as File).dir;
+        //     if (!fileCache.isRoot(dir)) {
+        //         position += step;
+        //     }
+        // }
 
         if (position > -1 && position <= this.state.nodes.length - 1) {
             if (isShiftDown) {

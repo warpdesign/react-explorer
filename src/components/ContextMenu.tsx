@@ -24,7 +24,11 @@ export class ContextMenu extends React.Component<IProps, IState> {
         this.menu = remote.Menu.buildFromTemplate(props.template);
     }
 
-    showMenu() {
+    showMenu(template: MenuItemConstructorOptions[] = null) {
+        if (template) {
+            this.menu = remote.Menu.buildFromTemplate(template);
+        }
+
         const window = remote.getCurrentWindow();
         this.menu.popup({
             window

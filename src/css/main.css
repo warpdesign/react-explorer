@@ -282,6 +282,12 @@ body.bp3-dark .bp3-loader.active{
 
 .tablist button{
     border-bottom-left-radius:0;
+    cursor:default;
+}
+
+.tablist .bp3-button .bp3-icon.folder{
+    margin: 0 10px;
+    opacity:.9;
 }
 
 .tablist button:last-child{

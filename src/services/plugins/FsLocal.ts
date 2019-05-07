@@ -1,4 +1,4 @@
-import { FsApi, File, ICredentials, Fs, Parent, filetype, MakeId } from '../Fs';
+import { FsApi, File, ICredentials, Fs, filetype, MakeId } from '../Fs';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as mkdir from 'mkdirp';
@@ -291,10 +291,6 @@ class LocalApi implements FsApi {
         } else {
             return Promise.reject('Path does not exist');
         }
-    }
-
-    getParent(dir: string): File {
-        return { ...Parent, dir: path.resolve(dir) }
     }
 
     isRoot(path: string): boolean {

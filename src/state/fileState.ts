@@ -515,10 +515,6 @@ export class FileState {
         return this.api.join(path, path2);
     }
 
-    getParent(dir: string): File {
-        return this.api.getParent(dir);
-    }
-
     async openFile(appState: AppState, cache: FileState, file: File) {
         try {
             const path = await appState.prepareLocalTransfer(cache, [file]);
@@ -537,7 +533,7 @@ export class FileState {
         // });
     }
 
-    openDirectory(file: File) {
+    openDirectory(file: { dir: string, fullname: string }) {
         console.log('need to read dir', file.dir, file.fullname);
         return this.cd(file.dir, file.fullname).catch(this.handleError);
     }
@@ -546,6 +542,11 @@ export class FileState {
         if (this.getFS().name === 'local') {
             ipcRenderer.send('openTerminal', path);
         }
+    }
+
+    openParentDirectory() {
+        const parent = { dir: this.path, fullname: '..' };
+        this.openDirectory(parent);
     }
 
     isRoot(path: string): boolean {

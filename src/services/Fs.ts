@@ -40,23 +40,6 @@ export interface Fs {
     icon: string;
 }
 
-export const Parent: File = {
-    dir: '..',
-    fullname: '..',
-    name: '',
-    extension: '',
-    cDate: new Date(),
-    mDate: new Date(),
-    bDate: new Date(),
-    length: 0,
-    mode: 1,
-    isDir: true,
-    readonly: true,
-    type: '',
-    isSym: false,
-    id: null
-};
-
 const Extensions = {
     'exe': /\.(exe|bat|com|msi|mui|cmd)$/,
     'img': /\.(png|jpeg|jpg|gif|pcx|tiff|raw|webp|svg|heif|bmp|ilbm|iff|lbm|ppm|pgw|pbm|pnm|psd)$/,
@@ -125,7 +108,6 @@ export interface FsApi {
     isConnected(): boolean;
     isDirectoryNameValid(dirName: string): boolean;
     isRoot(path: string): boolean;
-    getParent(dir: string): File;
     on(event: string, cb: (data: any) => void): void;
     off(): void;
     loginOptions: ICredentials;

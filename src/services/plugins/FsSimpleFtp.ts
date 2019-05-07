@@ -1,4 +1,4 @@
-import { FsApi, File, ICredentials, Fs, Parent, filetype, MakeId } from '../Fs';
+import { FsApi, File, ICredentials, Fs, filetype } from '../Fs';
 import { Client as FtpClient, FileInfo, FTPResponse } from 'basic-ftp';
 import * as fs from 'fs';
 import { Transform, Readable, Writable } from 'stream';
@@ -395,10 +395,6 @@ class SimpleFtpApi implements FsApi {
         } catch (err) {
             return path === '/';
         }
-    }
-
-    getParent(dir: string): File {
-        return { ...Parent, dir }
     }
 
     async getStream(path: string, file: string, transferId = -1): Promise<Readable> {
