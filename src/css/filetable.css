@@ -104,13 +104,11 @@ body.bp3-dark .tableRow .bp3-icon{
     font-size:12px;
 }
 
-.ReactVirtualized__Table__headerRow{
-    -webkit-box-shadow: inset 0 0 0 1px rgba(16, 22, 26, 0.2), inset 0 -1px 0 rgba(16, 22, 26, 0.1);
-    box-shadow: inset 0 0 0 1px rgba(16, 22, 26, 0.2), inset 0 -1px 0 rgba(16, 22, 26, 0.1);
-    /* background-color: #f5f8fa; */
+.headerRow{
+    -webkit-box-shadow: inset 0 -1px 0 rgba(16, 22, 26, 0.1);
+    box-shadow: inset 0 -1px 0 rgba(16, 22, 26, 0.1);
     background-color:rgb(231, 236, 239);
-    /* background-image: -webkit-gradient(linear, left top, left bottom, from(rgba(255, 255, 255, 0.8)), to(rgba(255, 255, 255, 0)));
-    background-image: linear-gradient(to bottom, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0)); */
+    border-right: 1px solid rgba(16, 22, 26, 0.2);
     color: #182026;
     font-weight:normal;
     text-transform:none;
@@ -120,10 +118,37 @@ body.bp3-dark .tableRow .bp3-icon{
     vertical-align:bottom;
 }
 
+.ReactVirtualized__Table__headerTruncatedText:first-child{
+    flex-grow:1;
+}
+
+.tableHeader .resizeHandle, .tableHeader .sort {
+    color:#ABAFB3;
+}
+
 .tableHeader{
-    border-right: 1px solid #ccc;
+    display:flex;    
 }
 
 .tableHeader:last-child{
     border:none;
+}
+
+.bp3-dark .headerRow{
+    background-color:rgb(66, 84, 97);
+    color:#BFCCD6;
+}
+
+.tableHeader .sort{
+    align-self:flex-end;
+    font-family:verdana;
+}
+
+.tableHeader .sort.desc{
+    align-self:flex-start;    
+    transform:rotateX(180deg);
+}
+
+.bp3-dark .tableHeader .resizeHandle, .bp3-dark .tableHeader .sort{
+    color: rgba(163, 188, 207, 0.589);
 }

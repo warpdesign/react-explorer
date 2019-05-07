@@ -33,6 +33,7 @@ const ElectronApp = {
         // while transfers are in progress so we first send a request to the frontend
         // if no transfers are in progress, exit confirmation is received which makes the app close
         app.on('before-quit', (e) => {
+            // TODO: detect interrupt
             console.log('before quit');
             if (!this.forceExit) {
                 e.preventDefault();
@@ -45,6 +46,12 @@ const ElectronApp = {
             if (this.mainWindow) {
                 this.mainWindow.restore();
             }
+        });
+
+        // when interrupt is received we have to force exit
+        process.on('SIGINT', function () {
+            console.log('*** BREAK');
+            this.forceExit = true;
         });
     },
     /**
@@ -91,6 +98,10 @@ const ElectronApp = {
         this.mainWindow.on('minimize', () => {
             this.mainWindow.minimize();
         });
+
+        // this.mainWindpw.on('page-title-updated', (e: Event) => {
+        //     e.preventDefault();
+        // });
 
         this.appMenu = new AppMenu(this.mainWindow);
     },

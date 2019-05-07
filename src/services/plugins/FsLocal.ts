@@ -1,4 +1,4 @@
-import { FsApi, File, ICredentials, Fs, Parent, filetype } from '../Fs';
+import { FsApi, File, ICredentials, Fs, Parent, filetype, MakeId } from '../Fs';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as mkdir from 'mkdirp';
@@ -6,7 +6,7 @@ import * as del from 'del';
 import { size } from '../../utils/size';
 import { throttle } from '../../utils/throttle';
 const { Transform } = require('stream');
-import { isWin, lineEnding } from '../../utils/platform';
+import { isWin } from '../../utils/platform';
 import { LocalWatch } from './LocalWatch';
 
 const invalidDirChars = isWin && /[\*:<>\?|"]+/ig || /^[\.]+[\/]+(.)*$/ig;
@@ -184,12 +184,14 @@ class LocalApi implements FsApi {
                     extension: format.ext.toLowerCase(),
                     cDate: stats.ctime,
                     mDate: stats.mtime,
+                    bDate: stats.birthtime,
                     length: stats.size,
                     mode: stats.mode,
                     isDir: stats.isDirectory(),
                     readonly: false,
                     type: !stats.isDirectory() && filetype(stats.mode, format.ext.toLowerCase()) || '',
-                    isSym: stats.isSymbolicLink()
+                    isSym: stats.isSymbolicLink(),
+                    id: MakeId(stats)
                 };
 
                 resolve(file);
@@ -240,10 +242,13 @@ class LocalApi implements FsApi {
                                 stats = {
                                     ctime: new Date(),
                                     mtime: new Date(),
+                                    birthtime: new Date(),
                                     size: 0,
                                     isDirectory: () => true,
                                     mode: -1,
-                                    isSymbolicLink: () => false
+                                    isSymbolicLink: () => false,
+                                    ino: 0,
+                                    dev: 0
                                 }
                             }
 
@@ -255,12 +260,14 @@ class LocalApi implements FsApi {
                                 extension: format.ext.toLowerCase(),
                                 cDate: stats.ctime,
                                 mDate: stats.mtime,
+                                bDate: stats.birthtime,
                                 length: stats.size,
                                 mode: stats.mode,
                                 isDir: stats.isDirectory(),
                                 readonly: false,
                                 type: !stats.isDirectory() && filetype(stats.mode, format.ext.toLowerCase()) || '',
-                                isSym: stats.isSymbolicLink()
+                                isSym: stats.isSymbolicLink(),
+                                id: MakeId(stats)
                             };
 
                             files.push(file);
@@ -268,20 +275,26 @@ class LocalApi implements FsApi {
 
                         this.onList(dirPath);
 
+                        resolve(files);
                         // add parent
-                        if (appendParent && !this.isRoot(dir)) {
-                            const parent = { ...Parent, dir: dirPath };
+                        // if (appendParent && !this.isRoot(dir)) {
+                        //     debugger;
+                        //     const parent = { ...Parent, dir: dirPath };
 
-                            resolve([parent].concat(files));
-                        } else {
-                            resolve(files);
-                        }
+                        //     resolve([parent].concat(files));
+                        // } else {
+                        //     resolve(files);
+                        // }
                     }
                 });
             });
         } else {
             return Promise.reject('Path does not exist');
         }
+    }
+
+    getParent(dir: string): File {
+        return { ...Parent, dir: path.resolve(dir) }
     }
 
     isRoot(path: string): boolean {

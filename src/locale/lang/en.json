@@ -140,6 +140,10 @@
             "EMPTY_FOLDER": "Folder is empty.",
             "PATH_PLACEHOLDER": "Enter path to load"
         },
+        "FILETABLE": {
+            "COL_NAME": "Name",
+            "COL_SIZE": "Size"
+        },
         "FILEMENU": {
             "PASTE": "Paste {{count}} item",
             "PASTE_plural": "Paste {{count}} items",

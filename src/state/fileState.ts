@@ -1,14 +1,15 @@
 import { observable, action, runInAction } from "mobx";
-import { FsApi, Fs, getFS, File, ICredentials, needsConnection } from "../services/Fs";
+import { FsApi, Fs, getFS, File, ICredentials, needsConnection, FileID } from "../services/Fs";
 import { Deferred } from '../utils/deferred';
 import i18next from '../locale/i18n';
 import { shell, ipcRenderer } from 'electron';
 import * as process from 'process';
 import { AppState } from "./appState";
+import { TSORT_METHOD_NAME, TSORT_ORDER } from "../services/FsSort";
 
 const isWin = process.platform === "win32";
 
-type TStatus = 'blank' | 'busy' | 'ok' | 'login' | 'offline';
+export type TStatus = 'blank' | 'busy' | 'ok' | 'login' | 'offline';
 
 export class FileState {
     /* observable properties start here */
@@ -27,6 +28,14 @@ export class FileState {
 
     // the last cursor position
     position = -1;
+
+    selectedId: FileID = null;
+
+    @observable
+    sortMethod: TSORT_METHOD_NAME = 'name';
+
+    @observable
+    sortOrder: TSORT_ORDER = 'asc';
 
     @observable
     server: string = '';
@@ -171,6 +180,7 @@ export class FileState {
         if (!skipHistory && this.status !== 'login') {
             this.addPathToHistory(path);
             this.scrollTop = 0;
+            this.selectedId = null;
             this.position = -1;
         }
     }
@@ -238,8 +248,15 @@ export class FileState {
         return this.loginDefer.promise;
     }
 
-    @action clearSelection() {
+    @action
+    clearSelection() {
         this.selected.clear();
+    }
+
+    @action
+    setSort(sortMethod: TSORT_METHOD_NAME, sortOrder: TSORT_ORDER) {
+        this.sortMethod = sortMethod;
+        this.sortOrder = sortOrder;
     }
 
     @action
@@ -253,9 +270,15 @@ export class FileState {
                     newSelection.push(newFile);
                 }
             }
+            const selectedFile = newSelection[newSelection.length - 1];
             this.selected.replace(newSelection);
+            this.selectedId = {
+                ino: selectedFile.id.ino,
+                dev: selectedFile.id.dev
+            }
         } else {
             this.selected.clear();
+            this.selectedId = null;
         }
     }
 
@@ -490,6 +513,10 @@ export class FileState {
 
     join(path: string, path2: string) {
         return this.api.join(path, path2);
+    }
+
+    getParent(dir: string): File {
+        return this.api.getParent(dir);
     }
 
     async openFile(appState: AppState, cache: FileState, file: File) {

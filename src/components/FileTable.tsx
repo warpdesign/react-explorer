@@ -1,12 +1,12 @@
 import * as React from 'react';
 import { IconName, Icon, Classes, HotkeysTarget, Hotkeys, Hotkey } from '@blueprintjs/core';
-import { Column, Table, AutoSizer, Index } from 'react-virtualized';
+import { Column, Table, AutoSizer, Index, HeaderMouseEventHandlerParams } from 'react-virtualized';
 import { AppState } from '../state/appState';
 import { WithNamespaces, withNamespaces } from 'react-i18next';
 import { inject } from 'mobx-react';
 import i18next from 'i18next';
 import { IReactionDisposer, reaction, toJS } from 'mobx';
-import { File } from '../services/Fs';
+import { File, FileID } from '../services/Fs';
 import { formatBytes } from '../utils/formatBytes';
 import { shouldCatchEvent, isEditable } from '../utils/dom';
 import { AppAlert } from './AppAlert';
@@ -18,6 +18,7 @@ import { RowRenderer } from './RowRenderer';
 import { SettingsState } from '../state/settingsState';
 import { ViewState } from '../state/viewState';
 import { debounce } from '../utils/debounce';
+import { TSORT_METHOD_NAME, TSORT_ORDER, getSortMethod } from '../services/FsSort';
 
 require('react-virtualized/styles.css');
 require('../css/filetable.css');
@@ -106,14 +107,14 @@ export class FileTableClass extends React.Component<IProps, IState> {
     constructor(props: IProps) {
         super(props);
 
-        this.viewState = this.injected.viewState;
+        const cache = this.cache;
 
         this.state = {
             nodes: [],// this.buildNodes(this.cache.files, false),
             selected: 0,
             type: 'local',
-            position: this.cache.position,
-            path: this.cache.path
+            position: cache.position,
+            path: cache.path
         };
 
         this.installReaction();
@@ -126,7 +127,8 @@ export class FileTableClass extends React.Component<IProps, IState> {
     }
 
     get cache() {
-        return this.viewState.getVisibleCache();
+        const viewState = this.injected.viewState;
+        return viewState.getVisibleCache();
     }
 
     private bindLanguageChange = () => {
@@ -157,7 +159,7 @@ export class FileTableClass extends React.Component<IProps, IState> {
             this.tableRef.current.scrollToPosition(scrollTop);
         }
 
-        this.cache.position = this.state.position;
+        // this.cache.position = this.state.position;
     }
 
     renderMenuAccelerators() {
@@ -226,35 +228,45 @@ export class FileTableClass extends React.Component<IProps, IState> {
         return !!cache.selected.find(file => file.fullname === name);
     }
 
-    private buildNodes = (files: File[], keepSelection = false): ITableRow[] => {
-        // console.log('** building nodes', files.length, 'cmd=', this.cache.cmd, this.injected.viewState.getVisibleCacheIndex(), this.cache.selected.length, this.cache.selected);
-        // console.log(this.injected.viewState.getVisibleCacheIndex());
+    buildNodeFromFile(file: File, keepSelection: boolean) {
+        const filetype = file.type;
+        let isSelected = keepSelection && this.getSelectedState(file.fullname) || false;
 
-        return files
-            .sort((file1, file2) => {
-                if ((file2.isDir && !file1.isDir)) {
-                    return 1;
-                } else if (!file1.name.length || (file1.isDir && !file2.isDir)) {
-                    return -1;
-                } else {
-                    return file1.fullname.localeCompare(file2.fullname);
-                }
-            })
-            .map((file, i) => {
-                const filetype = file.type;
-                let isSelected = keepSelection && this.getSelectedState(file.fullname) || false;
+        const res: ITableRow = {
+            icon: file.isDir && "folder-close" || (filetype && TYPE_ICONS[filetype] || TYPE_ICONS['any']),
+            name: file.fullname,
+            nodeData: file,
+            className: file.fullname !== '..' && file.fullname.startsWith('.') && 'isHidden' || '',
+            isSelected: isSelected,
+            size: !file.isDir && formatBytes(file.length) || '--'
+        };
 
-                const res: ITableRow = {
-                    icon: file.isDir && "folder-close" || (filetype && TYPE_ICONS[filetype] || TYPE_ICONS['any']),
-                    name: file.fullname,
-                    nodeData: file,
-                    className: file.fullname !== '..' && file.fullname.startsWith('.') && 'isHidden' || '',
-                    isSelected: isSelected,
-                    size: !file.isDir && formatBytes(file.length) || '--'
-                };
+        return res;
+    }
 
-                return res;
-            });
+    private buildNodes = (list: File[], keepSelection = false): ITableRow[] => {
+        console.time('buildingNodes');
+        const { sortMethod, sortOrder } = this.cache;
+        const SortFn = getSortMethod(sortMethod, sortOrder);
+        const dirs = list.filter(file => file.isDir);
+        const files = list.filter(file => !file.isDir);
+
+        const nodes = dirs.sort(SortFn)
+            .concat(files.sort(SortFn))
+            .map((file, i) => this.buildNodeFromFile(file, keepSelection));
+
+        // append parent element
+        const path = this.cache.path;
+
+        // TODO: when enabling ftp again, there may be something wrong
+        // with the dir of the parent element added here
+        if (!this.cache.isRoot(path)) {
+            const node = this.buildNodeFromFile(this.cache.getParent(path), keepSelection);
+            nodes.unshift(node);
+        }
+        console.timeEnd('buildingNodes');
+
+        return nodes;
     }
 
     _noRowsRenderer = () => {
@@ -279,7 +291,18 @@ export class FileTableClass extends React.Component<IProps, IState> {
     private updateState(nodes: ITableRow[], keepSelection = false) {
         const cache = this.cache;
         const newPath = nodes.length && nodes[0].nodeData.dir || '';
-        this.setState({ nodes, selected: keepSelection ? this.state.selected : 0, position: keepSelection ? cache.position : -1, path: newPath });
+        // TODO: retrieve cursor selection: this may have changed if:
+        // - cache have change (new files, files renamed, ...)
+        // - sort method/order has changed
+        const position = keepSelection && this.getFilePosition(nodes, cache.selectedId) || -1;
+        this.setState({ nodes, selected: keepSelection ? this.state.selected : 0, position, path: newPath });
+    }
+
+    getFilePosition(nodes: ITableRow[], id: FileID): number {
+        return nodes.findIndex(node => {
+            const fileId = node.nodeData.id;
+            return fileId && fileId.ino === id.ino && fileId.dev === id.dev
+        });
     }
 
     getRow(index: number): ITableRow {
@@ -292,11 +315,41 @@ export class FileTableClass extends React.Component<IProps, IState> {
         return (<div className="name"><Icon icon={iconName}></Icon><span title={data.cellData} className="file-label">{data.cellData}</span></div>);
     }
 
+    /*
+    {
+        columnData,
+        dataKey,
+        disableSort,
+        label,
+        sortBy,
+        sortDirection
+      }
+    */
+    headerRenderer = (data: any) => {
+        // TOOD: hardcoded for now, should store the column size/list
+        // and use it here instead      
+        const hasResize = data.columnData.index < 1;
+        const { sortMethod, sortOrder } = this.cache;
+        const isSort = data.columnData.sortMethod === sortMethod;
+        const classes = classnames("sort", sortOrder);
+
+        return (<React.Fragment key={data.dataKey}>
+            <div className="ReactVirtualized__Table__headerTruncatedText">
+                {data.label}
+            </div>
+            {isSort && (<div className={classes}>^</div>)}
+            {hasResize && (
+                <Icon className="resizeHandle" icon="drag-handle-vertical"></Icon>
+            )}
+        </React.Fragment>);
+    }
+
     rowClassName = (data: any) => {
         const file = this.state.nodes[data.index];
         const error = file && file.nodeData.mode === -1;
+        const mainClass = data.index === - 1 ? 'headerRow' : 'tableRow';
 
-        return classnames('tableRow', file && file.className, { selected: file && file.isSelected, error: error });
+        return classnames(mainClass, file && file.className, { selected: file && file.isSelected, error: error, headerRow: data.index === -1 });
     }
 
     clearClickTimeout() {
@@ -304,6 +357,22 @@ export class FileTableClass extends React.Component<IProps, IState> {
             clearTimeout(this.clickTimeout);
             this.clickTimeout = 0;
         }
+    }
+
+    setSort(newMethod: TSORT_METHOD_NAME, newOrder: TSORT_ORDER) {
+        this.cache.setSort(newMethod, newOrder);
+    }
+
+    /*
+    { columnData: any, dataKey: string, event: Event }
+    */
+    onHeaderClick = ({ columnData, dataKey }: HeaderMouseEventHandlerParams) => {
+        console.log('column click', columnData, dataKey);
+        const { sortMethod, sortOrder } = this.cache;
+        const newMethod = columnData.sortMethod as TSORT_METHOD_NAME;
+        const newOrder = sortMethod !== newMethod ? 'asc' : (sortOrder === 'asc' && 'desc' || 'asc') as TSORT_ORDER;
+        this.setSort(newMethod, newOrder);
+        this.updateNodes(this.cache.files);
     }
 
     onRowClick = (data: any) => {
@@ -358,8 +427,9 @@ export class FileTableClass extends React.Component<IProps, IState> {
             newSelected--;
         }
 
-        this.setState({ nodes, selected: newSelected, position });
-        this.updateSelection();
+        this.setState({ nodes, selected: newSelected, position }, () => {
+            this.updateSelection();
+        });
     }
 
     private onInlineEdit(cancel: boolean) {
@@ -401,9 +471,14 @@ export class FileTableClass extends React.Component<IProps, IState> {
     updateSelection() {
         const { appState } = this.injected;
         const fileCache = this.cache;
-        const { nodes } = this.state;
+        const { nodes, position } = this.state;
 
-        const selection = nodes.filter((node) => node.isSelected).map((node) => node.nodeData) as File[];
+        const selection = nodes.filter((node, i) => i !== position && node.isSelected).map((node) => node.nodeData) as File[];
+
+        if (position > -1) {
+            const cursorFile = nodes[position].nodeData as File;
+            selection.push(cursorFile);
+        }
 
         appState.updateSelection(fileCache, selection);
     }
@@ -422,6 +497,7 @@ export class FileTableClass extends React.Component<IProps, IState> {
     }
 
     toggleInlineRename(element: HTMLElement, originallySelected: boolean, file: File) {
+
         console.log('toggle inlinerename');
         if (!file.readonly) {
             if (originallySelected) {
@@ -503,9 +579,9 @@ export class FileTableClass extends React.Component<IProps, IState> {
                 i++;
             }
 
-            this.setState({ nodes, selected, position });
-
-            this.updateSelection();
+            this.setState({ nodes, selected, position }, () => {
+                this.updateSelection();
+            });
         }
     }
 
@@ -639,9 +715,9 @@ export class FileTableClass extends React.Component<IProps, IState> {
             nodes[position].isSelected = true;
 
             // move in method to reuse
-            this.setState({ nodes, selected, position });
-
-            this.updateSelection();
+            this.setState({ nodes, selected, position }, () => {
+                this.updateSelection();
+            });
         }
     }
 
@@ -669,6 +745,7 @@ export class FileTableClass extends React.Component<IProps, IState> {
     rowGetter = (index: Index) => this.getRow(index.index);
 
     render() {
+        const { t } = this.injected;
         const { position } = this.state;
         const rowCount = this.state.nodes.length;
         const scrollTop = position === -1 && this.cache.scrollTop || undefined;
@@ -678,12 +755,12 @@ export class FileTableClass extends React.Component<IProps, IState> {
             <AutoSizer>
                 {({ width, height }) => (
                     <Table
-                        disableHeader={false}
                         headerClassName="tableHeader"
                         headerHeight={ROW_HEIGHT}
                         height={height}
                         onRowClick={this.onRowClick}
                         onRowDoubleClick={this.onRowDoubleClick}
+                        onHeaderClick={this.onHeaderClick}
                         noRowsRenderer={this._noRowsRenderer}
                         rowClassName={this.rowClassName}
                         rowHeight={ROW_HEIGHT}
@@ -696,18 +773,21 @@ export class FileTableClass extends React.Component<IProps, IState> {
                         width={width}>
                         <Column
                             dataKey="name"
-                            label="Name"
+                            label={t('FILETABLE.COL_NAME')}
                             cellRenderer={this.nameRenderer}
+                            headerRenderer={this.headerRenderer}
                             width={NAME_COLUMN_WIDTH}
                             flexGrow={1}
+                            columnData={{ 'index': 0, sortMethod: 'name' }}
                         />
                         <Column
                             className="size bp3-text-small"
                             width={SIZE_COLUMN_WITDH}
-                            disableSort
-                            label="Size"
+                            label={t('FILETABLE.COL_SIZE')}
+                            headerRenderer={this.headerRenderer}
                             dataKey="size"
                             flexShrink={1}
+                            columnData={{ 'index': 1, sortMethod: 'ctime' }}
                         />
                     </Table>
                 )

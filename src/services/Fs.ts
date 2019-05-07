@@ -3,8 +3,12 @@ import { FsGeneric } from './plugins/FsGeneric';
 import { FsSimpleFtp } from './plugins/FsSimpleFtp';
 import { remote } from 'electron';
 import { Readable } from 'stream';
+import { Stats } from 'fs';
 
-declare var ENV: any;
+export interface FileID {
+    ino: number;
+    dev: number;
+}
 
 export interface File {
     dir: string;
@@ -13,12 +17,14 @@ export interface File {
     extension: string;
     cDate: Date;
     mDate: Date;
+    bDate: Date;
     length: number;
     mode: number;
     isDir: boolean;
     readonly: boolean;
     type: FileType;
     isSym: boolean;
+    id: FileID;
 }
 
 export interface Fs {
@@ -41,12 +47,14 @@ export const Parent: File = {
     extension: '',
     cDate: new Date(),
     mDate: new Date(),
+    bDate: new Date(),
     length: 0,
     mode: 1,
     isDir: true,
     readonly: true,
     type: '',
-    isSym: false
+    isSym: false,
+    id: null
 };
 
 const Extensions = {
@@ -63,6 +71,13 @@ const ExeMaskGroup = 0o0010;
 const ExeMaskUser = 0o0100;
 
 export type FileType = 'exe' | 'img' | 'arc' | 'snd' | 'vid' | 'doc' | 'cod' | '';
+
+export function MakeId(stats: any): FileID {
+    return {
+        ino: stats.ino,
+        dev: stats.dev
+    }
+}
 
 function isModeExe(mode: number): Boolean {
     return !!((mode & ExeMaskAll) || (mode & ExeMaskUser) || (mode & ExeMaskGroup));
@@ -110,6 +125,7 @@ export interface FsApi {
     isConnected(): boolean;
     isDirectoryNameValid(dirName: string): boolean;
     isRoot(path: string): boolean;
+    getParent(dir: string): File;
     on(event: string, cb: (data: any) => void): void;
     off(): void;
     loginOptions: ICredentials;

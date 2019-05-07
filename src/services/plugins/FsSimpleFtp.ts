@@ -1,4 +1,4 @@
-import { FsApi, File, ICredentials, Fs, Parent, filetype } from '../Fs';
+import { FsApi, File, ICredentials, Fs, Parent, filetype, MakeId } from '../Fs';
 import { Client as FtpClient, FileInfo, FTPResponse } from 'basic-ftp';
 import * as fs from 'fs';
 import { Transform, Readable, Writable } from 'stream';
@@ -350,6 +350,7 @@ class SimpleFtpApi implements FsApi {
                 const files = ftpFiles.filter((ftpFile) => !ftpFile.name.match(/^[\.]{1,2}$/)).map((ftpFile) => {
                     const format = nodePath.parse(ftpFile.name);
                     const ext = format.ext.toLowerCase();
+                    const mDate = new Date(ftpFile.date);
 
                     const file: File = {
                         dir: path,
@@ -357,24 +358,30 @@ class SimpleFtpApi implements FsApi {
                         fullname: ftpFile.name,
                         isDir: ftpFile.isDirectory,
                         length: ftpFile.size,
-                        cDate: new Date(ftpFile.date),
-                        mDate: new Date(ftpFile.date),
+                        cDate: mDate,
+                        mDate: mDate,
+                        bDate: mDate,
                         extension: '',
                         mode: 0,
                         readonly: false,
                         type: !ftpFile.isDirectory && filetype(0, ext) || '',
-                        isSym: false
+                        isSym: false,
+                        id: {
+                            ino: mDate.getTime(),
+                            dev: new Date().getTime()
+                        }
                     };
                     return file;
                 });
 
-                if (appendParent && !this.isRoot(newpath)) {
-                    const parent = { ...Parent, dir: path };
+                resolve(files);
+                // if (appendParent && !this.isRoot(newpath)) {
+                //     const parent = { ...Parent, dir: path };
 
-                    resolve([parent].concat(files));
-                } else {
-                    resolve(files);
-                }
+                //     resolve([parent].concat(files));
+                // } else {
+                //     resolve(files);
+                // }
             } catch (err) {
                 reject(err);
             }
@@ -388,6 +395,10 @@ class SimpleFtpApi implements FsApi {
         } catch (err) {
             return path === '/';
         }
+    }
+
+    getParent(dir: string): File {
+        return { ...Parent, dir }
     }
 
     async getStream(path: string, file: string, transferId = -1): Promise<Readable> {
