@@ -330,7 +330,7 @@ export class FileTableClass extends React.Component<IProps, IState> {
         // and use it here instead      
         const hasResize = data.columnData.index < 1;
         const { sortMethod, sortOrder } = this.cache;
-        const isSort = data.dataKey === sortMethod;
+        const isSort = data.columnData.sortMethod === sortMethod;
         const classes = classnames("sort", sortOrder);
 
         return (<React.Fragment key={data.dataKey}>
