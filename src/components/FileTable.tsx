@@ -6,7 +6,7 @@ import { WithNamespaces, withNamespaces } from 'react-i18next';
 import { inject } from 'mobx-react';
 import i18next from 'i18next';
 import { IReactionDisposer, reaction, toJS } from 'mobx';
-import { File } from '../services/Fs';
+import { File, FileID } from '../services/Fs';
 import { formatBytes } from '../utils/formatBytes';
 import { shouldCatchEvent, isEditable } from '../utils/dom';
 import { AppAlert } from './AppAlert';
@@ -159,7 +159,7 @@ export class FileTableClass extends React.Component<IProps, IState> {
             this.tableRef.current.scrollToPosition(scrollTop);
         }
 
-        this.cache.position = this.state.position;
+        // this.cache.position = this.state.position;
     }
 
     renderMenuAccelerators() {
@@ -280,10 +280,6 @@ export class FileTableClass extends React.Component<IProps, IState> {
         }
     }
 
-    findNewPosition() {
-
-    }
-
     private updateNodes(files: File[]) {
         // reselect previously selected file in case of reload/change tab
         const keepSelection = !!this.cache.selected.length;
@@ -292,17 +288,21 @@ export class FileTableClass extends React.Component<IProps, IState> {
         this.updateState(nodes, keepSelection);
     }
 
-    private retrievePosition(file: File) {
-
-    }
-
     private updateState(nodes: ITableRow[], keepSelection = false) {
         const cache = this.cache;
         const newPath = nodes.length && nodes[0].nodeData.dir || '';
         // TODO: retrieve cursor selection: this may have changed if:
         // - cache have change (new files, files renamed, ...)
         // - sort method/order has changed
-        this.setState({ nodes, selected: keepSelection ? this.state.selected : 0, position: keepSelection ? cache.position : -1, path: newPath });
+        const position = keepSelection && this.getFilePosition(nodes, cache.selectedId) || -1;
+        this.setState({ nodes, selected: keepSelection ? this.state.selected : 0, position, path: newPath });
+    }
+
+    getFilePosition(nodes: ITableRow[], id: FileID): number {
+        return nodes.findIndex(node => {
+            const fileId = node.nodeData.id;
+            return fileId && fileId.ino === id.ino && fileId.dev === id.dev
+        });
     }
 
     getRow(index: number): ITableRow {
@@ -427,8 +427,9 @@ export class FileTableClass extends React.Component<IProps, IState> {
             newSelected--;
         }
 
-        this.setState({ nodes, selected: newSelected, position });
-        this.updateSelection();
+        this.setState({ nodes, selected: newSelected, position }, () => {
+            this.updateSelection();
+        });
     }
 
     private onInlineEdit(cancel: boolean) {
@@ -496,6 +497,7 @@ export class FileTableClass extends React.Component<IProps, IState> {
     }
 
     toggleInlineRename(element: HTMLElement, originallySelected: boolean, file: File) {
+
         console.log('toggle inlinerename');
         if (!file.readonly) {
             if (originallySelected) {
@@ -577,9 +579,9 @@ export class FileTableClass extends React.Component<IProps, IState> {
                 i++;
             }
 
-            this.setState({ nodes, selected, position });
-
-            this.updateSelection();
+            this.setState({ nodes, selected, position }, () => {
+                this.updateSelection();
+            });
         }
     }
 
@@ -713,9 +715,9 @@ export class FileTableClass extends React.Component<IProps, IState> {
             nodes[position].isSelected = true;
 
             // move in method to reuse
-            this.setState({ nodes, selected, position });
-
-            this.updateSelection();
+            this.setState({ nodes, selected, position }, () => {
+                this.updateSelection();
+            });
         }
     }
 

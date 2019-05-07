@@ -3,6 +3,12 @@ import { FsGeneric } from './plugins/FsGeneric';
 import { FsSimpleFtp } from './plugins/FsSimpleFtp';
 import { remote } from 'electron';
 import { Readable } from 'stream';
+import { Stats } from 'fs';
+
+export interface FileID {
+    ino: number;
+    dev: number;
+}
 
 export interface File {
     dir: string;
@@ -18,6 +24,7 @@ export interface File {
     readonly: boolean;
     type: FileType;
     isSym: boolean;
+    id: FileID;
 }
 
 export interface Fs {
@@ -46,7 +53,8 @@ export const Parent: File = {
     isDir: true,
     readonly: true,
     type: '',
-    isSym: false
+    isSym: false,
+    id: null
 };
 
 const Extensions = {
@@ -63,6 +71,13 @@ const ExeMaskGroup = 0o0010;
 const ExeMaskUser = 0o0100;
 
 export type FileType = 'exe' | 'img' | 'arc' | 'snd' | 'vid' | 'doc' | 'cod' | '';
+
+export function MakeId(stats: any): FileID {
+    return {
+        ino: stats.ino,
+        dev: stats.dev
+    }
+}
 
 function isModeExe(mode: number): Boolean {
     return !!((mode & ExeMaskAll) || (mode & ExeMaskUser) || (mode & ExeMaskGroup));

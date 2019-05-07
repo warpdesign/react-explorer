@@ -1,4 +1,4 @@
-import { FsApi, File, ICredentials, Fs, Parent, filetype } from '../Fs';
+import { FsApi, File, ICredentials, Fs, Parent, filetype, MakeId } from '../Fs';
 import { Client as FtpClient, FileInfo, FTPResponse } from 'basic-ftp';
 import * as fs from 'fs';
 import { Transform, Readable, Writable } from 'stream';
@@ -365,7 +365,11 @@ class SimpleFtpApi implements FsApi {
                         mode: 0,
                         readonly: false,
                         type: !ftpFile.isDirectory && filetype(0, ext) || '',
-                        isSym: false
+                        isSym: false,
+                        id: {
+                            ino: mDate.getTime(),
+                            dev: new Date().getTime()
+                        }
                     };
                     return file;
                 });

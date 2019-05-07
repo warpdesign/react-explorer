@@ -1,5 +1,5 @@
 import { observable, action, runInAction } from "mobx";
-import { FsApi, Fs, getFS, File, ICredentials, needsConnection } from "../services/Fs";
+import { FsApi, Fs, getFS, File, ICredentials, needsConnection, FileID } from "../services/Fs";
 import { Deferred } from '../utils/deferred';
 import i18next from '../locale/i18n';
 import { shell, ipcRenderer } from 'electron';
@@ -28,6 +28,8 @@ export class FileState {
 
     // the last cursor position
     position = -1;
+
+    selectedId: FileID = null;
 
     @observable
     sortMethod: TSORT_METHOD_NAME = 'name';
@@ -178,6 +180,7 @@ export class FileState {
         if (!skipHistory && this.status !== 'login') {
             this.addPathToHistory(path);
             this.scrollTop = 0;
+            this.selectedId = null;
             this.position = -1;
         }
     }
@@ -267,9 +270,15 @@ export class FileState {
                     newSelection.push(newFile);
                 }
             }
+            const selectedFile = newSelection[newSelection.length - 1];
             this.selected.replace(newSelection);
+            this.selectedId = {
+                ino: selectedFile.id.ino,
+                dev: selectedFile.id.dev
+            }
         } else {
             this.selected.clear();
+            this.selectedId = null;
         }
     }
 

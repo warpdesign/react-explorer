@@ -238,7 +238,11 @@ class Client {
                             mode: 0,
                             readonly: false,
                             type: ftpFile.type !== 'd' && filetype(0, ext) || '',
-                            isSym: false
+                            isSym: false,
+                            id: {
+                                ino: mDate.getTime(),
+                                dev: new Date().getTime()
+                            }
                         };
                         return file;
                     });

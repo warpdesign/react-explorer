@@ -322,6 +322,7 @@ export class AppState {
     updateSelection(cache: FileState, newSelection: File[]) {
         console.log('updateSelection', newSelection.length);
         cache.selected.replace(newSelection);
+        cache.updateSelection();
     }
 
     @observable

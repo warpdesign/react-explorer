@@ -1,4 +1,4 @@
-import { FsApi, File, ICredentials, Fs, Parent, filetype } from '../Fs';
+import { FsApi, File, ICredentials, Fs, Parent, filetype, MakeId } from '../Fs';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as mkdir from 'mkdirp';
@@ -190,7 +190,8 @@ class LocalApi implements FsApi {
                     isDir: stats.isDirectory(),
                     readonly: false,
                     type: !stats.isDirectory() && filetype(stats.mode, format.ext.toLowerCase()) || '',
-                    isSym: stats.isSymbolicLink()
+                    isSym: stats.isSymbolicLink(),
+                    id: MakeId(stats)
                 };
 
                 resolve(file);
@@ -245,7 +246,9 @@ class LocalApi implements FsApi {
                                     size: 0,
                                     isDirectory: () => true,
                                     mode: -1,
-                                    isSymbolicLink: () => false
+                                    isSymbolicLink: () => false,
+                                    ino: 0,
+                                    dev: 0
                                 }
                             }
 
@@ -263,7 +266,8 @@ class LocalApi implements FsApi {
                                 isDir: stats.isDirectory(),
                                 readonly: false,
                                 type: !stats.isDirectory() && filetype(stats.mode, format.ext.toLowerCase()) || '',
-                                isSym: stats.isSymbolicLink()
+                                isSym: stats.isSymbolicLink(),
+                                id: MakeId(stats)
                             };
 
                             files.push(file);
