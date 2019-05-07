@@ -5,12 +5,11 @@ import i18next from '../locale/i18n';
 import { shell, ipcRenderer } from 'electron';
 import * as process from 'process';
 import { AppState } from "./appState";
+import { TSORT_METHOD_NAME, TSORT_ORDER } from "../services/FsSort";
 
 const isWin = process.platform === "win32";
 
 export type TStatus = 'blank' | 'busy' | 'ok' | 'login' | 'offline';
-export type TSort = 'name' | 'cdate' | 'bdate';
-export type TSortDir = 'asc' | 'desc';
 
 export class FileState {
     /* observable properties start here */
@@ -31,10 +30,10 @@ export class FileState {
     position = -1;
 
     @observable
-    sortBy: TSort = 'name';
+    sortMethod: TSORT_METHOD_NAME = 'name';
 
     @observable
-    sortDirection: TSortDir = 'asc';
+    sortOrder: TSORT_ORDER = 'asc';
 
     @observable
     server: string = '';
@@ -246,8 +245,15 @@ export class FileState {
         return this.loginDefer.promise;
     }
 
-    @action clearSelection() {
+    @action
+    clearSelection() {
         this.selected.clear();
+    }
+
+    @action
+    setSort(sortMethod: TSORT_METHOD_NAME, sortOrder: TSORT_ORDER) {
+        this.sortMethod = sortMethod;
+        this.sortOrder = sortOrder;
     }
 
     @action

@@ -18,7 +18,7 @@ import { RowRenderer } from './RowRenderer';
 import { SettingsState } from '../state/settingsState';
 import { ViewState } from '../state/viewState';
 import { debounce } from '../utils/debounce';
-import { SortMethods, TSORT_METHOD_NAME, TSORT_ORDER, getSortMethod } from '../services/FsSort';
+import { TSORT_METHOD_NAME, TSORT_ORDER, getSortMethod } from '../services/FsSort';
 
 require('react-virtualized/styles.css');
 require('../css/filetable.css');
@@ -73,9 +73,6 @@ interface IState {
     position: number;
     // last path that was used
     path: string;
-
-    // sortMethod: TSORT_METHOD_NAME;
-    // sortOrder: TSORT_ORDER;
 };
 
 interface IProps extends WithNamespaces {
@@ -110,14 +107,14 @@ export class FileTableClass extends React.Component<IProps, IState> {
     constructor(props: IProps) {
         super(props);
 
-        this.viewState = this.injected.viewState;
+        const cache = this.cache;
 
         this.state = {
             nodes: [],// this.buildNodes(this.cache.files, false),
             selected: 0,
             type: 'local',
-            position: this.cache.position,
-            path: this.cache.path
+            position: cache.position,
+            path: cache.path
         };
 
         this.installReaction();
@@ -130,7 +127,8 @@ export class FileTableClass extends React.Component<IProps, IState> {
     }
 
     get cache() {
-        return this.viewState.getVisibleCache();
+        const viewState = this.injected.viewState;
+        return viewState.getVisibleCache();
     }
 
     private bindLanguageChange = () => {
@@ -247,10 +245,9 @@ export class FileTableClass extends React.Component<IProps, IState> {
     }
 
     private buildNodes = (list: File[], keepSelection = false): ITableRow[] => {
-        // console.log('** building nodes', files.length, 'cmd=', this.cache.cmd, this.injected.viewState.getVisibleCacheIndex(), this.cache.selected.length, this.cache.selected);
-        // console.log(this.injected.viewState.getVisibleCacheIndex());
         console.time('buildingNodes');
-        const SortFn = getSortMethod('name', 'asc');
+        const { sortMethod, sortOrder } = this.cache;
+        const SortFn = getSortMethod(sortMethod, sortOrder);
         const dirs = list.filter(file => file.isDir);
         const files = list.filter(file => !file.isDir);
 
@@ -283,6 +280,10 @@ export class FileTableClass extends React.Component<IProps, IState> {
         }
     }
 
+    findNewPosition() {
+
+    }
+
     private updateNodes(files: File[]) {
         // reselect previously selected file in case of reload/change tab
         const keepSelection = !!this.cache.selected.length;
@@ -291,9 +292,16 @@ export class FileTableClass extends React.Component<IProps, IState> {
         this.updateState(nodes, keepSelection);
     }
 
+    private retrievePosition(file: File) {
+
+    }
+
     private updateState(nodes: ITableRow[], keepSelection = false) {
         const cache = this.cache;
         const newPath = nodes.length && nodes[0].nodeData.dir || '';
+        // TODO: retrieve cursor selection: this may have changed if:
+        // - cache have change (new files, files renamed, ...)
+        // - sort method/order has changed
         this.setState({ nodes, selected: keepSelection ? this.state.selected : 0, position: keepSelection ? cache.position : -1, path: newPath });
     }
 
@@ -319,13 +327,17 @@ export class FileTableClass extends React.Component<IProps, IState> {
     */
     headerRenderer = (data: any) => {
         // TOOD: hardcoded for now, should store the column size/list
-        // and use it here instead
+        // and use it here instead      
         const hasResize = data.columnData.index < 1;
+        const { sortMethod, sortOrder } = this.cache;
+        const isSort = data.dataKey === sortMethod;
+        const classes = classnames("sort", sortOrder);
+
         return (<React.Fragment key={data.dataKey}>
             <div className="ReactVirtualized__Table__headerTruncatedText">
                 {data.label}
             </div>
-            <div className="sort">^</div>
+            {isSort && (<div className={classes}>^</div>)}
             {hasResize && (
                 <Icon className="resizeHandle" icon="drag-handle-vertical"></Icon>
             )}
@@ -347,11 +359,20 @@ export class FileTableClass extends React.Component<IProps, IState> {
         }
     }
 
+    setSort(newMethod: TSORT_METHOD_NAME, newOrder: TSORT_ORDER) {
+        this.cache.setSort(newMethod, newOrder);
+    }
+
     /*
     { columnData: any, dataKey: string, event: Event }
     */
     onHeaderClick = ({ columnData, dataKey }: HeaderMouseEventHandlerParams) => {
         console.log('column click', columnData, dataKey);
+        const { sortMethod, sortOrder } = this.cache;
+        const newMethod = columnData.sortMethod as TSORT_METHOD_NAME;
+        const newOrder = sortMethod !== newMethod ? 'asc' : (sortOrder === 'asc' && 'desc' || 'asc') as TSORT_ORDER;
+        this.setSort(newMethod, newOrder);
+        this.updateNodes(this.cache.files);
     }
 
     onRowClick = (data: any) => {
@@ -449,9 +470,14 @@ export class FileTableClass extends React.Component<IProps, IState> {
     updateSelection() {
         const { appState } = this.injected;
         const fileCache = this.cache;
-        const { nodes } = this.state;
+        const { nodes, position } = this.state;
 
-        const selection = nodes.filter((node) => node.isSelected).map((node) => node.nodeData) as File[];
+        const selection = nodes.filter((node, i) => i !== position && node.isSelected).map((node) => node.nodeData) as File[];
+
+        if (position > -1) {
+            const cursorFile = nodes[position].nodeData as File;
+            selection.push(cursorFile);
+        }
 
         appState.updateSelection(fileCache, selection);
     }
@@ -750,7 +776,7 @@ export class FileTableClass extends React.Component<IProps, IState> {
                             headerRenderer={this.headerRenderer}
                             width={NAME_COLUMN_WIDTH}
                             flexGrow={1}
-                            columnData={{ 'index': 0 }}
+                            columnData={{ 'index': 0, sortMethod: 'name' }}
                         />
                         <Column
                             className="size bp3-text-small"
@@ -759,7 +785,7 @@ export class FileTableClass extends React.Component<IProps, IState> {
                             headerRenderer={this.headerRenderer}
                             dataKey="size"
                             flexShrink={1}
-                            columnData={{ 'index': 1 }}
+                            columnData={{ 'index': 1, sortMethod: 'ctime' }}
                         />
                     </Table>
                 )
