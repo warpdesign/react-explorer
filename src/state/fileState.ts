@@ -270,11 +270,16 @@ export class FileState {
                     newSelection.push(newFile);
                 }
             }
-            const selectedFile = newSelection[newSelection.length - 1];
-            this.selected.replace(newSelection);
-            this.selectedId = {
-                ino: selectedFile.id.ino,
-                dev: selectedFile.id.dev
+            if (newSelection.length) {
+                const selectedFile = newSelection[newSelection.length - 1];
+                this.selected.replace(newSelection);
+                this.selectedId = {
+                    ino: selectedFile.id.ino,
+                    dev: selectedFile.id.dev
+                }
+            } else {
+                this.selected.clear();
+                this.selectedId = null;
             }
         } else {
             this.selected.clear();
