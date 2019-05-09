@@ -12,7 +12,7 @@ export interface IWatcher {
 
 // only fire change callback each 2 seconds: should be more than enough
 // and will avoid locking the app if two many changes are fired rapidly
-const CB_FIRE_RATE = 1000;
+const CB_FIRE_RATE = 500;
 
 export const LocalWatch = {
     watchers: new Array<IWatcher>(),

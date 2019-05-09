@@ -20,12 +20,13 @@ import { ShortcutsDialog } from "./dialogs/ShortcutsDialog";
 import { shouldCatchEvent, isEditable } from "../utils/dom";
 import { WithMenuAccelerators, Accelerators, Accelerator } from "./WithMenuAccelerators";
 import { remote } from 'electron';
-import { isPackage } from '../utils/platform';
+import { isPackage, isWin } from '../utils/platform';
 import { TabDescriptor } from "./TabList";
 
 require("@blueprintjs/core/lib/css/blueprint.css");
 require("@blueprintjs/icons/lib/css/blueprint-icons.css");
 require("../css/main.css");
+require("../css/windows.css");
 
 interface IState {
     isPrefsOpen: boolean;
@@ -221,6 +222,7 @@ class App extends React.Component<WithNamespaces, IState> {
         // listen for events from main process
         this.addListeners();
         this.setDarkTheme();
+        this.setPlatformClass();
     }
 
     componentWillUnmount() {
@@ -573,6 +575,12 @@ class App extends React.Component<WithNamespaces, IState> {
             document.body.classList.add(Classes.DARK);
         } else {
             document.body.classList.remove(Classes.DARK);
+        }
+    }
+
+    setPlatformClass() {
+        if (isWin) {
+            document.body.classList.add('windows');
         }
     }
 
