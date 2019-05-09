@@ -26,10 +26,10 @@ export class FileState {
     // cache reload
     scrollTop = -1;
 
-    // the last cursor position
-    position = -1;
-
+    // last element that was selected (ie: cursor position)
     selectedId: FileID = null;
+    // element that's being edited
+    editingId: FileID = null;
 
     @observable
     sortMethod: TSORT_METHOD_NAME = 'name';
@@ -181,7 +181,7 @@ export class FileState {
             this.addPathToHistory(path);
             this.scrollTop = 0;
             this.selectedId = null;
-            this.position = -1;
+            this.editingId = null;
         }
     }
 
@@ -265,7 +265,9 @@ export class FileState {
         const newSelection = [];
         if (isSameDir) {
             for (let selection of this.selected) {
-                const newFile = this.files.find(file => file.fullname === selection.fullname);
+                // use inode/dev to retrieve files that were selected before reload:
+                // we cannot use fullname anymore since files may have been renamed
+                const newFile = this.files.find(file => file.id.dev === selection.id.dev && file.id.ino === selection.id.ino);
                 if (newFile) {
                     newSelection.push(newFile);
                 }
@@ -274,8 +276,7 @@ export class FileState {
                 const selectedFile = newSelection[newSelection.length - 1];
                 this.selected.replace(newSelection);
                 this.selectedId = {
-                    ino: selectedFile.id.ino,
-                    dev: selectedFile.id.dev
+                    ...selectedFile.id
                 }
             } else {
                 this.selected.clear();
@@ -284,6 +285,18 @@ export class FileState {
         } else {
             this.selected.clear();
             this.selectedId = null;
+        }
+    }
+
+    @action
+    setEditingFile(file: File) {
+        console.log('setEditingFile', file);
+        if (file) {
+            this.editingId = {
+                ...file.id
+            }
+        } else {
+            this.editingId = null;
         }
     }
 

@@ -424,7 +424,7 @@ class App extends React.Component<WithNamespaces, IState> {
     onDebugCache = () => {
         let i = 0;
         for (let cache of this.appState.views[0].caches) {
-            console.log('cache', cache.selected.length, cache.selected, cache.position, cache.selectedId);
+            console.log('cache', cache.selected.length, cache.selected, cache.selectedId, cache.editingId);
         }
     }
 
