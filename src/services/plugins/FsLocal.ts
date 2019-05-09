@@ -345,8 +345,7 @@ class LocalApi implements FsApi {
     }
 
     getParentTree(dir: string): Array<{ dir: string, fullname: string, name: string }> {
-        // TODO: handle Windows special case
-        const parts = dir.split('/');
+        const parts = dir.split(SEP);
         const max = parts.length - 1;
         let fullname = '';
 
