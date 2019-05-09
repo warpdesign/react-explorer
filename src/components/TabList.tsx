@@ -194,12 +194,12 @@ class TabListClass extends React.Component<InjectedProps> {
                 <ContextMenu ref={this.menuFolderRef} onItemClick={this.onMenuFolderClick} template={null}></ContextMenu>
                 {
                     caches.map((cache, index) => {
-                        const closeIcon = cache.isVisible && caches.length > 1 && <Icon iconSize={12} htmlTitle={t('TABS.CLOSE')} className="closetab" intent="warning" onClick={this.closeTab.bind(this, index)} icon="cross"></Icon>;
+                        const closeIcon = caches.length > 1 && <Icon iconSize={12} htmlTitle={t('TABS.CLOSE')} className="closetab" intent="warning" onClick={this.closeTab.bind(this, index)} icon="cross"></Icon>;
                         const path = cache.path;
                         const tabInfo = cache.getFS().displaypath(path);
 
                         return (
-                            <Button key={"" + viewId + index} onContextMenu={() => this.onContextMenu(index)} onClick={this.selectTab.bind(this, index)} title={tabInfo.fullPath} intent={cache.isVisible ? "primary" : "none"} rightIcon={closeIcon}><Icon onContextMenu={this.onFolderContextMenu} className="folder" icon="folder-close"></Icon>{tabInfo.shortPath}</Button>
+                            <Button key={"" + viewId + index} onContextMenu={() => this.onContextMenu(index)} onClick={this.selectTab.bind(this, index)} title={tabInfo.fullPath} intent={cache.isVisible ? "primary" : "none"} rightIcon={closeIcon} className="tab"><Icon onContextMenu={this.onFolderContextMenu} className="folder" icon="folder-close"></Icon>{tabInfo.shortPath}</Button>
                         )
                     })
                 }

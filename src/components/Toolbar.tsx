@@ -410,7 +410,7 @@ export class ToolbarClass extends React.Component<IProps, PathInputState> {
         const isRoot = fileCache.isRoot(fileCache.path);
 
         return (
-            <ControlGroup>
+            <ControlGroup className="toolbar">
                 <ButtonGroup style={{ minWidth: 120 }}>
                     <Button title={t('TOOLBAR.BACK')} data-cy-backward disabled={!canGoBackward} onClick={this.onBackward} rightIcon="chevron-left"></Button>
                     <Button title={t('TOOLBAR.FORWARD')} data-cy-forward disabled={!canGoForward} onClick={this.onForward} rightIcon="chevron-right"></Button>
