@@ -1,4 +1,4 @@
-import { FsApi, File, ICredentials, Fs, Parent } from '../Fs';
+import { FsApi, File, ICredentials, Fs } from '../Fs';
 import * as fs from 'fs';
 
 class GenericApi implements FsApi {
@@ -102,10 +102,6 @@ class GenericApi implements FsApi {
         }
     }
 
-    getParent(dir: string) {
-        return { ...Parent };
-    }
-
     off() {
 
     }
@@ -126,6 +122,15 @@ class GenericApi implements FsApi {
 
     async putStream(readStream: fs.ReadStream, dstPath: string, progress: (bytesRead: number) => void, transferId = -1): Promise<void> {
         return Promise.resolve();
+    }
+
+    getParentTree(dir: string): Array<{ dir: string, fullname: string }> {
+        const numParts = dir.replace(/^\//, '').split('/').length;
+        const folders = [];
+        for (let i = 0; i < numParts; ++i) {
+
+        }
+        return [];
     }
 
     sanityze(path: string) {

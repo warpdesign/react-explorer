@@ -23,6 +23,10 @@ button.small:hover{
     min-width:10px;
 }
 
+.bp3-control-group.toolbar{
+    z-index:1;
+}
+
 /* auto resize layout */
 .filelist, .sideview{
     display:flex;
@@ -79,7 +83,9 @@ button.small:hover{
 }
 
 #root .sideview.active:before{
-    box-shadow: 0 0 4px 2px inset #137cbd82;
+    box-shadow: 0 0 0px 2px inset rgba(19, 124, 189, 0.8);
+    z-index:2;
+    pointer-events: none;
 }
 
 #root .sideview.dropTarget:before{
@@ -282,6 +288,17 @@ body.bp3-dark .bp3-loader.active{
 
 .tablist button{
     border-bottom-left-radius:0;
+    cursor:default;
+}
+
+.tablist .bp3-button.tab > * {
+    margin-right:0;
+}
+
+.tablist .bp3-button .bp3-icon.folder{
+    padding: 0 10px;
+    margin:0;
+    opacity:.9;
 }
 
 .tablist button:last-child{

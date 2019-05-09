@@ -1,4 +1,4 @@
-import { FsApi, File, ICredentials, Fs, Parent, filetype, MakeId } from '../Fs';
+import { FsApi, File, ICredentials, Fs, filetype } from '../Fs';
 import { Client as FtpClient, FileInfo, FTPResponse } from 'basic-ftp';
 import * as fs from 'fs';
 import { Transform, Readable, Writable } from 'stream';
@@ -397,10 +397,6 @@ class SimpleFtpApi implements FsApi {
         }
     }
 
-    getParent(dir: string): File {
-        return { ...Parent, dir }
-    }
-
     async getStream(path: string, file: string, transferId = -1): Promise<Readable> {
         try {
             // create a duplex stream
@@ -422,6 +418,16 @@ class SimpleFtpApi implements FsApi {
     async putStream(readStream: fs.ReadStream, dstPath: string, progress: (bytesRead: number) => void, transferId = -1): Promise<void> {
         debugger;
         return Promise.resolve();
+    }
+
+    getParentTree(dir: string): Array<{ dir: string, fullname: string }> {
+        console.error('TODO: implement me');
+        const numParts = dir.replace(/^\//, '').split('/').length;
+        const folders = [];
+        for (let i = 0; i < numParts; ++i) {
+
+        }
+        return [];
     }
 
     sanityze(path: string) {

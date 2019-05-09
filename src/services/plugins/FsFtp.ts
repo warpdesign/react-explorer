@@ -1,4 +1,4 @@
-import { FsApi, File, ICredentials, Fs, Parent, filetype } from '../Fs';
+import { FsApi, File, ICredentials, Fs, filetype } from '../Fs';
 import * as ftp from 'ftp';
 import * as path from 'path';
 import * as fs from 'fs';
@@ -259,13 +259,14 @@ class Client {
                         isDir: boolean;
                         readonly: boolean;
                         */
-                    if (appendParent && !this.api.isRoot(newpath)) {
-                        const parent = { ...Parent, dir: path };
+                    resolve(files);
+                    // if (appendParent && !this.api.isRoot(newpath)) {
+                    //     const parent = { ...Parent, dir: path };
 
-                        resolve([parent].concat(files));
-                    } else {
-                        resolve(files);
-                    }
+                    //     resolve([parent].concat(files));
+                    // } else {
+                    //     resolve(files);
+                    // }
                 }
             });
         });
@@ -675,10 +676,6 @@ class FtpAPI implements FsApi {
         }
     }
 
-    getParent(dir: string): File {
-        return { ...Parent, dir }
-    }
-
     off() {
         console.log('*** free');
         // free client
@@ -731,6 +728,16 @@ class FtpAPI implements FsApi {
         const info = new URL(str);
 
         return info.hostname.toLowerCase();
+    }
+
+    getParentTree(dir: string): Array<{ dir: string, fullname: string }> {
+        console.error('TODO: implement me');
+        const numParts = dir.replace(/^\//, '').split('/').length;
+        const folders = [];
+        for (let i = 0; i < numParts; ++i) {
+
+        }
+        return [];
     }
 
     sanityze(path: string) {

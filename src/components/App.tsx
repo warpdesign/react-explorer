@@ -18,14 +18,15 @@ import { PrefsDialog } from "./dialogs/PrefsDialog";
 import { HamburgerMenu } from "./HamburgerMenu";
 import { ShortcutsDialog } from "./dialogs/ShortcutsDialog";
 import { shouldCatchEvent, isEditable } from "../utils/dom";
-import { WithMenuAccelerators, Accelerators, Accelerator } from "./WithMenuAccelerators";
+import { WithMenuAccelerators, Accelerators, Accelerator, sendFakeCombo } from "./WithMenuAccelerators";
 import { remote } from 'electron';
-import { isPackage } from '../utils/platform';
+import { isPackage, isWin } from '../utils/platform';
 import { TabDescriptor } from "./TabList";
 
 require("@blueprintjs/core/lib/css/blueprint.css");
 require("@blueprintjs/icons/lib/css/blueprint-icons.css");
 require("../css/main.css");
+require("../css/windows.css");
 
 interface IState {
     isPrefsOpen: boolean;
@@ -37,9 +38,9 @@ interface InjectedProps extends WithNamespaces {
     settingsState: SettingsState
 }
 
-const EXIT_DELAY = 1200;
-const KEY_Q = 81;
-const UP_DELAY = 130;
+enum KEYS {
+    TAB = 9
+};
 
 declare var ENV: any;
 
@@ -95,7 +96,19 @@ class App extends React.Component<WithNamespaces, IState> {
     }
 
     onShortcutsCombo = (e: KeyboardEvent) => {
-        if (shouldCatchEvent(e) && e.which === 191 && e.shiftKey) {
+        // Little hack to prevent pressing tab key from focus an element:
+        // we prevent the propagation of the tab key keydown event
+        // but this will then prevent the menu accelerators from working
+        // so we simply send a fakeCombo to conter that.
+        // We could simply disable outline using css but we want to keep
+        // the app accessible.
+        if (e.ctrlKey && e.keyCode === KEYS.TAB) {
+            e.stopPropagation();
+            e.stopImmediatePropagation();
+            e.preventDefault();
+            const combo = e.shiftKey ? 'Ctrl+Shift+Tab' : 'Ctrl+Tab';
+            sendFakeCombo(combo);
+        } else if (shouldCatchEvent(e) && e.which === 191 && e.shiftKey) {
             console.log('stopPropagation');
             e.stopPropagation();
             e.stopImmediatePropagation();
@@ -221,6 +234,7 @@ class App extends React.Component<WithNamespaces, IState> {
         // listen for events from main process
         this.addListeners();
         this.setDarkTheme();
+        this.setPlatformClass();
     }
 
     componentWillUnmount() {
@@ -424,7 +438,7 @@ class App extends React.Component<WithNamespaces, IState> {
     onDebugCache = () => {
         let i = 0;
         for (let cache of this.appState.views[0].caches) {
-            console.log('cache', cache.selected.length, cache.selected, cache.position, cache.selectedId);
+            console.log('cache', cache.selected.length, cache.selected, cache.selectedId, cache.editingId);
         }
     }
 
@@ -573,6 +587,12 @@ class App extends React.Component<WithNamespaces, IState> {
             document.body.classList.add(Classes.DARK);
         } else {
             document.body.classList.remove(Classes.DARK);
+        }
+    }
+
+    setPlatformClass() {
+        if (isWin) {
+            document.body.classList.add('windows');
         }
     }
 

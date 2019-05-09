@@ -22,6 +22,7 @@ interface InjectedProps extends WithNamespaces {
 @observer
 class TabListClass extends React.Component<InjectedProps> {
     menuRef: React.RefObject<ContextMenu> = React.createRef();
+    menuFolderRef: React.RefObject<ContextMenu> = React.createRef();
     menuIndex = 0;
 
     constructor(props: InjectedProps) {
@@ -75,6 +76,10 @@ class TabListClass extends React.Component<InjectedProps> {
         console.log('menu Click', item);
     }
 
+    onMenuFolderClick = (item: number) => {
+        console.log()
+    }
+
     onContextMenu = (menuIndex: number) => {
         this.menuIndex = menuIndex;
         this.menuRef.current.showMenu();
@@ -101,6 +106,40 @@ class TabListClass extends React.Component<InjectedProps> {
             //     break;
             // case 'COPY_PATH':
         }
+    }
+
+    onFolderItemClick = (menuItem: MenuItem & { id: string }) => {
+        console.log('folderItem click', menuItem);
+        const { viewState } = this.injected;
+        const cache = viewState.getVisibleCache();
+        if (menuItem.id) {
+            cache.openDirectory({
+                dir: cache.path,
+                fullname: menuItem.id
+            });
+        }
+    };
+
+    onFolderContextMenu = (e: React.MouseEvent) => {
+        const { t } = this.injected;
+        const { viewState } = this.injected;
+
+        e.preventDefault();
+        e.stopPropagation();
+
+        // TODO: get path entries
+        const cache = viewState.getVisibleCache();
+        const tree = cache.getAPI().getParentTree(cache.path);
+
+        const template: MenuItemConstructorOptions[] = tree.map((el: { dir: string, fullname: string, name: string }) => {
+            return {
+                label: el.name,
+                id: el.fullname,
+                click: this.onFolderItemClick
+            };
+        });
+
+        this.menuFolderRef.current.showMenu(template);
     }
 
     render() {
@@ -152,14 +191,15 @@ class TabListClass extends React.Component<InjectedProps> {
         return (
             <ButtonGroup fill className="tablist" alignText="center">
                 <ContextMenu ref={this.menuRef} onItemClick={this.onMenuClick} template={template}></ContextMenu>
+                <ContextMenu ref={this.menuFolderRef} onItemClick={this.onMenuFolderClick} template={null}></ContextMenu>
                 {
                     caches.map((cache, index) => {
-                        const closeIcon = cache.isVisible && caches.length > 1 && <Icon iconSize={12} htmlTitle={t('TABS.CLOSE')} className="closetab" intent="warning" onClick={this.closeTab.bind(this, index)} icon="cross"></Icon>;
+                        const closeIcon = caches.length > 1 && <Icon iconSize={12} htmlTitle={t('TABS.CLOSE')} className="closetab" intent="warning" onClick={this.closeTab.bind(this, index)} icon="cross"></Icon>;
                         const path = cache.path;
                         const tabInfo = cache.getFS().displaypath(path);
 
                         return (
-                            <Button key={"" + viewId + index} onContextMenu={() => this.onContextMenu(index)} onClick={this.selectTab.bind(this, index)} title={tabInfo.fullPath} intent={cache.isVisible ? "primary" : "none"} rightIcon={closeIcon}>{tabInfo.shortPath}</Button>
+                            <Button key={"" + viewId + index} onContextMenu={() => this.onContextMenu(index)} onClick={this.selectTab.bind(this, index)} title={tabInfo.fullPath} intent={cache.isVisible ? "primary" : "none"} rightIcon={closeIcon} className="tab"><Icon onContextMenu={this.onFolderContextMenu} className="folder" icon="folder-close"></Icon>{tabInfo.shortPath}</Button>
                         )
                     })
                 }

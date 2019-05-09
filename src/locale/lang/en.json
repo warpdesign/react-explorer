@@ -117,6 +117,11 @@
             "FOLDERS": "{{count}} folder",
             "FOLDERS_plural": "{{count}} folders"
         },
+        "TOOLBAR": {
+            "BACK": "Goto previously visited folder",
+            "FORWARD": "Goto previously visited folder",
+            "PARENT": "Open parent folder"
+        },
         "COMMON": {
             "SIZE": {
                 "B": "byte",

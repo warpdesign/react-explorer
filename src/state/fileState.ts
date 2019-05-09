@@ -26,10 +26,10 @@ export class FileState {
     // cache reload
     scrollTop = -1;
 
-    // the last cursor position
-    position = -1;
-
+    // last element that was selected (ie: cursor position)
     selectedId: FileID = null;
+    // element that's being edited
+    editingId: FileID = null;
 
     @observable
     sortMethod: TSORT_METHOD_NAME = 'name';
@@ -181,7 +181,7 @@ export class FileState {
             this.addPathToHistory(path);
             this.scrollTop = 0;
             this.selectedId = null;
-            this.position = -1;
+            this.editingId = null;
         }
     }
 
@@ -265,20 +265,38 @@ export class FileState {
         const newSelection = [];
         if (isSameDir) {
             for (let selection of this.selected) {
-                const newFile = this.files.find(file => file.fullname === selection.fullname);
+                // use inode/dev to retrieve files that were selected before reload:
+                // we cannot use fullname anymore since files may have been renamed
+                const newFile = this.files.find(file => file.id.dev === selection.id.dev && file.id.ino === selection.id.ino);
                 if (newFile) {
                     newSelection.push(newFile);
                 }
             }
-            const selectedFile = newSelection[newSelection.length - 1];
-            this.selected.replace(newSelection);
-            this.selectedId = {
-                ino: selectedFile.id.ino,
-                dev: selectedFile.id.dev
+            if (newSelection.length) {
+                const selectedFile = newSelection[newSelection.length - 1];
+                this.selected.replace(newSelection);
+                this.selectedId = {
+                    ...selectedFile.id
+                }
+            } else {
+                this.selected.clear();
+                this.selectedId = null;
             }
         } else {
             this.selected.clear();
             this.selectedId = null;
+        }
+    }
+
+    @action
+    setEditingFile(file: File) {
+        console.log('setEditingFile', file);
+        if (file) {
+            this.editingId = {
+                ...file.id
+            }
+        } else {
+            this.editingId = null;
         }
     }
 
@@ -515,10 +533,6 @@ export class FileState {
         return this.api.join(path, path2);
     }
 
-    getParent(dir: string): File {
-        return this.api.getParent(dir);
-    }
-
     async openFile(appState: AppState, cache: FileState, file: File) {
         try {
             const path = await appState.prepareLocalTransfer(cache, [file]);
@@ -537,7 +551,7 @@ export class FileState {
         // });
     }
 
-    openDirectory(file: File) {
+    openDirectory(file: { dir: string, fullname: string }) {
         console.log('need to read dir', file.dir, file.fullname);
         return this.cd(file.dir, file.fullname).catch(this.handleError);
     }
@@ -546,6 +560,11 @@ export class FileState {
         if (this.getFS().name === 'local') {
             ipcRenderer.send('openTerminal', path);
         }
+    }
+
+    openParentDirectory() {
+        const parent = { dir: this.path, fullname: '..' };
+        this.openDirectory(parent);
     }
 
     isRoot(path: string): boolean {

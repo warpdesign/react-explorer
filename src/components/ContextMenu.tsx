@@ -11,7 +11,7 @@ interface IState {
 }
 
 export class ContextMenu extends React.Component<IProps, IState> {
-    menu: Menu;
+    menu: Menu = null;
 
     constructor(props: IProps) {
         super(props);
@@ -21,10 +21,16 @@ export class ContextMenu extends React.Component<IProps, IState> {
         };
 
         // generate menu
-        this.menu = remote.Menu.buildFromTemplate(props.template);
+        if (props.template) {
+            this.menu = remote.Menu.buildFromTemplate(props.template);
+        }
     }
 
-    showMenu() {
+    showMenu(template: MenuItemConstructorOptions[] = null) {
+        if (template) {
+            this.menu = remote.Menu.buildFromTemplate(template);
+        }
+
         const window = remote.getCurrentWindow();
         this.menu.popup({
             window

@@ -1,4 +1,4 @@
-import { FsApi, File, ICredentials, Fs, Parent, filetype, MakeId } from '../Fs';
+import { FsApi, File, ICredentials, Fs, filetype, MakeId } from '../Fs';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as mkdir from 'mkdirp';
@@ -293,10 +293,6 @@ class LocalApi implements FsApi {
         }
     }
 
-    getParent(dir: string): File {
-        return { ...Parent, dir: path.resolve(dir) }
-    }
-
     isRoot(path: string): boolean {
         return !!path.match(isRoot);
     }
@@ -346,6 +342,38 @@ class LocalApi implements FsApi {
                 resolve();
             });
         });
+    }
+
+    getParentTree(dir: string): Array<{ dir: string, fullname: string, name: string }> {
+        const parts = dir.split(SEP);
+        const max = parts.length - 1;
+        let fullname = '';
+
+        if (dir.length === 1) {
+            return [{
+                dir,
+                fullname: '',
+                name: dir
+            }]
+        } else {
+            const folders = [];
+
+            for (let i = 0; i <= max; ++i) {
+                folders.push({
+                    dir,
+                    fullname,
+                    name: parts[max - i] || SEP
+                });
+
+                if (!i) {
+                    fullname += '..';
+                } else {
+                    fullname += '/..'
+                }
+            }
+
+            return folders;
+        }
     }
 
     sanityze(path: string) {
