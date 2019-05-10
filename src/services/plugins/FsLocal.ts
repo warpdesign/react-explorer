@@ -15,7 +15,7 @@ const SEP = path.sep;
 
 // Since nodeJS will translate unix like paths to windows path, when running under Windows
 // we accept Windows style paths (eg. C:\foo...) and unix paths (eg. /foo or ./foo)
-const localStart = isWin && /^(([a-zA-Z]\:)|([\.]*\/|\.)|(\\\\))/ || /^([\.]*\/|\.)/;
+const localStart = isWin && /^(([a-zA-Z]\:)|([\.]*\/|\.)|(\\\\)|~)/ || /^([\.]*\/|\.|~)/;
 const isRoot = isWin && /((([a-zA-Z]\:)(\\)*)|(\\\\))$/ || /^\/$/;
 
 class LocalApi implements FsApi {
@@ -44,7 +44,9 @@ class LocalApi implements FsApi {
     }
 
     resolve(newPath: string): string {
-        return path.resolve(newPath);
+        // gh#44: replace ~ with userpath
+        const dir = newPath.replace(/^~/, HOME_DIR);
+        return path.resolve(dir);
     }
 
     cd(path: string, transferId = -1) {
