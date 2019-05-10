@@ -180,7 +180,7 @@
         },
         "TOOLTIP": {
             "PATH": {
-                "TITLE1": "Entrer le chemin vers un dossier local ou distant pour en afficher le contenu.",
+                "TITLE1": "Entrer le chemin vers un dossier local pour en afficher le contenu.",
                 "TITLE2": "Exemples:",
                 "EXAMPLE_WIN": "C:\\Users\\Nico",
                 "EXAMPLE_MAC": "/Users/robert/Documents",

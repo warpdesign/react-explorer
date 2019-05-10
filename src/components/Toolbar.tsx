@@ -386,7 +386,7 @@ export class ToolbarClass extends React.Component<IProps, PathInputState> {
                 <p>{t('TOOLTIP.PATH.TITLE1')}</p>
                 <p>{t('TOOLTIP.PATH.TITLE2')}</p>
                 <ul>
-                    <li>{localExample}/</li>
+                    <li>{localExample}</li>
                     {/* <li>{t('TOOLTIP.PATH.FTP1')}</li>
                     <li>{t('TOOLTIP.PATH.FTP2')}</li> */}
                 </ul>

@@ -180,7 +180,7 @@
         },
         "TOOLTIP": {
             "PATH": {
-                "TITLE1": "Enter a local or remote path to show its contents.",
+                "TITLE1": "Enter a local path to show its contents.",
                 "TITLE2": "Examples:",
                 "EXAMPLE_WIN": "C:\\Users\\Jack",
                 "EXAMPLE_MAC": "/Users/jack/Documents",
