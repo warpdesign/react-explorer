@@ -1,8 +1,9 @@
 import { app, BrowserWindow, ipcMain, ipcRenderer } from 'electron';
 import * as process from 'process';
 import { watch } from 'fs';
+import * as path from 'path';
 import { AppMenu, LocaleString } from './appMenus';
-import { isPackage } from '../utils/platform';
+import { isPackage, isLinux } from '../utils/platform';
 import * as windowStateKeeper from 'electron-window-state';
 
 declare var __dirname: string
@@ -77,7 +78,8 @@ const ElectronApp = {
             y: winState.y,
             webPreferences: {
                 enableBlinkFeatures: 'OverlayScrollbars,OverlayScrollbarsFlashAfterScrollUpdate,OverlayScrollbarsFlashWhenMouseEnter'
-            }
+            },
+            icon: isLinux && path.join(__dirname, 'icon.png') || undefined
         });
 
         winState.manage(this.mainWindow);

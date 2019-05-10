@@ -8,7 +8,7 @@
     "appId": "reactexplorer",
     "mac": {
       "darkModeSupport": true,
-      "icon": "icon.png"
+      "icon": "icon.icns"
     },
     "win": {
       "icon": "icon.ico"
@@ -17,7 +17,10 @@
       "synopsis": "React-based FileManager",
       "description": "Plugin-based file explorer written with React",
       "category": "FileManager",
-      "target": "AppImage"
+      "target": [
+        "deb",
+        "AppImage"
+      ]
     },
     "files": [
       "build/**/*"
@@ -35,7 +38,11 @@
     "dist-linux": "webpack --config webpack.config.production.js && electron-builder -l"
   },
   "postinstall": "electron-builder install-app-deps",
-  "author": "Nicolas Ramz",
+  "author": {
+    "name": "Nicolas Ramz",
+    "email": "nicolas.ramz@gmail.com",
+    "url": "https://www.warpdesign.fr"
+  },
   "license": "MIT",
   "devDependencies": {
     "@types/classnames": "^2.2.7",

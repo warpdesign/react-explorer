@@ -6,10 +6,10 @@ import { SettingsState } from "../../state/settingsState";
 import { inject } from "mobx-react";
 import { Select, ItemRenderer } from "@blueprintjs/select";
 import { FsLocal, FolderExists } from "../../services/plugins/FsLocal";
-import { remote, ipcRenderer } from "electron";
+import { ipcRenderer } from "electron";
+import { HOME_DIR } from '../../utils/platform';
 
 const DEBOUNCE_DELAY = 300;
-const HOME_DIR = remote.app.getPath('home');
 
 interface IPrefsProps extends WithNamespaces {
     isOpen: boolean;

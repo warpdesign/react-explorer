@@ -14,5 +14,9 @@ export const isMojave = isMac && ((parseInt(release().split('.')[0], 10) - 4) >=
 export const isWin = platform === 'win32';
 export const isLinux = platform === 'linux';
 export const metaKeyCode = isMac && META_KEY || CTRL_KEY;
-export const defaultFolder = ENV.NODE_ENV === 'production' ? appInstance.getPath('home') : (platform === "win32" ? appInstance.getPath('temp') : '/tmp/react-explorer');
 export const lineEnding = isWin ? '\r\n' : '\n';
+// Folders
+export const defaultFolder = ENV.NODE_ENV === 'production' ? appInstance.getPath('home') : (platform === "win32" ? appInstance.getPath('temp') : '/tmp/react-explorer');
+export const TMP_DIR = appInstance.getPath('temp');
+export const HOME_DIR = appInstance.getPath('home');
+export const DOWNLOADS_DIR = appInstance.getPath('downloads');

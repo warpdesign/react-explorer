@@ -1,9 +1,9 @@
 import { action, observable, computed } from 'mobx';
-import { File, FsApi, getFS, DOWNLOADS_DIR } from '../services/Fs';
+import { File, FsApi, getFS } from '../services/Fs';
 import { FileState } from './fileState';
 import { Batch } from '../transfers/batch';
 import { clipboard } from 'electron';
-import { lineEnding } from '../utils/platform';
+import { lineEnding, DOWNLOADS_DIR } from '../utils/platform';
 import { TabDescriptor } from '../components/TabList';
 import { ViewState } from './viewState';
 

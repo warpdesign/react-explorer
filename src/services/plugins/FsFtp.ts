@@ -7,13 +7,12 @@ import { remote } from 'electron';
 import { throttle } from '../../utils/throttle';
 import { Logger, JSObject } from "../../components/Log";
 import { EventEmitter } from 'events';
-import { isWin } from '../../utils/platform';
+import { isWin, DOWNLOADS_DIR } from '../../utils/platform';
 import * as nodePath from 'path';
 
 const FtpUrl = /^(ftp\:\/\/)*(ftp\.[a-z]+\.[a-z]{2,3}|[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})$/i;
 const ServerPart = /^(ftp\:\/\/)*(ftp\.[a-z]+\.[a-z]{2,3}|[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})/i;
 const invalidChars = /^[\.]+$/ig;
-const TMP_DIR = remote.app.getPath('downloads');
 
 function join(path1: string, path2: string) {
     let prefix = '';
@@ -631,7 +630,7 @@ class FtpAPI implements FsApi {
     };
 
     get(file_path: string, file: string): Promise<string> {
-        const dest = path.join(TMP_DIR, file);
+        const dest = path.join(DOWNLOADS_DIR, file);
         console.log('need to get file', this.join(file_path, file), 'to', dest);
         return this.master.get(this.join(file_path, file), dest);
     }
