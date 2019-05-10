@@ -251,7 +251,9 @@ export class FileTableClass extends React.Component<IProps, IState> {
         const dirs = list.filter(file => file.isDir);
         const files = list.filter(file => !file.isDir);
 
-        const nodes = dirs.sort(SortFn)
+        // if we sort by size, we only sort files by size: folders should still be sorted
+        // alphabetically
+        const nodes = dirs.sort(sortMethod !== 'size' ? SortFn : getSortMethod('name', 'asc'))
             .concat(files.sort(SortFn))
             .map((file, i) => this.buildNodeFromFile(file, keepSelection));
 
@@ -801,7 +803,7 @@ export class FileTableClass extends React.Component<IProps, IState> {
                             headerRenderer={this.headerRenderer}
                             dataKey="size"
                             flexShrink={1}
-                            columnData={{ 'index': 1, sortMethod: 'ctime' }}
+                            columnData={{ 'index': 1, sortMethod: 'size' }}
                         />
                     </Table>
                 )

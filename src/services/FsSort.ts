@@ -1,7 +1,7 @@
 import { File } from "./Fs";
 
 export type TSORT_ORDER = 'asc' | 'desc';
-export type TSORT_METHOD_NAME = 'ctime' | 'btime' | 'name';
+export type TSORT_METHOD_NAME = 'ctime' | 'btime' | 'name' | 'size';
 export type TSORT_METHOD = (file1: File, file2: File) => number;
 
 export type ISORT_METHODS = {
@@ -24,7 +24,18 @@ export function getSortMethod(method: TSORT_METHOD_NAME, order: TSORT_ORDER): TS
 export const SortMethods: ISORT_METHODS = {
     name: sortName,
     ctime: (file1: File, file2: File) => sortTime(file1.mDate, file2.mDate),
-    btime: (file1: File, file2: File) => sortTime(file1.bDate, file2.bDate)
+    btime: (file1: File, file2: File) => sortTime(file1.bDate, file2.bDate),
+    size: (file1: File, file2: File) => sortSize(file1, file2)
+}
+
+function sortSize(file1: File, file2: File) {
+    if (file1.length < file2.length) {
+        return -1;
+    } else if (file1.length > file2.length) {
+        return 1;
+    } else {
+        return 0;
+    }
 }
 
 function sortTime(t1: Date, t2: Date) {

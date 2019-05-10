@@ -1,0 +1,4 @@
+/* put ok button first on Windows */
+.windows .bp3-alert-footer .bp3-button:first-child, .windows .bp3-dialog-footer .bp3-button:first-child{
+    order:1;
+}
