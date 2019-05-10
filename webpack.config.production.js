@@ -93,6 +93,10 @@ module.exports = [
                 }),
                 new CopyPlugin([
                     {
+                        from: 'img/icon.icns',
+                        to: 'icon.icns'
+                    },
+                    {
                         from: 'img/icon-512x512.png',
                         to: 'icon.png'
                     },

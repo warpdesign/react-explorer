@@ -3,7 +3,6 @@ import { FsGeneric } from './plugins/FsGeneric';
 import { FsSimpleFtp } from './plugins/FsSimpleFtp';
 import { remote } from 'electron';
 import { Readable } from 'stream';
-import { Stats } from 'fs';
 
 export interface FileID {
     ino: number;
@@ -115,8 +114,6 @@ export interface FsApi {
 }
 
 const interfaces: Array<Fs> = new Array();
-
-export const DOWNLOADS_DIR = remote.app.getPath('downloads');
 
 export interface ICredentials {
     user?: string;

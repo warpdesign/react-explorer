@@ -286,6 +286,10 @@ body.bp3-dark .bp3-loader.active{
     left: -2px;
 }
 
+.tablist{
+    z-index:0;
+}
+
 .tablist button{
     border-bottom-left-radius:0;
     cursor:default;

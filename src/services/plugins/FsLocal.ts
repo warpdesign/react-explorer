@@ -6,7 +6,7 @@ import * as del from 'del';
 import { size } from '../../utils/size';
 import { throttle } from '../../utils/throttle';
 const { Transform } = require('stream');
-import { isWin } from '../../utils/platform';
+import { isWin, HOME_DIR } from '../../utils/platform';
 import { LocalWatch } from './LocalWatch';
 
 const invalidDirChars = isWin && /[\*:<>\?|"]+/ig || /^[\.]+[\/]+(.)*$/ig;
