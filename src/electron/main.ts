@@ -38,6 +38,7 @@ const ElectronApp = {
             console.log('before quit');
             if (!this.forceExit) {
                 e.preventDefault();
+                this.mainWindow.webContents.send('exitRequest');
             } else {
                 this.cleanupAndExit();
             }
