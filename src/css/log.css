@@ -16,6 +16,7 @@
     transition-timing-function: ease-in-out;
     transition-duration:.3s;
     box-shadow:0 -5px 12px rgba(0,0,0,.3);
+    user-select:text;
 }
 
 .console.visible{
