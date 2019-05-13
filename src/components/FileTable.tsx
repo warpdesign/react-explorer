@@ -561,6 +561,7 @@ export class FileTableClass extends React.Component<IProps, IState> {
             }
         } catch (error) {
             const { t } = this.injected;
+
             AppAlert.show(t('ERRORS.GENERIC', { error }), {
                 intent: 'danger'
             });

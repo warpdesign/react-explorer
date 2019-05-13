@@ -117,16 +117,16 @@ button.small:hover{
 }
 
 .downloads{
+    overflow:auto;
     width: auto;
-    align-self: flex-start;
     flex-grow:1;
 }
 
 .downloads.empty{
-    flex-grow: 0;
     display: flex;
     flex-direction: column;
-    padding-top:20%;
+    flex-grow: 0;
+    align-self: center;
 }
 
 .downloads.empty .bp3-icon{

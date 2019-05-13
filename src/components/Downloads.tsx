@@ -146,7 +146,7 @@ class DownloadsClass extends React.Component<IProps, IState> {
             return (
                 <div className="downloads empty">
                     <Icon iconSize={80} icon="document" color="#d9dde0"></Icon>
-                    <p>
+                    <p style={{ textAlign: 'center' }}>
                         {t('DOWNLOADS.EMPTY_TITLE')}
                     </p>
                 </div>

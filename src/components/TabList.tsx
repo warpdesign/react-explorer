@@ -1,5 +1,5 @@
 import * as React from "react";
-import { ButtonGroup, Button, Icon } from "@blueprintjs/core";
+import { ButtonGroup, Button, Icon, IconName } from "@blueprintjs/core";
 import { inject, observer } from "mobx-react";
 import { WithNamespaces, withNamespaces } from "react-i18next";
 import { ViewState } from "../state/viewState";
@@ -7,6 +7,7 @@ import { sendFakeCombo } from "./WithMenuAccelerators";
 import { ContextMenu } from './ContextMenu';
 import { MenuItemConstructorOptions, MenuItem } from "electron";
 import { SettingsState } from "../state/settingsState";
+import { DOWNLOADS_DIR, HOME_DIR, DOCS_DIR, DESKTOP_DIR, MUSIC_DIR, PICTURES_DIR, VIDEOS_DIR } from '../utils/platform';
 
 export interface TabDescriptor {
     viewId: number;
@@ -24,6 +25,35 @@ class TabListClass extends React.Component<InjectedProps> {
     menuRef: React.RefObject<ContextMenu> = React.createRef();
     menuFolderRef: React.RefObject<ContextMenu> = React.createRef();
     menuIndex = 0;
+
+    tabIcons = [{
+        regex: new RegExp('^' + DOWNLOADS_DIR),
+        icon: 'download'
+    },
+    {
+        regex: new RegExp('^' + MUSIC_DIR),
+        icon: 'music'
+    },
+    {
+        regex: new RegExp('^' + PICTURES_DIR),
+        icon: 'camera'
+    },
+    {
+        regex: new RegExp('^' + DESKTOP_DIR),
+        icon: 'desktop'
+    },
+    {
+        regex: new RegExp('^' + DOCS_DIR),
+        icon: 'projects'
+    },
+    {
+        regex: new RegExp('^' + HOME_DIR),
+        icon: 'home'
+    },
+    {
+        regex: new RegExp('^' + VIDEOS_DIR),
+        icon: 'video'
+    }];
 
     constructor(props: InjectedProps) {
         super(props);
@@ -142,13 +172,10 @@ class TabListClass extends React.Component<InjectedProps> {
         this.menuFolderRef.current.showMenu(template);
     }
 
-    render() {
-        const { viewState } = this.injected;
-        const { t } = this.props;
-        const viewId = viewState.viewId;
-        const caches = viewState.caches;
+    getTabMenu(): MenuItemConstructorOptions[] {
+        const { t } = this.injected;
 
-        const template: MenuItemConstructorOptions[] = [{
+        return [{
             label: t('TABS.NEW'),
             id: 'NEW_TAB',
             click: this.onItemClick
@@ -175,31 +202,41 @@ class TabListClass extends React.Component<InjectedProps> {
             label: t('APP_MENUS.OPEN_TERMINAL'),
             id: 'OPEN_TERMINAL',
             click: this.onItemClick
-            // }, {
-            //     label: 'open in finder/explorer/manager',
-            //     id: 'OPEN_EXPLORER',
-            //     click: this.onItemClick
-            // }, {
-            //     type: 'separator'
-            // }, {
-            //     label: 'Copy path',
-            //     id: 'COPY_PATH',
-            //     click: this.onItemClick
-            // }];
         }];
+    }
+
+    getTabIcon(path: string): IconName {
+        for (let obj of this.tabIcons) {
+            if (obj.regex.test(path)) {
+                return obj.icon as IconName;
+            }
+        }
+
+        return 'folder-close';
+    }
+
+    render() {
+        const { viewState } = this.injected;
+        const { t } = this.props;
+        const viewId = viewState.viewId;
+        const caches = viewState.caches;
+        // TODO: this will be created at each render: this should only be re-rendered
+        // whenever the language has changed
+        const tabMenuTemplate = this.getTabMenu();
 
         return (
             <ButtonGroup fill className="tablist" alignText="center">
-                <ContextMenu ref={this.menuRef} onItemClick={this.onMenuClick} template={template}></ContextMenu>
+                <ContextMenu ref={this.menuRef} onItemClick={this.onMenuClick} template={tabMenuTemplate}></ContextMenu>
                 <ContextMenu ref={this.menuFolderRef} onItemClick={this.onMenuFolderClick} template={null}></ContextMenu>
                 {
                     caches.map((cache, index) => {
                         const closeIcon = caches.length > 1 && <Icon iconSize={12} htmlTitle={t('TABS.CLOSE')} className="closetab" intent="warning" onClick={this.closeTab.bind(this, index)} icon="cross"></Icon>;
                         const path = cache.path;
+                        const tabIcon = this.getTabIcon(path);
                         const tabInfo = cache.getFS().displaypath(path);
 
                         return (
-                            <Button key={"" + viewId + index} onContextMenu={() => this.onContextMenu(index)} onClick={this.selectTab.bind(this, index)} title={tabInfo.fullPath} intent={cache.isVisible ? "primary" : "none"} rightIcon={closeIcon} className="tab"><Icon onContextMenu={this.onFolderContextMenu} className="folder" icon="folder-close"></Icon>{tabInfo.shortPath}</Button>
+                            <Button key={"" + viewId + index} onContextMenu={() => this.onContextMenu(index)} onClick={this.selectTab.bind(this, index)} title={tabInfo.fullPath} intent={cache.isVisible ? "primary" : "none"} rightIcon={closeIcon} className="tab"><Icon onContextMenu={this.onFolderContextMenu} className="folder" icon={tabIcon}></Icon>{tabInfo.shortPath}</Button>
                         )
                     })
                 }

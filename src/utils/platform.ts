@@ -20,3 +20,8 @@ export const defaultFolder = ENV.NODE_ENV === 'production' ? appInstance.getPath
 export const TMP_DIR = appInstance.getPath('temp');
 export const HOME_DIR = appInstance.getPath('home');
 export const DOWNLOADS_DIR = appInstance.getPath('downloads');
+export const MUSIC_DIR = appInstance.getPath('music');
+export const DOCS_DIR = appInstance.getPath('documents');
+export const DESKTOP_DIR = appInstance.getPath('desktop');
+export const PICTURES_DIR = appInstance.getPath('pictures');
+export const VIDEOS_DIR = appInstance.getPath('videos');

@@ -170,7 +170,7 @@
             "550": "File unavailable, not found, not accessible",
             "NOT_A_DIR": "Path entered is not a directory",
             "UNKNOWN": "An error has occured",
-            "GENERIC": "{{message}} (code {{code}})",
+            "GENERIC": "{{error.message}} (code {{error.code}})",
             "BAD_FILENAME": "File or directory name not valid: '{{entry}}'",
             "WIN_VALID_FILENAME": "All characters except *:<>\\?| can be used",
             "UNIX_VALID_FILENAME": "All characters except / can be used",

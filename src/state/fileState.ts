@@ -326,7 +326,6 @@ export class FileState {
 
         switch (niceError.code) {
             case 'ENOTFOUND':
-                debugger;
                 niceError.message = i18next.t('ERRORS.ENOTFOUND');
                 break;
 
