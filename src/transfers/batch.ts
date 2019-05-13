@@ -18,7 +18,7 @@ export class Batch {
     public id: number;
     public srcName: string;
     public dstName: string;
-    public startDate: Date;
+    public startDate: Date = new Date();
 
     @observable
     public size: number = 0;
@@ -117,7 +117,7 @@ export class Batch {
 
     /**
      * Gets the next transfer(s) and starts them, where:
-     * num transfers = max(MAX_TRANSFERS, slotsAvailable)
+     * num transfers = min(MAX_TRANSFERS, slotsAvailable)
      * 
      */
     queueNextTransfers() {
