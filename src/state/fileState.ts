@@ -342,6 +342,10 @@ export class FileState {
                 niceError.message = i18next.t('ERRORS.EPERM');
                 break;
 
+            case 'EACCES':
+                niceError.message = i18next.t('ERRORS.EACCES');
+                break;
+
             case 'BAD_FILENAME':
                 const acceptedChars = isWin ? i18next.t('ERRORS.WIN_VALID_FILENAME') : i18next.t('ERRORS.UNIX_VALID_FILENAME');
 
@@ -350,6 +354,10 @@ export class FileState {
 
             case 'EHOSTDOWN':
                 niceError.message = i18next.t('ERRORS.EHOSTDOWN');
+                break;
+
+            case 'NOT_A_DIR':
+                niceError.message = i18next.t('ERRORS.NOT_A_DIR');
                 break;
 
             case 530:
@@ -412,10 +420,10 @@ export class FileState {
 
         return this.api.cd(joint)
             .then((path) => {
-                this.updatePath(path, skipHistory);
                 return this.list(path).then(() => {
+                    this.updatePath(path, skipHistory);
                     this.cmd = '';
-                    return path
+                    return path;
                 });
             })
             .catch((error) => {
