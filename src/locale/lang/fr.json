@@ -156,7 +156,11 @@
             "DELETE_plural": "Supprimer {{count}} éléments"
         },
         "DOWNLOADS": {
-            "EMPTY_TITLE": "Aucun téléchargement."
+            "EMPTY_TITLE": "Aucun téléchargement.",
+            "FINISHED": "Terminé ({{size}})",
+            "PROGRESS": "{{current}} / {{size}}",
+            "ERROR": "Erreur",
+            "CANCELLED": "Annulé"
         },
         "ERRORS": {
             "CANNOT_READ_FOLDER": "Impossible d'ouvrir '{{folder}}': fichier ou dossier introuvable",

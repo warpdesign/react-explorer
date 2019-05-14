@@ -156,7 +156,11 @@
             "DELETE_plural": "Delete {{count}} items"
         },
         "DOWNLOADS": {
-            "EMPTY_TITLE": "No download."
+            "EMPTY_TITLE": "No download.",
+            "FINISHED": "Finished ({{size}})",
+            "PROGRESS": "{{current}} / {{size}}",
+            "ERROR": "Error",
+            "CANCELLED": "Cancelled"
         },
         "ERRORS": {
             "CANNOT_READ_FOLDER": "Cannot open '{{folder}}': no such file or directory",

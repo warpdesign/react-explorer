@@ -135,6 +135,12 @@ export class Batch {
         }
     }
 
+    onTransferError = (transfer: FileTransfer, err: Error) => {
+        debugger;
+        transfer.status = 'error';
+        return this.transferDef.reject(err);
+    }
+
     @action
     /**
      * Immediately initiates a file transfer, queues the next transfer when it's done
@@ -169,8 +175,7 @@ export class Batch {
                 // and throw an error in this case because the putStream won't throw in this case:
                 // it will just stall
                 stream.on('error', (err) => {
-                    debugger;
-                    throw new Error('transfer');
+                    this.onTransferError(transfer, err);
                 });
                 await dstFs.putStream(stream, dstFs.join(fullDstPath, newFilename), (bytesRead: number) => {
                     // console.log('read', bytesRead);
@@ -182,8 +187,9 @@ export class Batch {
                 // TODO: catch batch cancel ?
                 debugger;
                 console.log('error with streams', err);
-                transfer.status = 'error';
-                return Promise.reject(err);
+                // transfer.status = 'error';
+                // return Promise.reject(err);
+                return this.onTransferError(transfer, err);
             }
 
         } else {

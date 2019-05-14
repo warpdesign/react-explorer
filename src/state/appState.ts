@@ -2,7 +2,7 @@ import { action, observable, computed } from 'mobx';
 import { File, FsApi, getFS } from '../services/Fs';
 import { FileState } from './fileState';
 import { Batch } from '../transfers/batch';
-import { clipboard } from 'electron';
+import { clipboard, shell } from 'electron';
 import { lineEnding, DOWNLOADS_DIR } from '../utils/platform';
 import { TabDescriptor } from '../components/TabList';
 import { ViewState } from './viewState';
@@ -150,10 +150,24 @@ export class AppState {
     }
 
     /**
+     * Opens a file that has been transfered
+     * 
+     * @param file the file to open
+     */
+    openTransferedFile(batchId: number, file: File) {
+        // TODO: this id duplicate code from appState/prepareLocalTransfer and fileState.openFile()
+        // because we don't have a reference to the destination cache
+        const batch = this.transfers.find(transfer => transfer.id === batchId);
+        const api = batch.dstFs;
+        const path = api.join(file.dir, file.fullname);
+        shell.openItem(path);
+    }
+
+    /**
      * Prepares transferring files from srcCache to temp location
      * in local filesystem
      * 
-     * @param srcCacche: cache to trasnfer files from
+     * @param srcCache: cache to trasnfer files from
      * @param files the list of files to transfer
      * 
      * @returns {Promise<FileTransfer[]>}

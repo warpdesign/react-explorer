@@ -1,7 +1,6 @@
 import { FsLocal } from './plugins/FsLocal';
 import { FsGeneric } from './plugins/FsGeneric';
 import { FsSimpleFtp } from './plugins/FsSimpleFtp';
-import { remote } from 'electron';
 import { Readable } from 'stream';
 
 export interface FileID {
