@@ -1,12 +1,12 @@
 import * as React from 'react';
-import { Callout, Code, ITreeNode, Tree, Icon, Button } from '@blueprintjs/core';
+import { ITreeNode, Tree, Icon } from '@blueprintjs/core';
 import { AppState } from '../state/appState';
 import { inject } from 'mobx-react';
 import { Batch } from '../transfers/batch';
 import { reaction, toJS, IReactionDisposer } from 'mobx';
+import i18next from 'i18next';
 import { withNamespaces, WithNamespaces } from 'react-i18next';
 import { formatBytes } from '../utils/formatBytes';
-import { getTargetTagName } from '../utils/dom';
 
 interface IProps extends WithNamespaces {
     hide: boolean;
@@ -41,6 +41,13 @@ class DownloadsClass extends React.Component<IProps, IState> {
         };
 
         this.installReaction();
+
+        // nodes are only generated after the transfers have changed
+        // changing the language will cause a new render, but with the
+        // same nodes (using the previous language)
+        // we listen for the languageChange event and re-generated the nodes
+        // with the updated language
+        this.bindLanguageChange();
     }
 
     private installReaction() {
@@ -52,8 +59,25 @@ class DownloadsClass extends React.Component<IProps, IState> {
         );
     }
 
+    private bindLanguageChange = () => {
+        i18next.on('languageChanged', this.onLanguageChanged);
+    }
+
+    private unbindLanguageChange = () => {
+        i18next.off('languageChanged', this.onLanguageChanged);
+    }
+
+    public onLanguageChanged = (lang: string) => {
+        const nodes = this.getTreeData(this.appState.transfers);
+        this.setState({ nodes });
+    }
+
     private get injected() {
         return this.props as InjectedProps;
+    }
+
+    componentWillUnMount() {
+        this.unbindLanguageChange();
     }
 
     private handleNodeCollapse = (nodeData: ITreeNode) => {
@@ -71,47 +95,45 @@ class DownloadsClass extends React.Component<IProps, IState> {
         this.setState(this.state);
     };
 
-    private handleActionClick = (nodeData: ITreeNode, nodePath: number[], e: React.MouseEvent<HTMLElement>) => {
-        console.log('need to handle action click');
-    };
-
-    private handleNodeClick = (nodeData: ITreeNode, nodePath: number[], e: React.MouseEvent<HTMLElement>) => {
-        if (getTargetTagName(e.nativeEvent).match(/svg|path/)) {
-            this.handleActionClick(nodeData, nodePath, e);
-        } else {
-            debugger;
+    onCloseClick(transferId: number, fileId: number) {
+        const appState = this.appState;
+        const transfer = appState.getTransfer(transferId);
+        if (transfer.hasEnded) {
+            appState.removeTransfer(transferId);
         }
-    };
+    }
 
     getTreeData(transfers: Batch[]) {
         const treeData: ITreeNode[] = [];
 
         for (let transfer of transfers) {
-            let i = transfer.id;
             const sizeStr = transfer.status !== 'calculating' && formatBytes(transfer.size) || '';
             const transferProgress = formatBytes(transfer.progress);
 
             const node: ITreeNode =
             {
-                id: i++,
+                id: transfer.id,
                 hasCaret: true,
                 icon: "duplicate",
                 label: `${transfer.srcName} ⇢ ${transfer.dstName}`,
-                secondaryLabel: (<span>{`${transfer.status} - ${transferProgress} ${sizeStr}`} <Icon className="action" intent="danger" icon="small-cross" /></span>),
+                secondaryLabel: (<span>{`${transfer.status} - ${transferProgress} ${sizeStr}`} <Icon className="action" onClick={() => this.onCloseClick(transfer.id, -1)} intent="danger" icon="small-cross" /></span>),
                 isExpanded: !!this.state.expandedNodes[transfer.id],
                 childNodes: []
             };
 
+            let i = 0;
             for (let file of transfer.files) {
                 if (!file.file.isDir) {
                     const fileProgress = formatBytes(file.progress);
+                    const id = transfer.id + '_' + i;
                     // console.log(file.file.dir.split('/')[file.file.dir.split('/').length -1]);
                     node.childNodes.push({
-                        id: i++,
+                        id: id,
                         icon: 'document',
                         label: file.subDirectory ? (file.subDirectory + '/' + file.file.fullname) : file.file.fullname,
-                        secondaryLabel: (<span>{`${file.status} - ${fileProgress}`} <Icon className="action" intent="danger" icon="small-cross" /></span>)
+                        secondaryLabel: (<span>{`${file.status} - ${fileProgress}`} <Icon className="action" onClick={() => this.onCloseClick(transfer.id, i)} intent="danger" icon="small-cross" /></span>)
                     });
+                    i++;
                 }
             }
 
@@ -130,7 +152,7 @@ class DownloadsClass extends React.Component<IProps, IState> {
         const { nodes } = this.state;
         const { t } = this.props;
 
-        console.log('render downloads tree');
+        console.log('render downloads tree', t('DOWNLOADS.EMPTY_TITLE'));
 
         if (nodes.length) {
             return (
@@ -139,7 +161,6 @@ class DownloadsClass extends React.Component<IProps, IState> {
                     contents={nodes}
                     onNodeCollapse={this.handleNodeCollapse}
                     onNodeExpand={this.handleNodeExpand}
-                    onNodeClick={this.handleNodeClick}
                 />
             );
         } else {

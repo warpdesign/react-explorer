@@ -250,6 +250,10 @@ export class AppState {
         return totalSize && (totalProgress / totalSize) || 0;
     }
 
+    getTransfer(transferId: number): Batch {
+        return this.transfers.find(transfer => transferId === transfer.id);
+    }
+
     @computed
     get pendingTransfers(): number {
         const now = new Date();
@@ -284,6 +288,13 @@ export class AppState {
         }).catch((err) => {
             debugger;
         });
+    }
+
+    removeTransfer(transferId: number) {
+        const batch = this.transfers.find(transfer => transfer.id === transferId);
+        if (batch) {
+            this.transfers.remove(batch);
+        }
     }
 
     /* /transfers */

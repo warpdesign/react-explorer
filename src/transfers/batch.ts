@@ -35,6 +35,10 @@ export class Batch {
         return !this.status.match(/error|done/);
     }
 
+    get hasEnded(): boolean {
+        return !!this.status.match(/done|error/);
+    }
+
     public isExpanded: boolean = false;
 
     private transferDef: Deferred<any>;
