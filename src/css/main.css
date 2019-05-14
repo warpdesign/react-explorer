@@ -160,6 +160,11 @@ button.small:hover{
     vertical-align:top;
 }
 
+.bp3-navbar .download .bp3-button-text{
+    display: flex;
+    align-items: center;
+}
+
 .bp3-badge{
     display: inline-block;
     margin-left: 10px;

@@ -20,6 +20,7 @@ import { ShortcutsDialog } from "./dialogs/ShortcutsDialog";
 import { shouldCatchEvent, isEditable } from "../utils/dom";
 import { WithMenuAccelerators, Accelerators, Accelerator, sendFakeCombo } from "./WithMenuAccelerators";
 import { remote } from 'electron';
+import classnames from 'classnames';
 import { isPackage, isWin } from '../utils/platform';
 import { TabDescriptor } from "./TabList";
 
@@ -606,6 +607,7 @@ class App extends React.Component<WithNamespaces, IState> {
         const { t } = this.props;
         const viewStateLeft = this.appState.views[0];
         const viewStateRight = this.appState.views[1];
+        const downloadClass = classnames(Classes.MINIMAL, "download");
         // const cacheLeft = this.appState.getViewVisibleCache(0);
         // const cacheRight = this.appState.getViewVisibleCache(1);
 
@@ -639,7 +641,7 @@ class App extends React.Component<WithNamespaces, IState> {
                             <Navbar.Heading>{t('APP_MENUS.ABOUT_TITLE')}</Navbar.Heading>
                             <Navbar.Divider />
                             <Button className={Classes.MINIMAL} icon="home" text={t('NAV.EXPLORER')} onClick={this.navClick} intent={isExplorer ? Intent.PRIMARY : 'none'} />
-                            <Button style={{ position: 'relative' }} className={Classes.MINIMAL} icon="download" onClick={this.navClick} intent={!isExplorer ? Intent.PRIMARY : 'none'}>{t('NAV.TRANSFERS')}<Badge intent="none" text={badgeText} progress={badgeProgress} /></Button>
+                            <Button style={{ position: 'relative' }} className={downloadClass} icon="download" onClick={this.navClick} intent={!isExplorer ? Intent.PRIMARY : 'none'}>{t('NAV.TRANSFERS')}<Badge intent="none" text={badgeText} progress={badgeProgress} /></Button>
                         </Navbar.Group>
                         <Navbar.Group align={Alignment.RIGHT}>
                             <Navbar.Divider />
