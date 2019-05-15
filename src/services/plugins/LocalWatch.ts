@@ -17,7 +17,7 @@ const CB_FIRE_RATE = 500;
 export const LocalWatch = {
     watchers: new Array<IWatcher>(),
     getWatcher(path: string, createIfNull = false): IWatcher | null {
-        console.log('LocalWatch.getWatcher', path, createIfNull);
+        // console.log('LocalWatch.getWatcher', path, createIfNull);
         const watcher = this.watchers.find((watcher: IWatcher) => watcher.path === path);
         if (!watcher) {
             return createIfNull ? this.addWatcher(path) : null;
@@ -30,9 +30,9 @@ export const LocalWatch = {
         return watcher.callbacks;
     },
     createCallback(path: string) {
-        console.log('LocalWatch.createCallback', path);
+        // console.log('LocalWatch.createCallback', path);
         return debounce((eventType: string, filename: string | Buffer) => {
-            console.log('changeCallback', eventType, filename);
+            // console.log('changeCallback', eventType, filename);
             const callbacks = this.getCallbacks(path);
             for (let cb of callbacks) {
                 cb(filename);
@@ -40,7 +40,7 @@ export const LocalWatch = {
         }, CB_FIRE_RATE);
     },
     addWatcher(path: string): IWatcher {
-        console.log('LocalWatch.addWatcher', path);
+        // console.log('LocalWatch.addWatcher', path);
         const watcher = {
             path,
             callbacks: new Array<WatcherCB>(),
@@ -52,24 +52,24 @@ export const LocalWatch = {
         return watcher;
     },
     watchPath(path: string, callback: WatcherCB) {
-        console.log('LocalWatch.watchPath', path);
+        // console.log('LocalWatch.watchPath', path);
         const watcher = this.getWatcher(path, true);
         watcher.callbacks.push(callback);
     },
     stopWatchingPath(path: string, callback: WatcherCB) {
-        console.log('LocalWatch.stopWatchingPath', path);
+        // console.log('LocalWatch.stopWatchingPath', path);
         const watcher = this.getWatcher(path);
         if (watcher) {
-            console.log('LocalWatch.stopWatchingPath avant', watcher.callbacks.length);
+            // console.log('LocalWatch.stopWatchingPath avant', watcher.callbacks.length);
             watcher.callbacks = watcher.callbacks.filter((cb: WatcherCB) => cb !== callback);
-            console.log('LocalWatch.stopWatchingPath apres', watcher.callbacks.length);
+            // console.log('LocalWatch.stopWatchingPath apres', watcher.callbacks.length);
             if (!watcher.callbacks.length) {
-                console.log('no more callbacks: closing watch and removing watcher');
+                // console.log('no more callbacks: closing watch and removing watcher');
                 watcher.ref.close();
                 this.watchers = this.watchers.filter((w: IWatcher) => w !== watcher);
             }
         } else {
-            console.log('LocalWatch.noWatcher');
+            // console.log('LocalWatch.noWatcher');
         }
     },
     closeAll() {

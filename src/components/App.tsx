@@ -248,7 +248,6 @@ class App extends React.Component<WithNamespaces, IState> {
     componentDidUpdate() {
         const progress = this.appState.pendingTransfers && this.appState.totalTransferProgress || -1;
         this.setDarkTheme();
-        console.log('progress', progress);
         remote.getCurrentWindow().setProgressBar(progress);
     }
 

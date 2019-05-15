@@ -143,7 +143,6 @@ class DownloadsClass extends React.Component<IProps, IState> {
     getTransferIcon(transfer: Batch) {
         const status = transfer.status;
         const intent = status.match(/error|cancelled/) ? Intent.DANGER : ((status === 'done' && Intent.SUCCESS) || Intent.NONE);
-        console.log('status', status);
 
         return (<Icon icon="dot" className={Classes.TREE_NODE_ICON} intent={intent}></Icon>)
     }
@@ -158,19 +157,21 @@ class DownloadsClass extends React.Component<IProps, IState> {
         const transferSize = transfer.status !== 'calculating' && sizeFormatted || '';
         const currentSize = formatBytes(transfer.progress);
         const percent = transfer.status === 'calculating' ? 0 : transfer.progress / transfer.size;
-        const done = transfer.hasEnded;
-        const rightLabel = done ? t('DOWNLOADS.FINISHED', { size: sizeFormatted }) : t('DOWNLOADS.PROGRESS', { current: currentSize, size: transferSize });
+        const ended = transfer.hasEnded;
+        const error = transfer.status === 'error';
+        const rightLabel = ended ? (error ? t('DOWNLOADS.ERROR') : t('DOWNLOADS.FINISHED', { size: sizeFormatted })) : t('DOWNLOADS.PROGRESS', { current: currentSize, size: transferSize });
+        const classes = classnames({ [Classes.INTENT_DANGER]: error });
 
         return (
-            <span>
-                {!done && <ProgressBar value={percent} animate={false}></ProgressBar>}
+            <span className={classes}>
+                {!ended && <ProgressBar value={percent} animate={false}></ProgressBar>}
                 {rightLabel}
-                <Icon className="action" onClick={() => this.onCloseClick(transfer.id, -1)} intent="danger" icon="small-cross" />
+                <Icon className="action" onClick={(e) => { e.stopPropagation(); this.onCloseClick(transfer.id, -1); }} intent="danger" icon="small-cross" />
             </span>
         );
     }
 
-    getFileRightLabel(file: FileTransfer) {
+    createFileRightLabel(file: FileTransfer) {
         const { t } = this.injected;
         const fileProgress = formatBytes(file.progress);
         const fileSize = formatBytes(file.file.length);
@@ -178,7 +179,8 @@ class DownloadsClass extends React.Component<IProps, IState> {
         const done = file.status.match(/done/);
         const isError = file.status.match(/error|cancelled/);
         const spanClass = classnames({
-            [Classes.INTENT_DANGER]: isError
+            [Classes.INTENT_DANGER]: isError,
+            [Classes.INTENT_SUCCESS]: done
         })
 
         return (<span className={spanClass}>
@@ -192,10 +194,6 @@ class DownloadsClass extends React.Component<IProps, IState> {
         const treeData: ITreeNode[] = [];
 
         for (let transfer of transfers) {
-            const sizeStr = transfer.status !== 'calculating' && formatBytes(transfer.size) || '';
-            console.log('progress', transfer.progress);
-            const transferProgress = formatBytes(transfer.progress);
-            const label = this.createTransferLabel(transfer);
 
             const node: ITreeNode =
             {
@@ -218,7 +216,7 @@ class DownloadsClass extends React.Component<IProps, IState> {
                         id: id,
                         icon: this.getFileIcon(filetype),
                         label: file.subDirectory ? (file.subDirectory + '/' + file.file.fullname) : file.file.fullname,
-                        secondaryLabel: this.getFileRightLabel(file),
+                        secondaryLabel: this.createFileRightLabel(file),
                         nodeData: {
                             transfer: file,
                             batchId: transfer.id
@@ -240,11 +238,9 @@ class DownloadsClass extends React.Component<IProps, IState> {
     }
 
     renderTransferTree() {
-        console.log('render');
+        // console.log('render');
         const { nodes } = this.state;
         const { t } = this.props;
-
-        console.log('render downloads tree', t('DOWNLOADS.EMPTY_TITLE'));
 
         if (nodes.length) {
             return (

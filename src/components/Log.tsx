@@ -49,7 +49,7 @@ function pushLog(lines: Printable[], intent: Intent) {
     // be sure the state is modified *outside*
     // of any render function
     setTimeout(() => {
-        console.log.apply(undefined, lines);
+        // console.log.apply(undefined, lines);
         runInAction(() => {
             Logger.logs.push({
                 date: new Date(),

@@ -95,7 +95,7 @@ export class FileState {
 
         const path = history[current + dir];
         if (path !== this.path || force) {
-            console.log('opening path from history', path);
+            // console.log('opening path from history', path);
             this.cd(path, '', true, true);
         } else {
             console.warn('preventing endless loop');
@@ -144,7 +144,7 @@ export class FileState {
     }
 
     onFSChange = (filename: string): void => {
-        console.log('fsChanged', filename);
+        // console.log('fsChanged', filename);
         this.reload();
     }
 
@@ -387,7 +387,7 @@ export class FileState {
     @action
     async cd(path: string, path2: string = '', skipHistory = false, skipContext = false): Promise<string> {
         // first updates fs (eg. was local fs, is now ftp)
-        console.log('cd', path, this.path);
+        // console.log('cd', path, this.path);
 
         if (this.path !== path) {
             if (this.getNewFS(path, skipContext)) {
@@ -441,7 +441,6 @@ export class FileState {
         return this.api.list(path, appendParent)
             .then((files: File[]) => {
                 runInAction(() => {
-                    console.log('run in actions', this.path);
                     this.files.replace(files);
                     // update the cache's selection, keeping files that were previously selected
                     this.updateSelection();
@@ -559,7 +558,7 @@ export class FileState {
     }
 
     openDirectory(file: { dir: string, fullname: string }) {
-        console.log('need to read dir', file.dir, file.fullname);
+        // console.log('need to read dir', file.dir, file.fullname);
         return this.cd(file.dir, file.fullname).catch(this.handleError);
     }
 

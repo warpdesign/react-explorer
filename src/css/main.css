@@ -359,7 +359,35 @@ body.bp3-dark .bp3-loader.active{
     text-overflow:ellipsis;
 }
 
-/*
-.tablist .sideview.active .tableRow.selected{
-    background-color:#137cbd;
-} */
+/* intent colors on any span */
+span.bp3-intent-success{
+    color:#0d8050;
+}
+
+span.bp3-intent-danger{
+    color:#c23030;
+}
+
+span.bp3-intent-primary{
+    color:#106ba3;
+}
+
+span.bp3-intent-warning{
+    color:#bf7326;
+}
+
+.bp3-dark span.bp3-intent-success{
+    color:#0f9960;
+}
+
+.bp3-dark span.bp3-intent-danger{
+    color:#db3737;
+}
+
+.bp3-dark span.bp3-intent-primary{
+    color:#137cbd;
+}
+
+.bp3-dark span.bp3-intent-warning{
+    color:#d9822b;
+}
