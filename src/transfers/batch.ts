@@ -2,6 +2,7 @@ import { observable, action, runInAction, computed } from "mobx";
 import { FsApi, File } from "../services/Fs";
 import { FileTransfer } from "./fileTransfer";
 import { Deferred } from "../utils/deferred";
+import { getLocalizedError } from "../locale/error";
 
 const MAX_TRANSFERS = 2;
 const RENAME_SUFFIX = '_';
@@ -138,6 +139,7 @@ export class Batch {
     onTransferError = (transfer: FileTransfer, err: Error) => {
         debugger;
         transfer.status = 'error';
+        transfer.error = getLocalizedError(err);
         // return this.transferDef.reject(err);
     }
 
