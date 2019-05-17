@@ -182,11 +182,11 @@ class DownloadsClass extends React.Component<IProps, IState> {
             [Classes.INTENT_DANGER]: isError,
             [Classes.INTENT_SUCCESS]: done
         });
-        const title = isError && file.error.message || undefined;
+        const errorMessage = isError && file.error.message || t('DOWNLOADS.ERROR');
 
-        return (<span className={spanClass} title={title}>
+        return (<span className={spanClass}>
             {started && t('DOWNLOADS.PROGRESS', { current: fileProgress, size: fileSize })}
-            {!started && (done ? fileSize : t('DOWNLOADS.ERROR'))}
+            {!started && (done ? fileSize : errorMessage)}
         </span>
         );
     }

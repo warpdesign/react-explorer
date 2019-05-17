@@ -323,7 +323,7 @@ class LocalApi implements FsApi {
             let count = LocalApi.counter++;
             let finished = false;
             let bytesRead = 0;
-            let error = null;
+
             const throttledProgress = throttle(() => { progress(bytesRead) }, 800);
 
             const reportProgress = new Transform({
@@ -364,11 +364,10 @@ class LocalApi implements FsApi {
                     resolve();
                 } else {
                     reject();
-                    debugger;
                 }
             });
             writeStream.once('end', () => console.log('end', count));
-            writeStream.once('error', (err) => {
+            writeStream.once('error', err => {
                 reject(err);
                 console.log('error', count)
             });

@@ -136,8 +136,8 @@ export class Batch {
         }
     }
 
+    @action
     onTransferError = (transfer: FileTransfer, err: Error) => {
-        debugger;
         transfer.status = 'error';
         transfer.error = getLocalizedError(err);
         // return this.transferDef.reject(err);
@@ -192,7 +192,6 @@ export class Batch {
                 transfer.status = 'done';
             } catch (err) {
                 // TODO: catch batch cancel ?
-                debugger;
                 console.log('error with streams', err);
                 // transfer.status = 'error';
                 // return Promise.reject(err);
