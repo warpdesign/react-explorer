@@ -78,6 +78,7 @@ export class FileState {
     navHistory(dir = -1, force = false) {
         if (!this.history.length) {
             console.warn('attempting to nav in empty history');
+            this.setStatus('blank');
             return;
         }
 

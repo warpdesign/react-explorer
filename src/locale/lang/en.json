@@ -143,6 +143,7 @@
             "AUTO": "Automatic",
             "CLOSE": "Close",
             "EMPTY_FOLDER": "Folder is empty.",
+            "NO_SUCH_FOLDER": "No such folder or permission denied.",
             "PATH_PLACEHOLDER": "Enter path to load"
         },
         "FILETABLE": {

@@ -27,6 +27,10 @@ button.small:hover{
     z-index:1;
 }
 
+.toolbar > .bp3-popover-wrapper{
+    flex-shrink:1;
+}
+
 /* auto resize layout */
 .filelist, .sideview{
     display:flex;
@@ -354,9 +358,20 @@ body.bp3-dark .bp3-loader.active{
 }
 
 .tablist .bp3-button .bp3-button-text{
-    white-space: nowrap;
     overflow:hidden;
+    white-space: nowrap;    
     text-overflow:ellipsis;
+}
+
+.tablist-wrapper{
+    position: relative;
+    padding-right: 30px;
+}
+
+.tablist-wrapper .addtab{
+    position:absolute;
+    right:0;
+    top:0;
 }
 
 /* intent colors on any span */

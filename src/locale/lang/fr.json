@@ -143,6 +143,7 @@
             "AUTO": "Automatique",
             "CLOSE": "Fermer",
             "EMPTY_FOLDER": "Dossier vide.",
+            "NO_SUCH_FOLDER": "Dossier inexistant ou inaccessible.",
             "PATH_PLACEHOLDER": "Entrer le chemin à visiter"
         },
         "FILETABLE": {

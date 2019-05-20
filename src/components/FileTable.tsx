@@ -264,10 +264,13 @@ export class FileTableClass extends React.Component<IProps, IState> {
 
     _noRowsRenderer = () => {
         const { t } = this.injected;
+        const status = this.cache.status;
 
         // we don't want to show empty + loader at the same time
-        if (this.cache.status !== 'busy') {
-            return (<div className="empty"><Icon icon="tick-circle" iconSize={40} />{t('COMMON.EMPTY_FOLDER')}</div>);
+        if (status !== 'busy') {
+            const placeholder = status === 'blank' && t('COMMON.NO_SUCH_FOLDER') || t('COMMON.EMPTY_FOLDER');
+            const icon = status === 'blank' ? 'warning-sign' : 'tick-circle';
+            return (<div className="empty"><Icon icon={icon} iconSize={40} />{placeholder}</div>);
         } else {
             return (<div />);
         }
