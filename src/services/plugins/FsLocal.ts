@@ -342,14 +342,14 @@ class LocalApi implements FsApi {
                 writeStream.destroy(err);
             });
 
-            console.log('open', count);
+            // console.log('open', count);
             const writeStream = fs.createWriteStream(dstPath);
 
             readStream.pipe(reportProgress)
                 .pipe(writeStream);
 
             writeStream.once('finish', () => {
-                console.log('finish', count);
+                // console.log('finish', count);
                 finished = true;
                 // resolve();
             });
@@ -359,19 +359,19 @@ class LocalApi implements FsApi {
             });
 
             writeStream.once('close', () => {
-                console.log('close', count);
+                // console.log('close', count);
                 if (finished) {
                     resolve();
                 } else {
                     reject();
                 }
             });
-            writeStream.once('end', () => console.log('end', count));
+            // writeStream.once('end', () => console.log('end', count));
             writeStream.once('error', err => {
                 reject(err);
-                console.log('error', count)
+                // console.log('error', count)
             });
-            writeStream.once('destroy', () => console.log('destroy', count));
+            // writeStream.once('destroy', () => console.log('destroy', count));
         })
     }
 

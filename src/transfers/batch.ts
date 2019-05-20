@@ -40,6 +40,10 @@ export class Batch {
         return !!this.status.match(/done|error/);
     }
 
+    get numErrors(): number {
+        return this.files.reduce((acc, val) => acc + (val.error && 1 || 0), 0);
+    }
+
     public isExpanded: boolean = false;
 
     private transferDef: Deferred<any>;

@@ -119,7 +119,6 @@ export class SideViewClass extends React.Component<InjectedProps>{
         const files = item.selectedCount > 0 ? item.fileState.selected.slice(0) : [item.dragFile];
 
         // TODO: check both cache are active?
-        console.log(1);
         appState.prepareTransferTo(item.fileState, fileCache, files).catch(err => {
             debugger;
         });

@@ -141,7 +141,6 @@ export class AppState {
             dstFsName: dstCache.getFS().name
         };
 
-        console.log(2);
         return this.addTransfer(options)
             .then(() => {
                 if (options.dstPath === dstCache.path && options.dstFsName === dstCache.getFS().name) {

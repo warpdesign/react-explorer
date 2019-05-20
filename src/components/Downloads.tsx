@@ -9,6 +9,7 @@ import { withNamespaces, WithNamespaces } from 'react-i18next';
 import { formatBytes } from '../utils/formatBytes';
 import { FileTransfer } from '../transfers/fileTransfer';
 import classnames from 'classnames';
+import { intentClass } from '@blueprintjs/core/lib/esm/common/classes';
 
 const TYPE_ICONS: { [key: string]: IconName } = {
     'img': 'media',
@@ -98,8 +99,6 @@ class DownloadsClass extends React.Component<IProps, IState> {
         expandedNodes[node.id] = false;
         node.isExpanded = false;
 
-        console.log('collapse id', node.id);
-
         this.setState(this.state);
     };
 
@@ -140,10 +139,25 @@ class DownloadsClass extends React.Component<IProps, IState> {
         }
     }
 
-    getTransferIcon(transfer: Batch) {
+    getIntent(transfer: Batch) {
         const status = transfer.status;
-        const intent = status.match(/error|cancelled/) ? Intent.DANGER : ((status === 'done' && Intent.SUCCESS) || Intent.NONE);
+        let intent: Intent = Intent.NONE;
+        if (!status.match(/queued|calculating/)) {
+            intent = status.match(/error|cancelled/) ? Intent.DANGER : status.match(/started/) ? Intent.PRIMARY : Intent.SUCCESS;
+            if (status !== 'started') {
+                // some errors
+                const errors = transfer.numErrors;
+                if (errors) {
+                    console.log('errors', errors, transfer.files.length);
+                    intent = errors === transfer.files.length ? Intent.DANGER : Intent.WARNING;
+                }
+            }
+        }
 
+        return intent;
+    }
+
+    getTransferIcon(intent: Intent) {
         return (<Icon icon="dot" className={Classes.TREE_NODE_ICON} intent={intent}></Icon>)
     }
 
@@ -151,7 +165,7 @@ class DownloadsClass extends React.Component<IProps, IState> {
         return filetype && TYPE_ICONS[filetype] || TYPE_ICONS['any'];
     }
 
-    createTransferLabel(transfer: Batch) {
+    createTransferLabel(transfer: Batch, className: string) {
         const { t } = this.injected;
         const sizeFormatted = formatBytes(transfer.size);
         const transferSize = transfer.status !== 'calculating' && sizeFormatted || '';
@@ -160,11 +174,11 @@ class DownloadsClass extends React.Component<IProps, IState> {
         const ended = transfer.hasEnded;
         const error = transfer.status === 'error';
         const rightLabel = ended ? (error ? t('DOWNLOADS.ERROR') : t('DOWNLOADS.FINISHED', { size: sizeFormatted })) : t('DOWNLOADS.PROGRESS', { current: currentSize, size: transferSize });
-        const classes = classnames({ [Classes.INTENT_DANGER]: error });
+        // const classes = classnames({ [Classes.INTENT_DANGER]: error });
 
         return (
-            <span className={classes}>
-                {!ended && <ProgressBar value={percent} animate={false}></ProgressBar>}
+            <span className={className}>
+                {!ended && <ProgressBar value={percent} intent={Intent.PRIMARY} animate={false}></ProgressBar>}
                 {rightLabel}
                 <Icon className="action" onClick={(e) => { e.stopPropagation(); this.onCloseClick(transfer.id, -1); }} intent="danger" icon="small-cross" />
             </span>
@@ -196,13 +210,16 @@ class DownloadsClass extends React.Component<IProps, IState> {
 
         for (let transfer of transfers) {
 
+            const intent = this.getIntent(transfer);
+            const className = intentClass(intent);
+
             const node: ITreeNode =
             {
                 id: transfer.id,
                 hasCaret: true,
-                icon: this.getTransferIcon(transfer),
-                label: ` ${transfer.srcName} ⇢ ${transfer.dstName}`,
-                secondaryLabel: this.createTransferLabel(transfer),
+                icon: this.getTransferIcon(intent),
+                label: (<span className={className}> {transfer.srcName} ⇢ {transfer.dstName}</span>),
+                secondaryLabel: this.createTransferLabel(transfer, className),
                 isExpanded: !!this.state.expandedNodes[transfer.id],
                 childNodes: []
             };
