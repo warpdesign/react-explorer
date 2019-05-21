@@ -311,6 +311,7 @@ export class AppState {
     removeTransfer(transferId: number) {
         const batch = this.transfers.find(transfer => transfer.id === transferId);
         if (batch) {
+            batch.cancel();
             this.transfers.remove(batch);
         }
     }

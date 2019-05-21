@@ -3,6 +3,7 @@ import { FsApi, File } from "../services/Fs";
 import { FileTransfer } from "./fileTransfer";
 import { Deferred } from "../utils/deferred";
 import { getLocalizedError } from "../locale/error";
+import { Readable } from "stream";
 
 const MAX_TRANSFERS = 2;
 const RENAME_SUFFIX = '_';
@@ -25,6 +26,8 @@ export class Batch {
     public size: number = 0;
 
     public files = observable<FileTransfer>([]);
+
+    public streams = new Array<Readable>();
 
     @observable
     public status: Status = 'queued';
@@ -147,6 +150,13 @@ export class Batch {
         // return this.transferDef.reject(err);
     }
 
+    removeStream(stream: Readable) {
+        const index = this.streams.findIndex(item => item === stream);
+        if (index > -1) {
+            this.streams.splice(index, 1);
+        }
+    }
+
     @action
     /**
      * Immediately initiates a file transfer, queues the next transfer when it's done
@@ -161,9 +171,8 @@ export class Batch {
         const srcPath = srcFs.join(this.srcPath, transfer.subDirectory);
         const wantedName = transfer.file.fullname;
 
-        // will be set to true if an error is caught
-        let cancelled = false;
         let newFilename = '';
+        let stream = null;
 
         try {
             newFilename = await this.renameOrCreateDir(transfer, fullDstPath);
@@ -172,10 +181,16 @@ export class Batch {
             transfer.status = 'error';
         }
 
+        if (this.status === 'cancelled') {
+            debugger;
+        }
+
         if (!transfer.file.isDir) {
             try {
                 // console.log('getting stream', srcPath, wantedName);
-                const stream = await srcFs.getStream(srcPath, wantedName, this.id);
+                stream = await srcFs.getStream(srcPath, wantedName, this.id);
+
+                this.streams.push(stream);
                 // console.log('sending to stream', dstFs.join(fullDstPath, newFilename));
                 // we have to listen for errors that may appear during the transfer: socket closed, timeout,...
                 // and throw an error in this case because the putStream won't throw in this case:
@@ -192,11 +207,12 @@ export class Batch {
                     this.onData(transfer, bytesRead);
                 }, this.id);
 
-                // console.log('finished writing file', newFilename);
+                this.removeStream(stream);
                 transfer.status = 'done';
             } catch (err) {
                 // TODO: catch batch cancel ?
                 console.log('error with streams', err);
+                this.removeStream(stream);
                 // transfer.status = 'error';
                 // return Promise.reject(err);
                 // generate transfer error, but do not stop transfer unless errors > MAX_TRANSFER_ERRORS
@@ -212,6 +228,10 @@ export class Batch {
             transfer.status = 'done';
             // make transfers with this directory ready
             this.updatePendingTransfers(srcFs.join(transfer.subDirectory, wantedName), newFilename);
+        }
+
+        if (this.status === 'cancelled') {
+            debugger;
         }
 
         this.transfersDone++;
@@ -254,7 +274,7 @@ export class Batch {
             } else if (!stats.isDir) {
                 // exists but is a file: attempt to create a directory with newName
                 let success = false;
-                while (!success) {
+                while (!success && this.status !== 'cancelled') {
                     newName = wantedName + RENAME_SUFFIX + i++;
                     try {
                         await dstFs.makedir(dstPath, newName, this.id);
@@ -294,6 +314,22 @@ export class Batch {
         }
 
         return Promise.resolve(newName);
+    }
+
+    @action
+    cancel() {
+        if (this.status !== 'done') {
+            this.status = 'cancelled';
+            const todo = this.files.filter(file => file.status !== 'done');
+            for (let file of todo) {
+                file.status = 'cancelled';
+            }
+
+            for (let stream of this.streams) {
+                stream.destroy();
+            }
+        }
+        // otherwise there is nothing to do
     }
 
     @action

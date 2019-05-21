@@ -10,6 +10,7 @@ import { formatBytes } from '../utils/formatBytes';
 import { FileTransfer } from '../transfers/fileTransfer';
 import classnames from 'classnames';
 import { intentClass } from '@blueprintjs/core/lib/esm/common/classes';
+import { AppAlert } from './AppAlert';
 
 const TYPE_ICONS: { [key: string]: IconName } = {
     'img': 'media',
@@ -109,11 +110,28 @@ class DownloadsClass extends React.Component<IProps, IState> {
         this.setState(this.state);
     };
 
-    onCloseClick(transferId: number, fileId: number) {
+    showTransferAlert() {
+        const { t } = this.injected;
+
+        return AppAlert.show(t('DIALOG.STOP_TRANSFER.MESSAGE'), {
+            cancelButtonText: t('DIALOG.STOP_TRANSFER.BT_CANCEL'),
+            confirmButtonText: t('DIALOG.STOP_TRANSFER.BT_OK'),
+            intent: Intent.WARNING,
+            icon: "warning-sign"
+        });
+    }
+
+    async onCloseClick(transferId: number, fileId: number) {
         const appState = this.appState;
         const transfer = appState.getTransfer(transferId);
+
         if (transfer.hasEnded) {
             appState.removeTransfer(transferId);
+        } else {
+            const cancel = await this.showTransferAlert();
+            if (cancel) {
+                appState.removeTransfer(transferId);
+            }
         }
     }
 
@@ -174,7 +192,7 @@ class DownloadsClass extends React.Component<IProps, IState> {
         const ended = transfer.hasEnded;
         const error = transfer.status === 'error';
         const rightLabel = ended ? (error ? t('DOWNLOADS.ERROR') : t('DOWNLOADS.FINISHED', { size: sizeFormatted })) : t('DOWNLOADS.PROGRESS', { current: currentSize, size: transferSize });
-        // const classes = classnames({ [Classes.INTENT_DANGER]: error });
+        // const classes = classnames({[Classes.INTENT_DANGER]: error });
 
         return (
             <span className={className}>
@@ -189,18 +207,20 @@ class DownloadsClass extends React.Component<IProps, IState> {
         const { t } = this.injected;
         const fileProgress = formatBytes(file.progress);
         const fileSize = formatBytes(file.file.length);
-        const started = file.status.match(/started|queued/);
+        const started = file.status.match(/started/);
+        const queued = file.status.match(/queued/);
         const done = file.status.match(/done/);
         const isError = file.status.match(/error|cancelled/);
         const spanClass = classnames({
             [Classes.INTENT_DANGER]: isError,
             [Classes.INTENT_SUCCESS]: done
         });
-        const errorMessage = isError && file.error.message || t('DOWNLOADS.ERROR');
+        const errorMessage = isError && file.error && file.error.message || t('DOWNLOADS.ERROR');
 
         return (<span className={spanClass}>
             {started && t('DOWNLOADS.PROGRESS', { current: fileProgress, size: fileSize })}
-            {!started && (done ? fileSize : errorMessage)}
+            {queued && t('DOWNLOADS.QUEUED')}
+            {!started && !queued && (done ? fileSize : errorMessage)}
         </span>
         );
     }
