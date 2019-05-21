@@ -1,7 +1,7 @@
 import { FsLocal } from './plugins/FsLocal';
 import { FsGeneric } from './plugins/FsGeneric';
 import { FsSimpleFtp } from './plugins/FsSimpleFtp';
-import { Readable } from 'stream';
+import { Readable, Writable } from 'stream';
 
 export interface FileID {
     ino: number;

@@ -146,6 +146,8 @@ export class AppState {
                 if (options.dstPath === dstCache.path && options.dstFsName === dstCache.getFS().name) {
                     dstCache.reload();
                 }
+            }).catch(() => {
+                debugger;
             });
     }
 
@@ -199,7 +201,6 @@ export class AppState {
             return this.addTransfer(options).then(() => {
                 return api.join(DOWNLOADS_DIR, files[0].fullname);
             }).catch((err) => {
-                debugger;
                 return Promise.reject(err);
             });
         }
@@ -284,7 +285,7 @@ export class AppState {
         return batch.setFileList(options.files).then(() => {
             batch.calcTotalSize();
             batch.status = 'queued';
-            console.log('got file list !');
+            // console.log('got file list !');
             // start transfer ?
             // setInterval(() => {
             //     runInAction(() => {
@@ -298,7 +299,10 @@ export class AppState {
             }
             this.activeTransfers.push(batch);
 
-            return batch.start();
+            return batch.start()
+                .catch(err => {
+                    debugger;
+                })
         }).catch((err) => {
             debugger;
         });
@@ -307,6 +311,7 @@ export class AppState {
     removeTransfer(transferId: number) {
         const batch = this.transfers.find(transfer => transfer.id === transferId);
         if (batch) {
+            batch.cancel();
             this.transfers.remove(batch);
         }
     }
@@ -349,7 +354,7 @@ export class AppState {
 
     @action
     updateSelection(cache: FileState, newSelection: File[]) {
-        console.log('updateSelection', newSelection.length);
+        // console.log('updateSelection', newSelection.length);
         cache.selected.replace(newSelection);
         cache.updateSelection();
     }

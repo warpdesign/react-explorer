@@ -1,5 +1,6 @@
 import { FsApi, File, ICredentials, Fs } from '../Fs';
 import * as fs from 'fs';
+import { Writable } from 'stream';
 
 class GenericApi implements FsApi {
     type = 0;

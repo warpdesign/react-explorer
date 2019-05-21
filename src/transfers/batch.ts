@@ -2,8 +2,11 @@ import { observable, action, runInAction, computed } from "mobx";
 import { FsApi, File } from "../services/Fs";
 import { FileTransfer } from "./fileTransfer";
 import { Deferred } from "../utils/deferred";
+import { getLocalizedError } from "../locale/error";
+import { Readable } from "stream";
 
-const MAX_TRANSFERS = 1;
+const MAX_TRANSFERS = 2;
+const MAX_ERRORS = 5;
 const RENAME_SUFFIX = '_';
 const REGEX_EXTENSION = /\.(?=[^0-9])/;
 
@@ -19,11 +22,14 @@ export class Batch {
     public srcName: string;
     public dstName: string;
     public startDate: Date = new Date();
+    public errors = 0;
 
     @observable
     public size: number = 0;
 
     public files = observable<FileTransfer>([]);
+
+    public streams = new Array<Readable>();
 
     @observable
     public status: Status = 'queued';
@@ -37,6 +43,10 @@ export class Batch {
 
     get hasEnded(): boolean {
         return !!this.status.match(/done|error/);
+    }
+
+    get numErrors(): number {
+        return this.files.reduce((acc, val) => acc + (val.error && 1 || 0), 0);
     }
 
     public isExpanded: boolean = false;
@@ -61,8 +71,8 @@ export class Batch {
 
     @action
     onEndTransfer = (status: Status = 'done') => {
-        console.log('transfer ended ! duration=', Math.round((new Date().getTime() - this.startDate.getTime()) / 1000), 'sec(s)');
-        console.log('destroy batch, new maxId', Batch.maxId);
+        // console.log('transfer ended ! duration=', Math.round((new Date().getTime() - this.startDate.getTime()) / 1000), 'sec(s)');
+        // console.log('destroy batch, new maxId', Batch.maxId);
         this.status = status;
     }
 
@@ -135,10 +145,19 @@ export class Batch {
         }
     }
 
+    @action
     onTransferError = (transfer: FileTransfer, err: Error) => {
-        debugger;
         transfer.status = 'error';
-        return this.transferDef.reject(err);
+        transfer.error = getLocalizedError(err);
+        this.errors++;
+        // return this.transferDef.reject(err);
+    }
+
+    removeStream(stream: Readable) {
+        const index = this.streams.findIndex(item => item === stream);
+        if (index > -1) {
+            this.streams.splice(index, 1);
+        }
     }
 
     @action
@@ -155,9 +174,8 @@ export class Batch {
         const srcPath = srcFs.join(this.srcPath, transfer.subDirectory);
         const wantedName = transfer.file.fullname;
 
-        // will be set to true if an error is caught
-        let cancelled = false;
         let newFilename = '';
+        let stream = null;
 
         try {
             newFilename = await this.renameOrCreateDir(transfer, fullDstPath);
@@ -166,30 +184,51 @@ export class Batch {
             transfer.status = 'error';
         }
 
+        if (this.status === 'cancelled') {
+            debugger;
+        }
+
         if (!transfer.file.isDir) {
             try {
-                console.log('getting stream', srcPath, wantedName);
-                const stream = await srcFs.getStream(srcPath, wantedName, this.id);
-                console.log('sending to stream', dstFs.join(fullDstPath, newFilename));
+                // console.log('getting stream', srcPath, wantedName);
+                stream = await srcFs.getStream(srcPath, wantedName, this.id);
+
+                this.streams.push(stream);
+                // console.log('sending to stream', dstFs.join(fullDstPath, newFilename));
                 // we have to listen for errors that may appear during the transfer: socket closed, timeout,...
                 // and throw an error in this case because the putStream won't throw in this case:
                 // it will just stall
-                stream.on('error', (err) => {
-                    this.onTransferError(transfer, err);
-                });
+                // stream.on('error', (err) => {
+                //     console.log('error on read stream');
+                //     this.onTransferError(transfer, err);
+                //     // destroy stream so that put stream resolves ?
+                //     stream.destroy();
+                // });
+
                 await dstFs.putStream(stream, dstFs.join(fullDstPath, newFilename), (bytesRead: number) => {
                     // console.log('read', bytesRead);
                     this.onData(transfer, bytesRead);
-                }), this.id;
-                console.log('finished writing file', newFilename);
+                }, this.id);
+
+                this.removeStream(stream);
                 transfer.status = 'done';
             } catch (err) {
                 // TODO: catch batch cancel ?
-                debugger;
                 console.log('error with streams', err);
+                this.removeStream(stream);
                 // transfer.status = 'error';
                 // return Promise.reject(err);
-                return this.onTransferError(transfer, err);
+                // generate transfer error, but do not stop transfer unless errors > MAX_TRANSFER_ERRORS
+                // TODO: transfer.errors++
+                // if (transfer.errors > MAX) {
+                // set remaining transfers to cancel
+                // return ?
+                //}
+                this.onTransferError(transfer, err);
+                if (this.errors > MAX_ERRORS) {
+                    this.status = 'error';
+                    this.cancelFiles();
+                }
             }
 
         } else {
@@ -198,13 +237,17 @@ export class Batch {
             this.updatePendingTransfers(srcFs.join(transfer.subDirectory, wantedName), newFilename);
         }
 
+        if (this.status === 'cancelled') {
+            debugger;
+        }
+
         this.transfersDone++;
         this.slotsAvailable++;
-        console.log('finished', transfer.file.fullname, 'slotsAvailable', this.slotsAvailable, 'done', this.transfersDone);
-        if (this.transfersDone < this.files.length) {
+        // console.log('finished', transfer.file.fullname, 'slotsAvailable', this.slotsAvailable, 'done', this.transfersDone);
+        if (this.status !== 'error' && this.transfersDone < this.files.length) {
             this.queueNextTransfers();
         } else {
-            console.log('no more transfers !!');
+            // console.log('no more transfers !!');
             this.transferDef.resolve();
         }
     }
@@ -238,7 +281,7 @@ export class Batch {
             } else if (!stats.isDir) {
                 // exists but is a file: attempt to create a directory with newName
                 let success = false;
-                while (!success) {
+                while (!success && this.status !== 'cancelled') {
                     newName = wantedName + RENAME_SUFFIX + i++;
                     try {
                         await dstFs.makedir(dstPath, newName, this.id);
@@ -281,6 +324,32 @@ export class Batch {
     }
 
     @action
+    cancelFiles() {
+        const todo = this.files.filter(file => !!file.status.match(/queued/));
+
+        for (let file of todo) {
+            file.status = 'cancelled';
+        }
+    }
+
+    @action
+    destroyRunningStreams() {
+        for (let stream of this.streams) {
+            stream.destroy();
+        }
+    }
+
+    @action
+    cancel() {
+        if (this.status !== 'done') {
+            this.status = 'cancelled';
+            this.cancelFiles();
+            this.destroyRunningStreams();
+        }
+        // otherwise there is nothing to do
+    }
+
+    @action
     calcTotalSize() {
         let size = 0;
         for (let fileTransfer of this.files) {
@@ -290,7 +359,6 @@ export class Batch {
             }
         }
         this.size = size;
-        console.log('total transfer size', size);
     }
 
     getLastPathPart(path: string) {
@@ -301,7 +369,7 @@ export class Batch {
     }
 
     async getFileList(srcFiles: File[], subDirectory = ''): Promise<FileTransfer[]> {
-        console.log('getting file list');
+        // console.log('getting file list');
         const dirs = srcFiles.filter((file) => file.isDir);
         const files = srcFiles.filter((file) => !file.isDir);
         let transfers: FileTransfer[] = [];
@@ -346,7 +414,7 @@ export class Batch {
     @action
     async setFileList(files: File[]) {
         return this.getFileList(files).then((transfers) => {
-            console.log('got files', transfers);
+            // console.log('got files', transfers);
             this.files.replace(transfers);
         }).catch((err) => {
             return Promise.reject(err);

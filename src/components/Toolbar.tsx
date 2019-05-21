@@ -415,6 +415,7 @@ export class ToolbarClass extends React.Component<IProps, PathInputState> {
                     <Button title={t('TOOLBAR.BACK')} data-cy-backward disabled={!canGoBackward} onClick={this.onBackward} rightIcon="chevron-left"></Button>
                     <Button title={t('TOOLBAR.FORWARD')} data-cy-forward disabled={!canGoForward} onClick={this.onForward} rightIcon="chevron-right"></Button>
                     <Button title={t('TOOLBAR.PARENT')} disabled={isRoot} onClick={this.onParent} rightIcon="arrow-up"></Button>
+
                     <Popover content={<FileMenu selectedItems={selected} onFileAction={this.onFileAction} />}>
                         <Button rightIcon="caret-down" icon="cog" text="" />
                     </Popover>

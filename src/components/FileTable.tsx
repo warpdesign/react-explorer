@@ -215,7 +215,7 @@ export class FileTableClass extends React.Component<IProps, IState> {
                 // we don't want to show "empty folder" placeholder in that
                 // that case, only when cache is loaded and there are no files
                 const { viewState } = this.injected;
-                console.log('reaction', viewState.viewId);
+
                 if (cache.cmd === 'cwd' || cache.history.length) {
                     this.updateNodes(files);
                 }
@@ -245,7 +245,7 @@ export class FileTableClass extends React.Component<IProps, IState> {
     }
 
     private buildNodes = (list: File[], keepSelection = false): ITableRow[] => {
-        console.time('buildingNodes');
+        // console.time('buildingNodes');
         const { sortMethod, sortOrder } = this.cache;
         const SortFn = getSortMethod(sortMethod, sortOrder);
         const dirs = list.filter(file => file.isDir);
@@ -257,17 +257,20 @@ export class FileTableClass extends React.Component<IProps, IState> {
             .concat(files.sort(SortFn))
             .map((file, i) => this.buildNodeFromFile(file, keepSelection));
 
-        console.timeEnd('buildingNodes');
+        // console.timeEnd('buildingNodes');
 
         return nodes;
     }
 
     _noRowsRenderer = () => {
         const { t } = this.injected;
+        const status = this.cache.status;
 
         // we don't want to show empty + loader at the same time
-        if (this.cache.status !== 'busy') {
-            return (<div className="empty"><Icon icon="tick-circle" iconSize={40} />{t('COMMON.EMPTY_FOLDER')}</div>);
+        if (status !== 'busy') {
+            const placeholder = status === 'blank' && t('COMMON.NO_SUCH_FOLDER') || t('COMMON.EMPTY_FOLDER');
+            const icon = status === 'blank' ? 'warning-sign' : 'tick-circle';
+            return (<div className="empty"><Icon icon={icon} iconSize={40} />{placeholder}</div>);
         } else {
             return (<div />);
         }
@@ -276,7 +279,7 @@ export class FileTableClass extends React.Component<IProps, IState> {
     private updateNodes(files: File[]) {
         // reselect previously selected file in case of reload/change tab
         const keepSelection = !!this.cache.selected.length;
-        console.log('got files', files.length);
+
         const nodes = this.buildNodes(files, keepSelection);
         this.updateState(nodes, keepSelection);
     }
@@ -285,13 +288,10 @@ export class FileTableClass extends React.Component<IProps, IState> {
         const cache = this.cache;
         const newPath = nodes.length && nodes[0].nodeData.dir || '';
         const position = keepSelection && this.getFilePosition(nodes, cache.selectedId) || -1;
-        console.log('setState 1', position);
         // cancel inlineedit if there was one
         this.clearEditElement();
         this.setState({ nodes, selected: keepSelection ? this.state.selected : 0, position, path: newPath }, () => {
-            console.log('setState 1 done', keepSelection, cache.editingId, position);
             if (keepSelection && cache.editingId && position > -1) {
-                console.log('*** need to restore edit id!');
                 this.getElementAndToggleRename(undefined, false);
             }
         });
@@ -384,7 +384,6 @@ export class FileTableClass extends React.Component<IProps, IState> {
     }
 
     onRowClick = (data: any) => {
-        console.log('nodeclick');
         const { rowData, event, index } = data;
         const { nodes, selected } = this.state;
         const originallySelected = rowData.isSelected;
@@ -435,7 +434,6 @@ export class FileTableClass extends React.Component<IProps, IState> {
             newSelected--;
         }
 
-        console.log('setState 2', position);
         this.setState({ nodes, selected: newSelected, position }, () => {
             this.updateSelection();
         });
@@ -766,7 +764,6 @@ export class FileTableClass extends React.Component<IProps, IState> {
         const { position } = this.state;
         const rowCount = this.state.nodes.length;
         const scrollTop = position === -1 && this.cache.scrollTop || undefined;
-        console.log('scrollTop', scrollTop, position);
 
         return (<div ref={this.setTableRef} onKeyDown={this.onInputKeyDown} className={`fileListSizerWrapper ${Classes.ELEVATION_0}`}>
             <AutoSizer>

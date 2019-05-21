@@ -32,6 +32,11 @@
                 "CONTENT": "There is <1>{{count}}</1> transfer <3>in progress</3>.<5 /><6 />Exiting the app now will <8>cancel</8> the download.",
                 "CONTENT_plural": "There are <1>{{count}}</1> transfers <3>in progress</3>.<5 /><6 />Exiting the app now will <8>cancel</8> all downloads."
             },
+            "STOP_TRANSFER": {
+                "BT_OK": "Discard transfer",
+                "BT_CANCEL": "Keep transfer",
+                "MESSAGE": "Discarding the transfer will cancel every on-going copy."
+            },
             "MAKEDIR": {
                 "NOT_VALID": "Folder name not valid",
                 "TITLE": "Enter a name for the new folder:",
@@ -143,6 +148,7 @@
             "AUTO": "Automatic",
             "CLOSE": "Close",
             "EMPTY_FOLDER": "Folder is empty.",
+            "NO_SUCH_FOLDER": "No such folder or permission denied.",
             "PATH_PLACEHOLDER": "Enter path to load"
         },
         "FILETABLE": {
@@ -160,7 +166,8 @@
             "FINISHED": "Finished ({{size}})",
             "PROGRESS": "{{current}} / {{size}}",
             "ERROR": "Error",
-            "CANCELLED": "Cancelled"
+            "CANCELLED": "Cancelled",
+            "QUEUED": "Queued"
         },
         "ERRORS": {
             "CANNOT_READ_FOLDER": "Cannot open '{{folder}}': no such file or directory",

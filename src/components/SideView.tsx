@@ -93,10 +93,10 @@ export class SideViewClass extends React.Component<InjectedProps>{
 
         const needLogin = fileCache.status === 'login';
         const busy = fileCache.status === 'busy';
-        console.log('renderSideView, needLogin=', needLogin);
+        // console.log('renderSideView, needLogin=', needLogin);
 
         if (dropAndOver) {
-            console.log('isOver', viewState.viewId);
+            // console.log('isOver', viewState.viewId);
         }
 
         return (
@@ -119,18 +119,20 @@ export class SideViewClass extends React.Component<InjectedProps>{
         const files = item.selectedCount > 0 ? item.fileState.selected.slice(0) : [item.dragFile];
 
         // TODO: check both cache are active?
-        appState.prepareTransferTo(item.fileState, fileCache, files);
+        appState.prepareTransferTo(item.fileState, fileCache, files).catch(err => {
+            debugger;
+        });
     }
 
     shouldComponentUpdate() {
         const { viewState } = this.props;
-        console.time('SideView Render' + viewState.viewId);
+        // console.time('SideView Render' + viewState.viewId);
         return true;
     }
 
     componentDidUpdate() {
         const { viewState } = this.props;
-        console.timeEnd('SideView Render' + viewState.viewId);
+        // console.timeEnd('SideView Render' + viewState.viewId);
     }
 
     render() {

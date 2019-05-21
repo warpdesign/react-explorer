@@ -27,6 +27,10 @@ button.small:hover{
     z-index:1;
 }
 
+.toolbar > .bp3-popover-wrapper{
+    flex-shrink:1;
+}
+
 /* auto resize layout */
 .filelist, .sideview{
     display:flex;
@@ -143,15 +147,11 @@ button.small:hover{
 
 .downloads .bp3-tree-node-content .action{
     vertical-align:text-bottom;
-    opacity: 0;
+    opacity: .5;
+    cursor:pointer;    
 }
 
 .downloads .bp3-tree-node-content:hover .action{
-    opacity: .3;
-    cursor:pointer;
-}
-
-.downloads .bp3-tree-node-content .action:hover{
     opacity: 1;
 }
 
@@ -354,12 +354,51 @@ body.bp3-dark .bp3-loader.active{
 }
 
 .tablist .bp3-button .bp3-button-text{
-    white-space: nowrap;
     overflow:hidden;
+    white-space: nowrap;    
     text-overflow:ellipsis;
 }
 
-/*
-.tablist .sideview.active .tableRow.selected{
-    background-color:#137cbd;
-} */
+.tablist-wrapper{
+    position: relative;
+    padding-right: 30px;
+}
+
+.tablist-wrapper .addtab{
+    position:absolute;
+    right:0;
+    top:0;
+}
+
+/* intent colors on any span */
+span.bp3-intent-success{
+    color:#0d8050;
+}
+
+span.bp3-intent-danger{
+    color:#c23030;
+}
+
+span.bp3-intent-primary{
+    color:#106ba3;
+}
+
+span.bp3-intent-warning{
+    color:#bf7326;
+}
+
+.bp3-dark span.bp3-intent-success{
+    color:#0f9960;
+}
+
+.bp3-dark span.bp3-intent-danger{
+    color:#db3737;
+}
+
+.bp3-dark span.bp3-intent-primary{
+    color:#137cbd;
+}
+
+.bp3-dark span.bp3-intent-warning{
+    color:#d9822b;
+}

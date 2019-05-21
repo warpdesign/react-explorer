@@ -208,18 +208,16 @@ class LocalApi implements FsApi {
     }
 
     onList(dir: string) {
-        console.log('onList', dir, this.path);
         if (dir !== this.path) {
-            console.log('stopWatching', this.path);
+            // console.log('stopWatching', this.path);
             LocalWatch.stopWatchingPath(this.path, this.onFsChange);
-            console.log('watchPath', dir);
+            // console.log('watchPath', dir);
             LocalWatch.watchPath(dir, this.onFsChange);
             this.path = dir;
         }
     }
 
     async list(dir: string, appendParent = true, transferId = -1): Promise<File[]> {
-        console.log('calling readDirectory', dir);
         const pathExists = await this.isDir(dir);
 
         if (pathExists) {
@@ -308,7 +306,7 @@ class LocalApi implements FsApi {
     // TODO add error handling
     async getStream(path: string, file: string, transferId = -1): Promise<fs.ReadStream> {
         try {
-            console.log('opening read stream', this.join(path, file));
+            // console.log('opening read stream', this.join(path, file));
             const stream = fs.createReadStream(this.join(path, file), { highWaterMark: 31 * 16384 });
             return Promise.resolve(stream);
         } catch (err) {
@@ -317,33 +315,64 @@ class LocalApi implements FsApi {
         };
     }
 
+    static counter = 0;
+
     // TODO: handle stream error
     async putStream(readStream: fs.ReadStream, dstPath: string, progress: (pourcent: number) => void, transferId = -1): Promise<void> {
-        let bytesRead = 0;
-        const throttledProgress = throttle(() => { progress(bytesRead) }, 800);
-
-        const reportProgress = new Transform({
-            transform(chunk: any, encoding: any, callback: any) {
-                bytesRead += chunk.length;
-                // console.log('dataChunk', bytesRead / 1024, 'Ko');
-                throttledProgress();
-                callback(null, chunk);
-            },
-            highWaterMark: 16384 * 31
-        });
-
-        console.log('opening write stream', dstPath);
-        const writeStream = fs.createWriteStream(dstPath);
-
-        readStream.pipe(reportProgress)
-            .pipe(writeStream);
-
         return new Promise((resolve: (val?: any) => void, reject: (val?: any) => void) => {
-            // readStream.once('close', () => resolve());
-            writeStream.once('finish', () => {
-                resolve();
+            let count = LocalApi.counter++;
+            let finished = false;
+            let bytesRead = 0;
+
+            const throttledProgress = throttle(() => { progress(bytesRead) }, 800);
+
+            const reportProgress = new Transform({
+                transform(chunk: any, encoding: any, callback: any) {
+                    bytesRead += chunk.length;
+                    // console.log('dataChunk', bytesRead / 1024, 'Ko');
+                    throttledProgress();
+                    callback(null, chunk);
+                },
+                highWaterMark: 16384 * 31
             });
-        });
+
+            readStream.once('error', (err) => {
+                console.log('error on read stream');
+                readStream.destroy();
+                writeStream.destroy(err);
+            });
+
+            // console.log('open', count);
+            const writeStream = fs.createWriteStream(dstPath);
+
+            readStream.pipe(reportProgress)
+                .pipe(writeStream);
+
+            writeStream.once('finish', () => {
+                // console.log('finish', count);
+                finished = true;
+                // resolve();
+            });
+
+            writeStream.once('error', err => {
+                reject(err);
+            });
+
+            writeStream.once('close', () => {
+                // console.log('close', count);
+                if (finished) {
+                    resolve();
+                } else {
+                    reject();
+                }
+            });
+            // writeStream.once('end', () => console.log('end', count));
+            writeStream.once('error', err => {
+                reject(err);
+                // console.log('error', count)
+            });
+            // writeStream.once('destroy', () => console.log('destroy', count));
+        })
     }
 
     getParentTree(dir: string): Array<{ dir: string, fullname: string, name: string }> {
@@ -400,7 +429,7 @@ export const FsLocal: Fs = {
     name: 'local',
     description: 'Local Filesystem',
     canread(str: string): boolean {
-        console.log('FsLocal.canread', str, !!str.match(localStart));
+        // console.log('FsLocal.canread', str, !!str.match(localStart));
         return !!str.match(localStart);
     },
     serverpart(str: string): string {

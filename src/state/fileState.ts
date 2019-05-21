@@ -2,6 +2,7 @@ import { observable, action, runInAction } from "mobx";
 import { FsApi, Fs, getFS, File, ICredentials, needsConnection, FileID } from "../services/Fs";
 import { Deferred } from '../utils/deferred';
 import i18next from '../locale/i18n';
+import { getLocalizedError } from '../locale/error';
 import { shell, ipcRenderer } from 'electron';
 import * as process from 'process';
 import { AppState } from "./appState";
@@ -77,6 +78,7 @@ export class FileState {
     navHistory(dir = -1, force = false) {
         if (!this.history.length) {
             console.warn('attempting to nav in empty history');
+            this.setStatus('blank');
             return;
         }
 
@@ -95,7 +97,7 @@ export class FileState {
 
         const path = history[current + dir];
         if (path !== this.path || force) {
-            console.log('opening path from history', path);
+            // console.log('opening path from history', path);
             this.cd(path, '', true, true);
         } else {
             console.warn('preventing endless loop');
@@ -144,7 +146,7 @@ export class FileState {
     }
 
     onFSChange = (filename: string): void => {
-        console.log('fsChanged', filename);
+        // console.log('fsChanged', filename);
         this.reload();
     }
 
@@ -237,7 +239,7 @@ export class FileState {
             await this.api.login(server, credentials);
             this.onLoginSuccess();
         } catch (err) {
-            const error = this.getLocalizedError(err);
+            const error = getLocalizedError(err);
             this.loginDefer.reject(error);
         }
         // .then(() => ).catch((err) => {
@@ -306,80 +308,10 @@ export class FileState {
         }
     }
 
-    getLocalizedError(error: any) {
-        let niceError = error;
-
-        if (typeof error.code === 'undefined') {
-            debugger;
-            niceError = {};
-
-            switch (true) {
-                case /EHOSTDOWN/.test(error):
-                    niceError.code = 'EHOSTDOWN';
-                    break;
-
-                default:
-                    niceError.code = 'NOCODE';
-                    break;
-            }
-        }
-
-        switch (niceError.code) {
-            case 'ENOTFOUND':
-                niceError.message = i18next.t('ERRORS.ENOTFOUND');
-                break;
-
-            case 'ECONNREFUSED':
-                niceError.message = i18next.t('ERRORS.ECONNREFUSED');
-                break;
-
-            case 'ENOENT':
-                niceError.message = i18next.t('ERRORS.ENOENT');
-                break;
-
-            case 'EPERM':
-                niceError.message = i18next.t('ERRORS.EPERM');
-                break;
-
-            case 'EACCES':
-                niceError.message = i18next.t('ERRORS.EACCES');
-                break;
-
-            case 'BAD_FILENAME':
-                const acceptedChars = isWin ? i18next.t('ERRORS.WIN_VALID_FILENAME') : i18next.t('ERRORS.UNIX_VALID_FILENAME');
-
-                niceError.message = i18next.t('ERRORS.BAD_FILENAME', { entry: error.newName }) + '. ' + acceptedChars;
-                break;
-
-            case 'EHOSTDOWN':
-                niceError.message = i18next.t('ERRORS.EHOSTDOWN');
-                break;
-
-            case 'NOT_A_DIR':
-                niceError.message = i18next.t('ERRORS.NOT_A_DIR');
-                break;
-
-            case 530:
-                niceError.message = i18next.t('ERRORS.530');
-                break;
-
-            case 550:
-                niceError.message = i18next.t('ERRORS.550');
-                break;
-
-            default:
-                debugger;
-                niceError.message = i18next.t('ERRORS.UNKNOWN');
-                break;
-        }
-
-        return niceError;
-    }
-
     handleError = (error: any) => {
         console.log('handleError', error);
         this.setStatus('ok');
-        const niceError = this.getLocalizedError(error);
+        const niceError = getLocalizedError(error);
         console.log('orignalCode', error.code, 'newCode', niceError.code);
         return Promise.reject(niceError);
     }
@@ -387,7 +319,7 @@ export class FileState {
     @action
     async cd(path: string, path2: string = '', skipHistory = false, skipContext = false): Promise<string> {
         // first updates fs (eg. was local fs, is now ftp)
-        console.log('cd', path, this.path);
+        // console.log('cd', path, this.path);
 
         if (this.path !== path) {
             if (this.getNewFS(path, skipContext)) {
@@ -430,7 +362,7 @@ export class FileState {
                 console.log('path not valid ?', joint, 'restoring previous path');
                 this.setStatus('ok');
                 this.navHistory(0);
-                const localizedError = this.getLocalizedError(error);
+                const localizedError = getLocalizedError(error);
                 return Promise.reject(localizedError);
             });
     }
@@ -441,7 +373,6 @@ export class FileState {
         return this.api.list(path, appendParent)
             .then((files: File[]) => {
                 runInAction(() => {
-                    console.log('run in actions', this.path);
                     this.files.replace(files);
                     // update the cache's selection, keeping files that were previously selected
                     this.updateSelection();
@@ -559,7 +490,7 @@ export class FileState {
     }
 
     openDirectory(file: { dir: string, fullname: string }) {
-        console.log('need to read dir', file.dir, file.fullname);
+        // console.log('need to read dir', file.dir, file.fullname);
         return this.cd(file.dir, file.fullname).catch(this.handleError);
     }
 

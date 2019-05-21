@@ -32,6 +32,11 @@
                 "CONTENT": "<1>{{count}}</1> téléchargement est <3>en cours</3>.<5 /><6 />Quiiter l'application maintenant le <8>stoppera</8>.",
                 "CONTENT_plural": "<1>{{count}}</1> téléchargements sont <3>en cours</3>.<5 /><6 />Quiiter l'application maintenant les <8>arrêtera</8>."
             },
+            "STOP_TRANSFER": {
+                "BT_OK": "Supprimer le transfert",
+                "BT_CANCEL": "Continuer les copies",
+                "MESSAGE": "Supprimer le transfert stoppera toutes les copies en cours."
+            },
             "MAKEDIR": {
                 "NOT_VALID": "Nom de dossier non valide",
                 "TITLE": "Entrer un nom pour le nouveau dossier:",
@@ -143,6 +148,7 @@
             "AUTO": "Automatique",
             "CLOSE": "Fermer",
             "EMPTY_FOLDER": "Dossier vide.",
+            "NO_SUCH_FOLDER": "Dossier inexistant ou inaccessible.",
             "PATH_PLACEHOLDER": "Entrer le chemin à visiter"
         },
         "FILETABLE": {
@@ -160,7 +166,8 @@
             "FINISHED": "Terminé ({{size}})",
             "PROGRESS": "{{current}} / {{size}}",
             "ERROR": "Erreur",
-            "CANCELLED": "Annulé"
+            "CANCELLED": "Annulé",
+            "QUEUED": "En attente"
         },
         "ERRORS": {
             "CANNOT_READ_FOLDER": "Impossible d'ouvrir '{{folder}}': fichier ou dossier introuvable",

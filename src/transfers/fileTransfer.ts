@@ -7,4 +7,5 @@ export interface FileTransfer {
     subDirectory: string;
     newSub: string;
     ready: boolean;
+    error?: Error
 }
