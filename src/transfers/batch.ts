@@ -6,6 +6,7 @@ import { getLocalizedError } from "../locale/error";
 import { Readable } from "stream";
 
 const MAX_TRANSFERS = 2;
+const MAX_ERRORS = 5;
 const RENAME_SUFFIX = '_';
 const REGEX_EXTENSION = /\.(?=[^0-9])/;
 
@@ -21,6 +22,7 @@ export class Batch {
     public srcName: string;
     public dstName: string;
     public startDate: Date = new Date();
+    public errors = 0;
 
     @observable
     public size: number = 0;
@@ -147,6 +149,7 @@ export class Batch {
     onTransferError = (transfer: FileTransfer, err: Error) => {
         transfer.status = 'error';
         transfer.error = getLocalizedError(err);
+        this.errors++;
         // return this.transferDef.reject(err);
     }
 
@@ -222,6 +225,10 @@ export class Batch {
                 // return ?
                 //}
                 this.onTransferError(transfer, err);
+                if (this.errors > MAX_ERRORS) {
+                    this.status = 'error';
+                    this.cancelFiles();
+                }
             }
 
         } else {
@@ -237,7 +244,7 @@ export class Batch {
         this.transfersDone++;
         this.slotsAvailable++;
         // console.log('finished', transfer.file.fullname, 'slotsAvailable', this.slotsAvailable, 'done', this.transfersDone);
-        if (this.transfersDone < this.files.length) {
+        if (this.status !== 'error' && this.transfersDone < this.files.length) {
             this.queueNextTransfers();
         } else {
             // console.log('no more transfers !!');
@@ -317,17 +324,27 @@ export class Batch {
     }
 
     @action
+    cancelFiles() {
+        const todo = this.files.filter(file => !!file.status.match(/queued/));
+
+        for (let file of todo) {
+            file.status = 'cancelled';
+        }
+    }
+
+    @action
+    destroyRunningStreams() {
+        for (let stream of this.streams) {
+            stream.destroy();
+        }
+    }
+
+    @action
     cancel() {
         if (this.status !== 'done') {
             this.status = 'cancelled';
-            const todo = this.files.filter(file => file.status !== 'done');
-            for (let file of todo) {
-                file.status = 'cancelled';
-            }
-
-            for (let stream of this.streams) {
-                stream.destroy();
-            }
+            this.cancelFiles();
+            this.destroyRunningStreams();
         }
         // otherwise there is nothing to do
     }

@@ -147,15 +147,11 @@ button.small:hover{
 
 .downloads .bp3-tree-node-content .action{
     vertical-align:text-bottom;
-    opacity: 0;
+    opacity: .5;
+    cursor:pointer;    
 }
 
 .downloads .bp3-tree-node-content:hover .action{
-    opacity: .3;
-    cursor:pointer;
-}
-
-.downloads .bp3-tree-node-content .action:hover{
     opacity: 1;
 }
 

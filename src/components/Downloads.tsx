@@ -210,12 +210,20 @@ class DownloadsClass extends React.Component<IProps, IState> {
         const started = file.status.match(/started/);
         const queued = file.status.match(/queued/);
         const done = file.status.match(/done/);
-        const isError = file.status.match(/error|cancelled/);
+        const isError = file.status.match(/error/);
+        const isCancelled = file.status.match(/cancelled/);
+        let errorMessage = '';
+
         const spanClass = classnames({
             [Classes.INTENT_DANGER]: isError,
             [Classes.INTENT_SUCCESS]: done
         });
-        const errorMessage = isError && file.error && file.error.message || t('DOWNLOADS.ERROR');
+
+        if (isError) {
+            errorMessage = isError && file.error && file.error.message || t('DOWNLOADS.ERROR');
+        } else if (isCancelled) {
+            errorMessage = isCancelled && file.error && file.error.message || t('DOWNLOADS.CANCELLED');
+        }
 
         return (<span className={spanClass}>
             {started && t('DOWNLOADS.PROGRESS', { current: fileProgress, size: fileSize })}
