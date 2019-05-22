@@ -186,7 +186,8 @@
             "WIN_VALID_FILENAME": "Tous les caractères sauf *:<>\\?| sont acceptés",
             "UNIX_VALID_FILENAME": "Tous les caractères sauf / sont acceptés",
             "DELETE": "Erreur lors de la suppression des fichiers: {{message}}",
-            "CREATE_FOLDER": "Erreor lors de la création du dossier: {{message}}"
+            "CREATE_FOLDER": "Erreur lors de la création du dossier: {{message}}",
+            "EEXIST": "un fichier avec ce nom existe déjà"
         },
         "MAIN_PROCESS": {
             "PRESS_TO_EXIT": "Maintenez la touche ⌘Q enfoncée pour quitter"

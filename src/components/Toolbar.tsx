@@ -172,10 +172,10 @@ export class ToolbarClass extends React.Component<IProps, PathInputState> {
             const { t } = this.props;
 
             AppToaster.show({
-                message: t('ERRORS.CREATE_FOLDER', { message: err }),
+                message: t('ERRORS.CREATE_FOLDER', { message: err.message }),
                 icon: 'error',
                 intent: Intent.DANGER,
-                timeout: 4000
+                timeout: 3000
             });
         }
     }

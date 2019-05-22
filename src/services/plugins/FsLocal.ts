@@ -89,15 +89,14 @@ class LocalApi implements FsApi {
                 console.log('mkdir', unixPath);
                 mkdir(unixPath, (err) => {
                     if (err) {
-                        reject(false);
+                        reject(err);
                     } else {
                         resolve(path.join(source, dirName));
                     }
                 });
 
             } catch (err) {
-                console.error(err);
-                reject(false);
+                reject(err);
             }
         });
     }

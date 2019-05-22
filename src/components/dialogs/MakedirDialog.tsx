@@ -22,6 +22,8 @@ const DEBOUNCE_DELAY = 300;
 const ENTER_KEY = 13;
 
 class MakedirDialogClass extends React.Component<IMakedirProps, IMakedirState>{
+    mounted = false;
+
     constructor(props: any) {
         super(props);
 
@@ -52,12 +54,17 @@ class MakedirDialogClass extends React.Component<IMakedirProps, IMakedirState>{
 
     private isValid(path: string): boolean {
         const valid = this.props.onValidation(path);
-        console.log('valid', path, valid);
         return valid;
     }
 
     private checkPath: (path: string) => any = debounce(
         (path: string) => {
+            // prevent memleak in case debounce callback is called
+            // after the dialog has been closed
+            if (!this.mounted) {
+                return;
+            }
+
             try {
                 const isValid = this.isValid(path);
                 this.setState({ valid: isValid });
@@ -68,12 +75,10 @@ class MakedirDialogClass extends React.Component<IMakedirProps, IMakedirState>{
         }, DEBOUNCE_DELAY);
 
     private cancelClose = () => {
-        console.log('handleClose');
         this.props.onClose("", false);
     }
 
     private onCreate = () => {
-        console.log('onCreate');
         const { path, ctrlKey } = this.state;
         if (this.isValid(path)) {
             this.props.onClose(path, ctrlKey);
@@ -83,15 +88,13 @@ class MakedirDialogClass extends React.Component<IMakedirProps, IMakedirState>{
     }
 
     private onPathChange = (event: React.FormEvent<HTMLElement>) => {
-        console.log('path change');
-        // 1.Update date
         const path = (event.target as HTMLInputElement).value;
         this.setState({ path });
-        // // 2. isValid ?
         this.checkPath(path);
     }
 
     componentDidMount() {
+        this.mounted = true;
         document.addEventListener('keyup', this.onKeyUp);
         document.addEventListener('keydown', this.onKeyDown);
     }
@@ -99,6 +102,7 @@ class MakedirDialogClass extends React.Component<IMakedirProps, IMakedirState>{
     componentWillUnmount() {
         document.removeEventListener('keyup', this.onKeyUp);
         document.removeEventListener('keydown', this.onKeyDown);
+        this.mounted = false;
     }
 
     // shouldComponentUpdate() {

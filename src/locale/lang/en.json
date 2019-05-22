@@ -186,7 +186,8 @@
             "WIN_VALID_FILENAME": "All characters except *:<>\\?| can be used",
             "UNIX_VALID_FILENAME": "All characters except / can be used",
             "DELETE": "Error deleting files: {{message}}",
-            "CREATE_FOLDER": "Error creating folder: {{message}}"
+            "CREATE_FOLDER": "Error creating folder: {{message}}",
+            "EEXIST": "a file with that name already exists"
         },
         "MAIN_PROCESS": {
             "PRESS_TO_EXIT": "Keep pressing ⌘Q to exit"
