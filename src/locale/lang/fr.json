@@ -176,6 +176,7 @@
             "ENOENT": "Dossier ou fichier introuvable",
             "EPERM": "Vous n'avez pas la permission d'effectuer cette action",
             "EACCES": "Accès refusé",
+            "ENOSPC": "le disque est plein",
             "EHOSTDOWN": "Houston, on a un problème: il n'y a plus d'internet :(",
             "530": "Echec de l'authentification",
             "550": "Fichier non disponible, introuvable ou non accessible.",

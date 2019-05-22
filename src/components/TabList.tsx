@@ -232,7 +232,7 @@ class TabListClass extends React.Component<InjectedProps> {
                     caches.map((cache, index) => {
                         const closeIcon = caches.length > 1 && <Icon iconSize={12} htmlTitle={t('TABS.CLOSE')} className="closetab" intent="warning" onClick={this.closeTab.bind(this, index)} icon="cross"></Icon>;
                         const path = cache.path;
-                        const tabIcon = this.getTabIcon(path);
+                        const tabIcon = cache.status === 'blank' ? 'issue' : this.getTabIcon(path);
                         const tabInfo = cache.getFS().displaypath(path);
 
                         return (
