@@ -40,6 +40,10 @@ export function getLocalizedError(error: any) {
             niceError.message = i18next.t('ERRORS.EACCES');
             break;
 
+        case 'EEXIST':
+            niceError.message = i18next.t('ERRORS.EEXIST');
+            break;
+
         case 'BAD_FILENAME':
             const acceptedChars = isWin ? i18next.t('ERRORS.WIN_VALID_FILENAME') : i18next.t('ERRORS.UNIX_VALID_FILENAME');
 
