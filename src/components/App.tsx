@@ -81,7 +81,7 @@ class App extends React.Component<WithNamespaces, IState> {
         // one tab for each view with the same default folder
         const defaultTabs: Array<TabDescriptor> = [
             { viewId: 0, path: path },
-            { viewId: 1, path: path }
+            // { viewId: 1, path: path }
         ]
 
         this.appState = new AppState(defaultTabs);
@@ -651,7 +651,7 @@ class App extends React.Component<WithNamespaces, IState> {
                     </Navbar>
                     <div onClickCapture={this.handleClick} className="main">
                         <SideView viewState={viewStateLeft} hide={!isExplorer} onPaste={this.onPaste} />
-                        <SideView viewState={viewStateRight} hide={!isExplorer} onPaste={this.onPaste} />
+                        {/* <SideView viewState={viewStateRight} hide={!isExplorer} onPaste={this.onPaste} /> */}
                         <Downloads hide={isExplorer} />
                     </div>
                     <LogUI></LogUI>

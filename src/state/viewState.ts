@@ -41,7 +41,7 @@ export class ViewState {
     }
 
     @action
-    setVisibleCache(index: number, activateInput = false) {
+    setVisibleCache(index: number) {
         const previous = this.getVisibleCache();
         const next = this.caches[index];
         // do nothing if previous === next
