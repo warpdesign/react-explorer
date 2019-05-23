@@ -8,6 +8,7 @@ import { ContextMenu } from './ContextMenu';
 import { MenuItemConstructorOptions, MenuItem } from "electron";
 import { SettingsState } from "../state/settingsState";
 import { DOWNLOADS_DIR, HOME_DIR, DOCS_DIR, DESKTOP_DIR, MUSIC_DIR, PICTURES_DIR, VIDEOS_DIR } from '../utils/platform';
+import { AppAlert } from "./AppAlert";
 
 export interface TabDescriptor {
     viewId: number;
@@ -146,7 +147,11 @@ class TabListClass extends React.Component<InjectedProps> {
             cache.openDirectory({
                 dir: cache.path,
                 fullname: menuItem.id
-            });
+            }).catch((err) => {
+                AppAlert.show(`${err.message} (${err.code})`, {
+                    intent: 'danger'
+                });
+            })
         }
     };
 

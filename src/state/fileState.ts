@@ -517,7 +517,10 @@ export class FileState {
 
     openParentDirectory() {
         const parent = { dir: this.path, fullname: '..' };
-        this.openDirectory(parent);
+        this.openDirectory(parent).catch(() => {
+            this.updatePath(this.api.join(this.path, '..'), true);
+            this.emptyCache();
+        });
     }
 
     isRoot(path: string): boolean {
