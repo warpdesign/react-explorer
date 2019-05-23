@@ -97,7 +97,7 @@ interface InjectedProps extends IProps {
 @HotkeysTarget
 export class FileTableClass extends React.Component<IProps, IState> {
     private viewState: ViewState;
-    private disposer: IReactionDisposer;
+    private disposers: Array<IReactionDisposer> = new Array();
     private editingElement: HTMLElement = null;
     private editingFile: File;
     private clickTimeout: any;
@@ -117,7 +117,7 @@ export class FileTableClass extends React.Component<IProps, IState> {
             path: cache.path
         };
 
-        this.installReaction();
+        this.installReactions();
         // since the nodes are only generated after the files are updated
         // we re-render them after language has changed otherwise FileList
         // gets re-rendered with the wrong language after language has been changed
@@ -144,7 +144,9 @@ export class FileTableClass extends React.Component<IProps, IState> {
     }
 
     public componentWillUnmount() {
-        this.disposer();
+        for (let disposer of this.disposers) {
+            disposer();
+        }
         document.removeEventListener('keydown', this.onDocKeyDown);
         this.unbindLanguageChange();
     }
@@ -206,20 +208,25 @@ export class FileTableClass extends React.Component<IProps, IState> {
         return this.props as InjectedProps;
     }
 
-    private installReaction() {
-        this.disposer = reaction(
-            () => { return toJS(this.cache.files) },
+    private installReactions() {
+        this.disposers.push(reaction(
+            () => toJS(this.cache.files),
             (files: File[]) => {
                 const cache = this.cache;
                 // when cache is being (re)loaded, cache.files is empty:
-                // we don't want to show "empty folder" placeholder in that
+                // we don't want to show "empty folder" placeholder
                 // that case, only when cache is loaded and there are no files
                 const { viewState } = this.injected;
 
                 if (cache.cmd === 'cwd' || cache.history.length) {
                     this.updateNodes(files);
                 }
-            });
+            }),
+            reaction(
+                () => this.cache.error,
+                () => this.updateNodes(this.cache.files)
+            )
+        );
     }
 
     private getSelectedState(name: string) {

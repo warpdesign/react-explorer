@@ -8,8 +8,6 @@ import * as process from 'process';
 import { AppState } from "./appState";
 import { TSORT_METHOD_NAME, TSORT_ORDER } from "../services/FsSort";
 
-const isWin = process.platform === "win32";
-
 export type TStatus = 'busy' | 'ok' | 'login' | 'offline';
 
 export class FileState {
@@ -86,6 +84,10 @@ export class FileState {
             return;
         }
 
+        if (force) {
+            debugger;
+        }
+
         const history = this.history;
         const current = this.current;
         const length = history.length;
@@ -100,12 +102,19 @@ export class FileState {
         this.current = newCurrent;
 
         const path = history[current + dir];
-        if (path !== this.path || force) {
-            // console.log('opening path from history', path);
-            this.cd(path, '', true, true);
-        } else {
-            console.warn('preventing endless loop');
-        }
+
+        return this.cd(path, '', true, true)
+            .catch(() => {
+                // whatever happens, we want switch to that folder
+                this.updatePath(path, true);
+                this.emptyCache();
+            });
+        // if (path !== this.path || force) {
+        //     // console.log('opening path from history', path);
+        //     this.cd(path, '', true, true);
+        // } else {
+        //     console.warn('preventing endless loop');
+        // }
     }
     // /history
 
@@ -198,6 +207,7 @@ export class FileState {
         // only reload directory if connection hasn't been lost otherwise we enter
         // into an infinite loop
         if (this.api.isConnected()) {
+            debugger;
             this.navHistory(0);
             this.setStatus('ok');
         }
@@ -308,7 +318,6 @@ export class FileState {
 
     reload() {
         if (this.status !== 'busy') {
-            // this.navHistory(0, true);
             this.cd(this.path, "", true, true)
                 .catch(this.emptyCache);
         }
@@ -339,7 +348,8 @@ export class FileState {
                 this.server = this.fs.serverpart(path);
                 this.credentials = this.fs.credentials(path);
             } else {
-                this.navHistory(0);
+                debugger;
+                // this.navHistory(0);
                 return Promise.reject({
                     message: i18next.t('ERRORS.CANNOT_READ_FOLDER', { folder: path }),
                     code: 'NO_FS'

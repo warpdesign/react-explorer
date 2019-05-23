@@ -58,8 +58,6 @@ export class ViewState {
 
     @action
     removeCache(index: number) {
-        // const toDelete = this.caches.splice(index, 1)[0];
-
         return this.caches.splice(index, 1)[0];
     }
 
