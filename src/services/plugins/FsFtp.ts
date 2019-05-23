@@ -236,7 +236,7 @@ class Client {
                             extension: '',
                             mode: 0,
                             readonly: false,
-                            type: ftpFile.type !== 'd' && filetype(0, ext) || '',
+                            type: ftpFile.type !== 'd' && filetype(0, 0, 0, ext) || '',
                             isSym: false,
                             id: {
                                 ino: mDate.getTime(),

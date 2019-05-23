@@ -106,9 +106,9 @@ class LocalApi implements FsApi {
 
         return new Promise(async (resolve, reject) => {
             try {
-                console.log('delete', toDelete);
-                await del(toDelete, { force: true });
-                resolve(files.length);
+                const deleted = await del(toDelete, { force: true });
+
+                resolve(deleted.length);
             } catch (err) {
                 reject(err);
             }
@@ -122,16 +122,27 @@ class LocalApi implements FsApi {
         if (!newName.match(invalidFileChars)) {
             console.log('valid !', oldPath, newPath);
             return new Promise((resolve, reject) => {
-                fs.rename(oldPath, newPath, (err) => {
-                    if (err) {
+                // since node's fs.rename will overwrite the destination
+                // path if it exists, first check that file dones't exists
+                this.exists(newPath).then((exists) => {
+                    if (exists) {
                         reject({
-                            code: err.code,
-                            message: err.message,
-                            newName: newName,
+                            code: 'EEXIST',
                             oldName: file.fullname
                         });
                     } else {
-                        resolve(newName);
+                        fs.rename(oldPath, newPath, (err) => {
+                            if (err) {
+                                reject({
+                                    code: err.code,
+                                    message: err.message,
+                                    newName: newName,
+                                    oldName: file.fullname
+                                });
+                            } else {
+                                resolve(newName);
+                            }
+                        });
                     }
                 });
             });
@@ -190,7 +201,7 @@ class LocalApi implements FsApi {
                     mode: stats.mode,
                     isDir: stats.isDirectory(),
                     readonly: false,
-                    type: !stats.isDirectory() && filetype(stats.mode, format.ext.toLowerCase()) || '',
+                    type: !stats.isDirectory() && filetype(stats.mode, stats.gid, stats.uid, format.ext.toLowerCase()) || '',
                     isSym: stats.isSymbolicLink(),
                     id: MakeId(stats)
                 };
@@ -264,7 +275,7 @@ class LocalApi implements FsApi {
                                 mode: stats.mode,
                                 isDir: stats.isDirectory(),
                                 readonly: false,
-                                type: !stats.isDirectory() && filetype(stats.mode, format.ext.toLowerCase()) || '',
+                                type: !stats.isDirectory() && filetype(stats.mode, 0, 0, format.ext.toLowerCase()) || '',
                                 isSym: stats.isSymbolicLink(),
                                 id: MakeId(stats)
                             };

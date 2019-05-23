@@ -2,6 +2,8 @@ import { FsLocal } from './plugins/FsLocal';
 import { FsGeneric } from './plugins/FsGeneric';
 import { FsSimpleFtp } from './plugins/FsSimpleFtp';
 import { Readable, Writable } from 'stream';
+import { isWin } from '../utils/platform';
+import { number } from 'prop-types';
 
 export interface FileID {
     ino: number;
@@ -60,12 +62,19 @@ export function MakeId(stats: any): FileID {
     }
 }
 
-function isModeExe(mode: number): Boolean {
-    return !!((mode & ExeMaskAll) || (mode & ExeMaskUser) || (mode & ExeMaskGroup));
+function isModeExe(mode: number, gid: number, uid: number): Boolean {
+    if (isWin) {
+        return false;
+    }
+
+    const isGroup = gid ? process.getgid && gid === process.getgid() : false;
+    const isUser = uid ? process.getuid && uid === process.getuid() : false;
+
+    return !!((mode & ExeMaskAll) || ((mode & ExeMaskUser) && isGroup) || ((mode & ExeMaskGroup) && isUser));
 }
 
-export function filetype(mode: number, extension: string): FileType {
-    if (isModeExe(mode) || extension.match(Extensions.exe)) {
+export function filetype(mode: number, gid: number, uid: number, extension: string): FileType {
+    if (isModeExe(mode, gid, uid) || extension.match(Extensions.exe)) {
         return 'exe';
     } else if (extension.match(Extensions.img)) {
         return 'img';

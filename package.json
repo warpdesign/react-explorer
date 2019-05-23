@@ -74,7 +74,7 @@
     "@types/react-dom": "^16.0.8",
     "basic-ftp": "^3.2.2",
     "classnames": "^2.2.6",
-    "del": "^3.0.0",
+    "del": "github:warpdesign/del",
     "electron-window-state": "^5.0.3",
     "get-folder-size": "^2.0.0",
     "i18next": "^13.0.0",

@@ -364,7 +364,7 @@ class SimpleFtpApi implements FsApi {
                         extension: '',
                         mode: 0,
                         readonly: false,
-                        type: !ftpFile.isDirectory && filetype(0, ext) || '',
+                        type: !ftpFile.isDirectory && filetype(0, 0, 0, ext) || '',
                         isSym: false,
                         id: {
                             ino: mDate.getTime(),
