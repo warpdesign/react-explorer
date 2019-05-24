@@ -149,7 +149,9 @@
             "CLOSE": "Fermer",
             "EMPTY_FOLDER": "Dossier vide.",
             "NO_SUCH_FOLDER": "Dossier inexistant ou inaccessible.",
-            "PATH_PLACEHOLDER": "Entrer le chemin à visiter"
+            "PATH_PLACEHOLDER": "Entrer le chemin à visiter",
+            "COPY_FINISHED": "La copie a été réalisée avec succès",
+            "COPY_WARNING": "Copie terminée: certains éléments n'ont pu être copiés."
         },
         "FILETABLE": {
             "COL_NAME": "Nom",
@@ -163,7 +165,8 @@
         },
         "DOWNLOADS": {
             "EMPTY_TITLE": "Aucun téléchargement.",
-            "FINISHED": "Terminé ({{size}})",
+            "FINISHED": "Terminé",
+            "FINISHED_ERRORS": "Terminé, mais avec erreurs",
             "PROGRESS": "{{current}} / {{size}}",
             "ERROR": "Erreur",
             "CANCELLED": "Annulé",
@@ -189,7 +192,10 @@
             "DELETE": "Erreur lors de la suppression des fichiers: {{message}}",
             "DELETE_WARN": "Certains fichiers n'ont pu être supprimés",
             "CREATE_FOLDER": "Erreur lors de la création du dossier: {{message}}",
-            "EEXIST": "Un fichier avec ce nom existe déjà"
+            "EEXIST": "Un fichier avec ce nom existe déjà",
+            "NODEST": "la destination de la copie n'est pas accessible",
+            "COPY_ERROR": "La copie n'a pu s'effectuer: {{message}}",
+            "COPY_UNKNOWN_ERROR": "Impossible de copier les fichiers demandés."
         },
         "MAIN_PROCESS": {
             "PRESS_TO_EXIT": "Maintenez la touche ⌘Q enfoncée pour quitter"

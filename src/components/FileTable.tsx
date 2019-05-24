@@ -489,6 +489,7 @@ export class FileTableClass extends React.Component<IProps, IState> {
 
         const selection = nodes.filter((node, i) => i !== position && node.isSelected).map((node) => node.nodeData) as File[];
 
+        debugger;
         if (position > -1) {
             const cursorFile = nodes[position].nodeData as File;
             selection.push(cursorFile);

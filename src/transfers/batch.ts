@@ -46,7 +46,7 @@ export class Batch {
     }
 
     get numErrors(): number {
-        return this.files.reduce((acc, val) => acc + (val.error && 1 || 0), 0);
+        return this.files.reduce((acc, val) => acc + ((val.error || val.status === 'cancelled') && 1 || 0), 0);
     }
 
     public isExpanded: boolean = false;
@@ -70,57 +70,67 @@ export class Batch {
     }
 
     @action
-    onEndTransfer = (status: Status = 'done') => {
+    onEndTransfer = () => {
         // console.log('transfer ended ! duration=', Math.round((new Date().getTime() - this.startDate.getTime()) / 1000), 'sec(s)');
         // console.log('destroy batch, new maxId', Batch.maxId);
-        this.status = status;
+        this.status = 'done';
+        return Promise.resolve(this.numErrors === 0);
     }
 
     @action
-    start(): Promise<void> {
+    start(): Promise<boolean> {
         console.log('starting batch');
         if (this.status === 'queued') {
             this.slotsAvailable = MAX_TRANSFERS;
             this.status = 'started';
             this.transferDef = new Deferred();
-            this.transferDef.promise.then(
-                this.onEndTransfer
-            ).catch((err: Error) => {
-                console.log('error transfer', err);
-                this.status = 'error';
-                return Promise.reject(err);
-            });
 
-            this.transfersDone = 0;
             this.startDate = new Date();
             this.queueNextTransfers();
         }
 
-        return this.transferDef.promise;
+        // return this.transferDef.promise;
+        return this.transferDef.promise.then(
+            this.onEndTransfer
+        ).catch((err: Error) => {
+            console.log('error transfer', err);
+            this.status = 'error';
+            return Promise.reject(err);
+        });
     }
 
     @action
-    updatePendingTransfers(subDir: string, newFilename: string) {
+    updatePendingTransfers(subDir: string, newFilename: string, cancel = false) {
         // TODO: escape '(' & ')' in subDir if needed
         const regExp = new RegExp('^(' + subDir + ')');
         const files = this.files.filter((file) => file.subDirectory.match(regExp) !== null);
-        let newPrefix = '';
-        // need to rename
-        if (!subDir.match(new RegExp(newFilename + '$'))) {
-            const parts = subDir.split('/');
-            parts[parts.length - 1] = newFilename;
-            newPrefix = parts.join('/');
-        }
 
-        for (let transfer of files) {
-            // enable files inside this directory
-            if (transfer.subDirectory === subDir) {
-                transfer.ready = true;
+        // destination directory for these files could not be created: we cancel these transfers
+        if (cancel) {
+            for (let file of files) {
+                debugger;
+                file.status = 'cancelled';
+                this.transfersDone++;
             }
-            // for all files (ie. this directory & subdirectories)
-            // rename this part if needed
-            if (newPrefix) {
-                transfer.newSub = transfer.subDirectory.replace(regExp, newPrefix);
+        } else {
+            let newPrefix = '';
+            // need to rename
+            if (!subDir.match(new RegExp(newFilename + '$'))) {
+                const parts = subDir.split('/');
+                parts[parts.length - 1] = newFilename;
+                newPrefix = parts.join('/');
+            }
+
+            for (let transfer of files) {
+                // enable files inside this directory
+                if (transfer.subDirectory === subDir) {
+                    transfer.ready = true;
+                }
+                // for all files (ie. this directory & subdirectories)
+                // rename this part if needed
+                if (newPrefix) {
+                    transfer.newSub = transfer.subDirectory.replace(regExp, newPrefix);
+                }
             }
         }
     }
@@ -146,7 +156,10 @@ export class Batch {
     }
 
     @action
-    onTransferError = (transfer: FileTransfer, err: Error) => {
+    onTransferError = (transfer: FileTransfer, err: any) => {
+        transfer;
+        debugger;
+        // console.log('transfer error', transfer.file.fullname, err);
         transfer.status = 'error';
         transfer.error = getLocalizedError(err);
         this.errors++;
@@ -179,9 +192,11 @@ export class Batch {
 
         try {
             newFilename = await this.renameOrCreateDir(transfer, fullDstPath);
+            transfer.status = 'done';
         } catch (err) {
+            debugger;
             console.log('error creating directory', err);
-            transfer.status = 'error';
+            this.onTransferError(transfer, err);
         }
 
         if (this.status === 'cancelled') {
@@ -206,7 +221,6 @@ export class Batch {
                 // });
 
                 await dstFs.putStream(stream, dstFs.join(fullDstPath, newFilename), (bytesRead: number) => {
-                    // console.log('read', bytesRead);
                     this.onData(transfer, bytesRead);
                 }, this.id);
 
@@ -226,15 +240,17 @@ export class Batch {
                 //}
                 this.onTransferError(transfer, err);
                 if (this.errors > MAX_ERRORS) {
+                    console.warn('maximum errors occurred: cancelling upcoming file transfers');
                     this.status = 'error';
                     this.cancelFiles();
                 }
             }
 
         } else {
-            transfer.status = 'done';
+            transfer;
+            debugger;
             // make transfers with this directory ready
-            this.updatePendingTransfers(srcFs.join(transfer.subDirectory, wantedName), newFilename);
+            this.updatePendingTransfers(srcFs.join(transfer.subDirectory, wantedName), newFilename, (transfer as FileTransfer).status !== 'done');
         }
 
         if (this.status === 'cancelled') {
@@ -247,11 +263,31 @@ export class Batch {
         if (this.status !== 'error' && this.transfersDone < this.files.length) {
             this.queueNextTransfers();
         } else {
+            for (let transfer of this.files) {
+                console.log(transfer.status, transfer);
+            }
             // console.log('no more transfers !!');
-            this.transferDef.resolve();
+            if (this.numErrors === this.files.length) {
+                for (let transfer of this.files) {
+                    console.log(transfer.status, transfer.file.fullname, transfer);
+                }
+                debugger;
+                this.transferDef.reject({
+                    code: ''
+                });
+            } else {
+                for (let transfer of this.files) {
+                    console.log(transfer.status, transfer.file.fullname, transfer);
+                }
+                debugger;
+                this.transferDef.resolve();
+            }
         }
     }
 
+    // TODO: do not infinite loop if directory cannot be created
+    // if not, reject and then we should set each file found inside
+    // that directory to error
     async renameOrCreateDir(transfer: FileTransfer, dstPath: string): Promise<string> {
         const isDir = transfer.file.isDir;
         const dstFs = this.dstFs;
@@ -276,8 +312,11 @@ export class Batch {
         if (isDir) {
             // directory already exists: for now, simply use it
             if (!exists) {
-                // TODO: handle error
-                const newDir = await dstFs.makedir(dstPath, newName, this.id);
+                try {
+                    const newDir = await dstFs.makedir(dstPath, newName, this.id);
+                } catch (err) {
+                    return Promise.reject(err);
+                }
             } else if (!stats.isDir) {
                 // exists but is a file: attempt to create a directory with newName
                 let success = false;
@@ -342,6 +381,7 @@ export class Batch {
     @action
     cancel() {
         if (this.status !== 'done') {
+            debugger;
             this.status = 'cancelled';
             this.cancelFiles();
             this.destroyRunningStreams();
@@ -388,24 +428,36 @@ export class Batch {
 
         // dir: need to call list for each directry to get files
         for (let dir of dirs) {
-            transfers.push({
+            const transfer: FileTransfer = {
                 file: dir,
                 status: 'queued',
                 progress: 0,
                 subDirectory,
                 newSub: subDirectory,
                 ready: subDirectory === ''
-            });
+            };
+
+            transfers.push(transfer);
 
             // get directory listing
             const currentPath = this.srcFs.join(dir.dir, dir.fullname);
             // note: this is needed for FTP only: since Ftp.list(path) has to ignore the path
             // and lists the contents of the CWD (which is changed by calling Ftp.cd())
-            await this.srcFs.cd(currentPath);
+            let subFiles: File[] = null;
             // /note
-            const subFiles = await this.srcFs.list(currentPath);
-            const subDir = this.srcFs.join(subDirectory, dir.fullname);
-            transfers = transfers.concat(await this.getFileList(subFiles, subDir));
+            try {
+                await this.srcFs.cd(currentPath);
+                subFiles = await this.srcFs.list(currentPath);
+                const subDir = this.srcFs.join(subDirectory, dir.fullname);
+                transfers = transfers.concat(await this.getFileList(subFiles, subDir));
+            } catch (err) {
+                // TODO: set the transfer to error/skip
+                // then, simply skip it when doing the transfer
+                this.onTransferError(transfer, { code: 'ENOENT' });
+                this.transfersDone++;
+                console.log('could not get directory content for', currentPath);
+                console.log('directory was still added to transfer list for consistency');
+            }
         }
 
         return Promise.resolve(transfers);
@@ -414,7 +466,7 @@ export class Batch {
     @action
     async setFileList(files: File[]) {
         return this.getFileList(files).then((transfers) => {
-            // console.log('got files', transfers);
+            console.log('got files', transfers);
             this.files.replace(transfers);
         }).catch((err) => {
             return Promise.reject(err);

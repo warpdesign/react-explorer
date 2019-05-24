@@ -32,7 +32,7 @@ const fileTarget: DropTargetSpec<InjectedProps> = {
         const sourceViewId = monitor.getItem().fileState.viewId;
         const viewState = props.viewState;
         const fileCache = viewState.getVisibleCache();
-        return props.viewState.viewId !== sourceViewId && fileCache.status !== 'busy';
+        return props.viewState.viewId !== sourceViewId && fileCache.status !== 'busy' && !fileCache.error;
     },
     drop(props, monitor, component) {
         const item = monitor.getItem();

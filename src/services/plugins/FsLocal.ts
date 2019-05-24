@@ -87,7 +87,9 @@ class LocalApi implements FsApi {
             const unixPath = path.join(source, dirName).replace(/\\/g, '/');
             try {
                 console.log('mkdir', unixPath);
+                debugger;
                 mkdir(unixPath, (err) => {
+                    debugger;
                     if (err) {
                         reject(err);
                     } else {
@@ -96,6 +98,7 @@ class LocalApi implements FsApi {
                 });
 
             } catch (err) {
+                debugger;
                 reject(err);
             }
         });
@@ -218,6 +221,7 @@ class LocalApi implements FsApi {
     }
 
     onList(dir: string) {
+        return;
         if (dir !== this.path) {
             // console.log('stopWatching', this.path);
             LocalWatch.stopWatchingPath(this.path, this.onFsChange);
@@ -319,6 +323,7 @@ class LocalApi implements FsApi {
     async putStream(readStream: fs.ReadStream, dstPath: string, progress: (pourcent: number) => void, transferId = -1): Promise<void> {
         return new Promise((resolve: (val?: any) => void, reject: (val?: any) => void) => {
             let finished = false;
+            let readError = false;
             let bytesRead = 0;
 
             const throttledProgress = throttle(() => { progress(bytesRead) }, 800);
@@ -334,6 +339,7 @@ class LocalApi implements FsApi {
 
             readStream.once('error', (err) => {
                 console.log('error on read stream');
+                readError = true;
                 readStream.destroy();
                 writeStream.destroy(err);
             });
@@ -348,6 +354,19 @@ class LocalApi implements FsApi {
             });
 
             writeStream.once('error', err => {
+                // remove created file if it's empty and there was a problem
+                // accessing the source file: we will report an error to the
+                // user so there's no need to leave an empty file
+                if (readError && !bytesRead && !writeStream.bytesWritten) {
+                    console.log('cleaning up fs');
+                    fs.unlink(dstPath, (err) => {
+                        if (!err) {
+                            console.log('cleaned-up fs');
+                        } else {
+                            console.log('error cleaning-up fs', err);
+                        }
+                    });
+                }
                 reject(err);
             });
 
