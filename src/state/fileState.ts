@@ -387,8 +387,8 @@ export class FileState {
 
     @action
     @needsConnection
-    async list(path: string, appendParent?: boolean): Promise<File[]> {
-        return this.api.list(path, appendParent)
+    async list(path: string): Promise<File[]> {
+        return this.api.list(path)
             .then((files: File[]) => {
                 runInAction(() => {
                     this.files.replace(files);

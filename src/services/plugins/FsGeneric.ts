@@ -92,7 +92,7 @@ class GenericApi implements FsApi {
         } as File);
     }
 
-    async list(dir: string, appendParent = true, transferId = -1): Promise<File[]> {
+    async list(dir: string, transferId = -1): Promise<File[]> {
         console.log('FsGeneric.readDirectory');
         const pathExists = await this.isDir(dir);
 

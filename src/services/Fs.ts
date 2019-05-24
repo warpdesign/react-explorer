@@ -96,7 +96,7 @@ export function filetype(mode: number, gid: number, uid: number, extension: stri
 export interface FsApi {
     // public API
     // async methods that may require server access
-    list(dir: string, appendParent?: boolean, transferId?: number): Promise<File[]>;
+    list(dir: string, transferId?: number): Promise<File[]>;
     cd(path: string, transferId?: number): Promise<string>;
     delete(parent: string, files: File[], transferId?: number): Promise<number>;
     makedir(parent: string, name: string, transferId?: number): Promise<string>;

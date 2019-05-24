@@ -403,7 +403,7 @@ export class Batch {
             // and lists the contents of the CWD (which is changed by calling Ftp.cd())
             await this.srcFs.cd(currentPath);
             // /note
-            const subFiles = await this.srcFs.list(currentPath, false);
+            const subFiles = await this.srcFs.list(currentPath);
             const subDir = this.srcFs.join(subDirectory, dir.fullname);
             transfers = transfers.concat(await this.getFileList(subFiles, subDir));
         }

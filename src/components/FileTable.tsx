@@ -301,6 +301,8 @@ export class FileTableClass extends React.Component<IProps, IState> {
         this.setState({ nodes, selected: keepSelection ? this.state.selected : 0, position, path: newPath }, () => {
             if (keepSelection && cache.editingId && position > -1) {
                 this.getElementAndToggleRename(undefined, false);
+            } else if (this.editingElement) {
+                this.editingElement = null;
             }
         });
     }
@@ -383,7 +385,6 @@ export class FileTableClass extends React.Component<IProps, IState> {
     { columnData: any, dataKey: string, event: Event }
     */
     onHeaderClick = ({ columnData, dataKey }: HeaderMouseEventHandlerParams) => {
-        console.log('column click', columnData, dataKey);
         const { sortMethod, sortOrder } = this.cache;
         const newMethod = columnData.sortMethod as TSORT_METHOD_NAME;
         const newOrder = sortMethod !== newMethod ? 'asc' : (sortOrder === 'asc' && 'desc' || 'asc') as TSORT_ORDER;
@@ -398,7 +399,8 @@ export class FileTableClass extends React.Component<IProps, IState> {
         const file = rowData.nodeData as File;
 
         // keep a reference to the target before set setTimeout is called
-        // because React set the event to null
+        // because React appaers to recycle the event object after event handler
+        // has returned
         const element = event.target as HTMLElement;
 
         // do not select parent dir pseudo file
@@ -451,11 +453,9 @@ export class FileTableClass extends React.Component<IProps, IState> {
         const editingElement = this.editingElement;
 
         if (cancel) {
-            console.log('restoring value');
             // restore previous value
             editingElement.innerText = this.editingFile.fullname;
         } else {
-            console.log('renaming value', this.cache.path, this.editingFile);
             // since the File element is modified by the rename FileState.rename method there is
             // no need to refresh the file cache:
             // 1. innerText has been updated and is valid
@@ -518,16 +518,13 @@ export class FileTableClass extends React.Component<IProps, IState> {
     }
 
     toggleInlineRename(element: HTMLElement, originallySelected: boolean, file: File, selectText = true) {
-        console.log('toggle inlinerename');
         if (!file.readonly) {
             if (originallySelected) {
-                console.log('activate inline rename!');
                 element.contentEditable = "true";
                 element.focus();
                 this.setEditElement(element, file);
                 selectText && this.selectLeftPart();
                 element.onblur = () => {
-                    console.log('onblur!!');
                     if (this.editingElement) {
                         this.onInlineEdit(true);
                     }
@@ -558,7 +555,6 @@ export class FileTableClass extends React.Component<IProps, IState> {
                 // await this.cache.openFile(file);
                 // await appState.getFile(file);
                 await this.cache.openFile(appState, this.cache, file);
-                console.log('** done');
             } else {
                 const isShiftDown = event.shiftKey;
                 const cache = isShiftDown ? appState.getInactiveViewVisibleCache() : this.cache;
@@ -580,7 +576,6 @@ export class FileTableClass extends React.Component<IProps, IState> {
         const fileCache = this.cache;
 
         if (nodes.length && this.isViewActive()) {
-            console.log('onSelectAll', document.activeElement);
             const isRoot = fileCache.isRoot((nodes[0].nodeData as File).dir);
             selected = 0;
 
@@ -597,7 +592,6 @@ export class FileTableClass extends React.Component<IProps, IState> {
                 i++;
             }
 
-            console.log('setState 3', position);
             this.setState({ nodes, selected, position }, () => {
                 this.updateSelection();
             });
@@ -625,7 +619,6 @@ export class FileTableClass extends React.Component<IProps, IState> {
             this.selectAll();
         } else {
             // need to select all text: send message
-            console.log('isEditable');
             ipcRenderer.send('selectAll');
         }
     }
@@ -641,7 +634,6 @@ export class FileTableClass extends React.Component<IProps, IState> {
                 if (e.keyCode === KEYS.Enter) {
                     e.preventDefault();
                 }
-                // console.log('end inline edit');
                 this.onInlineEdit(e.keyCode === KEYS.Escape);
             }
         }
@@ -672,8 +664,8 @@ export class FileTableClass extends React.Component<IProps, IState> {
             const node = nodes[position];
             const file = nodes[position].nodeData as File;
             const element = this.getNodeContentElement(position + 1);
-            console.log('got element', position + 1, element, nodes.length);
             const span: HTMLElement = element.querySelector(`.${LABEL_CLASSNAME}`);
+
             if (e && typeof e !== 'string') {
                 e.preventDefault();
             }
@@ -721,9 +713,7 @@ export class FileTableClass extends React.Component<IProps, IState> {
         let { position, selected } = this.state;
         let { nodes } = this.state;
 
-        console.log('moveSelection', position);
         position += step;
-        console.log('moveSelection apres', position);
 
         if (position > -1 && position <= this.state.nodes.length - 1) {
             if (isShiftDown) {
@@ -736,7 +726,6 @@ export class FileTableClass extends React.Component<IProps, IState> {
 
             nodes[position].isSelected = true;
 
-            console.log('setState 4', position);
             // move in method to reuse
             this.setState({ nodes, selected, position }, () => {
                 this.updateSelection();
@@ -771,7 +760,6 @@ export class FileTableClass extends React.Component<IProps, IState> {
         const { t } = this.injected;
         const { position } = this.state;
         const rowCount = this.state.nodes.length;
-        const scrollTop = position === -1 && this.cache.scrollTop || undefined;
 
         return (<div ref={this.setTableRef} onKeyDown={this.onInputKeyDown} className={`fileListSizerWrapper ${Classes.ELEVATION_0}`}>
             <AutoSizer>

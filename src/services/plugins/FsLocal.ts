@@ -227,7 +227,7 @@ class LocalApi implements FsApi {
         }
     }
 
-    async list(dir: string, appendParent = true, transferId = -1): Promise<File[]> {
+    async list(dir: string, transferId = -1): Promise<File[]> {
         const pathExists = await this.isDir(dir);
 
         if (pathExists) {
@@ -286,15 +286,6 @@ class LocalApi implements FsApi {
                         this.onList(dirPath);
 
                         resolve(files);
-                        // add parent
-                        // if (appendParent && !this.isRoot(dir)) {
-                        //     debugger;
-                        //     const parent = { ...Parent, dir: dirPath };
-
-                        //     resolve([parent].concat(files));
-                        // } else {
-                        //     resolve(files);
-                        // }
                     }
                 });
             });
@@ -325,12 +316,8 @@ class LocalApi implements FsApi {
         };
     }
 
-    static counter = 0;
-
-    // TODO: handle stream error
     async putStream(readStream: fs.ReadStream, dstPath: string, progress: (pourcent: number) => void, transferId = -1): Promise<void> {
         return new Promise((resolve: (val?: any) => void, reject: (val?: any) => void) => {
-            let count = LocalApi.counter++;
             let finished = false;
             let bytesRead = 0;
 
@@ -339,7 +326,6 @@ class LocalApi implements FsApi {
             const reportProgress = new Transform({
                 transform(chunk: any, encoding: any, callback: any) {
                     bytesRead += chunk.length;
-                    // console.log('dataChunk', bytesRead / 1024, 'Ko');
                     throttledProgress();
                     callback(null, chunk);
                 },
@@ -352,16 +338,13 @@ class LocalApi implements FsApi {
                 writeStream.destroy(err);
             });
 
-            // console.log('open', count);
             const writeStream = fs.createWriteStream(dstPath);
 
             readStream.pipe(reportProgress)
                 .pipe(writeStream);
 
             writeStream.once('finish', () => {
-                // console.log('finish', count);
                 finished = true;
-                // resolve();
             });
 
             writeStream.once('error', err => {
@@ -369,20 +352,17 @@ class LocalApi implements FsApi {
             });
 
             writeStream.once('close', () => {
-                // console.log('close', count);
                 if (finished) {
                     resolve();
                 } else {
                     reject();
                 }
             });
-            // writeStream.once('end', () => console.log('end', count));
+
             writeStream.once('error', err => {
                 reject(err);
-                // console.log('error', count)
             });
-            // writeStream.once('destroy', () => console.log('destroy', count));
-        })
+        });
     }
 
     getParentTree(dir: string): Array<{ dir: string, fullname: string, name: string }> {
