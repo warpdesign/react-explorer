@@ -247,10 +247,16 @@ class LocalApi implements FsApi {
                         for (var i = 0; i < items.length; i++) {
                             const fullPath = path.join(dirPath, items[i]);
                             const format = path.parse(fullPath);
-                            let stats;
+                            let name = fullPath;
+                            let stats = null;
+                            let target_stats = null;
 
                             try {
-                                stats = fs.statSync(path.join(dirPath, items[i]));
+                                stats = fs.lstatSync(fullPath);
+                                if (stats.isSymbolicLink()) {
+                                    target_stats = fs.statSync(fullPath);
+                                    name = fs.readlinkSync(fullPath);
+                                }
                             } catch (err) {
                                 console.warn('error getting stats for', path.join(dirPath, items[i]), err);
                                 stats = {
@@ -266,20 +272,23 @@ class LocalApi implements FsApi {
                                 }
                             }
 
+                            const extension = path.parse(name).ext.toLowerCase();
+                            const mode = target_stats ? target_stats.mode : stats.mode;
+
                             const file: File =
                             {
                                 dir: format.dir,
                                 fullname: items[i],
                                 name: format.name,
-                                extension: format.ext.toLowerCase(),
+                                extension: extension,
                                 cDate: stats.ctime,
                                 mDate: stats.mtime,
                                 bDate: stats.birthtime,
                                 length: stats.size,
-                                mode: stats.mode,
-                                isDir: stats.isDirectory(),
+                                mode: mode,
+                                isDir: target_stats ? target_stats.isDirectory() : stats.isDirectory(),
                                 readonly: false,
-                                type: !stats.isDirectory() && filetype(stats.mode, 0, 0, format.ext.toLowerCase()) || '',
+                                type: !(target_stats ? target_stats.isDirectory() : stats.isDirectory()) && filetype(mode, 0, 0, extension) || '',
                                 isSym: stats.isSymbolicLink(),
                                 id: MakeId(stats)
                             };

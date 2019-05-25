@@ -63,6 +63,7 @@
     "source-map-loader": "^0.2.4",
     "style-loader": "^0.23.0",
     "typescript": "^3.1.1",
+    "url-loader": "^1.1.2",
     "webpack": "^4.30.0",
     "webpack-cli": "^3.1.2"
   },

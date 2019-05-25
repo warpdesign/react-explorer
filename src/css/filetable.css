@@ -74,6 +74,19 @@
     color:#5c7080;
 }
 
+.tableRow.isSymlink:after{
+    content:'';
+    position:absolute;
+    bottom:4px;
+    left:6px;
+    background:transparent url(../../img/link.png) no-repeat;
+    background-color:white;
+    background-size:100% 100%;
+    width:10px;
+    height:10px;
+    border:1px solid rgba(0,0,0,.4);
+}
+
 .tableRow.error, .tableRow.error .bp3-icon, body.bp3-dark .tableRow.error .bp3-icon{
     color: rgb(160, 43, 43);
 }

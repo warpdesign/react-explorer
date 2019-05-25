@@ -238,12 +238,16 @@ export class FileTableClass extends React.Component<IProps, IState> {
     buildNodeFromFile(file: File, keepSelection: boolean) {
         const filetype = file.type;
         let isSelected = keepSelection && this.getSelectedState(file.fullname) || false;
+        const classes = classnames({
+            isHidden: file.fullname.startsWith('.'),
+            isSymlink: file.isSym
+        });
 
         const res: ITableRow = {
             icon: file.isDir && "folder-close" || (filetype && TYPE_ICONS[filetype] || TYPE_ICONS['any']),
             name: file.fullname,
             nodeData: file,
-            className: file.fullname.startsWith('.') && 'isHidden' || '',
+            className: classes,
             isSelected: isSelected,
             size: !file.isDir && formatBytes(file.length) || '--'
         };
@@ -489,7 +493,6 @@ export class FileTableClass extends React.Component<IProps, IState> {
 
         const selection = nodes.filter((node, i) => i !== position && node.isSelected).map((node) => node.nodeData) as File[];
 
-        debugger;
         if (position > -1) {
             const cursorFile = nodes[position].nodeData as File;
             selection.push(cursorFile);
