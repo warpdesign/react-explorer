@@ -108,7 +108,6 @@ export class Batch {
         // destination directory for these files could not be created: we cancel these transfers
         if (cancel) {
             for (let file of files) {
-                debugger;
                 file.status = 'cancelled';
                 this.transfersDone++;
             }
@@ -157,8 +156,6 @@ export class Batch {
 
     @action
     onTransferError = (transfer: FileTransfer, err: any) => {
-        transfer;
-        debugger;
         // console.log('transfer error', transfer.file.fullname, err);
         transfer.status = 'error';
         transfer.error = getLocalizedError(err);
@@ -194,7 +191,6 @@ export class Batch {
             newFilename = await this.renameOrCreateDir(transfer, fullDstPath);
             transfer.status = 'done';
         } catch (err) {
-            debugger;
             console.log('error creating directory', err);
             this.onTransferError(transfer, err);
         }
@@ -247,8 +243,6 @@ export class Batch {
             }
 
         } else {
-            transfer;
-            debugger;
             // make transfers with this directory ready
             this.updatePendingTransfers(srcFs.join(transfer.subDirectory, wantedName), newFilename, (transfer as FileTransfer).status !== 'done');
         }
@@ -279,7 +273,7 @@ export class Batch {
                 for (let transfer of this.files) {
                     console.log(transfer.status, transfer.file.fullname, transfer);
                 }
-                debugger;
+
                 this.transferDef.resolve();
             }
         }

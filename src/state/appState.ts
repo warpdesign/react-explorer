@@ -369,10 +369,11 @@ export class AppState {
         for (let selected of cache.selected) {
             console.log(selected.fullname, selected.id.dev, selected.id.ino);
         }
-        cache.updateSelection();
-        for (let selected of cache.selected) {
-            console.log(selected.fullname, selected.id.dev, selected.id.ino);
-        }
+        // cache.updateSelection();
+        // console.log('== apres ==');
+        // for (let selected of cache.selected) {
+        //     console.log(selected.fullname, selected.id.dev, selected.id.ino);
+        // }
     }
 
     @observable

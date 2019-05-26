@@ -491,6 +491,8 @@ export class FileTableClass extends React.Component<IProps, IState> {
         const fileCache = this.cache;
         const { nodes, position } = this.state;
 
+        console.log('selected', nodes.filter((node, i) => i !== position && node.isSelected));
+
         const selection = nodes.filter((node, i) => i !== position && node.isSelected).map((node) => node.nodeData) as File[];
 
         if (position > -1) {
@@ -577,21 +579,17 @@ export class FileTableClass extends React.Component<IProps, IState> {
     selectAll(invert = false) {
         let { position, selected } = this.state;
         let { nodes } = this.state;
-        const fileCache = this.cache;
 
         if (nodes.length && this.isViewActive()) {
-            const isRoot = fileCache.isRoot((nodes[0].nodeData as File).dir);
             selected = 0;
 
             let i = 0;
             for (let node of nodes) {
                 // do not select parent dir
-                if (i || isRoot) {
-                    node.isSelected = invert ? !node.isSelected : true;
-                    if (node.isSelected) {
-                        position = i;
-                        selected++;
-                    }
+                node.isSelected = invert ? !node.isSelected : true;
+                if (node.isSelected) {
+                    position = i;
+                    selected++;
                 }
                 i++;
             }

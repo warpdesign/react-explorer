@@ -209,6 +209,7 @@ export class ToolbarClass extends React.Component<IProps, PathInputState> {
 
             const deleted = await this.cache.delete(this.state.path, fileCache.selected);
 
+            // TODO: reset selection ?
             if (!deleted) {
                 this.onDeleteError();
             } else {

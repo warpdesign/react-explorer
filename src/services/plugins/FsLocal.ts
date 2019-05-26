@@ -87,9 +87,8 @@ class LocalApi implements FsApi {
             const unixPath = path.join(source, dirName).replace(/\\/g, '/');
             try {
                 console.log('mkdir', unixPath);
-                debugger;
+
                 mkdir(unixPath, (err) => {
-                    debugger;
                     if (err) {
                         reject(err);
                     } else {
@@ -109,8 +108,9 @@ class LocalApi implements FsApi {
 
         return new Promise(async (resolve, reject) => {
             try {
+                debugger;
                 const deleted = await del(toDelete, { force: true });
-
+                debugger;
                 resolve(deleted.length);
             } catch (err) {
                 reject(err);
@@ -221,7 +221,6 @@ class LocalApi implements FsApi {
     }
 
     onList(dir: string) {
-        return;
         if (dir !== this.path) {
             // console.log('stopWatching', this.path);
             LocalWatch.stopWatchingPath(this.path, this.onFsChange);
