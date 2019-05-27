@@ -9,12 +9,20 @@ export interface SelectionRange {
 
 function getExtensionIndex(filename: string): number {
     let index = -1;
-    for (let ext of Object.keys(Extensions)) {
-        const matches = filename.match(Extensions[ext]);
-        if (matches && (index === -1 || matches.index < index)) {
-            index = matches.index;
+    let found = true;
+
+    while (found) {
+        found = false;
+        for (let ext of Object.keys(Extensions)) {
+            const matches = filename.match(Extensions[ext]);
+            if (matches && (index === -1 || matches.index < index)) {
+                found = true;
+                index = matches.index;
+                filename = filename.substring(0, filename.length - filename.substring(index).length);
+            }
         }
     }
+
 
     return index;
 }
