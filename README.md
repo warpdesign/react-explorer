@@ -1,12 +1,11 @@
 # File manager written in TypeScript & React
 
-![React-Explorer](./img/react-ftp.png)
+![React-Explorer](./img/react-explorer-theme.png)
 
 ## Features
 
 **Note**
 React-Explorer is still being worked on so this is a work in progress.
-
 - Fully keyboard controlled
 - Dual-view window supporting any numbers of tabs
 - Fully localized (French & English available)
