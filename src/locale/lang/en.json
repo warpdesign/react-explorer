@@ -178,6 +178,7 @@
             "ECONNREFUSED": "Connection refused by the server",
             "ENOENT": "No such file or directory",
             "EPERM": "You don't have the permission to do this action",
+            "EIO": "Transfer was interrupted",
             "EACCES": "Permission denied",
             "ENOSPC": "no space left on device",
             "EHOSTDOWN": "Your internet connection appears to be down :(",

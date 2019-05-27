@@ -40,6 +40,10 @@ export function getLocalizedError(error: any) {
             niceError.message = i18next.t('ERRORS.EACCES');
             break;
 
+        case 'EIO':
+            niceError.message = i18next.t('ERRORS.EIO');
+            break;
+
         case 'ENOSPC':
             niceError.message = i18next.t('ERRORS.ENOSPC');
             break;

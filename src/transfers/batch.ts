@@ -196,7 +196,7 @@ export class Batch {
         }
 
         if (this.status === 'cancelled') {
-            debugger;
+            console.warn('startTransfer while cancelled (1)');
         }
 
         if (!transfer.file.isDir) {
@@ -248,7 +248,7 @@ export class Batch {
         }
 
         if (this.status === 'cancelled') {
-            debugger;
+            console.warn('startTransfer while cancelled (2)');
         }
 
         this.transfersDone++;
@@ -320,7 +320,7 @@ export class Batch {
                         await dstFs.makedir(dstPath, newName, this.id);
                         success = true;
                     } catch (err) {
-                        debugger;
+                        return Promise.reject(err);
                     }
                 }
             }
@@ -339,7 +339,7 @@ export class Batch {
         let newName = wantedName;
 
         // put suffix before the extension, so foo.txt will be renamed foo_1.txt to preserve the extension
-        // TODO: avoid endless loop, give up after enough tries
+        // TODO: avoid endless loop, give up after max tries
         while (exists) {
             const range = getSelectionRange(wantedName);
             const prefix = wantedName.startsWith('.') ? wantedName : wantedName.substring(range.start, range.length);
@@ -378,7 +378,6 @@ export class Batch {
     @action
     cancel() {
         if (this.status !== 'done') {
-            debugger;
             this.status = 'cancelled';
             this.cancelFiles();
             this.destroyRunningStreams();

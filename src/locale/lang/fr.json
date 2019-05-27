@@ -178,6 +178,7 @@
             "ECONNREFUSED": "Connexion refusée par le serveur",
             "ENOENT": "Dossier ou fichier introuvable",
             "EPERM": "Vous n'avez pas la permission d'effectuer cette action",
+            "EIO": "Le transfert a été interrompu",
             "EACCES": "Accès refusé",
             "ENOSPC": "le disque est plein",
             "EHOSTDOWN": "Houston, on a un problème: il n'y a plus d'internet :(",

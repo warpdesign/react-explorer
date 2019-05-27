@@ -82,7 +82,7 @@ class App extends React.Component<WithNamespaces, IState> {
         // one tab for each view with the same default folder
         const defaultTabs: Array<TabDescriptor> = [
             { viewId: 0, path: path },
-            // { viewId: 1, path: path }
+            { viewId: 1, path: path }
         ]
 
         this.appState = new AppState(defaultTabs);
@@ -563,7 +563,6 @@ class App extends React.Component<WithNamespaces, IState> {
                     }
                 })
                 .catch((err: any) => {
-                    debugger;
                     const { t } = this.injected;
                     const localizedError = getLocalizedError(err);
                     const message = err.code ? t('ERRORS.COPY_ERROR', { message: localizedError.message }) : t('ERRORS.COPY_UNKNOWN_ERROR');
@@ -684,7 +683,7 @@ class App extends React.Component<WithNamespaces, IState> {
                     </Navbar>
                     <div onClickCapture={this.handleClick} className="main">
                         <SideView viewState={viewStateLeft} hide={!isExplorer} onPaste={this.onPaste} />
-                        {/* <SideView viewState={viewStateRight} hide={!isExplorer} onPaste={this.onPaste} /> */}
+                        {<SideView viewState={viewStateRight} hide={!isExplorer} onPaste={this.onPaste} />}
                         <Downloads hide={isExplorer} />
                     </div>
                     <LogUI></LogUI>
