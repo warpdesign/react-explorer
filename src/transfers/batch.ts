@@ -4,6 +4,7 @@ import { FileTransfer } from "./fileTransfer";
 import { Deferred } from "../utils/deferred";
 import { getLocalizedError } from "../locale/error";
 import { Readable } from "stream";
+import { getSelectionRange } from "../utils/fileUtils";
 
 const MAX_TRANSFERS = 2;
 const MAX_ERRORS = 5;
@@ -341,9 +342,12 @@ export class Batch {
         // put suffix before the extension, so foo.txt will be renamed foo_1.txt to preserve the extension
         // TODO: avoid endless loop, give up after enough tries
         while (exists) {
-            const split = wantedName.split(REGEX_EXTENSION);
-            split[0] += RENAME_SUFFIX + i++;
-            newName = split.join('.');
+            const range = getSelectionRange(wantedName);
+            const prefix = wantedName.startsWith('.') ? wantedName : wantedName.substring(range.start, range.length);
+            const suffix = wantedName.startsWith('.') ? '' : wantedName.substring(range.length);
+
+            newName = prefix + RENAME_SUFFIX + i++ + suffix;
+
             const tmpPath = this.dstFs.join(this.dstPath, newName);
             try {
                 exists = await this.dstFs.exists(tmpPath, this.id);
