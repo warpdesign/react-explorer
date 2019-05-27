@@ -40,6 +40,14 @@ export function getLocalizedError(error: any) {
             niceError.message = i18next.t('ERRORS.EACCES');
             break;
 
+        case 'EIO':
+            niceError.message = i18next.t('ERRORS.EIO');
+            break;
+
+        case 'ENOSPC':
+            niceError.message = i18next.t('ERRORS.ENOSPC');
+            break;
+
         case 'EEXIST':
             niceError.message = i18next.t('ERRORS.EEXIST');
             break;
@@ -56,6 +64,10 @@ export function getLocalizedError(error: any) {
 
         case 'NOT_A_DIR':
             niceError.message = i18next.t('ERRORS.NOT_A_DIR');
+            break;
+
+        case 'NODEST':
+            niceError.message = i18next.t('ERRORS.NODEST');
             break;
 
         case 530:

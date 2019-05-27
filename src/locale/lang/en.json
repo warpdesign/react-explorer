@@ -149,7 +149,9 @@
             "CLOSE": "Close",
             "EMPTY_FOLDER": "Folder is empty.",
             "NO_SUCH_FOLDER": "No such folder or permission denied.",
-            "PATH_PLACEHOLDER": "Enter path to load"
+            "PATH_PLACEHOLDER": "Enter path to load",
+            "COPY_FINISHED": "The files have been copied successfully.",
+            "COPY_WARNING": "Copy finished: some items could not be copied."
         },
         "FILETABLE": {
             "COL_NAME": "Name",
@@ -163,7 +165,8 @@
         },
         "DOWNLOADS": {
             "EMPTY_TITLE": "No download.",
-            "FINISHED": "Finished ({{size}})",
+            "FINISHED": "Finished",
+            "FINISHED_ERRORS": "Finished, with errors",
             "PROGRESS": "{{current}} / {{size}}",
             "ERROR": "Error",
             "CANCELLED": "Cancelled",
@@ -175,7 +178,9 @@
             "ECONNREFUSED": "Connection refused by the server",
             "ENOENT": "No such file or directory",
             "EPERM": "You don't have the permission to do this action",
+            "EIO": "Transfer was interrupted",
             "EACCES": "Permission denied",
+            "ENOSPC": "no space left on device",
             "EHOSTDOWN": "Your internet connection appears to be down :(",
             "530": "Login authentication failed",
             "550": "File unavailable, not found, not accessible",
@@ -186,8 +191,12 @@
             "WIN_VALID_FILENAME": "All characters except *:<>\\?| can be used",
             "UNIX_VALID_FILENAME": "All characters except / can be used",
             "DELETE": "Error deleting files: {{message}}",
+            "DELETE_WARN": "Some files could not be deleted",
             "CREATE_FOLDER": "Error creating folder: {{message}}",
-            "EEXIST": "a file with that name already exists"
+            "EEXIST": "A file with that name already exists",
+            "NODEST": "copy target could not be accessed",
+            "COPY_ERROR": "Couldn't copy files: {{message}}",
+            "COPY_UNKNOWN_ERROR": "Error while copying files."
         },
         "MAIN_PROCESS": {
             "PRESS_TO_EXIT": "Keep pressing ⌘Q to exit"

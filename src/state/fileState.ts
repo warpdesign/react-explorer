@@ -8,9 +8,7 @@ import * as process from 'process';
 import { AppState } from "./appState";
 import { TSORT_METHOD_NAME, TSORT_ORDER } from "../services/FsSort";
 
-const isWin = process.platform === "win32";
-
-export type TStatus = 'blank' | 'busy' | 'ok' | 'login' | 'offline';
+export type TStatus = 'busy' | 'ok' | 'login' | 'offline';
 
 export class FileState {
     /* observable properties start here */
@@ -46,6 +44,9 @@ export class FileState {
     @observable
     status: TStatus;
 
+    @observable
+    error = false;
+
     cmd: string = '';
 
     // @observable
@@ -63,8 +64,9 @@ export class FileState {
     current: number = -1;
 
     @action
-    setStatus(status: TStatus) {
+    setStatus(status: TStatus, error = false) {
         this.status = status;
+        this.error = error;
     }
 
     @action
@@ -77,9 +79,13 @@ export class FileState {
     @action
     navHistory(dir = -1, force = false) {
         if (!this.history.length) {
+            debugger;
             console.warn('attempting to nav in empty history');
-            this.setStatus('blank');
             return;
+        }
+
+        if (force) {
+            debugger;
         }
 
         const history = this.history;
@@ -96,12 +102,19 @@ export class FileState {
         this.current = newCurrent;
 
         const path = history[current + dir];
-        if (path !== this.path || force) {
-            // console.log('opening path from history', path);
-            this.cd(path, '', true, true);
-        } else {
-            console.warn('preventing endless loop');
-        }
+
+        return this.cd(path, '', true, true)
+            .catch(() => {
+                // whatever happens, we want switch to that folder
+                this.updatePath(path, true);
+                this.emptyCache();
+            });
+        // if (path !== this.path || force) {
+        //     // console.log('opening path from history', path);
+        //     this.cd(path, '', true, true);
+        // } else {
+        //     console.warn('preventing endless loop');
+        // }
     }
     // /history
 
@@ -194,6 +207,7 @@ export class FileState {
         // only reload directory if connection hasn't been lost otherwise we enter
         // into an infinite loop
         if (this.api.isConnected()) {
+            debugger;
             this.navHistory(0);
             this.setStatus('ok');
         }
@@ -303,9 +317,18 @@ export class FileState {
     }
 
     reload() {
-        if (this.status === 'ok') {
-            this.navHistory(0, true);
+        if (this.status !== 'busy') {
+            this.cd(this.path, "", true, true)
+                .catch(this.emptyCache);
         }
+    }
+
+    @action
+    emptyCache = () => {
+        this.files.clear();
+        this.clearSelection();
+        this.setStatus('ok', true);
+        console.log('emptycache');
     }
 
     handleError = (error: any) => {
@@ -320,13 +343,13 @@ export class FileState {
     async cd(path: string, path2: string = '', skipHistory = false, skipContext = false): Promise<string> {
         // first updates fs (eg. was local fs, is now ftp)
         // console.log('cd', path, this.path);
-
         if (this.path !== path) {
             if (this.getNewFS(path, skipContext)) {
                 this.server = this.fs.serverpart(path);
                 this.credentials = this.fs.credentials(path);
             } else {
-                this.navHistory(0);
+                debugger;
+                // this.navHistory(0);
                 return Promise.reject({
                     message: i18next.t('ERRORS.CANNOT_READ_FOLDER', { folder: path }),
                     code: 'NO_FS'
@@ -334,18 +357,13 @@ export class FileState {
             }
         }
 
-        return this.cwd(path, path2, skipHistory, skipContext);
+        return this.cwd(path, path2, skipHistory);
     }
 
     @action
     @needsConnection
     // changes current path and retrieves file list
-    async cwd(path: string, path2: string = '', skipHistory = false, skipContext = false): Promise<string> {
-        // try {
-        //     await this.waitForConnection();
-        // } catch (err) {
-        //     return this.cd(path, path2, false, true);
-        // }
+    async cwd(path: string, path2: string = '', skipHistory = false): Promise<string> {
         const joint = path2 ? this.api.join(path, path2) : this.api.sanityze(path);
         this.cmd = 'cwd';
 
@@ -359,25 +377,23 @@ export class FileState {
             })
             .catch((error) => {
                 this.cmd = '';
-                console.log('path not valid ?', joint, 'restoring previous path');
+                console.log('error cd/list for path', joint, 'error was', error);
                 this.setStatus('ok');
-                this.navHistory(0);
                 const localizedError = getLocalizedError(error);
-                return Promise.reject(localizedError);
+                //return Promise.reject(localizedError);
+                throw localizedError;
             });
     }
 
     @action
     @needsConnection
-    async list(path: string, appendParent?: boolean): Promise<File[]> {
-        return this.api.list(path, appendParent)
+    async list(path: string): Promise<File[]> {
+        return this.api.list(path)
             .then((files: File[]) => {
                 runInAction(() => {
                     this.files.replace(files);
                     // update the cache's selection, keeping files that were previously selected
                     this.updateSelection();
-
-                    // TODO: sync caches ?
 
                     this.setStatus('ok');
                 });
@@ -490,7 +506,6 @@ export class FileState {
     }
 
     openDirectory(file: { dir: string, fullname: string }) {
-        // console.log('need to read dir', file.dir, file.fullname);
         return this.cd(file.dir, file.fullname).catch(this.handleError);
     }
 
@@ -502,7 +517,10 @@ export class FileState {
 
     openParentDirectory() {
         const parent = { dir: this.path, fullname: '..' };
-        this.openDirectory(parent);
+        this.openDirectory(parent).catch(() => {
+            this.updatePath(this.api.join(this.path, '..'), true);
+            this.emptyCache();
+        });
     }
 
     isRoot(path: string): boolean {

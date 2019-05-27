@@ -2,6 +2,7 @@ import { FsLocal } from './plugins/FsLocal';
 import { FsGeneric } from './plugins/FsGeneric';
 import { FsSimpleFtp } from './plugins/FsSimpleFtp';
 import { Readable, Writable } from 'stream';
+import { isWin } from '../utils/platform';
 
 export interface FileID {
     ino: number;
@@ -38,14 +39,14 @@ export interface Fs {
     icon: string;
 }
 
-const Extensions = {
-    'exe': /\.(exe|bat|com|msi|mui|cmd)$/,
-    'img': /\.(png|jpeg|jpg|gif|pcx|tiff|raw|webp|svg|heif|bmp|ilbm|iff|lbm|ppm|pgw|pbm|pnm|psd)$/,
-    'arc': /\.(zip|tar|rar|7zip|7z|dmg|shar|ar|bz2|lz|gz|tgz|lha|lzh|lzx|sz|xz|z|s7z|ace|apk|arp|arj|cab|car|cfs|cso|dar|iso|ice|jar|pak|sea|sfx|sit|sitx|lzma|war|xar|zoo|zipx|img|adf|dms|dmz)$/,
-    'snd': /\.(mp3|wav|mp2|ogg|aac|aiff|mod|flac|m4a|mpc|oga|opus|ra|rm|vox|wma|8svx)$/,
-    'vid': /\.(webm|avi|mpeg|mpg|mp4|mov|mkv|qt|wmv|vob|ogb|m4v|m4p|asf|mts|m2ts|3gp|flv|anim)$/,
-    'cod': /\.(json|js|cpp|c|cxx|java|rb|s|tsx|ts|jsx|lua|as|coffee|ps1|py|r|rexx|spt|sptd|go|rs|sh|bash|vbs|cljs)$/,
-    'doc': /\.(log|last|css|htm|html|rtf|doc|pdf|docx|txt|md|1st|asc|epub|xhtml|xml|amigaguide|info)$/
+export const Extensions: { [index: string]: RegExp } = {
+    'exe': /\.([\.]*(exe|bat|com|msi|mui|cmd))+$/,
+    'img': /\.([\.]*(png|jpeg|jpg|gif|pcx|tiff|raw|webp|svg|heif|bmp|ilbm|iff|lbm|ppm|pgw|pbm|pnm|psd))+$/,
+    'arc': /\.([\.]*(zip|tar|rar|7zip|7z|dmg|shar|ar|bz2|lz|gz|tgz|lha|lzh|lzx|sz|xz|z|s7z|ace|apk|arp|arj|cab|car|cfs|cso|dar|iso|ice|jar|pak|sea|sfx|sit|sitx|lzma|war|xar|zoo|zipx|img|adf|dms|dmz))+$/,
+    'snd': /\.([\.]*(mp3|wav|mp2|ogg|aac|aiff|mod|flac|m4a|mpc|oga|opus|ra|rm|vox|wma|8svx))+$/,
+    'vid': /\.([\.]*(webm|avi|mpeg|mpg|mp4|mov|mkv|qt|wmv|vob|ogb|m4v|m4p|asf|mts|m2ts|3gp|flv|anim))+$/,
+    'cod': /\.([\.]*(json|js|cpp|c|cxx|java|rb|s|tsx|ts|jsx|lua|as|coffee|ps1|py|r|rexx|spt|sptd|go|rs|sh|bash|vbs|cljs))+$/,
+    'doc': /\.([\.]*(log|last|css|htm|html|rtf|doc|pdf|docx|txt|md|1st|asc|epub|xhtml|xml|amigaguide|info))+$/
 };
 const ExeMaskAll = 0o0001;
 const ExeMaskGroup = 0o0010;
@@ -60,12 +61,19 @@ export function MakeId(stats: any): FileID {
     }
 }
 
-function isModeExe(mode: number): Boolean {
-    return !!((mode & ExeMaskAll) || (mode & ExeMaskUser) || (mode & ExeMaskGroup));
+function isModeExe(mode: number, gid: number, uid: number): Boolean {
+    if (isWin) {
+        return false;
+    }
+
+    const isGroup = gid ? process.getgid && gid === process.getgid() : false;
+    const isUser = uid ? process.getuid && uid === process.getuid() : false;
+
+    return !!((mode & ExeMaskAll) || ((mode & ExeMaskUser) && isGroup) || ((mode & ExeMaskGroup) && isUser));
 }
 
-export function filetype(mode: number, extension: string): FileType {
-    if (isModeExe(mode) || extension.match(Extensions.exe)) {
+export function filetype(mode: number, gid: number, uid: number, extension: string): FileType {
+    if (isModeExe(mode, gid, uid) || extension.match(Extensions.exe)) {
         return 'exe';
     } else if (extension.match(Extensions.img)) {
         return 'img';
@@ -87,7 +95,7 @@ export function filetype(mode: number, extension: string): FileType {
 export interface FsApi {
     // public API
     // async methods that may require server access
-    list(dir: string, appendParent?: boolean, transferId?: number): Promise<File[]>;
+    list(dir: string, transferId?: number): Promise<File[]>;
     cd(path: string, transferId?: number): Promise<string>;
     delete(parent: string, files: File[], transferId?: number): Promise<number>;
     makedir(parent: string, name: string, transferId?: number): Promise<string>;

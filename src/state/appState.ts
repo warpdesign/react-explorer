@@ -11,7 +11,7 @@ declare var ENV: any;
 
 // wait 1 sec before showing badge: this avoids
 // flashing (1) badge when the transfer is very fast
-const SHOW_BADGE_DELAY = 1000;
+const SHOW_BADGE_DELAY = 600;
 
 /**
  * Interface for a clipboard entry
@@ -95,10 +95,6 @@ export class AppState {
      * @returns {Promise<FileTransfer[]>}
      */
     prepareClipboardTransferTo(cache: FileState) {
-        if (!this.clipboard.files.length) {
-            return;
-        }
-
         const options = {
             files: this.clipboard.files,
             srcFs: this.clipboard.srcFs,
@@ -109,12 +105,15 @@ export class AppState {
         };
 
         return this.addTransfer(options)
-            .then(() => {
+            .then((res) => {
+                debugger;
                 if (options.dstPath === cache.path && options.dstFsName === cache.getFS().name) {
                     // FIX ME: since watcher has been implemented, there's no need to reload cache
                     // if destination is local fs
                     cache.reload();
                 }
+
+                return res;
             });
     }
 
@@ -142,11 +141,14 @@ export class AppState {
         };
 
         return this.addTransfer(options)
-            .then(() => {
+            .then((res) => {
+                debugger;
                 if (options.dstPath === dstCache.path && options.dstFsName === dstCache.getFS().name) {
                     dstCache.reload();
                 }
-            }).catch(() => {
+
+                return res;
+            }).catch((err) => {
                 debugger;
             });
     }
@@ -278,7 +280,21 @@ export class AppState {
 
     @action
     // addTransfer(srcFs: FsApi, dstFs: FsApi, files: File[], srcPath: string, dstPath: string) {
-    addTransfer(options: TransferOptions) {
+    async addTransfer(options: TransferOptions) {
+        let isDir = false;
+
+        try {
+            isDir = await options.dstFs.isDir(options.dstPath);
+        } catch (err) {
+            isDir = false;
+        }
+
+        if (!isDir) {
+            return Promise.reject({
+                code: 'NODEST'
+            });
+        }
+
         console.log('addTransfer', options.files, options.srcFs, options.dstFs, options.dstPath);
         const batch = new Batch(options.srcFs, options.dstFs, options.srcPath, options.dstPath);
         this.transfers.unshift(batch);
@@ -299,12 +315,7 @@ export class AppState {
             }
             this.activeTransfers.push(batch);
 
-            return batch.start()
-                .catch(err => {
-                    debugger;
-                })
-        }).catch((err) => {
-            debugger;
+            return batch.start();
         });
     }
 
@@ -354,9 +365,16 @@ export class AppState {
 
     @action
     updateSelection(cache: FileState, newSelection: File[]) {
-        // console.log('updateSelection', newSelection.length);
+        console.log('updateSelection', newSelection.length);
         cache.selected.replace(newSelection);
-        cache.updateSelection();
+        for (let selected of cache.selected) {
+            console.log(selected.fullname, selected.id.dev, selected.id.ino);
+        }
+        // cache.updateSelection();
+        // console.log('== apres ==');
+        // for (let selected of cache.selected) {
+        //     console.log(selected.fullname, selected.id.dev, selected.id.ino);
+        // }
     }
 
     @observable
@@ -371,6 +389,8 @@ export class AppState {
         const files = fileState.selected.slice(0);
 
         this.clipboard = { srcFs: fileState.getAPI(), srcPath: fileState.path, files };
+
+        console.log('clipboard', files);
 
         return files.length;
     }

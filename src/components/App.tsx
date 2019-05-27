@@ -23,6 +23,7 @@ import { remote } from 'electron';
 import classnames from 'classnames';
 import { isPackage, isWin } from '../utils/platform';
 import { TabDescriptor } from "./TabList";
+import { getLocalizedError } from "../locale/error";
 
 require("@blueprintjs/core/lib/css/blueprint.css");
 require("@blueprintjs/icons/lib/css/blueprint-icons.css");
@@ -438,7 +439,7 @@ class App extends React.Component<WithNamespaces, IState> {
     onDebugCache = () => {
         let i = 0;
         for (let cache of this.appState.views[0].caches) {
-            console.log('cache', cache.selected.length, cache.selected, cache.selectedId, cache.editingId);
+            console.log('cache', cache.selected.length, cache.selected, cache.selectedId, cache.editingId, cache);
         }
     }
 
@@ -539,9 +540,40 @@ class App extends React.Component<WithNamespaces, IState> {
 
     private onPaste = (): void => {
         const fileCache: FileState = this.getActiveFileCache();
+        const appState = this.appState;
 
-        if (fileCache) {
-            this.appState.prepareClipboardTransferTo(fileCache);
+        if (fileCache && !fileCache.error && appState.clipboard.files.length) {
+            this.appState.prepareClipboardTransferTo(fileCache)
+                .then((noErrors: any) => {
+                    const { t } = this.injected;
+                    if (noErrors) {
+                        AppToaster.show({
+                            message: t('COMMON.COPY_FINISHED'),
+                            icon: "tick",
+                            intent: Intent.SUCCESS,
+                            timeout: 3000
+                        });
+                    } else {
+                        AppToaster.show({
+                            message: t('COMMON.COPY_WARNING'),
+                            icon: "warning-sign",
+                            intent: Intent.WARNING,
+                            timeout: 5000
+                        });
+                    }
+                })
+                .catch((err: any) => {
+                    const { t } = this.injected;
+                    const localizedError = getLocalizedError(err);
+                    const message = err.code ? t('ERRORS.COPY_ERROR', { message: localizedError.message }) : t('ERRORS.COPY_UNKNOWN_ERROR');
+
+                    AppToaster.show({
+                        message: message,
+                        icon: "error",
+                        intent: Intent.DANGER,
+                        timeout: 5000
+                    });
+                });
         }
     }
 
@@ -651,7 +683,7 @@ class App extends React.Component<WithNamespaces, IState> {
                     </Navbar>
                     <div onClickCapture={this.handleClick} className="main">
                         <SideView viewState={viewStateLeft} hide={!isExplorer} onPaste={this.onPaste} />
-                        <SideView viewState={viewStateRight} hide={!isExplorer} onPaste={this.onPaste} />
+                        {<SideView viewState={viewStateRight} hide={!isExplorer} onPaste={this.onPaste} />}
                         <Downloads hide={isExplorer} />
                     </div>
                     <LogUI></LogUI>

@@ -72,7 +72,7 @@
                 "TEST_TERMINAL": "Cliquez ici pour lancer le terminal specifié"
             },
             "DELETE": {
-                "CONFIRM": "Etes-vous sûr de vouloir supprimer <1>{{count}}</1> fichier(s)/dossier(s)?<3 /><4 />Cette action supprimera de manière <6>permanente</6> les éléments sélectionnés."
+                "CONFIRM": "Etes-vous sûr de vouloir supprimer <1>{{count}}</1> fichier(s)/dossier(s) ?<3 /><4 />Cette action supprimera de manière <6>permanente</6> les éléments sélectionnés."
             }
         },
         "SHORTCUT": {
@@ -149,7 +149,9 @@
             "CLOSE": "Fermer",
             "EMPTY_FOLDER": "Dossier vide.",
             "NO_SUCH_FOLDER": "Dossier inexistant ou inaccessible.",
-            "PATH_PLACEHOLDER": "Entrer le chemin à visiter"
+            "PATH_PLACEHOLDER": "Entrer le chemin à visiter",
+            "COPY_FINISHED": "La copie a été réalisée avec succès",
+            "COPY_WARNING": "Copie terminée: certains éléments n'ont pu être copiés."
         },
         "FILETABLE": {
             "COL_NAME": "Nom",
@@ -163,7 +165,8 @@
         },
         "DOWNLOADS": {
             "EMPTY_TITLE": "Aucun téléchargement.",
-            "FINISHED": "Terminé ({{size}})",
+            "FINISHED": "Terminé",
+            "FINISHED_ERRORS": "Terminé, mais avec erreurs",
             "PROGRESS": "{{current}} / {{size}}",
             "ERROR": "Erreur",
             "CANCELLED": "Annulé",
@@ -175,7 +178,9 @@
             "ECONNREFUSED": "Connexion refusée par le serveur",
             "ENOENT": "Dossier ou fichier introuvable",
             "EPERM": "Vous n'avez pas la permission d'effectuer cette action",
+            "EIO": "Le transfert a été interrompu",
             "EACCES": "Accès refusé",
+            "ENOSPC": "le disque est plein",
             "EHOSTDOWN": "Houston, on a un problème: il n'y a plus d'internet :(",
             "530": "Echec de l'authentification",
             "550": "Fichier non disponible, introuvable ou non accessible.",
@@ -186,8 +191,12 @@
             "WIN_VALID_FILENAME": "Tous les caractères sauf *:<>\\?| sont acceptés",
             "UNIX_VALID_FILENAME": "Tous les caractères sauf / sont acceptés",
             "DELETE": "Erreur lors de la suppression des fichiers: {{message}}",
+            "DELETE_WARN": "Certains fichiers n'ont pu être supprimés",
             "CREATE_FOLDER": "Erreur lors de la création du dossier: {{message}}",
-            "EEXIST": "un fichier avec ce nom existe déjà"
+            "EEXIST": "Un fichier avec ce nom existe déjà",
+            "NODEST": "la destination de la copie n'est pas accessible",
+            "COPY_ERROR": "La copie n'a pu s'effectuer: {{message}}",
+            "COPY_UNKNOWN_ERROR": "Impossible de copier les fichiers demandés."
         },
         "MAIN_PROCESS": {
             "PRESS_TO_EXIT": "Maintenez la touche ⌘Q enfoncée pour quitter"

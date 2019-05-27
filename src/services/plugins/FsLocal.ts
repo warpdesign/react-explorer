@@ -87,6 +87,7 @@ class LocalApi implements FsApi {
             const unixPath = path.join(source, dirName).replace(/\\/g, '/');
             try {
                 console.log('mkdir', unixPath);
+
                 mkdir(unixPath, (err) => {
                     if (err) {
                         reject(err);
@@ -96,6 +97,7 @@ class LocalApi implements FsApi {
                 });
 
             } catch (err) {
+                debugger;
                 reject(err);
             }
         });
@@ -106,9 +108,8 @@ class LocalApi implements FsApi {
 
         return new Promise(async (resolve, reject) => {
             try {
-                console.log('delete', toDelete);
-                await del(toDelete, { force: true });
-                resolve(files.length);
+                const deleted = await del(toDelete, { force: true, noGlob: true });
+                resolve(deleted.length);
             } catch (err) {
                 reject(err);
             }
@@ -122,16 +123,27 @@ class LocalApi implements FsApi {
         if (!newName.match(invalidFileChars)) {
             console.log('valid !', oldPath, newPath);
             return new Promise((resolve, reject) => {
-                fs.rename(oldPath, newPath, (err) => {
-                    if (err) {
+                // since node's fs.rename will overwrite the destination
+                // path if it exists, first check that file dones't exists
+                this.exists(newPath).then((exists) => {
+                    if (exists) {
                         reject({
-                            code: err.code,
-                            message: err.message,
-                            newName: newName,
+                            code: 'EEXIST',
                             oldName: file.fullname
                         });
                     } else {
-                        resolve(newName);
+                        fs.rename(oldPath, newPath, (err) => {
+                            if (err) {
+                                reject({
+                                    code: err.code,
+                                    message: err.message,
+                                    newName: newName,
+                                    oldName: file.fullname
+                                });
+                            } else {
+                                resolve(newName);
+                            }
+                        });
                     }
                 });
             });
@@ -190,7 +202,7 @@ class LocalApi implements FsApi {
                     mode: stats.mode,
                     isDir: stats.isDirectory(),
                     readonly: false,
-                    type: !stats.isDirectory() && filetype(stats.mode, format.ext.toLowerCase()) || '',
+                    type: !stats.isDirectory() && filetype(stats.mode, stats.gid, stats.uid, format.ext.toLowerCase()) || '',
                     isSym: stats.isSymbolicLink(),
                     id: MakeId(stats)
                 };
@@ -216,7 +228,7 @@ class LocalApi implements FsApi {
         }
     }
 
-    async list(dir: string, appendParent = true, transferId = -1): Promise<File[]> {
+    async list(dir: string, transferId = -1): Promise<File[]> {
         const pathExists = await this.isDir(dir);
 
         if (pathExists) {
@@ -232,10 +244,16 @@ class LocalApi implements FsApi {
                         for (var i = 0; i < items.length; i++) {
                             const fullPath = path.join(dirPath, items[i]);
                             const format = path.parse(fullPath);
-                            let stats;
+                            let name = fullPath;
+                            let stats = null;
+                            let target_stats = null;
 
                             try {
-                                stats = fs.statSync(path.join(dirPath, items[i]));
+                                stats = fs.lstatSync(fullPath);
+                                if (stats.isSymbolicLink()) {
+                                    target_stats = fs.statSync(fullPath);
+                                    name = fs.readlinkSync(fullPath);
+                                }
                             } catch (err) {
                                 console.warn('error getting stats for', path.join(dirPath, items[i]), err);
                                 stats = {
@@ -251,20 +269,23 @@ class LocalApi implements FsApi {
                                 }
                             }
 
+                            const extension = path.parse(name).ext.toLowerCase();
+                            const mode = target_stats ? target_stats.mode : stats.mode;
+
                             const file: File =
                             {
                                 dir: format.dir,
                                 fullname: items[i],
                                 name: format.name,
-                                extension: format.ext.toLowerCase(),
+                                extension: extension,
                                 cDate: stats.ctime,
                                 mDate: stats.mtime,
                                 bDate: stats.birthtime,
                                 length: stats.size,
-                                mode: stats.mode,
-                                isDir: stats.isDirectory(),
+                                mode: mode,
+                                isDir: target_stats ? target_stats.isDirectory() : stats.isDirectory(),
                                 readonly: false,
-                                type: !stats.isDirectory() && filetype(stats.mode, format.ext.toLowerCase()) || '',
+                                type: !(target_stats ? target_stats.isDirectory() : stats.isDirectory()) && filetype(mode, 0, 0, extension) || '',
                                 isSym: stats.isSymbolicLink(),
                                 id: MakeId(stats)
                             };
@@ -275,15 +296,6 @@ class LocalApi implements FsApi {
                         this.onList(dirPath);
 
                         resolve(files);
-                        // add parent
-                        // if (appendParent && !this.isRoot(dir)) {
-                        //     debugger;
-                        //     const parent = { ...Parent, dir: dirPath };
-
-                        //     resolve([parent].concat(files));
-                        // } else {
-                        //     resolve(files);
-                        // }
                     }
                 });
             });
@@ -314,13 +326,10 @@ class LocalApi implements FsApi {
         };
     }
 
-    static counter = 0;
-
-    // TODO: handle stream error
     async putStream(readStream: fs.ReadStream, dstPath: string, progress: (pourcent: number) => void, transferId = -1): Promise<void> {
         return new Promise((resolve: (val?: any) => void, reject: (val?: any) => void) => {
-            let count = LocalApi.counter++;
             let finished = false;
+            let readError = false;
             let bytesRead = 0;
 
             const throttledProgress = throttle(() => { progress(bytesRead) }, 800);
@@ -328,7 +337,6 @@ class LocalApi implements FsApi {
             const reportProgress = new Transform({
                 transform(chunk: any, encoding: any, callback: any) {
                     bytesRead += chunk.length;
-                    // console.log('dataChunk', bytesRead / 1024, 'Ko');
                     throttledProgress();
                     callback(null, chunk);
                 },
@@ -337,41 +345,49 @@ class LocalApi implements FsApi {
 
             readStream.once('error', (err) => {
                 console.log('error on read stream');
+                readError = true;
                 readStream.destroy();
                 writeStream.destroy(err);
             });
 
-            // console.log('open', count);
             const writeStream = fs.createWriteStream(dstPath);
 
             readStream.pipe(reportProgress)
                 .pipe(writeStream);
 
             writeStream.once('finish', () => {
-                // console.log('finish', count);
                 finished = true;
-                // resolve();
             });
 
             writeStream.once('error', err => {
+                // remove created file if it's empty and there was a problem
+                // accessing the source file: we will report an error to the
+                // user so there's no need to leave an empty file
+                if (readError && !bytesRead && !writeStream.bytesWritten) {
+                    console.log('cleaning up fs');
+                    fs.unlink(dstPath, (err) => {
+                        if (!err) {
+                            console.log('cleaned-up fs');
+                        } else {
+                            console.log('error cleaning-up fs', err);
+                        }
+                    });
+                }
                 reject(err);
             });
 
             writeStream.once('close', () => {
-                // console.log('close', count);
                 if (finished) {
                     resolve();
                 } else {
                     reject();
                 }
             });
-            // writeStream.once('end', () => console.log('end', count));
+
             writeStream.once('error', err => {
                 reject(err);
-                // console.log('error', count)
             });
-            // writeStream.once('destroy', () => console.log('destroy', count));
-        })
+        });
     }
 
     getParentTree(dir: string): Array<{ dir: string, fullname: string, name: string }> {

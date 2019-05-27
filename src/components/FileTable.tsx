@@ -19,11 +19,10 @@ import { SettingsState } from '../state/settingsState';
 import { ViewState } from '../state/viewState';
 import { debounce } from '../utils/debounce';
 import { TSORT_METHOD_NAME, TSORT_ORDER, getSortMethod } from '../services/FsSort';
+import { getSelectionRange } from '../utils/fileUtils';
 
 require('react-virtualized/styles.css');
 require('../css/filetable.css');
-
-const REGEX_EXTENSION = /\.(?=[^0-9])/;
 
 const CLICK_DELAY = 300;
 const SCROLL_DEBOUNCE = 50;
@@ -97,7 +96,7 @@ interface InjectedProps extends IProps {
 @HotkeysTarget
 export class FileTableClass extends React.Component<IProps, IState> {
     private viewState: ViewState;
-    private disposer: IReactionDisposer;
+    private disposers: Array<IReactionDisposer> = new Array();
     private editingElement: HTMLElement = null;
     private editingFile: File;
     private clickTimeout: any;
@@ -117,7 +116,7 @@ export class FileTableClass extends React.Component<IProps, IState> {
             path: cache.path
         };
 
-        this.installReaction();
+        this.installReactions();
         // since the nodes are only generated after the files are updated
         // we re-render them after language has changed otherwise FileList
         // gets re-rendered with the wrong language after language has been changed
@@ -144,7 +143,9 @@ export class FileTableClass extends React.Component<IProps, IState> {
     }
 
     public componentWillUnmount() {
-        this.disposer();
+        for (let disposer of this.disposers) {
+            disposer();
+        }
         document.removeEventListener('keydown', this.onDocKeyDown);
         this.unbindLanguageChange();
     }
@@ -206,20 +207,25 @@ export class FileTableClass extends React.Component<IProps, IState> {
         return this.props as InjectedProps;
     }
 
-    private installReaction() {
-        this.disposer = reaction(
-            () => { return toJS(this.cache.files) },
+    private installReactions() {
+        this.disposers.push(reaction(
+            () => toJS(this.cache.files),
             (files: File[]) => {
                 const cache = this.cache;
                 // when cache is being (re)loaded, cache.files is empty:
-                // we don't want to show "empty folder" placeholder in that
+                // we don't want to show "empty folder" placeholder
                 // that case, only when cache is loaded and there are no files
                 const { viewState } = this.injected;
 
                 if (cache.cmd === 'cwd' || cache.history.length) {
                     this.updateNodes(files);
                 }
-            });
+            }),
+            reaction(
+                () => this.cache.error,
+                () => this.updateNodes(this.cache.files)
+            )
+        );
     }
 
     private getSelectedState(name: string) {
@@ -231,12 +237,16 @@ export class FileTableClass extends React.Component<IProps, IState> {
     buildNodeFromFile(file: File, keepSelection: boolean) {
         const filetype = file.type;
         let isSelected = keepSelection && this.getSelectedState(file.fullname) || false;
+        const classes = classnames({
+            isHidden: file.fullname.startsWith('.'),
+            isSymlink: file.isSym
+        });
 
         const res: ITableRow = {
             icon: file.isDir && "folder-close" || (filetype && TYPE_ICONS[filetype] || TYPE_ICONS['any']),
             name: file.fullname,
             nodeData: file,
-            className: file.fullname.startsWith('.') && 'isHidden' || '',
+            className: classes,
             isSelected: isSelected,
             size: !file.isDir && formatBytes(file.length) || '--'
         };
@@ -265,11 +275,12 @@ export class FileTableClass extends React.Component<IProps, IState> {
     _noRowsRenderer = () => {
         const { t } = this.injected;
         const status = this.cache.status;
+        const error = this.cache.error;
 
         // we don't want to show empty + loader at the same time
         if (status !== 'busy') {
-            const placeholder = status === 'blank' && t('COMMON.NO_SUCH_FOLDER') || t('COMMON.EMPTY_FOLDER');
-            const icon = status === 'blank' ? 'warning-sign' : 'tick-circle';
+            const placeholder = error && t('COMMON.NO_SUCH_FOLDER') || t('COMMON.EMPTY_FOLDER');
+            const icon = error ? 'warning-sign' : 'tick-circle';
             return (<div className="empty"><Icon icon={icon} iconSize={40} />{placeholder}</div>);
         } else {
             return (<div />);
@@ -293,6 +304,8 @@ export class FileTableClass extends React.Component<IProps, IState> {
         this.setState({ nodes, selected: keepSelection ? this.state.selected : 0, position, path: newPath }, () => {
             if (keepSelection && cache.editingId && position > -1) {
                 this.getElementAndToggleRename(undefined, false);
+            } else if (this.editingElement) {
+                this.editingElement = null;
             }
         });
     }
@@ -375,7 +388,6 @@ export class FileTableClass extends React.Component<IProps, IState> {
     { columnData: any, dataKey: string, event: Event }
     */
     onHeaderClick = ({ columnData, dataKey }: HeaderMouseEventHandlerParams) => {
-        console.log('column click', columnData, dataKey);
         const { sortMethod, sortOrder } = this.cache;
         const newMethod = columnData.sortMethod as TSORT_METHOD_NAME;
         const newOrder = sortMethod !== newMethod ? 'asc' : (sortOrder === 'asc' && 'desc' || 'asc') as TSORT_ORDER;
@@ -390,7 +402,8 @@ export class FileTableClass extends React.Component<IProps, IState> {
         const file = rowData.nodeData as File;
 
         // keep a reference to the target before set setTimeout is called
-        // because React set the event to null
+        // because React appaers to recycle the event object after event handler
+        // has returned
         const element = event.target as HTMLElement;
 
         // do not select parent dir pseudo file
@@ -443,11 +456,9 @@ export class FileTableClass extends React.Component<IProps, IState> {
         const editingElement = this.editingElement;
 
         if (cancel) {
-            console.log('restoring value');
             // restore previous value
             editingElement.innerText = this.editingFile.fullname;
         } else {
-            console.log('renaming value', this.cache.path, this.editingFile);
             // since the File element is modified by the rename FileState.rename method there is
             // no need to refresh the file cache:
             // 1. innerText has been updated and is valid
@@ -479,6 +490,8 @@ export class FileTableClass extends React.Component<IProps, IState> {
         const fileCache = this.cache;
         const { nodes, position } = this.state;
 
+        console.log('selected', nodes.filter((node, i) => i !== position && node.isSelected));
+
         const selection = nodes.filter((node, i) => i !== position && node.isSelected).map((node) => node.nodeData) as File[];
 
         if (position > -1) {
@@ -491,13 +504,14 @@ export class FileTableClass extends React.Component<IProps, IState> {
 
     selectLeftPart() {
         const filename = this.editingFile.fullname;
-        const selectionLength = filename.split(REGEX_EXTENSION)[0].length;
+        const selectionRange = getSelectionRange(filename);
+        // const selectionLength = filename.split(REGEX_EXTENSION)[0].length;
         const selection = window.getSelection();
         const range = document.createRange();
         const textNode = this.editingElement.childNodes[0];
 
-        range.setStart(textNode, 0);
-        range.setEnd(textNode, selectionLength);
+        range.setStart(textNode, selectionRange.start);
+        range.setEnd(textNode, selectionRange.length);
         selection.empty();
         selection.addRange(range);
     }
@@ -510,16 +524,13 @@ export class FileTableClass extends React.Component<IProps, IState> {
     }
 
     toggleInlineRename(element: HTMLElement, originallySelected: boolean, file: File, selectText = true) {
-        console.log('toggle inlinerename');
         if (!file.readonly) {
             if (originallySelected) {
-                console.log('activate inline rename!');
                 element.contentEditable = "true";
                 element.focus();
                 this.setEditElement(element, file);
                 selectText && this.selectLeftPart();
                 element.onblur = () => {
-                    console.log('onblur!!');
                     if (this.editingElement) {
                         this.onInlineEdit(true);
                     }
@@ -550,7 +561,6 @@ export class FileTableClass extends React.Component<IProps, IState> {
                 // await this.cache.openFile(file);
                 // await appState.getFile(file);
                 await this.cache.openFile(appState, this.cache, file);
-                console.log('** done');
             } else {
                 const isShiftDown = event.shiftKey;
                 const cache = isShiftDown ? appState.getInactiveViewVisibleCache() : this.cache;
@@ -569,27 +579,21 @@ export class FileTableClass extends React.Component<IProps, IState> {
     selectAll(invert = false) {
         let { position, selected } = this.state;
         let { nodes } = this.state;
-        const fileCache = this.cache;
 
         if (nodes.length && this.isViewActive()) {
-            console.log('onSelectAll', document.activeElement);
-            const isRoot = fileCache.isRoot((nodes[0].nodeData as File).dir);
             selected = 0;
 
             let i = 0;
             for (let node of nodes) {
                 // do not select parent dir
-                if (i || isRoot) {
-                    node.isSelected = invert ? !node.isSelected : true;
-                    if (node.isSelected) {
-                        position = i;
-                        selected++;
-                    }
+                node.isSelected = invert ? !node.isSelected : true;
+                if (node.isSelected) {
+                    position = i;
+                    selected++;
                 }
                 i++;
             }
 
-            console.log('setState 3', position);
             this.setState({ nodes, selected, position }, () => {
                 this.updateSelection();
             });
@@ -617,7 +621,6 @@ export class FileTableClass extends React.Component<IProps, IState> {
             this.selectAll();
         } else {
             // need to select all text: send message
-            console.log('isEditable');
             ipcRenderer.send('selectAll');
         }
     }
@@ -633,7 +636,6 @@ export class FileTableClass extends React.Component<IProps, IState> {
                 if (e.keyCode === KEYS.Enter) {
                     e.preventDefault();
                 }
-                // console.log('end inline edit');
                 this.onInlineEdit(e.keyCode === KEYS.Escape);
             }
         }
@@ -664,8 +666,8 @@ export class FileTableClass extends React.Component<IProps, IState> {
             const node = nodes[position];
             const file = nodes[position].nodeData as File;
             const element = this.getNodeContentElement(position + 1);
-            console.log('got element', position + 1, element, nodes.length);
             const span: HTMLElement = element.querySelector(`.${LABEL_CLASSNAME}`);
+
             if (e && typeof e !== 'string') {
                 e.preventDefault();
             }
@@ -713,9 +715,7 @@ export class FileTableClass extends React.Component<IProps, IState> {
         let { position, selected } = this.state;
         let { nodes } = this.state;
 
-        console.log('moveSelection', position);
         position += step;
-        console.log('moveSelection apres', position);
 
         if (position > -1 && position <= this.state.nodes.length - 1) {
             if (isShiftDown) {
@@ -728,7 +728,6 @@ export class FileTableClass extends React.Component<IProps, IState> {
 
             nodes[position].isSelected = true;
 
-            console.log('setState 4', position);
             // move in method to reuse
             this.setState({ nodes, selected, position }, () => {
                 this.updateSelection();
@@ -763,7 +762,6 @@ export class FileTableClass extends React.Component<IProps, IState> {
         const { t } = this.injected;
         const { position } = this.state;
         const rowCount = this.state.nodes.length;
-        const scrollTop = position === -1 && this.cache.scrollTop || undefined;
 
         return (<div ref={this.setTableRef} onKeyDown={this.onInputKeyDown} className={`fileListSizerWrapper ${Classes.ELEVATION_0}`}>
             <AutoSizer>

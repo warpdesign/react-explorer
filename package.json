@@ -46,7 +46,6 @@
   "license": "MIT",
   "devDependencies": {
     "@types/classnames": "^2.2.7",
-    "@types/del": "^3.0.1",
     "@types/i18next": "^12.1.0",
     "@types/react-i18next": "^8.1.0",
     "@types/react-virtualized": "^9.18.12",
@@ -63,6 +62,7 @@
     "source-map-loader": "^0.2.4",
     "style-loader": "^0.23.0",
     "typescript": "^3.1.1",
+    "url-loader": "^1.1.2",
     "webpack": "^4.30.0",
     "webpack-cli": "^3.1.2"
   },
@@ -74,7 +74,7 @@
     "@types/react-dom": "^16.0.8",
     "basic-ftp": "^3.2.2",
     "classnames": "^2.2.6",
-    "del": "^3.0.0",
+    "del": "github:warpdesign/del",
     "electron-window-state": "^5.0.3",
     "get-folder-size": "^2.0.0",
     "i18next": "^13.0.0",

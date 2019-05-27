@@ -197,7 +197,7 @@ class Client {
         }
     }
 
-    public list(path: string, appendParent = true): Promise<File[]> {
+    public list(path: string): Promise<File[]> {
         this.status = 'busy';
 
         this.log('list', path);
@@ -236,7 +236,7 @@ class Client {
                             extension: '',
                             mode: 0,
                             readonly: false,
-                            type: ftpFile.type !== 'd' && filetype(0, ext) || '',
+                            type: ftpFile.type !== 'd' && filetype(0, 0, 0, ext) || '',
                             isSym: false,
                             id: {
                                 ino: mDate.getTime(),
@@ -245,27 +245,8 @@ class Client {
                         };
                         return file;
                     });
-                    // TODO: build list of files
-                    /*
-                        dir: string;
-                        name: string;
-                        fullname: string;
-                        extension: string;
-                        cDate: Date;
-                        mDate: Date;
-                        length: number;
-                        mode: number;
-                        isDir: boolean;
-                        readonly: boolean;
-                        */
-                    resolve(files);
-                    // if (appendParent && !this.api.isRoot(newpath)) {
-                    //     const parent = { ...Parent, dir: path };
 
-                    //     resolve([parent].concat(files));
-                    // } else {
-                    //     resolve(files);
-                    // }
+                    resolve(files);
                 }
             });
         });
@@ -565,7 +546,7 @@ class FtpAPI implements FsApi {
                     const fullPath = this.join(dir.dir, dir.fullname)
                     await this.master.cd(fullPath);
                     debugger;
-                    const files = await this.master.list(fullPath, false);
+                    const files = await this.master.list(fullPath);
                     debugger;
                     // first delete files found inside the folder
                     await this.delete(fullPath, files);
@@ -600,9 +581,9 @@ class FtpAPI implements FsApi {
         // return Promise.resolve(false);
     }
 
-    list(dir: string, appendParent = true): Promise<File[]> {
+    list(dir: string): Promise<File[]> {
         console.log('FsFtp.readDirectory', dir);
-        return this.master.list(dir, appendParent);
+        return this.master.list(dir);
     };
 
     async stat(fullPath: string): Promise<File> {

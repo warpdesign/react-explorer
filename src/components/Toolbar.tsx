@@ -16,6 +16,7 @@ import { ViewState } from "../state/viewState";
 
 const TOOLTIP_DELAY = 1200;
 const MOVE_EVENT_THROTTLE = 300;
+const ERROR_MESSAGE_TIMEOUT = 3500;
 
 interface IProps extends WithNamespaces {
     onPaste: () => void;
@@ -88,12 +89,10 @@ export class ToolbarClass extends React.Component<IProps, PathInputState> {
     }
 
     private onBackward = (event: React.FormEvent<HTMLElement>) => {
-        console.log(this.cache.history);
         this.cache.navHistory(-1);
     }
 
     private onForward = (event: React.FormEvent<HTMLElement>) => {
-        console.log(this.cache.history);
         this.cache.navHistory(1);
     }
 
@@ -140,8 +139,6 @@ export class ToolbarClass extends React.Component<IProps, PathInputState> {
     }
 
     private onBlur = () => {
-        // console.log('blur');
-        // this.pathHasFocus = false;
         this.setState({ path: this.cache.path, status: 0, isTooltipOpen: false });
     }
 
@@ -175,7 +172,7 @@ export class ToolbarClass extends React.Component<IProps, PathInputState> {
                 message: t('ERRORS.CREATE_FOLDER', { message: err.message }),
                 icon: 'error',
                 intent: Intent.DANGER,
-                timeout: 3000
+                timeout: ERROR_MESSAGE_TIMEOUT
             });
         }
     }
@@ -184,48 +181,49 @@ export class ToolbarClass extends React.Component<IProps, PathInputState> {
         this.setState({ isDeleteOpen: false });
     }
 
+    private onDeleteError = (err?: Error) => {
+        const { t } = this.props;
+
+        if (err) {
+            AppToaster.show({
+                message: t('ERRORS.DELETE', { message: err.message }),
+                icon: 'error',
+                intent: Intent.DANGER,
+                timeout: ERROR_MESSAGE_TIMEOUT
+            });
+        } else {
+            AppToaster.show({
+                message: t('ERRORS.DELETE_WARN'),
+                icon: 'warning-sign',
+                intent: Intent.WARNING,
+                timeout: ERROR_MESSAGE_TIMEOUT
+            });
+        }
+    }
+
     private delete = async () => {
         Logger.log('delete selected files');
         try {
             const { viewState } = this.injected;
             const fileCache = viewState.getVisibleCache();
 
-            await this.cache.delete(this.state.path, fileCache.selected);
-            console.log('need to refresh cache');
-            this.cache.reload();
-            // appState.refreshCache(this.cache);
-        } catch (err) {
-            const { t } = this.props;
+            const deleted = await this.cache.delete(this.state.path, fileCache.selected);
 
-            AppToaster.show({
-                message: t('ERRORS.DELETE', { message: err }),
-                icon: 'error',
-                intent: Intent.DANGER,
-                timeout: 4000
-            });
+            // TODO: reset selection ?
+            if (!deleted) {
+                this.onDeleteError();
+            } else {
+                if (deleted !== fileCache.selected.length) {
+                    // show warning
+                    this.onDeleteError();
+                }
+                this.cache.reload();
+            }
+        } catch (err) {
+            this.onDeleteError(err);
         }
 
         this.setState({ isDeleteOpen: false });
-    }
-
-    // private renderCopyProgress(percent: number): IToasterOpts {
-    //     return {
-    //         icon: "cloud-upload",
-    //         message: (
-    //             <ProgressBar
-    //                 className={percent >= 100 && Classes.PROGRESS_NO_STRIPES}
-    //                 intent={percent < 100 ? Intent.PRIMARY : Intent.SUCCESS}
-    //                 value={percent / 100}
-    //             />
-    //         ),
-    //         timeout: percent < 100 ? 0 : 2000
-    //     }
-    // }
-
-    private copy = async () => {
-        // TODO: attempt to copy
-        const { appState, viewState } = this.injected;
-        appState.prepareClipboardTransferTo(viewState.getVisibleCache());
     }
 
     private onMakedir = () => {
@@ -356,16 +354,11 @@ export class ToolbarClass extends React.Component<IProps, PathInputState> {
             clearTimeout(this.tooltipTimeout);
             this.setTooltipTimeout();
         }
-        // else {
-        //     console.log('cannot show');
-        // }
     }, MOVE_EVENT_THROTTLE);
 
     setTooltipTimeout() {
         this.tooltipTimeout = window.setTimeout(() => {
-            // console.log('timeout reached', this.tooltipReady, this.canShowTooltip);
             if (this.tooltipReady && this.canShowTooltip) {
-                // console.log('yeah ! opening');
                 this.setState({ isTooltipOpen: true });
             }
         }, TOOLTIP_DELAY);

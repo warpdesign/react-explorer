@@ -12,8 +12,12 @@ import { DropTargetSpec, DropTargetConnector, DropTargetMonitor, DropTargetColle
 import { DraggedObject } from './RowRenderer';
 import { TabList } from "./TabList";
 import { ViewState } from "../state/viewState";
+import { AppToaster } from "./AppToaster";
+import { Intent } from "@blueprintjs/core";
+import { getLocalizedError } from "../locale/error";
+import { withNamespaces, WithNamespaces } from "react-i18next";
 
-interface SideViewProps {
+interface SideViewProps extends WithNamespaces {
     hide: boolean;
     viewState: ViewState;
     onPaste: () => void;
@@ -32,7 +36,7 @@ const fileTarget: DropTargetSpec<InjectedProps> = {
         const sourceViewId = monitor.getItem().fileState.viewId;
         const viewState = props.viewState;
         const fileCache = viewState.getVisibleCache();
-        return props.viewState.viewId !== sourceViewId && fileCache.status !== 'busy';
+        return props.viewState.viewId !== sourceViewId && fileCache.status !== 'busy' && !fileCache.error;
     },
     drop(props, monitor, component) {
         const item = monitor.getItem();
@@ -119,9 +123,37 @@ export class SideViewClass extends React.Component<InjectedProps>{
         const files = item.selectedCount > 0 ? item.fileState.selected.slice(0) : [item.dragFile];
 
         // TODO: check both cache are active?
-        appState.prepareTransferTo(item.fileState, fileCache, files).catch(err => {
-            debugger;
-        });
+        appState.prepareTransferTo(item.fileState, fileCache, files)
+            .then((noErrors: any) => {
+                const { t } = this.injected;
+                if (noErrors) {
+                    AppToaster.show({
+                        message: t('COMMON.COPY_FINISHED'),
+                        icon: "tick",
+                        intent: Intent.SUCCESS,
+                        timeout: 3000
+                    });
+                } else {
+                    AppToaster.show({
+                        message: t('COMMON.COPY_WARNING'),
+                        icon: "warning-sign",
+                        intent: Intent.WARNING,
+                        timeout: 5000
+                    });
+                }
+            })
+            .catch((err: any) => {
+                const { t } = this.injected;
+                const localizedError = getLocalizedError(err);
+                const message = err.code ? t('ERRORS.COPY_ERROR', { message: localizedError.message }) : t('ERRORS.COPY_UNKNOWN_ERROR');
+
+                AppToaster.show({
+                    message: message,
+                    icon: "error",
+                    intent: Intent.DANGER,
+                    timeout: 5000
+                });
+            });
     }
 
     shouldComponentUpdate() {
@@ -147,4 +179,8 @@ export class SideViewClass extends React.Component<InjectedProps>{
     }
 }
 
-export const SideView = DropTarget<InjectedProps>('file', fileTarget, collect)(SideViewClass);
+const SideViewDD = DropTarget<InjectedProps>('file', fileTarget, collect)(SideViewClass);
+
+const SideView = withNamespaces()(SideViewDD);
+
+export { SideView };

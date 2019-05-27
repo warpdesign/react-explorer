@@ -340,7 +340,7 @@ class SimpleFtpApi implements FsApi {
         } as File);
     }
 
-    list(path: string, appendParent = true, transferId = -1): Promise<File[]> {
+    list(path: string, transferId = -1): Promise<File[]> {
         return new Promise(async (resolve, reject) => {
             const newpath = this.pathpart(path);
 
@@ -364,7 +364,7 @@ class SimpleFtpApi implements FsApi {
                         extension: '',
                         mode: 0,
                         readonly: false,
-                        type: !ftpFile.isDirectory && filetype(0, ext) || '',
+                        type: !ftpFile.isDirectory && filetype(0, 0, 0, ext) || '',
                         isSym: false,
                         id: {
                             ino: mDate.getTime(),

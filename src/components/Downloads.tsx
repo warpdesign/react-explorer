@@ -158,6 +158,7 @@ class DownloadsClass extends React.Component<IProps, IState> {
     }
 
     getIntent(transfer: Batch) {
+        console.log(transfer.status, transfer);
         const status = transfer.status;
         let intent: Intent = Intent.NONE;
         if (!status.match(/queued|calculating/)) {
@@ -190,9 +191,8 @@ class DownloadsClass extends React.Component<IProps, IState> {
         const currentSize = formatBytes(transfer.progress);
         const percent = transfer.status === 'calculating' ? 0 : transfer.progress / transfer.size;
         const ended = transfer.hasEnded;
-        const error = transfer.status === 'error';
-        const rightLabel = ended ? (error ? t('DOWNLOADS.ERROR') : t('DOWNLOADS.FINISHED', { size: sizeFormatted })) : t('DOWNLOADS.PROGRESS', { current: currentSize, size: transferSize });
-        // const classes = classnames({[Classes.INTENT_DANGER]: error });
+        const errors = transfer.numErrors;
+        const rightLabel = ended ? (errors ? t('DOWNLOADS.FINISHED_ERRORS') : t('DOWNLOADS.FINISHED')) : t('DOWNLOADS.PROGRESS', { current: currentSize, size: transferSize });
 
         return (
             <span className={className}>
@@ -254,13 +254,13 @@ class DownloadsClass extends React.Component<IProps, IState> {
 
             let i = 0;
             for (let file of transfer.files) {
-                if (!file.file.isDir) {
+                if (!file.file.isDir || file.status === 'error') {
                     const id = transfer.id + '_' + i;
                     const filetype = file.file.type;
 
                     node.childNodes.push({
                         id: id,
-                        icon: this.getFileIcon(filetype),
+                        icon: file.file.isDir ? 'folder-close' : this.getFileIcon(filetype),
                         label: file.subDirectory ? (file.subDirectory + '/' + file.file.fullname) : file.file.fullname,
                         secondaryLabel: this.createFileRightLabel(file),
                         nodeData: {
