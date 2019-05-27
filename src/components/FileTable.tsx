@@ -298,7 +298,7 @@ export class FileTableClass extends React.Component<IProps, IState> {
     private updateState(nodes: ITableRow[], keepSelection = false) {
         const cache = this.cache;
         const newPath = nodes.length && nodes[0].nodeData.dir || '';
-        const position = keepSelection && this.getFilePosition(nodes, cache.selectedId) || -1;
+        const position = keepSelection && cache.selectedId && this.getFilePosition(nodes, cache.selectedId) || -1;
         // cancel inlineedit if there was one
         this.clearEditElement();
         this.setState({ nodes, selected: keepSelection ? this.state.selected : 0, position, path: newPath }, () => {
