@@ -260,7 +260,7 @@ class DownloadsClass extends React.Component<IProps, IState> {
 
                     node.childNodes.push({
                         id: id,
-                        icon: filetype.length && this.getFileIcon(filetype) || 'folder-close',
+                        icon: file.file.isDir ? 'folder-close' : this.getFileIcon(filetype),
                         label: file.subDirectory ? (file.subDirectory + '/' + file.file.fullname) : file.file.fullname,
                         secondaryLabel: this.createFileRightLabel(file),
                         nodeData: {

@@ -265,7 +265,7 @@ export class Batch {
                 for (let transfer of this.files) {
                     console.log(transfer.status, transfer.file.fullname, transfer);
                 }
-                debugger;
+
                 this.transferDef.reject({
                     code: ''
                 });

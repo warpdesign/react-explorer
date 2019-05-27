@@ -19,11 +19,10 @@ import { SettingsState } from '../state/settingsState';
 import { ViewState } from '../state/viewState';
 import { debounce } from '../utils/debounce';
 import { TSORT_METHOD_NAME, TSORT_ORDER, getSortMethod } from '../services/FsSort';
+import { getSelectionRange } from '../utils/fileUtils';
 
 require('react-virtualized/styles.css');
 require('../css/filetable.css');
-
-const REGEX_EXTENSION = /\.(?=[^0-9])/;
 
 const CLICK_DELAY = 300;
 const SCROLL_DEBOUNCE = 50;
@@ -505,13 +504,14 @@ export class FileTableClass extends React.Component<IProps, IState> {
 
     selectLeftPart() {
         const filename = this.editingFile.fullname;
-        const selectionLength = filename.split(REGEX_EXTENSION)[0].length;
+        const selectionRange = getSelectionRange(filename);
+        // const selectionLength = filename.split(REGEX_EXTENSION)[0].length;
         const selection = window.getSelection();
         const range = document.createRange();
         const textNode = this.editingElement.childNodes[0];
 
-        range.setStart(textNode, 0);
-        range.setEnd(textNode, selectionLength);
+        range.setStart(textNode, selectionRange.start);
+        range.setEnd(textNode, selectionRange.length);
         selection.empty();
         selection.addRange(range);
     }
