@@ -9,7 +9,6 @@ import { getSelectionRange } from "../utils/fileUtils";
 const MAX_TRANSFERS = 2;
 const MAX_ERRORS = 5;
 const RENAME_SUFFIX = '_';
-const REGEX_EXTENSION = /\.(?=[^0-9])/;
 
 type Status = 'started' | 'queued' | 'error' | 'done' | 'cancelled' | 'calculating';
 

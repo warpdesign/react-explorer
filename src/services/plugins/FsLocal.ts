@@ -108,9 +108,7 @@ class LocalApi implements FsApi {
 
         return new Promise(async (resolve, reject) => {
             try {
-                debugger;
-                const deleted = await del(toDelete, { force: true });
-                debugger;
+                const deleted = await del(toDelete, { force: true, noGlob: true });
                 resolve(deleted.length);
             } catch (err) {
                 reject(err);

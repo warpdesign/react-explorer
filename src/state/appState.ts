@@ -11,7 +11,7 @@ declare var ENV: any;
 
 // wait 1 sec before showing badge: this avoids
 // flashing (1) badge when the transfer is very fast
-const SHOW_BADGE_DELAY = 1000;
+const SHOW_BADGE_DELAY = 600;
 
 /**
  * Interface for a clipboard entry
