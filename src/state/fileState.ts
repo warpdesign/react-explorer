@@ -284,6 +284,11 @@ export class FileState {
         const isSameDir = this.selected.length && this.selected[0].dir === this.path;
         const newSelection = [];
         if (isSameDir) {
+            // selected contains files that can be outdated:
+            // files may have been removed on reload
+            // we iterated through the previously selected files and
+            // create a new selection based on file ids that were and are still
+            // in the list of files
             for (let selection of this.selected) {
                 // use inode/dev to retrieve files that were selected before reload:
                 // we cannot use fullname anymore since files may have been renamed
@@ -292,18 +297,35 @@ export class FileState {
                     newSelection.push(newFile);
                 }
             }
-            if (newSelection.length) {
-                const selectedFile = newSelection[newSelection.length - 1];
-                this.selected.replace(newSelection);
-                this.selectedId = {
-                    ...selectedFile.id
-                }
-            } else {
-                this.selected.clear();
+
+            if (this.selectedId && !this.files.find(file => file.id.dev === this.selectedId.dev && file.id.ino === this.selectedId.ino)) {
                 this.selectedId = null;
             }
+            // Do not change the selectedId here, we want to keep it
+            // if (newSelection.length) {
+            //     const selectedFile = newSelection[newSelection.length - 1];
+            //     this.selected.replace(newSelection);
+            //     this.selectedId = {
+            //         ...selectedFile.id
+            //     }
+            // } else {
+            //     this.selected.clear();
+            //     this.selectedId = null;
+            // }
         } else {
             this.selected.clear();
+            this.selectedId = null;
+        }
+    }
+
+    @action
+    setSelectedFile(file: File) {
+        console.log('setSelectedFile', file);
+        if (file) {
+            this.selectedId = {
+                ...file.id
+            }
+        } else {
             this.selectedId = null;
         }
     }

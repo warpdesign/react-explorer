@@ -455,10 +455,17 @@ class App extends React.Component<WithNamespaces, IState> {
     }
 
     onDebugCache = () => {
-        let i = 0;
-        for (let cache of this.appState.views[0].caches) {
-            console.log('cache', cache.selected.length, cache.selected, cache.selectedId, cache.editingId, cache);
-        }
+        // let i = 0;
+        // for (let cache of this.appState.views[0].caches) {
+        const cache = this.getActiveFileCache();
+        console.log('====');
+        console.log('cache selected length', cache.selected.length);
+        console.log('cache.selectedId', cache.selectedId);
+        console.log('cache.editingId', cache.editingId);
+        console.log('===');
+        console.log(cache.selected);
+        console.log(cache);
+        // }
     }
 
     backwardHistory = () => {

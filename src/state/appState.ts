@@ -370,8 +370,13 @@ export class AppState {
         for (let selected of cache.selected) {
             console.log(selected.fullname, selected.id.dev, selected.id.ino);
         }
-        // cache.updateSelection();
-        // console.log('== apres ==');
+
+        if (newSelection.length) {
+            const file = newSelection.slice(-1)[0];
+            cache.setSelectedFile(file);
+        } else {
+            cache.setSelectedFile(null);
+        }
         // for (let selected of cache.selected) {
         //     console.log(selected.fullname, selected.id.dev, selected.id.ino);
         // }
