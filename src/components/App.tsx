@@ -21,7 +21,7 @@ import { shouldCatchEvent, isEditable } from "../utils/dom";
 import { WithMenuAccelerators, Accelerators, Accelerator, sendFakeCombo } from "./WithMenuAccelerators";
 import { remote } from 'electron';
 import classnames from 'classnames';
-import { isPackage, isWin } from '../utils/platform';
+import { isPackage, isWin, isMac } from '../utils/platform';
 import { TabDescriptor } from "./TabList";
 import { getLocalizedError } from "../locale/error";
 
@@ -336,13 +336,13 @@ class App extends React.Component<WithNamespaces, IState> {
             />
             <Hotkey
                 global={true}
-                combo="ctrl + alt + right"
+                combo="ctrl + shift + right"
                 label={t('SHORTCUT.MAIN.NEXT_VIEW')}
                 onKeyDown={this.onNextView}
             />
             <Hotkey
                 global={true}
-                combo="ctrl + alt + left"
+                combo="ctrl + shift + left"
                 label={t('SHORTCUT.MAIN.PREVIOUS_VIEW')}
                 onKeyDown={this.onNextView}
             />
@@ -353,12 +353,30 @@ class App extends React.Component<WithNamespaces, IState> {
                 preventDefault={true}
                 onKeyDown={this.onReloadFileView}
             /> */}
-            <Hotkey
+            {isMac && (<Hotkey
+                global={true}
+                combo="mod + left"
+                label={t('SHORTCUT.ACTIVE_VIEW.BACKWARD_HISTORY')}
+                onKeyDown={this.backwardHistory}
+            />)}
+            {!isMac && (<Hotkey
                 global={true}
                 combo="alt + left"
                 label={t('SHORTCUT.ACTIVE_VIEW.BACKWARD_HISTORY')}
                 onKeyDown={this.backwardHistory}
-            />
+            />)}
+            {isMac && (<Hotkey
+                global={true}
+                combo="mod + right"
+                label={t('SHORTCUT.ACTIVE_VIEW.FORWARD_HISTORY')}
+                onKeyDown={this.forwardHistory}
+            />)}
+            {!isMac && (<Hotkey
+                global={true}
+                combo="alt + right"
+                label={t('SHORTCUT.ACTIVE_VIEW.FORWARD_HISTORY')}
+                onKeyDown={this.forwardHistory}
+            />)}
             <Hotkey
                 global={true}
                 combo="alt + right"
