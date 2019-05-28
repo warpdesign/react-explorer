@@ -99,9 +99,13 @@ export class FileState {
             newCurrent = length - 1;
         }
 
+        if (newCurrent === this.current) {
+            return;
+        }
+
         this.current = newCurrent;
 
-        const path = history[current + dir];
+        const path = history[newCurrent];
 
         return this.cd(path, '', true, true)
             .catch(() => {
