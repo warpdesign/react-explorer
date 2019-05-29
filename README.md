@@ -1,23 +1,46 @@
 # File manager written in TypeScript & React
 
-![React-Explorer](./img/react-ftp.png)
+![React-Explorer](./img/react-explorer-theme.png)
 
 ## Features
 
-**Note**
-React-Explorer is still being worked on so this is a work in progress.
-
+- Dual-view window
+- Tabs support
 - Fully keyboard controlled
-- Dual-view window supporting any numbers of tabs
 - Fully localized (French & English available)
 - Dark Mode with automatic detection (macOS Mojave)
 - Open a terminal from any folder
 - Plugin-based: local supported for now, ftp in the works
-- Transfers from/to any plugin
+
+## Feature tour
+
+### Dark theme automatic detection (macOS Mojave)
+
+React-Explorer will automatically switch to dark-theme when it's detected:
+
+![dark-theme](./img/feature-darktheme.gif)
+
+### Create and read folder
+
+By pressing `ctrl` (Linux/Win) or `cmd` the folder you create will be automatically read:
+
+![create-read-folder](./img/feature-read-folder.gif)
+
+### Create nested folders
+
+You can create several folders at once by separating them with a forward-slash:
+
+![nested-folders](./img/feature-nested-folders.gif)
+
+### Quick access to parent folders
+
+By right-clicking on a tab's icon you can quickly get access to the parents of the currend folder:
+
+![parent-folders](./img/feature-rightclick-icon.gif)
 
 ## Requirements
 
-React-Explorer works on any modern Windows, Mac and Linux computer.
+React-Explorer works on any modern Windows, Mac or Linux computer.
 
 ## Building for local development
 

@@ -42,7 +42,7 @@
                 "TITLE": "Enter a name for the new folder:",
                 "NAME": "Folder name",
                 "CREATE": "Create",
-                "CREATE_READ": "Create & read folderr"
+                "CREATE_READ": "Create & read folder"
             },
             "LOGIN": {
                 "TITLE": "Login to {{server}}",

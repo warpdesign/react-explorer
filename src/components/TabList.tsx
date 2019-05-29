@@ -28,31 +28,31 @@ class TabListClass extends React.Component<InjectedProps> {
     menuIndex = 0;
 
     tabIcons = [{
-        regex: new RegExp('^' + DOWNLOADS_DIR),
+        regex: new RegExp('^' + DOWNLOADS_DIR + '$'),
         icon: 'download'
     },
     {
-        regex: new RegExp('^' + MUSIC_DIR),
+        regex: new RegExp('^' + MUSIC_DIR + '$'),
         icon: 'music'
     },
     {
-        regex: new RegExp('^' + PICTURES_DIR),
+        regex: new RegExp('^' + PICTURES_DIR + '$'),
         icon: 'camera'
     },
     {
-        regex: new RegExp('^' + DESKTOP_DIR),
+        regex: new RegExp('^' + DESKTOP_DIR + '$'),
         icon: 'desktop'
     },
     {
-        regex: new RegExp('^' + DOCS_DIR),
+        regex: new RegExp('^' + DOCS_DIR + '$'),
         icon: 'projects'
     },
     {
-        regex: new RegExp('^' + HOME_DIR),
+        regex: new RegExp('^' + HOME_DIR + '$'),
         icon: 'home'
     },
     {
-        regex: new RegExp('^' + VIDEOS_DIR),
+        regex: new RegExp('^' + VIDEOS_DIR + '$'),
         icon: 'video'
     }];
 
