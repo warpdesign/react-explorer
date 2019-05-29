@@ -1,5 +1,6 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const CleanWebpackPlugin = require('clean-webpack-plugin');
 const CopyPlugin = require('copy-webpack-plugin');
 const webpack = require('webpack');
 const packageJson = require('./package.json');
@@ -77,12 +78,18 @@ module.exports = [
             target: 'electron-main',
             entry: { main: './src/electron/main.ts' },
             plugins: [
+                new CleanWebpackPlugin({
+                    cleanOnceBeforeBuildPatterns: [path.join(process.cwd(), 'dist/**/*')],
+                    dangerouslyAllowCleanPatternsOutsideProject: true,
+                    dry: false
+                }),
                 new webpack.DefinePlugin({
                     'ENV.CY': false,
                     'ENV.NODE_ENV': JSON.stringify(baseConfig.mode),
                     'ENV.VERSION': JSON.stringify(packageJson.version),
                     'ENV.HASH': JSON.stringify(gitHash)
-                })
+                },
+                )
             ]
         },
         baseConfig),
