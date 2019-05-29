@@ -5,8 +5,6 @@ const webpack = require('webpack');
 const packageJson = require('./package.json');
 const gitHash = require('./scripts/hash');
 
-console.log(packageJson.version);
-
 const baseConfig = {
     output: {
         path: path.resolve(__dirname, 'build'),

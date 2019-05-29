@@ -21,7 +21,7 @@ import { shouldCatchEvent, isEditable } from "../utils/dom";
 import { WithMenuAccelerators, Accelerators, Accelerator, sendFakeCombo } from "./WithMenuAccelerators";
 import { remote } from 'electron';
 import classnames from 'classnames';
-import { isPackage, isWin } from '../utils/platform';
+import { isPackage, isWin, isMac } from '../utils/platform';
 import { TabDescriptor } from "./TabList";
 import { getLocalizedError } from "../locale/error";
 
@@ -336,13 +336,13 @@ class App extends React.Component<WithNamespaces, IState> {
             />
             <Hotkey
                 global={true}
-                combo="ctrl + alt + right"
+                combo="ctrl + shift + right"
                 label={t('SHORTCUT.MAIN.NEXT_VIEW')}
                 onKeyDown={this.onNextView}
             />
             <Hotkey
                 global={true}
-                combo="ctrl + alt + left"
+                combo="ctrl + shift + left"
                 label={t('SHORTCUT.MAIN.PREVIOUS_VIEW')}
                 onKeyDown={this.onNextView}
             />
@@ -353,12 +353,30 @@ class App extends React.Component<WithNamespaces, IState> {
                 preventDefault={true}
                 onKeyDown={this.onReloadFileView}
             /> */}
-            <Hotkey
+            {isMac && (<Hotkey
+                global={true}
+                combo="mod + left"
+                label={t('SHORTCUT.ACTIVE_VIEW.BACKWARD_HISTORY')}
+                onKeyDown={this.backwardHistory}
+            />)}
+            {!isMac && (<Hotkey
                 global={true}
                 combo="alt + left"
                 label={t('SHORTCUT.ACTIVE_VIEW.BACKWARD_HISTORY')}
                 onKeyDown={this.backwardHistory}
-            />
+            />)}
+            {isMac && (<Hotkey
+                global={true}
+                combo="mod + right"
+                label={t('SHORTCUT.ACTIVE_VIEW.FORWARD_HISTORY')}
+                onKeyDown={this.forwardHistory}
+            />)}
+            {!isMac && (<Hotkey
+                global={true}
+                combo="alt + right"
+                label={t('SHORTCUT.ACTIVE_VIEW.FORWARD_HISTORY')}
+                onKeyDown={this.forwardHistory}
+            />)}
             <Hotkey
                 global={true}
                 combo="alt + right"
@@ -437,10 +455,17 @@ class App extends React.Component<WithNamespaces, IState> {
     }
 
     onDebugCache = () => {
-        let i = 0;
-        for (let cache of this.appState.views[0].caches) {
-            console.log('cache', cache.selected.length, cache.selected, cache.selectedId, cache.editingId, cache);
-        }
+        // let i = 0;
+        // for (let cache of this.appState.views[0].caches) {
+        const cache = this.getActiveFileCache();
+        console.log('====');
+        console.log('cache selected length', cache.selected.length);
+        console.log('cache.selectedId', cache.selectedId);
+        console.log('cache.editingId', cache.editingId);
+        console.log('===');
+        console.log(cache.selected);
+        console.log(cache);
+        // }
     }
 
     backwardHistory = () => {

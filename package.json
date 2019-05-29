@@ -51,6 +51,7 @@
     "@types/react-virtualized": "^9.18.12",
     "awesome-typescript-loader": "^5.2.1",
     "aws-sdk": "^2.332.0",
+    "clean-webpack-plugin": "^2.0.2",
     "copy-webpack-plugin": "^5.0.3",
     "css-loader": "^1.0.0",
     "electron": "^3.0.5",
