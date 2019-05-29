@@ -155,8 +155,8 @@ export class FileTableClass extends React.Component<IProps, IState> {
     }
 
     public componentDidUpdate() {
-        const scrollTop = this.state.position === -1 && this.cache.scrollTop || undefined;
-        if (scrollTop > 0) {
+        const scrollTop = this.state.position === -1 ? this.cache.scrollTop : null;
+        if (scrollTop !== null && scrollTop > -1) {
             this.tableRef.current.scrollToPosition(scrollTop);
         }
     }
@@ -215,8 +215,6 @@ export class FileTableClass extends React.Component<IProps, IState> {
                 // when cache is being (re)loaded, cache.files is empty:
                 // we don't want to show "empty folder" placeholder
                 // that case, only when cache is loaded and there are no files
-                const { viewState } = this.injected;
-
                 if (cache.cmd === 'cwd' || cache.history.length) {
                     this.updateNodes(files);
                 }
@@ -298,7 +296,8 @@ export class FileTableClass extends React.Component<IProps, IState> {
     private updateState(nodes: ITableRow[], keepSelection = false) {
         const cache = this.cache;
         const newPath = nodes.length && nodes[0].nodeData.dir || '';
-        const position = keepSelection && cache.selectedId && this.getFilePosition(nodes, cache.selectedId) || -1;
+        const position = keepSelection && cache.selectedId ? this.getFilePosition(nodes, cache.selectedId) : -1;
+
         // cancel inlineedit if there was one
         this.clearEditElement();
         this.setState({ nodes, selected: keepSelection ? this.state.selected : 0, position, path: newPath }, () => {
@@ -489,8 +488,6 @@ export class FileTableClass extends React.Component<IProps, IState> {
         const { appState } = this.injected;
         const fileCache = this.cache;
         const { nodes, position } = this.state;
-
-        console.log('selected', nodes.filter((node, i) => i !== position && node.isSelected));
 
         const selection = nodes.filter((node, i) => i !== position && node.isSelected).map((node) => node.nodeData) as File[];
 

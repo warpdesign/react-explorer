@@ -280,15 +280,12 @@ export class FileState {
     }
 
     @action
-    updateSelection() {
-        const isSameDir = this.selected.length && this.selected[0].dir === this.path;
-        const newSelection = [];
+    updateSelection(isSameDir: boolean) {
         if (isSameDir) {
-            // selected contains files that can be outdated:
+            const newSelection = [];
+            // cache.selected contains files that can be outdated:
             // files may have been removed on reload
-            // we iterated through the previously selected files and
-            // create a new selection based on file ids that were and are still
-            // in the list of files
+            // so we filter the list and remove outdated files.
             for (let selection of this.selected) {
                 // use inode/dev to retrieve files that were selected before reload:
                 // we cannot use fullname anymore since files may have been renamed
@@ -301,20 +298,22 @@ export class FileState {
             if (this.selectedId && !this.files.find(file => file.id.dev === this.selectedId.dev && file.id.ino === this.selectedId.ino)) {
                 this.selectedId = null;
             }
+
             // Do not change the selectedId here, we want to keep it
-            // if (newSelection.length) {
-            //     const selectedFile = newSelection[newSelection.length - 1];
-            //     this.selected.replace(newSelection);
-            //     this.selectedId = {
-            //         ...selectedFile.id
-            //     }
-            // } else {
-            //     this.selected.clear();
-            //     this.selectedId = null;
-            // }
+            if (newSelection.length) {
+                const selectedFile = newSelection[newSelection.length - 1];
+                this.selected.replace(newSelection);
+                this.selectedId = {
+                    ...selectedFile.id
+                }
+            } else {
+                this.selected.clear();
+                this.selectedId = null;
+            }
         } else {
             this.selected.clear();
             this.selectedId = null;
+            this.scrollTop = 0;
         }
     }
 
@@ -395,9 +394,21 @@ export class FileState {
 
         return this.api.cd(joint)
             .then((path) => {
-                return this.list(path).then(() => {
-                    this.updatePath(path, skipHistory);
-                    this.cmd = '';
+                return this.list(path).then((files) => {
+                    runInAction(() => {
+                        const isSameDir = this.path === path;
+
+                        this.files.replace(files);
+
+                        this.updatePath(path, skipHistory);
+                        this.cmd = '';
+
+                        // update the cache's selection, keeping files that were previously selected
+                        this.updateSelection(isSameDir);
+
+                        this.setStatus('ok');
+                    });
+
                     return path;
                 });
             })
@@ -415,17 +426,6 @@ export class FileState {
     @needsConnection
     async list(path: string): Promise<File[]> {
         return this.api.list(path)
-            .then((files: File[]) => {
-                runInAction(() => {
-                    this.files.replace(files);
-                    // update the cache's selection, keeping files that were previously selected
-                    this.updateSelection();
-
-                    this.setStatus('ok');
-                });
-
-                return files;
-            })
             .catch(this.handleError)
     }
 

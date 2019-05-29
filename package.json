@@ -1,6 +1,6 @@
 {
   "name": "react-explorer",
-  "version": "v2.0.0-beta.2",
+  "version": "v2.0.0-beta.3",
   "description": "Plugin-based file explorer written with React",
   "main": "build/main.js",
   "build": {
