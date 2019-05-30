@@ -1,7 +1,7 @@
 import { AppState } from "../state/appState";
 import * as React from "react";
 import * as ReactDOM from "react-dom";
-import { FocusStyleManager, Icon, HotkeysTarget, Hotkeys, Hotkey, Alert, Popover, Classes } from "@blueprintjs/core";
+import { FocusStyleManager, Icon, HotkeysTarget, Hotkeys, Hotkey, Alert, Popover, Classes, IHotkeysProps } from "@blueprintjs/core";
 import { Provider, observer, inject } from "mobx-react";
 import { Navbar, Alignment, Button, Intent } from "@blueprintjs/core";
 import { SideView } from "./SideView";
@@ -317,10 +317,10 @@ class App extends React.Component<WithNamespaces, IState> {
         </Accelerators>;
     }
 
-    public renderHotkeys() {
+    public renderHotkeys(): React.ReactElement<IHotkeysProps> {
         const t = this.props.t;
 
-        return <Hotkeys>
+        return (<Hotkeys>
             <Hotkey
                 global={true}
                 combo="alt + mod + l"
@@ -451,7 +451,7 @@ class App extends React.Component<WithNamespaces, IState> {
                 onKeyDown={this.onDebugCache}
                 group={t('SHORTCUT.GROUP.ACTIVE_VIEW')}
             />
-        </Hotkeys>;
+        </Hotkeys>) as React.ReactElement<IHotkeysProps>;
     }
 
     onDebugCache = () => {

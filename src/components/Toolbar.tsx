@@ -1,7 +1,7 @@
 import * as React from "react";
 import { reaction, IReactionDisposer } from 'mobx';
 import { inject, observer } from 'mobx-react';
-import { InputGroup, ControlGroup, Button, ButtonGroup, Popover, Intent, Alert, ProgressBar, Classes, HotkeysTarget, Hotkeys, Hotkey, Tooltip, Position } from '@blueprintjs/core';
+import { InputGroup, ControlGroup, Button, ButtonGroup, Popover, Intent, Alert, ProgressBar, Classes, HotkeysTarget, Hotkeys, Hotkey, Tooltip, Position, IHotkeysProps } from '@blueprintjs/core';
 import { AppState } from "../state/appState";
 import { FileMenu } from "./FileMenu";
 import { MakedirDialog } from "./dialogs/MakedirDialog";
@@ -303,10 +303,10 @@ export class ToolbarClass extends React.Component<IProps, PathInputState> {
         </Accelerators>;
     }
 
-    public renderHotkeys() {
+    public renderHotkeys(): React.ReactElement<IHotkeysProps> {
         const { t } = this.props;
 
-        return <Hotkeys>
+        return (<Hotkeys>
             <Hotkey
                 global={true}
                 combo="mod+l"
@@ -328,7 +328,7 @@ export class ToolbarClass extends React.Component<IProps, PathInputState> {
                 onKeyDown={this.onDelete}
                 group={t('SHORTCUT.GROUP.ACTIVE_VIEW')}
             /> */}
-        </Hotkeys>;
+        </Hotkeys>) as React.ReactElement<IHotkeysProps>;
     }
 
 

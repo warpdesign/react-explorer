@@ -2,7 +2,7 @@ import * as React from 'react';
 import { observer } from 'mobx-react';
 import { observable, runInAction } from 'mobx';
 import { debounce } from '../utils/debounce';
-import { Intent, HotkeysTarget, Hotkeys, Hotkey, Classes } from '@blueprintjs/core';
+import { Intent, HotkeysTarget, Hotkeys, Hotkey, Classes, IHotkeysProps } from '@blueprintjs/core';
 import { WithNamespaces, withNamespaces } from 'react-i18next';
 import { shouldCatchEvent } from '../utils/dom';
 import classnames from 'classnames';
@@ -123,17 +123,17 @@ export class LogUIClass extends React.Component<WithNamespaces, LogUIState> {
             });
     }
 
-    renderHotkeys() {
+    renderHotkeys(): React.ReactElement<IHotkeysProps> {
         const { t } = this.props;
 
-        return <Hotkeys>
+        return (<Hotkeys>
             <Hotkey
                 global={true}
                 combo="escape"
                 label={t('SHORTCUT.LOG.TOGGLE')}
                 onKeyDown={this.toggleConsole}>
             </Hotkey>
-        </Hotkeys>;
+        </Hotkeys>) as React.ReactElement<IHotkeysProps>;
     }
 
     // shouldComponentUpdate() {
