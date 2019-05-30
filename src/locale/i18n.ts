@@ -1,16 +1,22 @@
 import i18next from 'i18next';
-import * as en from './lang/en.json';
-import * as fr from './lang/fr.json';
 import { ipcRenderer } from 'electron';
 
-    i18next
-        .init({
+const locales: any = {};
+
+function importAllLocales(r: any) {
+    r.keys().forEach((key: any) => {
+        const code = key.match(/([a-zA-Z]+)\.json$/)[1];
+        locales[code] = r(key);
+    });
+}
+
+importAllLocales(require['context']('./lang/', true, /\.json$/));
+
+i18next
+    .init({
         lng: 'en',
         // we init with resources
-        resources: {
-            en: en,
-            fr: fr
-        },
+        resources: locales,
         fallbackLng: 'en',
         debug: true,
 

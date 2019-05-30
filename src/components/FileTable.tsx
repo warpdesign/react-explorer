@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { IconName, Icon, Classes, HotkeysTarget, Hotkeys, Hotkey } from '@blueprintjs/core';
+import { IconName, Icon, Classes, HotkeysTarget, Hotkeys, Hotkey, IHotkeysProps } from '@blueprintjs/core';
 import { Column, Table, AutoSizer, Index, HeaderMouseEventHandlerParams } from 'react-virtualized';
 import { AppState } from '../state/appState';
 import { WithNamespaces, withNamespaces } from 'react-i18next';
@@ -168,10 +168,10 @@ export class FileTableClass extends React.Component<IProps, IState> {
         </Accelerators>;
     }
 
-    renderHotkeys() {
+    renderHotkeys(): React.ReactElement<IHotkeysProps> {
         const { t } = this.props;
 
-        return <Hotkeys>
+        return (<Hotkeys>
             <Hotkey
                 global={true}
                 combo="mod + o"
@@ -200,7 +200,7 @@ export class FileTableClass extends React.Component<IProps, IState> {
                 onKeyDown={this.onInvertSelection}
                 group={t('SHORTCUT.GROUP.ACTIVE_VIEW')}>
             </Hotkey>
-        </Hotkeys>;
+        </Hotkeys>) as React.ReactElement<IHotkeysProps>;
     }
 
     private get injected() {

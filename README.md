@@ -75,6 +75,14 @@ React-Explorer can also be built for a single patform. For example, to build onl
 npm run dist-win
 ```
 
+## Localization
+
+React-Explorer is fully localized using `.json` files. Right now, English and French are available.
+
+Adding a new language to React-Explorer is easy: simply duplicate one of the file found in [src/locale/lang](https://github.com/warpdesign/react-explorer/tree/master/src/locale/lang) directory.
+
+The new file should have the name `code.json` where code is a valid language code, for example: `ja.json` to add support for Japanese.
+
 ## How to develop a new Plugin
 
 React-Explorer has been written so that it can easily be extended using plugins.
