@@ -86,6 +86,14 @@ button.small:hover{
     content: "";
 }
 
+#root .sideview:before{
+    box-shadow: 0 0 2px 2px inset rgb(231, 236, 239);
+}
+
+.bp3-dark #root .sideview:before{
+    box-shadow: 0 0 2px 2px inset rgb(66, 84, 97);
+}
+
 #root .sideview.active:before{
     box-shadow: 0 0 0px 2px inset rgba(19, 124, 189, 0.8);
     z-index:2;
