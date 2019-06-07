@@ -37,9 +37,11 @@ const ElectronApp = {
             // TODO: detect interrupt
             console.log('before quit');
             if (!this.forceExit) {
+                console.log('no forceExit, sending exitRequest to renderer');
                 e.preventDefault();
                 this.mainWindow.webContents.send('exitRequest');
             } else {
+                console.log('forceExit is true, calling cleanupAndExit');
                 this.cleanupAndExit();
             }
         });
@@ -91,10 +93,13 @@ const ElectronApp = {
 
         // Prevent the window from closing in case transfers are in progress
         this.mainWindow.on('close', (e: Event) => {
+            console.log('on:close');
             if (!this.forceExit) {
                 console.log('exit request and no force: sending back exitRequest');
                 e.preventDefault();
                 this.mainWindow.webContents.send('exitRequest');
+            } else {
+                console.log('forceExit: let go exit event');
             }
         });
 
@@ -156,6 +161,7 @@ const ElectronApp = {
         ipcMain.on('reloadIgnoringCache', () => this.reloadApp());
 
         ipcMain.on('readyToExit', () => {
+            console.log('readyToExit');
             this.cleanupAndExit();
         });
 
@@ -184,7 +190,7 @@ const ElectronApp = {
             }
         });
 
-        ipcMain.on('needsCleanup', () => this.cleanupCounter++);
+        ipcMain.on('needsCleanup', () => { console.log('needscleanup'); this.cleanupCounter++; console.log('needscleanup, counter now:', this.cleanupCounter); });
         ipcMain.on('cleanedUp', () => this.onCleanUp());
     },
 
@@ -195,7 +201,7 @@ const ElectronApp = {
     cleanupAndExit() {
         console.log('cleanupAndExit');
         if (this.cleanupCounter) {
-            console.log('cleanupCounter non zero');
+            console.log('cleanupCounter non zero', this.cleanupCounter);
             this.mainWindow.webContents.send('cleanup');
         } else {
             console.log('cleanupCount zero: exit');
@@ -203,12 +209,15 @@ const ElectronApp = {
         }
     },
     onCleanUp() {
-        console.log('onCleanup');
         this.cleanupCounter--;
         // exit app if everything has been cleaned up
         // otherwise do nothing and wait for cleanup
+        console.log('onCleanUp, counter now', this.cleanupCounter);
         if (!this.cleanupCounter) {
+            console.log('cleanupCounter equals to zero, calling app.exit()');
             app.exit();
+        } else {
+            console.log('cleanupCounter non zero, cancel exit', this.cleanupCounter);
         }
     },
     /**

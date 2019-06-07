@@ -183,13 +183,13 @@ export class Batch {
         const fullDstPath = dstFs.join(this.dstPath, transfer.newSub);
         const srcPath = srcFs.join(this.srcPath, transfer.subDirectory);
         const wantedName = transfer.file.fullname;
+        const isDir = transfer.file.isDir;
 
         let newFilename = '';
         let stream = null;
 
         try {
             newFilename = await this.renameOrCreateDir(transfer, fullDstPath);
-            transfer.status = 'done';
         } catch (err) {
             console.log('error creating directory', err);
             this.onTransferError(transfer, err);
@@ -199,7 +199,7 @@ export class Batch {
             console.warn('startTransfer while cancelled (1)');
         }
 
-        if (!transfer.file.isDir) {
+        if (!isDir) {
             try {
                 // console.log('getting stream', srcPath, wantedName);
                 stream = await srcFs.getStream(srcPath, wantedName, this.id);
@@ -223,7 +223,6 @@ export class Batch {
                 this.removeStream(stream);
                 transfer.status = 'done';
             } catch (err) {
-                // TODO: catch batch cancel ?
                 console.log('error with streams', err);
                 this.removeStream(stream);
                 // transfer.status = 'error';
@@ -243,6 +242,7 @@ export class Batch {
             }
 
         } else {
+            transfer.status = 'done';
             // make transfers with this directory ready
             this.updatePendingTransfers(srcFs.join(transfer.subDirectory, wantedName), newFilename, (transfer as FileTransfer).status !== 'done');
         }
@@ -351,7 +351,6 @@ export class Batch {
             try {
                 exists = await this.dstFs.exists(tmpPath, this.id);
             } catch (err) {
-                debugger;
                 exists = false;
             }
         }

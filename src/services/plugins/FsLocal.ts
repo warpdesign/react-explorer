@@ -97,7 +97,6 @@ class LocalApi implements FsApi {
                 });
 
             } catch (err) {
-                debugger;
                 reject(err);
             }
         });
@@ -326,7 +325,7 @@ class LocalApi implements FsApi {
         };
     }
 
-    async putStream(readStream: fs.ReadStream, dstPath: string, progress: (pourcent: number) => void, transferId = -1): Promise<void> {
+    putStream(readStream: fs.ReadStream, dstPath: string, progress: (pourcent: number) => void, transferId = -1): Promise<void> {
         return new Promise((resolve: (val?: any) => void, reject: (val?: any) => void) => {
             let finished = false;
             let readError = false;

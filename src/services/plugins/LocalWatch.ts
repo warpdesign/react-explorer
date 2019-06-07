@@ -82,6 +82,8 @@ export const LocalWatch = {
 
 ipcRenderer.send('needsCleanup');
 ipcRenderer.on('cleanup', () => {
+    console.log('cleanup received, closing watchers');
     LocalWatch.closeAll();
+    console.log('cleanup received, sending cleanedUp');
     ipcRenderer.send('cleanedUp');
 });
