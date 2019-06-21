@@ -80,7 +80,8 @@ const ElectronApp = {
             x: winState.x,
             y: winState.y,
             webPreferences: {
-                enableBlinkFeatures: 'OverlayScrollbars,OverlayScrollbarsFlashAfterScrollUpdate,OverlayScrollbarsFlashWhenMouseEnter'
+                enableBlinkFeatures: 'OverlayScrollbars,OverlayScrollbarsFlashAfterScrollUpdate,OverlayScrollbarsFlashWhenMouseEnter',
+                nodeIntegration: true
             },
             icon: isLinux && path.join(__dirname, 'icon.png') || undefined
         });
