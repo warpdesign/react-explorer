@@ -18,7 +18,9 @@ const SEP = path.sep;
 const localStart = isWin && /^(([a-zA-Z]\:)|([\.]*\/|\.)|(\\\\)|~)/ || /^([\.]*\/|\.|~)/;
 const isRoot = isWin && /((([a-zA-Z]\:)(\\)*)|(\\\\))$/ || /^\/$/;
 
-class LocalApi implements FsApi {
+const progressFunc = throttle((progress: any, bytesRead: number) => { progress(bytesRead) }, 400)
+
+export class LocalApi implements FsApi {
     type = 0;
     // current path
     path: string;
@@ -241,54 +243,7 @@ class LocalApi implements FsApi {
                         const files: File[] = [];
 
                         for (var i = 0; i < items.length; i++) {
-                            const fullPath = path.join(dirPath, items[i]);
-                            const format = path.parse(fullPath);
-                            let name = fullPath;
-                            let stats = null;
-                            let target_stats = null;
-
-                            try {
-                                stats = fs.lstatSync(fullPath);
-                                if (stats.isSymbolicLink()) {
-                                    target_stats = fs.statSync(fullPath);
-                                    name = fs.readlinkSync(fullPath);
-                                }
-                            } catch (err) {
-                                console.warn('error getting stats for', path.join(dirPath, items[i]), err);
-                                stats = {
-                                    ctime: new Date(),
-                                    mtime: new Date(),
-                                    birthtime: new Date(),
-                                    size: 0,
-                                    isDirectory: () => true,
-                                    mode: -1,
-                                    isSymbolicLink: () => false,
-                                    ino: 0,
-                                    dev: 0
-                                }
-                            }
-
-                            const extension = path.parse(name).ext.toLowerCase();
-                            const mode = target_stats ? target_stats.mode : stats.mode;
-
-                            const file: File =
-                            {
-                                dir: format.dir,
-                                fullname: items[i],
-                                name: format.name,
-                                extension: extension,
-                                cDate: stats.ctime,
-                                mDate: stats.mtime,
-                                bDate: stats.birthtime,
-                                length: stats.size,
-                                mode: mode,
-                                isDir: target_stats ? target_stats.isDirectory() : stats.isDirectory(),
-                                readonly: false,
-                                type: !(target_stats ? target_stats.isDirectory() : stats.isDirectory()) && filetype(mode, 0, 0, extension) || '',
-                                isSym: stats.isSymbolicLink(),
-                                id: MakeId(stats)
-                            };
-
+                            const file = LocalApi.fileFromPath(path.join(dirPath, items[i]))
                             files.push(file);
                         }
 
@@ -301,6 +256,57 @@ class LocalApi implements FsApi {
         } else {
             return Promise.reject('Path does not exist');
         }
+    }
+
+    static fileFromPath(fullPath: string): File {
+        const format = path.parse(fullPath);
+        let name = fullPath;
+        let stats = null;
+        let target_stats = null;
+
+        try {
+            stats = fs.lstatSync(fullPath);
+            if (stats.isSymbolicLink()) {
+                target_stats = fs.statSync(fullPath);
+                name = fs.readlinkSync(fullPath);
+            }
+        } catch (err) {
+            console.warn('error getting stats for', /*path.join(dirPath, items[i])*/ fullPath, err);
+            stats = {
+                ctime: new Date(),
+                mtime: new Date(),
+                birthtime: new Date(),
+                size: 0,
+                isDirectory: () => true,
+                mode: -1,
+                isSymbolicLink: () => false,
+                ino: 0,
+                dev: 0
+            }
+        }
+
+        const extension = path.parse(name).ext.toLowerCase();
+        const mode = target_stats ? target_stats.mode : stats.mode;
+
+        const file: File =
+        {
+            dir: format.dir,
+            fullname: format.base,
+            name: format.name,
+            extension: extension,
+            cDate: stats.ctime,
+            mDate: stats.mtime,
+            bDate: stats.birthtime,
+            length: stats.size,
+            mode: mode,
+            isDir: target_stats ? target_stats.isDirectory() : stats.isDirectory(),
+            readonly: false,
+            type: !(target_stats ? target_stats.isDirectory() : stats.isDirectory()) && filetype(mode, 0, 0, extension) || '',
+            isSym: stats.isSymbolicLink(),
+            id: MakeId(stats)
+        };
+
+        return file;
     }
 
     isRoot(path: string): boolean {
@@ -331,12 +337,10 @@ class LocalApi implements FsApi {
             let readError = false;
             let bytesRead = 0;
 
-            const throttledProgress = throttle(() => { progress(bytesRead) }, 800);
-
             const reportProgress = new Transform({
                 transform(chunk: any, encoding: any, callback: any) {
                     bytesRead += chunk.length;
-                    throttledProgress();
+                    progressFunc(progress, bytesRead);
                     callback(null, chunk);
                 },
                 highWaterMark: 16384 * 31

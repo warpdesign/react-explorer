@@ -16,7 +16,7 @@ function collect(connect: DragSourceConnector, monitor: DragSourceMonitor) {
 export interface DraggedObject {
     // selectedCount: number;
     fileState?: FileState;
-    dragFiles: [File];
+    dragFiles: File[];
 }
 
 const fileSource: DragSourceSpec<RowRendererParams, DraggedObject> = {
