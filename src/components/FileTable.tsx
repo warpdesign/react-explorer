@@ -749,6 +749,20 @@ export class FileTableClass extends React.Component<IProps, IState> {
         return RowRenderer(props);
     }
 
+    onNativeDrop = (event: React.DragEvent) => {
+        debugger;
+    }
+
+    onNoop = (event: React.DragEvent) => {
+        console.log(event.type, event.dataTransfer.files.length);
+        console.log(event.dataTransfer.getData("file"));
+        if (event.dataTransfer.files.length) {
+            console.log('wow!');
+            event.preventDefault();
+            event.stopPropagation();
+        }
+    }
+
     onScroll = debounce(({ scrollTop }: any) => {
         this.cache.scrollTop = scrollTop;
     }, SCROLL_DEBOUNCE);

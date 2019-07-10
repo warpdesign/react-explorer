@@ -9,6 +9,7 @@ import { Loader } from "./Loader";
 import { FileTable } from "./FileTable";
 import classnames from 'classnames';
 import { DropTargetSpec, DropTargetConnector, DropTargetMonitor, DropTargetCollector, ConnectDropTarget, DropTarget } from "react-dnd";
+import { NativeTypes } from 'react-dnd-html5-backend';
 import { DraggedObject } from './RowRenderer';
 import { TabList } from "./TabList";
 import { ViewState } from "../state/viewState";
@@ -32,11 +33,16 @@ interface InjectedProps extends SideViewProps {
 
 const fileTarget: DropTargetSpec<InjectedProps> = {
     canDrop(props: InjectedProps, monitor) {
-        // prevent drag and drop in same sideview for now
-        const sourceViewId = monitor.getItem().fileState.viewId;
         const viewState = props.viewState;
         const fileCache = viewState.getVisibleCache();
-        return props.viewState.viewId !== sourceViewId && fileCache.status !== 'busy' && !fileCache.error;
+
+        // prevent drag and drop in same sideview for now
+        if (monitor.getItemType() === NativeTypes.FILE) {
+            return fileCache.status !== 'busy' && !fileCache.error;
+        } else {
+            const sourceViewId = monitor.getItem().fileState.viewId;
+            return viewState.viewId !== sourceViewId && fileCache.status !== 'busy' && !fileCache.error;
+        }
     },
     drop(props, monitor, component) {
         const item = monitor.getItem();
@@ -117,10 +123,13 @@ export class SideViewClass extends React.Component<InjectedProps>{
     }
 
     onDrop(item: DraggedObject) {
+        console.log('onDrop');
+        debugger;
         const appState = this.injected.appState;
         const { viewState } = this.props;
         const fileCache = viewState.getVisibleCache();
-        const files = item.selectedCount > 0 ? item.fileState.selected.slice(0) : [item.dragFile];
+        // TODO: build files from native urls
+        const files = item.dragFiles;
 
         // TODO: check both cache are active?
         appState.prepareTransferTo(item.fileState, fileCache, files)
@@ -179,7 +188,7 @@ export class SideViewClass extends React.Component<InjectedProps>{
     }
 }
 
-const SideViewDD = DropTarget<InjectedProps>('file', fileTarget, collect)(SideViewClass);
+const SideViewDD = DropTarget<InjectedProps>(['file', NativeTypes.FILE], fileTarget, collect)(SideViewClass);
 
 const SideView = withNamespaces()(SideViewDD);
 
