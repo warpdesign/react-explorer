@@ -131,10 +131,20 @@ export class AppState {
             return;
         }
 
+        let srcApi = null;
+        let srcPath = "";
+
+        // native drag and drop
+        if (!srcCache) {
+            srcPath = files[0].dir;
+            const fs = getFS(srcPath);
+            srcApi = new fs.API(srcPath, () => { });
+        }
+
         const options = {
             files,
-            srcFs: srcCache.getAPI(),
-            srcPath: srcCache.path,
+            srcFs: srcCache && srcCache.getAPI() || srcApi,
+            srcPath: srcCache && srcCache.path || srcPath,
             dstFs: dstCache.getAPI(),
             dstPath: dstCache.path,
             dstFsName: dstCache.getFS().name
@@ -158,7 +168,7 @@ export class AppState {
      * @param file the file to open
      */
     openTransferedFile(batchId: number, file: File) {
-        // TODO: this id duplicate code from appState/prepareLocalTransfer and fileState.openFile()
+        // TODO: this is duplicate code from appState/prepareLocalTransfer and fileState.openFile()
         // because we don't have a reference to the destination cache
         const batch = this.transfers.find(transfer => transfer.id === batchId);
         const api = batch.dstFs;
