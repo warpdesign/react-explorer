@@ -10,7 +10,7 @@ body.bp3-dark {
     color: #f5f8fa;
 }
 
-button.small{
+button.small.bp3-minimal{
     transform:scale(.8);
     opacity:.6;
 }
