@@ -14,9 +14,9 @@ function collect(connect: DragSourceConnector, monitor: DragSourceMonitor) {
 }
 
 export interface DraggedObject {
-    selectedCount: number;
-    fileState: FileState;
-    dragFile: File;
+    // selectedCount: number;
+    fileState?: FileState;
+    dragFiles: File[];
 }
 
 const fileSource: DragSourceSpec<RowRendererParams, DraggedObject> = {
@@ -24,7 +24,7 @@ const fileSource: DragSourceSpec<RowRendererParams, DraggedObject> = {
         return {
             selectedCount: props.selectedCount,
             fileState: props.fileCache,
-            dragFile: props.rowData.nodeData
+            dragFiles: props.selectedCount > 0 ? props.fileCache.selected.slice(0) : [props.rowData.nodeData]
         };
     },
     canDrag: (props: any, monitor: DragSourceMonitor) => {

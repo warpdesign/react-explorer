@@ -16,6 +16,8 @@ import { AppToaster } from "./AppToaster";
 import { Intent } from "@blueprintjs/core";
 import { getLocalizedError } from "../locale/error";
 import { withNamespaces, WithNamespaces } from "react-i18next";
+import { FsLocal, LocalApi } from "../services/plugins/FsLocal";
+import { getFS } from "../services/Fs";
 
 interface SideViewProps extends WithNamespaces {
     hide: boolean;
@@ -116,11 +118,13 @@ export class SideViewClass extends React.Component<InjectedProps>{
         );
     }
 
-    onDrop(item: DraggedObject) {
+    onDrop(item: any /* DraggedObject | DataTransfer */) {
+        console.log('onDrop');
         const appState = this.injected.appState;
         const { viewState } = this.props;
         const fileCache = viewState.getVisibleCache();
-        const files = item.selectedCount > 0 ? item.fileState.selected.slice(0) : [item.dragFile];
+        // TODO: build files from native urls
+        const files = item.fileState ? item.dragFiles : item.files.map((webFile: any) => LocalApi.fileFromPath(webFile.path));
 
         // TODO: check both cache are active?
         appState.prepareTransferTo(item.fileState, fileCache, files)

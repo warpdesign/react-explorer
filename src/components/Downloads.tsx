@@ -70,6 +70,9 @@ class DownloadsClass extends React.Component<IProps, IState> {
             () => { return toJS(this.appState.transfers) },
             (transfers: Batch[]) => {
                 this.setState({ nodes: this.getTreeData(transfers) });
+            },
+            {
+                delay: 500
             }
         );
     }
