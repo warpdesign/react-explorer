@@ -50,6 +50,9 @@
     background-color:white;
     color:black;
     cursor:text;
+    /* disable ellipsis so that the full text is visible & editable */
+    text-overflow:initial;
+    overflow:visible;
 }
 
 .tableRow.isHidden{
