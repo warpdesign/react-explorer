@@ -16,7 +16,7 @@ const ENTER_KEY = 13;
 class Alerter extends React.Component<{}, IAlerterState> {
     defer: Deferred<boolean> = null;
 
-    constructor(props:{}) {
+    constructor(props: {}) {
         super(props);
 
         this.state = {
@@ -28,8 +28,10 @@ class Alerter extends React.Component<{}, IAlerterState> {
     public static create(container = document.body) {
         const containerElement = document.createElement("div");
         container.appendChild(containerElement);
-        const alerter = ReactDOM.render(<Alerter />, containerElement) as Alerter;
-        return alerter;
+        // use a ref and return a promise since in the future ReactDOM.render may return void
+        return new Promise((resolve) => {
+            ReactDOM.render(<Alerter ref={c => resolve(c)} />, containerElement);
+        });
     }
 
     onClose = (res: boolean) => {
@@ -43,7 +45,7 @@ class Alerter extends React.Component<{}, IAlerterState> {
         defer.resolve(res);
     }
 
-    async show(message: React.ReactNode | string, options: Partial<IAlertProps>):Promise<boolean> {
+    async show(message: React.ReactNode | string, options: Partial<IAlertProps>): Promise<boolean> {
         if (!this.defer) {
             this.defer = new Deferred();
 
@@ -98,10 +100,14 @@ class Alerter extends React.Component<{}, IAlerterState> {
     }
 }
 
-const MyAlerter = Alerter.create();
+let MyAlerter: Alerter = null;
+
+Alerter.create().then((component: Alerter) => {
+    MyAlerter = component;
+});
 
 export const AppAlert = {
     show(message: React.ReactNode | string, props: Partial<IAlertProps> = {}): Promise<boolean> {
-        return MyAlerter.show(message, props);
+        return MyAlerter && MyAlerter.show(message, props) || Promise.reject('alerter dom not ready');
     }
 }

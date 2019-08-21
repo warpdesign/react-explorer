@@ -47,7 +47,7 @@ const fileTarget: DropTargetSpec<InjectedProps> = {
     }
 };
 
-const collect: DropTargetCollector<any> = (connect: DropTargetConnector, monitor: DropTargetMonitor) => {
+const collect: DropTargetCollector<any, any> = (connect: DropTargetConnector, monitor: DropTargetMonitor) => {
     return {
         connectDropTarget: connect.dropTarget(),
         isOver: monitor.isOver(),
