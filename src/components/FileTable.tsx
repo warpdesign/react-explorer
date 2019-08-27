@@ -169,7 +169,7 @@ export class FileTableClass extends React.Component<IProps, IState> {
         // eg. files have been deleted, or selected item has been renamed,
         // so that using previous scrollTop would hide the selected item
         // if (/*scrollTop !== null && scrollTop > -1*/1) {
-        //     this.tableRef.current.scrollToPosition(this.cache.scrollTop);
+        this.tableRef.current.scrollToPosition(this.cache.scrollTop);
         // }
     }
 
