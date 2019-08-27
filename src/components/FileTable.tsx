@@ -20,12 +20,14 @@ import { ViewState } from '../state/viewState';
 import { debounce } from '../utils/debounce';
 import { TSORT_METHOD_NAME, TSORT_ORDER, getSortMethod } from '../services/FsSort';
 import { getSelectionRange } from '../utils/fileUtils';
+import { throttle } from '../utils/throttle';
 
 require('react-virtualized/styles.css');
 require('../css/filetable.css');
 
 const CLICK_DELAY = 300;
 const SCROLL_DEBOUNCE = 50;
+const ARROW_KEYS_REPEAT_DELAY = 5;
 const ROW_HEIGHT = 28;
 const SIZE_COLUMN_WITDH = 70;
 // this is just some small enough value: column will grow
@@ -51,7 +53,9 @@ enum KEYS {
     Enter = 13,
     Escape = 27,
     Down = 40,
-    Up = 38
+    Up = 38,
+    PageDown = 34,
+    PageUp = 33
 };
 
 interface ITableRow {
@@ -156,9 +160,17 @@ export class FileTableClass extends React.Component<IProps, IState> {
 
     public componentDidUpdate() {
         const scrollTop = this.state.position === -1 ? this.cache.scrollTop : null;
-        if (scrollTop !== null && scrollTop > -1) {
-            this.tableRef.current.scrollToPosition(scrollTop);
+        const viewState = this.injected.viewState;
+        if (!viewState.viewId) {
+            console.log('componentDidUpdate', this.state.position, this.cache.scrollTop, scrollTop);
         }
+
+        // edge case: previous saved scrollTop isn't good anymore
+        // eg. files have been deleted, or selected item has been renamed,
+        // so that using previous scrollTop would hide the selected item
+        // if (/*scrollTop !== null && scrollTop > -1*/1) {
+        //     this.tableRef.current.scrollToPosition(this.cache.scrollTop);
+        // }
     }
 
     renderMenuAccelerators() {
@@ -672,6 +684,32 @@ export class FileTableClass extends React.Component<IProps, IState> {
         }
     }
 
+    scrollPage = throttle((up: boolean) => {
+        const table = this.tableRef.current;
+        const props = this.tableRef.current.props;
+        const headerHeight = props.disableHeader ? 0 : props.headerHeight;
+        const scrollTop = this.cache.scrollTop;
+        // TODO: props.rowHeight may be a function
+        const rowHeight = props.rowHeight as number;
+        const maxHeight = this.state.nodes.length * rowHeight - (props.height - headerHeight);
+
+        let newScrollTop = 0;
+
+        if (!up) {
+            newScrollTop = scrollTop + (props.height - headerHeight);
+            if (newScrollTop > maxHeight) {
+                newScrollTop = maxHeight;
+            }
+        } else {
+            newScrollTop = scrollTop - (props.height - headerHeight);
+            if (newScrollTop < 0) {
+                newScrollTop = 0;
+            }
+        }
+
+        table.scrollToPosition(newScrollTop);
+    }, ARROW_KEYS_REPEAT_DELAY)
+
     onDocKeyDown = (e: KeyboardEvent) => {
         const fileCache = this.cache;
 
@@ -692,6 +730,11 @@ export class FileTableClass extends React.Component<IProps, IState> {
                 this.getElementAndToggleRename(e);
                 break;
 
+            case KEYS.PageDown:
+            case KEYS.PageUp:
+                this.scrollPage(e.keyCode === KEYS.PageUp);
+                break;
+
             case KEYS.Backspace:
                 // TODO: this is used in Log as well, share the code !
                 const { nodes } = this.state;
@@ -708,7 +751,7 @@ export class FileTableClass extends React.Component<IProps, IState> {
         }
     }
 
-    moveSelection(step: number, isShiftDown: boolean) {
+    moveSelection = throttle((step: number, isShiftDown: boolean) => {
         let { position, selected } = this.state;
         let { nodes } = this.state;
 
@@ -728,9 +771,11 @@ export class FileTableClass extends React.Component<IProps, IState> {
             // move in method to reuse
             this.setState({ nodes, selected, position }, () => {
                 this.updateSelection();
+                // test
+                this.tableRef.current.scrollToRow(position);
             });
         }
-    }
+    }, ARROW_KEYS_REPEAT_DELAY)
 
     setTableRef = (element: HTMLElement) => {
         this.gridElement = element && element.querySelector(`.${TABLE_CLASSNAME}`) || null;
@@ -751,6 +796,7 @@ export class FileTableClass extends React.Component<IProps, IState> {
 
     onScroll = debounce(({ scrollTop }: any) => {
         this.cache.scrollTop = scrollTop;
+        console.log('onScroll: updating scrollTop', scrollTop, this.cache.path);
     }, SCROLL_DEBOUNCE);
 
     rowGetter = (index: Index) => this.getRow(index.index);
@@ -775,7 +821,7 @@ export class FileTableClass extends React.Component<IProps, IState> {
                         rowHeight={ROW_HEIGHT}
                         rowGetter={this.rowGetter}
                         rowCount={rowCount}
-                        scrollToIndex={position < 0 ? undefined : position}
+                        // scrollToIndex={position < 0 ? undefined : position}
                         onScroll={this.onScroll}
                         rowRenderer={this.rowRenderer}
                         ref={this.tableRef}
