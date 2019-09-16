@@ -1,8 +1,8 @@
 import { FsApi, File, ICredentials, Fs, filetype, MakeId } from '../Fs';
 import * as fs from 'fs';
 import * as path from 'path';
-import * as mkdir from 'mkdirp';
-import * as del from 'del';
+import mkdir from 'mkdirp';
+import del from 'del';
 import { size } from '../../utils/size';
 import { throttle } from '../../utils/throttle';
 const { Transform } = require('stream');
@@ -57,7 +57,7 @@ export class LocalApi implements FsApi {
             if (isDir) {
                 return resolvedPath;
             } else {
-                throw { code: 'NOT_A_DIR' };
+                throw { code: 'ENOTDIR' };
             }
         })
             .catch((err) => {

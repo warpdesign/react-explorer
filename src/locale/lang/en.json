@@ -184,7 +184,7 @@
             "EHOSTDOWN": "Your internet connection appears to be down :(",
             "530": "Login authentication failed",
             "550": "File unavailable, not found, not accessible",
-            "NOT_A_DIR": "Path entered is not a directory",
+            "ENOTDIR": "Path entered is not a directory",
             "UNKNOWN": "An error has occured",
             "GENERIC": "{{error.message}} (code {{error.code}})",
             "BAD_FILENAME": "File or directory name not valid: '{{entry}}'",

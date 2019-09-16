@@ -184,7 +184,7 @@
             "EHOSTDOWN": "Houston, on a un problème: il n'y a plus d'internet :(",
             "530": "Echec de l'authentification",
             "550": "Fichier non disponible, introuvable ou non accessible.",
-            "NOT_A_DIR": "Le chemin entré ne pointe pas vers un dossier",
+            "ENOTDIR": "Le chemin entré ne pointe pas vers un dossier",
             "UNKNOWN": "Une erreur est survenue",
             "GENERIC": "{{error.message}} (code {{error.code}})",
             "BAD_FILENAME": "Nom de fichier ou dossier non valide: '{{entry}}'",

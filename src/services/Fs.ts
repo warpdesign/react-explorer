@@ -129,7 +129,7 @@ export interface ICredentials {
 }
 
 export function registerFs(fs: Fs): void {
-    console.log('Registring Fs', fs.name);
+    console.log('Registring Fs', fs);
     interfaces.push(fs);
 };
 
