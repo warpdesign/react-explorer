@@ -1,8 +1,8 @@
 import { FsApi, File, ICredentials, Fs, filetype, MakeId } from '../Fs';
 import * as fs from 'fs';
 import * as path from 'path';
-import mkdir from 'mkdirp';
-import del from 'del';
+const mkdir = require('mkdirp');
+const del = require('del');
 import { size } from '../../utils/size';
 import { throttle } from '../../utils/throttle';
 const { Transform } = require('stream');
@@ -79,18 +79,13 @@ export class LocalApi implements FsApi {
         });
     }
 
-    // copy(source: string, files: string[], dest: string): Promise<any> & cp.ProgressEmitter {
-    //     console.log('***', files, dest, source);
-    //     return cp(files, dest, { parents: true, cwd: source });
-    // }
-
     makedir(source: string, dirName: string, transferId = -1): Promise<string> {
         return new Promise((resolve, reject) => {
             const unixPath = path.join(source, dirName).replace(/\\/g, '/');
             try {
                 console.log('mkdir', unixPath);
 
-                mkdir(unixPath, (err) => {
+                mkdir(unixPath, (err: any) => {
                     if (err) {
                         reject(err);
                     } else {

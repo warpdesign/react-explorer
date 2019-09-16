@@ -1,10 +1,11 @@
 import { FsLocal } from './FsLocal';
 
-import { describeUnix, getPath } from '../../utils/test';
+import { describeUnix, getPath, prepareTmpTestFiles } from '../../utils/test';
 
 let localAPI: any;
 
 const HOMEDIR = getPath('home');
+const TESTS_DIR = getPath('tests_dir');
 
 describeUnix('isDirectoryNameValid: unix', function () {
     beforeAll(() => {
@@ -70,8 +71,6 @@ describe('cd', function () {
     });
 
     it('should return resolved path if exists and is a dir', function () {
-        expect.assertions(1);
-
         const dir = localAPI.resolve(__dirname);
 
         expect(dir).toBe(__dirname);
@@ -87,7 +86,93 @@ describe('cd', function () {
 });
 
 describe('size', function () {
-    beforeAll(() => {
+    const SIZE_PATH = `${TESTS_DIR}/sizeTest`;
+
+    beforeAll(async () => {
         localAPI = new FsLocal.API('/', () => { });
+        await prepareTmpTestFiles();
+    });
+
+    it('should return 0 if no files', async () => {
+        expect.assertions(1);
+
+        const size = await localAPI.size(__dirname, []);
+        expect(size).toBe(0);
+    });
+
+    it('should return correct size for 14 bytes file', async () => {
+        expect.assertions(1);
+
+        const size = await localAPI.size(SIZE_PATH, ['14bytes']);
+        expect(size).toBe(14);
+    });
+
+    it('should return correct size for several 14 + 1024 files', async () => {
+        expect.assertions(1);
+
+        const size = await localAPI.size(SIZE_PATH, ['14bytes', '1024bytes']);
+        expect(size).toBe(1038);
+    });
+
+    it('should throw ENOENT if file does not exist', async () => {
+        expect.assertions(1);
+
+        try {
+            await localAPI.size(SIZE_PATH, ['15bytes']);
+        } catch (err) {
+            expect(err.code).toBe('ENOENT');
+        }
+    });
+});
+
+describe('makedir', function () {
+    const MAKEDIR_PATH = `${TESTS_DIR}/makedirTest`;
+
+    beforeAll(async () => {
+        localAPI = new FsLocal.API('/', () => { });
+        await prepareTmpTestFiles();
+    });
+
+    it('should return success if folder already exists', async () => {
+        expect.assertions(1);
+
+        const resolved = await localAPI.makedir(MAKEDIR_PATH, '');
+        expect(resolved).toBe(MAKEDIR_PATH);
+    });
+
+    it('should throw EACCES if source does not exist', async () => {
+        expect.assertions(1);
+
+        try {
+            await localAPI.makedir('/azerty', 'foo');
+        } catch (err) {
+            expect(err.code).toBe('EACCES');
+        }
+    });
+
+    it('should throw EACCES if source is not readable', async () => {
+        expect.assertions(1);
+
+        try {
+            await localAPI.makedir(`${MAKEDIR_PATH}/denied`, 'foo');
+        } catch (err) {
+            expect(err.code).toBe('EACCES');
+        }
+    });
+
+    it('should create a single folder', async () => {
+        expect.assertions(1);
+
+        const resolved = await localAPI.makedir(MAKEDIR_PATH, 'dir1');
+
+        expect(resolved).toBe(`${MAKEDIR_PATH}/dir1`);
+    });
+
+    it('should create several folders', async () => {
+        expect.assertions(1);
+
+        const resolved = await localAPI.makedir(MAKEDIR_PATH, 'dir2/dir3/dir4');
+
+        expect(resolved).toBe(`${MAKEDIR_PATH}/dir2/dir3/dir4`);
     });
 });

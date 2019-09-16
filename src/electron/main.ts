@@ -1,10 +1,10 @@
 import { app, BrowserWindow, ipcMain, ipcRenderer } from 'electron';
-import * as process from 'process';
+const process = require('process');
 import { watch } from 'fs';
-import * as path from 'path';
+const path = require('path');
 import { AppMenu, LocaleString } from './appMenus';
 import { isPackage, isLinux } from '../utils/platform';
-import * as windowStateKeeper from 'electron-window-state';
+const windowStateKeeper = require('electron-window-state');
 
 declare var __dirname: string
 declare var ENV: any;
@@ -51,6 +51,8 @@ const ElectronApp = {
                 this.mainWindow.restore();
             }
         });
+
+        console.log('here');
 
         // when interrupt is received we have to force exit
         process.on('SIGINT', function () {
