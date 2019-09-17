@@ -68,6 +68,7 @@ class Alerter extends React.Component<{}, IAlerterState> {
 
         alertProps.onOpened = this.addEnterListener;
         alertProps.onClosing = this.removeEnterListener;
+        alertProps.className = "data-cy-alert";
 
         return <Alert {...alertProps}>{message}</Alert>;
     }

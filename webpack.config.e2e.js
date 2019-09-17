@@ -12,7 +12,7 @@ const baseConfig = {
     },
     externals: {
         "process": '{process: "foo"}',
-        "electron": '{ipcRenderer: {send: function() {}, on: function() {}}, remote: { app: { getPath: function(str) { return "**ci**"; } } } }',
+        "electron": '{ipcRenderer: {send: function() {}, on: function() {}}, remote: { Menu: { buildFromTemplate: function() { return { popup: function() {}, closePopup: function() { } };}},app: { getLocale: function() { return "en"; }, getPath: function(str) { return "cy_" + str; } } } }',
         "child_process": '{exec: function(str, cb) { cb(); }}',
         "fs": '{}',
         "path": '{}',

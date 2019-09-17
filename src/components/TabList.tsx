@@ -238,7 +238,7 @@ class TabListClass extends React.Component<InjectedProps> {
                         const closeIcon = caches.length > 1 && <Icon iconSize={12} htmlTitle={t('TABS.CLOSE')} className="closetab" intent="warning" onClick={this.closeTab.bind(this, index)} icon="cross"></Icon>;
                         const path = cache.path;
                         const tabIcon = cache.error ? 'issue' : this.getTabIcon(path);
-                        const tabInfo = cache.getFS().displaypath(path);
+                        const tabInfo = cache.getFS() && cache.getFS().displaypath(path) || { fullPath: '', shortPath: '' };
 
                         return (
                             <Button key={"" + viewId + index} onContextMenu={() => this.onContextMenu(index)} onClick={this.selectTab.bind(this, index)} title={tabInfo.fullPath} intent={cache.isVisible ? "primary" : "none"} rightIcon={closeIcon} className="tab"><Icon onContextMenu={this.onFolderContextMenu} className="folder" icon={tabIcon}></Icon>{tabInfo.shortPath}</Button>

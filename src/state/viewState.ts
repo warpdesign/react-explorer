@@ -50,7 +50,7 @@ export class ViewState {
                 previous.isVisible = false;
             }
             next.isVisible = true;
-            if (!next.history.length) {
+            if (!next.history.length && next.path.length) {
                 next.cd(next.path);
             }
         }

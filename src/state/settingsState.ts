@@ -72,7 +72,7 @@ export class SettingsState {
         }
 
         // check we support this language
-        if (i18next.languages.indexOf(lang) < -1) {
+        if (i18next.languages.indexOf(lang) < 0) {
             lang = 'en';
         }
 

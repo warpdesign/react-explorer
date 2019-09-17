@@ -56,7 +56,7 @@ export class StatusbarClass extends React.Component<IProps> {
         const numDirs = fileCache.files.filter((file) => file.fullname !== '..' && file.isDir).length;
         const numFiles = fileCache.files.filter((file) => !file.isDir).length;
         const numSelected = fileCache.selected.length;
-        const iconName = fileCache.getFS().icon as IconName;
+        const iconName = (fileCache.getFS() && fileCache.getFS().icon || 'offline') as IconName;
         const offline = classnames('status-bar', { offline: fileCache.status === 'offline' });
         const { t } = this.props;
 

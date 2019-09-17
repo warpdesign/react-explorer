@@ -103,7 +103,9 @@ export class ToolbarClass extends React.Component<IProps, PathInputState> {
     }
 
     private onSubmit = () => {
+        console.log('onSubmit');
         if (this.cache.path !== this.state.path) {
+            console.log('onSubmit2', this.cache.cd);
             this.input.blur();
             const path = this.state.path;
             this.cache.cd(this.state.path)
@@ -390,9 +392,17 @@ export class ToolbarClass extends React.Component<IProps, PathInputState> {
     public render() {
         const { status, path, isOpen, isDeleteOpen, isTooltipOpen } = this.state;
         const { viewState } = this.injected;
+
         const fileCache = viewState.getVisibleCache();
         const { selected, history, current } = fileCache;
         const { t } = this.props;
+
+        if (fileCache) {
+            console.log('ok', fileCache);
+        } else {
+            console.log('oops', fileCache);
+            debugger;
+        }
 
         const canGoBackward = current > 0;
         const canGoForward = history.length > 1 && current < history.length - 1;
@@ -400,6 +410,7 @@ export class ToolbarClass extends React.Component<IProps, PathInputState> {
         const reloadButton = <Button className="small" onClick={this.onReload} minimal rightIcon="repeat"></Button>;
         const intent = status === -1 ? 'danger' : 'none';
         const count = selected.length;
+
         const isRoot = fileCache.isRoot(fileCache.path);
 
         return (
