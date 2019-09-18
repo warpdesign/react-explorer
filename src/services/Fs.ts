@@ -4,6 +4,8 @@ import { FsSimpleFtp } from './plugins/FsSimpleFtp';
 import { Readable, Writable } from 'stream';
 import { isWin } from '../utils/platform';
 
+declare var ENV: any;
+
 export interface FileID {
     ino: number;
     dev: number;
@@ -170,9 +172,9 @@ export function needsConnection(target: any, key: any, descriptor: any) {
 }
 
 // in test environment, load the generic fs as first one
-// if (ENV.CY) {
-//     registerFs(FsGeneric);
-// }
+if (ENV.CY) {
+    registerFs(FsGeneric);
+}
 registerFs(FsLocal);
 // registerFs(FsFtp);
 // registerFs(FsSimpleFtp);

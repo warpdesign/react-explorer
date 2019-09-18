@@ -135,6 +135,7 @@ export class FileState {
         this.viewId = viewId;
         this.path = path;
         this.getNewFS(path);
+        console.log(`new FileState('${path}'') -> fs = ${this.fs.name}`);
     }
 
     private saveContext() {

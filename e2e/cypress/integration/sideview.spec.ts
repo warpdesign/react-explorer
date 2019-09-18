@@ -7,15 +7,8 @@ interface Window {
 // let win:Window;
 
 describe('sideview initial state', () => {
-    const stubs: any = {
-        cd: []
-    };
-
-    beforeEach(() => {
-        cy.visit('http://127.0.0.1:8080').then((win) => {
-            const views = win.appState.views;
-            cy.log('appState views', views);
-        });
+    before(() => {
+        cy.visit('http://127.0.0.1:8080');
     });
 
     it('left view should be active', () => {
