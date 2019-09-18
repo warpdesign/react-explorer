@@ -83,7 +83,7 @@ export class LocalApi implements FsApi {
         return new Promise((resolve, reject) => {
             const unixPath = path.join(source, dirName).replace(/\\/g, '/');
             try {
-                console.log('mkdir', unixPath);
+                // console.log('mkdir', unixPath);
 
                 mkdir(unixPath, (err: any) => {
                     if (err) {

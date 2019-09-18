@@ -1,8 +1,32 @@
-import { FsLocal } from './plugins/FsLocal';
 import { FsGeneric } from './plugins/FsGeneric';
+import { FsLocal } from './plugins/FsLocal';
+import { FsDtc } from './plugins/FsDtc';
 import { FsSimpleFtp } from './plugins/FsSimpleFtp';
 import { Readable, Writable } from 'stream';
 import { isWin } from '../utils/platform';
+
+debugger;
+console.log('fslocal', FsLocal);
+
+const interfaces: Array<Fs> = new Array();
+
+export interface ICredentials {
+    user?: string;
+    password?: string;
+    port?: number;
+}
+
+export function registerFs(fs: Fs): void {
+    console.log('Registring Fs', fs);
+    interfaces.push(fs);
+};
+
+if ((process && process.env && process.env.NODE_ENV === 'test') || ENV.CY) {
+    console.log('**register generic', FsGeneric);
+    registerFs(FsGeneric);
+} else {
+    registerFs(FsLocal);
+}
 
 declare var ENV: any;
 
@@ -122,19 +146,6 @@ export interface FsApi {
     loginOptions: ICredentials;
 }
 
-const interfaces: Array<Fs> = new Array();
-
-export interface ICredentials {
-    user?: string;
-    password?: string;
-    port?: number;
-}
-
-export function registerFs(fs: Fs): void {
-    console.log('Registring Fs', fs);
-    interfaces.push(fs);
-};
-
 export function getFS(path: string): Fs {
     let newfs = interfaces.find((filesystem) => filesystem.canread(path));
 
@@ -172,9 +183,5 @@ export function needsConnection(target: any, key: any, descriptor: any) {
 }
 
 // in test environment, load the generic fs as first one
-if (ENV.CY) {
-    registerFs(FsGeneric);
-}
-registerFs(FsLocal);
 // registerFs(FsFtp);
 // registerFs(FsSimpleFtp);

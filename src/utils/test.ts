@@ -32,24 +32,24 @@ export const getPath = (id: string) => {
 }
 
 function createEmptyFile(path: string, bytes = 0) {
-    console.log('creating file', path, bytes);
+    // console.log('creating file', path, bytes);
     execSync(`dd if=/dev/zero of=${path} bs=${bytes} count=1`);
 }
 
 // create some test files/directories for testing local fs functions
 // @todo handle windows style separators
 export const prepareTmpTestFiles = async () => {
-    console.log('tmpdir', TEST_FILES_DIR);
+    // console.log('tmpdir', TEST_FILES_DIR);
     const tmpSizeDir = `${TEST_FILES_DIR}/sizeTest`;
     const tmpMakedirDir = `${TEST_FILES_DIR}/makedirTest`
 
     // delete tmpdir if it exits
-    console.log('deleting dir', TEST_FILES_DIR);
+    // console.log('deleting dir', TEST_FILES_DIR);
     // first make this folder readable so that it can be removed
     execSync(`chmod 777 ${tmpMakedirDir}/denied`);
     execSync(`rm -rf ${TEST_FILES_DIR}`);
 
-    console.log('creating dir', TEST_FILES_DIR);
+    // console.log('creating dir', TEST_FILES_DIR);
     // recreate directory
     mkdirSync(TEST_FILES_DIR);
 
