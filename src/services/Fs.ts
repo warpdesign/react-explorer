@@ -1,11 +1,9 @@
 import { FsGeneric } from './plugins/FsGeneric';
 import { FsLocal } from './plugins/FsLocal';
-import { FsDtc } from './plugins/FsDtc';
 import { FsSimpleFtp } from './plugins/FsSimpleFtp';
 import { Readable, Writable } from 'stream';
 import { isWin } from '../utils/platform';
 
-debugger;
 console.log('fslocal', FsLocal);
 
 const interfaces: Array<Fs> = new Array();
@@ -17,7 +15,7 @@ export interface ICredentials {
 }
 
 export function registerFs(fs: Fs): void {
-    console.log('Registring Fs', fs);
+    console.log('Registering Fs', fs);
     interfaces.push(fs);
 };
 

@@ -1,22 +1,6 @@
 [
     {
         "dir": "/",
-        "fullname": "..",
-        "name": "",
-        "extension": "",
-        "cDate": "2018-12-12T10:01:38.212Z",
-        "mDate": "2018-12-12T10:01:38.212Z",
-        "length": 0,
-        "mode": 0,
-        "isDir": true,
-        "readonly": true,
-        "id": {
-            "ino": 1,
-            "dev": 1
-        }
-    },
-    {
-        "dir": "/",
         "fullname": "foo",
         "name": "foo",
         "extension": "",

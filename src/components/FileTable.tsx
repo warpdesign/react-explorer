@@ -37,7 +37,7 @@ const NAME_COLUMN_WIDTH = 10;
 const LABEL_CLASSNAME = 'file-label';
 const TABLE_CLASSNAME = 'ReactVirtualized__Table__Grid';
 
-const TYPE_ICONS: { [key: string]: IconName } = {
+export const TYPE_ICONS: { [key: string]: IconName } = {
     'img': 'media',
     'any': 'document',
     'snd': 'music',
@@ -45,7 +45,8 @@ const TYPE_ICONS: { [key: string]: IconName } = {
     'exe': 'application',
     'arc': 'compressed',
     'doc': 'align-left',
-    'cod': 'code'
+    'cod': 'code',
+    'dir': 'folder-close'
 };
 
 enum KEYS {
@@ -253,7 +254,7 @@ export class FileTableClass extends React.Component<IProps, IState> {
         });
 
         const res: ITableRow = {
-            icon: file.isDir && "folder-close" || (filetype && TYPE_ICONS[filetype] || TYPE_ICONS['any']),
+            icon: file.isDir && TYPE_ICONS['dir'] || (filetype && TYPE_ICONS[filetype] || TYPE_ICONS['any']),
             name: file.fullname,
             nodeData: file,
             className: classes,
