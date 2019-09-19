@@ -2,8 +2,6 @@
 
 interface Window {
     appState: any;
-    foo: any,
-    fooStub: any
 }
 
 describe('toolbar', () => {
@@ -12,8 +10,6 @@ describe('toolbar', () => {
     };
 
     function createStubs() {
-        // console.log('createStubs', window, window.appState.caches);
-        // stub cd/list
         stubs.cd = [];
 
         cy.window().then(win => {

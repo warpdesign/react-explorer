@@ -1,11 +1,5 @@
 /// <reference types="cypress"/>
 
-interface Window {
-    appState: any;
-}
-
-// let win:Window;
-
 describe('sideview initial state', () => {
     before(() => {
         cy.visit('http://127.0.0.1:8080');
