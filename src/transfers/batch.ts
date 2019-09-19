@@ -342,8 +342,8 @@ export class Batch {
         // TODO: avoid endless loop, give up after max tries
         while (exists) {
             const range = getSelectionRange(wantedName);
-            const prefix = wantedName.startsWith('.') ? wantedName : wantedName.substring(range.start, range.length);
-            const suffix = wantedName.startsWith('.') ? '' : wantedName.substring(range.length);
+            const prefix = wantedName.startsWith('.') ? wantedName : wantedName.substring(range.start, range.end);
+            const suffix = wantedName.startsWith('.') ? '' : wantedName.substring(range.end);
 
             newName = prefix + RENAME_SUFFIX + i++ + suffix;
 

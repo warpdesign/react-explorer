@@ -37,7 +37,7 @@ const NAME_COLUMN_WIDTH = 10;
 const LABEL_CLASSNAME = 'file-label';
 const TABLE_CLASSNAME = 'ReactVirtualized__Table__Grid';
 
-export const TYPE_ICONS: { [key: string]: IconName } = {
+const TYPE_ICONS: { [key: string]: IconName } = {
     'img': 'media',
     'any': 'document',
     'snd': 'music',
@@ -521,7 +521,7 @@ export class FileTableClass extends React.Component<IProps, IState> {
         const textNode = this.editingElement.childNodes[0];
 
         range.setStart(textNode, selectionRange.start);
-        range.setEnd(textNode, selectionRange.length);
+        range.setEnd(textNode, selectionRange.end);
         selection.empty();
         selection.addRange(range);
     }
