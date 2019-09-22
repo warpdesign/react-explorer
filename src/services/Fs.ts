@@ -4,7 +4,7 @@ import { FsSimpleFtp } from './plugins/FsSimpleFtp';
 import { Readable, Writable } from 'stream';
 import { isWin } from '../utils/platform';
 
-console.log('fslocal', FsLocal);
+// console.log('fslocal', FsLocal);
 
 const interfaces: Array<Fs> = new Array();
 
@@ -15,12 +15,12 @@ export interface ICredentials {
 }
 
 export function registerFs(fs: Fs): void {
-    console.log('Registering Fs', fs);
+    // console.log('Registering Fs', fs);
     interfaces.push(fs);
 };
 
 if ((process && process.env && process.env.NODE_ENV === 'test') || ENV.CY) {
-    console.log('**register generic', FsGeneric);
+    // console.log('**register generic', FsGeneric);
     registerFs(FsGeneric);
 } else {
     registerFs(FsLocal);

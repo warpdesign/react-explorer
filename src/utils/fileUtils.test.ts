@@ -1,7 +1,7 @@
 import { getSelectionRange, getExtensionIndex } from './fileUtils';
 
 describe('fileUtils', () => {
-    it.only('getSelectionRange: should exclude both extensions for archive.tar.gz', () => {
+    it('getSelectionRange: should exclude both extensions for archive.tar.gz', () => {
         const filename = 'archive.tar.gz';
         const range = getSelectionRange(filename);
         expect(range).toEqual({
@@ -10,16 +10,16 @@ describe('fileUtils', () => {
         });
     });
 
-    it.only('getSelectionRange: should only exclude leading point for .gitignore', () => {
+    it('getSelectionRange: should only exclude leading point for .gitignore', () => {
         const filename = '.gitignore';
         const range = getSelectionRange(filename);
         expect(range).toEqual({
             start: 1,
-            end: 9
+            end: 10
         });
     });
 
-    it.only('getSelectionRange: should select everything if for my_file', () => {
+    it('getSelectionRange: should select everything if for my_file', () => {
         const filename = 'my_file';
         const range = getSelectionRange(filename);
         expect(range).toEqual({

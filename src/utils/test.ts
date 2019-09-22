@@ -1,6 +1,6 @@
 import { isWin } from './platform';
 import { homedir, tmpdir } from 'os';
-import { mkdirSync } from 'fs';
+import { mkdirSync, writeFileSync } from 'fs';
 import { execSync } from 'child_process';
 
 // expects describe to be globally defined: should only be used from test environment
@@ -33,7 +33,7 @@ export const getPath = (id: string) => {
 
 function createEmptyFile(path: string, bytes = 0) {
     // console.log('creating file', path, bytes);
-    execSync(`dd if=/dev/zero of=${path} bs=${bytes} count=1`);
+    writeFileSync(path, Buffer.alloc(bytes));
 }
 
 // create some test files/directories for testing local fs functions
