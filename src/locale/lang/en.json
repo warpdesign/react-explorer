@@ -106,7 +106,8 @@
                 "DELETE": "Delete selected items",
                 "SELECT_ALL": "Select all items",
                 "SELECT_INVERT": "Invert selection",
-                "OPEN_TERMINAL": "Open Terminal in active folder"
+                "OPEN_TERMINAL": "Open Terminal in active folder",
+                "PARENT_DIRECTORY": "Go to parent folder"
             },
             "GROUP": {
                 "ACTIVE_VIEW": "Active file view",

@@ -2,7 +2,7 @@ import { platform } from 'process';
 import { release } from 'os';
 import { remote, app } from 'electron';
 // simulate getPath for test environment
-import { getPath } from '../utils/test';
+import { getPath } from './test-helpers';
 
 declare var ENV: any;
 

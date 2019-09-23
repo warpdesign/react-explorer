@@ -1,6 +1,6 @@
 import { FsLocal } from './FsLocal';
 
-import { describeUnix, getPath, prepareTmpTestFiles } from '../../utils/test';
+import { describeUnix, getPath, prepareTmpTestFiles } from '../../utils/test-helpers';
 
 let localAPI: any;
 

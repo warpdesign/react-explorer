@@ -1,4 +1,4 @@
-import { isWin } from './platform';
+import { isWin, isMac } from './platform';
 import { homedir, tmpdir } from 'os';
 import { mkdirSync, writeFileSync } from 'fs';
 import { execSync } from 'child_process';

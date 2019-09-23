@@ -814,6 +814,7 @@ export class FileTableClass extends React.Component<IProps, IState> {
                         headerClassName="tableHeader"
                         headerHeight={ROW_HEIGHT}
                         height={height}
+                        gridClassName="data-cy-filetable"
                         onRowClick={this.onRowClick}
                         onRowDoubleClick={this.onRowDoubleClick}
                         onHeaderClick={this.onHeaderClick}

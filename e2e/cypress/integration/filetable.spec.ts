@@ -22,12 +22,44 @@ enum KEYS {
     PageUp = 33
 };
 
+const isMac = Cypress.platform === 'darwin';
+
+const MOD_KEY = isMac ? '{meta}' : '{ctrl}';
+
 describe('filetable', () => {
     before(() => {
         cy.visit('http://127.0.0.1:8080');
     });
 
+    beforeEach(() => {
+        createStubs();
+    });
+
     let files: any;
+
+    const stubs: any = {
+        openDirectory: [],
+        openFile: []
+    };
+
+    function createStubs() {
+        stubs.openFile = [];
+        stubs.openDirectory = [];
+        stubs.openParentDirectory = [];
+
+        cy.window().then(win => {
+            const views = win.appState.views;
+            for (let view of views) {
+                for (let cache of view.caches) {
+                    stubs.openFile.push(cy.stub(cache, 'openFile').resolves());
+                    stubs.openDirectory.push(cy.stub(cache, 'openDirectory').resolves());
+                    stubs.openParentDirectory.push(cy.stub(cache, 'openParentDirectory').resolves());
+                    // this will be called but we don't care
+                    cy.stub(cache, 'isRoot').returns(false);
+                }
+            }
+        });
+    }
 
     beforeEach(() => {
         cy.get('#view_0 [data-cy-path]').type('/{enter}').focus().blur();
@@ -69,7 +101,47 @@ describe('filetable', () => {
         });
     });
 
-    describe('keyboard navigation', () => {
+    describe('mouse navigation', () => {
+        it('click on element should select it', () => {
+            cy.get('#view_0 [data-cy-file]:first').click()
+                .should('have.class', 'selected');
+        });
+
+        it('click + shift should remove element from selection if already selected', () => {
+            cy.get('#view_0 [data-cy-file]:first').click()
+                .should('have.class', 'selected');
+
+            cy.get('body').type('{shift}', { release: false })
+                .get('#view_0 [data-cy-file]:first').click()
+                .should('not.have.class', 'selected');
+        });
+
+        it('click + shift should add element to selection if not selected', () => {
+            cy.get('#view_0 [data-cy-file]:first').click()
+                .should('have.class', 'selected');
+
+            cy.get('body').type('{shift}', { release: false })
+                .get('#view_0 [data-cy-file]:eq(1)').click()
+                .should('have.class', 'selected');
+
+            cy.get('#view_0 [data-cy-file]:first')
+                .should('have.class', 'selected');
+        });
+
+        it('click on folder should open directory', () => {
+            cy.get('#view_0 [data-cy-file]:first').dblclick().then(() => {
+                expect(stubs.openDirectory[0]).to.be.called;
+            });
+        });
+
+        it('click on file should open file', () => {
+            cy.get('#view_0 [data-cy-file]:eq(5)').dblclick().then(() => {
+                expect(stubs.openFile[0]).to.be.called;
+            });
+        });
+    });
+
+    describe.only('keyboard navigation', () => {
         it('arrow down should select the next element', () => {
             // one press: select the first one
             cy.get('#view_0').trigger('keydown', { keyCode: KEYS.Down })
@@ -157,6 +229,33 @@ describe('filetable', () => {
 
             // it's the only one that's selected
             cy.get('#view_0 [data-cy-file].selected').its('length').should('be', 1);
+        });
+
+        it('mod + o should open folder if folder is selected', () => {
+            cy.get('#view_0 [data-cy-file]').first().click()
+            cy.get('body').type(`${MOD_KEY}o`).then(() => {
+                expect(stubs.openDirectory[0]).to.be.called;
+            });
+        });
+
+        it('mod + o should open file if file is selected', () => {
+            cy.get('#view_0 [data-cy-file]').eq(5).click()
+            cy.get('body').type(`${MOD_KEY}o`).then(() => {
+                expect(stubs.openFile[0]).to.be.called;
+            });
+        });
+
+        it('mod + o should open file if file is selected', () => {
+            cy.get('#view_0 [data-cy-file]').eq(5).click()
+            cy.get('body').type(`${MOD_KEY}o`).then(() => {
+                expect(stubs.openFile[0]).to.be.called;
+            });
+        });
+
+        it('backspace should open parent directory', () => {
+            cy.get('body').type('{backspace}').then(() => {
+                expect(stubs.openParentDirectory[0]).to.be.called;
+            });
         });
     });
 
