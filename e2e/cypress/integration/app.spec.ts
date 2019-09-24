@@ -33,7 +33,7 @@ describe('app shortcuts', () => {
         cy.get('@navHistory').should('be.calledWithExactly', 1);
     });
 
-    it.only('changing settingsState.lang should change UI language', () => {
+    it('changing settingsState.lang should update UI language', () => {
         cy.window().then(win => {
             const currentLanguage = win.settingsState.lang;
             win.settingsState.setLanguage(currentLanguage === 'en' ? 'fr' : 'en');
