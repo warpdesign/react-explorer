@@ -1,7 +1,7 @@
 import { observable, action, runInAction } from "mobx";
 import { FsApi, Fs, getFS, File, ICredentials, needsConnection, FileID } from "../services/Fs";
 import { Deferred } from '../utils/deferred';
-import i18next from '../locale/i18n';
+import { i18next } from '../locale/i18n';
 import { getLocalizedError } from '../locale/error';
 import { shell, ipcRenderer } from 'electron';
 import * as process from 'process';

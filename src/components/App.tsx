@@ -11,7 +11,7 @@ import { Badge } from "./Badge";
 import { ipcRenderer } from "electron";
 import { withNamespaces, WithNamespaces, Trans } from 'react-i18next';
 import { AppToaster } from "./AppToaster";
-import i18next from '../locale/i18n';
+import { i18next } from '../locale/i18n';
 import { FileState } from "../state/fileState";
 import { SettingsState } from "../state/settingsState";
 import { PrefsDialog } from "./dialogs/PrefsDialog";

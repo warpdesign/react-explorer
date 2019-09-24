@@ -37,4 +37,4 @@ i18next.on('languageChanged', () => {
     ipcRenderer.send('languageChanged', i18next.t('APP_MENUS', { returnObjects: true }));
 });
 
-export default i18next;
+export { i18next };

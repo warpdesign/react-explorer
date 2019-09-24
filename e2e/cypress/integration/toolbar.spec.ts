@@ -91,8 +91,4 @@ describe('toolbar', () => {
                 expect(stubs.reload[0]).to.be.called;
             });
     });
-
-    it('path buttons should be disabled if cache is busy', () => {
-
-    });
 });
