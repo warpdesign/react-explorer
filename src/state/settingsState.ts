@@ -1,6 +1,5 @@
 import { observable, action } from "mobx";
 import { remote } from 'electron';
-import { platform } from 'process';
 import { JSObject } from "../components/Log";
 import i18next from '../locale/i18n';
 import { isMojave, isWin, isMac, defaultFolder } from '../utils/platform';
@@ -50,7 +49,8 @@ export class SettingsState {
     }
 
     installListeners() {
-        if (isMojave) {
+        // systemPreferences may not be defined if running outside of Electron
+        if (isMojave && systemPreferences) {
             systemPreferences.subscribeNotification(
                 'AppleInterfaceThemeChangedNotification',
                 () => this.setActiveTheme()
@@ -72,7 +72,7 @@ export class SettingsState {
         }
 
         // check we support this language
-        if (i18next.languages.indexOf(lang) < -1) {
+        if (i18next.languages.indexOf(lang) < 0) {
             lang = 'en';
         }
 
@@ -158,7 +158,7 @@ export class SettingsState {
         }
 
         if (this.darkMode === 'auto') {
-            this.isDarkModeActive = isMojave ? systemPreferences.isDarkMode() : false;
+            this.isDarkModeActive = (isMojave && systemPreferences) ? systemPreferences.isDarkMode() : false;
         } else {
             this.isDarkModeActive = this.darkMode;
         }

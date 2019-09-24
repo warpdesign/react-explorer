@@ -1,14 +1,17 @@
 import { platform } from 'process';
 import { release } from 'os';
 import { remote, app } from 'electron';
-
-declare var ENV: any;
+// simulate getPath for test environment
+import { getPath } from './test-helpers';
 
 const META_KEY = 91;
 const CTRL_KEY = 17;
-const appInstance = app || remote.app;
+// test environement doesn't have access to app
+const appInstance = app || remote && remote.app || {
+    getPath
+};
 
-export const isPackage = process.mainModule.filename.indexOf('app.asar') > -1;
+export const isPackage = process.mainModule && process.mainModule.filename.indexOf('app.asar') > -1;
 export const isMac = platform === 'darwin';
 export const isMojave = isMac && ((parseInt(release().split('.')[0], 10) - 4) >= 14);
 export const isWin = platform === 'win32';
@@ -16,7 +19,8 @@ export const isLinux = platform === 'linux';
 export const metaKeyCode = isMac && META_KEY || CTRL_KEY;
 export const lineEnding = isWin ? '\r\n' : '\n';
 // Folders
-export const defaultFolder = ENV.NODE_ENV === 'production' ? appInstance.getPath('home') : (platform === "win32" ? appInstance.getPath('temp') : '/tmp/react-explorer');
+// export const defaultFolder = ENV.NODE_ENV === 'production' ? appInstance.getPath('home') : (platform === "win32" ? appInstance.getPath('temp') : '/tmp/react-explorer');
+export const defaultFolder = '';
 export const TMP_DIR = appInstance.getPath('temp');
 export const HOME_DIR = appInstance.getPath('home');
 export const DOWNLOADS_DIR = appInstance.getPath('downloads');

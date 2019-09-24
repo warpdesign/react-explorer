@@ -62,8 +62,8 @@ export function getLocalizedError(error: any) {
             niceError.message = i18next.t('ERRORS.EHOSTDOWN');
             break;
 
-        case 'NOT_A_DIR':
-            niceError.message = i18next.t('ERRORS.NOT_A_DIR');
+        case 'ENOTDIR':
+            niceError.message = i18next.t('ERRORS.ENOTDIR');
             break;
 
         case 'NODEST':

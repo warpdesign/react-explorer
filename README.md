@@ -83,6 +83,48 @@ Adding a new language to React-Explorer is easy: simply duplicate one of the fil
 
 The new file should have the name `code.json` where code is a valid language code, for example: `ja.json` to add support for Japanese.
 
+## Tests
+
+### Unit testing
+
+React-Explorer has both unit tests (using Jest) and end to end tests (using Cypress).
+
+To run unit tests simply type:
+
+```shell
+npm test
+```
+
+This will start Jest and run every spec files found in src. Every test file can be found next to the component it is testing.
+
+### End to End testing
+
+End to end tests are using Cypress and are in the separate `e2e` directory.
+
+Since end to end tests need to run Electron-Explorer outside of Electron, a special build needs to be created that stubs some Electron APIs. To create this build, simply type:
+
+```shell
+npm run build:e2e
+```
+
+This will create a new Electron-Explorer in the `build-e2e` directory.
+
+For React-Explorer to run without Electron, a local webserver needs to be started before running the tests:
+
+```shell
+npm run server
+```
+
+Then type `cd e2e && npm install` to install Cypress dependencies (this only needs to be run once).
+
+Now, simply type:
+
+```shell
+npm run cypress
+```
+
+This brings up the cypress interface from where you can run end to end tests.
+
 ## How to develop a new Plugin
 
 React-Explorer has been written so that it can easily be extended using plugins.

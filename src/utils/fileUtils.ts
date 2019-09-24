@@ -4,10 +4,10 @@ export const REGEX_EXTENSION = /\.(?=[^0-9])/;
 
 export interface SelectionRange {
     start: number;
-    length: number;
+    end: number;
 }
 
-function getExtensionIndex(filename: string): number {
+export function getExtensionIndex(filename: string): number {
     let index = -1;
     for (let ext of Object.keys(Extensions)) {
         const matches = filename.match(Extensions[ext]);
@@ -25,19 +25,19 @@ export function getSelectionRange(filename: string): SelectionRange {
     if (filename.startsWith('.')) {
         return {
             start: 1,
-            length: length
+            end: length
         };
     } else {
         const index = getExtensionIndex(filename);
         if (index > -1) {
             return {
                 start: 0,
-                length: index
+                end: index
             };
         } else {
             return {
                 start: 0,
-                length: length
+                end: length
             };
         }
     }

@@ -1,8 +1,8 @@
 import { FsApi, File, ICredentials, Fs, filetype, MakeId } from '../Fs';
 import * as fs from 'fs';
 import * as path from 'path';
-import * as mkdir from 'mkdirp';
-import * as del from 'del';
+const mkdir = require('mkdirp');
+const del = require('del');
 import { size } from '../../utils/size';
 import { throttle } from '../../utils/throttle';
 const { Transform } = require('stream');
@@ -57,7 +57,7 @@ export class LocalApi implements FsApi {
             if (isDir) {
                 return resolvedPath;
             } else {
-                throw { code: 'NOT_A_DIR' };
+                throw { code: 'ENOTDIR' };
             }
         })
             .catch((err) => {
@@ -79,18 +79,13 @@ export class LocalApi implements FsApi {
         });
     }
 
-    // copy(source: string, files: string[], dest: string): Promise<any> & cp.ProgressEmitter {
-    //     console.log('***', files, dest, source);
-    //     return cp(files, dest, { parents: true, cwd: source });
-    // }
-
     makedir(source: string, dirName: string, transferId = -1): Promise<string> {
         return new Promise((resolve, reject) => {
             const unixPath = path.join(source, dirName).replace(/\\/g, '/');
             try {
-                console.log('mkdir', unixPath);
+                // console.log('mkdir', unixPath);
 
-                mkdir(unixPath, (err) => {
+                mkdir(unixPath, (err: any) => {
                     if (err) {
                         reject(err);
                     } else {
@@ -112,6 +107,7 @@ export class LocalApi implements FsApi {
                 const deleted = await del(toDelete, { force: true, noGlob: true });
                 resolve(deleted.length);
             } catch (err) {
+                console.log('error delete', err);
                 reject(err);
             }
         });

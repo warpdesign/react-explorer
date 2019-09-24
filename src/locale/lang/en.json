@@ -106,7 +106,8 @@
                 "DELETE": "Delete selected items",
                 "SELECT_ALL": "Select all items",
                 "SELECT_INVERT": "Invert selection",
-                "OPEN_TERMINAL": "Open Terminal in active folder"
+                "OPEN_TERMINAL": "Open Terminal in active folder",
+                "PARENT_DIRECTORY": "Go to parent folder"
             },
             "GROUP": {
                 "ACTIVE_VIEW": "Active file view",
@@ -184,7 +185,7 @@
             "EHOSTDOWN": "Your internet connection appears to be down :(",
             "530": "Login authentication failed",
             "550": "File unavailable, not found, not accessible",
-            "NOT_A_DIR": "Path entered is not a directory",
+            "ENOTDIR": "Path entered is not a directory",
             "UNKNOWN": "An error has occured",
             "GENERIC": "{{error.message}} (code {{error.code}})",
             "BAD_FILENAME": "File or directory name not valid: '{{entry}}'",

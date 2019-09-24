@@ -135,6 +135,8 @@ export class FileState {
         this.viewId = viewId;
         this.path = path;
         this.getNewFS(path);
+        console.log('this.fs', this.fs);
+        // console.log(`new FileState('${path}'') -> fs = ${this.fs.name}`);
     }
 
     private saveContext() {
@@ -219,6 +221,9 @@ export class FileState {
 
     @action
     waitForConnection() {
+        if (!this.api) {
+            debugger;
+        }
         if (!this.api.isConnected()) {
             this.loginDefer = new Deferred();
 
@@ -271,6 +276,14 @@ export class FileState {
     @action
     clearSelection() {
         this.selected.clear();
+    }
+
+    @action
+    reset() {
+        this.clearSelection();
+        this.scrollTop = -1;
+        this.selectedId = null;
+        this.editingId = null;
     }
 
     @action
@@ -367,7 +380,7 @@ export class FileState {
     @action
     async cd(path: string, path2: string = '', skipHistory = false, skipContext = false): Promise<string> {
         // first updates fs (eg. was local fs, is now ftp)
-        // console.log('cd', path, this.path);
+        console.log('fileState: cd', path, this.path);
         if (this.path !== path) {
             if (this.getNewFS(path, skipContext)) {
                 this.server = this.fs.serverpart(path);
@@ -550,6 +563,6 @@ export class FileState {
     }
 
     isRoot(path: string): boolean {
-        return this.api.isRoot(path);
+        return this.api ? this.api.isRoot(path) : false;
     }
 }

@@ -45,10 +45,10 @@ function createPreview(size: number, isDarkModeActive: boolean) {
         paddingBottom: 7,
         paddingLeft: 10
     }, {
-            backgroundColor: isDarkModeActive ? 'rgba(92, 112, 128, 0.3)' : 'rgba(191, 204, 214, 0.4)',
-            color: isDarkModeActive ? '#f5f8fa' : '#182026',
-            borderColor: 'rgba(0,0,0,0)'
-        }));
+        backgroundColor: isDarkModeActive ? 'rgba(92, 112, 128, 0.3)' : 'rgba(191, 204, 214, 0.4)',
+        color: isDarkModeActive ? '#f5f8fa' : '#182026',
+        borderColor: 'rgba(0,0,0,0)'
+    }));
 }
 
 interface RowRendererParams {
@@ -132,6 +132,7 @@ export function RowRendererFn({
         connectDragSource(<div
             {...a11yProps}
             className={className}
+            data-cy-file
             key={key}
             role="row"
             style={style}>

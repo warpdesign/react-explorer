@@ -12,7 +12,8 @@
             "dom"
         ],
         "experimentalDecorators": true,
-        "resolveJsonModule": true
+        "resolveJsonModule": true,
+        "esModuleInterop": true
     },
     "include": [
         "./src/**/*"
