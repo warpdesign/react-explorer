@@ -11,7 +11,7 @@ import { Badge } from "./Badge";
 import { ipcRenderer } from "electron";
 import { withNamespaces, WithNamespaces, Trans } from 'react-i18next';
 import { AppToaster } from "./AppToaster";
-import i18next from '../locale/i18n';
+import { i18next } from '../locale/i18n';
 import { FileState } from "../state/fileState";
 import { SettingsState } from "../state/settingsState";
 import { PrefsDialog } from "./dialogs/PrefsDialog";
@@ -49,6 +49,7 @@ declare var ENV: any;
 declare global {
     interface Window {
         appState: AppState;
+        settingsState: SettingsState
     }
 }
 
@@ -89,6 +90,7 @@ class App extends React.Component<WithNamespaces, IState> {
 
         if (ENV.CY) {
             window.appState = this.appState;
+            window.settingsState = settingsState;
         }
 
         Logger.success(`React-Explorer ${ENV.VERSION} - CY: ${ENV.CY} - NODE_ENV: ${ENV.NODE_ENV} - lang: ${i18next.language}`);
@@ -249,7 +251,9 @@ class App extends React.Component<WithNamespaces, IState> {
     componentDidUpdate() {
         const progress = this.appState.pendingTransfers && this.appState.totalTransferProgress || -1;
         this.setDarkTheme();
-        remote.getCurrentWindow().setProgressBar(progress);
+        if (!ENV.CY) {
+            remote.getCurrentWindow().setProgressBar(progress);
+        }
     }
 
     onExitDialogClose = (valid: boolean) => {
@@ -690,7 +694,7 @@ class App extends React.Component<WithNamespaces, IState> {
                         <Navbar.Group align={Alignment.LEFT}>
                             <Navbar.Heading>{t('APP_MENUS.ABOUT_TITLE')}</Navbar.Heading>
                             <Navbar.Divider />
-                            <Button className={Classes.MINIMAL} icon="home" text={t('NAV.EXPLORER')} onClick={this.navClick} intent={isExplorer ? Intent.PRIMARY : 'none'} />
+                            <Button className={`${Classes.MINIMAL} data-cy-explorer-tab`} icon="home" text={t('NAV.EXPLORER')} onClick={this.navClick} intent={isExplorer ? Intent.PRIMARY : 'none'} />
                             <Button style={{ position: 'relative' }} className={downloadClass} icon="download" onClick={this.navClick} intent={!isExplorer ? Intent.PRIMARY : 'none'}>{t('NAV.TRANSFERS')}<Badge intent="none" text={badgeText} progress={badgeProgress} /></Button>
                         </Navbar.Group>
                         <Navbar.Group align={Alignment.RIGHT}>

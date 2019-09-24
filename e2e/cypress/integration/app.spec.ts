@@ -1,5 +1,10 @@
 /// <reference types="cypress"/>
 
+interface Window {
+    appState: any;
+    settingsState: any;
+}
+
 describe('app shortcuts', () => {
     before(() => {
         cy.visit('http://127.0.0.1:8080');
@@ -26,5 +31,13 @@ describe('app shortcuts', () => {
         const key = Cypress.platform === 'darwin' ? '{meta}{rightarrow}' : '{alt}{rightarrow}';
         cy.get('body').type(key);
         cy.get('@navHistory').should('be.calledWithExactly', 1);
+    });
+
+    it('changing settingsState.lang should update UI language', () => {
+        cy.window().then(win => {
+            const currentLanguage = win.settingsState.lang;
+            win.settingsState.setLanguage(currentLanguage === 'en' ? 'fr' : 'en');
+            cy.get('.data-cy-explorer-tab').should('contain', currentLanguage === 'en' ? 'Explorateur' : 'Explorer');
+        });
     });
 });

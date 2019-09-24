@@ -1,4 +1,4 @@
-import i18next from './i18n';
+import { i18next } from './i18n';
 import { isWin } from '../utils/platform';
 
 export function getLocalizedError(error: any) {

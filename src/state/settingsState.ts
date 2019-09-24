@@ -1,7 +1,7 @@
 import { observable, action } from "mobx";
 import { remote } from 'electron';
 import { JSObject } from "../components/Log";
-import i18next from '../locale/i18n';
+import { i18next } from '../locale/i18n';
 import { isMojave, isWin, isMac, defaultFolder } from '../utils/platform';
 
 const { systemPreferences } = remote;
@@ -71,17 +71,20 @@ export class SettingsState {
             lang = remote.app.getLocale();
         }
 
-        // check we support this language
-        if (i18next.languages.indexOf(lang) < 0) {
-            lang = 'en';
-        }
+        // Note: it seems i18next may not always
+        // have cached all languages, even though it will correctly work.
+        // Comment this out for now since it prevents locale other than English
+        // from working
+        // if (i18next.languages.indexOf(lang) < 0) {
+        //     lang = 'en';
+        // }
 
         // finally set requested language
         i18next.changeLanguage(lang);
 
-        console.log('setting language to', lang);
+        console.log('setting language to', i18next.language);
 
-        this.lang = askedLang;
+        this.lang = i18next.language;
     }
 
     @action

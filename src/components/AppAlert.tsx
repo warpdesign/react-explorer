@@ -3,7 +3,7 @@ import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import { Alert, IAlertProps } from '@blueprintjs/core';
 import { Deferred } from '../utils/deferred';
-import i18next from '../locale/i18n';
+import { i18next } from '../locale/i18n';
 
 type Message = React.ReactNode | string;
 

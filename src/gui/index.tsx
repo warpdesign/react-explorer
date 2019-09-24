@@ -3,7 +3,7 @@ import * as ReactDOM from "react-dom";
 import DevTools from 'mobx-react-devtools';
 import { ReactApp } from "../components/App";
 import { I18nextProvider } from 'react-i18next';
-import i18next from '../locale/i18n';
+import { i18next } from '../locale/i18n';
 import { SettingsState } from "../state/settingsState";
 import { Provider } from "mobx-react";
 import { DragDropContextProvider } from 'react-dnd';

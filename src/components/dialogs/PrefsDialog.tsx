@@ -219,6 +219,7 @@ class PrefsDialogClass extends React.Component<IPrefsProps, IState>{
         return (
             <Dialog
                 icon="cog"
+                className="data-cy-prefs-dialog"
                 title={t('DIALOG.PREFS.TITLE')}
                 isOpen={this.props.isOpen}
                 autoFocus={true}
@@ -234,6 +235,7 @@ class PrefsDialogClass extends React.Component<IPrefsProps, IState>{
                     >
                         <LanguageSelect filterable={false} activeItem={selectedLanguage} items={languageItems} itemRenderer={this.renderLanguageItem} onItemSelect={this.onLanguageSelect}>
                             <Button
+                                className="data-cy-language-select"
                                 icon="flag"
                                 rightIcon="caret-down"
                                 text={`${selectedLanguage.lang}`}
@@ -307,7 +309,7 @@ class PrefsDialogClass extends React.Component<IPrefsProps, IState>{
                 </div>
                 <div className={Classes.DIALOG_FOOTER}>
                     <div className={Classes.DIALOG_FOOTER_ACTIONS}>
-                        <Button onClick={this.cancelClose}>
+                        <Button onClick={this.cancelClose} className="data-cy-close">
                             {t('COMMON.CLOSE')}
                         </Button>
                     </div>
