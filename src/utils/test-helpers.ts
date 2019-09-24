@@ -31,9 +31,11 @@ export const getPath = (id: string) => {
     }
 }
 
-function createEmptyFile(path: string, bytes = 0) {
+function createEmptyFile(path: string, bytes = 0, mode = 0o777) {
     // console.log('creating file', path, bytes);
-    writeFileSync(path, Buffer.alloc(bytes));
+    writeFileSync(path, Buffer.alloc(bytes), {
+        mode
+    });
 }
 
 // create some test files/directories for testing local fs functions
@@ -43,12 +45,21 @@ export const prepareTmpTestFiles = () => {
         // console.log('tmpdir', TEST_FILES_DIR);
         const tmpSizeDir = `${TEST_FILES_DIR}/sizeTest`;
         const tmpMakedirDir = `${TEST_FILES_DIR}/makedirTest`
+        const tmpDeleteDir = `${TEST_FILES_DIR}/deleteTest`
 
         // delete tmpdir if it exits
         // console.log('deleting dir', TEST_FILES_DIR);
         // first make this folder readable so that it can be removed
         if (existsSync(`${tmpMakedirDir}/denied`)) {
             execSync(`chmod 777 ${tmpMakedirDir}/denied`);
+        }
+
+        if (existsSync(`${tmpDeleteDir}/folder_denied`)) {
+            execSync(`chmod 777 ${tmpDeleteDir}/folder_denied`);
+        }
+
+        if (existsSync(`${tmpDeleteDir}/file_denied`)) {
+            execSync(`chmod 777 ${tmpDeleteDir}/file_denied`);
         }
 
         if (existsSync(TEST_FILES_DIR)) {
@@ -67,6 +78,16 @@ export const prepareTmpTestFiles = () => {
         // makedir test
         mkdirSync(tmpMakedirDir);
         mkdirSync(`${tmpMakedirDir}/denied`, 0o000);
+
+        // delete test
+        mkdirSync(tmpDeleteDir);
+        mkdirSync(`${tmpDeleteDir}/folder_denied`, 0o000);
+
+        mkdirSync(`${tmpDeleteDir}/single_folder`);
+        mkdirSync(`${tmpDeleteDir}/multiple_folder`);
+
+        createEmptyFile(`${tmpDeleteDir}/file`, 1024);
+        createEmptyFile(`${tmpDeleteDir}/file_denied`, 1024, 0o000);
 
         resolve();
     });

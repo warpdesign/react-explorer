@@ -49,13 +49,13 @@ describe('toolbar', () => {
         cy.get('#view_1 [data-cy-paste-bt]').should('be.disabled');
     });
 
-    it('enter path and enter calls cd', () => {
+    it('type path and enter calls cd', () => {
         cy.get('#view_0 [data-cy-path]').type('/{enter}').then(() => {
             expect(stubs.cd[0]).to.be.called;
         });
     });
 
-    it('enter path and escape clears path with previous value', () => {
+    it('type path and escape clears path with previous value', () => {
         cy.get('#view_0 [data-cy-path]')
             .type('/var{esc}')
             .should('have.value', '').should(() => {
@@ -63,13 +63,20 @@ describe('toolbar', () => {
             });
     });
 
-    it('enter non valid path should show alert then focus input', () => {
+    it('type non valid path should show alert then focus input', () => {
         cy.get('#view_0 [data-cy-path]')
             .type(':{enter}');
 
         cy.get('.data-cy-alert').should('be.visible').find('.bp3-button').click().then(() => {
             cy.get('#view_0 [data-cy-path]').should('have.value', ':');
             expect(stubs.cd[0]).to.be.called;
+        });
+    });
+
+    it('path should get updated when fileState is updated', () => {
+        cy.window().then(win => {
+            win.appState.views[0].caches[0].updatePath('/newPath');
+            cy.get('#view_0 [data-cy-path]').should('have.value', '/newPath');
         });
     });
 });

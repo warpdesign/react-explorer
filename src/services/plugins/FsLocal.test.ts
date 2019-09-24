@@ -175,3 +175,48 @@ describe('makedir', function () {
         expect(resolved).toBe(`${MAKEDIR_PATH}/dir2/dir3/dir4`);
     });
 });
+
+describe.only('delete', function () {
+    const DELETE_PATH = `${TESTS_DIR}/deleteTest`;
+
+    beforeAll(() => {
+        localAPI = new FsLocal.API('/', () => { });
+        return prepareTmpTestFiles();
+    });
+
+    // it('should resolve if file/folder does not exist', async () => {
+    //     expect.assertions(1);
+
+    //     const deleted = await localAPI.delete(`${DELETE_PATH}`, [{
+    //         fullname: 'not_here'
+    //     }]);
+
+    //     expect(deleted).toBe(1);
+    // });
+
+    // it.only('should throw EACCESS if file/folder is write protected', async () => {
+    //     expect.assertions(1);
+
+    //     const deleted = await localAPI.delete(`${DELETE_PATH}`, [{
+    //         fullname: 'file_denied'
+    //     }]);
+
+    //     expect(deleted).toBe(2);
+    // });
+
+    it('should delete single file and resolve if success', () => {
+
+    });
+
+    it('should delete empty folder and resolve if success', () => {
+
+    });
+
+    it('should delete not empty folder and resolve if success', () => {
+
+    });
+
+    it('should delete not empty folder + files and resolve', () => {
+
+    });
+})

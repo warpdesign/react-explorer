@@ -107,6 +107,7 @@ export class LocalApi implements FsApi {
                 const deleted = await del(toDelete, { force: true, noGlob: true });
                 resolve(deleted.length);
             } catch (err) {
+                console.log('error delete', err);
                 reject(err);
             }
         });
