@@ -4,6 +4,8 @@ const CopyPlugin = require('copy-webpack-plugin');
 const webpack = require('webpack');
 const packageJson = require('./package.json');
 const gitHash = require('./scripts/hash');
+const platform = require('process').platform;
+const release = require('os').release();
 
 const baseConfig = {
     output: {
@@ -11,7 +13,8 @@ const baseConfig = {
         filename: '[name].js'
     },
     externals: {
-        "process": '{process: "foo"}',
+        "os": `{release: function() { return "${release}"}, tmpdir: function() { return "/tmpdir" }, homedir: function() { return "/homedir" }}`,
+        "process": `{process: "foo", platform: "${platform}"}`,
         "electron": '{ipcRenderer: {send: function() {}, on: function() {}}, remote: { Menu: { buildFromTemplate: function() { return { popup: function() {}, closePopup: function() { } };}},app: { getLocale: function() { return "en"; }, getPath: function(str) { return "cy_" + str; } } } }',
         "child_process": '{exec: function(str, cb) { cb(); }}',
         "fs": '{}',

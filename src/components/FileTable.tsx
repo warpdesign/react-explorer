@@ -22,6 +22,8 @@ import { TSORT_METHOD_NAME, TSORT_ORDER, getSortMethod } from '../services/FsSor
 import { getSelectionRange } from '../utils/fileUtils';
 import { throttle } from '../utils/throttle';
 
+declare var ENV: any;
+
 require('react-virtualized/styles.css');
 require('../css/filetable.css');
 
@@ -199,7 +201,7 @@ export class FileTableClass extends React.Component<IProps, IState> {
                 onKeyDown={this.onOpenFile}
                 group={t('SHORTCUT.GROUP.ACTIVE_VIEW')}>
             </Hotkey>
-            {!isMac && (<Hotkey
+            {(!isMac || ENV.CY) && (<Hotkey
                 global={true}
                 combo="mod + a"
                 label={t('SHORTCUT.ACTIVE_VIEW.SELECT_ALL')}
@@ -515,7 +517,6 @@ export class FileTableClass extends React.Component<IProps, IState> {
     selectLeftPart() {
         const filename = this.editingFile.fullname;
         const selectionRange = getSelectionRange(filename);
-        // const selectionLength = filename.split(REGEX_EXTENSION)[0].length;
         const selection = window.getSelection();
         const range = document.createRange();
         const textNode = this.editingElement.childNodes[0];
@@ -568,8 +569,6 @@ export class FileTableClass extends React.Component<IProps, IState> {
 
         try {
             if (!file.isDir) {
-                // await this.cache.openFile(file);
-                // await appState.getFile(file);
                 await this.cache.openFile(appState, this.cache, file);
             } else {
                 const isShiftDown = event.shiftKey;
@@ -592,6 +591,7 @@ export class FileTableClass extends React.Component<IProps, IState> {
 
         if (nodes.length && this.isViewActive()) {
             selected = 0;
+            position = -1;
 
             let i = 0;
             for (let node of nodes) {
@@ -615,12 +615,6 @@ export class FileTableClass extends React.Component<IProps, IState> {
 
         if (this.isViewActive() && position > -1) {
             const file = nodes[position].nodeData as File;
-            // this.cache.openFile(file).catch((error) => {
-            //     const { t } = this.injected;
-            //     AppAlert.show(t('ERRORS.GENERIC', { error }), {
-            //         intent: 'danger'
-            //     });
-            // })
             this.openFileOrDirectory(file, e);
         }
     }

@@ -279,6 +279,14 @@ export class FileState {
     }
 
     @action
+    reset() {
+        this.clearSelection();
+        this.scrollTop = -1;
+        this.selectedId = null;
+        this.editingId = null;
+    }
+
+    @action
     setSort(sortMethod: TSORT_METHOD_NAME, sortOrder: TSORT_ORDER) {
         this.sortMethod = sortMethod;
         this.sortOrder = sortOrder;

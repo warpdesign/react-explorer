@@ -379,12 +379,6 @@ class App extends React.Component<WithNamespaces, IState> {
             />)}
             <Hotkey
                 global={true}
-                combo="alt + right"
-                label={t('SHORTCUT.ACTIVE_VIEW.FORWARD_HISTORY')}
-                onKeyDown={this.forwardHistory}
-            />
-            <Hotkey
-                global={true}
                 combo="alt + mod + i"
                 label={t('SHORTCUT.OPEN_DEVTOOLS')}
                 onKeyDown={this.openDevTools}

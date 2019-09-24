@@ -4,8 +4,6 @@ import { remote, app } from 'electron';
 // simulate getPath for test environment
 import { getPath } from './test-helpers';
 
-declare var ENV: any;
-
 const META_KEY = 91;
 const CTRL_KEY = 17;
 // test environement doesn't have access to app
