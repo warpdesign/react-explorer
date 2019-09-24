@@ -1,6 +1,6 @@
 /// <reference types="cypress"/>
 
-describe.only('app shortcuts', () => {
+describe('app shortcuts', () => {
     before(() => {
         cy.visit('http://127.0.0.1:8080');
     });

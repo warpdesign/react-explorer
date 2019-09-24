@@ -32,7 +32,6 @@ describeUnix('isDirectoryNameValid: unix', function () {
 });
 
 // @todo add Windows specific tests for isDirectoryNameValid
-
 describe('resolve', function () {
     beforeAll(() => {
         localAPI = new FsLocal.API('/', () => { });
@@ -88,9 +87,9 @@ describe('cd', function () {
 describe('size', function () {
     const SIZE_PATH = `${TESTS_DIR}/sizeTest`;
 
-    beforeAll(async () => {
+    beforeAll(() => {
         localAPI = new FsLocal.API('/', () => { });
-        await prepareTmpTestFiles();
+        return prepareTmpTestFiles();
     });
 
     it('should return 0 if no files', async () => {
@@ -128,9 +127,9 @@ describe('size', function () {
 describe('makedir', function () {
     const MAKEDIR_PATH = `${TESTS_DIR}/makedirTest`;
 
-    beforeAll(async () => {
+    beforeAll(() => {
         localAPI = new FsLocal.API('/', () => { });
-        await prepareTmpTestFiles();
+        return prepareTmpTestFiles();
     });
 
     it('should return success if folder already exists', async () => {

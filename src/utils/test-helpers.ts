@@ -1,6 +1,6 @@
 import { isWin, isMac } from './platform';
 import { homedir, tmpdir } from 'os';
-import { mkdirSync, writeFileSync } from 'fs';
+import { mkdirSync, writeFileSync, existsSync } from 'fs';
 import { execSync } from 'child_process';
 
 // expects describe to be globally defined: should only be used from test environment
@@ -38,27 +38,36 @@ function createEmptyFile(path: string, bytes = 0) {
 
 // create some test files/directories for testing local fs functions
 // @todo handle windows style separators
-export const prepareTmpTestFiles = async () => {
-    // console.log('tmpdir', TEST_FILES_DIR);
-    const tmpSizeDir = `${TEST_FILES_DIR}/sizeTest`;
-    const tmpMakedirDir = `${TEST_FILES_DIR}/makedirTest`
+export const prepareTmpTestFiles = () => {
+    return new Promise((resolve, reject) => {
+        // console.log('tmpdir', TEST_FILES_DIR);
+        const tmpSizeDir = `${TEST_FILES_DIR}/sizeTest`;
+        const tmpMakedirDir = `${TEST_FILES_DIR}/makedirTest`
 
-    // delete tmpdir if it exits
-    // console.log('deleting dir', TEST_FILES_DIR);
-    // first make this folder readable so that it can be removed
-    execSync(`chmod 777 ${tmpMakedirDir}/denied`);
-    execSync(`rm -rf ${TEST_FILES_DIR}`);
+        // delete tmpdir if it exits
+        // console.log('deleting dir', TEST_FILES_DIR);
+        // first make this folder readable so that it can be removed
+        if (existsSync(`${tmpMakedirDir}/denied`)) {
+            execSync(`chmod 777 ${tmpMakedirDir}/denied`);
+        }
 
-    // console.log('creating dir', TEST_FILES_DIR);
-    // recreate directory
-    mkdirSync(TEST_FILES_DIR);
+        if (existsSync(TEST_FILES_DIR)) {
+            execSync(`rm -rf ${TEST_FILES_DIR}`);
+        }
 
-    // size test
-    mkdirSync(tmpSizeDir);
-    createEmptyFile(`${tmpSizeDir}/14bytes`, 14);
-    createEmptyFile(`${tmpSizeDir}/1024bytes`, 1024);
+        // console.log('creating dir', TEST_FILES_DIR);
+        // recreate directory
+        mkdirSync(TEST_FILES_DIR);
 
-    // makedir test
-    mkdirSync(tmpMakedirDir);
-    mkdirSync(`${tmpMakedirDir}/denied`, 0o000);
+        // size test
+        mkdirSync(tmpSizeDir);
+        createEmptyFile(`${tmpSizeDir}/14bytes`, 14);
+        createEmptyFile(`${tmpSizeDir}/1024bytes`, 1024);
+
+        // makedir test
+        mkdirSync(tmpMakedirDir);
+        mkdirSync(`${tmpMakedirDir}/denied`, 0o000);
+
+        resolve();
+    });
 }
