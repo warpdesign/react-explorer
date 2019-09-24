@@ -11,13 +11,14 @@ describe('toolbar', () => {
 
     function createStubs() {
         stubs.cd = [];
+        stubs.reload = [];
 
         cy.window().then(win => {
             const views = win.appState.views;
             for (let view of views) {
                 for (let cache of view.caches) {
                     const stub = cy.stub(cache, 'cd', (path) => {
-                        if (path === '/') {
+                        if (path.startsWith('/')) {
                             return Promise.resolve(path);
                         } else return Promise.reject({
                             message: '',
@@ -25,6 +26,7 @@ describe('toolbar', () => {
                         });
                     });
                     stubs.cd.push(stub)
+                    stubs.reload.push(cy.spy(cache, 'reload'));
                 }
             }
         });
@@ -36,30 +38,33 @@ describe('toolbar', () => {
 
     beforeEach(() => {
         createStubs();
-        cy.get('#view_0 [data-cy-path]').clear().focus();
+        // load files
+        cy.CDAndList(0, '/');
+        cy.get('#view_0 [data-cy-path]').invoke('val', '/').focus();
     });
 
     it('nav buttons are disabled', () => {
         cy.get('#view_0 [data-cy-backward]').should('be.disabled');
         cy.get('#view_0 [data-cy-forward]').should('be.disabled');
-        cy.get('#view_0 [data-cy-paste-bt]').should('be.disabled');
 
         cy.get('#view_1 [data-cy-backward]').should('be.disabled');
         cy.get('#view_1 [data-cy-forward]').should('be.disabled');
-        cy.get('#view_1 [data-cy-paste-bt]').should('be.disabled');
     });
 
     it('type path and enter calls cd', () => {
-        cy.get('#view_0 [data-cy-path]').type('/{enter}').then(() => {
+        cy.get('#view_0 [data-cy-path]').type('/other_folder{enter}').then(() => {
             expect(stubs.cd[0]).to.be.called;
         });
     });
 
     it('type path and escape clears path with previous value', () => {
-        cy.get('#view_0 [data-cy-path]')
-            .type('/var{esc}')
-            .should('have.value', '').should(() => {
-                expect(stubs.cd[0]).not.to.be.called;
+        cy.get('#view_0 [data-cy-path]').as('input')
+            .invoke('val').then(val => {
+                cy.log('got val', val);
+                cy.get('@input').type('/var{esc}').then(input => {
+                    cy.get('@input').should('have.value', val);
+                    expect(stubs.cd[0]).not.to.be.called;
+                });
             });
     });
 
@@ -78,5 +83,16 @@ describe('toolbar', () => {
             win.appState.views[0].caches[0].updatePath('/newPath');
             cy.get('#view_0 [data-cy-path]').should('have.value', '/newPath');
         });
+    });
+
+    it('clicking on reload should reload path', () => {
+        cy.get('#view_0 .data-cy-reload')
+            .click().then(() => {
+                expect(stubs.reload[0]).to.be.called;
+            });
+    });
+
+    it('path buttons should be disabled if cache is busy', () => {
+
     });
 });

@@ -407,7 +407,7 @@ export class ToolbarClass extends React.Component<IProps, PathInputState> {
         const canGoBackward = current > 0;
         const canGoForward = history.length > 1 && current < history.length - 1;
         // const loadingSpinner = false ? <Spinner size={Icon.SIZE_STANDARD} /> : undefined;
-        const reloadButton = <Button className="small" onClick={this.onReload} minimal rightIcon="repeat"></Button>;
+        const reloadButton = <Button className="small data-cy-reload" onClick={this.onReload} minimal rightIcon="repeat"></Button>;
         const intent = status === -1 ? 'danger' : 'none';
         const count = selected.length;
 
