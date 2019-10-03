@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "webpack --config ./webpack.config.e2e.js --watch",
+    "build": "webpack --config ./webpack.config.e2e.js",
     "server": "ws -d ./build-e2e -p 8080",
     "cypress:open": "cypress open",
     "cypress:run": "cypress run"
