@@ -1,21 +1,19 @@
 {
-    "compilerOptions": {
-        "outDir": "./dist/",
-        "sourceMap": true,
-        "noImplicitAny": true,
-        "module": "commonjs",
-        "target": "es5",
-        "jsx": "react",
-        "removeComments": true,
-        "lib": [
-            "es2015",
-            "dom"
-        ],
-        "experimentalDecorators": true,
-        "resolveJsonModule": true,
-        "esModuleInterop": true
-    },
-    "include": [
-        "./src/**/*"
-    ]
+  "compilerOptions": {
+    "outDir": "./dist/",
+    "sourceMap": true,
+    "noImplicitAny": true,
+    "module": "commonjs",
+    "target": "es5",
+    "jsx": "react",
+    "removeComments": true,
+    "lib": ["es2015", "dom"],
+    "experimentalDecorators": true,
+    "resolveJsonModule": true,
+    "esModuleInterop": true
+  },
+  "awesomeTypescriptLoaderOptions": {
+    "useCache": true
+  },
+  "include": ["./src/**/*"]
 }

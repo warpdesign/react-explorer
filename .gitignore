@@ -3,5 +3,5 @@ dist/
 dist-e2e/
 .DS_Store
 build/
-build-e2e/
+e2e/build-e2e/
 public

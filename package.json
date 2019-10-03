@@ -71,6 +71,7 @@
     "ts-jest": "^24.1.0",
     "typescript": "^3.5.3",
     "url-loader": "^1.1.2",
+    "wait-on": "^3.3.0",
     "webpack": "^4.39.2",
     "webpack-cli": "^3.3.7"
   },
