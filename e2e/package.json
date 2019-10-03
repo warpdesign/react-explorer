@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "build": "webpack --config ./webpack.config.e2e.js",
+    "watch": "webpack --config ./webpack.config.e2e.js --watch",
     "server": "ws -d ./build-e2e -p 8080",
     "cypress:open": "cypress open",
     "cypress:run": "cypress run"
