@@ -12,8 +12,5 @@
     "resolveJsonModule": true,
     "esModuleInterop": true
   },
-  "awesomeTypescriptLoaderOptions": {
-    "useCache": true
-  },
   "include": ["./src/**/*"]
 }
