@@ -7,7 +7,6 @@ install:
 before_script: npm run server & npx wait-on http://localhost:8080
 script:
   #   ## print all Travis environment variables for debugging
-  - npm
   - $(npm bin)/print-env TRAVIS
   - npm run cypress:run
   # after all tests finish running we need
