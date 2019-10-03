@@ -41,7 +41,6 @@ const baseConfig = {
         test: /\.tsx?$/,
         loader: "awesome-typescript-loader",
         options: {
-          useCache: true,
           configFileName: "./build-tsconfig.json"
         }
       },
