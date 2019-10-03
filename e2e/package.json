@@ -4,6 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "build": "webpack --config ./webpack.config.e2e.js",
+    "server": "ws -d ./build-e2e -p 8080",
     "cypress:open": "cypress open",
     "cypress:run": "cypress run"
   },
@@ -15,7 +17,10 @@
     "cypress": "^3.4.1",
     "ts-loader": "^5.3.1",
     "typescript": "^3.2.2",
-    "webpack": "^4.27.1"
+    "webpack": "^4.27.1",
+    "local-web-server": "^3.0.7",
+    "clean-webpack-plugin": "^2.0.2",
+    "copy-webpack-plugin": "^5.0.4"
   },
   "devDependencies": {
     "@bahmutov/add-typescript-to-cypress": "^2.0.0"

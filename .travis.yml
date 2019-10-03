@@ -1,0 +1,22 @@
+language: node_js
+node_js:
+  - 11.10.1
+# if using Ubuntu 16 need this library
+# https://github.com/cypress-io/cypress-documentation/pull/1647
+addons:
+  apt:
+    packages:
+      - libgconf-2-4
+install:
+  - npm ci
+  - cd e2e && npm ci && npm run build
+before_script: npm run server & npx wait-on http://localhost:8080
+script:
+  #   ## print all Travis environment variables for debugging
+  # - $(npm bin)/print-env TRAVIS
+  # run e2e tests
+  - npm run cypress:run
+  - cd .. && npm test
+  # after all tests finish running we need
+  # to kill all background jobs (like "npm start &")
+  - kill $(jobs -p) || true
