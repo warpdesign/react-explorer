@@ -1,5 +1,7 @@
 # File manager written in TypeScript & React
 
+[![Build Status](https://www.travis-ci.org/warpdesign/react-explorer.svg?branch=master)](https://www.travis-ci.org/warpdesign/react-explorer)
+
 ![React-Explorer](./img/react-explorer-theme.png)
 
 ## Features
@@ -61,6 +63,7 @@ npx electron ./build/main.js
 ```
 
 ## Building binary packages
+
 In order to build binary packages, simply type the following:
 
 ```shell
@@ -135,14 +138,14 @@ As a starting point you may use the `FsGeneric` skeleton.
 
 React-Explorer makes use of the following tools/components:
 
- - [React](https://reactjs.org)
- - [Electron](https://electron.s.org)
- - [TypeScript](https://typescriptlang.org)
- - [MobX](https://mobx.js.org)
- - [Blueprintjs](https://blueprintjs.com)
- - [basic-ftp](https://github.com/patrickjuchli/basic-ftp)
- - [i18next](https://i18next.com) & [react-i18n](https://github.com/i18next/react-i18next)
+- [React](https://reactjs.org)
+- [Electron](https://electron.s.org)
+- [TypeScript](https://typescriptlang.org)
+- [MobX](https://mobx.js.org)
+- [Blueprintjs](https://blueprintjs.com)
+- [basic-ftp](https://github.com/patrickjuchli/basic-ftp)
+- [i18next](https://i18next.com) & [react-i18n](https://github.com/i18next/react-i18next)
 
- ## Licence
+## Licence
 
- React-Explorer is licenced under the MIT licence.
+React-Explorer is licenced under the MIT licence.
