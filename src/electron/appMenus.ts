@@ -264,7 +264,7 @@ export class AppMenu {
 
         const menuTemplate = this.getMenuTemplate();
 
-        var menu = Menu.buildFromTemplate(menuTemplate)
+        var menu = Menu.buildFromTemplate(menuTemplate);
 
         Menu.setApplicationMenu(menu);
     }
