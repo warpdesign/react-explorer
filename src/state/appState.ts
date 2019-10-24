@@ -1,11 +1,11 @@
-import { action, observable, computed } from 'mobx';
-import { File, FsApi, getFS } from '../services/Fs';
-import { FileState } from './fileState';
-import { Batch } from '../transfers/batch';
-import { clipboard, shell } from 'electron';
-import { lineEnding, DOWNLOADS_DIR } from '../utils/platform';
-import { TabDescriptor } from '../components/TabList';
-import { ViewState } from './viewState';
+import { action, observable, computed } from "mobx";
+import { File, FsApi, getFS } from "../services/Fs";
+import { FileState } from "./fileState";
+import { Batch } from "../transfers/batch";
+import { clipboard, shell } from "electron";
+import { lineEnding, DOWNLOADS_DIR } from "../utils/platform";
+import { TabDescriptor } from "../components/TabList";
+import { ViewState } from "./viewState";
 
 declare var ENV: any;
 
@@ -15,7 +15,7 @@ const SHOW_BADGE_DELAY = 600;
 
 /**
  * Interface for a clipboard entry
- * 
+ *
  * @interface
  */
 interface Clipboard {
@@ -26,7 +26,7 @@ interface Clipboard {
 
 /**
  * Interface for a transfer
- * 
+ *
  * @interface
  */
 interface TransferOptions {
@@ -38,13 +38,12 @@ interface TransferOptions {
     dstFsName: string;
 }
 
-
 /**
  * Maintains global application state:
- * 
+ *
  * - list of ongoing transfers
  * - active view: explorer of file view
- * 
+ *
  * Transfers are also starting from appState
  */
 export class AppState {
@@ -58,6 +57,15 @@ export class AppState {
     @observable
     isExplorer = true;
 
+    @observable
+    isPrefsOpen = false;
+
+    @observable
+    isShortcutsOpen = false;
+
+    @observable
+    isExitDialogOpen = false;
+
     /* transfers */
     transfers = observable<Batch>([]);
 
@@ -66,16 +74,26 @@ export class AppState {
 
     /**
      * Creates the application state
-     * 
+     *
      * @param tabs The initial paths of the caches that we want to create
      */
     constructor(tabs: Array<TabDescriptor>) {
         for (let tab of tabs) {
-            console.log('adding cache', tab.viewId, tab.path);
-            this.addCache(ENV.CY ? '' : tab.path, tab.viewId);
+            console.log("adding cache", tab.viewId, tab.path);
+            this.addCache(ENV.CY ? "" : tab.path, tab.viewId);
         }
         this.setViewState();
     }
+
+    @action
+    showDownloadsTab = () => {
+        this.isExplorer = false;
+    };
+
+    @action
+    showExplorerTab = () => {
+        this.isExplorer = true;
+    };
 
     @action
     setViewState() {
@@ -89,9 +107,9 @@ export class AppState {
     /**
      * Prepares transferring files from clipboard to specified cache
      * The source cache is taken from the clipboard
-     * 
+     *
      * @param cache file cache to transfer files to
-     * 
+     *
      * @returns {Promise<FileTransfer[]>}
      */
     prepareClipboardTransferTo(cache: FileState) {
@@ -104,26 +122,28 @@ export class AppState {
             dstFsName: cache.getFS().name
         };
 
-        return this.addTransfer(options)
-            .then((res) => {
-                debugger;
-                if (options.dstPath === cache.path && options.dstFsName === cache.getFS().name) {
-                    // FIX ME: since watcher has been implemented, there's no need to reload cache
-                    // if destination is local fs
-                    cache.reload();
-                }
+        return this.addTransfer(options).then(res => {
+            debugger;
+            if (
+                options.dstPath === cache.path &&
+                options.dstFsName === cache.getFS().name
+            ) {
+                // FIX ME: since watcher has been implemented, there's no need to reload cache
+                // if destination is local fs
+                cache.reload();
+            }
 
-                return res;
-            });
+            return res;
+        });
     }
 
     /**
      * Prepares transferring files from source to destination cache
-     * 
+     *
      * @param srcCache file cache to transfer files from
      * @param dstCache  file fache to transfer files to
      * @param files the list of files to transfer
-     * 
+     *
      * @returns {Promise<void>}
      */
     prepareTransferTo(srcCache: FileState, dstCache: FileState, files: File[]) {
@@ -138,33 +158,37 @@ export class AppState {
         if (!srcCache) {
             srcPath = files[0].dir;
             const fs = getFS(srcPath);
-            srcApi = new fs.API(srcPath, () => { });
+            srcApi = new fs.API(srcPath, () => {});
         }
 
         const options = {
             files,
-            srcFs: srcCache && srcCache.getAPI() || srcApi,
-            srcPath: srcCache && srcCache.path || srcPath,
+            srcFs: (srcCache && srcCache.getAPI()) || srcApi,
+            srcPath: (srcCache && srcCache.path) || srcPath,
             dstFs: dstCache.getAPI(),
             dstPath: dstCache.path,
             dstFsName: dstCache.getFS().name
         };
 
         return this.addTransfer(options)
-            .then((res) => {
-                if (options.dstPath === dstCache.path && options.dstFsName === dstCache.getFS().name) {
+            .then(res => {
+                if (
+                    options.dstPath === dstCache.path &&
+                    options.dstFsName === dstCache.getFS().name
+                ) {
                     dstCache.reload();
                 }
 
                 return res;
-            }).catch((err) => {
+            })
+            .catch(err => {
                 debugger;
             });
     }
 
     /**
      * Opens a file that has been transfered
-     * 
+     *
      * @param file the file to open
      */
     openTransferedFile(batchId: number, file: File) {
@@ -179,25 +203,25 @@ export class AppState {
     /**
      * Prepares transferring files from srcCache to temp location
      * in local filesystem
-     * 
+     *
      * @param srcCache: cache to trasnfer files from
      * @param files the list of files to transfer
-     * 
+     *
      * @returns {Promise<FileTransfer[]>}
      */
     prepareLocalTransfer(srcCache: FileState, files: File[]): Promise<string> {
         if (!files.length) {
-            return Promise.resolve('');
+            return Promise.resolve("");
         }
 
         // simply open the file if src is local FS
-        if (srcCache.getFS().name === 'local') {
+        if (srcCache.getFS().name === "local") {
             const api = srcCache.getAPI();
             return Promise.resolve(api.join(files[0].dir, files[0].fullname));
         } else {
             // first we need to get a FS for local
             const fs = getFS(DOWNLOADS_DIR);
-            const api = new fs.API(DOWNLOADS_DIR, () => { });
+            const api = new fs.API(DOWNLOADS_DIR, () => {});
 
             const options = {
                 files,
@@ -209,22 +233,24 @@ export class AppState {
             };
 
             // TODO: use a temporary filename for destination file?
-            return this.addTransfer(options).then(() => {
-                return api.join(DOWNLOADS_DIR, files[0].fullname);
-            }).catch((err) => {
-                return Promise.reject(err);
-            });
+            return this.addTransfer(options)
+                .then(() => {
+                    return api.join(DOWNLOADS_DIR, files[0].fullname);
+                })
+                .catch(err => {
+                    return Promise.reject(err);
+                });
         }
     }
 
     /**
      * Changes the active file cache
-     * 
+     *
      * @param active the number of the cache to be the new active one
      */
     @action
     setActiveView(viewId: number) {
-        console.log('setting active view', viewId);
+        console.log("setting active view", viewId);
         const previous = this.getActiveView(true);
         const next = this.getView(viewId);
         previous.isActive = false;
@@ -242,7 +268,7 @@ export class AppState {
 
     /**
      * Returns the cache that's not active (ie: destination cache)
-     * 
+     *
      * NOTE: this would have no sense if we had more than two file caches
      */
     getInactiveViewVisibleCache(): FileState {
@@ -273,7 +299,7 @@ export class AppState {
             totalProgress += transfer.progress;
         }
 
-        return totalSize && (totalProgress / totalSize) || 0;
+        return (totalSize && totalProgress / totalSize) || 0;
     }
 
     getTransfer(transferId: number): Batch {
@@ -283,7 +309,12 @@ export class AppState {
     @computed
     get pendingTransfers(): number {
         const now = new Date();
-        const num = this.transfers.filter(transfer => transfer.progress && transfer.isStarted && (now.getTime() - transfer.startDate.getTime()) >= SHOW_BADGE_DELAY).length;
+        const num = this.transfers.filter(
+            transfer =>
+                transfer.progress &&
+                transfer.isStarted &&
+                now.getTime() - transfer.startDate.getTime() >= SHOW_BADGE_DELAY
+        ).length;
         return num;
     }
 
@@ -300,16 +331,27 @@ export class AppState {
 
         if (!isDir) {
             return Promise.reject({
-                code: 'NODEST'
+                code: "NODEST"
             });
         }
 
-        console.log('addTransfer', options.files, options.srcFs, options.dstFs, options.dstPath);
-        const batch = new Batch(options.srcFs, options.dstFs, options.srcPath, options.dstPath);
+        console.log(
+            "addTransfer",
+            options.files,
+            options.srcFs,
+            options.dstFs,
+            options.dstPath
+        );
+        const batch = new Batch(
+            options.srcFs,
+            options.dstFs,
+            options.srcPath,
+            options.dstPath
+        );
         this.transfers.unshift(batch);
         return batch.setFileList(options.files).then(() => {
             batch.calcTotalSize();
-            batch.status = 'queued';
+            batch.status = "queued";
             // console.log('got file list !');
             // start transfer ?
             // setInterval(() => {
@@ -318,7 +360,9 @@ export class AppState {
             //         batch.updateProgress();
             //     });
             // }, 1000);
-            const activeTransfers = this.transfers.filter(transfer => !transfer.status.match(/error|done/));
+            const activeTransfers = this.transfers.filter(
+                transfer => !transfer.status.match(/error|done/)
+            );
             if (this.activeTransfers.length === 1) {
                 this.activeTransfers.clear();
             }
@@ -329,7 +373,9 @@ export class AppState {
     }
 
     removeTransfer(transferId: number) {
-        const batch = this.transfers.find(transfer => transfer.id === transferId);
+        const batch = this.transfers.find(
+            transfer => transfer.id === transferId
+        );
         if (batch) {
             batch.cancel();
             this.transfers.remove(batch);
@@ -340,7 +386,9 @@ export class AppState {
 
     getActiveCache(): FileState {
         const view = this.getActiveView(true);
-        return this.isExplorer ? view.caches.find((cache) => cache.isVisible === true) : null;
+        return this.isExplorer
+            ? view.caches.find(cache => cache.isVisible === true)
+            : null;
     }
 
     @action
@@ -361,7 +409,7 @@ export class AppState {
     }
 
     @action
-    addCache(path: string = '', viewId = -1) {
+    addCache(path: string = "", viewId = -1) {
         let view = this.getView(viewId);
 
         if (!view) {
@@ -374,7 +422,7 @@ export class AppState {
 
     @action
     updateSelection(cache: FileState, newSelection: File[]) {
-        console.log('updateSelection', newSelection.length);
+        console.log("updateSelection", newSelection.length);
         cache.selected.replace(newSelection);
         for (let selected of cache.selected) {
             console.log(selected.fullname, selected.id.dev, selected.id.ino);
@@ -393,7 +441,7 @@ export class AppState {
 
     @observable
     clipboard: Clipboard = {
-        srcPath: '',
+        srcPath: "",
         srcFs: null,
         files: []
     };
@@ -402,9 +450,13 @@ export class AppState {
     setClipboard(fileState: FileState): number {
         const files = fileState.selected.slice(0);
 
-        this.clipboard = { srcFs: fileState.getAPI(), srcPath: fileState.path, files };
+        this.clipboard = {
+            srcFs: fileState.getAPI(),
+            srcPath: fileState.path,
+            files
+        };
 
-        console.log('clipboard', files);
+        console.log("clipboard", files);
 
         return files.length;
     }
@@ -412,10 +464,12 @@ export class AppState {
     @action
     copySelectedItemsPath(fileState: FileState, filenameOnly = false): string {
         const files = fileState.selected;
-        let text = '';
+        let text = "";
 
         if (files.length) {
-            const pathnames = files.map((file) => fileState.join(!filenameOnly && file.dir || '', file.fullname));
+            const pathnames = files.map(file =>
+                fileState.join((!filenameOnly && file.dir) || "", file.fullname)
+            );
             text = pathnames.join(lineEnding);
             clipboard.writeText(text);
         }

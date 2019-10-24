@@ -1,29 +1,31 @@
 {
-  "name": "e2e",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "scripts": {
-    "build": "webpack --config ./webpack.config.e2e.js",
-    "watch": "webpack --config ./webpack.config.e2e.js --watch",
-    "server": "ws -d ./build-e2e -p 8080",
-    "cypress:open": "cypress open",
-    "cypress:run": "cypress run"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "MIT",
-  "dependencies": {
-    "@cypress/webpack-preprocessor": "^4.0.2",
-    "cypress": "^3.4.1",
-    "ts-loader": "^5.3.1",
-    "typescript": "^3.2.2",
-    "webpack": "^4.27.1",
-    "local-web-server": "^3.0.7",
-    "clean-webpack-plugin": "^2.0.2",
-    "copy-webpack-plugin": "^5.0.4"
-  },
-  "devDependencies": {
-    "@bahmutov/add-typescript-to-cypress": "^2.0.0"
-  }
+    "name": "e2e",
+    "version": "1.0.0",
+    "description": "",
+    "main": "index.js",
+    "scripts": {
+        "build": "webpack --config ./webpack.config.e2e.js",
+        "watch": "webpack --config ./webpack.config.e2e.js --watch",
+        "server-old": "ws -d ./build-e2e -p 8080",
+        "server": "pm2 start \"npx ws -d ./build-e2e -p 8080\" --name cy-server",
+        "cypress:open": "cypress open",
+        "cypress:run": "cypress run --config video=false"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "MIT",
+    "dependencies": {
+        "@cypress/webpack-preprocessor": "^4.0.2",
+        "cypress": "^3.4.1",
+        "ts-loader": "^5.3.1",
+        "typescript": "^3.2.2",
+        "webpack": "^4.27.1",
+        "local-web-server": "^3.0.7",
+        "clean-webpack-plugin": "^2.0.2",
+        "copy-webpack-plugin": "^5.0.4"
+    },
+    "devDependencies": {
+        "@bahmutov/add-typescript-to-cypress": "^2.0.0",
+        "pm2": "^4.1.2"
+    }
 }

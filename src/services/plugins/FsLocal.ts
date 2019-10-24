@@ -1,24 +1,27 @@
-import { FsApi, File, ICredentials, Fs, filetype, MakeId } from '../Fs';
-import * as fs from 'fs';
-import * as path from 'path';
-const mkdir = require('mkdirp');
-const del = require('del');
-import { size } from '../../utils/size';
-import { throttle } from '../../utils/throttle';
-const { Transform } = require('stream');
-import { isWin, HOME_DIR } from '../../utils/platform';
-import { LocalWatch } from './LocalWatch';
+import { FsApi, File, ICredentials, Fs, filetype, MakeId } from "../Fs";
+import * as fs from "fs";
+import * as path from "path";
+const mkdir = require("mkdirp");
+const del = require("del");
+import { size } from "../../utils/size";
+import { throttle } from "../../utils/throttle";
+const { Transform } = require("stream");
+import { isWin, HOME_DIR } from "../../utils/platform";
+import { LocalWatch } from "./LocalWatch";
 
-const invalidDirChars = isWin && /[\*:<>\?|"]+/ig || /^[\.]+[\/]+(.)*$/ig;
-const invalidFileChars = isWin && /[\*:<>\?|"]+/ig || /\//;
+const invalidDirChars = (isWin && /[\*:<>\?|"]+/gi) || /^[\.]+[\/]+(.)*$/gi;
+const invalidFileChars = (isWin && /[\*:<>\?|"]+/gi) || /\//;
 const SEP = path.sep;
 
 // Since nodeJS will translate unix like paths to windows path, when running under Windows
 // we accept Windows style paths (eg. C:\foo...) and unix paths (eg. /foo or ./foo)
-const localStart = isWin && /^(([a-zA-Z]\:)|([\.]*\/|\.)|(\\\\)|~)/ || /^([\.]*\/|\.|~)/;
-const isRoot = isWin && /((([a-zA-Z]\:)(\\)*)|(\\\\))$/ || /^\/$/;
+const localStart =
+    (isWin && /^(([a-zA-Z]\:)|([\.]*\/|\.)|(\\\\)|~)/) || /^([\.]*\/|\.|~)/;
+const isRoot = (isWin && /((([a-zA-Z]\:)(\\)*)|(\\\\))$/) || /^\/$/;
 
-const progressFunc = throttle((progress: any, bytesRead: number) => { progress(bytesRead) }, 400)
+const progressFunc = throttle((progress: any, bytesRead: number) => {
+    progress(bytesRead);
+}, 400);
 
 export class LocalApi implements FsApi {
     type = 0;
@@ -28,7 +31,7 @@ export class LocalApi implements FsApi {
     onFsChange: (filename: string) => void;
 
     constructor(path: string, onFsChange: (filename: string) => void) {
-        this.path = '';
+        this.path = "";
         this.onFsChange = onFsChange;
     }
 
@@ -38,7 +41,7 @@ export class LocalApi implements FsApi {
     }
 
     isDirectoryNameValid(dirName: string): boolean {
-        return !!!dirName.match(invalidDirChars) && dirName !== '/';
+        return !!!dirName.match(invalidDirChars) && dirName !== "/";
     }
 
     join(...paths: string[]): string {
@@ -53,14 +56,15 @@ export class LocalApi implements FsApi {
 
     cd(path: string, transferId = -1) {
         const resolvedPath = this.resolve(path);
-        return this.isDir(resolvedPath).then((isDir: boolean) => {
-            if (isDir) {
-                return resolvedPath;
-            } else {
-                throw { code: 'ENOTDIR' };
-            }
-        })
-            .catch((err) => {
+        return this.isDir(resolvedPath)
+            .then((isDir: boolean) => {
+                if (isDir) {
+                    return resolvedPath;
+                } else {
+                    throw { code: "ENOTDIR" };
+                }
+            })
+            .catch(err => {
                 return Promise.reject(err);
             });
     }
@@ -81,7 +85,7 @@ export class LocalApi implements FsApi {
 
     makedir(source: string, dirName: string, transferId = -1): Promise<string> {
         return new Promise((resolve, reject) => {
-            const unixPath = path.join(source, dirName).replace(/\\/g, '/');
+            const unixPath = path.join(source, dirName).replace(/\\/g, "/");
             try {
                 // console.log('mkdir', unixPath);
 
@@ -92,7 +96,6 @@ export class LocalApi implements FsApi {
                         resolve(path.join(source, dirName));
                     }
                 });
-
             } catch (err) {
                 reject(err);
             }
@@ -100,36 +103,44 @@ export class LocalApi implements FsApi {
     }
 
     delete(source: string, files: File[], transferId = -1): Promise<number> {
-        let toDelete = files.map((file) => path.join(source, file.fullname));
+        let toDelete = files.map(file => path.join(source, file.fullname));
 
         return new Promise(async (resolve, reject) => {
             try {
-                const deleted = await del(toDelete, { force: true, noGlob: true });
+                const deleted = await del(toDelete, {
+                    force: true,
+                    noGlob: true
+                });
                 resolve(deleted.length);
             } catch (err) {
-                console.log('error delete', err);
+                console.log("error delete", err);
                 reject(err);
             }
         });
     }
 
-    rename(source: string, file: File, newName: string, transferId = -1): Promise<string> {
+    rename(
+        source: string,
+        file: File,
+        newName: string,
+        transferId = -1
+    ): Promise<string> {
         const oldPath = path.join(source, file.fullname);
         const newPath = path.join(source, newName);
 
         if (!newName.match(invalidFileChars)) {
-            console.log('valid !', oldPath, newPath);
+            console.log("valid !", oldPath, newPath);
             return new Promise((resolve, reject) => {
                 // since node's fs.rename will overwrite the destination
                 // path if it exists, first check that file dones't exists
-                this.exists(newPath).then((exists) => {
+                this.exists(newPath).then(exists => {
                     if (exists) {
                         reject({
-                            code: 'EEXIST',
+                            code: "EEXIST",
                             oldName: file.fullname
                         });
                     } else {
-                        fs.rename(oldPath, newPath, (err) => {
+                        fs.rename(oldPath, newPath, err => {
                             if (err) {
                                 reject({
                                     code: err.code,
@@ -149,7 +160,7 @@ export class LocalApi implements FsApi {
             return Promise.reject({
                 oldName: file.fullname,
                 newName: newName,
-                code: 'BAD_FILENAME'
+                code: "BAD_FILENAME"
             });
         }
     }
@@ -172,7 +183,7 @@ export class LocalApi implements FsApi {
                 fs.statSync(path);
                 resolve(true);
             } catch (err) {
-                if (err.code === 'ENOENT') {
+                if (err.code === "ENOENT") {
                     resolve(false);
                 } else {
                     reject(err);
@@ -186,8 +197,7 @@ export class LocalApi implements FsApi {
             try {
                 const format = path.parse(fullPath);
                 const stats = fs.statSync(fullPath);
-                const file: File =
-                {
+                const file: File = {
                     dir: format.dir,
                     fullname: format.base,
                     name: format.name,
@@ -199,7 +209,15 @@ export class LocalApi implements FsApi {
                     mode: stats.mode,
                     isDir: stats.isDirectory(),
                     readonly: false,
-                    type: !stats.isDirectory() && filetype(stats.mode, stats.gid, stats.uid, format.ext.toLowerCase()) || '',
+                    type:
+                        (!stats.isDirectory() &&
+                            filetype(
+                                stats.mode,
+                                stats.gid,
+                                stats.uid,
+                                format.ext.toLowerCase()
+                            )) ||
+                        "",
                     isSym: stats.isSymbolicLink(),
                     id: MakeId(stats)
                 };
@@ -239,7 +257,9 @@ export class LocalApi implements FsApi {
                         const files: File[] = [];
 
                         for (var i = 0; i < items.length; i++) {
-                            const file = LocalApi.fileFromPath(path.join(dirPath, items[i]))
+                            const file = LocalApi.fileFromPath(
+                                path.join(dirPath, items[i])
+                            );
                             files.push(file);
                         }
 
@@ -250,7 +270,7 @@ export class LocalApi implements FsApi {
                 });
             });
         } else {
-            return Promise.reject('Path does not exist');
+            return Promise.reject("Path does not exist");
         }
     }
 
@@ -267,7 +287,11 @@ export class LocalApi implements FsApi {
                 name = fs.readlinkSync(fullPath);
             }
         } catch (err) {
-            console.warn('error getting stats for', /*path.join(dirPath, items[i])*/ fullPath, err);
+            console.warn(
+                "error getting stats for",
+                /*path.join(dirPath, items[i])*/ fullPath,
+                err
+            );
             stats = {
                 ctime: new Date(),
                 mtime: new Date(),
@@ -278,14 +302,13 @@ export class LocalApi implements FsApi {
                 isSymbolicLink: () => false,
                 ino: 0,
                 dev: 0
-            }
+            };
         }
 
         const extension = path.parse(name).ext.toLowerCase();
         const mode = target_stats ? target_stats.mode : stats.mode;
 
-        const file: File =
-        {
+        const file: File = {
             dir: format.dir,
             fullname: format.base,
             name: format.name,
@@ -295,9 +318,16 @@ export class LocalApi implements FsApi {
             bDate: stats.birthtime,
             length: stats.size,
             mode: mode,
-            isDir: target_stats ? target_stats.isDirectory() : stats.isDirectory(),
+            isDir: target_stats
+                ? target_stats.isDirectory()
+                : stats.isDirectory(),
             readonly: false,
-            type: !(target_stats ? target_stats.isDirectory() : stats.isDirectory()) && filetype(mode, 0, 0, extension) || '',
+            type:
+                (!(target_stats
+                    ? target_stats.isDirectory()
+                    : stats.isDirectory()) &&
+                    filetype(mode, 0, 0, extension)) ||
+                "",
             isSym: stats.isSymbolicLink(),
             id: MakeId(stats)
         };
@@ -310,96 +340,112 @@ export class LocalApi implements FsApi {
     }
 
     off() {
-        console.log('off', this.path);
-        console.log('stopWatchingPath', this.path);
+        console.log("off", this.path);
+        console.log("stopWatchingPath", this.path);
         LocalWatch.stopWatchingPath(this.path, this.onFsChange);
     }
 
     // TODO add error handling
-    async getStream(path: string, file: string, transferId = -1): Promise<fs.ReadStream> {
+    async getStream(
+        path: string,
+        file: string,
+        transferId = -1
+    ): Promise<fs.ReadStream> {
         try {
             // console.log('opening read stream', this.join(path, file));
-            const stream = fs.createReadStream(this.join(path, file), { highWaterMark: 31 * 16384 });
+            const stream = fs.createReadStream(this.join(path, file), {
+                highWaterMark: 31 * 16384
+            });
             return Promise.resolve(stream);
         } catch (err) {
-            console.log('FsLocal.getStream error', err);
+            console.log("FsLocal.getStream error", err);
             return Promise.reject(err);
-        };
+        }
     }
 
-    putStream(readStream: fs.ReadStream, dstPath: string, progress: (pourcent: number) => void, transferId = -1): Promise<void> {
-        return new Promise((resolve: (val?: any) => void, reject: (val?: any) => void) => {
-            let finished = false;
-            let readError = false;
-            let bytesRead = 0;
+    putStream(
+        readStream: fs.ReadStream,
+        dstPath: string,
+        progress: (pourcent: number) => void,
+        transferId = -1
+    ): Promise<void> {
+        return new Promise(
+            (resolve: (val?: any) => void, reject: (val?: any) => void) => {
+                let finished = false;
+                let readError = false;
+                let bytesRead = 0;
 
-            const reportProgress = new Transform({
-                transform(chunk: any, encoding: any, callback: any) {
-                    bytesRead += chunk.length;
-                    progressFunc(progress, bytesRead);
-                    callback(null, chunk);
-                },
-                highWaterMark: 16384 * 31
-            });
+                const reportProgress = new Transform({
+                    transform(chunk: any, encoding: any, callback: any) {
+                        bytesRead += chunk.length;
+                        progressFunc(progress, bytesRead);
+                        callback(null, chunk);
+                    },
+                    highWaterMark: 16384 * 31
+                });
 
-            readStream.once('error', (err) => {
-                console.log('error on read stream');
-                readError = true;
-                readStream.destroy();
-                writeStream.destroy(err);
-            });
+                readStream.once("error", err => {
+                    console.log("error on read stream");
+                    readError = true;
+                    readStream.destroy();
+                    writeStream.destroy(err);
+                });
 
-            const writeStream = fs.createWriteStream(dstPath);
+                const writeStream = fs.createWriteStream(dstPath);
 
-            readStream.pipe(reportProgress)
-                .pipe(writeStream);
+                readStream.pipe(reportProgress).pipe(writeStream);
 
-            writeStream.once('finish', () => {
-                finished = true;
-            });
+                writeStream.once("finish", () => {
+                    finished = true;
+                });
 
-            writeStream.once('error', err => {
-                // remove created file if it's empty and there was a problem
-                // accessing the source file: we will report an error to the
-                // user so there's no need to leave an empty file
-                if (readError && !bytesRead && !writeStream.bytesWritten) {
-                    console.log('cleaning up fs');
-                    fs.unlink(dstPath, (err) => {
-                        if (!err) {
-                            console.log('cleaned-up fs');
-                        } else {
-                            console.log('error cleaning-up fs', err);
-                        }
-                    });
-                }
-                reject(err);
-            });
+                writeStream.once("error", err => {
+                    // remove created file if it's empty and there was a problem
+                    // accessing the source file: we will report an error to the
+                    // user so there's no need to leave an empty file
+                    if (readError && !bytesRead && !writeStream.bytesWritten) {
+                        console.log("cleaning up fs");
+                        fs.unlink(dstPath, err => {
+                            if (!err) {
+                                console.log("cleaned-up fs");
+                            } else {
+                                console.log("error cleaning-up fs", err);
+                            }
+                        });
+                    }
+                    reject(err);
+                });
 
-            writeStream.once('close', () => {
-                if (finished) {
-                    resolve();
-                } else {
-                    reject();
-                }
-            });
+                writeStream.once("close", () => {
+                    if (finished) {
+                        resolve();
+                    } else {
+                        reject();
+                    }
+                });
 
-            writeStream.once('error', err => {
-                reject(err);
-            });
-        });
+                writeStream.once("error", err => {
+                    reject(err);
+                });
+            }
+        );
     }
 
-    getParentTree(dir: string): Array<{ dir: string, fullname: string, name: string }> {
+    getParentTree(
+        dir: string
+    ): Array<{ dir: string; fullname: string; name: string }> {
         const parts = dir.split(SEP);
         const max = parts.length - 1;
-        let fullname = '';
+        let fullname = "";
 
         if (dir.length === 1) {
-            return [{
-                dir,
-                fullname: '',
-                name: dir
-            }]
+            return [
+                {
+                    dir,
+                    fullname: "",
+                    name: dir
+                }
+            ];
         } else {
             const folders = [];
 
@@ -411,9 +457,9 @@ export class LocalApi implements FsApi {
                 });
 
                 if (!i) {
-                    fullname += '..';
+                    fullname += "..";
                 } else {
-                    fullname += '/..'
+                    fullname += "/..";
                 }
             }
 
@@ -422,13 +468,11 @@ export class LocalApi implements FsApi {
     }
 
     sanityze(path: string) {
-        return isWin ? (path.match(/\\$/) ? path : path + '\\') : path;
+        return isWin ? (path.match(/\\$/) ? path : path + "\\") : path;
     }
 
-    on(event: string, cb: (data: any) => void): void {
-
-    }
-};
+    on(event: string, cb: (data: any) => void): void {}
+}
 
 export function FolderExists(path: string) {
     try {
@@ -439,20 +483,20 @@ export function FolderExists(path: string) {
 }
 
 export const FsLocal: Fs = {
-    icon: 'database',
-    name: 'local',
-    description: 'Local Filesystem',
+    icon: "database",
+    name: "local",
+    description: "Local Filesystem",
     canread(str: string): boolean {
         // console.log('FsLocal.canread', str, !!str.match(localStart));
         return !!str.match(localStart);
     },
     serverpart(str: string): string {
-        return 'local';
+        return "local";
     },
     credentials(str: string): ICredentials {
         return {
-            user: '',
-            password: '',
+            user: "",
+            password: "",
             port: 0
         };
     },
@@ -464,4 +508,4 @@ export const FsLocal: Fs = {
         };
     },
     API: LocalApi
-}
+};
