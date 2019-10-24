@@ -1,6 +1,6 @@
 /// <reference types="cypress"/>
 
-import { MOD_KEY } from "../support/constants";
+import { MOD_KEY, isMac } from "../support/constants";
 
 describe("keyboard hotkeys", () => {
     const stubs: any = {
@@ -58,14 +58,16 @@ describe("keyboard hotkeys", () => {
     });
 
     it("should go forward history", () => {
-        cy.triggerHotkey(`${MOD_KEY}{rightarrow}`).then(() => {
+        const hotkey = isMac ? `${MOD_KEY}{rightarrow}` : `{alt}{rightarrow}`;
+        cy.triggerHotkey(hotkey).then(() => {
             expect(stubs.navHistory[0]).to.be.calledOnce;
             expect(stubs.navHistory[0]).to.be.calledWith(1);
         });
     });
 
     it("should go backward history", () => {
-        cy.triggerHotkey(`${MOD_KEY}{leftarrow}`).then(() => {
+        const hotkey = isMac ? `${MOD_KEY}{leftarrow}` : `{alt}{leftarrow}`;
+        cy.triggerHotkey(hotkey).then(() => {
             expect(stubs.navHistory[0]).to.be.calledOnce;
             expect(stubs.navHistory[0]).to.be.calledWith(-1);
         });
