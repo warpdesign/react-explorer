@@ -3,8 +3,35 @@
 import { MOD_KEY } from "../support/constants";
 
 describe("keyboard hotkeys", () => {
+    const stubs: any = {
+        navHistory: []
+    };
+
+    function createStubs() {
+        stubs.navHistory = [];
+
+        cy.window().then(win => {
+            const views = win.appState.views;
+            for (let view of views) {
+                for (let cache of view.caches) {
+                    stubs.navHistory.push(cy.spy(cache, "navHistory"));
+                }
+            }
+        });
+    }
+
     before(() => {
-        cy.visit("http://127.0.0.1:8080");
+        return cy.visit("http://127.0.0.1:8080");
+    });
+
+    beforeEach(() => {
+        createStubs();
+        // load files
+        cy.CDAndList(0, "/");
+        cy.get("#view_0 [data-cy-path]")
+            .invoke("val", "/")
+            .focus()
+            .blur();
     });
 
     it("should show downloads and explorer tabs", () => {
@@ -29,4 +56,25 @@ describe("keyboard hotkeys", () => {
             cy.get("#view_0").should("have.class", "active");
         });
     });
+
+    it("should go forward history", () => {
+        cy.triggerHotkey(`${MOD_KEY}{rightarrow}`).then(() => {
+            expect(stubs.navHistory[0]).to.be.calledOnce;
+            expect(stubs.navHistory[0]).to.be.calledWith(1);
+        });
+    });
+
+    it("should go backward history", () => {
+        cy.triggerHotkey(`${MOD_KEY}{leftarrow}`).then(() => {
+            expect(stubs.navHistory[0]).to.be.calledOnce;
+            expect(stubs.navHistory[0]).to.be.calledWith(-1);
+        });
+    });
+
+    // it("should open devtools", () => {
+    //     cy.triggerHotkey(`{alt}${MOD_KEY}i`).then(() => {
+    //         expect(ipcRenderer.send).to.be.calledOnce;
+    //         expect(ipcRenderer.send).to.be.calledWith("openDevTools");
+    //     });
+    // });
 });

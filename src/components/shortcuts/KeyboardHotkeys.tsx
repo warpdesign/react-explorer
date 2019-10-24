@@ -89,14 +89,18 @@ class KeyboardHotkeysClass extends React.Component<WithNamespaces> {
 
     onBackwardHistory = () => {
         const cache = this.getActiveFileCache();
+        console.log("onBackwardHistory");
         if (cache) {
+            console.log("if cache");
             cache.navHistory(-1);
         }
     };
 
     onForwardHistory = () => {
         const cache = this.getActiveFileCache();
+        console.log("onForwardHistory");
         if (cache) {
+            console.log("if cache");
             cache.navHistory(1);
         }
     };
@@ -199,6 +203,7 @@ class KeyboardHotkeysClass extends React.Component<WithNamespaces> {
                     label={t("SHORTCUT.OPEN_DEVTOOLS")}
                     onKeyDown={this.onOpenDevTools}
                 />
+                {/* debug only shortcuts */}
                 <Hotkey
                     global={true}
                     combo="mod + h"
