@@ -111,7 +111,8 @@ class MenuAcceleratorsClass extends React.Component<IProps> {
         if (typeof data.viewId === "undefined") {
             cache = this.getActiveFileCache();
         } else {
-            const view = this.appState.views[data.viewId];
+            const winState = this.appState.winStates[0];
+            const view = winState.views[data.viewId];
             cache = view.caches[data.tabIndex];
             if (cache.status !== "ok") {
                 cache = null;
@@ -132,14 +133,16 @@ class MenuAcceleratorsClass extends React.Component<IProps> {
 
     onNextTab = () => {
         if (this.appState.isExplorer) {
-            const viewState = this.appState.getActiveView();
+            const winState = this.appState.winStates[0];
+            const viewState = winState.getActiveView();
             viewState.cycleTab(1);
         }
     };
 
     onPreviousTab = () => {
         if (this.appState.isExplorer) {
-            const viewState = this.appState.getActiveView();
+            const winState = this.appState.winStates[0];
+            const viewState = winState.getActiveView();
             viewState.cycleTab(-1);
         }
     };
@@ -147,7 +150,8 @@ class MenuAcceleratorsClass extends React.Component<IProps> {
     onNewTab = () => {
         if (this.appState.isExplorer) {
             const { settingsState } = this.injected;
-            const viewState = this.appState.getActiveView();
+            const winState = this.appState.winStates[0];
+            const viewState = winState.getActiveView();
             viewState.addCache(
                 settingsState.defaultFolder,
                 viewState.getVisibleCacheIndex() + 1,
@@ -159,7 +163,8 @@ class MenuAcceleratorsClass extends React.Component<IProps> {
 
     onCloseTab = () => {
         if (this.appState.isExplorer) {
-            const viewState = this.appState.getActiveView();
+            const winState = this.appState.winStates[0];
+            const viewState = winState.getActiveView();
             const activeTabIndex = viewState.getVisibleCacheIndex();
             viewState.closeTab(activeTabIndex);
         }

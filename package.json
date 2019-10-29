@@ -93,7 +93,7 @@
         "basic-ftp": "^3.8.1",
         "classnames": "^2.2.6",
         "del": "github:warpdesign/del",
-        "electron-window-state": "^5.0.3",
+        "electron-window-state": "github:warpdesign/electron-window-state",
         "get-folder-size": "^2.0.1",
         "i18next": "^13.1.5",
         "mkdirp": "^0.5.1",

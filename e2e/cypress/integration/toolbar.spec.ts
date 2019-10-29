@@ -14,7 +14,7 @@ describe("toolbar", () => {
         stubs.reload = [];
 
         cy.window().then(win => {
-            const views = win.appState.views;
+            const views = win.appState.winStates[0].views;
             for (let view of views) {
                 for (let cache of view.caches) {
                     const stub = cy.stub(cache, "cd", path => {
@@ -92,7 +92,7 @@ describe("toolbar", () => {
 
     it("path should get updated when fileState is updated", () => {
         cy.window().then(win => {
-            win.appState.views[0].caches[0].updatePath("/newPath");
+            win.appState.winStates[0].views[0].caches[0].updatePath("/newPath");
             cy.get("#view_0 [data-cy-path]").should("have.value", "/newPath");
         });
     });

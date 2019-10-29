@@ -18,7 +18,7 @@ import { ShortcutsDialog } from "./dialogs/ShortcutsDialog";
 import { shouldCatchEvent } from "../utils/dom";
 import { sendFakeCombo } from "./WithMenuAccelerators";
 import { isPackage, isWin } from "../utils/platform";
-import { TabDescriptor } from "./TabList";
+import { ViewDescriptor } from "./TabList";
 import { getLocalizedError } from "../locale/error";
 import { MenuAccelerators } from "./shortcuts/MenuAccelerators";
 import { KeyboardHotkeys } from "./shortcuts/KeyboardHotkeys";
@@ -64,11 +64,12 @@ class App extends React.Component<WithNamespaces> {
         // do not show outlines when using the mouse
         FocusStyleManager.onlyShowFocusOnTabs();
 
+        // TODO: in the future this should be stored somewhere and not hardcoded
         const path = settingsState.defaultFolder;
         // this is hardcoded for now but could be saved and restored
         // each time the app is started
         // one tab for each view with the same default folder
-        const defaultTabs: Array<TabDescriptor> = [
+        const defaultTabs: Array<ViewDescriptor> = [
             { viewId: 0, path: path },
             { viewId: 1, path: path }
         ];
@@ -144,7 +145,8 @@ class App extends React.Component<WithNamespaces> {
     };
 
     setActiveView(view: number) {
-        this.appState.setActiveView(view);
+        const winState = this.appState.winStates[0];
+        winState.setActiveView(view);
     }
 
     /**
@@ -160,7 +162,8 @@ class App extends React.Component<WithNamespaces> {
 
         if (sideview) {
             const num = parseInt(sideview.id.replace("view_", ""), 10);
-            const view = this.appState.getView(num);
+            const winState = this.appState.winStates[0];
+            const view = winState.getView(num);
             if (!view.isActive) {
                 // prevent selecting a row when the view gets activated
                 if (filetable) {
@@ -329,10 +332,10 @@ class App extends React.Component<WithNamespaces> {
         const isExplorer = this.appState.isExplorer;
         const count = this.appState.pendingTransfers;
         const { t } = this.props;
-        const viewStateLeft = this.appState.views[0];
-        const viewStateRight = this.appState.views[1];
-        // const cacheLeft = this.appState.getViewVisibleCache(0);
-        // const cacheRight = this.appState.getViewVisibleCache(1);
+        const winState = this.appState.winStates[0];
+        const isDualView = winState.splitView;
+        const viewStateLeft = winState.views[0];
+        const viewStateRight = winState.views[1];
 
         // Access isDarkModeActive without modifying it to make mobx trigger the render
         // when isDarkModeActive is modified.
@@ -381,7 +384,7 @@ class App extends React.Component<WithNamespaces> {
                         />
                         <SideView
                             viewState={viewStateRight}
-                            hide={!isExplorer}
+                            hide={!isExplorer || !isDualView}
                             onPaste={this.onPaste}
                         />
                         <Downloads hide={isExplorer} />

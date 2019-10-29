@@ -1,5 +1,5 @@
 import * as React from "react";
-import { inject } from "mobx-react";
+import { inject, observer } from "mobx-react";
 import {
     Navbar,
     Popover,
@@ -19,6 +19,7 @@ interface InjectedProps extends WithNamespaces {
 }
 
 @inject("appState")
+@observer
 class NavComponent extends React.Component<WithNamespaces> {
     appState: AppState = null;
 
@@ -48,6 +49,11 @@ class NavComponent extends React.Component<WithNamespaces> {
         }
     };
 
+    onToggleDualView = () => {
+        const winState = this.appState.winStates[0];
+        winState.toggleSplitViewMode();
+    };
+
     onOpenPrefs = () => {
         this.appState.isPrefsOpen = true;
     };
@@ -63,10 +69,13 @@ class NavComponent extends React.Component<WithNamespaces> {
         const badgeText = (count && count + "") || "";
         const badgeProgress = this.appState.totalTransferProgress;
         const downloadClass = classnames(Classes.MINIMAL, "download");
+        const isSplitViewActive = this.appState.winStates[0].splitView;
+
+        console.log('render nav', isSplitViewActive);
 
         return (
             <Navbar>
-                <Navbar.Group align={Alignment.LEFT}>
+                <Navbar.Group align={Alignment.LEFT} className="title-group">
                     <Navbar.Heading>
                         {t("APP_MENUS.ABOUT_TITLE")}
                     </Navbar.Heading>
@@ -94,6 +103,7 @@ class NavComponent extends React.Component<WithNamespaces> {
                     </Button>
                 </Navbar.Group>
                 <Navbar.Group align={Alignment.RIGHT}>
+                    <Button className={Classes.MINIMAL} active={isSplitViewActive} intent={isSplitViewActive && 'primary' || 'none'} onClick={this.onToggleDualView} icon="segmented-control" title={t("NAV.SPLITVIEW")}/>
                     <Navbar.Divider />
                     <Popover
                         content={

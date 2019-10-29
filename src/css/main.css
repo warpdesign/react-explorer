@@ -124,7 +124,7 @@ button.small:hover{
     width:100%;
 }
 
-.bp3-navbar .bp3-intent-primary{
+.bp3-navbar .title-group .bp3-intent-primary{
     pointer-events:none;
 }
 

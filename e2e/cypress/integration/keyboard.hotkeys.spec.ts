@@ -11,7 +11,7 @@ describe("keyboard hotkeys", () => {
         stubs.navHistory = [];
 
         cy.window().then(win => {
-            const views = win.appState.views;
+            const views = win.appState.winStates[0].views;
             for (let view of views) {
                 for (let cache of view.caches) {
                     stubs.navHistory.push(cy.spy(cache, "navHistory"));

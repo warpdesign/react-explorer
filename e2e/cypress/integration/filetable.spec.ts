@@ -43,7 +43,7 @@ describe("filetable", () => {
 
     function resetSelection() {
         cy.window().then(win => {
-            win.appState.views.forEach((view: any) => {
+            win.appState.winStates[0].views.forEach((view: any) => {
                 view.caches.forEach((cache: any) => {
                     cache.reset();
                 });
@@ -58,7 +58,7 @@ describe("filetable", () => {
         stubs.rename = [];
 
         cy.window().then(win => {
-            const views = win.appState.views;
+            const views = win.appState.winStates[0].views;
             cy.spy(win.appState, "updateSelection").as("updateSelection");
 
             for (let view of views) {

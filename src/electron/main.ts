@@ -15,7 +15,8 @@ const HTML_PATH = `file://${__dirname}/index.html`;
 const WINDOW_DEFAULT_SETTINGS = {
     minWidth: 750,
     width: 800,
-    height: 600
+    height: 600,
+    custom: { splitView: false }
 };
 const WIN_STATE_TPL = 'win.%s.state.json';
 
