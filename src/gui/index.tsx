@@ -41,7 +41,7 @@ class App {
 
     getInitialSettings() {
         const window:any = remote.getCurrentWindow();
-        return window.initialSettings;
+        return window && window.initialSettings || {};
     }
 
     renderApp = () => {

@@ -12,6 +12,7 @@ describe('app shortcuts', () => {
 
     beforeEach(() => {
         cy.window().then(win => {
+            cy.log('appState', win.appState);
             const cache = win.appState.winStates[0].views[0].caches[0];
             cy.spy(cache, 'navHistory').as('navHistory');
         });
