@@ -1,15 +1,24 @@
-import { observable, action } from "mobx";
+import { observable, action, computed } from "mobx";
 import { ViewState } from "./viewState";
+import { ipcRenderer } from "electron";
 
 export class WinState {
     @observable splitView = false;
 
+    static id = 0;
+
+    id = 0;
     // two views per window now
     // we'll need to extend it if we decide
     // to have multiple windows (which may or may not
     // have several views)
     views: ViewState[] = observable<ViewState>([]);  
-    
+
+    constructor() {
+        this.id = WinState.id++;
+        console.log('WinState', this.id, WinState.id);
+    }    
+
     @action
     toggleSplitViewMode() {
         this.splitView = !this.splitView;
@@ -22,6 +31,18 @@ export class WinState {
         }
 
         // send new value to main process
+        console.log('calling setWindowSettings', this.toJSON);
+        ipcRenderer.send("setWindowSettings", this.toJSON);
+    }
+
+    @computed
+    get toJSON():any {
+        return {
+            id: this.id,
+            settings: {
+                dualView: this.splitView
+            }
+        };
     }
 
     /**

@@ -28,7 +28,11 @@ require("@blueprintjs/icons/lib/css/blueprint-icons.css");
 require("../css/main.css");
 require("../css/windows.css");
 
-interface InjectedProps extends WithNamespaces {
+interface AppProps extends WithNamespaces {
+    initialSettings: {[key: string]: any};
+}
+
+interface InjectedProps extends AppProps {
     settingsState: SettingsState;
 }
 
@@ -47,17 +51,19 @@ declare global {
 
 @inject("settingsState")
 @observer
-class App extends React.Component<WithNamespaces> {
+class App extends React.Component<AppProps> {
     private appState: AppState;
 
     private get injected() {
         return this.props as InjectedProps;
     }
 
-    constructor(props: WithNamespaces) {
+    constructor(props: AppProps) {
         super(props);
 
         const { settingsState } = this.injected;
+
+        console.log('App:constructor', props.initialSettings);
 
         this.state = {};
 
