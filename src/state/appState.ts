@@ -5,7 +5,7 @@ import { Batch } from "../transfers/batch";
 import { clipboard, shell } from "electron";
 import { lineEnding, DOWNLOADS_DIR } from "../utils/platform";
 import { ViewDescriptor } from "../components/TabList";
-import { WinState } from "./winState";
+import { WinState, WindowSettings } from "./winState";
 
 declare var ENV: any;
 
@@ -49,7 +49,7 @@ interface TransferOptions {
 export class AppState {
     caches: FileState[] = new Array();
 
-    winStates: WinState[] = observable<WinState>([new WinState()]);
+    winStates: WinState[] = observable<WinState>([]);
 
     @observable
     isExplorer = true;
@@ -78,12 +78,14 @@ export class AppState {
     /**
      * Creates the application state
      *
-     * @param tabs The initial paths of the caches that we want to create
+     * @param views The initial paths of the caches that we want to create
      */
-    constructor(tabs: Array<ViewDescriptor>) {
-        for (let tab of tabs) {
-            console.log("adding cache", tab.viewId, tab.path);
-            this.addCache(ENV.CY ? "" : tab.path, tab.viewId);
+    constructor(views: Array<ViewDescriptor>, options: WindowSettings) {
+        this.addWindow(options);
+
+        for (let desc of views) {
+            console.log("adding view", desc.viewId, desc.path);
+            this.addView(ENV.CY ? "" : desc.path, desc.viewId);
         }
         this.initViewState();
     }
@@ -391,10 +393,13 @@ export class AppState {
         }
     }
 
-
+    addWindow(options: WindowSettings) {
+        const winState = new WinState(options);
+        this.winStates.push(winState);
+    }
 
     @action
-    addCache(path: string = "", viewId = -1) {
+    addView(path: string = "", viewId = -1) {
         const winState = this.winStates[0];
         const view = winState.getOrCreateView(viewId);
         // let view = this.getView(viewId);

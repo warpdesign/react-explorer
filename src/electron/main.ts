@@ -83,7 +83,7 @@ const ElectronApp = {
 
         if (!settings.getCustom()) {
             settings.setCustom({
-                dualView: false
+                splitView: false
             });
         }
 

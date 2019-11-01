@@ -2,6 +2,10 @@ import { observable, action, computed } from "mobx";
 import { ViewState } from "./viewState";
 import { ipcRenderer } from "electron";
 
+export interface WindowSettings {
+    splitView: boolean;
+};
+
 export class WinState {
     @observable splitView = false;
 
@@ -14,20 +18,20 @@ export class WinState {
     // have several views)
     views: ViewState[] = observable<ViewState>([]);  
 
-    constructor() {
+    constructor(options:WindowSettings) {
         this.id = WinState.id++;
+        this.splitView = options.splitView;
         console.log('WinState', this.id, WinState.id);
     }    
 
     @action
     toggleSplitViewMode() {
         this.splitView = !this.splitView;
-        // TODO:
-        // if toggled
-        // 1. make 
-        // if not toggled
+
         if (!this.splitView) {
             this.setActiveView(0);
+        } else {
+            this.setActiveView(1);
         }
 
         // send new value to main process
@@ -40,7 +44,7 @@ export class WinState {
         return {
             id: this.id,
             settings: {
-                dualView: this.splitView
+                splitView: this.splitView
             }
         };
     }

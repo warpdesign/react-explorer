@@ -72,15 +72,19 @@ class App extends React.Component<AppProps> {
 
         // TODO: in the future this should be stored somewhere and not hardcoded
         const path = settingsState.defaultFolder;
-        // this is hardcoded for now but could be saved and restored
+        // This is hardcoded for now but could be saved and restored
         // each time the app is started
-        // one tab for each view with the same default folder
-        const defaultTabs: Array<ViewDescriptor> = [
+        // NOTE: we always create two views with one tab each,
+        // even if splitView is not set: this could be improved
+        // and the view would need to be created on the fly
+        const defaultViews: Array<ViewDescriptor> = [
             { viewId: 0, path: path },
             { viewId: 1, path: path }
         ];
 
-        this.appState = new AppState(defaultTabs);
+        this.appState = new AppState(defaultViews, {
+            splitView: props.initialSettings.splitView
+        });
 
         if (ENV.CY) {
             window.appState = this.appState;
@@ -339,7 +343,7 @@ class App extends React.Component<AppProps> {
         const count = this.appState.pendingTransfers;
         const { t } = this.props;
         const winState = this.appState.winStates[0];
-        const isDualView = winState.splitView;
+        const isSplitView = winState.splitView;
         const viewStateLeft = winState.views[0];
         const viewStateRight = winState.views[1];
 
@@ -390,7 +394,7 @@ class App extends React.Component<AppProps> {
                         />
                         <SideView
                             viewState={viewStateRight}
-                            hide={!isExplorer || !isDualView}
+                            hide={!isExplorer || !isSplitView}
                             onPaste={this.onPaste}
                         />
                         <Downloads hide={isExplorer} />

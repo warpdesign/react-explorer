@@ -49,7 +49,7 @@ class NavComponent extends React.Component<WithNamespaces> {
         }
     };
 
-    onToggleDualView = () => {
+    onToggleSplitView = () => {
         const winState = this.appState.winStates[0];
         winState.toggleSplitViewMode();
     };
@@ -103,7 +103,7 @@ class NavComponent extends React.Component<WithNamespaces> {
                     </Button>
                 </Navbar.Group>
                 <Navbar.Group align={Alignment.RIGHT}>
-                    <Button className={Classes.MINIMAL} active={isSplitViewActive} intent={isSplitViewActive && 'primary' || 'none'} onClick={this.onToggleDualView} icon="segmented-control" title={t("NAV.SPLITVIEW")}/>
+                    <Button className={Classes.MINIMAL} active={isSplitViewActive} intent={isSplitViewActive && 'primary' || 'none'} onClick={this.onToggleSplitView} icon="segmented-control" title={t("NAV.SPLITVIEW")}/>
                     <Navbar.Divider />
                     <Popover
                         content={
