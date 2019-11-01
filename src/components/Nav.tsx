@@ -89,7 +89,7 @@ class NavComponent extends React.Component<WithNamespaces> {
                     />
                     <Button
                         style={{ position: "relative" }}
-                        className={downloadClass}
+                        className={`${downloadClass} data-cy-downloads-tab`}
                         icon="download"
                         onClick={this.navClick}
                         intent={!isExplorer ? Intent.PRIMARY : "none"}
@@ -103,7 +103,7 @@ class NavComponent extends React.Component<WithNamespaces> {
                     </Button>
                 </Navbar.Group>
                 <Navbar.Group align={Alignment.RIGHT}>
-                    <Button className={Classes.MINIMAL} active={isSplitViewActive} intent={isSplitViewActive && 'primary' || 'none'} onClick={this.onToggleSplitView} icon="segmented-control" title={t("NAV.SPLITVIEW")}/>
+                    <Button className={`data-cy-toggle-splitview ${Classes.MINIMAL}`} active={isSplitViewActive} intent={isSplitViewActive && 'primary' || 'none'} onClick={this.onToggleSplitView} icon="segmented-control" title={t("NAV.SPLITVIEW")}/>
                     <Navbar.Divider />
                     <Popover
                         content={
@@ -113,7 +113,7 @@ class NavComponent extends React.Component<WithNamespaces> {
                             />
                         }
                     >
-                        <Button className={Classes.MINIMAL} icon="menu" />
+                        <Button className={`data-cy-toggle-app-menu ${Classes.MINIMAL}`} icon="menu" />
                     </Popover>
                 </Navbar.Group>
             </Navbar>

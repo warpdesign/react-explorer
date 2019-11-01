@@ -17,7 +17,7 @@ export class HamburgerMenuClass extends React.Component<IHamburgerProps>{
 
         return (
         <React.Fragment>
-                <Menu>
+                <Menu className="data-cy-app-menu">
                 <MenuItem text={t('NAV.PREFS')} icon="cog" onClick={this.props.onOpenPrefs}/>
                 <MenuDivider />
                 <MenuItem text={t('NAV.SHORTCUTS')} icon="lightbulb" onClick={this.props.onOpenShortcuts} />
