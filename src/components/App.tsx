@@ -2,6 +2,7 @@ import { AppState } from "../state/appState";
 import * as React from "react";
 import * as ReactDOM from "react-dom";
 import { FocusStyleManager, Alert, Classes, Intent } from "@blueprintjs/core";
+import classNames from "classnames";
 import { Provider, observer, inject } from "mobx-react";
 import { SideView } from "./SideView";
 import { LogUI, Logger } from "./Log";
@@ -344,6 +345,9 @@ class App extends React.Component<AppProps> {
         const { t } = this.props;
         const winState = this.appState.winStates[0];
         const isSplitView = winState.splitView;
+        const mainClass = classNames('main', {
+            singleView: !isSplitView
+        });
         const viewStateLeft = winState.views[0];
         const viewStateRight = winState.views[1];
 
@@ -386,7 +390,7 @@ class App extends React.Component<AppProps> {
                     <MenuAccelerators onExitComboDown={this.onExitComboDown} />
                     <KeyboardHotkeys />
                     <Nav></Nav>
-                    <div onClickCapture={this.handleClick} className="main">
+                    <div onClickCapture={this.handleClick} className={mainClass}>
                         <SideView
                             viewState={viewStateLeft}
                             hide={!isExplorer}
