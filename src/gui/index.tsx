@@ -8,6 +8,7 @@ import { SettingsState } from "../state/settingsState";
 import { Provider } from "mobx-react";
 import { DragDropContextProvider } from "react-dnd";
 import HTML5Backend from "react-dnd-html5-backend";
+import { remote } from "electron";
 
 declare var ENV: any;
 
@@ -38,14 +39,20 @@ class App {
         });
     }
 
+    getInitialSettings() {
+        const window:any = remote.getCurrentWindow();
+        return window && window.initialSettings || {};
+    }
+
     renderApp = () => {
+        const initialSettings = this.getInitialSettings();
         document.body.classList.add("loaded");
 
         ReactDOM.render(
             <DragDropContextProvider backend={HTML5Backend}>
                 <I18nextProvider i18n={i18next}>
                     <Provider settingsState={this.settingsState}>
-                        <ExplorerApp></ExplorerApp>
+                        <ExplorerApp initialSettings={initialSettings}></ExplorerApp>
                     </Provider>
                 </I18nextProvider>
             </DragDropContextProvider>,

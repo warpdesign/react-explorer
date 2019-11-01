@@ -4,7 +4,7 @@ import { watch } from 'fs';
 const path = require('path');
 import { AppMenu, LocaleString } from './appMenus';
 import { isPackage, isLinux } from '../utils/platform';
-const windowStateKeeper = require('electron-window-state');
+import { WindowSettings } from './windowSettings';
 
 declare var __dirname: string
 declare var ENV: any;
@@ -12,12 +12,6 @@ declare var ENV: any;
 const ENV_E2E = !!process.env.E2E;
 const SOURCE_PATH = './build';
 const HTML_PATH = `file://${__dirname}/index.html`;
-const WINDOW_DEFAULT_SETTINGS = {
-    minWidth: 750,
-    width: 800,
-    height: 600
-};
-const WIN_STATE_TPL = 'win.%s.state.json';
 
 const ElectronApp = {
     mainWindow: <Electron.BrowserWindow>null,
@@ -69,18 +63,15 @@ const ElectronApp = {
     createMainWindow() {
         console.log('Create Main Window');
 
-        const winState = windowStateKeeper({
-            defaultWidth: WINDOW_DEFAULT_SETTINGS.width,
-            defaultHeight: WINDOW_DEFAULT_SETTINGS.height,
-            file: WIN_STATE_TPL.replace('%s', "0")
-        });
+        const settings = WindowSettings.getSettings(0);
+        console.log('settings', settings);
 
         this.mainWindow = new BrowserWindow({
-            minWidth: WINDOW_DEFAULT_SETTINGS.minWidth,
-            width: winState.width,
-            height: winState.height,
-            x: winState.x,
-            y: winState.y,
+            minWidth: WindowSettings.DEFAULTS.minWidth,
+            width: settings.width,
+            height: settings.height,
+            x: settings.x,
+            y: settings.y,
             webPreferences: {
                 enableBlinkFeatures: 'OverlayScrollbars,OverlayScrollbarsFlashAfterScrollUpdate,OverlayScrollbarsFlashWhenMouseEnter',
                 nodeIntegration: true
@@ -88,7 +79,17 @@ const ElectronApp = {
             icon: isLinux && path.join(__dirname, 'icon.png') || undefined
         });
 
-        winState.manage(this.mainWindow);
+        settings.manage(this.mainWindow);
+
+        if (!settings.getCustom()) {
+            settings.setCustom({
+                splitView: false
+            });
+        }
+
+        console.log(settings.getCustom());
+
+        this.mainWindow.initialSettings = settings.getCustom();
 
         this.mainWindow.loadURL(HTML_PATH);
 
@@ -195,6 +196,14 @@ const ElectronApp = {
 
         ipcMain.on('needsCleanup', () => { console.log('needscleanup'); this.cleanupCounter++; console.log('needscleanup, counter now:', this.cleanupCounter); });
         ipcMain.on('cleanedUp', () => this.onCleanUp());
+
+        ipcMain.on('setWindowSettings', (_:Event, data: {[key:string]: any}) => {
+            console.log('changeWindowSettings', data);
+            const { id, settings } = data;
+            const state = WindowSettings.getSettings(id);
+            console.log('got state', state);
+            state.setCustom(settings);
+        });
     },
 
     /**
@@ -230,11 +239,7 @@ const ElectronApp = {
         // spectron problem if devtools is opened, see https://github.com/electron/spectron/issues/254
         if ((!ENV_E2E && !isPackage) || force) {
             if (!this.devWindow || this.devWindow.isDestroyed()) {
-                const winState = windowStateKeeper({
-                    defaultWidth: WINDOW_DEFAULT_SETTINGS.width,
-                    defaultHeight: WINDOW_DEFAULT_SETTINGS.height,
-                    file: WIN_STATE_TPL.replace('%s', "devtools")
-                });
+                const winState = WindowSettings.getDevToolsSettings();
 
                 this.devWindow = new BrowserWindow({
                     width: winState.width,
@@ -242,6 +247,7 @@ const ElectronApp = {
                     x: winState.x,
                     y: winState.y,
                 });
+
                 winState.manage(this.devWindow);
 
                 this.mainWindow.webContents.setDevToolsWebContents(this.devWindow.webContents);

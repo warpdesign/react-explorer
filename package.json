@@ -1,12 +1,13 @@
 {
     "name": "react-explorer",
-    "version": "2.0.0-beta.8",
+    "version": "2.1.0",
     "description": "Plugin-based file explorer written with React",
     "main": "build/main.js",
     "build": {
         "productName": "React-Explorer",
         "appId": "reactexplorer",
         "mac": {
+            "gatekeeperAssess": false,
             "darkModeSupport": true,
             "icon": "icon.icns"
         },
@@ -65,7 +66,7 @@
         "copy-webpack-plugin": "^5.0.4",
         "css-loader": "^1.0.1",
         "electron": "^3.1.13",
-        "electron-builder": "^20.44.4",
+        "electron-builder": "^21.2.0",
         "electron-devtools-installer": "^2.2.4",
         "file-loader": "^2.0.0",
         "ftp-srv": "^3.1.1",
@@ -93,7 +94,7 @@
         "basic-ftp": "^3.8.1",
         "classnames": "^2.2.6",
         "del": "github:warpdesign/del",
-        "electron-window-state": "^5.0.3",
+        "electron-window-state": "github:warpdesign/electron-window-state",
         "get-folder-size": "^2.0.1",
         "i18next": "^13.1.5",
         "mkdirp": "^0.5.1",

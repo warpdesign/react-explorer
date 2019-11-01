@@ -19,7 +19,7 @@ export function CDList(viewId = 0, path: string, fixture = "files.json") {
     return cy.window().then(win => {
         cy.fixture(fixture).then(json => {
             if (win.appState && win.appState.caches) {
-                const fileCache = win.appState.views[viewId].caches[0];
+                const fileCache = win.appState.winStates[0].views[viewId].caches[0];
                 fileCache.updatePath(path);
                 fileCache.files.replace(json);
                 fileCache.setStatus("ok");

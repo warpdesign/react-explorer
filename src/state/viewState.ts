@@ -26,7 +26,6 @@ export class ViewState {
 
         if (activateNewCache) {
             this.setVisibleCache(index);
-            // setTimeout(() => (document.querySelector('.sideview.active input') as HTMLInputElement).focus());
         }
 
         return cache;

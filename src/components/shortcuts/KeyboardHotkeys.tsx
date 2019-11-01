@@ -82,9 +82,10 @@ class KeyboardHotkeysClass extends React.Component<WithNamespaces> {
     };
 
     onNextView = () => {
-        const nextView = this.appState.getActiveView(false);
+        const winState = this.appState.winStates[0];
+        const nextView = winState.getActiveView(false);        
 
-        this.appState.setActiveView(nextView.viewId);
+        winState.setActiveView(nextView.viewId);
     };
 
     onBackwardHistory = () => {

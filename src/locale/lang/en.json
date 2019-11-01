@@ -14,7 +14,8 @@
             "EXPLORER": "Explorer",
             "TRANSFERS": "Transfers",
             "PREFS": "Preferences",
-            "SHORTCUTS": "Keyboard shortcuts"
+            "SHORTCUTS": "Keyboard shortcuts",
+            "SPLITVIEW": "Toggle dual view"
         },
         "DRAG": {
             "MULTIPLE": "Copy {{count}} elements"

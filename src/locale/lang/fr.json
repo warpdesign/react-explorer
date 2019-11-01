@@ -14,7 +14,8 @@
             "EXPLORER": "Explorateur",
             "TRANSFERS": "Téléchargements",
             "PREFS": "Préférences",
-            "SHORTCUTS": "Raccourcis clavier"
+            "SHORTCUTS": "Raccourcis clavier",
+            "SPLITVIEW": "Alterner entre double vue et vue unique"
         },
         "DRAG": {
             "MULTIPLE": "Copier {{count}} éléments"

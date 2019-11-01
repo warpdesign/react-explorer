@@ -4,8 +4,8 @@ import { FileState } from "./fileState";
 import { Batch } from "../transfers/batch";
 import { clipboard, shell } from "electron";
 import { lineEnding, DOWNLOADS_DIR } from "../utils/platform";
-import { TabDescriptor } from "../components/TabList";
-import { ViewState } from "./viewState";
+import { ViewDescriptor } from "../components/TabList";
+import { WinState, WindowSettings } from "./winState";
 
 declare var ENV: any;
 
@@ -48,11 +48,8 @@ interface TransferOptions {
  */
 export class AppState {
     caches: FileState[] = new Array();
-    // two views per window now
-    // we'll need to extend it if we decide
-    // to have multiple windows (which may or may not
-    // have several views)
-    views: ViewState[] = observable<ViewState>([]);
+
+    winStates: WinState[] = observable<WinState>([]);
 
     @observable
     isExplorer = true;
@@ -66,6 +63,12 @@ export class AppState {
     @observable
     isExitDialogOpen = false;
 
+    @action
+    toggleSplitViewMode() {
+        const winState = this.winStates[0];
+        winState.toggleSplitViewMode();
+    }
+
     /* transfers */
     transfers = observable<Batch>([]);
 
@@ -75,14 +78,16 @@ export class AppState {
     /**
      * Creates the application state
      *
-     * @param tabs The initial paths of the caches that we want to create
+     * @param views The initial paths of the caches that we want to create
      */
-    constructor(tabs: Array<TabDescriptor>) {
-        for (let tab of tabs) {
-            console.log("adding cache", tab.viewId, tab.path);
-            this.addCache(ENV.CY ? "" : tab.path, tab.viewId);
+    constructor(views: Array<ViewDescriptor>, options: WindowSettings) {
+        this.addWindow(options);
+
+        for (let desc of views) {
+            console.log("adding view", desc.viewId, desc.path);
+            this.addView(ENV.CY ? "" : desc.path, desc.viewId);
         }
-        this.setViewState();
+        this.initViewState();
     }
 
     @action
@@ -96,12 +101,13 @@ export class AppState {
     };
 
     @action
-    setViewState() {
-        this.views[0].isActive = true;
-        for (let view of this.views) {
-            // get and activate the first cache for now
-            view.setVisibleCache(0);
-        }
+    /**
+     * initialize each window's state: hardcoded to first window since we only have
+     * one window now
+     */
+    initViewState() {
+        const winState = this.winStates[0];
+        winState.initState()
     }
 
     /**
@@ -243,27 +249,10 @@ export class AppState {
         }
     }
 
-    /**
-     * Changes the active file cache
-     *
-     * @param active the number of the cache to be the new active one
-     */
-    @action
-    setActiveView(viewId: number) {
-        console.log("setting active view", viewId);
-        const previous = this.getActiveView(true);
-        const next = this.getView(viewId);
-        previous.isActive = false;
-        next.isActive = true;
-    }
-
-    getActiveView(isActive = true): ViewState {
-        return this.views.find(view => view.isActive === isActive);
-    }
-
     getViewFromCache(cache: FileState) {
+        const winState = this.winStates[0];        
         const viewId = cache.viewId;
-        return this.getView(viewId);
+        return winState.getView(viewId);
     }
 
     /**
@@ -272,17 +261,20 @@ export class AppState {
      * NOTE: this would have no sense if we had more than two file caches
      */
     getInactiveViewVisibleCache(): FileState {
-        const view = this.getActiveView(false);
+        const winState = this.winStates[0];
+        const view = winState.getActiveView(false);
         return view.caches.find(cache => cache.isVisible === true);
     }
 
     getViewVisibleCache(viewId: number): FileState {
-        const view = this.getView(viewId);
+        const winState = this.winStates[0];        
+        const view = winState.getView(viewId);
         return view.caches.find(cache => cache.isVisible === true);
     }
 
     getCachesForView(viewId: number) {
-        const view = this.getView(viewId);
+        const winState = this.winStates[0];        
+        const view = winState.getView(viewId);
         return view.caches;
     }
 
@@ -385,7 +377,8 @@ export class AppState {
     /* /transfers */
 
     getActiveCache(): FileState {
-        const view = this.getActiveView(true);
+        const winState = this.winStates[0];        
+        const view = winState.getActiveView(true);
         return this.isExplorer
             ? view.caches.find(cache => cache.isVisible === true)
             : null;
@@ -400,22 +393,21 @@ export class AppState {
         }
     }
 
-    createView(viewId: number) {
-        return new ViewState(viewId);
-    }
-
-    getView(viewId: number) {
-        return this.views.find(view => view.viewId === viewId);
+    addWindow(options: WindowSettings) {
+        const winState = new WinState(options);
+        this.winStates.push(winState);
     }
 
     @action
-    addCache(path: string = "", viewId = -1) {
-        let view = this.getView(viewId);
+    addView(path: string = "", viewId = -1) {
+        const winState = this.winStates[0];
+        const view = winState.getOrCreateView(viewId);
+        // let view = this.getView(viewId);
 
-        if (!view) {
-            view = this.createView(viewId);
-            this.views[viewId] = view;
-        }
+        // if (!view) {
+        //     view = this.createView(viewId);
+        //     this.views[viewId] = view;
+        // }
 
         view.addCache(path);
     }

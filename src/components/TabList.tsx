@@ -10,7 +10,11 @@ import { SettingsState } from "../state/settingsState";
 import { DOWNLOADS_DIR, HOME_DIR, DOCS_DIR, DESKTOP_DIR, MUSIC_DIR, PICTURES_DIR, VIDEOS_DIR } from '../utils/platform';
 import { AppAlert } from "./AppAlert";
 
-export interface TabDescriptor {
+/**
+ * Describes a view, the path is the path to its first tab: right now each view is created with only
+ * one tab: this may change in the future
+ */
+export interface ViewDescriptor {
     viewId: number;
     path: string;
 }

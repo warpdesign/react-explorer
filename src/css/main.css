@@ -100,6 +100,14 @@ button.small:hover{
     pointer-events: none;
 }
 
+#root .singleView .sideview.active:before{
+    box-shadow: 0 0 2px 2px inset rgb(219, 219, 219);
+}
+
+.bp3-dark #root .singleView .sideview:before{
+    box-shadow: 0 0 2px 2px inset rgb(66, 84, 97);
+}
+
 #root .sideview.dropTarget:before{
     box-shadow: 0 0 4px 2px inset #00b63d82;
 }
@@ -110,6 +118,10 @@ button.small:hover{
 
 #root .sideview:first-child{
     margin-right:10px;
+}
+
+#root .singleView .sideview:first-child{
+    margin-right:0;
 }
 
 .bp3-input-group{
@@ -124,7 +136,7 @@ button.small:hover{
     width:100%;
 }
 
-.bp3-navbar .bp3-intent-primary{
+.bp3-navbar .title-group .bp3-intent-primary{
     pointer-events:none;
 }
 
