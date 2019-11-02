@@ -131,20 +131,20 @@ class MenuAcceleratorsClass extends React.Component<IProps> {
         }
     };
 
-    onNextTab = () => {
+    cycleTab = (direction: 1|-1) => {
         if (this.appState.isExplorer) {
             const winState = this.appState.winStates[0];
             const viewState = winState.getActiveView();
-            viewState.cycleTab(1);
+            viewState.cycleTab(direction);
         }
+    }
+
+    onNextTab = () => {
+        this.cycleTab(1);
     };
 
     onPreviousTab = () => {
-        if (this.appState.isExplorer) {
-            const winState = this.appState.winStates[0];
-            const viewState = winState.getActiveView();
-            viewState.cycleTab(-1);
-        }
+        this.cycleTab(-1);
     };
 
     onNewTab = () => {

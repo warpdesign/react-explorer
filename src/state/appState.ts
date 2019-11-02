@@ -250,7 +250,7 @@ export class AppState {
     }
 
     getViewFromCache(cache: FileState) {
-        const winState = this.winStates[0];        
+        const winState = this.winStates[0];
         const viewId = cache.viewId;
         return winState.getView(viewId);
     }
@@ -262,18 +262,18 @@ export class AppState {
      */
     getInactiveViewVisibleCache(): FileState {
         const winState = this.winStates[0];
-        const view = winState.getActiveView(false);
+        const view = winState.getInactiveView();
         return view.caches.find(cache => cache.isVisible === true);
     }
 
     getViewVisibleCache(viewId: number): FileState {
-        const winState = this.winStates[0];        
+        const winState = this.winStates[0];
         const view = winState.getView(viewId);
         return view.caches.find(cache => cache.isVisible === true);
     }
 
     getCachesForView(viewId: number) {
-        const winState = this.winStates[0];        
+        const winState = this.winStates[0];
         const view = winState.getView(viewId);
         return view.caches;
     }
@@ -378,7 +378,7 @@ export class AppState {
 
     getActiveCache(): FileState {
         const winState = this.winStates[0];        
-        const view = winState.getActiveView(true);
+        const view = winState.getActiveView();
         return this.isExplorer
             ? view.caches.find(cache => cache.isVisible === true)
             : null;

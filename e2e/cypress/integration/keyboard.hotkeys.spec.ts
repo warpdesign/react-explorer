@@ -17,6 +17,10 @@ describe("keyboard hotkeys", () => {
                     stubs.navHistory.push(cy.spy(cache, "navHistory"));
                 }
             }
+
+            // activate splitView mode
+            const winState = win.appState.winStates[0];
+            winState.splitView = true;
         });
     }
 
@@ -73,6 +77,18 @@ describe("keyboard hotkeys", () => {
         });
     });
 
+    it("should not change view in single view mode", () => {
+        cy.get("#view_0").should("have.class", "active");
+        cy.get("#view_1").should("not.have.class", "active");
+
+        cy.get('.data-cy-toggle-splitview')
+        .click();
+
+        cy.triggerHotkey(`{ctrl}{shift}{rightarrow}`).then(() => {
+            cy.get("#view_1").should("not.have.class", "active");
+            cy.get("#view_0").should("have.class", "active");
+        });
+    });
     // it("should open devtools", () => {
     //     cy.triggerHotkey(`{alt}${MOD_KEY}i`).then(() => {
     //         expect(ipcRenderer.send).to.be.calledOnce;

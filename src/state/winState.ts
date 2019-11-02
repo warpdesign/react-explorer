@@ -80,13 +80,25 @@ export class WinState {
     @action
     setActiveView(viewId: number) {
         console.log("setting active view", viewId);
-        const previous = this.getActiveView(true);
+        const previous = this.getActiveView();
         const next = this.getView(viewId);
         previous.isActive = false;
         next.isActive = true;
     }
 
-    getActiveView(isActive = true): ViewState {
+    getActiveView():ViewState {
+        return this.getViewByActive(true);
+    }
+
+    getInactiveView():ViewState {
+        return this.getViewByActive(false);
+    }
+
+    /**
+     * returns active or invactive view
+     * @param isActive if set to true returns the active view, otherwise inactive one
+     */
+    getViewByActive(isActive = true): ViewState {
         return this.views.find(view => view.isActive === isActive);
     }
 
