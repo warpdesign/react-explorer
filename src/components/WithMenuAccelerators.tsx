@@ -87,7 +87,6 @@ export function WithMenuAccelerators<
             e: MenuAcceleratorEvent,
             data: { combo: string; data: any }
         ) => {
-            console.log('******* onAccelerator !!', e, data);
             // check if combo is valid
             const callback = this.getCallback(data.combo);
             if (typeof callback === "function") {

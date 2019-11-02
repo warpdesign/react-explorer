@@ -6,7 +6,7 @@
 
 ## Features
 
-- Dual-view window
+- Split-view window
 - Tabs support
 - Fully keyboard controlled
 - Fully localized (French & English available)

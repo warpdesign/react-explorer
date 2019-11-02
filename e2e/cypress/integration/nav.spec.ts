@@ -47,7 +47,7 @@ describe('app shortcuts', () => {
         });
     });
 
-    it('click on dual should toggle dual view', () => {
+    it('click on split should toggle split view', () => {
         cy.get('.data-cy-toggle-splitview')
         .click()
         .should('have.class', Classes.INTENT_PRIMARY)
