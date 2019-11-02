@@ -15,7 +15,7 @@ class GenericApi implements FsApi {
     }
 
     join(...paths: string[]): string {
-        return this.join(...paths);
+        return paths.join('/');
     }
 
     isConnected(): boolean {
@@ -30,21 +30,6 @@ class GenericApi implements FsApi {
         console.log("GenericFs.size");
         return Promise.resolve(10);
     }
-
-    // copy(source: string, files: string[], dest: string): Promise<any> & cp.ProgressEmitter {
-    //     console.log('Generic.copy');
-    //     const prom: Promise<void> & cp.ProgressEmitter = new Promise((resolve, reject) => {
-    //         setTimeout(() => {
-    //             resolve();
-    //         }, 2000);
-    //     }) as Promise<void> & cp.ProgressEmitter;
-
-    //     prom.on = (name, handler): Promise<void> => {
-    //         return prom;
-    //     }
-
-    //     return prom;
-    // }
 
     login(server?: string, credentials?: ICredentials): Promise<void> {
         return Promise.resolve();

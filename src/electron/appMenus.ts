@@ -150,6 +150,12 @@ export class AppMenu {
                 label: menuStrings['TITLE_VIEW'],
                 submenu: [
                     {
+                        label: menuStrings['TOGGLE_SPLITVIEW'],
+                        accelerator: 'CmdOrCtrl+Shift+Alt+V',
+                        click: this.sendComboEvent
+                    },
+                    { type: 'separator' },
+                    {
                         label: menuStrings['RELOAD_VIEW'],
                         accelerator: 'CmdOrCtrl+R',
                         click: this.sendComboEvent

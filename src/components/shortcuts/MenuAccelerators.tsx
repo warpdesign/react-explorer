@@ -170,6 +170,13 @@ class MenuAcceleratorsClass extends React.Component<IProps> {
         }
     };
 
+    onToggleSplitView = () => {
+        if (this.appState.isExplorer) {
+            const winState = this.appState.winStates[0];
+            winState.toggleSplitViewMode();
+        }
+    }
+
     renderMenuAccelerators() {
         return (
             <Accelerators>
@@ -216,6 +223,10 @@ class MenuAcceleratorsClass extends React.Component<IProps> {
                 <Accelerator
                     combo="CmdOrCtrl+W"
                     onClick={this.onCloseTab}
+                ></Accelerator>
+                <Accelerator
+                    combo="CmdOrCtrl+Shift+Alt+V"
+                    onClick={this.onToggleSplitView}
                 ></Accelerator>
             </Accelerators>
         );

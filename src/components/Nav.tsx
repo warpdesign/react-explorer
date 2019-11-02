@@ -50,8 +50,10 @@ class NavComponent extends React.Component<WithNamespaces> {
     };
 
     onToggleSplitView = () => {
-        const winState = this.appState.winStates[0];
-        winState.toggleSplitViewMode();
+        if (this.appState.isExplorer) {
+            const winState = this.appState.winStates[0];
+            winState.toggleSplitViewMode();
+        }
     };
 
     onOpenPrefs = () => {

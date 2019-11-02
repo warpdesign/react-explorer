@@ -15,7 +15,7 @@
             "TRANSFERS": "Téléchargements",
             "PREFS": "Préférences",
             "SHORTCUTS": "Raccourcis clavier",
-            "SPLITVIEW": "Alterner entre double vue et vue unique"
+            "SPLITVIEW": "Activer/Désactiver double vue"
         },
         "DRAG": {
             "MULTIPLE": "Copier {{count}} éléments"
@@ -244,7 +244,8 @@
             "SELECT_PREVIOUS_TAB": "Sélectionner l'onglet précédent",
             "NEW_TAB": "Nouvel onglet",
             "CLOSE_TAB": "Fermer l'onglet",
-            "OK": "OK"
+            "OK": "OK",
+            "TOGGLE_SPLITVIEW": "Activer/Désactiver Vue Double"
         }
     }
 }

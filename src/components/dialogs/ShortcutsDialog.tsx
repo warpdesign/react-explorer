@@ -30,7 +30,8 @@ class ShortcutsDialogClass extends React.Component<IShortcutsProps>{
                 { combo: "mod + s", label: t('SHORTCUT.MAIN.KEYBOARD_SHORTCUTS') },
                 { combo: "mod + ,", label: t('SHORTCUT.MAIN.PREFERENCES') },
                 { combo: "alt + mod + i", label: t('SHORTCUT.OPEN_DEVTOOLS') },
-                { combo: "mod + q", label: t('SHORTCUT.MAIN.QUIT') }
+                { combo: "mod + q", label: t('SHORTCUT.MAIN.QUIT') },
+                { combo: "mod + alt + shift + v", label: t('NAV.SPLITVIEW') }
             ],
             // group: t('SHORTCUT.GROUP.ACTIVE_VIEW')
             [
@@ -111,7 +112,7 @@ class ShortcutsDialogClass extends React.Component<IShortcutsProps>{
                 </div>
                 <div className={Classes.DIALOG_FOOTER}>
                     <div className={Classes.DIALOG_FOOTER_ACTIONS}>
-                        <Button onClick={this.onClose}>
+                        <Button onClick={this.onClose} className="data-cy-close">
                             {t('COMMON.CLOSE')}
                         </Button>
                     </div>

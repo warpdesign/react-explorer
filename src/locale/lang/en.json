@@ -15,7 +15,7 @@
             "TRANSFERS": "Transfers",
             "PREFS": "Preferences",
             "SHORTCUTS": "Keyboard shortcuts",
-            "SPLITVIEW": "Toggle dual view"
+            "SPLITVIEW": "Toggle split view"
         },
         "DRAG": {
             "MULTIPLE": "Copy {{count}} elements"
@@ -244,7 +244,8 @@
             "SELECT_PREVIOUS_TAB": "Select previous tab",
             "NEW_TAB": "New tab",
             "CLOSE_TAB": "Close tab",
-            "OK": "OK"
+            "OK": "OK",
+            "TOGGLE_SPLITVIEW": "Toggle Split View"
         }
     }
 }
