@@ -59,7 +59,11 @@ const baseConfig = {
                         }
                     }
                 ]
-            }
+            },
+            {
+                test: /\.node$/,
+                loader: "native-ext-loader"
+            }            
         ]
     },
 

@@ -16,6 +16,7 @@ import { FileState } from "../state/fileState";
 import { SettingsState } from "../state/settingsState";
 import { PrefsDialog } from "./dialogs/PrefsDialog";
 import { ShortcutsDialog } from "./dialogs/ShortcutsDialog";
+import { LeftPanel } from "./LeftPanel";
 import { shouldCatchEvent } from "../utils/dom";
 import { sendFakeCombo } from "./WithMenuAccelerators";
 import { isPackage, isWin } from "../utils/platform";
@@ -390,6 +391,7 @@ class App extends React.Component<AppProps> {
                     <MenuAccelerators onExitComboDown={this.onExitComboDown} />
                     <KeyboardHotkeys />
                     <Nav></Nav>
+                    <LeftPanel></LeftPanel>
                     <div onClickCapture={this.handleClick} className={mainClass}>
                         <SideView
                             viewState={viewStateLeft}
