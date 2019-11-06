@@ -23,7 +23,7 @@ function getAppInstance() : App {
     let appInstance:App = app || remote && remote.app;
     
     if (!appInstance) {
-        const getPath:(name:string) => string = require('./test-helpers').getPath;
+        const getPath:(name:string) => string = require('./test/helpers').getPath;
         // simulate getPath for test environment
         appInstance = {
             getPath
