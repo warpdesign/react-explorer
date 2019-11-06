@@ -21,6 +21,7 @@ describe('app shortcuts', () => {
 
         cy.get(".downloads").should("not.exist");
         cy.get(".sideview.active").should("be.visible");
+        cy.get(".favoritesPanel").should("be.visible");
     });
 
     it('click on nav tabs should activate each tab', () => {
@@ -33,6 +34,7 @@ describe('app shortcuts', () => {
 
             cy.get(".downloads").should("exist");
             cy.get(".sideview.active").should("not.be.visible");
+            cy.get(".favoritesPanel").should("not.be.visible");
         });
 
         cy.get('.data-cy-explorer-tab')
@@ -44,6 +46,7 @@ describe('app shortcuts', () => {
 
             cy.get(".downloads").should("not.exist");
             cy.get(".sideview.active").should("be.visible");
+            cy.get(".favoritesPanel").should("be.visible");
         });
     });
 

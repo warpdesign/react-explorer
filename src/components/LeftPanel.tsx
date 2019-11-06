@@ -2,13 +2,13 @@ import * as React from "react";
 import { Tree, ITreeNode } from "@blueprintjs/core";
 import { observer, inject } from "mobx-react";
 import { withNamespaces, WithNamespaces } from 'react-i18next';
+import classNames from "classnames";
+import { IReactionDisposer, reaction, toJS } from "mobx";
 import { USERNAME } from "../utils/platform";
 import Icons from "../constants/icons";
 import { FavoritesState, Favorite } from "../state/favoritesState";
 import { AppState } from "../state/appState";
 import { AppAlert } from "./AppAlert";
-import { IReactionDisposer, reaction, toJS } from "mobx";
-
 require("../css/favoritesPanel.css");
 
 interface LeftPanelState {
@@ -16,17 +16,21 @@ interface LeftPanelState {
     selectedNode: ITreeNode<string>;
 }
 
-interface InjectedProps extends WithNamespaces {
+interface IProps extends WithNamespaces {
+    hide: boolean;
+}
+
+interface InjectedProps extends IProps {
     appState: AppState;
 }
 
 @inject('appState')
 @observer
-export class LeftPanelClass extends React.Component<WithNamespaces, LeftPanelState> {
+export class LeftPanelClass extends React.Component<IProps, LeftPanelState> {
     favoritesState: FavoritesState;
     disposers:Array<IReactionDisposer> = new Array();
 
-    constructor(props:WithNamespaces) {
+    constructor(props:IProps) {
         super(props);
 
         const { t } = props;
@@ -68,8 +72,10 @@ export class LeftPanelClass extends React.Component<WithNamespaces, LeftPanelSta
         this.disposers.push(reaction(
             () => toJS(this.favoritesState.places),
             (places: Favorite[]) => {
-                console.log('places updated: need to rebuild nodes');
-                this.buildNodes(this.favoritesState);
+                if (!this.props.hide) {
+                    console.log('places updated: need to rebuild nodes');
+                    this.buildNodes(this.favoritesState);
+                }
             })
         );
     }
@@ -169,13 +175,16 @@ export class LeftPanelClass extends React.Component<WithNamespaces, LeftPanelSta
         const path = this.getActiveCachePath();
         this.setActiveNode(path);
         const { nodes } = this.state;
+        const classnames = classNames("favoritesPanel", {
+            hidden: this.props.hide
+        });
 
         return <Tree 
             contents={nodes}
             onNodeClick={this.onNodeClick}
             onNodeCollapse={this.onNodeToggle}
             onNodeExpand={this.onNodeToggle}
-            className="favoritesPanel" />;
+            className={classnames} />;
     }
 }
 

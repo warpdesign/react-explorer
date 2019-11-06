@@ -392,7 +392,7 @@ class App extends React.Component<AppProps> {
                     <KeyboardHotkeys />
                     <Nav></Nav>
                     <div onClickCapture={this.handleClick} className={mainClass}>
-                        <LeftPanel></LeftPanel>
+                        <LeftPanel hide={!isExplorer}></LeftPanel>
                         <SideView
                             viewState={viewStateLeft}
                             hide={!isExplorer}
