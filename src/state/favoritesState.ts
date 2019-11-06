@@ -4,6 +4,8 @@ import * as drivelist from "drivelist";
 import { IconNames } from "@blueprintjs/icons";
 import { ALL_DIRS } from "../utils/platform";
 
+const CHECK_FOR_DRIVES_DELAY = 5000;
+
 export interface Favorite {
     label: string;
     path: string;
@@ -16,24 +18,23 @@ export interface Favorite {
 export class FavoritesState {
     shortcuts = observable<Favorite>([]);
     places = observable<Favorite>([]);
+    previousPlaces:drivelist.Drive[] = [];
 
     buildShortcuts() {
-        console.log('building shortcuts', ALL_DIRS, Object.entries(ALL_DIRS));
         this.shortcuts.replace(Object.entries(ALL_DIRS).map(dir => ({
             label: dir[0],
             path: dir[1],
             icon: IconNames.DATABASE
         })));
-
-        console.log('shortcuts', this.shortcuts);
     }
 
-    async buildPlaces() {
-        console.log('getting drives');
+    async getDrivesList() {
         const drives = await drivelist.list();
-        console.log('got drives', drives);
-        const usableDrives = drives.filter((drive:any) => drive.mountpoints && drive.mountpoints.length);
-        this.places.replace(usableDrives.map((drive:any) => {
+        return drives.filter((drive:drivelist.Drive) => drive.mountpoints && drive.mountpoints.length);
+    }
+
+    async buildPlaces(drives:drivelist.Drive[]) {
+        this.places.replace(drives.map((drive:any) => {
             const mountpoint = drive.mountpoints[0];
 
             return {
@@ -42,23 +43,52 @@ export class FavoritesState {
                 icon: (drive.isRemovable || drive.isVirtual) ? IconNames.FLOPPY_DISK : IconNames.DATABASE
             } as Favorite;
         }));
-        console.log('created drives', this.places);
+    }
+
+    launchTimeout(immediate = false) {
+        if (immediate) {
+            this.checkForNewDrives();
+        } else {
+            setTimeout(() => this.checkForNewDrives(), CHECK_FOR_DRIVES_DELAY);
+        }
     }
 
     async buildDrivesList() {
         this.buildShortcuts();
-        this.buildPlaces();
+        this.launchTimeout(true);
+    }
+
+    /**
+     * checks if new drives: if new drives are found, re-generate the places
+     */
+    async checkForNewDrives() {
+        const usableDrives = await this.getDrivesList();
+        if (this.hasDriveListChanged(usableDrives)) {
+            this.previousPlaces = usableDrives;
+            this.buildPlaces(usableDrives);
+        }
+
+        // restart timeout in any case
+        this.launchTimeout();
+    }
+
+    hasDriveListChanged(newList:drivelist.Drive[]):boolean {
+        if (newList.length !== this.previousPlaces.length) {
+            return true;
+        } else {
+            const newString = newList
+                                .filter((drive:drivelist.Drive) => drive.mountpoints && drive.mountpoints.length)
+                                .reduce((str:string, drive:drivelist.Drive) => str + drive.mountpoints[0].path, '');
+
+            const oldString = this.previousPlaces
+            .filter((drive:drivelist.Drive) => drive.mountpoints && drive.mountpoints.length)
+            .reduce((str:string, drive:drivelist.Drive) => str + drive.mountpoints[0].path, '');
+
+            return oldString !== newString;
+        }
     }
 
     constructor() {
         this.buildDrivesList();
-        // // test
-        // setTimeout(() => {
-        //     runInAction(() => {
-        //         this.places[0].label = "dtc";
-        //         console.log('changing nodes !!');
-        //     });
-        // }, 10000);
-        // TODO: add listener for language change + check that places haven't changed every 5 secs
     }
 }

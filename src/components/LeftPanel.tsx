@@ -100,12 +100,9 @@ export class LeftPanelClass extends React.Component<WithNamespaces, LeftPanelSta
             node.childNodes.forEach(childNode => childNode.isSelected = false)
         );
 
-        console.log('setActiveNode', path);
-
         // get active path based on path
         const selectedNode = this.getNodeFromPath(path);
         if (selectedNode) {
-            console.log('setting active node', selectedNode);
             selectedNode.isSelected = true;
         }
     }
@@ -141,7 +138,6 @@ export class LeftPanelClass extends React.Component<WithNamespaces, LeftPanelSta
     }
 
     buildNodes(favorites:FavoritesState) {
-        console.log('building nodes');
         const { t } = this.props;
         const { nodes } = this.state;
         const shortcuts = nodes[0];
@@ -166,13 +162,11 @@ export class LeftPanelClass extends React.Component<WithNamespaces, LeftPanelSta
         }));
 
         this.setState(this.state);
-
-        console.log('built nodes', shortcuts.childNodes, places.childNodes);
     }
 
     render() {
+        console.log('LeftPanel.render');
         const path = this.getActiveCachePath();
-        console.log('path', path);
         this.setActiveNode(path);
         const { nodes } = this.state;
 
