@@ -4,15 +4,16 @@ import { observer, inject } from "mobx-react";
 import { withNamespaces, WithNamespaces } from 'react-i18next';
 import { USERNAME } from "../utils/platform";
 import Icons from "../constants/icons";
-import { FavoritesState } from "../state/favoritesState";
+import { FavoritesState, Favorite } from "../state/favoritesState";
 import { AppState } from "../state/appState";
 import { AppAlert } from "./AppAlert";
+import { IReactionDisposer, reaction, toJS } from "mobx";
 
 require("../css/favoritesPanel.css");
 
 interface LeftPanelState {
     nodes: ITreeNode<string>[];
-    selectedNode: ITreeNode;
+    selectedNode: ITreeNode<string>;
 }
 
 interface InjectedProps extends WithNamespaces {
@@ -23,6 +24,7 @@ interface InjectedProps extends WithNamespaces {
 @observer
 export class LeftPanelClass extends React.Component<WithNamespaces, LeftPanelState> {
     favoritesState: FavoritesState;
+    disposers:Array<IReactionDisposer> = new Array();
 
     constructor(props:WithNamespaces) {
         super(props);
@@ -50,15 +52,73 @@ export class LeftPanelClass extends React.Component<WithNamespaces, LeftPanelSta
         };
 
         this.favoritesState = new FavoritesState();
+
+        this.installReaction();
     }
 
     private get injected() {
         return this.props as InjectedProps;
     }
 
-    getItemClassName(path: string) {
-        // const { nodes } = this.state;
-        // return path === this.state.selectedPath ? 'active' : '';
+    componentWillUnmount() {
+        this.disposers.forEach(disposer => disposer());
+    }
+
+    private installReaction() {
+        this.disposers.push(reaction(
+            () => toJS(this.favoritesState.places),
+            (places: Favorite[]) => {
+                console.log('places updated: need to rebuild nodes');
+                this.buildNodes(this.favoritesState);
+            })
+        );
+    }
+
+    /**
+     * 
+     * @param path string attempts to find the first node with the given path
+     * 
+     * @returns ITreeNode<string> | null
+     */
+    getNodeFromPath(path:string):ITreeNode<string> {
+        const { nodes } = this.state;
+        const shortcuts = nodes[0].childNodes;
+
+        const found = shortcuts.find(node => node.nodeData === path);
+        
+        if (found) {
+            return found;
+        } else {
+            const places = nodes[1].childNodes;
+            return places.find(node => node.nodeData === path);
+        }
+    }
+
+    setActiveNode(path:string) {
+        const { nodes } = this.state;
+        nodes.forEach(node => 
+            node.childNodes.forEach(childNode => childNode.isSelected = false)
+        );
+
+        console.log('setActiveNode', path);
+
+        // get active path based on path
+        const selectedNode = this.getNodeFromPath(path);
+        if (selectedNode) {
+            console.log('setting active node', selectedNode);
+            selectedNode.isSelected = true;
+        }
+    }
+
+    getActiveCachePath():string {
+        const { appState } = this.injected;
+        const activeCache = appState.getActiveCache();
+
+        if (activeCache) {
+            return activeCache.path;
+        } else {
+            return '';
+        }
     }
 
     onNodeClick = (node: ITreeNode<string>) => {
@@ -70,12 +130,6 @@ export class LeftPanelClass extends React.Component<WithNamespaces, LeftPanelSta
             .catch((err: any) => {
                 AppAlert.show(`${err.message} (${err.code})`, {
                     intent: 'danger'
-                // }).then(() => {
-                //     // we restore the wrong path entered and focus the input:
-                //     // in case the user made a simple typo he doesn't want
-                //     // to type it again
-                //     this.setState({ path });
-                //     this.input.focus();
                 });
             });
         }
@@ -111,13 +165,15 @@ export class LeftPanelClass extends React.Component<WithNamespaces, LeftPanelSta
             nodeData: place.path
         }));
 
+        this.setState(this.state);
+
         console.log('built nodes', shortcuts.childNodes, places.childNodes);
     }
 
     render() {
-        // since we are an observer, render will automatically be called
-        // every time favorites are updated
-        this.buildNodes(this.favoritesState);
+        const path = this.getActiveCachePath();
+        console.log('path', path);
+        this.setActiveNode(path);
         const { nodes } = this.state;
 
         return <Tree 

@@ -4,7 +4,7 @@ import * as drivelist from "drivelist";
 import { IconNames } from "@blueprintjs/icons";
 import { ALL_DIRS } from "../utils/platform";
 
-interface Favorite {
+export interface Favorite {
     label: string;
     path: string;
     icon?: IconName;
