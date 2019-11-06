@@ -33,7 +33,7 @@ function resolveMock(moduleName) {
  * 
  * { fs: '<full path to mockPath>/fs.js', fs: '<full path to mockPath>/process.js' }
  * 
- * @param {path to the mocks directory} mockPath 
+ * @param {string} mockPath path to the mocks directory
  */
 function webpackAliases(mockPath) {
   const mockNames = fs.readdirSync(mockPath).map(file => file.replace('.js', ''));

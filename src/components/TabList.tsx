@@ -49,6 +49,7 @@ class TabListClass extends React.Component<InjectedProps> {
 
     constructor(props: InjectedProps) {
         super(props);
+        console.log('**tabIcons', this.tabIcons);
     }
 
     get injected() {
@@ -92,14 +93,6 @@ class TabListClass extends React.Component<InjectedProps> {
             tabIndex: this.menuIndex,
             viewId: viewState.viewId
         });
-    }
-
-    onMenuClick = (item: number) => {
-        console.log('menu Click', item);
-    }
-
-    onMenuFolderClick = (item: number) => {
-        console.log()
     }
 
     onContextMenu = (menuIndex: number) => {
@@ -222,8 +215,8 @@ class TabListClass extends React.Component<InjectedProps> {
 
         return (
             <ButtonGroup fill className="tablist" alignText="center">
-                <ContextMenu ref={this.menuRef} onItemClick={this.onMenuClick} template={tabMenuTemplate}></ContextMenu>
-                <ContextMenu ref={this.menuFolderRef} onItemClick={this.onMenuFolderClick} template={null}></ContextMenu>
+                <ContextMenu ref={this.menuRef} template={tabMenuTemplate}></ContextMenu>
+                <ContextMenu ref={this.menuFolderRef} template={null}></ContextMenu>
                 {
                     caches.map((cache, index) => {
                         const closeIcon = caches.length > 1 && <Icon iconSize={12} htmlTitle={t('TABS.CLOSE')} className="closetab" intent="warning" onClick={this.closeTab.bind(this, index)} icon="cross"></Icon>;

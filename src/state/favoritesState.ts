@@ -34,7 +34,7 @@ export class FavoritesState {
     }
 
     async buildPlaces(drives:drivelist.Drive[]) {
-        this.places.replace(drives.map((drive:any) => {
+        this.places.replace(drives.map((drive:drivelist.Drive) => {
             const mountpoint = drive.mountpoints[0];
 
             return {

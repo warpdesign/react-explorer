@@ -2,7 +2,6 @@ import * as React from "react";
 import { remote, MenuItemConstructorOptions, Menu } from 'electron';
 
 interface IProps {
-    onItemClick: (item: number) => void;
     template: MenuItemConstructorOptions[];
 }
 

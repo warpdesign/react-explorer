@@ -30,7 +30,7 @@ module.exports = {
                 return "en";
             },
             getPath: function(str) {
-                return "cy_" + str;
+                return "/cy/" + str;
             }
         }
     }
