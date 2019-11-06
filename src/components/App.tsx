@@ -391,8 +391,8 @@ class App extends React.Component<AppProps> {
                     <MenuAccelerators onExitComboDown={this.onExitComboDown} />
                     <KeyboardHotkeys />
                     <Nav></Nav>
-                    <LeftPanel></LeftPanel>
                     <div onClickCapture={this.handleClick} className={mainClass}>
+                        <LeftPanel></LeftPanel>
                         <SideView
                             viewState={viewStateLeft}
                             hide={!isExplorer}

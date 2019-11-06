@@ -7,7 +7,9 @@ import { sendFakeCombo } from "./WithMenuAccelerators";
 import { ContextMenu } from './ContextMenu';
 import { MenuItemConstructorOptions, MenuItem } from "electron";
 import { SettingsState } from "../state/settingsState";
-import { DOWNLOADS_DIR, HOME_DIR, DOCS_DIR, DESKTOP_DIR, MUSIC_DIR, PICTURES_DIR, VIDEOS_DIR } from '../utils/platform';
+// import { DOWNLOADS_DIR, HOME_DIR, DOCS_DIR, DESKTOP_DIR, MUSIC_DIR, PICTURES_DIR, VIDEOS_DIR } from '../utils/platform';
+const Platform = require('../utils/platform');
+import Icons from '../constants/icons';
 import { AppAlert } from "./AppAlert";
 
 /**
@@ -31,34 +33,19 @@ class TabListClass extends React.Component<InjectedProps> {
     menuFolderRef: React.RefObject<ContextMenu> = React.createRef();
     menuIndex = 0;
 
-    tabIcons = [{
-        regex: new RegExp('^' + DOWNLOADS_DIR + '$'),
-        icon: 'download'
-    },
-    {
-        regex: new RegExp('^' + MUSIC_DIR + '$'),
-        icon: 'music'
-    },
-    {
-        regex: new RegExp('^' + PICTURES_DIR + '$'),
-        icon: 'camera'
-    },
-    {
-        regex: new RegExp('^' + DESKTOP_DIR + '$'),
-        icon: 'desktop'
-    },
-    {
-        regex: new RegExp('^' + DOCS_DIR + '$'),
-        icon: 'projects'
-    },
-    {
-        regex: new RegExp('^' + HOME_DIR + '$'),
-        icon: 'home'
-    },
-    {
-        regex: new RegExp('^' + VIDEOS_DIR + '$'),
-        icon: 'video'
-    }];
+    /**
+     * build a list of { regex, IconName } to match folders with an icon
+     * For ex:
+     * {
+     *    regex: /^/Users/leo$/,
+     *    icon: 'home'
+     * }
+     */
+    tabIcons = Object.keys(Icons)
+     .map((dirname:string) => ({
+         regex: new RegExp(`^${Platform[dirname]}$`),
+         icon: Icons[dirname]
+     }));
 
     constructor(props: InjectedProps) {
         super(props);

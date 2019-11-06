@@ -214,6 +214,16 @@
                 "FTP2": "ftp://jack:bauer@ftp.24hours.net"
             }
         },
+        "FAVORITES_PANEL": {
+            "SHORTCUTS": "Shortcuts",
+            "PLACES": "Places",
+            "DOWNLOADS_DIR": "Downloads",
+            "MUSIC_DIR": "Music",
+            "PICTURES_DIR": "Images",
+            "DESKTOP_DIR": "Desktop",
+            "VIDEOS_DIR": "Videos",
+            "DOCS_DIR": "Documents"
+        },        
         "APP_MENUS": {
             "ABOUT": "About",
             "PREFS": "Preferences",

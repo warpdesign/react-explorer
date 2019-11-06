@@ -214,6 +214,16 @@
                 "FTP2": "ftp://kylian:mbappe@ftp.psg.fr"
             }
         },
+        "FAVORITES_PANEL": {
+            "SHORTCUTS": "Raccourcis",
+            "PLACES": "Emplacements",
+            "DOWNLOADS_DIR": "Téléchargements",
+            "MUSIC_DIR": "Musique",
+            "PICTURES_DIR": "Images",
+            "DESKTOP_DIR": "Bureau",
+            "VIDEOS_DIR": "Vidéos",
+            "DOCS_DIR": "Documents"
+        },
         "APP_MENUS": {
             "ABOUT": "A propos de",
             "PREFS": "Préférences",

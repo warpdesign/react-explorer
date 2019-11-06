@@ -377,7 +377,7 @@ export class AppState {
     /* /transfers */
 
     getActiveCache(): FileState {
-        const winState = this.winStates[0];        
+        const winState = this.winStates[0];
         const view = winState.getActiveView();
         return this.isExplorer
             ? view.caches.find(cache => cache.isVisible === true)
