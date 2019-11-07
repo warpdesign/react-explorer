@@ -1,11 +1,6 @@
 /// <reference types="cypress"/>
 
-interface Window {
-    appState: any;
-    remote: any;
- }
-
- import { TAB_ICONS } from '../support/constants';
+import { TAB_ICONS } from '../support/constants';
 import { Classes } from '@blueprintjs/core';
 
 function matchPath(path: string) {
@@ -22,7 +17,7 @@ describe("tablist", () => {
         stubs.cd = [];
         stubs.reload = [];
 
-        cy.window().then((win:Window) => {
+        cy.window().then((win:any) => {
             const views = win.appState.winStates[0].views;
             for (let view of views) {
                 for (let cache of view.caches) {
