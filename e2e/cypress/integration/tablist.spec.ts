@@ -35,7 +35,6 @@ describe("tablist", () => {
                 }
             }
 
-            // cy.spy(win.remote.Menu)
             // remote menu stubs
             stubs.popup = cy.stub().as('popup');
 
