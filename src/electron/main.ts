@@ -67,6 +67,7 @@ const ElectronApp = {
 
         this.mainWindow = new BrowserWindow({
             minWidth: WindowSettings.DEFAULTS.minWidth,
+            minHeight: WindowSettings.DEFAULTS.minHeight,
             width: settings.width,
             height: settings.height,
             x: settings.x,

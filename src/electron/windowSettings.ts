@@ -7,6 +7,7 @@ const WIN_STATE_TPL = 'win.%s.state.json';
 
 const WINDOW_DEFAULT_SETTINGS = {
     minWidth: 750,
+    minHeight: 240,
     width: 800,
     height: 600,
     custom: { splitView: false }

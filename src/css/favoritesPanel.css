@@ -1,5 +1,6 @@
 .favoritesPanel {
     position:relative;
+    overflow:auto;
     flex-shrink:0;
     width:200px;
     border:1px dotted gray;
