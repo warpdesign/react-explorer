@@ -48,6 +48,7 @@ declare global {
     interface Window {
         appState: AppState;
         settingsState: SettingsState;
+        remote: any;
     }
 }
 
@@ -91,6 +92,8 @@ class App extends React.Component<AppProps> {
         if (ENV.CY) {
             window.appState = this.appState;
             window.settingsState = settingsState;
+            window.remote = remote;
+            console.log('remote', remote);
         }
 
         Logger.success(

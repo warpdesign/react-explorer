@@ -49,7 +49,6 @@ class TabListClass extends React.Component<InjectedProps> {
 
     constructor(props: InjectedProps) {
         super(props);
-        console.log('**tabIcons', this.tabIcons);
     }
 
     get injected() {
@@ -96,8 +95,9 @@ class TabListClass extends React.Component<InjectedProps> {
     }
 
     onContextMenu = (menuIndex: number) => {
+        const tabMenuTemplate = this.getTabMenu();
         this.menuIndex = menuIndex;
-        this.menuRef.current.showMenu();
+        this.menuRef.current.showMenu(tabMenuTemplate);
     }
 
     onItemClick = (menuItem: MenuItem & { id: string }) => {
@@ -124,7 +124,6 @@ class TabListClass extends React.Component<InjectedProps> {
     }
 
     onFolderItemClick = (menuItem: MenuItem & { id: string }) => {
-        console.log('folderItem click', menuItem);
         const { viewState } = this.injected;
         const cache = viewState.getVisibleCache();
         if (menuItem.id) {
@@ -211,11 +210,10 @@ class TabListClass extends React.Component<InjectedProps> {
         const caches = viewState.caches;
         // TODO: this will be created at each render: this should only be re-rendered
         // whenever the language has changed
-        const tabMenuTemplate = this.getTabMenu();
 
         return (
             <ButtonGroup fill className="tablist" alignText="center">
-                <ContextMenu ref={this.menuRef} template={tabMenuTemplate}></ContextMenu>
+                <ContextMenu ref={this.menuRef} template={null}></ContextMenu>
                 <ContextMenu ref={this.menuFolderRef} template={null}></ContextMenu>
                 {
                     caches.map((cache, index) => {
