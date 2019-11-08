@@ -801,7 +801,7 @@ export class FileTableClass extends React.Component<IProps, IState> {
         const { position } = this.state;
         const rowCount = this.state.nodes.length;
 
-        return (<div ref={this.setTableRef} onKeyDown={this.onInputKeyDown} className={`fileListSizerWrapper ${Classes.ELEVATION_0}`}>
+        return (<div ref={this.setTableRef} onKeyDown={this.onInputKeyDown} className={`fileListSizerWrapper`}>
             <AutoSizer>
                 {({ width, height }) => (
                     <Table

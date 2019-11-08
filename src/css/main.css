@@ -43,6 +43,11 @@ button.small:hover{
     -webkit-user-select: none;
 }
 
+.sideview > .bp3-control-group > :first-child,
+.sideview > .bp3-control-group > :last-child {
+    border-radius:0;
+}
+
 .main > .hidden{
     display:none;
     pointer-events: none;
@@ -66,7 +71,7 @@ button.small:hover{
     justify-content: center;
     flex-grow:1;
     overflow:hidden;
-    padding:10px;
+    /* padding:10px; */
 }
 
 #root .sideview{
@@ -74,9 +79,10 @@ button.small:hover{
     width:50%;
     min-width:360px;
     flex-grow:1;
+    border-left: 1px solid rgb(189, 195, 199);
 }
 
-#root .sideview:before{
+/* #root .sideview:before{
     position: absolute;
     top: -2px;
     right: -2px;
@@ -84,9 +90,9 @@ button.small:hover{
     left: -2px;
     border-radius: 4px;
     content: "";
-}
+} */
 
-#root .sideview:before{
+/* #root .sideview:before{
     box-shadow: 0 0 2px 2px inset rgb(231, 236, 239);
 }
 
@@ -106,7 +112,7 @@ button.small:hover{
 
 .bp3-dark #root .singleView .sideview:before{
     box-shadow: 0 0 2px 2px inset rgb(66, 84, 97);
-}
+} */
 
 #root .sideview.dropTarget:before{
     box-shadow: 0 0 4px 2px inset #00b63d82;
@@ -178,6 +184,19 @@ button.small:hover{
 /* line height bug ? */
 .bp3-tree-node-caret > span{
     vertical-align:top;
+}
+
+#root .bp3-navbar {
+    border-bottom: 1px solid rgb(189, 195, 199);
+    background: rgb(246,246,246);
+    background: linear-gradient(180deg, rgba(246,246,246,1) 0%, rgba(210,216,219,1) 50%, rgba(230,236,239,1) 100%);
+    background: rgb(246,246,246);
+    background: linear-gradient(180deg, rgba(246,246,246,1) 0%, rgba(210,216,219,1) 10%, rgba(230,236,239,1) 100%);
+    background: rgb(230,236,239);
+    background: linear-gradient(180deg, rgba(230,236,239,1) 0%, rgba(246,246,246,1) 84%);
+    background: rgb(246,246,246);
+    background: linear-gradient(180deg, rgba(246,246,246,1) 16%, rgba(230,236,239,1) 100%);
+    box-shadow:none;
 }
 
 .bp3-navbar .download .bp3-button-text{
@@ -300,6 +319,10 @@ body.bp3-dark .bp3-loader.active{
     border:1px solid rgba(16,22,26,.2);
 }
 
+.status-bar {
+    border-top: 1px solid rgb(189, 195, 199);
+}
+
 .status-bar.offline > .bp3-icon:after{
     border-bottom: 1px solid rgba(255,0,0,.6);
     content: "";
@@ -373,9 +396,21 @@ body.bp3-dark .bp3-loader.active{
     background-color: rgb(88, 100, 109);
 }
 
+.sideview > .toolbar > .bp3-button-group > .bp3-button:not([class*="bp3-intent-"]) {
+    box-shadow: inset 0 0 0 1px rgba(16, 22, 26, 0.2), inset 0 -1px 0 rgba(16, 22, 26, 0.1);
+}
+
+.sideview > .toolbar > .bp3-button-group > .bp3-button:first-child:not([class*="bp3-intent-"]) {
+    margin-left:-1px;
+}
+
+.sideview > .toolbar > .bp3-button-group > .bp3-button:last-child:not([class*="bp3-intent-"]) {
+    box-shadow:inset 0 -1px 0 rgba(16, 22, 26, 0.1);
+}
+
 .tablist .bp3-button .bp3-button-text{
     overflow:hidden;
-    white-space: nowrap;    
+    white-space: nowrap;
     text-overflow:ellipsis;
 }
 
