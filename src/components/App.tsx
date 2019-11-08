@@ -7,6 +7,7 @@ import { Provider, observer, inject } from "mobx-react";
 import { SideView } from "./SideView";
 import { LogUI, Logger } from "./Log";
 import { Downloads } from "./Downloads";
+import * as drivelist from "drivelist";
 import { remote, ipcRenderer } from "electron";
 import { withNamespaces, WithNamespaces, Trans } from "react-i18next";
 import { AppToaster } from "./AppToaster";
@@ -49,6 +50,7 @@ declare global {
         appState: AppState;
         settingsState: SettingsState;
         remote: any;
+        drivelist:any;
     }
 }
 
@@ -93,7 +95,7 @@ class App extends React.Component<AppProps> {
             window.appState = this.appState;
             window.settingsState = settingsState;
             window.remote = remote;
-            console.log('remote', remote);
+            window.drivelist = drivelist;
         }
 
         Logger.success(

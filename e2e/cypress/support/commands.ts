@@ -54,11 +54,25 @@ declare global {
              *    cy.triggerHover().then(els => ...)
              */
             triggerHover: () => any;
+            /**
+             * Yields element
+             *
+             * @memberof Chainable
+             * @example
+             *    cy.toggleSplitView().then(els => ...)
+             */
+            toggleSplitView: () => any;
             // add missing call signatures from the documentation
+            // see: https://github.com/cypress-io/cypress/issues/5617#event-2780995183
             rightclick(position: string, options?: any): any;
             rightclick(x: number, y: number, options?: any): any;
         }
     }
+}
+
+export function toggleSplitView() {
+    return cy.get('.data-cy-toggle-splitview')
+        .click();
 }
 
 export function addTab(viewId = 0) {
@@ -120,3 +134,4 @@ Cypress.Commands.add("triggerFakeCombo", triggerFakeCombo);
 Cypress.Commands.add("addTab", addTab);
 Cypress.Commands.add("getTab", getTab);
 Cypress.Commands.add("triggerHover", { prevSubject: true }, triggerHover);
+Cypress.Commands.add("toggleSplitView", toggleSplitView);

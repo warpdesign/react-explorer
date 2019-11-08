@@ -55,7 +55,7 @@ export class LeftPanelClass extends React.Component<IProps, LeftPanelState> {
             selectedNode: null
         };
 
-        this.favoritesState = new FavoritesState();
+        this.favoritesState = this.injected.appState.favoritesState;
 
         this.installReaction();
     }

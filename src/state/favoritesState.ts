@@ -1,5 +1,5 @@
 import { IconName } from "@blueprintjs/core";
-import { observable, runInAction } from "mobx";
+import { observable } from "mobx";
 import * as drivelist from "drivelist";
 import { IconNames } from "@blueprintjs/icons";
 import { ALL_DIRS } from "../utils/platform";

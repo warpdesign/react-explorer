@@ -11,3 +11,4 @@ export const TAB_ICONS = [
     {regex: /^\/cy\/home$/, icon: "home"},
     {regex: /^\/cy\/videos$/, icon: "video"}
 ];
+export const SHORTCUTS = ['cypress', 'Downloads', 'Images', 'Music', 'Documents', 'Desktop', 'Videos'];
