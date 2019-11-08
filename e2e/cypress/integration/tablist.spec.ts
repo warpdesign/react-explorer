@@ -128,7 +128,7 @@ describe("tablist", () => {
         .should('equal', 1);
     });
 
-    it.only('clicking on an inactive tab should activate it', () => {
+    it('clicking on an inactive tab should activate it', () => {
         // check that first element is active
         cy.getTab(0, 0)
         .should('have.class', Classes.INTENT_PRIMARY);
@@ -157,7 +157,7 @@ describe("tablist", () => {
     // https://github.com/cypress-io/cypress/issues/10
     // a workaround could be to use getComputedStyle() to calculate the generated styles
     // for the tab element
-    // it.only('close button should have its opacity increase on mouseover', () => {
+    // it('close button should have its opacity increase on mouseover', () => {
     //     cy.addTab(0);
 
     //     cy.getTab(0)
