@@ -460,7 +460,7 @@ export class ToolbarClass extends React.Component<IProps, PathInputState> {
                         </Trans>
                     </p>
                 </Alert>
-                <Button rightIcon="arrow-right" disabled={status === -1} onClick={this.onSubmit} />
+                <Button rightIcon="arrow-right" className="data-cy-submit-path" disabled={status === -1} onClick={this.onSubmit} />
             </ControlGroup>
         )
     }

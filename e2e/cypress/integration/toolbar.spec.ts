@@ -60,6 +60,11 @@ describe("toolbar", () => {
             .then(() => {
                 expect(stubs.cd[0]).to.be.called;
             });
+
+        cy.get(".data-cy-alert")
+            .should("be.visible")
+            .find(".bp3-button")
+            .click();
     });
 
     it("type path and escape clears path with previous value", () => {
@@ -77,8 +82,9 @@ describe("toolbar", () => {
             });
     });
 
-    it("type non valid path should show alert then focus input", () => {
-        cy.get("#view_0 [data-cy-path]").type(":{enter}");
+    it("type non valid path should show alert then focus input", () => {       
+        cy.get("#view_0 [data-cy-path]")
+        .type(":{enter}");
 
         cy.get(".data-cy-alert")
             .should("be.visible")

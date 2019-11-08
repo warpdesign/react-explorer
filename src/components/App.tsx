@@ -7,6 +7,7 @@ import { Provider, observer, inject } from "mobx-react";
 import { SideView } from "./SideView";
 import { LogUI, Logger } from "./Log";
 import { Downloads } from "./Downloads";
+import * as drivelist from "drivelist";
 import { remote, ipcRenderer } from "electron";
 import { withNamespaces, WithNamespaces, Trans } from "react-i18next";
 import { AppToaster } from "./AppToaster";
@@ -16,6 +17,7 @@ import { FileState } from "../state/fileState";
 import { SettingsState } from "../state/settingsState";
 import { PrefsDialog } from "./dialogs/PrefsDialog";
 import { ShortcutsDialog } from "./dialogs/ShortcutsDialog";
+import { LeftPanel } from "./LeftPanel";
 import { shouldCatchEvent } from "../utils/dom";
 import { sendFakeCombo } from "./WithMenuAccelerators";
 import { isPackage, isWin } from "../utils/platform";
@@ -47,6 +49,8 @@ declare global {
     interface Window {
         appState: AppState;
         settingsState: SettingsState;
+        remote: any;
+        drivelist:any;
     }
 }
 
@@ -90,6 +94,8 @@ class App extends React.Component<AppProps> {
         if (ENV.CY) {
             window.appState = this.appState;
             window.settingsState = settingsState;
+            window.remote = remote;
+            window.drivelist = drivelist;
         }
 
         Logger.success(
@@ -391,6 +397,7 @@ class App extends React.Component<AppProps> {
                     <KeyboardHotkeys />
                     <Nav></Nav>
                     <div onClickCapture={this.handleClick} className={mainClass}>
+                        <LeftPanel hide={!isExplorer}></LeftPanel>
                         <SideView
                             viewState={viewStateLeft}
                             hide={!isExplorer}

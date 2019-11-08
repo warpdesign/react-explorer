@@ -4,8 +4,45 @@ const CopyPlugin = require("copy-webpack-plugin");
 const webpack = require("webpack");
 const packageJson = require("./package.json");
 const gitHash = require("../scripts/hash");
-const platform = require("process").platform;
-const release = require("os").release();
+const MOCKS_PATH = 'cypress/mocks/';
+const RELEASE = require('os').release();
+const PLATFORM = require('process').platform;
+const fs = require('fs');
+
+function resolveMock(moduleName) {
+  return path.resolve(__dirname, `${MOCKS_PATH}${moduleName}.js`);
+}
+
+/**
+ * Creates the alias configuration object for webpack
+ * 
+ * For each file found in mockPath, create a new entry inside an object pointing to this file.
+ * 
+ * Adding a new mock for the end to end build is as easy as adding a new file having the name
+ * of the module to mock.
+ * 
+ * eg.
+ * 
+ * contents of mockPath:
+ * ==
+ * fs.js
+ * process.js
+ * ==
+ * 
+ * returned object:
+ * 
+ * { fs: '<full path to mockPath>/fs.js', fs: '<full path to mockPath>/process.js' }
+ * 
+ * @param {string} mockPath path to the mocks directory
+ */
+function webpackAliases(mockPath) {
+  const mockNames = fs.readdirSync(mockPath).map(file => file.replace('.js', ''));
+  console.log('Generating webpack alias for mocks', mockNames);
+  return mockNames.reduce((acc, name) => {
+    acc[name] = resolveMock(name);
+    return acc;
+  }, {});
+}
 
 const baseConfig = {
   output: {
@@ -13,15 +50,10 @@ const baseConfig = {
     filename: "[name].js"
   },
   externals: {
-    os: `{release: function() { return "${release}"}, tmpdir: function() { return "/tmpdir" }, homedir: function() { return "/homedir" }}`,
-    process: `{process: "React-Explorer", platform: "${platform}"}`,
-    electron:
-      '{ipcRenderer: {send: function() {}, on: function(event, method) { document.addEventListener(event, function(e) { method(e, {data: e.data, combo: e.combo}); })}}, remote: { getCurrentWindow: () => {}, Menu: { buildFromTemplate: function() { return { popup: function() {}, closePopup: function() { } };}},app: { getLocale: function() { return "en"; }, getPath: function(str) { return "cy_" + str; } } } }',
-    child_process: "{exec: function(str, cb) { cb(); }}",
-    fs: "{}",
     path: "{}",
     net: "{}",
-    tls: "{}"
+    tls: "{}",
+    fs: "{}"
   },
   node: {
     __dirname: false
@@ -31,7 +63,8 @@ const baseConfig = {
   mode: "development",
   resolve: {
     // Add '.ts' and '.tsx' as resolvable extensions.
-    extensions: [".ts", ".tsx", ".js", ".json", ".css"]
+    extensions: [".ts", ".tsx", ".js", ".json", ".css"],
+    alias: webpackAliases(MOCKS_PATH)
   },
 
   module: {
@@ -79,15 +112,6 @@ const baseConfig = {
       }
     ]
   }
-
-  // When importing a module whose path matches one of the following, just
-  // assume a corresponding global variable exists and use that instead.
-  // This is important because it allows us to avoid bundling all of our
-  // dependencies, which allows browsers to cache those libraries between builds.
-  // externals: {
-  //     "react": "React",
-  //     "react-dom": "ReactDOM"
-  // }
 };
 
 module.exports = [
@@ -104,7 +128,9 @@ module.exports = [
           "ENV.CY": true,
           "ENV.NODE_ENV": JSON.stringify(baseConfig.mode),
           "ENV.VERSION": JSON.stringify(packageJson.version),
-          "ENV.HASH": JSON.stringify(gitHash)
+          "ENV.HASH": JSON.stringify(gitHash),
+          "__RELEASE__": JSON.stringify(RELEASE),
+          "__PLATFORM__": JSON.stringify(PLATFORM)
         }),
         new CopyPlugin([
           {

@@ -1,5 +1,5 @@
 import { platform } from 'process';
-import { release } from 'os';
+import { release, userInfo } from 'os';
 import { remote, app } from 'electron';
 
 declare var ENV: any;
@@ -23,7 +23,7 @@ function getAppInstance() : App {
     let appInstance:App = app || remote && remote.app;
     
     if (!appInstance) {
-        const getPath:(name:string) => string = require('./test-helpers').getPath;
+        const getPath:(name:string) => string = require('./test/helpers').getPath;
         // simulate getPath for test environment
         appInstance = {
             getPath
@@ -54,3 +54,5 @@ export const DOCS_DIR = appInstance.getPath('documents');
 export const DESKTOP_DIR = appInstance.getPath('desktop');
 export const PICTURES_DIR = appInstance.getPath('pictures');
 export const VIDEOS_DIR = appInstance.getPath('videos');
+export const ALL_DIRS = { HOME_DIR, DOWNLOADS_DIR, PICTURES_DIR, MUSIC_DIR, DOCS_DIR, DESKTOP_DIR, VIDEOS_DIR };
+export const USERNAME = userInfo().username || 'username';

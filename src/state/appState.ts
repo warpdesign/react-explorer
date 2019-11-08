@@ -6,6 +6,7 @@ import { clipboard, shell } from "electron";
 import { lineEnding, DOWNLOADS_DIR } from "../utils/platform";
 import { ViewDescriptor } from "../components/TabList";
 import { WinState, WindowSettings } from "./winState";
+import { FavoritesState } from "./favoritesState";
 
 declare var ENV: any;
 
@@ -50,6 +51,8 @@ export class AppState {
     caches: FileState[] = new Array();
 
     winStates: WinState[] = observable<WinState>([]);
+
+    favoritesState: FavoritesState = new FavoritesState();
 
     @observable
     isExplorer = true;
@@ -377,7 +380,7 @@ export class AppState {
     /* /transfers */
 
     getActiveCache(): FileState {
-        const winState = this.winStates[0];        
+        const winState = this.winStates[0];
         const view = winState.getActiveView();
         return this.isExplorer
             ? view.caches.find(cache => cache.isVisible === true)

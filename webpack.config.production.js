@@ -1,6 +1,7 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const CleanWebpackPlugin = require('clean-webpack-plugin');
+const TerserPlugin = require('terser-webpack-plugin');
 const CopyPlugin = require('copy-webpack-plugin');
 const webpack = require('webpack');
 const packageJson = require('./package.json');
@@ -15,6 +16,19 @@ const baseConfig = {
         __dirname: false
     },
     mode: "production",
+    optimization: {
+        minimizer: [
+            new TerserPlugin({
+                cache: true,
+                parallel: true,
+                terserOptions: {
+                    compress: {
+                        reduce_vars: false
+                    }
+                }
+              }),
+        ]
+    },    
     resolve: {
         // Add '.ts' and '.tsx' as resolvable extensions.
         extensions: [".ts", ".tsx", ".js", ".json", ".css"]

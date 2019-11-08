@@ -11,7 +11,8 @@ declare var ENV: any;
 
 const ENV_E2E = !!process.env.E2E;
 const SOURCE_PATH = './build';
-const HTML_PATH = `file://${__dirname}/index.html`;
+const HTML_URL = `file://${__dirname}/index.html`;
+const HTML_PATH = `${__dirname}/index.html`;
 
 const ElectronApp = {
     mainWindow: <Electron.BrowserWindow>null,
@@ -22,7 +23,7 @@ const ElectronApp = {
     /**
      * Listen to Electron app events
      */
-    init() {
+    async init() {
         app.on('ready', () => this.onReady());
         // prevent app from exiting at first request: the user may attempt to exit the app
         // while transfers are in progress so we first send a request to the frontend
@@ -46,8 +47,6 @@ const ElectronApp = {
             }
         });
 
-        console.log('here');
-
         // when interrupt is received we have to force exit
         process.on('SIGINT', function () {
             console.log('*** BREAK');
@@ -64,10 +63,11 @@ const ElectronApp = {
         console.log('Create Main Window');
 
         const settings = WindowSettings.getSettings(0);
-        console.log('settings', settings);
+        // console.log('settings', settings);
 
         this.mainWindow = new BrowserWindow({
             minWidth: WindowSettings.DEFAULTS.minWidth,
+            minHeight: WindowSettings.DEFAULTS.minHeight,
             width: settings.width,
             height: settings.height,
             x: settings.x,
@@ -91,7 +91,8 @@ const ElectronApp = {
 
         this.mainWindow.initialSettings = settings.getCustom();
 
-        this.mainWindow.loadURL(HTML_PATH);
+        // this.mainWindow.loadURL(HTML_PATH);
+        this.mainWindow.loadFile(HTML_PATH);
 
         // this.mainWindow.on('close', () => app.quit());
 

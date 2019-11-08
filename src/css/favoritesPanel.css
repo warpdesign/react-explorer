@@ -1,0 +1,36 @@
+.favoritesPanel {
+    position:relative;
+    overflow:auto;
+    flex-shrink:0;
+    width:200px;
+    border:1px dotted gray;
+    margin: 0;
+    list-style-type: none;
+    background: rgba(206, 217, 224, 0.5);
+    padding: 5px;
+    font-size:13px;
+}
+
+.favoritesPanel:before {
+    position: absolute;
+    top: -2px;
+    right: -2px;
+    bottom: -2px;
+    left: -2px;
+    border-radius: 4px;
+    content: "";
+    box-shadow: 0 0 2px 2px inset rgb(231, 236, 239);
+}
+
+.favoritesPanel .bp3-tree-node-content-0 {
+    color:#5c7080;
+    pointer-events:none;
+}
+
+.favoritesPanel .bp3-tree-node-content-0:hover {
+    background-color:transparent;
+}
+
+.favoritesPanel .bp3-tree-node-content-0 .bp3-icon {
+    pointer-events: all;
+}

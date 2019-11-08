@@ -7,7 +7,9 @@ import { sendFakeCombo } from "./WithMenuAccelerators";
 import { ContextMenu } from './ContextMenu';
 import { MenuItemConstructorOptions, MenuItem } from "electron";
 import { SettingsState } from "../state/settingsState";
-import { DOWNLOADS_DIR, HOME_DIR, DOCS_DIR, DESKTOP_DIR, MUSIC_DIR, PICTURES_DIR, VIDEOS_DIR } from '../utils/platform';
+// import { DOWNLOADS_DIR, HOME_DIR, DOCS_DIR, DESKTOP_DIR, MUSIC_DIR, PICTURES_DIR, VIDEOS_DIR } from '../utils/platform';
+const Platform = require('../utils/platform');
+import Icons from '../constants/icons';
 import { AppAlert } from "./AppAlert";
 
 /**
@@ -31,34 +33,19 @@ class TabListClass extends React.Component<InjectedProps> {
     menuFolderRef: React.RefObject<ContextMenu> = React.createRef();
     menuIndex = 0;
 
-    tabIcons = [{
-        regex: new RegExp('^' + DOWNLOADS_DIR + '$'),
-        icon: 'download'
-    },
-    {
-        regex: new RegExp('^' + MUSIC_DIR + '$'),
-        icon: 'music'
-    },
-    {
-        regex: new RegExp('^' + PICTURES_DIR + '$'),
-        icon: 'camera'
-    },
-    {
-        regex: new RegExp('^' + DESKTOP_DIR + '$'),
-        icon: 'desktop'
-    },
-    {
-        regex: new RegExp('^' + DOCS_DIR + '$'),
-        icon: 'projects'
-    },
-    {
-        regex: new RegExp('^' + HOME_DIR + '$'),
-        icon: 'home'
-    },
-    {
-        regex: new RegExp('^' + VIDEOS_DIR + '$'),
-        icon: 'video'
-    }];
+    /**
+     * build a list of { regex, IconName } to match folders with an icon
+     * For ex:
+     * {
+     *    regex: /^/Users/leo$/,
+     *    icon: 'home'
+     * }
+     */
+    tabIcons = Object.keys(Icons)
+     .map((dirname:string) => ({
+         regex: new RegExp(`^${Platform[dirname]}$`),
+         icon: Icons[dirname]
+     }));
 
     constructor(props: InjectedProps) {
         super(props);
@@ -107,17 +94,10 @@ class TabListClass extends React.Component<InjectedProps> {
         });
     }
 
-    onMenuClick = (item: number) => {
-        console.log('menu Click', item);
-    }
-
-    onMenuFolderClick = (item: number) => {
-        console.log()
-    }
-
     onContextMenu = (menuIndex: number) => {
+        const tabMenuTemplate = this.getTabMenu();
         this.menuIndex = menuIndex;
-        this.menuRef.current.showMenu();
+        this.menuRef.current.showMenu(tabMenuTemplate);
     }
 
     onItemClick = (menuItem: MenuItem & { id: string }) => {
@@ -144,7 +124,6 @@ class TabListClass extends React.Component<InjectedProps> {
     }
 
     onFolderItemClick = (menuItem: MenuItem & { id: string }) => {
-        console.log('folderItem click', menuItem);
         const { viewState } = this.injected;
         const cache = viewState.getVisibleCache();
         if (menuItem.id) {
@@ -231,12 +210,11 @@ class TabListClass extends React.Component<InjectedProps> {
         const caches = viewState.caches;
         // TODO: this will be created at each render: this should only be re-rendered
         // whenever the language has changed
-        const tabMenuTemplate = this.getTabMenu();
 
         return (
             <ButtonGroup fill className="tablist" alignText="center">
-                <ContextMenu ref={this.menuRef} onItemClick={this.onMenuClick} template={tabMenuTemplate}></ContextMenu>
-                <ContextMenu ref={this.menuFolderRef} onItemClick={this.onMenuFolderClick} template={null}></ContextMenu>
+                <ContextMenu ref={this.menuRef} template={null}></ContextMenu>
+                <ContextMenu ref={this.menuFolderRef} template={null}></ContextMenu>
                 {
                     caches.map((cache, index) => {
                         const closeIcon = caches.length > 1 && <Icon iconSize={12} htmlTitle={t('TABS.CLOSE')} className="closetab" intent="warning" onClick={this.closeTab.bind(this, index)} icon="cross"></Icon>;

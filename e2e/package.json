@@ -16,16 +16,15 @@
     "license": "MIT",
     "dependencies": {
         "@cypress/webpack-preprocessor": "^4.0.2",
-        "cypress": "^3.4.1",
-        "ts-loader": "^5.3.1",
-        "typescript": "^3.2.2",
-        "webpack": "^4.27.1",
-        "local-web-server": "^3.0.7",
         "clean-webpack-plugin": "^2.0.2",
-        "copy-webpack-plugin": "^5.0.4"
+        "copy-webpack-plugin": "^5.0.4",
+        "local-web-server": "^3.0.7",
+        "ts-loader": "^5.3.1",
+        "typescript": "^3.5.3",
+        "webpack": "^4.27.1"
     },
     "devDependencies": {
-        "@bahmutov/add-typescript-to-cypress": "^2.0.0",
+        "cypress": "^3.5.0",
         "pm2": "^4.1.2"
     }
 }
