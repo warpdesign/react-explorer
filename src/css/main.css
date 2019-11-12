@@ -74,12 +74,15 @@ button.small:hover{
     /* padding:10px; */
 }
 
-#root .sideview{
+#root .sideview {
     position:relative;
-    width:50%;
-    min-width:360px;
+    width:calc(100% - 200px);
     flex-grow:1;
     border-left: 1px solid rgb(189, 195, 199);
+}
+
+#root .singleView .sideview {
+    width:calc((100% - 200px) / 2);
 }
 
 .bp3-dark #root .sideview {

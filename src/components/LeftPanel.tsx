@@ -169,18 +169,18 @@ export class LeftPanelClass extends React.Component<IProps, LeftPanelState> {
         shortcuts.childNodes = favorites.shortcuts.map((shortcut, i) => ({
             id: `s_${shortcut.path}`,
             key: `s_${shortcut.path}`,
-            label: shortcut.label === 'HOME_DIR' ? USERNAME: t(`FAVORITES_PANEL.${shortcut.label}`),
+            label: <span title={shortcut.path}>
+                    {shortcut.label === 'HOME_DIR' ? USERNAME : t(`FAVORITES_PANEL.${shortcut.label}`)}
+                    </span>,
             icon: Icons[shortcut.label],
-            title: shortcut.path,
             nodeData: shortcut.path
         }));
 
         places.childNodes = favorites.places.map((place, i) => ({
             id: `p_${place.path}`,
             key: `p_${place.path}`,
-            label: place.label,
+            label: <span title={place.path}>{place.label}</span>,
             icon: place.icon,
-            title: place.path,
             nodeData: place.path
         }));
 
