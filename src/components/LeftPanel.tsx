@@ -4,6 +4,7 @@ import { observer, inject } from "mobx-react";
 import { withNamespaces, WithNamespaces } from 'react-i18next';
 import classNames from "classnames";
 import { IReactionDisposer, reaction, toJS } from "mobx";
+import i18next from 'i18next';
 import { USERNAME } from "../utils/platform";
 import Icons from "../constants/icons";
 import { FavoritesState, Favorite } from "../state/favoritesState";
@@ -58,7 +59,22 @@ export class LeftPanelClass extends React.Component<IProps, LeftPanelState> {
         this.favoritesState = this.injected.appState.favoritesState;
 
         this.installReaction();
+        this.bindLanguageChange();
     }
+
+    private bindLanguageChange = () => {
+        console.log('languageChanged');
+        i18next.on('languageChanged', this.onLanguageChanged);
+    }
+
+    private unbindLanguageChange = () => {
+        i18next.off('languageChanged', this.onLanguageChanged);
+    }
+
+    public onLanguageChanged = (lang: string) => {
+        console.log('building nodes', lang);
+        this.buildNodes(this.favoritesState);
+    }    
 
     private get injected() {
         return this.props as InjectedProps;
@@ -66,6 +82,7 @@ export class LeftPanelClass extends React.Component<IProps, LeftPanelState> {
 
     componentWillUnmount() {
         this.disposers.forEach(disposer => disposer());
+        this.unbindLanguageChange();
     }
 
     private installReaction() {
@@ -166,6 +183,10 @@ export class LeftPanelClass extends React.Component<IProps, LeftPanelState> {
             title: place.path,
             nodeData: place.path
         }));
+
+        // update root nodes label too
+        places.label = t('FAVORITES_PANEL.PLACES');
+        shortcuts.label = t('FAVORITES_PANEL.SHORTCUTS');
 
         this.setState(this.state);
     }
