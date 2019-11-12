@@ -11,6 +11,10 @@
     font-size:13px;
 }
 
+.bp3-dark .favoritesPanel {
+    background-color:rgb(41, 56, 66);
+}
+
 /* .favoritesPanel:before {
     position: absolute;
     top: -2px;

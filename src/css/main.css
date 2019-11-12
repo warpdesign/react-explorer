@@ -82,6 +82,10 @@ button.small:hover{
     border-left: 1px solid rgb(189, 195, 199);
 }
 
+.bp3-dark #root .sideview {
+    border-left: 1px solid rgb(14,25,34);
+}
+
 /* #root .sideview:before{
     position: absolute;
     top: -2px;
@@ -189,14 +193,14 @@ button.small:hover{
 #root .bp3-navbar {
     border-bottom: 1px solid rgb(189, 195, 199);
     background: rgb(246,246,246);
-    background: linear-gradient(180deg, rgba(246,246,246,1) 0%, rgba(210,216,219,1) 50%, rgba(230,236,239,1) 100%);
-    background: rgb(246,246,246);
-    background: linear-gradient(180deg, rgba(246,246,246,1) 0%, rgba(210,216,219,1) 10%, rgba(230,236,239,1) 100%);
-    background: rgb(230,236,239);
-    background: linear-gradient(180deg, rgba(230,236,239,1) 0%, rgba(246,246,246,1) 84%);
-    background: rgb(246,246,246);
     background: linear-gradient(180deg, rgba(246,246,246,1) 16%, rgba(230,236,239,1) 100%);
     box-shadow:none;
+}
+
+.bp3-dark #root .bp3-navbar {
+    border-bottom: 1px solid rgb(14,25,34);
+    background: rgb(46,46,46);
+    background: linear-gradient(180deg, rgba(56,56,56,1) 16%, rgba(40,56,69,1) 100%);
 }
 
 .bp3-navbar .download .bp3-button-text{
@@ -321,6 +325,10 @@ body.bp3-dark .bp3-loader.active{
 
 .status-bar {
     border-top: 1px solid rgb(189, 195, 199);
+}
+
+.bp3-dark .status-bar {
+    border-top: 1px solid rgb(14,25,34);
 }
 
 .status-bar.offline > .bp3-icon:after{
