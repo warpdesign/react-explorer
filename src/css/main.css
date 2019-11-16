@@ -353,7 +353,16 @@ body.bp3-dark .bp3-loader.active{
 
 .status-bar {
     border-top: 1px solid rgb(189, 195, 199);
-    /* background-color: rgba(19, 124, 189, 0.3); */
+}
+
+/* FIXME: we only used disable state to use the styles associated with disabled state */
+.status-bar .bp3-input:disabled,
+.status-bar .bp3-input.bp3-disabled,
+.status-bar .bp3-button.bp3-disabled,
+.status-bar button.bp3-minimal.bp3-disabled,
+.status-bar button.bp3-minimal.bp3-disabled:hover,
+.status-bar.bp3-input-group.bp3-disabled {
+    cursor:default;
 }
 
 .bp3-dark .status-bar {
