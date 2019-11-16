@@ -1,6 +1,7 @@
 import { AppState } from "../state/appState";
 import * as React from "react";
 import * as ReactDOM from "react-dom";
+import { platform } from "process";
 import { FocusStyleManager, Alert, Classes, Intent } from "@blueprintjs/core";
 import classNames from "classnames";
 import { Provider, observer, inject } from "mobx-react";
@@ -351,8 +352,9 @@ class App extends React.Component<AppProps> {
         const { t } = this.props;
         const winState = this.appState.winStates[0];
         const isSplitView = winState.splitView;
-        const mainClass = classNames('main', {
-            singleView: !isSplitView
+        const mainClass = classNames(`main ${platform}`, {
+            singleView: !isSplitView,
+            dualView: isSplitView
         });
         const viewStateLeft = winState.views[0];
         const viewStateRight = winState.views[1];

@@ -76,28 +76,54 @@ button.small:hover{
 
 #root .sideview {
     position:relative;
-    width:calc(100% - 200px);
+    width:calc((100% - 200px) / 2);
     flex-grow:1;
-    border-left: 1px solid rgb(189, 195, 199);
 }
 
 #root .singleView .sideview {
-    width:calc((100% - 200px) / 2);
+    width:calc(100% - 200px);
+    border-left: 1px solid rgb(189, 195, 199);
+}
+
+#root .dualView #view_0 {
+    border-left: 1px solid rgb(189, 195, 199);
+}
+
+#root .dualView #view_0.active {
+    border-color: transparent;
+}
+
+#root .darwin.dualView #view_1.active:before {
+    border-bottom-right-radius: 5px;
 }
 
 .bp3-dark #root .sideview {
     border-left: 1px solid rgb(14,25,34);
 }
 
-/* #root .sideview:before{
+#root .dualView .sideview:before{
     position: absolute;
-    top: -2px;
-    right: -2px;
-    bottom: -2px;
-    left: -2px;
-    border-radius: 4px;
+    pointer-events:none;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
     content: "";
-} */
+    opacity: .6;
+    z-index:99;
+    border: 1px solid rgb(189, 195, 199);
+    border-top:none;
+    border-bottom:none;
+}
+
+#root .dualView .sideview.active:before {
+    opacity:1;
+    border: 2px solid rgba(19, 124, 189, .9);
+}
+
+#root .dualView .sideview.inactive:before{
+    border-left:none;
+}
 
 /* #root .sideview:before{
     box-shadow: 0 0 2px 2px inset rgb(231, 236, 239);
@@ -328,6 +354,7 @@ body.bp3-dark .bp3-loader.active{
 
 .status-bar {
     border-top: 1px solid rgb(189, 195, 199);
+    /* background-color: rgba(19, 124, 189, 0.3); */
 }
 
 .bp3-dark .status-bar {
