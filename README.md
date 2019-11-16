@@ -102,10 +102,10 @@ This will start Jest and run every spec files found in src. Every test file can 
 
 ### End to End testing
 
-End to end tests are using Cypress and are in the separate `e2e` directory:
+End to end tests are using Cypress and are in the separate `e2e` directory. You must install & configure Cypress before running E2E tests. This needs to be done one once using the following commands:
 
 ```shell
-cd e2e
+cd e2e && npm install && cd ..
 ```
 
 The first time you run the tests, you also need to install cypress dependencies:
@@ -121,6 +121,8 @@ npm run build
 ```
 
 This will create a new Electron-Explorer in the `build-e2e` directory.
+
+You may also type `npm run watch` if you want to rebuild automatically the e2e build after a change has been detected inside the sources.
 
 For React-Explorer to run without Electron, a local webserver needs to be started before running the tests:
 

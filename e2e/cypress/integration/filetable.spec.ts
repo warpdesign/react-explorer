@@ -252,12 +252,19 @@ describe("filetable", () => {
                 .should("eq", 1);
         });
 
-        it("arrow up should select the previous element", () => {
-            // select second element
-            cy.get("#view_0").trigger("keydown", { keyCode: KEYS.Down });
-            cy.get("#view_0").trigger("keydown", { keyCode: KEYS.Down });
+        it.only("arrow up should select the previous element", () => {
+            // be sure to be in a predictable state, without any selected element
+            cy.triggerHotkey(`${MOD_KEY}a`);
+            cy.triggerHotkey(`${MOD_KEY}i`);
 
-            // select first element
+            // activate the first then second element
+            cy.get("#view_0")
+                .trigger("keydown", { keyCode: KEYS.Down });
+
+            cy.get("#view_0")
+                .trigger("keydown", { keyCode: KEYS.Down });
+
+            // activate previous element: should be the second one
             cy.get("#view_0")
                 .trigger("keydown", { keyCode: KEYS.Up })
                 .find("[data-cy-file]")

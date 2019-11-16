@@ -38,7 +38,8 @@ export class FavoritesState {
             const mountpoint = drive.mountpoints[0];
 
             return {
-                label: mountpoint.label,
+                // Some mountpoints may not have a label (eg. win: c:\)
+                label: mountpoint.label || mountpoint.path,
                 path: mountpoint.path,
                 icon: (drive.isRemovable || drive.isVirtual) ? IconNames.FLOPPY_DISK : IconNames.DATABASE
             } as Favorite;

@@ -92,6 +92,7 @@ export class SideViewClass extends React.Component<InjectedProps>{
 
         let activeClass = classnames('sideview', {
             active: active,
+            inactive: !active,
             hidden: this.props.hide,
             dropTarget: dropAndOver,
             notDropTarget: isOver && !canDrop

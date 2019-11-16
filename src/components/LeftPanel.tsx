@@ -4,6 +4,7 @@ import { observer, inject } from "mobx-react";
 import { withNamespaces, WithNamespaces } from 'react-i18next';
 import classNames from "classnames";
 import { IReactionDisposer, reaction, toJS } from "mobx";
+import i18next from 'i18next';
 import { USERNAME } from "../utils/platform";
 import Icons from "../constants/icons";
 import { FavoritesState, Favorite } from "../state/favoritesState";
@@ -58,7 +59,22 @@ export class LeftPanelClass extends React.Component<IProps, LeftPanelState> {
         this.favoritesState = this.injected.appState.favoritesState;
 
         this.installReaction();
+        this.bindLanguageChange();
     }
+
+    private bindLanguageChange = () => {
+        console.log('languageChanged');
+        i18next.on('languageChanged', this.onLanguageChanged);
+    }
+
+    private unbindLanguageChange = () => {
+        i18next.off('languageChanged', this.onLanguageChanged);
+    }
+
+    public onLanguageChanged = (lang: string) => {
+        console.log('building nodes', lang);
+        this.buildNodes(this.favoritesState);
+    }    
 
     private get injected() {
         return this.props as InjectedProps;
@@ -66,6 +82,7 @@ export class LeftPanelClass extends React.Component<IProps, LeftPanelState> {
 
     componentWillUnmount() {
         this.disposers.forEach(disposer => disposer());
+        this.unbindLanguageChange();
     }
 
     private installReaction() {
@@ -152,20 +169,24 @@ export class LeftPanelClass extends React.Component<IProps, LeftPanelState> {
         shortcuts.childNodes = favorites.shortcuts.map((shortcut, i) => ({
             id: `s_${shortcut.path}`,
             key: `s_${shortcut.path}`,
-            label: shortcut.label === 'HOME_DIR' ? USERNAME: t(`FAVORITES_PANEL.${shortcut.label}`),
+            label: <span title={shortcut.path}>
+                    {shortcut.label === 'HOME_DIR' ? USERNAME : t(`FAVORITES_PANEL.${shortcut.label}`)}
+                    </span>,
             icon: Icons[shortcut.label],
-            title: shortcut.path,
             nodeData: shortcut.path
         }));
 
         places.childNodes = favorites.places.map((place, i) => ({
             id: `p_${place.path}`,
             key: `p_${place.path}`,
-            label: place.label,
+            label: <span title={place.path}>{place.label}</span>,
             icon: place.icon,
-            title: place.path,
             nodeData: place.path
         }));
+
+        // update root nodes label too
+        places.label = t('FAVORITES_PANEL.PLACES');
+        shortcuts.label = t('FAVORITES_PANEL.SHORTCUTS');
 
         this.setState(this.state);
     }

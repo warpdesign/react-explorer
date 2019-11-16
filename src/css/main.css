@@ -43,6 +43,11 @@ button.small:hover{
     -webkit-user-select: none;
 }
 
+.sideview > .bp3-control-group > :first-child,
+.sideview > .bp3-control-group > :last-child {
+    border-radius:0;
+}
+
 .main > .hidden{
     display:none;
     pointer-events: none;
@@ -66,54 +71,87 @@ button.small:hover{
     justify-content: center;
     flex-grow:1;
     overflow:hidden;
-    padding:10px;
+    /* padding:10px; */
 }
 
-#root .sideview{
+#root .sideview {
     position:relative;
-    width:50%;
-    min-width:360px;
+    width:calc((100% - 200px) / 2);
     flex-grow:1;
 }
 
-#root .sideview:before{
+#root .singleView .sideview {
+    width:calc(100% - 200px);
+}
+
+#root .sideview {
+    border-left: 1px solid rgb(189, 195, 199);
+}
+
+#root .dualView #view_0.inactive {
+    border-right-color:transparent;
+}
+
+#root .dualView #view_0.active {
+    border-left-color:transparent;
+}
+
+#root .dualView #view_1.inactive{
+    border-left-color: rgb(131, 135, 138);
+}
+
+#root .darwin.dualView #view_1.active:before {
+    border-bottom-right-radius: 5px;
+}
+
+#root .dualView .sideview:before{
     position: absolute;
-    top: -2px;
-    right: -2px;
-    bottom: -2px;
-    left: -2px;
-    border-radius: 4px;
+    pointer-events:none;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: -1px;
     content: "";
+    opacity: .6;
+    z-index: 9;
+    border: 1px solid rgb(189, 195, 199);
+    border-top:none;
+    border-bottom:none;
 }
 
-#root .sideview:before{
-    box-shadow: 0 0 2px 2px inset rgb(231, 236, 239);
+#root .dualView .sideview.active:before {
+    opacity:1;
+    border: 2px solid rgba(19, 124, 189, .9);
 }
 
-.bp3-dark #root .sideview:before{
-    box-shadow: 0 0 2px 2px inset rgb(66, 84, 97);
+#root .dualView .sideview.inactive:before{
+    border-left:none;
 }
 
-#root .sideview.active:before{
-    box-shadow: 0 0 0px 2px inset rgba(19, 124, 189, 0.8);
-    z-index:2;
-    pointer-events: none;
+/* dark theme */
+.bp3-dark #root .singleView .sideview {
+    border-left: 1px solid rgb(14,25,34);
 }
 
-#root .singleView .sideview.active:before{
-    box-shadow: 0 0 2px 2px inset rgb(219, 219, 219);
+.bp3-dark #root .sideview,
+.bp3-dark #root .dualView #view_1.inactive {
+    border-color: rgb(14,25,34);
 }
 
-.bp3-dark #root .singleView .sideview:before{
-    box-shadow: 0 0 2px 2px inset rgb(66, 84, 97);
+.bp3-dark #root .dualView .sideview.inactive:before {
+    border-color: rgb(73, 75, 76);
 }
 
-#root .sideview.dropTarget:before{
-    box-shadow: 0 0 4px 2px inset #00b63d82;
+#root .sideview.dropTarget:before {
+    box-shadow: 0 0 4px 2px inset #00b63ddb;
 }
 
 #root .sideview.notDropTarget{
     cursor:no-drop;
+}
+
+#root .sideview.notDropTarget:before {
+    box-shadow: 0 0 4px 2px inset #b6000982;
 }
 
 #root .sideview:first-child{
@@ -178,6 +216,19 @@ button.small:hover{
 /* line height bug ? */
 .bp3-tree-node-caret > span{
     vertical-align:top;
+}
+
+#root .bp3-navbar {
+    border-bottom: 1px solid rgb(189, 195, 199);
+    background: rgb(246,246,246);
+    background: linear-gradient(180deg, rgba(246,246,246,1) 16%, rgba(230,236,239,1) 100%);
+    box-shadow:none;
+}
+
+.bp3-dark #root .bp3-navbar {
+    border-bottom: 1px solid rgb(14,25,34);
+    background: rgb(46,46,46);
+    background: linear-gradient(180deg, rgba(56,56,56,1) 16%, rgba(40,56,69,1) 100%);
 }
 
 .bp3-navbar .download .bp3-button-text{
@@ -300,6 +351,24 @@ body.bp3-dark .bp3-loader.active{
     border:1px solid rgba(16,22,26,.2);
 }
 
+.status-bar {
+    border-top: 1px solid rgb(189, 195, 199);
+}
+
+/* FIXME: we only used disable state to use the styles associated with disabled state */
+.status-bar .bp3-input:disabled,
+.status-bar .bp3-input.bp3-disabled,
+.status-bar .bp3-button.bp3-disabled,
+.status-bar button.bp3-minimal.bp3-disabled,
+.status-bar button.bp3-minimal.bp3-disabled:hover,
+.status-bar.bp3-input-group.bp3-disabled {
+    cursor:default;
+}
+
+.bp3-dark .status-bar {
+    border-top: 1px solid rgb(14,25,34);
+}
+
 .status-bar.offline > .bp3-icon:after{
     border-bottom: 1px solid rgba(255,0,0,.6);
     content: "";
@@ -373,9 +442,21 @@ body.bp3-dark .bp3-loader.active{
     background-color: rgb(88, 100, 109);
 }
 
+.sideview > .toolbar > .bp3-button-group > .bp3-button:not([class*="bp3-intent-"]) {
+    box-shadow: inset 0 0 0 1px rgba(16, 22, 26, 0.2), inset 0 -1px 0 rgba(16, 22, 26, 0.1);
+}
+
+.sideview > .toolbar > .bp3-button-group > .bp3-button:first-child:not([class*="bp3-intent-"]) {
+    margin-left:-1px;
+}
+
+.sideview > .toolbar > .bp3-button-group > .bp3-button:last-child:not([class*="bp3-intent-"]) {
+    box-shadow:inset 0 -1px 0 rgba(16, 22, 26, 0.1);
+}
+
 .tablist .bp3-button .bp3-button-text{
     overflow:hidden;
-    white-space: nowrap;    
+    white-space: nowrap;
     text-overflow:ellipsis;
 }
 

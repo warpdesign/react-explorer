@@ -791,7 +791,7 @@ export class FileTableClass extends React.Component<IProps, IState> {
 
     onScroll = debounce(({ scrollTop }: any) => {
         this.cache.scrollTop = scrollTop;
-        console.log('onScroll: updating scrollTop', scrollTop, this.cache.path);
+        // console.log('onScroll: updating scrollTop', scrollTop, this.cache.path);
     }, SCROLL_DEBOUNCE);
 
     rowGetter = (index: Index) => this.getRow(index.index);
@@ -801,7 +801,7 @@ export class FileTableClass extends React.Component<IProps, IState> {
         const { position } = this.state;
         const rowCount = this.state.nodes.length;
 
-        return (<div ref={this.setTableRef} onKeyDown={this.onInputKeyDown} className={`fileListSizerWrapper ${Classes.ELEVATION_0}`}>
+        return (<div ref={this.setTableRef} onKeyDown={this.onInputKeyDown} className={`fileListSizerWrapper`}>
             <AutoSizer>
                 {({ width, height }) => (
                     <Table
