@@ -791,7 +791,7 @@ export class FileTableClass extends React.Component<IProps, IState> {
 
     onScroll = debounce(({ scrollTop }: any) => {
         this.cache.scrollTop = scrollTop;
-        console.log('onScroll: updating scrollTop', scrollTop, this.cache.path);
+        // console.log('onScroll: updating scrollTop', scrollTop, this.cache.path);
     }, SCROLL_DEBOUNCE);
 
     rowGetter = (index: Index) => this.getRow(index.index);

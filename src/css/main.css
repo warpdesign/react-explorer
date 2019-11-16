@@ -92,6 +92,10 @@ button.small:hover{
     border-right-color:transparent;
 }
 
+#root .dualView #view_0.active {
+    border-left-color:transparent;
+}
+
 #root .dualView #view_1.inactive{
     border-left-color: rgb(131, 135, 138);
 }
@@ -106,7 +110,7 @@ button.small:hover{
     top: 0;
     right: 0;
     bottom: 0;
-    left: 0;
+    left: -1px;
     content: "";
     opacity: .6;
     z-index: 9;
