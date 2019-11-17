@@ -411,7 +411,7 @@ export class ToolbarClass extends React.Component<IProps, PathInputState> {
         const intent = status === -1 ? 'danger' : 'none';
         const count = selected.length;
 
-        const isRoot = fileCache.isRoot(fileCache.path);
+        const isRoot = fileCache.isRoot();
 
         return (
             <ControlGroup className="toolbar">
