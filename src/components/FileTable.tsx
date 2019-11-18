@@ -731,16 +731,8 @@ export class FileTableClass extends React.Component<IProps, IState> {
                 break;
 
             case KEYS.Backspace:
-                // TODO: this is used in Log as well, share the code !
-                const { nodes } = this.state;
-
-                if (!this.editingElement && nodes.length) {
-                    const node = nodes[0];
-                    const file = node.nodeData as File;
-
-                    if (!fileCache.isRoot(file.dir)) {
-                        this.cache.openParentDirectory();
-                    }
+                if (!this.editingElement && !this.cache.isRoot()) {
+                    this.cache.openParentDirectory();
                 }
                 break;
         }

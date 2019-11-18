@@ -562,7 +562,7 @@ export class FileState {
         });
     }
 
-    isRoot(path: string): boolean {
-        return this.api ? this.api.isRoot(path) : false;
+    isRoot(path = this.path): boolean {
+        return this.api ? path && this.api.isRoot(path) : false;
     }
 }
