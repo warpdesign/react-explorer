@@ -138,16 +138,15 @@ class TabListClass extends React.Component<InjectedProps> {
         }
     };
 
-    onFolderContextMenu = (e: React.MouseEvent) => {
+    onFolderContextMenu = (index:number, e: React.MouseEvent) => {
         const { t } = this.injected;
         const { viewState } = this.injected;
 
         e.preventDefault();
         e.stopPropagation();
 
-        // TODO: get path entries
-        const cache = viewState.getVisibleCache();
-        const tree = cache.getAPI().getParentTree(cache.path);
+        const cacheUnderMouse = viewState.caches[index];
+        const tree = cacheUnderMouse.getAPI().getParentTree(cacheUnderMouse.path);
 
         const template: MenuItemConstructorOptions[] = tree.map((el: { dir: string, fullname: string, name: string }) => {
             return {
@@ -223,7 +222,7 @@ class TabListClass extends React.Component<InjectedProps> {
                         const tabInfo = cache.getFS() && cache.getFS().displaypath(path) || { fullPath: '', shortPath: '' };
 
                         return (
-                            <Button key={"" + viewId + index} onContextMenu={() => this.onContextMenu(index)} onClick={this.selectTab.bind(this, index)} title={tabInfo.fullPath} intent={cache.isVisible ? "primary" : "none"} rightIcon={closeIcon} className="tab"><Icon onContextMenu={this.onFolderContextMenu} className="folder" icon={tabIcon}></Icon>{tabInfo.shortPath}</Button>
+                            <Button key={"" + viewId + index} onContextMenu={() => this.onContextMenu(index)} onClick={this.selectTab.bind(this, index)} title={tabInfo.fullPath} intent={cache.isVisible ? "primary" : "none"} rightIcon={closeIcon} className="tab"><Icon onContextMenu={this.onFolderContextMenu.bind(this, index)} className="folder" icon={tabIcon}></Icon>{tabInfo.shortPath}</Button>
                         )
                     })
                 }
