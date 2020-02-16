@@ -73,7 +73,6 @@ const ElectronApp = {
             x: settings.x,
             y: settings.y,
             webPreferences: {
-                enableBlinkFeatures: 'OverlayScrollbars,OverlayScrollbarsFlashAfterScrollUpdate,OverlayScrollbarsFlashWhenMouseEnter',
                 nodeIntegration: true
             },
             icon: isLinux && path.join(__dirname, 'icon.png') || undefined

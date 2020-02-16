@@ -31,6 +31,7 @@ require("@blueprintjs/core/lib/css/blueprint.css");
 require("@blueprintjs/icons/lib/css/blueprint-icons.css");
 require("../css/main.css");
 require("../css/windows.css");
+require("../css/scrollbars.css");
 
 interface AppProps extends WithNamespaces {
     initialSettings: {[key: string]: any};

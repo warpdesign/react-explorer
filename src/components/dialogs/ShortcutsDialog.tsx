@@ -24,8 +24,8 @@ class ShortcutsDialogClass extends React.Component<IShortcutsProps>{
                 { combo: "ctrl + alt + right", label: t('SHORTCUT.MAIN.NEXT_VIEW') },
                 { combo: "ctrl + alt + left", label: t('SHORTCUT.MAIN.PREVIOUS_VIEW') },
                 { combo: "mod + r", label: t('SHORTCUT.MAIN.RELOAD_VIEW') },
-                { combo: isMac && "mod + left" || "alt + left", label: t('SHORTCUT.ACTIVE_VIEW.BACKWARD_HISTORY') },
-                { combo: isMac && "mod + right" || "alt + right", label: t('SHORTCUT.ACTIVE_VIEW.FORWARD_HISTORY') },
+                // { combo: isMac && "mod + left" || "alt + left", label: t('SHORTCUT.ACTIVE_VIEW.BACKWARD_HISTORY') },
+                // { combo: isMac && "mod + right" || "alt + right", label: t('SHORTCUT.ACTIVE_VIEW.FORWARD_HISTORY') },
                 { combo: "escape", label: t('SHORTCUT.LOG.TOGGLE') },
                 { combo: "mod + s", label: t('SHORTCUT.MAIN.KEYBOARD_SHORTCUTS') },
                 { combo: "mod + ,", label: t('SHORTCUT.MAIN.PREFERENCES') },
@@ -36,7 +36,7 @@ class ShortcutsDialogClass extends React.Component<IShortcutsProps>{
             // group: t('SHORTCUT.GROUP.ACTIVE_VIEW')
             [
                 { combo: isMac && "mod + left" || "alt + left", label: t('SHORTCUT.ACTIVE_VIEW.BACKWARD_HISTORY') },
-                { combo: isMac && "mod + right" || "alt + left", label: t('SHORTCUT.ACTIVE_VIEW.FORWARD_HISTORY') },
+                { combo: isMac && "mod + right" || "alt + right", label: t('SHORTCUT.ACTIVE_VIEW.FORWARD_HISTORY') },
                 { combo: "meta + c", label: t('SHORTCUT.ACTIVE_VIEW.COPY') },
                 { combo: "meta + v", label: t('SHORTCUT.ACTIVE_VIEW.PASTE') },
                 { combo: "mod + shift + c", label: t('SHORTCUT.ACTIVE_VIEW.COPY_PATH') },

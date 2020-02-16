@@ -1,0 +1,73 @@
+.windows .ReactVirtualized__Table__Grid::-webkit-scrollbar,
+.linux .ReactVirtualized__Table__Grid::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+    margin: 4px; 
+}
+
+.windows .ReactVirtualized__Table__Grid::-webkit-scrollbar-thumb,
+.linux .ReactVirtualized__Table__Grid::-webkit-scrollbar-thumb {
+    background: rgba(90, 90, 90, .3);
+    border-radius:5px;
+}
+  
+.windows .ReactVirtualized__Table__Grid::-webkit-scrollbar-track,
+.linux .ReactVirtualized__Table__Grid::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0);
+}
+
+.windows .bp3-hotkey-column::-webkit-scrollbar,
+.linux .bp3-hotkey-column::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+.windows .bp3-hotkey-column::-webkit-scrollbar-thumb,
+.linux .bp3-hotkey-column::-webkit-scrollbar-thumb {
+    background: rgba(90, 90, 90, .3);
+    border-radius:5px;
+}
+  
+.windows .bp3-hotkey-column::-webkit-scrollbar-track,
+.linux .bp3-hotkey-column::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0);
+}
+
+.windows .favoritesPanel::-webkit-scrollbar,
+.linux .favoritesPanel::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+.windows .favoritesPanel::-webkit-scrollbar-thumb,
+.linux .favoritesPanel::-webkit-scrollbar-thumb {
+    background: rgba(90, 90, 90, .3);
+    border-radius:5px;
+}
+  
+.windows .favoritesPanel::-webkit-scrollbar-track,
+.linux .favoritesPanel::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0);
+}
+
+.windows .favoritesPanel,
+.linux .favoritesPanel {
+    overflow:overlay;
+}
+
+.windows .downloads::-webkit-scrollbar,
+.linux .downloads::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+.windows .downloads::-webkit-scrollbar-thumb,
+.linux .downloads::-webkit-scrollbar-thumb {
+    background: rgba(90, 90, 90, .3);
+    border-radius:5px;
+}
+  
+.windows .downloads::-webkit-scrollbar-track,
+.linux .downloads::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0);
+}
