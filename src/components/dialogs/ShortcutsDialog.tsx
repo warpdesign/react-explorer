@@ -2,6 +2,7 @@ import * as React from "react";
 import { Dialog, Classes, Button, KeyCombo } from "@blueprintjs/core";
 import { withNamespaces, WithNamespaces } from "react-i18next";
 import { isMac } from "../../utils/platform";
+import CONFIG from '../../config/appConfig'
 
 interface IShortcutsProps extends WithNamespaces {
     isOpen: boolean;
@@ -80,7 +81,7 @@ class ShortcutsDialogClass extends React.Component<IShortcutsProps>{
                 className="shortcutsDialog"
             >
                 <div className={`${Classes.DIALOG_BODY}`}>
-                    <div className="bp3-hotkey-column">
+                    <div className={`bp3-hotkey-column ${CONFIG.CUSTOM_SCROLLBAR_CLASSNAME}`}>
                         <h4 className={Classes.HEADING}>
                             {t('SHORTCUT.GROUP.GLOBAL')}
                         </h4>

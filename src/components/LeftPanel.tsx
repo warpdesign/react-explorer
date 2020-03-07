@@ -10,6 +10,8 @@ import Icons from "../constants/icons";
 import { FavoritesState, Favorite } from "../state/favoritesState";
 import { AppState } from "../state/appState";
 import { AppAlert } from "./AppAlert";
+import CONFIG from '../config/appConfig'
+
 require("../css/favoritesPanel.css");
 
 interface LeftPanelState {
@@ -176,7 +178,7 @@ export class LeftPanelClass extends React.Component<IProps, LeftPanelState> {
             nodeData: shortcut.path
         }));
 
-        places.childNodes = favorites.places.map((place, i) => ({
+        places.childNodes = favorites.places.map((place) => ({
             id: `p_${place.path}`,
             key: `p_${place.path}`,
             label: <span title={place.path}>{place.label}</span>,
@@ -196,7 +198,7 @@ export class LeftPanelClass extends React.Component<IProps, LeftPanelState> {
         const path = this.getActiveCachePath();
         this.setActiveNode(path);
         const { nodes } = this.state;
-        const classnames = classNames("favoritesPanel", {
+        const classnames = classNames(`favoritesPanel ${CONFIG.CUSTOM_SCROLLBAR_CLASSNAME}`, {
             hidden: this.props.hide
         });
 

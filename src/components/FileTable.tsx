@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { IconName, Icon, Classes, HotkeysTarget, Hotkeys, Hotkey, IHotkeysProps } from '@blueprintjs/core';
+import { IconName, Icon, HotkeysTarget, Hotkeys, Hotkey, IHotkeysProps } from '@blueprintjs/core';
 import { Column, Table, AutoSizer, Index, HeaderMouseEventHandlerParams } from 'react-virtualized';
 import { AppState } from '../state/appState';
 import { WithNamespaces, withNamespaces } from 'react-i18next';
@@ -19,6 +19,7 @@ import { SettingsState } from '../state/settingsState';
 import { ViewState } from '../state/viewState';
 import { debounce } from '../utils/debounce';
 import { TSORT_METHOD_NAME, TSORT_ORDER, getSortMethod } from '../services/FsSort';
+import CONFIG from '../config/appConfig'
 import { getSelectionRange } from '../utils/fileUtils';
 import { throttle } from '../utils/throttle';
 
@@ -37,7 +38,7 @@ const SIZE_COLUMN_WITDH = 70;
 const NAME_COLUMN_WIDTH = 10;
 
 const LABEL_CLASSNAME = 'file-label';
-const TABLE_CLASSNAME = 'ReactVirtualized__Table__Grid';
+const GRID_CLASSNAME = 'filetable-grid';
 
 const TYPE_ICONS: { [key: string]: IconName } = {
     'img': 'media',
@@ -764,8 +765,8 @@ export class FileTableClass extends React.Component<IProps, IState> {
         }
     }, ARROW_KEYS_REPEAT_DELAY)
 
-    setTableRef = (element: HTMLElement) => {
-        this.gridElement = element && element.querySelector(`.${TABLE_CLASSNAME}`) || null;
+    setGridRef = (element: HTMLElement) => {
+        this.gridElement = element && element.querySelector(`.${GRID_CLASSNAME}`) || null;
     }
 
     rowRenderer = (props: any) => {
@@ -792,15 +793,16 @@ export class FileTableClass extends React.Component<IProps, IState> {
         const { t } = this.injected;
         const { position } = this.state;
         const rowCount = this.state.nodes.length;
+        const GRID_CLASSES = `data-cy-filetable ${GRID_CLASSNAME} ${CONFIG.CUSTOM_SCROLLBAR_CLASSNAME}`
 
-        return (<div ref={this.setTableRef} onKeyDown={this.onInputKeyDown} className={`fileListSizerWrapper`}>
+        return (<div ref={this.setGridRef} onKeyDown={this.onInputKeyDown} className={`fileListSizerWrapper`}>
             <AutoSizer>
                 {({ width, height }) => (
                     <Table
                         headerClassName="tableHeader"
                         headerHeight={ROW_HEIGHT}
                         height={height}
-                        gridClassName="data-cy-filetable"
+                        gridClassName={GRID_CLASSES}
                         onRowClick={this.onRowClick}
                         onRowDoubleClick={this.onRowDoubleClick}
                         onHeaderClick={this.onHeaderClick}
