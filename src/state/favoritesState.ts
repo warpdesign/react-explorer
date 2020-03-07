@@ -21,7 +21,7 @@ export class FavoritesState {
     previousPlaces:drivelist.Drive[] = [];
 
     buildShortcuts() {
-        this.shortcuts.replace(Object.entries(ALL_DIRS).map(dir => ({
+        this.shortcuts.replace(Object.entries(ALL_DIRS).map((dir:string[]) => ({
             label: dir[0],
             path: dir[1],
             icon: IconNames.DATABASE
