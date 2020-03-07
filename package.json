@@ -38,14 +38,14 @@
         "dist": "webpack --config webpack.config.production.js && electron-builder -mwl",
         "dist-win": "webpack --config webpack.config.production.js && electron-builder -w",
         "dist-mac": "webpack --config webpack.config.production.js && electron-builder -m",
-        "dist-linux": "webpack --config webpack.config.production.js && electron-builder -l"
+        "dist-linux": "webpack --config webpack.config.production.js && electron-builder -l",
+        "postinstall": "electron-builder install-app-deps"
     },
     "husky": {
         "hooks": {
             "pre-push": "npm run test:all"
         }
     },
-    "postinstall": "electron-builder install-app-deps",
     "author": {
         "name": "Nicolas Ramz",
         "email": "nicolas.ramz@gmail.com",
