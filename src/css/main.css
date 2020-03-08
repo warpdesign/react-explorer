@@ -503,3 +503,13 @@ span.bp3-intent-warning{
 .bp3-dark span.bp3-intent-warning{
     color:#d9822b;
 }
+
+/* patch for linux/win dialogs that may show scrollbar */
+.bp3-overlay-inline .bp3-overlay-content,
+.bp3-overlay-scroll-container .bp3-overlay-content{
+    max-height:100%;
+}
+
+.bp3-portal .bp3-overlay.bp3-overlay-scroll-container{
+    overflow:hidden;
+}
