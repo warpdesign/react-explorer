@@ -31,6 +31,7 @@ require("@blueprintjs/core/lib/css/blueprint.css");
 require("@blueprintjs/icons/lib/css/blueprint-icons.css");
 require("../css/main.css");
 require("../css/windows.css");
+require("../css/scrollbars.css");
 
 interface AppProps extends WithNamespaces {
     initialSettings: {[key: string]: any};
@@ -335,9 +336,7 @@ class App extends React.Component<AppProps> {
     }
 
     setPlatformClass() {
-        if (isWin) {
-            document.body.classList.add("windows");
-        }
+        document.body.classList.add(platform);
     }
 
     render() {
@@ -352,7 +351,7 @@ class App extends React.Component<AppProps> {
         const { t } = this.props;
         const winState = this.appState.winStates[0];
         const isSplitView = winState.splitView;
-        const mainClass = classNames(`main ${platform}`, {
+        const mainClass = classNames('main', {
             singleView: !isSplitView,
             dualView: isSplitView
         });

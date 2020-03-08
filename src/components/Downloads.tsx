@@ -11,6 +11,7 @@ import { FileTransfer } from '../transfers/fileTransfer';
 import classnames from 'classnames';
 import { intentClass } from '@blueprintjs/core/lib/esm/common/classes';
 import { AppAlert } from './AppAlert';
+import CONFIG from '../config/appConfig'
 
 const TYPE_ICONS: { [key: string]: IconName } = {
     'img': 'media',
@@ -294,7 +295,7 @@ class DownloadsClass extends React.Component<IProps, IState> {
         if (nodes.length) {
             return (
                 <Tree
-                    className="downloads"
+                    className={`downloads ${CONFIG.CUSTOM_SCROLLBAR_CLASSNAME}`}
                     contents={nodes}
                     onNodeCollapse={this.handleNodeCollapse}
                     onNodeExpand={this.handleNodeExpand}

@@ -2,6 +2,7 @@ import * as React from "react";
 import { Dialog, Classes, Button, KeyCombo } from "@blueprintjs/core";
 import { withNamespaces, WithNamespaces } from "react-i18next";
 import { isMac } from "../../utils/platform";
+import CONFIG from '../../config/appConfig'
 
 interface IShortcutsProps extends WithNamespaces {
     isOpen: boolean;
@@ -24,8 +25,8 @@ class ShortcutsDialogClass extends React.Component<IShortcutsProps>{
                 { combo: "ctrl + alt + right", label: t('SHORTCUT.MAIN.NEXT_VIEW') },
                 { combo: "ctrl + alt + left", label: t('SHORTCUT.MAIN.PREVIOUS_VIEW') },
                 { combo: "mod + r", label: t('SHORTCUT.MAIN.RELOAD_VIEW') },
-                { combo: isMac && "mod + left" || "alt + left", label: t('SHORTCUT.ACTIVE_VIEW.BACKWARD_HISTORY') },
-                { combo: isMac && "mod + right" || "alt + right", label: t('SHORTCUT.ACTIVE_VIEW.FORWARD_HISTORY') },
+                // { combo: isMac && "mod + left" || "alt + left", label: t('SHORTCUT.ACTIVE_VIEW.BACKWARD_HISTORY') },
+                // { combo: isMac && "mod + right" || "alt + right", label: t('SHORTCUT.ACTIVE_VIEW.FORWARD_HISTORY') },
                 { combo: "escape", label: t('SHORTCUT.LOG.TOGGLE') },
                 { combo: "mod + s", label: t('SHORTCUT.MAIN.KEYBOARD_SHORTCUTS') },
                 { combo: "mod + ,", label: t('SHORTCUT.MAIN.PREFERENCES') },
@@ -36,7 +37,7 @@ class ShortcutsDialogClass extends React.Component<IShortcutsProps>{
             // group: t('SHORTCUT.GROUP.ACTIVE_VIEW')
             [
                 { combo: isMac && "mod + left" || "alt + left", label: t('SHORTCUT.ACTIVE_VIEW.BACKWARD_HISTORY') },
-                { combo: isMac && "mod + right" || "alt + left", label: t('SHORTCUT.ACTIVE_VIEW.FORWARD_HISTORY') },
+                { combo: isMac && "mod + right" || "alt + right", label: t('SHORTCUT.ACTIVE_VIEW.FORWARD_HISTORY') },
                 { combo: "meta + c", label: t('SHORTCUT.ACTIVE_VIEW.COPY') },
                 { combo: "meta + v", label: t('SHORTCUT.ACTIVE_VIEW.PASTE') },
                 { combo: "mod + shift + c", label: t('SHORTCUT.ACTIVE_VIEW.COPY_PATH') },
@@ -80,7 +81,7 @@ class ShortcutsDialogClass extends React.Component<IShortcutsProps>{
                 className="shortcutsDialog"
             >
                 <div className={`${Classes.DIALOG_BODY}`}>
-                    <div className="bp3-hotkey-column">
+                    <div className={`bp3-hotkey-column ${CONFIG.CUSTOM_SCROLLBAR_CLASSNAME}`}>
                         <h4 className={Classes.HEADING}>
                             {t('SHORTCUT.GROUP.GLOBAL')}
                         </h4>

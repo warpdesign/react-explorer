@@ -1,0 +1,28 @@
+.win32 .custom-scrollbar::-webkit-scrollbar,
+.linux .custom-scrollbar::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+    margin: 4px; 
+}
+
+.win32 .custom-scrollbar::-webkit-scrollbar-thumb,
+.linux .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(90, 90, 90, .3);
+    border-radius: 5px;
+}
+  
+.win32 .custom-scrollbar::-webkit-scrollbar-track,
+.linux .custom-scrollbar::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0);
+}
+
+.win32 .favoritesPanel,
+.linux .favoritesPanel {
+    overflow: overlay;
+}
+
+.bp3-dark.win32 .custom-scrollbar::-webkit-scrollbar-thumb,
+.bp3-dark.linux .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, .6);
+    border: 1px solid rgba(255, 255, 255, .2);
+}
