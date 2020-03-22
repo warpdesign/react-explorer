@@ -33,13 +33,14 @@
         "test:all": "npm run test:e2e && npm run test",
         "build": "webpack --watch",
         "server": "pm2 start \"npx ws -d ./build-e2e -p 8080\" --name cy-server",
-        "server:stop": "pm2 --silent stop cy-server  || :",
+        "server:stop": "pm2 --silent stop cy-server  || true",
         "ftpd": "ftp-srv ftp://0.0.0.0:9876 --root /tmp/react-explorer -c ./credentials.json",
         "dist": "webpack --config webpack.config.production.js && electron-builder -mwl",
         "dist-win": "webpack --config webpack.config.production.js && electron-builder -w",
         "dist-mac": "webpack --config webpack.config.production.js && electron-builder -m",
         "dist-linux": "webpack --config webpack.config.production.js && electron-builder -l",
-        "postinstall": "electron-builder install-app-deps"
+        "postinstall": "electron-builder install-app-deps && npm run install:e2e",
+        "install:e2e": "cd e2e && npm install"
     },
     "husky": {
         "hooks": {
