@@ -3,6 +3,9 @@ module.exports = {
         send: function() {
 
         },
+        sendTo: function() {
+
+        },
         on: function(event, method) {
             document.addEventListener(event, function(e) {
                 method(e, { data: e.data, combo: e.combo });
@@ -10,9 +13,9 @@ module.exports = {
         }
     },
     remote: {
-        getCurrentWindow: () => {
-
-        },
+        getCurrentWindow: () => ({
+            id: 9
+        }),
         Menu: {
             buildFromTemplate: function() {
                 return {

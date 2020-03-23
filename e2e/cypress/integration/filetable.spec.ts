@@ -252,7 +252,7 @@ describe("filetable", () => {
                 .should("eq", 1);
         });
 
-        it.only("arrow up should select the previous element", () => {
+        it("arrow up should select the previous element", () => {
             // be sure to be in a predictable state, without any selected element
             cy.triggerHotkey(`${MOD_KEY}a`);
             cy.triggerHotkey(`${MOD_KEY}i`);

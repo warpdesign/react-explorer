@@ -122,7 +122,7 @@ class App extends React.Component<AppProps> {
         let caught = false;
         if (e.ctrlKey) {
             switch(true) {
-                case !isMac && e.keyCode === KEYS.A && shouldCatchEvent(e):
+                case !ENV.CY && !isMac && e.keyCode === KEYS.A && shouldCatchEvent(e):
                     caught = true;
                     sendFakeCombo("CmdOrCtrl+A");
                     break;
