@@ -2,6 +2,7 @@ import { AppState } from "../state/appState";
 import * as React from "react";
 import * as ReactDOM from "react-dom";
 import { platform } from "process";
+import { isMac } from '../utils/platform'
 import { FocusStyleManager, Alert, Classes, Intent } from "@blueprintjs/core";
 import classNames from "classnames";
 import { Provider, observer, inject } from "mobx-react";
@@ -42,7 +43,8 @@ interface InjectedProps extends AppProps {
 }
 
 enum KEYS {
-    TAB = 9
+    TAB = 9,
+    A = 65
 }
 
 declare var ENV: any;
@@ -117,13 +119,26 @@ class App extends React.Component<AppProps> {
         // so we simply send a fakeCombo to avoid that.
         // We could simply disable outline using css but we want to keep
         // the app accessible.
-        if (e.ctrlKey && e.keyCode === KEYS.TAB) {
-            e.stopPropagation();
-            e.stopImmediatePropagation();
-            e.preventDefault();
-            const combo = e.shiftKey ? "Ctrl+Shift+Tab" : "Ctrl+Tab";
-            sendFakeCombo(combo);
+        let caught = false;
+        if (e.ctrlKey) {
+            switch(true) {
+                case !ENV.CY && !isMac && e.keyCode === KEYS.A && shouldCatchEvent(e):
+                    caught = true;
+                    sendFakeCombo("CmdOrCtrl+A");
+                    break;
+
+                case e.keyCode === KEYS.TAB:
+                    caught = true;
+                    const combo = e.shiftKey ? "Ctrl+Shift+Tab" : "Ctrl+Tab";
+                    sendFakeCombo(combo);
+                    break;
+            }
+
         } else if (shouldCatchEvent(e) && e.which === 191 && e.shiftKey) {
+            caught = true;
+        }
+
+        if (caught) {
             e.stopPropagation();
             e.stopImmediatePropagation();
             e.preventDefault();
