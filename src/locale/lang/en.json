@@ -225,9 +225,9 @@
             "DOCS_DIR": "Documents"
         },        
         "APP_MENUS": {
-            "ABOUT": "About",
+            "ABOUT": "About React-Explorer",
             "PREFS": "Preferences",
-            "EXIT": "Quit",
+            "EXIT": "Quit React-Explorer",
             "TITLE_FILE": "File",
             "TITLE_EDIT": "Edit",
             "TITLE_VIEW": "View",
