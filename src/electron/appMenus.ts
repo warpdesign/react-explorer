@@ -71,7 +71,7 @@ export class AppMenu {
 
     getMenuTemplate(): MenuItemConstructorOptions[] {
         const menuStrings = this.menuStrings;
-        let windowMenuIndex = 3;
+        let windowMenuIndex = 4;
 
         const template = [
             {
@@ -168,6 +168,26 @@ export class AppMenu {
                 ],
             },
             {
+                label: menuStrings['TITLE_GO'],
+                submenu: [
+                    {
+                        label: menuStrings['GO_BACK'],
+                        accelerator: isMac ? 'Cmd+Left' : 'Alt+Left',
+                        click: this.sendComboEvent
+                    },
+                    {
+                        label: menuStrings['GO_FORWARD'],
+                        accelerator: isMac ? 'Cmd+Right' : 'Alt+Right',
+                        click: this.sendComboEvent
+                    },
+                    {
+                        label: menuStrings['GO_PARENT'],
+                        accelerator: 'Backspace',
+                        click: this.sendComboEvent
+                    }                    
+                ]
+            },
+            {
                 label: menuStrings['TITLE_WINDOW'],
                 submenu: [
                     {
@@ -216,10 +236,10 @@ export class AppMenu {
                 version: ENV.HASH
             });
 
-            windowMenuIndex = 4;
+            windowMenuIndex = 5;
 
             // add zoom window/role entry
-            (template[4].submenu as MenuItemConstructorOptions[]).push({
+            (template[5].submenu as MenuItemConstructorOptions[]).push({
                 label: menuStrings['ZOOM'],
                 role: 'zoom'
             });
@@ -242,7 +262,7 @@ export class AppMenu {
                 });
 
             // add about menuItem
-            (template[4].submenu as MenuItemConstructorOptions[]).push({
+            (template[5].submenu as MenuItemConstructorOptions[]).push({
                 label: menuStrings['ABOUT'],
                 click: this.showAboutDialog
             });

@@ -232,6 +232,7 @@
             "TITLE_EDIT": "Editer",
             "TITLE_VIEW": "Vue",
             "TITLE_HELP": "Aide",
+            "TITLE_GO": "Aller",
             "TITLE_WINDOW": "Fenêtre",
             "MAKEDIR": "Nouveau Dossier",
             "DELETE": "Supprimer",
@@ -255,7 +256,10 @@
             "NEW_TAB": "Nouvel onglet",
             "CLOSE_TAB": "Fermer l'onglet",
             "OK": "OK",
-            "TOGGLE_SPLITVIEW": "Activer/Désactiver Vue Double"
+            "TOGGLE_SPLITVIEW": "Activer/Désactiver Vue Double",
+            "GO_PARENT": "Dossier parent",
+            "GO_BACK": "Précédent",
+            "GO_FORWARD": "Suivant"
         }
     }
 }

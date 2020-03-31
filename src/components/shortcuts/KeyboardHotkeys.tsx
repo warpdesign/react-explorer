@@ -59,7 +59,7 @@ class KeyboardHotkeysClass extends React.Component<WithNamespaces> {
     }
 
     private getActiveFileCache(ignoreStatus = false): FileState {
-        const state = this.appState.getActiveCache();
+        const state = this.appState.isExplorer && this.appState.getActiveCache();
 
         if (ignoreStatus || !state) {
             return state;
