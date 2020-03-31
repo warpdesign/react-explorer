@@ -428,7 +428,7 @@ export class FileState {
             .catch((error) => {
                 this.cmd = '';
                 console.log('error cd/list for path', joint, 'error was', error);
-                this.setStatus('ok');
+                this.setStatus('ok', true);
                 const localizedError = getLocalizedError(error);
                 //return Promise.reject(localizedError);
                 throw localizedError;
