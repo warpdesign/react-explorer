@@ -555,11 +555,13 @@ export class FileState {
     }
 
     openParentDirectory() {
-        const parent = { dir: this.path, fullname: '..' };
-        this.openDirectory(parent).catch(() => {
-            this.updatePath(this.api.join(this.path, '..'), true);
-            this.emptyCache();
-        });
+        if (!this.isRoot()) {
+            const parent = { dir: this.path, fullname: '..' };
+            this.openDirectory(parent).catch(() => {
+                this.updatePath(this.api.join(this.path, '..'), true);
+                this.emptyCache();
+            });
+        }
     }
 
     isRoot(path = this.path): boolean {
