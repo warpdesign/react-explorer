@@ -8,6 +8,7 @@ import {
     Accelerators,
     Accelerator
 } from "../WithMenuAccelerators";
+import { isMac } from "../../utils/platform"
 import { isEditable } from "../../utils/dom";
 import { AppState } from "../../state/appState";
 import { FileState } from "../../state/fileState";
@@ -60,7 +61,7 @@ class MenuAcceleratorsClass extends React.Component<IProps> {
     }
 
     private getActiveFileCache(ignoreStatus = false): FileState {
-        const state = this.appState.getActiveCache();
+        const state = this.appState.isExplorer && this.appState.getActiveCache();
 
         if (ignoreStatus || !state) {
             return state;
@@ -176,6 +177,22 @@ class MenuAcceleratorsClass extends React.Component<IProps> {
             winState.toggleSplitViewMode();
         }
     }
+    
+    onForward = () => {
+        const cache = this.getActiveFileCache();
+        cache && cache.navHistory(1);
+    }
+
+    onBack = () => {
+        const cache = this.getActiveFileCache();
+        cache && cache.navHistory(-1);
+    }
+
+    onParent = () => {
+        const cache = this.getActiveFileCache();
+
+        !isEditable(document.activeElement) && cache && cache.openParentDirectory();
+    }
 
     renderMenuAccelerators() {
         return (
@@ -228,6 +245,18 @@ class MenuAcceleratorsClass extends React.Component<IProps> {
                     combo="CmdOrCtrl+Shift+Alt+V"
                     onClick={this.onToggleSplitView}
                 ></Accelerator>
+                <Accelerator
+                    combo={isMac ? "Cmd+Left" : "Alt+Left"}
+                    onClick={this.onBack}
+                ></Accelerator>
+                <Accelerator
+                    combo={isMac ? "Cmd+Right" : "Alt+Right"}
+                    onClick={this.onForward}
+                ></Accelerator>
+                <Accelerator
+                    combo="Backspace"
+                    onClick={this.onParent}
+                ></Accelerator>                
             </Accelerators>
         );
     }

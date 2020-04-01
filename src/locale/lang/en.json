@@ -232,6 +232,7 @@
             "TITLE_EDIT": "Edit",
             "TITLE_VIEW": "View",
             "TITLE_HELP": "Help",
+            "TITLE_GO": "Go",
             "TITLE_WINDOW": "Window",
             "MAKEDIR": "New Directory",
             "RENAME": "Rename",
@@ -255,7 +256,10 @@
             "NEW_TAB": "New tab",
             "CLOSE_TAB": "Close tab",
             "OK": "OK",
-            "TOGGLE_SPLITVIEW": "Toggle Split View"
+            "TOGGLE_SPLITVIEW": "Toggle Split View",
+            "GO_PARENT": "Parent folder",
+            "GO_BACK": "Back",
+            "GO_FORWARD": "Forward"
         }
     }
 }
