@@ -93,7 +93,7 @@ function isModeExe(mode: number, gid: number, uid: number): Boolean {
     const isGroup = gid ? process.getgid && gid === process.getgid() : false;
     const isUser = uid ? process.getuid && uid === process.getuid() : false;
 
-    return !!((mode & ExeMaskAll) || ((mode & ExeMaskUser) && isGroup) || ((mode & ExeMaskGroup) && isUser));
+    return !!((mode !== -1 && (mode & ExeMaskAll)) || ((mode & ExeMaskUser) && isGroup) || ((mode & ExeMaskGroup) && isUser));
 }
 
 export function filetype(mode: number, gid: number, uid: number, extension: string): FileType {

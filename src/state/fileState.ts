@@ -529,19 +529,20 @@ export class FileState {
     async openFile(appState: AppState, cache: FileState, file: File) {
         try {
             const path = await appState.prepareLocalTransfer(cache, [file]);
-            this.shellOpenFile(path);
+            if (this.shellOpenFile(path) !== true) {
+                throw {
+                    message: i18next.t('ERRORS.SHELL_OPEN_FAILED', { path }),
+                    code: 'NO_CODE'
+                }
+            }
         } catch (err) {
             return Promise.reject(err);
         }
     }
 
-    shellOpenFile(path: string) {
+    shellOpenFile(path: string):boolean {
         console.log('need to open file', path);
-        shell.openItem(path);
-        // return this.get(file).then((tmpPath: string) => {
-        //     console.log('opening file', tmpPath);
-        //     shell.openItem(tmpPath);
-        // });
+        return shell.openItem(path);
     }
 
     openDirectory(file: { dir: string, fullname: string }) {

@@ -277,7 +277,7 @@ export class LocalApi implements FsApi {
     static fileFromPath(fullPath: string): File {
         const format = path.parse(fullPath);
         let name = fullPath;
-        let stats = null;
+        let stats: Partial<fs.Stats> = null;
         let target_stats = null;
 
         try {
@@ -292,14 +292,17 @@ export class LocalApi implements FsApi {
                 /*path.join(dirPath, items[i])*/ fullPath,
                 err
             );
+            const isDir = stats ? stats.isDirectory() : false
+            const isSymLink = stats ? stats.isSymbolicLink() : false
+
             stats = {
                 ctime: new Date(),
                 mtime: new Date(),
                 birthtime: new Date(),
                 size: 0,
-                isDirectory: () => true,
+                isDirectory: () => isDir,
                 mode: -1,
-                isSymbolicLink: () => false,
+                isSymbolicLink: () => isSymLink,
                 ino: 0,
                 dev: 0
             };

@@ -256,6 +256,9 @@ export class FileTableClass extends React.Component<IProps, IState> {
             isSymlink: file.isSym
         });
 
+        if (file.name.match(/link/))
+            debugger;
+
         const res: ITableRow = {
             icon: file.isDir && TYPE_ICONS['dir'] || (filetype && TYPE_ICONS[filetype] || TYPE_ICONS['any']),
             name: file.fullname,
