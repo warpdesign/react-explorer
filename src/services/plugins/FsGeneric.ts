@@ -65,6 +65,11 @@ class GenericApi implements FsApi {
         return Promise.resolve(true);
     }
 
+    async makeSymlink(targetPath: string, path: string, transferId?: number): Promise<boolean> {
+        console.log("FsGeneric.makeSymlink")
+        return true;
+    }
+
     stat(fullPath: string, transferId = -1): Promise<File> {
         return Promise.resolve({
             dir: "",

@@ -587,6 +587,11 @@ class FtpAPI implements FsApi {
         return this.master.list(dir);
     };
 
+    async makeSymlink(targetPath: string, path: string, transferId?: number): Promise<boolean> {
+        console.log("FsFtp.makeSymlink")
+        return true;
+    }
+
     async stat(fullPath: string): Promise<File> {
         console.warn('FsFtp.stat: TODO');
         return Promise.resolve({

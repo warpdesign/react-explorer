@@ -129,6 +129,7 @@ export interface FsApi {
     isDir(path: string, transferId?: number): Promise<boolean>;
     exists(path: string, transferId?: number): Promise<boolean>;
     size(source: string, files: string[], transferId?: number): Promise<number>;
+    makeSymlink(targetPath: string, path: string, transferId?: number): Promise<boolean>;
     getStream(path: string, file: string, transferId?: number): Promise<Readable>;
     putStream(readStream: Readable, dstPath: string, progress: (bytesRead: number) => void, transferId?: number): Promise<void>;
     getParentTree(dir: string): Array<{ dir: string, fullname: string }>;

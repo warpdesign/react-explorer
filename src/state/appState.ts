@@ -337,6 +337,7 @@ export class AppState {
             options.dstFs,
             options.dstPath
         );
+        debugger;
         const batch = new Batch(
             options.srcFs,
             options.dstFs,

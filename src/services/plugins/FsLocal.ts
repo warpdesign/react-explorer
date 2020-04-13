@@ -165,69 +165,72 @@ export class LocalApi implements FsApi {
         }
     }
 
-    isDir(path: string, transferId = -1): Promise<boolean> {
-        return new Promise((resolve, reject) => {
-            try {
-                const lstat = fs.lstatSync(path);
-                const stat = fs.statSync(path);
-                resolve(stat.isDirectory() || lstat.isDirectory());
-            } catch (err) {
+    async makeSymlink(targetPath: string, path: string, transferId = -1): Promise<boolean> {
+        console.log('creating symlink', targetPath, path);
+        return new Promise<boolean>((resolve, reject) => fs.symlink(targetPath, path, (err) => {
+            if (err) {
+                console.log('error creating symlink', err);
                 reject(err);
+            } else {
+                console.log('link created');
+                resolve(true);
             }
-        });
+        }))
     }
 
-    exists(path: string, transferId = -1): Promise<boolean> {
-        return new Promise((resolve, reject) => {
-            try {
-                fs.statSync(path);
-                resolve(true);
-            } catch (err) {
-                if (err.code === "ENOENT") {
-                    resolve(false);
-                } else {
-                    reject(err);
-                }
+    async isDir(path: string, transferId = -1): Promise<boolean> {
+        const lstat = fs.lstatSync(path);
+        const stat = fs.statSync(path);
+        return stat.isDirectory() || lstat.isDirectory();
+    }
+
+    async exists(path: string, transferId = -1): Promise<boolean> {
+        try {
+            fs.statSync(path);
+            return true;
+        } catch (err) {
+            if (err.code === "ENOENT") {
+                return false;
+            } else {
+                throw err;
             }
-        });
+        }
     }
 
     async stat(fullPath: string, transferId = -1): Promise<File> {
-        return new Promise<File>((resolve, reject) => {
-            try {
-                const format = path.parse(fullPath);
-                const stats = fs.lstatSync(fullPath);
-                const file: File = {
-                    dir: format.dir,
-                    fullname: format.base,
-                    name: format.name,
-                    extension: format.ext.toLowerCase(),
-                    cDate: stats.ctime,
-                    mDate: stats.mtime,
-                    bDate: stats.birthtime,
-                    length: stats.size,
-                    mode: stats.mode,
-                    isDir: stats.isDirectory(),
-                    readonly: false,
-                    type:
-                        (!stats.isDirectory() &&
-                            filetype(
-                                stats.mode,
-                                stats.gid,
-                                stats.uid,
-                                format.ext.toLowerCase()
-                            )) ||
-                        "",
-                    isSym: stats.isSymbolicLink(),
-                    target: stats.isSymbolicLink() && fs.readlinkSync(fullPath) || null,
-                    id: MakeId(stats)
-                };
+        try {
+            const format = path.parse(fullPath);
+            const stats = fs.lstatSync(fullPath);
+            const file: File = {
+                dir: format.dir,
+                fullname: format.base,
+                name: format.name,
+                extension: format.ext.toLowerCase(),
+                cDate: stats.ctime,
+                mDate: stats.mtime,
+                bDate: stats.birthtime,
+                length: stats.size,
+                mode: stats.mode,
+                isDir: stats.isDirectory(),
+                readonly: false,
+                type:
+                    (!stats.isDirectory() &&
+                        filetype(
+                            stats.mode,
+                            stats.gid,
+                            stats.uid,
+                            format.ext.toLowerCase()
+                        )) ||
+                    "",
+                isSym: stats.isSymbolicLink(),
+                target: stats.isSymbolicLink() && fs.readlinkSync(fullPath) || null,
+                id: MakeId(stats)
+            };
 
-                resolve(file);
-            } catch (err) {
-                reject(err);
-            }
-        });
+            return file;
+        } catch (err) {
+            return err;
+        }
     }
 
     login(server?: string, credentials?: ICredentials): Promise<void> {

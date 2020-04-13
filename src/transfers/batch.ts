@@ -184,6 +184,7 @@ export class Batch {
         const srcPath = srcFs.join(this.srcPath, transfer.subDirectory);
         const wantedName = transfer.file.fullname;
         const isDir = transfer.file.isDir;
+        const isSym = transfer.file.isSym;
 
         let newFilename = '';
         let stream = null;
@@ -203,50 +204,61 @@ export class Batch {
         }
 
         if (!isDir) {
-            try {
-                if (transfer.file.isSym) {
+            if (isSym) {
+                const linkPath = dstFs.join(fullDstPath, newFilename)
+                try {
+                    debugger;
+                    await srcFs.makeSymlink(transfer.file.target, linkPath, this.id)
+                    transfer.status = 'done';
+                } catch(err) {
+                    this.onTransferError(transfer, err);
                     debugger;
                 }
-                // console.log('getting stream', srcPath, wantedName);
-                stream = await srcFs.getStream(srcPath, wantedName, this.id);
-
-                this.streams.push(stream);
-                // console.log('sending to stream', dstFs.join(fullDstPath, newFilename));
-                // we have to listen for errors that may appear during the transfer: socket closed, timeout,...
-                // and throw an error in this case because the putStream won't throw in this case:
-                // it will just stall
-                // stream.on('error', (err) => {
-                //     console.log('error on read stream');
-                //     this.onTransferError(transfer, err);
-                //     // destroy stream so that put stream resolves ?
-                //     stream.destroy();
-                // });
-
-                await dstFs.putStream(stream, dstFs.join(fullDstPath, newFilename), (bytesRead: number) => {
-                    this.onData(transfer, bytesRead);
-                }, this.id);
-
-                this.removeStream(stream);
-                transfer.status = 'done';
-            } catch (err) {
-                console.log('error with streams', err);
-                this.removeStream(stream);
-                // transfer.status = 'error';
-                // return Promise.reject(err);
-                // generate transfer error, but do not stop transfer unless errors > MAX_TRANSFER_ERRORS
-                // TODO: transfer.errors++
-                // if (transfer.errors > MAX) {
-                // set remaining transfers to cancel
-                // return ?
-                //}
-                this.onTransferError(transfer, err);
-                if (this.errors > MAX_ERRORS) {
-                    console.warn('maximum errors occurred: cancelling upcoming file transfers');
-                    this.status = 'error';
-                    this.cancelFiles();
+            } else {
+                try {
+                    if (transfer.file.isSym) {
+                        debugger;
+                    }
+                    // console.log('getting stream', srcPath, wantedName);
+                    stream = await srcFs.getStream(srcPath, wantedName, this.id);
+    
+                    this.streams.push(stream);
+                    // console.log('sending to stream', dstFs.join(fullDstPath, newFilename));
+                    // we have to listen for errors that may appear during the transfer: socket closed, timeout,...
+                    // and throw an error in this case because the putStream won't throw in this case:
+                    // it will just stall
+                    // stream.on('error', (err) => {
+                    //     console.log('error on read stream');
+                    //     this.onTransferError(transfer, err);
+                    //     // destroy stream so that put stream resolves ?
+                    //     stream.destroy();
+                    // });
+    
+                    await dstFs.putStream(stream, dstFs.join(fullDstPath, newFilename), (bytesRead: number) => {
+                        this.onData(transfer, bytesRead);
+                    }, this.id);
+    
+                    this.removeStream(stream);
+                    transfer.status = 'done';
+                } catch (err) {
+                    console.log('error with streams', err);
+                    this.removeStream(stream);
+                    // transfer.status = 'error';
+                    // return Promise.reject(err);
+                    // generate transfer error, but do not stop transfer unless errors > MAX_TRANSFER_ERRORS
+                    // TODO: transfer.errors++
+                    // if (transfer.errors > MAX) {
+                    // set remaining transfers to cancel
+                    // return ?
+                    //}
+                    this.onTransferError(transfer, err);
+                    if (this.errors > MAX_ERRORS) {
+                        console.warn('maximum errors occurred: cancelling upcoming file transfers');
+                        this.status = 'error';
+                        this.cancelFiles();
+                    }
                 }
             }
-
         } else {
             transfer.status = 'done';
             // make transfers with this directory ready
@@ -291,7 +303,7 @@ export class Batch {
     async renameOrCreateDir(transfer: FileTransfer, dstPath: string): Promise<string> {
         const isDir = transfer.file.isDir;
         const dstFs = this.dstFs;
-        // create directory if not exists
+        // create directory if does not exist
         const wantedName = transfer.file.fullname;
         let dirPath = dstFs.join(dstPath, wantedName);
         let newName = wantedName;
