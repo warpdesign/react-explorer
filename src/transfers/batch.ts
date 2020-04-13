@@ -189,6 +189,9 @@ export class Batch {
         let stream = null;
 
         try {
+            if (transfer.file.isSym) {
+                debugger;
+            }
             newFilename = await this.renameOrCreateDir(transfer, fullDstPath);
         } catch (err) {
             console.log('error creating directory', err);
@@ -201,6 +204,9 @@ export class Batch {
 
         if (!isDir) {
             try {
+                if (transfer.file.isSym) {
+                    debugger;
+                }
                 // console.log('getting stream', srcPath, wantedName);
                 stream = await srcFs.getStream(srcPath, wantedName, this.id);
 
@@ -307,7 +313,7 @@ export class Batch {
             // directory already exists: for now, simply use it
             if (!exists) {
                 try {
-                    const newDir = await dstFs.makedir(dstPath, newName, this.id);
+                    await dstFs.makedir(dstPath, newName, this.id);
                 } catch (err) {
                     return Promise.reject(err);
                 }

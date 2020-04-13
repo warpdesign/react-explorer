@@ -38,6 +38,7 @@ export interface File {
     name: string;
     fullname: string;
     extension: string;
+    target: string;
     cDate: Date;
     mDate: Date;
     bDate: Date;

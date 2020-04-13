@@ -196,7 +196,7 @@ export class LocalApi implements FsApi {
         return new Promise<File>((resolve, reject) => {
             try {
                 const format = path.parse(fullPath);
-                const stats = fs.statSync(fullPath);
+                const stats = fs.lstatSync(fullPath);
                 const file: File = {
                     dir: format.dir,
                     fullname: format.base,
@@ -219,6 +219,7 @@ export class LocalApi implements FsApi {
                             )) ||
                         "",
                     isSym: stats.isSymbolicLink(),
+                    target: stats.isSymbolicLink() && fs.readlinkSync(fullPath) || null,
                     id: MakeId(stats)
                 };
 
@@ -281,17 +282,20 @@ export class LocalApi implements FsApi {
         let target_stats = null;
 
         try {
+            // do not follow symlinks first
             stats = fs.lstatSync(fullPath);
             if (stats.isSymbolicLink()) {
-                target_stats = fs.statSync(fullPath);
+                // get link target path first
                 name = fs.readlinkSync(fullPath);
+                target_stats = fs.statSync(fullPath);
             }
         } catch (err) {
             console.warn(
                 "error getting stats for",
-                /*path.join(dirPath, items[i])*/ fullPath,
+                fullPath,
                 err
             );
+
             const isDir = stats ? stats.isDirectory() : false
             const isSymLink = stats ? stats.isSymbolicLink() : false
 
@@ -299,7 +303,7 @@ export class LocalApi implements FsApi {
                 ctime: new Date(),
                 mtime: new Date(),
                 birthtime: new Date(),
-                size: 0,
+                size: stats.size,
                 isDirectory: () => isDir,
                 mode: -1,
                 isSymbolicLink: () => isSymLink,
@@ -332,6 +336,7 @@ export class LocalApi implements FsApi {
                     filetype(mode, 0, 0, extension)) ||
                 "",
             isSym: stats.isSymbolicLink(),
+            target: stats.isSymbolicLink() && name || null,
             id: MakeId(stats)
         };
 

@@ -238,6 +238,7 @@ class Client {
                             readonly: false,
                             type: ftpFile.type !== 'd' && filetype(0, 0, 0, ext) || '',
                             isSym: false,
+                            target: null,
                             id: {
                                 ino: mDate.getTime(),
                                 dev: new Date().getTime()
