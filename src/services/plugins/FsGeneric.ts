@@ -144,6 +144,9 @@ export const FsGeneric: Fs = {
     icon: "database",
     name: "generic",
     description: "Fs that just implements the FsInterface but does nothing",
+    options: {
+        needsRefresh: false
+    },
     canread(str: string): boolean {
         return true;
     },

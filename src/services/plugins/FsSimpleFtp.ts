@@ -469,6 +469,9 @@ export const FsSimpleFtp: Fs = {
     icon: 'globe-network',
     name: 'simple-ftp',
     description: 'Fs that implements ft connection on top of simple-ftp',
+    options: {
+        needsRefresh: true
+    },
     canread(str: string): boolean {
         const info = new URL(str);
         console.log('FsFtp.canread', str, info.protocol, info.protocol === 'ftp:');

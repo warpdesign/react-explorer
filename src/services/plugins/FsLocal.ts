@@ -83,7 +83,7 @@ export class LocalApi implements FsApi {
         });
     }
 
-    makedir(source: string, dirName: string, transferId = -1): Promise<string> {
+    async makedir(source: string, dirName: string, transferId = -1): Promise<string> {
         return new Promise((resolve, reject) => {
             const unixPath = path.join(source, dirName).replace(/\\/g, "/");
             try {
@@ -132,7 +132,7 @@ export class LocalApi implements FsApi {
             console.log("valid !", oldPath, newPath);
             return new Promise((resolve, reject) => {
                 // since node's fs.rename will overwrite the destination
-                // path if it exists, first check that file dones't exists
+                // path if it exists, first check that file doesn't exist
                 this.exists(newPath).then(exists => {
                     if (exists) {
                         reject({
@@ -497,6 +497,9 @@ export const FsLocal: Fs = {
     icon: "database",
     name: "local",
     description: "Local Filesystem",
+    options: {
+        needsRefresh: false
+    },
     canread(str: string): boolean {
         // console.log('FsLocal.canread', str, !!str.match(localStart));
         return !!str.match(localStart);

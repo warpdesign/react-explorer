@@ -51,6 +51,10 @@ export interface File {
     id: FileID;
 }
 
+export interface FsOptions {
+    needsRefresh: boolean;
+}
+
 export interface Fs {
     // runtime api
     API: (new (path: string, onFsChange: (filename: string) => void) => FsApi);
@@ -62,6 +66,7 @@ export interface Fs {
     name: string;
     description: string;
     icon: string;
+    options: FsOptions;
 }
 
 export const Extensions: { [index: string]: RegExp } = {

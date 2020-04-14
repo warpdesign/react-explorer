@@ -181,9 +181,11 @@ export class AppState {
 
         return this.addTransfer(options)
             .then(res => {
+                const fs = dstCache.getFS()
                 if (
+                    fs.options.needsRefresh &&
                     options.dstPath === dstCache.path &&
-                    options.dstFsName === dstCache.getFS().name
+                    options.dstFsName === fs.name
                 ) {
                     dstCache.reload();
                 }
