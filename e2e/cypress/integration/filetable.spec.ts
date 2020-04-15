@@ -98,7 +98,7 @@ describe("filetable", () => {
                 .should("be.gt", 0);
         });
 
-        it("files should have the correct icons", () => {
+        it("should use correct icons for each file type", () => {
             cy.get("#view_0 [data-cy-file] .file-label").as("rows");
 
             files.forEach((file: any) => {
@@ -113,7 +113,7 @@ describe("filetable", () => {
             });
         });
 
-        it("folders should appear first", () => {
+        it("should show folders first", () => {
             // check that the first two elements are the folders of our files list
             cy.get("#view_0 [data-cy-file] .file-label")
                 .first()
@@ -130,13 +130,13 @@ describe("filetable", () => {
     });
 
     describe("mouse navigation", () => {
-        it("click on element should select it", () => {
+        it("should select an element when clicking on it", () => {
             cy.get("#view_0 [data-cy-file]:first")
                 .click()
                 .should("have.class", "selected");
         });
 
-        it("click + shift should remove element from selection if already selected", () => {
+        it("should remove element from selection if already selected when pressing click + shift", () => {
             cy.get("#view_0 [data-cy-file]:first")
                 .click()
                 .should("have.class", "selected");
@@ -148,7 +148,7 @@ describe("filetable", () => {
                 .should("not.have.class", "selected");
         });
 
-        it("click + shift should add element to selection if not selected", () => {
+        it("should add element to selection if not selected when pressing click + shift", () => {
             cy.get("#view_0 [data-cy-file]:first")
                 .click()
                 .should("have.class", "selected");
@@ -165,7 +165,7 @@ describe("filetable", () => {
             );
         });
 
-        it("click on folder should open directory", () => {
+        it("should call openDirectory when double-clicking on folder", () => {
             cy.get("#view_0 [data-cy-file]:first")
                 .dblclick()
                 .then(() => {
@@ -173,17 +173,38 @@ describe("filetable", () => {
                 });
         });
 
-        it("click on file should open file", () => {
+        it("should call openFile when clicking on a file", () => {
             cy.get("#view_0 [data-cy-file]:eq(5)")
                 .dblclick()
                 .then(() => {
                     expect(stubs.openFile[0]).to.be.called;
                 });
         });
+
+        it("should unselect all files when clicking on empty grid area", () => {
+            // refresh file list but only keep last file from fixture
+            // only keep last file
+            cy.get("#view_0 [data-cy-path]")
+            .type("/{enter}")
+            .focus()
+            .blur();
+
+            cy.CDAndList(0, "/", -1);
+
+            cy.get("#view_0 [data-cy-file]:first")
+            .click()
+            .should("have.class", "selected");
+
+            cy.get("#view_0 .fileListSizerWrapper")
+            .click('bottom')
+
+            cy.get("#view_0 [data-cy-file].selected")
+            .should("not.exist");
+        })
     });
 
     describe("keyboard navigation", () => {
-        it("arrow down should select the next element", () => {
+        it("should select the next element when pressing arrow down", () => {
             // one press: select the first one
             cy.get("#view_0")
                 .trigger("keydown", { keyCode: KEYS.Down })
@@ -209,7 +230,7 @@ describe("filetable", () => {
                 .should("eq", 1);
         });
 
-        it("repeating arrow down should end up selecting the last element", () => {
+        it("should select the last element when rapidly pressing arrow down key", () => {
             cy.get("#view_0")
                 .trigger("keydown", { keyCode: KEYS.Down })
                 .find("[data-cy-file]")
@@ -230,7 +251,7 @@ describe("filetable", () => {
                 .should("eq", 1);
         });
 
-        it("using arrow down should scroll down the table if needed", () => {
+        it("should scroll down the table if needed when pressing arrow down key", () => {
             // first make sure the last element is hidden
             cy.get("#view_0 [data-cy-file")
                 .last()
@@ -252,7 +273,7 @@ describe("filetable", () => {
                 .should("eq", 1);
         });
 
-        it("arrow up should select the previous element", () => {
+        it("should select the previous element when pressing arrow up key", () => {
             // be sure to be in a predictable state, without any selected element
             cy.triggerHotkey(`${MOD_KEY}a`);
             cy.triggerHotkey(`${MOD_KEY}i`);
@@ -277,7 +298,7 @@ describe("filetable", () => {
                 .should("eq", 1);
         });
 
-        it("using arrow down should scroll up the table if needed", () => {
+        it("should scroll up the table if needed when pressing arrow up key", () => {
             // press arrow down key until the last item is selected: it should now be visible & selected
             for (let i = 0; i <= files.length; ++i) {
                 cy.get("#view_0").trigger("keydown", { keyCode: KEYS.Down });
@@ -305,7 +326,7 @@ describe("filetable", () => {
                 .should("eq", 1);
         });
 
-        it("mod + o should open folder if folder is selected", () => {
+        it("should open folder if folder is selected and mod + o is pressed", () => {
             cy.get("#view_0 [data-cy-file]")
                 .first()
                 .click();
@@ -316,7 +337,7 @@ describe("filetable", () => {
                 });
         });
 
-        it("mod + o should open file if file is selected", () => {
+        it("should open file if a file is selected and mod + o is pressed", () => {
             cy.get("#view_0 [data-cy-file]")
                 .eq(5)
                 .click();
@@ -327,18 +348,7 @@ describe("filetable", () => {
                 });
         });
 
-        it("mod + o should open file if file is selected", () => {
-            cy.get("#view_0 [data-cy-file]")
-                .eq(5)
-                .click();
-            cy.get("body")
-                .type(`${MOD_KEY}o`)
-                .then(() => {
-                    expect(stubs.openFile[0]).to.be.called;
-                });
-        });
-
-        it("backspace should open parent directory", () => {
+        it("should open parent directory if backspace is pressed", () => {
             cy.get("body")
                 .type("{backspace}")
                 .then(() => {
@@ -346,7 +356,7 @@ describe("filetable", () => {
                 });
         });
 
-        it("mod+a should select all files", () => {
+        it("should select all files if mod + a is pressed", () => {
             cy.get("body")
                 .type(`${MOD_KEY}a`)
                 .then(() => {
@@ -366,7 +376,7 @@ describe("filetable", () => {
                 });
         });
 
-        it("mod+i should invert selection", () => {
+        it("should invert selection if mod + i is pressed", () => {
             cy.get("body").type(`${MOD_KEY}a`);
             cy.wait(1000);
             cy.get("body")
@@ -390,7 +400,7 @@ describe("filetable", () => {
     });
 
     describe("rename feature", () => {
-        it("enter key should activate rename for selected element", () => {
+        it("should activate rename for selected element if enter key is pressed and a file is selected", () => {
             cy.get("#view_0")
                 .trigger("keydown", { keyCode: KEYS.Down })
                 .trigger("keydown", { keyCode: KEYS.Enter })
@@ -399,7 +409,7 @@ describe("filetable", () => {
                 .should("have.attr", "contenteditable", "true");
         });
 
-        it("long mousedown should activate rename for selected element", () => {
+        it("should activate rename for selected element if the user keeps mousedown", () => {
             cy.get("#view_0 [data-cy-file]:first .file-label").click();
             cy.wait(1000);
             cy.get("#view_0 [data-cy-file]:first .file-label")
@@ -407,7 +417,7 @@ describe("filetable", () => {
                 .should("have.attr", "contenteditable", "true");
         });
 
-        it("only left part of the filename should be selected", () => {
+        it("should select only left part of the filename", () => {
             // select the second element which is archive.tar.gz
             cy.get("#view_0 [data-cy-file]:eq(2) .file-label").click();
             cy.wait(1000);
@@ -430,7 +440,7 @@ describe("filetable", () => {
             });
         });
 
-        it("validating rename should call cache.rename", () => {
+        it("should call cache.rename when pressing enter in edit mode", () => {
             cy.get("#view_0")
                 .trigger("keydown", { keyCode: KEYS.Down })
                 .trigger("keydown", { keyCode: KEYS.Enter })
@@ -446,7 +456,7 @@ describe("filetable", () => {
                 .invoke("text", "folder2");
         });
 
-        it("pressing escape when renaming should not call cache.rename & restore previous filename", () => {
+        it("should not call cache.rename & restore previous filename when pressing escape in edit mode", () => {
             cy.get("#view_0")
                 .trigger("keydown", { keyCode: KEYS.Down })
                 .trigger("keydown", { keyCode: KEYS.Enter })
@@ -464,7 +474,7 @@ describe("filetable", () => {
             expect(stubs.rename[0]).not.to.be.called;
         });
 
-        it("if rename input gets blur event while active, renaming should be cancelled", () => {
+        it("renaming should be cancelled if rename input field gets blur event while active", () => {
             cy.get("#view_0")
                 .trigger("keydown", { keyCode: KEYS.Down })
                 .trigger("keydown", { keyCode: KEYS.Enter })

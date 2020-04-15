@@ -586,9 +586,21 @@ export class FileTableClass extends React.Component<IProps, IState> {
         }
     }
 
+    unSelectAll() {
+        const { nodes } = this.state;
+        const selectedNodes = nodes.filter(node => node.isSelected);
+
+        if (selectedNodes.length && this.isViewActive()) {
+            selectedNodes.forEach(node => { node.isSelected = false })
+            this.setState({ nodes, selected: 0, position: -1 }, () => {
+                this.updateSelection();
+            });
+        }
+    }
+
     selectAll(invert = false) {
         let { position, selected } = this.state;
-        let { nodes } = this.state;
+        const { nodes } = this.state;
 
         if (nodes.length && this.isViewActive()) {
             selected = 0;
@@ -596,7 +608,6 @@ export class FileTableClass extends React.Component<IProps, IState> {
 
             let i = 0;
             for (let node of nodes) {
-                // do not select parent dir
                 node.isSelected = invert ? !node.isSelected : true;
                 if (node.isSelected) {
                     position = i;
@@ -789,13 +800,19 @@ export class FileTableClass extends React.Component<IProps, IState> {
 
     rowGetter = (index: Index) => this.getRow(index.index);
 
+    onBlankAreaClick = (e:React.MouseEvent<HTMLElement>) => {
+        if (e.target === this.gridElement) {
+            this.unSelectAll()
+        }
+    }
+
     render() {
         const { t } = this.injected;
         const { position } = this.state;
         const rowCount = this.state.nodes.length;
         const GRID_CLASSES = `data-cy-filetable ${GRID_CLASSNAME} ${CONFIG.CUSTOM_SCROLLBAR_CLASSNAME}`
 
-        return (<div ref={this.setGridRef} onKeyDown={this.onInputKeyDown} className={`fileListSizerWrapper`}>
+        return (<div ref={this.setGridRef} onClick={this.onBlankAreaClick} onKeyDown={this.onInputKeyDown} className={`fileListSizerWrapper`}>
             <AutoSizer>
                 {({ width, height }) => (
                     <Table
