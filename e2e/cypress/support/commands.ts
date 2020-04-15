@@ -84,15 +84,16 @@ export function getTab(viewId = 0, tabIndex = 0) {
     return cy.get(`#view_${viewId} .tablist > button.tab`).eq(tabIndex);
 }
 
-export function CDList(viewId = 0, path: string, fixture = "files.json") {
+export function CDList(viewId = 0, path: string, splice = 0, fixture = "files.json") {
     return cy.window().then(win => {
         cy.fixture(fixture).then(json => {
             if (win.appState && win.appState.caches) {
+                const files = json.splice(splice)
                 const fileCache = win.appState.winStates[0].views[viewId].caches[0];
                 fileCache.updatePath(path);
-                fileCache.files.replace(json);
+                fileCache.files.replace(files);
                 fileCache.setStatus("ok");
-                return json;
+                return files;
             }
         });
     });
