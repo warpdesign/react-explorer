@@ -198,7 +198,8 @@
             "EEXIST": "Un fichier avec ce nom existe déjà",
             "NODEST": "la destination de la copie n'est pas accessible",
             "COPY_ERROR": "La copie n'a pu s'effectuer: {{message}}",
-            "COPY_UNKNOWN_ERROR": "Impossible de copier les fichiers demandés."
+            "COPY_UNKNOWN_ERROR": "Impossible de copier les fichiers demandés.",
+            "SHELL_OPEN_FAILED": "Impossible d'ouvrir le fichier: {{path}}"
         },
         "MAIN_PROCESS": {
             "PRESS_TO_EXIT": "Maintenez la touche ⌘Q enfoncée pour quitter"

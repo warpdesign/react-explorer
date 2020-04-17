@@ -1,4 +1,4 @@
-import { getSelectionRange, getExtensionIndex } from './fileUtils';
+import { getSelectionRange, getExtensionIndex } from '../fileUtils';
 
 describe('fileUtils', () => {
     it('getSelectionRange: should exclude both extensions for archive.tar.gz', () => {

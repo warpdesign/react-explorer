@@ -1,7 +1,7 @@
 import * as React from "react";
 import { reaction, IReactionDisposer } from 'mobx';
 import { inject, observer } from 'mobx-react';
-import { InputGroup, ControlGroup, Button, ButtonGroup, Popover, Intent, Alert, ProgressBar, Classes, HotkeysTarget, Hotkeys, Hotkey, Tooltip, Position, IHotkeysProps } from '@blueprintjs/core';
+import { InputGroup, ControlGroup, Button, ButtonGroup, Popover, Intent, Alert, HotkeysTarget, Hotkeys, Hotkey, Tooltip, Position, IHotkeysProps } from '@blueprintjs/core';
 import { AppState } from "../state/appState";
 import { FileMenu } from "./FileMenu";
 import { MakedirDialog } from "./dialogs/MakedirDialog";
@@ -103,9 +103,7 @@ export class ToolbarClass extends React.Component<IProps, PathInputState> {
     }
 
     private onSubmit = () => {
-        console.log('onSubmit');
         if (this.cache.path !== this.state.path) {
-            console.log('onSubmit2', this.cache.cd);
             this.input.blur();
             const path = this.state.path;
             this.cache.cd(this.state.path)
@@ -397,9 +395,7 @@ export class ToolbarClass extends React.Component<IProps, PathInputState> {
         const { selected, history, current } = fileCache;
         const { t } = this.props;
 
-        if (fileCache) {
-            console.log('ok', fileCache);
-        } else {
+        if (!fileCache) {
             console.log('oops', fileCache);
             debugger;
         }

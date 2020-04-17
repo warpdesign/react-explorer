@@ -1,10 +1,10 @@
-import { FsLocal } from "./FsLocal";
+import { FsLocal } from "../FsLocal";
 
 import {
     describeUnix,
     getPath,
     prepareTmpTestFiles
-} from "../../utils/test/helpers";
+} from "../../../utils/test/helpers";
 
 let localAPI: any;
 

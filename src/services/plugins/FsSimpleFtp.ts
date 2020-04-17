@@ -242,7 +242,7 @@ class SimpleFtpApi implements FsApi {
 
     isDirectoryNameValid(dirName: string): boolean {
         debugger;
-        console.log('GenericFs.isDirectoryNameValid');
+        console.log('SimpleFtpFs.isDirectoryNameValid');
         return true;
     }
 
@@ -280,7 +280,7 @@ class SimpleFtpApi implements FsApi {
     }
 
     size(source: string, files: string[], transferId = -1): Promise<number> {
-        console.log('GenericFs.size');
+        console.log('SimpleFtpFs.size');
         return Promise.resolve(10);
     }
 
@@ -300,28 +300,33 @@ class SimpleFtpApi implements FsApi {
     }
 
     makedir(parent: string, dirName: string, transferId = -1): Promise<string> {
-        console.log('FsGeneric.makedir');
+        console.log('FsSimpleFtp.makedir');
         return Promise.resolve('');
     }
 
     delete(src: string, files: File[], transferId = -1): Promise<number> {
-        console.log('FsGeneric.delete');
+        console.log('FsSimpleFtp.delete');
         return Promise.resolve(files.length);
     }
 
     rename(source: string, file: File, newName: string, transferId = -1): Promise<string> {
-        console.log('FsGeneric.rename');
+        console.log('FsSimpleFtp.rename');
         return Promise.resolve(newName);
     }
 
     isDir(path: string, transferId = -1): Promise<boolean> {
-        console.log('FsGeneric.isDir');
+        console.log('FsSimpleFtp.isDir');
         return Promise.resolve(true);
     }
 
     exists(path: string, transferId = -1): Promise<boolean> {
-        console.log('FsGeneric.exists');
+        console.log('FsSimpleFtp.exists');
         return Promise.resolve(true);
+    }
+
+    async makeSymlink(targetPath: string, path: string, transferId?: number): Promise<boolean> {
+        console.log("FsSimpleFtp.makeSymlink")
+        return true;
     }
 
     async stat(fullPath: string, transferId = -1): Promise<File> {
@@ -366,6 +371,7 @@ class SimpleFtpApi implements FsApi {
                         readonly: false,
                         type: !ftpFile.isDirectory && filetype(0, 0, 0, ext) || '',
                         isSym: false,
+                        target: null,
                         id: {
                             ino: mDate.getTime(),
                             dev: new Date().getTime()
@@ -463,6 +469,9 @@ export const FsSimpleFtp: Fs = {
     icon: 'globe-network',
     name: 'simple-ftp',
     description: 'Fs that implements ft connection on top of simple-ftp',
+    options: {
+        needsRefresh: true
+    },
     canread(str: string): boolean {
         const info = new URL(str);
         console.log('FsFtp.canread', str, info.protocol, info.protocol === 'ftp:');

@@ -38,6 +38,7 @@ export interface File {
     name: string;
     fullname: string;
     extension: string;
+    target: string;
     cDate: Date;
     mDate: Date;
     bDate: Date;
@@ -48,6 +49,10 @@ export interface File {
     type: FileType;
     isSym: boolean;
     id: FileID;
+}
+
+export interface FsOptions {
+    needsRefresh: boolean;
 }
 
 export interface Fs {
@@ -61,6 +66,7 @@ export interface Fs {
     name: string;
     description: string;
     icon: string;
+    options: FsOptions;
 }
 
 export const Extensions: { [index: string]: RegExp } = {
@@ -93,7 +99,7 @@ function isModeExe(mode: number, gid: number, uid: number): Boolean {
     const isGroup = gid ? process.getgid && gid === process.getgid() : false;
     const isUser = uid ? process.getuid && uid === process.getuid() : false;
 
-    return !!((mode & ExeMaskAll) || ((mode & ExeMaskUser) && isGroup) || ((mode & ExeMaskGroup) && isUser));
+    return !!((mode !== -1 && (mode & ExeMaskAll)) || ((mode & ExeMaskUser) && isGroup) || ((mode & ExeMaskGroup) && isUser));
 }
 
 export function filetype(mode: number, gid: number, uid: number, extension: string): FileType {
@@ -128,6 +134,7 @@ export interface FsApi {
     isDir(path: string, transferId?: number): Promise<boolean>;
     exists(path: string, transferId?: number): Promise<boolean>;
     size(source: string, files: string[], transferId?: number): Promise<number>;
+    makeSymlink(targetPath: string, path: string, transferId?: number): Promise<boolean>;
     getStream(path: string, file: string, transferId?: number): Promise<Readable>;
     putStream(readStream: Readable, dstPath: string, progress: (bytesRead: number) => void, transferId?: number): Promise<void>;
     getParentTree(dir: string): Array<{ dir: string, fullname: string }>;

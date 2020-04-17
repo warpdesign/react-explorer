@@ -69,6 +69,7 @@ interface ITableRow {
     isSelected: boolean;
     nodeData: File;
     className: string;
+    title: string;
 }
 
 interface IState {
@@ -256,9 +257,13 @@ export class FileTableClass extends React.Component<IProps, IState> {
             isSymlink: file.isSym
         });
 
+        // if (file.name.match(/link/))
+        //     debugger;
+
         const res: ITableRow = {
             icon: file.isDir && TYPE_ICONS['dir'] || (filetype && TYPE_ICONS[filetype] || TYPE_ICONS['any']),
             name: file.fullname,
+            title: file.isSym ? `${file.fullname} → ${file.target}` : file.fullname,
             nodeData: file,
             className: classes,
             isSelected: isSelected,
@@ -337,9 +342,9 @@ export class FileTableClass extends React.Component<IProps, IState> {
     }
 
     nameRenderer = (data: any) => {
-        const iconName = data.rowData.icon;
+        const { icon, title } = data.rowData;
 
-        return (<div className="name"><Icon icon={iconName}></Icon><span title={data.cellData} className="file-label">{data.cellData}</span></div>);
+        return (<div className="name"><Icon icon={icon}></Icon><span title={title} className="file-label">{data.cellData}</span></div>);
     }
 
     /*

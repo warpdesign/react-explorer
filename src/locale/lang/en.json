@@ -198,7 +198,8 @@
             "EEXIST": "A file with that name already exists",
             "NODEST": "copy target could not be accessed",
             "COPY_ERROR": "Couldn't copy files: {{message}}",
-            "COPY_UNKNOWN_ERROR": "Error while copying files."
+            "COPY_UNKNOWN_ERROR": "Error while copying files.",
+            "SHELL_OPEN_FAILED": "Could not open file: {{path}}"
         },
         "MAIN_PROCESS": {
             "PRESS_TO_EXIT": "Keep pressing ⌘Q to exit"

@@ -65,6 +65,11 @@ class GenericApi implements FsApi {
         return Promise.resolve(true);
     }
 
+    async makeSymlink(targetPath: string, path: string, transferId?: number): Promise<boolean> {
+        console.log("FsGeneric.makeSymlink")
+        return true;
+    }
+
     stat(fullPath: string, transferId = -1): Promise<File> {
         return Promise.resolve({
             dir: "",
@@ -139,6 +144,9 @@ export const FsGeneric: Fs = {
     icon: "database",
     name: "generic",
     description: "Fs that just implements the FsInterface but does nothing",
+    options: {
+        needsRefresh: false
+    },
     canread(str: string): boolean {
         return true;
     },

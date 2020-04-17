@@ -1,5 +1,5 @@
-import { getSortMethod } from './FsSort';
-import { File } from './Fs';
+import { getSortMethod } from '../FsSort';
+import { File } from '../Fs';
 
 const files: Array<File> = [{
     "dir": "/",
@@ -18,6 +18,7 @@ const files: Array<File> = [{
         "dev": 1
     },
     isSym: false,
+    target: null,
     type: ''
 },
 {
@@ -37,6 +38,7 @@ const files: Array<File> = [{
         "dev": 1
     },
     isSym: false,
+    target: null,
     type: ''
 },
 {
@@ -56,6 +58,7 @@ const files: Array<File> = [{
         "dev": 1
     },
     isSym: false,
+    target: null,
     type: ''
 },
 {
@@ -75,6 +78,7 @@ const files: Array<File> = [{
         "dev": 1
     },
     isSym: false,
+    target: null,
     type: ''
 }];
 

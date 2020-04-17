@@ -90,12 +90,14 @@
     border:1px solid rgba(0,0,0,.4);
 }
 
-.tableRow.error, .tableRow.error .bp3-icon, body.bp3-dark .tableRow.error .bp3-icon{
-    color: rgb(160, 43, 43);
-}
-
 .tableRow.selected, .tableRow.selected .bp3-icon{
     color:#fff;
+}
+
+.tableRow.error,
+.tableRow.error .bp3-icon,
+body.bp3-dark .tableRow.error .bp3-icon{
+    color: rgb(160, 43, 43);
 }
 
 /* dark theme */

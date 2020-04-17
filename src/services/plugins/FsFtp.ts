@@ -238,6 +238,7 @@ class Client {
                             readonly: false,
                             type: ftpFile.type !== 'd' && filetype(0, 0, 0, ext) || '',
                             isSym: false,
+                            target: null,
                             id: {
                                 ino: mDate.getTime(),
                                 dev: new Date().getTime()
@@ -586,6 +587,11 @@ class FtpAPI implements FsApi {
         return this.master.list(dir);
     };
 
+    async makeSymlink(targetPath: string, path: string, transferId?: number): Promise<boolean> {
+        console.log("FsFtp.makeSymlink")
+        return true;
+    }
+
     async stat(fullPath: string): Promise<File> {
         console.warn('FsFtp.stat: TODO');
         return Promise.resolve({
@@ -752,6 +758,9 @@ export const FsFtp: Fs = {
     icon: 'globe-network',
     name: 'ftp',
     description: 'Fs that just implements fs over ftp',
+    options: {
+        needsRefresh: true
+    },
     canread(str: string): boolean {
         const info = new URL(str);
         console.log('FsFtp.canread', str, info.protocol, info.protocol === 'ftp:');
