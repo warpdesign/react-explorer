@@ -5,7 +5,7 @@ const TEST_FILES_DIR = tmpdir() + '/react-explorer-tests';
 
 const TmpDir = {
     [TEST_FILES_DIR]: {
-        file: '',
+        file: 'aa',
         link: mock.symlink({
             path: 'file'
         }),

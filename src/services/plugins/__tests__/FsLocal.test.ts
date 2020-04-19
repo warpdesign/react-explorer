@@ -1,12 +1,11 @@
 import { FsLocal } from "../FsLocal";
+import * as fs from 'fs';
 
 import {
     describeUnix,
     getPath,
-    prepareTmpTestFiles
 } from "../../../utils/test/helpers";
 
-// new
 import mock from 'mock-fs';
 import TmpDir from './fixtures/tmpDir'
 
@@ -357,10 +356,122 @@ describe('FsLocal', () => {
         });
     });
 
-    // describe('exists', () => {
+    describe('exists', () => {
+        beforeAll(() => {
+            localAPI = new FsLocal.API("/", () => {});
+            mock(TmpDir);
+        });
 
-    // })
-    // describe("delete", function() {
+        afterAll(() => mock.restore());
+
+        it('should resolve to true if file exists', async () => {
+            expect.assertions(1);
+            const res = await localAPI.exists(`${TESTS_DIR}/file`);
+            expect(res).toBe(true);
+        });
+
+        it('should resolve to false if file does not exists', async () => {
+            expect.assertions(1);
+            const res = await localAPI.exists(`${TESTS_DIR}/nothing`);
+            expect(res).toBe(false);
+        });
+    });
+
+    describe('stat', () => {
+        beforeAll(() => {
+            localAPI = new FsLocal.API("/", () => {});
+            mock(TmpDir);
+        });
+
+        afterAll(() => mock.restore());
+
+        // -   "atime": 2020-04-19T16:54:07.529Z,
+        // -   "atimeMs": 1587315247529,
+        // -   "birthtime": 2020-04-19T16:54:07.529Z,
+        // -   "birthtimeMs": 1587315247529,
+        // -   "blksize": 4096,
+        // -   "blocks": 0,
+        // -   "ctime": 2020-04-19T16:54:07.529Z,
+        // -   "ctimeMs": 1587315247529,
+        //     -   "gid": 1140567832,
+        // -   "mtime": 2020-04-19T16:54:07.529Z,
+        // -   "mtimeMs": 1587315247529,
+        // -   "nlink": 1,
+        // -   "rdev": 0,
+        // -   "size": 0,
+        // -   "uid": 138850138,
+
+        it('should return stat for existing file', async () => {
+            const path = `${TESTS_DIR}/file`;
+            expect.assertions(1);
+
+            const fsStat = fs.statSync(path);
+            const stat = await localAPI.stat(path);
+            expect(stat).toEqual({
+                dir: TESTS_DIR,
+                fullname: 'file',
+                name: 'file',
+                extension: '',
+                cDate: fsStat.ctime,
+                bDate: fsStat.ctime,
+                mDate: fsStat.mtime,
+                length: fsStat.size,
+                isDir: false,
+                isSym: false,
+                id: {
+                    dev: fsStat.dev,
+                    ino: fsStat.ino
+                },
+                mode: fsStat.mode,
+                readonly: false,
+                target: null,
+                type: ''
+            });
+        });
+
+        it('should return link target in target prop if file is a link', async () => {
+            const path = `${TESTS_DIR}/link`;
+            expect.assertions(1);
+
+            const stat = await localAPI.stat(path);
+            expect(stat.target).toBe('file');
+        });
+
+        it('should throw error if file does not exist', async () => {
+            const path = `${TESTS_DIR}/nothing_here`;
+            expect.assertions(1);
+
+            try {
+                const stat = await localAPI.stat(path);
+            } catch(err) {
+                expect(err.code).toBe('ENOENT');
+            }
+        });
+    });
+
+    describe('login', () => {
+        it('should resolve to true', async () => {
+            expect.assertions(1);
+            expect(localAPI.login()).resolves.toBe(undefined);
+        });
+    });
+
+    // TODO: cannot be tested with mock-fs for now
+    // describe('onList',() => {
+    //     it('should return ')
+    // });
+
+    describe('list', () => {
+        it.only('should reject if path does not exist', async () => {
+            expect.assertions(1);
+            try {
+                localAPI.list('/nothing')
+            } catch(err) {
+                expect(err).toBe("Path does not exist");
+            }
+        });
+    });
+    // // describe("delete", function() {
     //     const DELETE_PATH = `${TESTS_DIR}/deleteTest`;
     
     //     beforeAll(() => {

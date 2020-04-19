@@ -231,7 +231,7 @@ export class LocalApi implements FsApi {
 
             return file;
         } catch (err) {
-            return err;
+            throw err;
         }
     }
 
