@@ -250,33 +250,35 @@ export class LocalApi implements FsApi {
     }
 
     async list(dir: string, transferId = -1): Promise<File[]> {
-        const pathExists = await this.isDir(dir);
-
-        if (pathExists) {
+        try {
+            await this.isDir(dir);
             return new Promise<File[]>((resolve, reject) => {
                 fs.readdir(dir, (err, items) => {
                     if (err) {
                         reject(err);
                     } else {
                         const dirPath = path.resolve(dir);
-
+    
                         const files: File[] = [];
-
+    
                         for (var i = 0; i < items.length; i++) {
                             const file = LocalApi.fileFromPath(
                                 path.join(dirPath, items[i])
                             );
                             files.push(file);
                         }
-
+    
                         this.onList(dirPath);
-
+    
                         resolve(files);
                     }
                 });
             });
-        } else {
-            return Promise.reject("Path does not exist");
+        } catch(err) {
+            throw({
+                code: err.code,
+                message: `Could not access path: ${dir}`
+            });
         }
     }
 
@@ -353,8 +355,8 @@ export class LocalApi implements FsApi {
     }
 
     off() {
-        console.log("off", this.path);
-        console.log("stopWatchingPath", this.path);
+        // console.log("off", this.path);
+        // console.log("stopWatchingPath", this.path);
         LocalWatch.stopWatchingPath(this.path, this.onFsChange);
     }
 

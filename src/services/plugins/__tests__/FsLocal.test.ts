@@ -3,6 +3,7 @@ import * as fs from 'fs';
 
 import {
     describeUnix,
+    describeWin,
     getPath,
 } from "../../../utils/test/helpers";
 
@@ -14,8 +15,13 @@ let localAPI: any;
 const HOMEDIR = getPath("home");
 const TESTS_DIR = getPath("tests_dir");
 
+// needed to avoid crashes when console.log
+// is called and mock() has been called
+// see #
+console.log('');
+
 describe('FsLocal', () => {
-    describeUnix("isDirectoryNameValid: unix", function() {
+    describeUnix("isDirectoryNameValid", function() {
         beforeAll(() => {
             localAPI = new FsLocal.API("/", () => {});
         });
@@ -442,7 +448,7 @@ describe('FsLocal', () => {
             expect.assertions(1);
 
             try {
-                const stat = await localAPI.stat(path);
+                await localAPI.stat(path);
             } catch(err) {
                 expect(err.code).toBe('ENOENT');
             }
@@ -462,13 +468,105 @@ describe('FsLocal', () => {
     // });
 
     describe('list', () => {
-        it.only('should reject if path does not exist', async () => {
+        beforeAll(() => {
+            localAPI = new FsLocal.API("/", () => {});
+            jest.spyOn(localAPI, 'onList').mockImplementation(() => {});
+            mock(TmpDir);
+        });
+
+        afterEach(() => jest.clearAllMocks())
+
+        afterAll(() => {
+            mock.restore();
+        });
+
+        it('should throw ENOENT if path does not exist', async () => {
             expect.assertions(1);
             try {
-                localAPI.list('/nothing')
+                await localAPI.list('/nothing');
             } catch(err) {
-                expect(err).toBe("Path does not exist");
+                expect(err.code).toBe('ENOENT');
             }
+        });
+
+        // TODO: should have called onList(dir)
+        it('should return every files found in path if it exists', async () => {
+            expect.assertions(1);
+            
+            const files = await localAPI.list(TESTS_DIR);
+            
+            expect(files.length).toBe(6);
+        });
+
+        it('should throw ENOTDIR if path is not a folder', async () => {
+            expect.assertions(1);
+            try {
+                await localAPI.list(`${TESTS_DIR}/deleteTest/file`);
+            } catch(err) {
+                expect(err.code).toBe('ENOTDIR');
+            }
+        });
+
+        it('should throw EACCES if cannot access folder', async () => {
+            expect.assertions(1);
+            try {
+                await localAPI.list(`${TESTS_DIR}/deleteTest/folder_denied`);
+            } catch(err) {
+                expect(err.code).toBe('EACCES');
+            }
+        });
+
+        it('should call onList with path when listing a valid directory', async () => {
+            expect.assertions(2);
+            
+            await localAPI.list(TESTS_DIR);
+            
+            expect(localAPI.onList).toHaveBeenCalledTimes(1);
+            expect(localAPI.onList).toHaveBeenCalledWith(TESTS_DIR);
+        });
+    });
+
+    describeUnix('isRoot', () => {
+        beforeAll(() => {
+            localAPI = new FsLocal.API("/", () => {});
+        });
+
+        it('should return false for empty path', () => {
+            expect(localAPI.isRoot('')).toBe(false);
+        });
+
+        it('should return true is path !== "/"', () => {
+            expect(localAPI.isRoot('/foo')).toBe(false);
+        });
+
+        it('should return true is path === "/"', () => {
+            expect(localAPI.isRoot('/')).toBe(true);
+        });
+    });
+
+    describeWin('isRoot', () => {
+        beforeAll(() => {
+            localAPI = new FsLocal.API("C:\\", () => {});
+        });
+
+        it('should return false for empty path', () => {
+            expect(localAPI.isRoot('')).toBe(false);
+        });
+
+        it('should return true is path !== "X:\\"', () => {
+            expect(localAPI.isRoot('C:\\Windows')).toBe(false);
+        });
+
+        it('should return true is path === "X:\\"', () => {
+            expect(localAPI.isRoot('C:\\')).toBe(true);
+        });
+
+        it('should return true if path === "\\\\"', () => {
+            expect(localAPI.isRoot('\\\\')).toBe(true);
+        });
+
+        it('should return false if path === "\\\\foo"', () => {
+            expect(localAPI.isRoot('\\\\foo')).toBe(true);
         });
     });
     // // describe("delete", function() {

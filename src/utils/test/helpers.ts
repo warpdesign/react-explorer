@@ -1,4 +1,4 @@
-import { isWin, isMac } from '../platform';
+import { platform } from 'process';
 import { homedir, tmpdir } from 'os';
 import { mkdirSync, writeFileSync, existsSync } from 'fs';
 import { execSync } from 'child_process';
@@ -7,13 +7,28 @@ import { execSync } from 'child_process';
 declare var describe: any;
 
 // assume Unix in that case: may need some tweaks for some exotic platform
-const isUnix = !isWin;
+const isUnix = platform !== 'win32';
 const TEST_FILES_DIR = tmpdir() + '/react-explorer-tests';
 
-// call this to perform unix specified tests
-export const describeUnix = (...args: any) => isUnix && describe(...args) || describe.skip(...args);
-// call this to perform windows specified tests
-export const describeWin = (...args: any) => isWin && describe(...args) || describe.skip(...args);
+// call this to perform unix specific tests
+export const describeUnix = (...args: any) => {
+    args[0] += ' (Unix)';
+    if (isUnix) {
+        describe(...args);
+    } else {
+        describe.skip(...args);
+    }
+};
+
+// call this to perform windows specific tests
+export const describeWin = (...args: any) => {
+    args[0] += ' (Win)';
+    if (!isUnix) {
+        describe(...args);
+    } else {
+        describe.skip(...args);
+    }
+};
 
 export const getPath = (id: string) => {
     switch (id) {

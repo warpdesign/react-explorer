@@ -70,7 +70,7 @@ export interface Fs {
 }
 
 export const Extensions: { [index: string]: RegExp } = {
-    'exe': /\.([\.]*(exe|bat|com|msi|mui|cmd))+$/,
+    'exe': /\.([\.]*(exe|bat|com|msi|mui|cmd|sh))+$/,
     'img': /\.([\.]*(png|jpeg|jpg|gif|pcx|tiff|raw|webp|svg|heif|bmp|ilbm|iff|lbm|ppm|pgw|pbm|pnm|psd))+$/,
     'arc': /\.([\.]*(zip|tar|rar|7zip|7z|dmg|shar|ar|bz2|lz|gz|tgz|lha|lzh|lzx|sz|xz|z|s7z|ace|apk|arp|arj|cab|car|cfs|cso|dar|iso|ice|jar|pak|sea|sfx|sit|sitx|lzma|war|xar|zoo|zipx|img|adf|dms|dmz))+$/,
     'snd': /\.([\.]*(mp3|wav|mp2|ogg|aac|aiff|mod|flac|m4a|mpc|oga|opus|ra|rm|vox|wma|8svx))+$/,
@@ -78,9 +78,9 @@ export const Extensions: { [index: string]: RegExp } = {
     'cod': /\.([\.]*(json|js|cpp|c|cxx|java|rb|s|tsx|ts|jsx|lua|as|coffee|ps1|py|r|rexx|spt|sptd|go|rs|sh|bash|vbs|cljs))+$/,
     'doc': /\.([\.]*(log|last|css|htm|html|rtf|doc|pdf|docx|txt|md|1st|asc|epub|xhtml|xml|amigaguide|info))+$/
 };
-const ExeMaskAll = 0o0001;
-const ExeMaskGroup = 0o0010;
-const ExeMaskUser = 0o0100;
+export const ExeMaskAll = 0o0001;
+export const ExeMaskGroup = 0o0010;
+export const ExeMaskUser = 0o0100;
 
 export type FileType = 'exe' | 'img' | 'arc' | 'snd' | 'vid' | 'doc' | 'cod' | '';
 
@@ -92,14 +92,14 @@ export function MakeId(stats: any): FileID {
 }
 
 function isModeExe(mode: number, gid: number, uid: number): Boolean {
-    if (isWin) {
+    if (isWin || mode === -1) {
         return false;
     }
 
     const isGroup = gid ? process.getgid && gid === process.getgid() : false;
     const isUser = uid ? process.getuid && uid === process.getuid() : false;
 
-    return !!((mode !== -1 && (mode & ExeMaskAll)) || ((mode & ExeMaskUser) && isGroup) || ((mode & ExeMaskGroup) && isUser));
+    return !!((mode & ExeMaskAll) || ((mode & ExeMaskUser) && isGroup) || ((mode & ExeMaskGroup) && isUser));
 }
 
 export function filetype(mode: number, gid: number, uid: number, extension: string): FileType {
