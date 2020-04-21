@@ -87,8 +87,6 @@ export class LocalApi implements FsApi {
         return new Promise((resolve, reject) => {
             const unixPath = path.join(source, dirName).replace(/\\/g, "/");
             try {
-                // console.log('mkdir', unixPath);
-
                 mkdir(unixPath, (err: any) => {
                     if (err) {
                         reject(err);
@@ -113,7 +111,7 @@ export class LocalApi implements FsApi {
                 });
                 resolve(deleted.length);
             } catch (err) {
-                console.log("error delete", err);
+                // console.log("error delete", err);
                 reject(err);
             }
         });
@@ -129,7 +127,6 @@ export class LocalApi implements FsApi {
         const newPath = path.join(source, newName);
 
         if (!newName.match(invalidFileChars)) {
-            console.log("valid !", oldPath, newPath);
             return new Promise((resolve, reject) => {
                 // since node's fs.rename will overwrite the destination
                 // path if it exists, first check that file doesn't exist
@@ -153,7 +150,15 @@ export class LocalApi implements FsApi {
                             }
                         });
                     }
-                });
+                })
+                .catch((err) => {
+                    reject({
+                        code: err.code,
+                        message: err.message,
+                        newName: newName,
+                        oldName: file.fullname
+                    });
+                })
             });
         } else {
             // reject promise with previous name in case of invalid chars
@@ -166,16 +171,13 @@ export class LocalApi implements FsApi {
     }
 
     async makeSymlink(targetPath: string, path: string, transferId = -1): Promise<boolean> {
-        console.log('creating symlink', targetPath, path);
         return new Promise<boolean>((resolve, reject) => fs.symlink(targetPath, path, (err) => {
             if (err) {
-                console.log('error creating symlink', err);
                 reject(err);
             } else {
-                console.log('link created');
                 resolve(true);
             }
-        }))
+        }));
     }
 
     async isDir(path: string, transferId = -1): Promise<boolean> {
@@ -229,7 +231,7 @@ export class LocalApi implements FsApi {
 
             return file;
         } catch (err) {
-            return err;
+            throw err;
         }
     }
 
@@ -248,33 +250,35 @@ export class LocalApi implements FsApi {
     }
 
     async list(dir: string, transferId = -1): Promise<File[]> {
-        const pathExists = await this.isDir(dir);
-
-        if (pathExists) {
+        try {
+            await this.isDir(dir);
             return new Promise<File[]>((resolve, reject) => {
                 fs.readdir(dir, (err, items) => {
                     if (err) {
                         reject(err);
                     } else {
                         const dirPath = path.resolve(dir);
-
+    
                         const files: File[] = [];
-
+    
                         for (var i = 0; i < items.length; i++) {
                             const file = LocalApi.fileFromPath(
                                 path.join(dirPath, items[i])
                             );
                             files.push(file);
                         }
-
+    
                         this.onList(dirPath);
-
+    
                         resolve(files);
                     }
                 });
             });
-        } else {
-            return Promise.reject("Path does not exist");
+        } catch(err) {
+            throw({
+                code: err.code,
+                message: `Could not access path: ${dir}`
+            });
         }
     }
 
@@ -351,8 +355,8 @@ export class LocalApi implements FsApi {
     }
 
     off() {
-        console.log("off", this.path);
-        console.log("stopWatchingPath", this.path);
+        // console.log("off", this.path);
+        // console.log("stopWatchingPath", this.path);
         LocalWatch.stopWatchingPath(this.path, this.onFsChange);
     }
 

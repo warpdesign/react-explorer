@@ -480,6 +480,7 @@ describe("filetable", () => {
                 .trigger("keydown", { keyCode: KEYS.Enter })
                 .find("[data-cy-file]:first")
                 .find(".file-label")
+                .focus()
                 .type("bar")
                 .blur()
                 .should("contain", "folder2")
