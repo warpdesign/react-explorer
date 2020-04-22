@@ -42,7 +42,7 @@ export class FileState {
     credentials: ICredentials;
 
     @observable
-    status: TStatus;
+    status: TStatus = 'ok';
 
     @observable
     error = false;

@@ -227,15 +227,15 @@ describe('left panel', () => {
     it('should not make favorite active if activeCache.path !== favorite.path', () => {
         cy.get(`.favoritesPanel > ul > li li.${Classes.TREE_NODE_SELECTED}`)
         .should('not.exist');
-    })
+    });
 
     it('should not update path is filecache is busy', () =>  {
         cy.window().then(win => {
             const views = win.appState.winStates[0].views;
             const cache = views[0].caches[0];
             cache.status = 'busy';
-        })
-        cy.wait(1000);
+        });
+
         cy.get('.favoritesPanel > ul > li:eq(0) .bp3-tree-node-content-1')
         .contains('cypress')
         .click()
