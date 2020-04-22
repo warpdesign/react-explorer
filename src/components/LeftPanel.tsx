@@ -90,7 +90,7 @@ export class LeftPanelClass extends React.Component<IProps, LeftPanelState> {
     private installReaction() {
         this.disposers.push(reaction(
             () => toJS(this.favoritesState.places),
-            (places: Favorite[]) => {
+            (_: Favorite[]) => {
                 if (!this.props.hide) {
                     console.log('places updated: need to rebuild nodes');
                     this.buildNodes(this.favoritesState);
@@ -136,7 +136,7 @@ export class LeftPanelClass extends React.Component<IProps, LeftPanelState> {
         const { appState } = this.injected;
         const activeCache = appState.getActiveCache();
 
-        if (activeCache) {
+        if (activeCache && activeCache.status === 'ok') {
             return activeCache.path;
         } else {
             return '';
