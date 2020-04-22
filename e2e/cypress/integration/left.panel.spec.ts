@@ -8,7 +8,6 @@ describe('left panel', () => {
     const stubs: any = {
         cd: []
     };
-
     function createStubs() {
         stubs.cd = [];
 
@@ -189,7 +188,7 @@ describe('left panel', () => {
         cy.toggleSplitView();
     });
 
-    it('should target the second view when active', () => {
+    it('should target the first view when active', () => {
         cy.toggleSplitView();
 
         // check that we are in split view
@@ -217,4 +216,43 @@ describe('left panel', () => {
 
         cy.toggleSplitView();
     });
+
+    it('should make favorite active if activeCache.path === favorite.path', () => {
+        cy.CDAndList(0, "/cy/documents");
+        cy.get('.favoritesPanel')
+        .contains('Documents').parents('li')
+        .should('have.class', Classes.TREE_NODE_SELECTED);
+    });
+
+    it('should not make favorite active if activeCache.path !== favorite.path', () => {
+        cy.get(`.favoritesPanel > ul > li li.${Classes.TREE_NODE_SELECTED}`)
+        .should('not.exist');
+    });
+
+    it('should not update path is filecache is busy', () =>  {
+        cy.window().then(win => {
+            const views = win.appState.winStates[0].views;
+            const cache = views[0].caches[0];
+            cache.status = 'busy';
+        });
+
+        cy.get('.favoritesPanel > ul > li:eq(0) .bp3-tree-node-content-1')
+        .contains('cypress')
+        .click()
+        .then(() => {
+            expect(stubs.cd[0]).not.to.be.called;
+        });
+    });
+
+    // it('should open specified link an a new tab on the second view if first view is active and alt/ctrl is down', () => {
+
+    // })
+
+    // it('should toggle second view and open specified link an a new tab if alt/ctrl is down', () => {
+
+    // })
+
+    // it('should open a new tab in the first view if the second view is active and alt/ctrl is down', () => {
+
+    // })
 });

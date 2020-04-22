@@ -136,7 +136,7 @@ export class LeftPanelClass extends React.Component<IProps, LeftPanelState> {
         const { appState } = this.injected;
         const activeCache = appState.getActiveCache();
 
-        if (activeCache && activeCache.status === 'ok') {
+        if (activeCache) {
             return activeCache.path;
         } else {
             return '';
@@ -147,7 +147,7 @@ export class LeftPanelClass extends React.Component<IProps, LeftPanelState> {
         const { appState } = this.injected;
         const activeCache = appState.getActiveCache();
 
-        if (activeCache) {
+        if (activeCache && activeCache.status === 'ok') {
             activeCache.cd(node.nodeData)
             .catch((err: any) => {
                 AppAlert.show(`${err.message} (${err.code})`, {
