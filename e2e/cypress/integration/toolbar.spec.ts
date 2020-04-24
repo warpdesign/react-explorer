@@ -5,19 +5,13 @@ interface Window {
 }
 
 describe("toolbar", () => {
-    const stubs: any = {
-        cd: []
-    };
-
     function createStubs() {
-        stubs.cd = [];
-        stubs.reload = [];
-
         cy.window().then(win => {
             const views = win.appState.winStates[0].views;
+            let count = 0;
             for (let view of views) {
                 for (let cache of view.caches) {
-                    const stub = cy.stub(cache, "cd", path => {
+                    cy.stub(cache, "cd", path => {
                         if (path.startsWith("/")) {
                             return Promise.resolve(path);
                         } else
@@ -25,9 +19,13 @@ describe("toolbar", () => {
                                 message: "",
                                 code: 0
                             });
-                    });
-                    stubs.cd.push(stub);
-                    stubs.reload.push(cy.spy(cache, "reload"));
+                    })
+                        .as(`stub_cd${count}`);
+
+                    cy.spy(cache, "reload")
+                        .as(`stub_reload${count}`);
+
+                    count++;
                 }
             }
         });
@@ -47,19 +45,23 @@ describe("toolbar", () => {
     });
 
     it("nav buttons are disabled", () => {
-        cy.get("#view_0 [data-cy-backward]").should("be.disabled");
-        cy.get("#view_0 [data-cy-forward]").should("be.disabled");
+        cy.get("#view_0 [data-cy-backward]")
+            .should("be.disabled");
+        cy.get("#view_0 [data-cy-forward]")
+            .should("be.disabled");
 
-        cy.get("#view_1 [data-cy-backward]").should("be.disabled");
-        cy.get("#view_1 [data-cy-forward]").should("be.disabled");
+        cy.get("#view_1 [data-cy-backward]")
+            .should("be.disabled");
+        cy.get("#view_1 [data-cy-forward]")
+            .should("be.disabled");
     });
 
     it("type path and enter calls cd", () => {
         cy.get("#view_0 [data-cy-path]")
-            .type("/other_folder{enter}")
-            .then(() => {
-                expect(stubs.cd[0]).to.be.called;
-            });
+            .type("/other_folder{enter}");
+
+        cy.get('@stub_cd0')
+            .should('be.called');
 
         cy.get(".data-cy-alert")
             .should("be.visible")
@@ -71,43 +73,48 @@ describe("toolbar", () => {
         cy.get("#view_0 [data-cy-path]")
             .as("input")
             .invoke("val")
-            .then(val => {
-                cy.log("got val", val);
-                cy.get("@input")
-                    .type("/var{esc}")
-                    .then(input => {
-                        cy.get("@input").should("have.value", val);
-                        expect(stubs.cd[0]).not.to.be.called;
-                    });
-            });
+            .as('previous_value');
+
+        cy.get("@input")
+            .type("/sdfdsgsdg{esc}");
+
+        cy.get('@previous_value').then(value => {
+            cy.get("@input").should("have.value", value);
+        });
+
+        cy.get('@stub_cd0')
+            .should('not.be.called');
     });
 
     it("type non valid path should show alert then focus input", () => {       
         cy.get("#view_0 [data-cy-path]")
-        .type(":{enter}");
+            .type(":{enter}");
 
         cy.get(".data-cy-alert")
             .should("be.visible")
             .find(".bp3-button")
-            .click()
-            .then(() => {
-                cy.get("#view_0 [data-cy-path]").should("have.value", ":");
-                expect(stubs.cd[0]).to.be.called;
-            });
+            .click();
+
+        cy.get("#view_0 [data-cy-path]")
+            .should("have.value", ":");
+
+        cy.get('@stub_cd0')
+            .should('be.called');
     });
 
     it("path should get updated when fileState is updated", () => {
         cy.window().then(win => {
             win.appState.winStates[0].views[0].caches[0].updatePath("/newPath");
-            cy.get("#view_0 [data-cy-path]").should("have.value", "/newPath");
+            cy.get("#view_0 [data-cy-path]")
+                .should("have.value", "/newPath");
         });
     });
 
     it("clicking on reload should reload path", () => {
         cy.get("#view_0 .data-cy-reload")
-            .click()
-            .then(() => {
-                expect(stubs.reload[0]).to.be.called;
-            });
+            .click();
+
+        cy.get('@stub_reload0')
+            .should('be.called');
     });
 });

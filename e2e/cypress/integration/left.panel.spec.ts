@@ -1,21 +1,19 @@
 /// <reference types="cypress"/>
 import { Classes } from '@blueprintjs/core';
-import { SHORTCUTS } from '../support/constants';
+import { SHORTCUTS, isMac } from '../support/constants';
+
+const MODIFIER = isMac ? '{alt}' : '{ctrl}';
 
 describe('left panel', () => {
     let favoritesState:any = null;
 
-    const stubs: any = {
-        cd: []
-    };
     function createStubs() {
-        stubs.cd = [];
-
         cy.window().then(win => {
             const views = win.appState.winStates[0].views;
+            let count = 0;
             for (let view of views) {
                 for (let cache of view.caches) {
-                    const stub = cy.stub(cache, "cd", path => {
+                    cy.stub(cache, "cd", path => {
                         if (path.startsWith("/")) {
                             return Promise.resolve(path);
                         } else
@@ -23,8 +21,7 @@ describe('left panel', () => {
                                 message: "",
                                 code: 0
                             });
-                    });
-                    stubs.cd.push(stub);
+                    }).as('stub_cd' + count++);
                 }
             }
         });
@@ -46,6 +43,12 @@ describe('left panel', () => {
             .invoke("val", "/")
             .focus()
             .blur();
+
+        cy.get('.favoritesPanel > ul > li:eq(0)')
+            .as('shortcuts');
+
+        cy.get('.favoritesPanel > ul > li:eq(1)')
+            .as('places')
     });
 
     it('should be visible and expanded', () => {
@@ -58,69 +61,67 @@ describe('left panel', () => {
 
     it('clicking on section should toggle elements', () => {
         // check that shortcuts node is expanded and toggle it
-        cy.get('.favoritesPanel > ul > li:eq(0)')
-        .as('shortcuts')
-        .should('have.class', Classes.TREE_NODE_EXPANDED)
-        .find(`.${Classes.TREE_NODE_CARET}`)
-        .click();
+        cy.get('@shortcuts')
+            .should('have.class', Classes.TREE_NODE_EXPANDED)
+            .find(`.${Classes.TREE_NODE_CARET}`)
+            .click();
 
         // check that it's no longer expanded and toggle it
         cy.get('@shortcuts')
-        .should('not.have.class', Classes.TREE_NODE_EXPANDED)
-        .find(`.${Classes.TREE_NODE_CARET}`)
-        .click();
+            .should('not.have.class', Classes.TREE_NODE_EXPANDED)
+            .find(`.${Classes.TREE_NODE_CARET}`)
+            .click();
 
         // check that shortcuts is expanded again
         cy.get('@shortcuts')
         .should('have.class', Classes.TREE_NODE_EXPANDED);
 
         // same thing for the places
-        cy.get('.favoritesPanel > ul > li:eq(1)')
-        .as('places')
-        .should('have.class', Classes.TREE_NODE_EXPANDED)
-        .find(`.${Classes.TREE_NODE_CARET}`)
-        .click();
+        cy.get('@places')
+            .should('have.class', Classes.TREE_NODE_EXPANDED)
+            .find(`.${Classes.TREE_NODE_CARET}`)
+            .click();
 
         cy.get('@places')
-        .should('not.have.class', Classes.TREE_NODE_EXPANDED)
-        .find(`.${Classes.TREE_NODE_CARET}`)
-        .click();
+            .should('not.have.class', Classes.TREE_NODE_EXPANDED)
+            .find(`.${Classes.TREE_NODE_CARET}`)
+            .click();
 
         cy.get('@places')
-        .should('have.class', Classes.TREE_NODE_EXPANDED);
+            .should('have.class', Classes.TREE_NODE_EXPANDED);
     });
 
     it(`should have all shortcuts`, () => {
         const length:number = favoritesState.shortcuts.length;
         cy.get('.favoritesPanel')
-        .contains('Shortcuts')
-        .should('be.visible');
+            .contains('Shortcuts')
+            .should('be.visible');
 
-        cy.get('.favoritesPanel > ul > li:eq(0) .bp3-tree-node-content-1')
-        .as('shortcuts')
-        .its('length')
-        .should('equal', length);
+        cy.get('@shortcuts')
+            .find('.bp3-tree-node-content-1')
+            .its('length')
+            .should('equal', length);
 
         SHORTCUTS.forEach(shortcut => {
             cy.get('@shortcuts')
-            .contains(shortcut)
-            .should('be.visible');
+                .contains(shortcut)
+                .should('be.visible');
         });
     });
 
     it(`should have all places`, () => {
         const length:number = favoritesState.places.length;
         cy.get('.favoritesPanel')
-        .contains('Places')
-        .should('be.visible');
+            .contains('Places')
+            .should('be.visible');
 
-        cy.get('.favoritesPanel > ul > li:eq(1) .bp3-tree-node-content-1')
-        .as('shortcuts')
-        .its('length')
-        .should('equal', length);
+        cy.get('@places')
+            .find('.bp3-tree-node-content-1')
+            .its('length')
+            .should('equal', length);
 
         favoritesState.places.forEach((place:any) => {
-            cy.get('@shortcuts')
+            cy.get('@places')
             .contains(place.label)
             .should('be.visible');
         });
@@ -142,13 +143,13 @@ describe('left panel', () => {
         // wait 5 secs: this is the delay we wait before updating drive list
         cy.wait(5000);
 
-        cy.get('.favoritesPanel > ul > li:eq(1) .bp3-tree-node-content-1')
-        .as('shortcuts')
-        .its('length')
-        .should('equal', favoritesState.places.length);
+        cy.get('@places')
+            .find('.bp3-tree-node-content-1')
+            .its('length')
+            .should('equal', favoritesState.places.length);
 
         favoritesState.places.forEach((place:any) => {
-            cy.get('@shortcuts')
+            cy.get('@places')
             .contains(place.label)
             .should('be.visible');
         });
@@ -160,10 +161,10 @@ describe('left panel', () => {
 
         cy.get('.favoritesPanel > ul > li:eq(0) .bp3-tree-node-content-1')
         .contains(label)
-        .click()
-        .then(() => {
-            expect(stubs.cd[0]).to.be.calledWith(path);
-        });
+        .click();
+
+        cy.get('@stub_cd0')
+            .should('be.calledWith', path);
     });
 
     it('should target the second view when active', () => {
@@ -176,13 +177,15 @@ describe('left panel', () => {
         cy.get('#view_1')
             .should('be.visible');
 
-        cy.get('.favoritesPanel > ul > li:eq(0) .bp3-tree-node-content-1')
+        cy.get('@shortcuts')
             .contains('cypress')
-            .click()
-            .then(() => {
-                expect(stubs.cd[1]).to.be.called;
-                expect(stubs.cd[0]).not.to.be.called;
-            });
+            .click();
+
+        cy.get('@stub_cd1')
+            .should('be.calledWith', '/cy/home');
+
+        cy.get('@stub_cd0')
+            .should('not.be.called', '/cy/home');
 
         // toggle back split view mode
         cy.toggleSplitView();
@@ -206,13 +209,15 @@ describe('left panel', () => {
         cy.get('#view_0')
             .should('have.class', 'active');
 
-        cy.get('.favoritesPanel > ul > li:eq(0) .bp3-tree-node-content-1')
+        cy.get('@shortcuts')
             .contains('cypress')
-            .click()
-            .then(() => {
-                expect(stubs.cd[0]).to.be.called;
-                expect(stubs.cd[1]).not.to.be.called;
-            });
+            .click();
+
+        cy.get('@stub_cd0')
+            .should('be.calledWith', '/cy/home');
+
+        cy.get('@stub_cd1')
+            .should('not.be.called');
 
         cy.toggleSplitView();
     });
@@ -236,23 +241,117 @@ describe('left panel', () => {
             cache.status = 'busy';
         });
 
-        cy.get('.favoritesPanel > ul > li:eq(0) .bp3-tree-node-content-1')
-        .contains('cypress')
-        .click()
-        .then(() => {
-            expect(stubs.cd[0]).not.to.be.called;
-        });
+        cy.get('@shortcuts')
+            .contains('cypress')
+            .click();
+
+        cy.get('@stub_cd0')
+            .should('not.be.called');
     });
 
-    // it('should open specified link an a new tab on the second view if first view is active and alt/ctrl is down', () => {
+    describe('click on favorites with alt/ctrl key down', () => {
+        it('should show&activate second view, open a new tab, if splitview is off', () => {
+            cy.get('#view_0')
+                .should('be.visible');
+    
+            cy.get('#view_1')
+                .should('not.be.visible');
+    
+            cy.get('body').type(MODIFIER, { release: false });
+    
+            cy.get('@shortcuts')
+                .contains('cypress')
+                .click();
+    
+            cy.get('@stub_cd0')
+                .should('not.be.called');
+            cy.get('@stub_cd1')
+                .should('not.be.called');
+    
+            // check that a new tab has been created,
+            // is active, and has the correct path
+            cy.getTab(1, 1)
+                .should('have.class', Classes.INTENT_PRIMARY)
+                .contains('/cy/home')
+                .should('exist');
+    
+            cy.get('#view_1')
+                .should('have.class', 'active');
+    
+            // toggle back split view mode
+            cy.toggleSplitView();
+        });
+    
+        it('should activate second view, open a new tab, if splitview is on', () => {
+            cy.get('.data-cy-toggle-splitview')
+                .click()
 
-    // })
+            // activate view one because splitview will activate the second view
+            cy.getTab(0, 0)
+                .click()
+    
+            cy.get('#view_0')
+                .should('be.visible');
 
-    // it('should toggle second view and open specified link an a new tab if alt/ctrl is down', () => {
+            cy.get('body').type(MODIFIER, { release: false });
+    
+            cy.get('@shortcuts')
+                .contains('cypress')
+                .click();
+    
+            cy.get('@stub_cd0')
+                .should('not.be.called');
+            cy.get('@stub_cd1')
+                .should('not.be.called');
+    
+            // check that a new tab has been created,
+            // is active, and has the correct path
+            cy.getTab(1, 1)
+                .should('have.class', Classes.INTENT_PRIMARY)
+                .contains('/cy/home')
+                .should('exist');
+    
+            cy.get('#view_1')
+                .should('have.class', 'active');
+    
+            // toggle back split view mode
+            cy.toggleSplitView();
+        });
+    
+        it('should activate first view, open a new tab, if splitview is on and second view is active', () => {
+            cy.get('.data-cy-toggle-splitview')
+                .click()
 
-    // })
+            // activate view one because splitview will activate the second view
+            cy.getTab(1, 0)
+                .click()
+    
+            cy.get('#view_1')
+                .should('be.visible');
 
-    // it('should open a new tab in the first view if the second view is active and alt/ctrl is down', () => {
-
-    // })
+            cy.get('body').type(MODIFIER, { release: false });
+    
+            cy.get('@shortcuts')
+                .contains('cypress')
+                .click();
+    
+            cy.get('@stub_cd0')
+                .should('not.be.called');
+            cy.get('@stub_cd1')
+                .should('not.be.called');
+    
+            // check that a new tab has been created,
+            // is active, and has the correct path
+            cy.getTab(0, 1)
+                .should('have.class', Classes.INTENT_PRIMARY)
+                .contains('/cy/home')
+                .should('exist');
+    
+            cy.get('#view_0')
+                .should('have.class', 'active');
+    
+            // toggle back split view mode
+            cy.toggleSplitView();
+        });
+    });
 });

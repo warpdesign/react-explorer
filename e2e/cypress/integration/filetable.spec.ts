@@ -58,21 +58,32 @@ describe("filetable", () => {
         stubs.rename = [];
 
         cy.window().then(win => {
-            const views = win.appState.winStates[0].views;
-            cy.spy(win.appState, "updateSelection").as("updateSelection");
-
+            const appState = win.appState;
+            const views = appState.winStates[0].views;
+            cy.spy(appState, "updateSelection").as("updateSelection");
+            let count = 0;
             for (let view of views) {
                 for (let cache of view.caches) {
-                    stubs.openFile.push(cy.stub(cache, "openFile").resolves());
-                    stubs.openDirectory.push(
-                        cy.stub(cache, "openDirectory").resolves()
-                    );
-                    stubs.openParentDirectory.push(
-                        cy.stub(cache, "openParentDirectory").resolves()
-                    );
-                    stubs.rename.push(cy.stub(cache, "rename").resolves());
+                    cy.stub(cache, "openFile")
+                        .as('stub_openFile' + count)
+                        .resolves();
+
+                    cy.stub(cache, "openDirectory")
+                        .as('stub_openDirectory' + count)
+                        .resolves();
+
+                    cy.stub(cache, "openParentDirectory")
+                        .as('stub_openParentDirectory' + count)
+                        .resolves();
+
+                    cy.stub(cache, "rename")
+                        .as('stub_rename' + count)
+                        .resolves();
+                    
                     // this will be called but we don't care
                     cy.stub(cache, "isRoot").returns(false);
+
+                    count++;
                 }
             }
         });
@@ -99,7 +110,8 @@ describe("filetable", () => {
         });
 
         it("should use correct icons for each file type", () => {
-            cy.get("#view_0 [data-cy-file] .file-label").as("rows");
+            cy.get("#view_0 [data-cy-file] .file-label")
+                .as("rows");
 
             files.forEach((file: any) => {
                 const name = file.fullname;
@@ -159,26 +171,27 @@ describe("filetable", () => {
                 .click()
                 .should("have.class", "selected");
 
-            cy.get("#view_0 [data-cy-file]:first").should(
-                "have.class",
-                "selected"
-            );
+            cy.get("#view_0 [data-cy-file]:first")
+                .should(
+                    "have.class",
+                    "selected"
+                );
         });
 
         it("should call openDirectory when double-clicking on folder", () => {
             cy.get("#view_0 [data-cy-file]:first")
-                .dblclick()
-                .then(() => {
-                    expect(stubs.openDirectory[0]).to.be.called;
-                });
+                .dblclick();
+
+            cy.get('@stub_openDirectory0')
+                .should('be.called');
         });
 
         it("should call openFile when clicking on a file", () => {
             cy.get("#view_0 [data-cy-file]:eq(5)")
-                .dblclick()
-                .then(() => {
-                    expect(stubs.openFile[0]).to.be.called;
-                });
+                .dblclick();
+
+            cy.get('@stub_openFile0')
+                .should('be.called');
         });
 
         it("should unselect all files when clicking on empty grid area", () => {
@@ -238,7 +251,8 @@ describe("filetable", () => {
                 .should("have.class", "selected");
 
             for (let i = 0; i <= files.length; ++i) {
-                cy.get("#view_0").trigger("keydown", { keyCode: KEYS.Down });
+                cy.get("#view_0")
+                    .trigger("keydown", { keyCode: KEYS.Down });
             }
 
             cy.get("#view_0 [data-cy-file]")
@@ -259,7 +273,8 @@ describe("filetable", () => {
 
             // press arrow down key until the last item is selected: it should now be visible & selected
             for (let i = 0; i <= files.length; ++i) {
-                cy.get("#view_0").trigger("keydown", { keyCode: KEYS.Down });
+                cy.get("#view_0")
+                    .trigger("keydown", { keyCode: KEYS.Down });
             }
 
             cy.get("#view_0 [data-cy-file]")
@@ -301,7 +316,8 @@ describe("filetable", () => {
         it("should scroll up the table if needed when pressing arrow up key", () => {
             // press arrow down key until the last item is selected: it should now be visible & selected
             for (let i = 0; i <= files.length; ++i) {
-                cy.get("#view_0").trigger("keydown", { keyCode: KEYS.Down });
+                cy.get("#view_0")
+                    .trigger("keydown", { keyCode: KEYS.Down });
             }
 
             // check that the first element isn't visible anymore
@@ -311,7 +327,8 @@ describe("filetable", () => {
 
             // press up arrow key until the first item is selected
             for (let i = 0; i <= files.length; ++i) {
-                cy.get("#view_0").trigger("keydown", { keyCode: KEYS.Up });
+                cy.get("#view_0")
+                    .trigger("keydown", { keyCode: KEYS.Up });
             }
 
             // it should now be visible & selected
@@ -330,30 +347,32 @@ describe("filetable", () => {
             cy.get("#view_0 [data-cy-file]")
                 .first()
                 .click();
+
             cy.get("body")
-                .type(`${MOD_KEY}o`)
-                .then(() => {
-                    expect(stubs.openDirectory[0]).to.be.called;
-                });
+                .type(`${MOD_KEY}o`);
+
+            cy.get('@stub_openDirectory0')
+                .should('be.called');
         });
 
         it("should open file if a file is selected and mod + o is pressed", () => {
             cy.get("#view_0 [data-cy-file]")
                 .eq(5)
                 .click();
+
             cy.get("body")
-                .type(`${MOD_KEY}o`)
-                .then(() => {
-                    expect(stubs.openFile[0]).to.be.called;
-                });
+                .type(`${MOD_KEY}o`);
+
+            cy.get('@stub_openFile0')
+                .should('be.called');
         });
 
         it("should open parent directory if backspace is pressed", () => {
             cy.get("body")
-                .type("{backspace}")
-                .then(() => {
-                    expect(stubs.openParentDirectory[0]).to.be.called;
-                });
+                .type("{backspace}");
+
+            cy.get('@stub_openParentDirectory0')
+                .should('be.called');
         });
 
         it("should select all files if mod + a is pressed", () => {
@@ -362,12 +381,13 @@ describe("filetable", () => {
                 .then(() => {
                     const length = files.length;
                     // check that appState.updateSelection is called with every elements
-                    cy.get("@updateSelection").should("be.called");
-                    cy.get("@updateSelection").then((spy: any) => {
-                        const calls = spy.getCalls();
-                        const { args } = calls[0];
-                        expect(args[1].length).to.equal(length);
-                    });
+                    cy.get("@updateSelection")
+                        .should("be.called")
+                        .and((spy: any) => {
+                            const calls = spy.getCalls();
+                            const { args } = calls[0];
+                            expect(args[1].length).to.equal(length);
+                        });
 
                     // and also check that every visible row is selected
                     cy.get("#view_0 [data-cy-file].selected")
@@ -383,13 +403,14 @@ describe("filetable", () => {
                 .type(`${MOD_KEY}i`)
                 .then(() => {
                     // check that appState.updateSelection is called with every elements
-                    cy.get("@updateSelection").should("be.called");
-                    cy.get("@updateSelection").then((spy: any) => {
-                        const calls = spy.getCalls();
-                        // get the last call
-                        const { args } = calls.pop();
-                        expect(args[1].length).to.equal(0);
-                    });
+                    cy.get("@updateSelection")
+                        .should("be.called")
+                        .and((spy: any) => {
+                            const calls = spy.getCalls();
+                            // get the last call
+                            const { args } = calls.pop();
+                            expect(args[1].length).to.equal(0);
+                        });
 
                     // and also check that every visible row is selected
                     cy.get("#view_0 [data-cy-file].selected").should(
@@ -410,7 +431,8 @@ describe("filetable", () => {
         });
 
         it("should activate rename for selected element if the user keeps mousedown", () => {
-            cy.get("#view_0 [data-cy-file]:first .file-label").click();
+            cy.get("#view_0 [data-cy-file]:first .file-label")
+                .click();
             cy.wait(1000);
             cy.get("#view_0 [data-cy-file]:first .file-label")
                 .click()
@@ -419,7 +441,8 @@ describe("filetable", () => {
 
         it("should select only left part of the filename", () => {
             // select the second element which is archive.tar.gz
-            cy.get("#view_0 [data-cy-file]:eq(2) .file-label").click();
+            cy.get("#view_0 [data-cy-file]:eq(2) .file-label")
+                .click();
             cy.wait(1000);
             cy.get("#view_0 [data-cy-file]:eq(2) .file-label")
                 .click()
@@ -447,13 +470,13 @@ describe("filetable", () => {
                 .find("[data-cy-file]:first")
                 .find(".file-label")
                 .type("bar{enter}")
-                .then(() => {
-                    expect(stubs.rename[0]).to.be.called;
-                })
                 // we need to restore previous text to avoid the next test to crash
                 // because React isn't aware of our inline edit since we created a stub for cache.rename
                 // (it's supposed to reload the file cache, which in turns causes a new render of FileTable)
                 .invoke("text", "folder2");
+
+            cy.get('@stub_rename0')
+                .should('be.called');
         });
 
         it("should not call cache.rename & restore previous filename when pressing escape in edit mode", () => {
@@ -462,16 +485,16 @@ describe("filetable", () => {
                 .trigger("keydown", { keyCode: KEYS.Enter })
                 .find("[data-cy-file]:first")
                 .find(".file-label")
-                .type("bar{esc}")
-                .then(() => {
-                    expect(stubs.rename[0]).not.to.be.called;
-                });
+                .type("bar{esc}");
 
+            // previous label must have been restored
             cy.get("#view_0 [data-cy-file].selected").should(
                 "contain",
                 "folder2"
             );
-            expect(stubs.rename[0]).not.to.be.called;
+
+            cy.get('@stub_rename0')
+                .should('not.be.called');
         });
 
         it("renaming should be cancelled if rename input field gets blur event while active", () => {
@@ -483,10 +506,10 @@ describe("filetable", () => {
                 .focus()
                 .type("bar")
                 .blur()
-                .should("contain", "folder2")
-                .then(() => {
-                    expect(stubs.rename[0]).not.to.be.called;
-                });
+                .should("contain", "folder2");
+
+            cy.get('@stub_rename0')
+                .should('not.be.called');
         });
     });
 });

@@ -3,24 +3,19 @@
 import { MOD_KEY, isMac } from "../support/constants";
 
 describe("keyboard hotkeys", () => {
-    const stubs: any = {
-        navHistory: []
-    };
-
     function createStubs() {
-        stubs.navHistory = [];
-
-        cy.log('hello');
         return cy.window().then(win => {
-            const views = win.appState.winStates[0].views;
+            const winState = win.appState.winStates[0];
+            const views = winState.views;
+            let count = 0;
             for (let view of views) {
                 for (let cache of view.caches) {
-                    stubs.navHistory.push(cy.spy(cache, "navHistory"));
+                    cy.spy(cache, "navHistory")
+                        .as('stub_navHistory' + count++);
                 }
             }
 
             // activate splitView mode
-            const winState = win.appState.winStates[0];
             winState.splitView = true;
         });
     }
@@ -41,41 +36,48 @@ describe("keyboard hotkeys", () => {
 
     it("should show downloads and explorer tabs", () => {
         cy.triggerHotkey(`{alt}${MOD_KEY}l`).then(() => {
-            cy.get(".downloads").should("be.visible");
+            cy.get(".downloads")
+                .should("be.visible");
         });
 
         cy.triggerHotkey(`{alt}${MOD_KEY}e`).then(() => {
-            cy.get(".downloads").should("not.exist");
-            cy.get(".sideview.active").should("be.visible");
+            cy.get(".downloads")
+                .should("not.exist");
+            cy.get(".sideview.active")
+                .should("be.visible");
         });
     });
 
     it("should show next/previous view", () => {
         cy.triggerHotkey(`{ctrl}{shift}{rightarrow}`).then(() => {
-            cy.get("#view_0").should("not.have.class", "active");
-            cy.get("#view_1").should("have.class", "active");
+            cy.get("#view_0")
+                .should("not.have.class", "active");
+            cy.get("#view_1")
+                .should("have.class", "active");
         });
 
         cy.triggerHotkey(`{ctrl}{shift}{leftarrow}`).then(() => {
-            cy.get("#view_1").should("not.have.class", "active");
-            cy.get("#view_0").should("have.class", "active");
+            cy.get("#view_1")
+                .should("not.have.class", "active");
+            cy.get("#view_0")
+                .should("have.class", "active");
         });
     });
 
     it("should go forward history", () => {
         const hotkey = isMac ? `${MOD_KEY}{rightarrow}` : `{alt}{rightarrow}`;
-        cy.triggerHotkey(hotkey).then(() => {
-            expect(stubs.navHistory[0]).to.be.calledOnce;
-            expect(stubs.navHistory[0]).to.be.calledWith(1);
-        });
+        cy.triggerHotkey(hotkey);
+        cy.get('@stub_navHistory0')
+            .should('be.calledOnce')
+            .should('be.calledWith', 1);
     });
 
     it("should go backward history", () => {
         const hotkey = isMac ? `${MOD_KEY}{leftarrow}` : `{alt}{leftarrow}`;
-        cy.triggerHotkey(hotkey).then(() => {
-            expect(stubs.navHistory[0]).to.be.calledOnce;
-            expect(stubs.navHistory[0]).to.be.calledWith(-1);
-        });
+        cy.triggerHotkey(hotkey);
+        cy.get('@stub_navHistory0')
+            .should('be.calledOnce')
+            .should('be.calledWith', -1);
     });
     // it("should open devtools", () => {
     //     cy.triggerHotkey(`{alt}${MOD_KEY}i`).then(() => {

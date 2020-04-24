@@ -5,12 +5,12 @@ import { withNamespaces, WithNamespaces } from 'react-i18next';
 import classNames from "classnames";
 import { IReactionDisposer, reaction, toJS } from "mobx";
 import i18next from 'i18next';
-import { USERNAME } from "../utils/platform";
+import { USERNAME, isMac } from "../utils/platform";
 import Icons from "../constants/icons";
 import { FavoritesState, Favorite } from "../state/favoritesState";
 import { AppState } from "../state/appState";
 import { AppAlert } from "./AppAlert";
-import CONFIG from '../config/appConfig'
+import CONFIG from '../config/appConfig';
 
 require("../css/favoritesPanel.css");
 
@@ -143,16 +143,35 @@ export class LeftPanelClass extends React.Component<IProps, LeftPanelState> {
         }
     }
 
-    onNodeClick = (node: ITreeNode<string>) => {
+    openFavorite(path: string, sameView: boolean):void {
         const { appState } = this.injected;
-        const activeCache = appState.getActiveCache();
+        if (sameView) {
+            const activeCache = appState.getActiveCache();
+            if (activeCache && activeCache.status === 'ok') {
+                activeCache.cd(path)
+            }
+        } else {
+            const winState = appState.winStates[0];
+            const viewState = winState.getInactiveView();
 
-        if (activeCache && activeCache.status === 'ok') {
-            activeCache.cd(node.nodeData)
-            .catch((err: any) => {
-                AppAlert.show(`${err.message} (${err.code})`, {
-                    intent: 'danger'
-                });
+            if (!winState.splitView) {
+                winState.toggleSplitViewMode();
+            } else {
+                winState.setActiveView(viewState.viewId);
+            }
+
+            if (viewState.getVisibleCache().path !== path) {
+                viewState.addCache(path, -1, true);
+            }
+        }
+    }
+
+    onNodeClick = async (node: ITreeNode<string>, _: number[], e: React.MouseEvent<HTMLElement>) => {
+        try {
+            await this.openFavorite(node.nodeData, !(isMac ? e.altKey : e.ctrlKey));
+        } catch(err) {
+            AppAlert.show(`${err.message} (${err.code})`, {
+                intent: 'danger'
             });
         }
     }

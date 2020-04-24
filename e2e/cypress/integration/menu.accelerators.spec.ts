@@ -12,10 +12,6 @@ import { Classes } from "@blueprintjs/core";
  * accelerator combo.
  */
 describe("combo hotkeys", () => {
-    const stubs: any = {
-        navHistory: []
-    };
-
     let caches:any;
 
     function resetSelection() {
@@ -30,34 +26,34 @@ describe("combo hotkeys", () => {
     }
 
     function createStubs() {
-        stubs.navHistory = [];
-
         cy.window().then(win => {
-            const views = win.appState.winStates[0].views;
-            for (let view of views) {
-                for (let cache of view.caches) {
-                    stubs.navHistory.push(cy.spy(cache, "navHistory"));
-                }
-            }
-
-            // activate splitView mode
-            const winState = win.appState.winStates[0];
+            const { appState } = win;
+            const winState = appState.winStates[0];
+            const view = winState.views[0];
+            
             winState.splitView = true;
 
             // stub copy/paste functions
-            cy.stub(win.appState, 'copySelectedItemsPath').as('copySelectedItemsPath');
+            cy.stub(appState, 'copySelectedItemsPath')
+                .as('copySelectedItemsPath');
             // stub reload view
-            cy.stub(win.appState, 'refreshActiveView').as('refreshActiveView');
+            cy.stub(appState, 'refreshActiveView')
+                .as('refreshActiveView');
             // stub first cache.openTerminal
-            cy.stub(win.appState.winStates[0].views[0].caches[0], 'openTerminal').as('openTerminal');
+            cy.stub(view.caches[0], 'openTerminal')
+                .as('openTerminal');
             // stub first view.cycleTab
-            cy.stub(win.appState.winStates[0].views[0], 'cycleTab').as('cycleTab');
+            cy.stub(view, 'cycleTab')
+                .as('cycleTab');
             // stub first view.addCache
-            cy.stub(win.appState.winStates[0].views[0], 'addCache').as('addCache');
+            cy.stub(view, 'addCache')
+                .as('addCache');
             // stub first view.closeTab
-            cy.stub(win.appState.winStates[0].views[0], 'closeTab').as('closeTab');
+            cy.stub(view, 'closeTab')
+                .as('closeTab');
             // stub first win.toggleSplitView
-            cy.spy(win.appState.winStates[0], 'toggleSplitViewMode').as('toggleSplitViewMode');
+            cy.spy(winState, 'toggleSplitViewMode')
+                .as('toggleSplitViewMode');
         });
     }
 
@@ -97,12 +93,12 @@ describe("combo hotkeys", () => {
     it("should copy file path to cb & show toast message if a file is selected", () => {
         // select first element
         cy.get("#view_0 [data-cy-file]:first")
-        .click();
+            .click();
 
         cy.triggerFakeCombo("CmdOrCtrl+Shift+C");
 
         cy.get('@copySelectedItemsPath')
-        .should('be.calledWith', caches[0], false);
+            .should('be.calledWith', caches[0], false);
 
         cy.get(`.${Classes.TOAST}`)
             .should('be.visible')
@@ -118,18 +114,18 @@ describe("combo hotkeys", () => {
             .should('not.be.visible');
 
         cy.get('@copySelectedItemsPath')
-        .should('be.calledWith', caches[0], true);
+            .should('be.calledWith', caches[0], true);
     });
 
     it("should copy file filename & show toast message if a file is selected", () => {
         // select first element
         cy.get("#view_0 [data-cy-file]:first")
-        .click();
+            .click();
 
         cy.triggerFakeCombo("CmdOrCtrl+Shift+N");
 
         cy.get('@copySelectedItemsPath')
-        .should('be.calledWith', caches[0], true);
+            .should('be.calledWith', caches[0], true);
 
         cy.get(`.${Classes.TOAST}`)
             .should('be.visible')
@@ -141,32 +137,32 @@ describe("combo hotkeys", () => {
         cy.triggerFakeCombo("CmdOrCtrl+S");
 
         cy.get('.shortcutsDialog')
-        .should('be.visible');
+            .should('be.visible');
 
         // close dialog
         cy.get(`.${Classes.DIALOG_FOOTER} .data-cy-close`)
-        .click();
+            .click();
 
         // wait for dialog to be closed otherwise
         // it could still be visible in next it()
         cy.get('.shortcutsDialog')
-        .should('not.be.visible');
+            .should('not.be.visible');
     });
 
     it("should open prefs dialog", () => {
         cy.triggerFakeCombo("CmdOrCtrl+,");
 
         cy.get('.data-cy-prefs-dialog')
-        .should('be.visible');
+            .should('be.visible');
 
         // close dialog
         cy.get(`.${Classes.DIALOG_FOOTER} .data-cy-close`)
-        .click();
+            .click();
 
         // wait for dialog to be closed otherwise
         // it could still be visible in next it()
         cy.get('.shortcutsDialog')
-        .should('not.be.visible');
+            .should('not.be.visible');
     });
 
     it("should reload file view", () => {

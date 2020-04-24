@@ -25,7 +25,7 @@ export class ViewState {
         }
 
         if (activateNewCache) {
-            this.setVisibleCache(index);
+            this.setVisibleCache(index > -1 ? index : this.caches.length - 1);
         }
 
         return cache;
