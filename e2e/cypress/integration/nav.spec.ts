@@ -17,70 +17,77 @@ describe('app shortcuts', () => {
 
     it('explorer tab should be active', () => {
         cy.get('.data-cy-explorer-tab')
-        .should('have.class', Classes.INTENT_PRIMARY)
+            .should('have.class', Classes.INTENT_PRIMARY)
 
-        cy.get(".downloads").should("not.exist");
-        cy.get(".sideview.active").should("be.visible");
-        cy.get(".favoritesPanel").should("be.visible");
+        cy.get(".downloads")
+            .should("not.exist");
+        cy.get(".sideview.active")
+            .should("be.visible");
+        cy.get(".favoritesPanel")
+            .should("be.visible");
     });
 
     it('click on nav tabs should activate each tab', () => {
         cy.get('.data-cy-downloads-tab')
-        .click()
-        .should('have.class', Classes.INTENT_PRIMARY)
-        .then(() => {
-            cy.get('.data-cy-explorer-tab')
-            .should('not.have.class', Classes.INTENT_PRIMARY);
-
-            cy.get(".downloads").should("exist");
-            cy.get(".sideview.active").should("not.be.visible");
-            cy.get(".favoritesPanel").should("not.be.visible");
-        });
+            .click()
+            .should('have.class', Classes.INTENT_PRIMARY)
 
         cy.get('.data-cy-explorer-tab')
-        .click()
-        .should('have.class', Classes.INTENT_PRIMARY)
-        .then(() => {
-            cy.get('.data-cy-downloads-tab')
             .should('not.have.class', Classes.INTENT_PRIMARY);
 
-            cy.get(".downloads").should("not.exist");
-            cy.get(".sideview.active").should("be.visible");
-            cy.get(".favoritesPanel").should("be.visible");
-        });
+        cy.get(".downloads")
+            .should("exist");
+        cy.get(".sideview.active")
+            .should("not.be.visible");
+        cy.get(".favoritesPanel")
+            .should("not.be.visible");
+
+        cy.get('.data-cy-explorer-tab')
+            .click()
+            .should('have.class', Classes.INTENT_PRIMARY)
+
+        cy.get('.data-cy-downloads-tab')
+            .should('not.have.class', Classes.INTENT_PRIMARY);
+
+        cy.get(".downloads")
+            .should("not.exist");
+        cy.get(".sideview.active")
+            .should("be.visible");
+        cy.get(".favoritesPanel")
+            .should("be.visible");
     });
 
     it('click on split should toggle split view', () => {
         cy.get('.data-cy-toggle-splitview')
-        .click()
-        .should('have.class', Classes.INTENT_PRIMARY)
-        .should('have.class', Classes.ACTIVE);
+            .click()
+            .should('have.class', Classes.INTENT_PRIMARY)
+            .should('have.class', Classes.ACTIVE);
 
         cy.get('#view_1')
-        .should('be.visible');
+            .should('be.visible');
 
         cy.get('.data-cy-toggle-splitview')
-        .click()
-        .should('not.have.class', Classes.INTENT_PRIMARY)
-        .should('not.have.class', Classes.ACTIVE);
+            .click()
+            .should('not.have.class', Classes.INTENT_PRIMARY)
+            .should('not.have.class', Classes.ACTIVE);
 
         cy.get('#view_1')
-        .should('not.be.visible');
+            .should('not.be.visible');
     });
 
     it('click on app menu should toggle app menu', () => {
         cy.get('.data-cy-toggle-app-menu')
-        .click()
-        .should('have.class', Classes.ACTIVE);
+            .click()
+            .should('have.class', Classes.ACTIVE);
 
         cy.get('.data-cy-app-menu')
-        .should('be.visible');
+            .should('be.visible');
 
         cy.get('.data-cy-toggle-app-menu')
-        .click()
-        .should('not.have.class', Classes.ACTIVE);
+            .click()
+            .should('not.have.class', Classes.ACTIVE);
 
         cy.get('.data-cy-app-menu')
-        .should('not.be.visible');
+            .should('not.be.visible');
     });
 });

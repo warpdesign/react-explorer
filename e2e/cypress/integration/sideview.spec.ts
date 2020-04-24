@@ -6,6 +6,7 @@ describe('sideview initial state', () => {
     });
 
     it('left view should be active', () => {
-        cy.get('#view_0').should('have.class', 'active');
+        cy.get('#view_0')
+            .should('have.class', 'active');
     });
 });
