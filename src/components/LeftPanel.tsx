@@ -10,9 +10,7 @@ import Icons from "../constants/icons";
 import { FavoritesState, Favorite } from "../state/favoritesState";
 import { AppState } from "../state/appState";
 import { AppAlert } from "./AppAlert";
-import CONFIG from '../config/appConfig'
-import { FileState } from "../state/fileState";
-import { createChildContext } from "react-dnd/lib/cjs/DragDropContext";
+import CONFIG from '../config/appConfig';
 
 require("../css/favoritesPanel.css");
 

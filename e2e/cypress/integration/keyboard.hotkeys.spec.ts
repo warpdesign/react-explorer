@@ -5,7 +5,8 @@ import { MOD_KEY, isMac } from "../support/constants";
 describe("keyboard hotkeys", () => {
     function createStubs() {
         return cy.window().then(win => {
-            const views = win.appState.winStates[0].views;
+            const winState = win.appState.winStates[0];
+            const views = winState.views;
             let count = 0;
             for (let view of views) {
                 for (let cache of view.caches) {
@@ -15,7 +16,6 @@ describe("keyboard hotkeys", () => {
             }
 
             // activate splitView mode
-            const winState = win.appState.winStates[0];
             winState.splitView = true;
         });
     }

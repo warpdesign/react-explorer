@@ -27,30 +27,32 @@ describe("combo hotkeys", () => {
 
     function createStubs() {
         cy.window().then(win => {
-            // activate splitView mode
-            const winState = win.appState.winStates[0];
+            const { appState } = win;
+            const winState = appState.winStates[0];
+            const view = winState.views[0];
+            
             winState.splitView = true;
 
             // stub copy/paste functions
-            cy.stub(win.appState, 'copySelectedItemsPath')
+            cy.stub(appState, 'copySelectedItemsPath')
                 .as('copySelectedItemsPath');
             // stub reload view
-            cy.stub(win.appState, 'refreshActiveView')
+            cy.stub(appState, 'refreshActiveView')
                 .as('refreshActiveView');
             // stub first cache.openTerminal
-            cy.stub(win.appState.winStates[0].views[0].caches[0], 'openTerminal')
+            cy.stub(view.caches[0], 'openTerminal')
                 .as('openTerminal');
             // stub first view.cycleTab
-            cy.stub(win.appState.winStates[0].views[0], 'cycleTab')
+            cy.stub(view, 'cycleTab')
                 .as('cycleTab');
             // stub first view.addCache
-            cy.stub(win.appState.winStates[0].views[0], 'addCache')
+            cy.stub(view, 'addCache')
                 .as('addCache');
             // stub first view.closeTab
-            cy.stub(win.appState.winStates[0].views[0], 'closeTab')
+            cy.stub(view, 'closeTab')
                 .as('closeTab');
             // stub first win.toggleSplitView
-            cy.spy(win.appState.winStates[0], 'toggleSplitViewMode')
+            cy.spy(winState, 'toggleSplitViewMode')
                 .as('toggleSplitViewMode');
         });
     }

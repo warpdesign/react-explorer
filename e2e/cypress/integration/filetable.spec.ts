@@ -58,8 +58,9 @@ describe("filetable", () => {
         stubs.rename = [];
 
         cy.window().then(win => {
-            const views = win.appState.winStates[0].views;
-            cy.spy(win.appState, "updateSelection").as("updateSelection");
+            const appState = win.appState;
+            const views = appState.winStates[0].views;
+            cy.spy(appState, "updateSelection").as("updateSelection");
             let count = 0;
             for (let view of views) {
                 for (let cache of view.caches) {
@@ -383,7 +384,6 @@ describe("filetable", () => {
                     cy.get("@updateSelection")
                         .should("be.called")
                         .and((spy: any) => {
-                            console.log('** expect !!');
                             const calls = spy.getCalls();
                             const { args } = calls[0];
                             expect(args[1].length).to.equal(length);
