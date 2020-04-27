@@ -135,15 +135,17 @@ export class AppState {
             debugger;
             if (
                 options.dstPath === cache.path &&
-                options.dstFsName === cache.getFS().name
+                options.dstFsName === cache.getFS().name &&
+                cache.getFS().options.needsRefresh
             ) {
-                // FIX ME: since watcher has been implemented, there's no need to reload cache
-                // if destination is local fs
                 cache.reload();
             }
 
             return res;
-        });
+        })
+            .catch(err => {
+                debugger;
+            })
     }
 
     /**
@@ -167,7 +169,7 @@ export class AppState {
         if (!srcCache) {
             srcPath = files[0].dir;
             const fs = getFS(srcPath);
-            srcApi = new fs.API(srcPath, () => {});
+            srcApi = new fs.API(srcPath, () => { });
         }
 
         const options = {
@@ -232,7 +234,7 @@ export class AppState {
         } else {
             // first we need to get a FS for local
             const fs = getFS(DOWNLOADS_DIR);
-            const api = new fs.API(DOWNLOADS_DIR, () => {});
+            const api = new fs.API(DOWNLOADS_DIR, () => { });
 
             const options = {
                 files,
@@ -339,7 +341,7 @@ export class AppState {
             options.dstFs,
             options.dstPath
         );
-        debugger;
+
         const batch = new Batch(
             options.srcFs,
             options.dstFs,

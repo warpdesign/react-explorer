@@ -30,7 +30,7 @@ export class LocalApi implements FsApi {
     loginOptions: ICredentials = null;
     onFsChange: (filename: string) => void;
 
-    constructor(path: string, onFsChange: (filename: string) => void) {
+    constructor(_: string, onFsChange: (filename: string) => void) {
         this.path = "";
         this.onFsChange = onFsChange;
     }
@@ -151,14 +151,14 @@ export class LocalApi implements FsApi {
                         });
                     }
                 })
-                .catch((err) => {
-                    reject({
-                        code: err.code,
-                        message: err.message,
-                        newName: newName,
-                        oldName: file.fullname
-                    });
-                })
+                    .catch((err) => {
+                        reject({
+                            code: err.code,
+                            message: err.message,
+                            newName: newName,
+                            oldName: file.fullname
+                        });
+                    })
             });
         } else {
             // reject promise with previous name in case of invalid chars
@@ -249,7 +249,7 @@ export class LocalApi implements FsApi {
         }
     }
 
-    async list(dir: string, transferId = -1): Promise<File[]> {
+    async list(dir: string, watchDir = false, transferId = -1): Promise<File[]> {
         try {
             await this.isDir(dir);
             return new Promise<File[]>((resolve, reject) => {
@@ -258,24 +258,24 @@ export class LocalApi implements FsApi {
                         reject(err);
                     } else {
                         const dirPath = path.resolve(dir);
-    
+
                         const files: File[] = [];
-    
+
                         for (var i = 0; i < items.length; i++) {
                             const file = LocalApi.fileFromPath(
                                 path.join(dirPath, items[i])
                             );
                             files.push(file);
                         }
-    
-                        this.onList(dirPath);
-    
+
+                        watchDir && this.onList(dirPath);
+
                         resolve(files);
                     }
                 });
             });
-        } catch(err) {
-            throw({
+        } catch (err) {
+            throw ({
                 code: err.code,
                 message: `Could not access path: ${dir}`
             });
@@ -310,7 +310,7 @@ export class LocalApi implements FsApi {
                 ctime: new Date(),
                 mtime: new Date(),
                 birthtime: new Date(),
-                size: stats.size,
+                size: stats ? stats.size : 0,
                 isDirectory: () => isDir,
                 mode: -1,
                 isSymbolicLink: () => isSymLink,
@@ -343,7 +343,7 @@ export class LocalApi implements FsApi {
                     filetype(mode, 0, 0, extension)) ||
                 "",
             isSym: stats.isSymbolicLink(),
-            target: stats.isSymbolicLink() && name || null,
+            target: stats.isSymbolicLink() && name || null,
             id: MakeId(stats)
         };
 
@@ -486,7 +486,7 @@ export class LocalApi implements FsApi {
         return isWin ? (path.match(/\\$/) ? path : path + "\\") : path;
     }
 
-    on(event: string, cb: (data: any) => void): void {}
+    on(event: string, cb: (data: any) => void): void { }
 }
 
 export function FolderExists(path: string) {

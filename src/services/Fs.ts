@@ -92,7 +92,7 @@ export function MakeId(stats: any): FileID {
 }
 
 function isModeExe(mode: number, gid: number, uid: number): Boolean {
-    if (isWin || mode === -1) {
+    if (isWin || mode === -1) {
         return false;
     }
 
@@ -125,7 +125,7 @@ export function filetype(mode: number, gid: number, uid: number, extension: stri
 export interface FsApi {
     // public API
     // async methods that may require server access
-    list(dir: string, transferId?: number): Promise<File[]>;
+    list(dir: string, watchDir?: boolean, transferId?: number): Promise<File[]>;
     cd(path: string, transferId?: number): Promise<string>;
     delete(parent: string, files: File[], transferId?: number): Promise<number>;
     makedir(parent: string, name: string, transferId?: number): Promise<string>;
