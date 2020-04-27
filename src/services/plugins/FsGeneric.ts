@@ -86,7 +86,7 @@ class GenericApi implements FsApi {
         } as File);
     }
 
-    async list(dir: string, transferId = -1): Promise<File[]> {
+    async list(dir: string, watchDir = false, transferId = -1): Promise<File[]> {
         console.log("FsGeneric.readDirectory");
         const pathExists = await this.isDir(dir);
 
@@ -97,7 +97,7 @@ class GenericApi implements FsApi {
         }
     }
 
-    off() {}
+    off() { }
 
     isRoot(path: string): boolean {
         return path === "/";
@@ -129,7 +129,7 @@ class GenericApi implements FsApi {
     getParentTree(dir: string): Array<{ dir: string; fullname: string }> {
         const numParts = dir.replace(/^\//, "").split("/").length;
         const folders = [];
-        for (let i = 0; i < numParts; ++i) {}
+        for (let i = 0; i < numParts; ++i) { }
         return [];
     }
 
@@ -137,7 +137,7 @@ class GenericApi implements FsApi {
         return path;
     }
 
-    on(event: string, cb: (data: any) => void): void {}
+    on(event: string, cb: (data: any) => void): void { }
 }
 
 export const FsGeneric: Fs = {

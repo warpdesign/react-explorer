@@ -7,7 +7,7 @@ import { FileMenu } from "./FileMenu";
 import { MakedirDialog } from "./dialogs/MakedirDialog";
 import { AppAlert } from './AppAlert';
 import { Logger } from "./Log";
-import { AppToaster, IToasterOpts } from "./AppToaster";
+import { AppToaster } from "./AppToaster";
 import { withNamespaces, WithNamespaces, Trans } from "react-i18next";
 import { WithMenuAccelerators, Accelerators, Accelerator } from "./WithMenuAccelerators";
 import { throttle } from "../utils/throttle";
@@ -206,8 +206,9 @@ export class ToolbarClass extends React.Component<IProps, PathInputState> {
         try {
             const { viewState } = this.injected;
             const fileCache = viewState.getVisibleCache();
+            const cache = this.cache;
 
-            const deleted = await this.cache.delete(this.state.path, fileCache.selected);
+            const deleted = await cache.delete(this.state.path, fileCache.selected);
 
             // TODO: reset selection ?
             if (!deleted) {
@@ -217,7 +218,9 @@ export class ToolbarClass extends React.Component<IProps, PathInputState> {
                     // show warning
                     this.onDeleteError();
                 }
-                this.cache.reload();
+                if (cache.getFS().options.needsRefresh) {
+                    cache.reload();
+                }
             }
         } catch (err) {
             this.onDeleteError(err);

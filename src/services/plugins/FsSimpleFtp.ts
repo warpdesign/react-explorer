@@ -345,7 +345,7 @@ class SimpleFtpApi implements FsApi {
         } as File);
     }
 
-    list(path: string, transferId = -1): Promise<File[]> {
+    list(path: string, watchDir = false, transferId = -1): Promise<File[]> {
         return new Promise(async (resolve, reject) => {
             const newpath = this.pathpart(path);
 

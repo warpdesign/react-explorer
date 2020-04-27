@@ -5,6 +5,7 @@ import { Deferred } from "../utils/deferred";
 import { getLocalizedError } from "../locale/error";
 import { Readable } from "stream";
 import { getSelectionRange } from "../utils/fileUtils";
+import { isWin } from "../utils/platform";
 
 const MAX_TRANSFERS = 2;
 const MAX_ERRORS = 5;
@@ -79,7 +80,7 @@ export class Batch {
 
     @action
     start(): Promise<boolean> {
-        console.log('starting batch');
+        console.log('Starting batch');
         if (this.status === 'queued') {
             this.slotsAvailable = MAX_TRANSFERS;
             this.status = 'started';
@@ -102,7 +103,8 @@ export class Batch {
     @action
     updatePendingTransfers(subDir: string, newFilename: string, cancel = false) {
         // TODO: escape '(' & ')' in subDir if needed
-        const regExp = new RegExp('^(' + subDir + ')');
+        const escapedSubDir = isWin ? subDir.replace(/\\/g, '\\\\') : subDir;
+        const regExp = new RegExp(`^(${escapedSubDir})`);
         const files = this.files.filter((file) => file.subDirectory.match(regExp) !== null);
 
         // destination directory for these files could not be created: we cancel these transfers
@@ -190,9 +192,9 @@ export class Batch {
         let stream = null;
 
         try {
-            if (transfer.file.isSym) {
-                debugger;
-            }
+            // if (transfer.file.isSym) {
+            //     debugger;
+            // }
             newFilename = await this.renameOrCreateDir(transfer, fullDstPath);
         } catch (err) {
             console.log('error creating directory', err);
@@ -207,21 +209,19 @@ export class Batch {
             if (isSym) {
                 const linkPath = dstFs.join(fullDstPath, newFilename)
                 try {
-                    debugger;
                     await srcFs.makeSymlink(transfer.file.target, linkPath, this.id)
                     transfer.status = 'done';
-                } catch(err) {
+                } catch (err) {
                     this.onTransferError(transfer, err);
-                    debugger;
                 }
             } else {
                 try {
-                    if (transfer.file.isSym) {
-                        debugger;
-                    }
+                    // if (transfer.file.isSym) {
+                    //     debugger;
+                    // }
                     // console.log('getting stream', srcPath, wantedName);
                     stream = await srcFs.getStream(srcPath, wantedName, this.id);
-    
+
                     this.streams.push(stream);
                     // console.log('sending to stream', dstFs.join(fullDstPath, newFilename));
                     // we have to listen for errors that may appear during the transfer: socket closed, timeout,...
@@ -233,11 +233,12 @@ export class Batch {
                     //     // destroy stream so that put stream resolves ?
                     //     stream.destroy();
                     // });
-    
+
                     await dstFs.putStream(stream, dstFs.join(fullDstPath, newFilename), (bytesRead: number) => {
                         this.onData(transfer, bytesRead);
                     }, this.id);
-    
+
+                    console.log('endPutStream', fullDstPath);
                     this.removeStream(stream);
                     transfer.status = 'done';
                 } catch (err) {
@@ -253,13 +254,14 @@ export class Batch {
                     //}
                     this.onTransferError(transfer, err);
                     if (this.errors > MAX_ERRORS) {
-                        console.warn('maximum errors occurred: cancelling upcoming file transfers');
+                        console.warn('Maximum errors occurred: cancelling upcoming file transfers');
                         this.status = 'error';
                         this.cancelFiles();
                     }
                 }
             }
         } else {
+            // console.log('isDir', fullDstPath);
             transfer.status = 'done';
             // make transfers with this directory ready
             this.updatePendingTransfers(srcFs.join(transfer.subDirectory, wantedName), newFilename, (transfer as FileTransfer).status !== 'done');
@@ -275,23 +277,11 @@ export class Batch {
         if (this.status !== 'error' && this.transfersDone < this.files.length) {
             this.queueNextTransfers();
         } else {
-            for (let transfer of this.files) {
-                console.log(transfer.status, transfer);
-            }
-            // console.log('no more transfers !!');
             if (this.numErrors === this.files.length) {
-                for (let transfer of this.files) {
-                    console.log(transfer.status, transfer.file.fullname, transfer);
-                }
-
                 this.transferDef.reject({
                     code: ''
                 });
             } else {
-                for (let transfer of this.files) {
-                    console.log(transfer.status, transfer.file.fullname, transfer);
-                }
-
                 this.transferDef.resolve();
             }
         }
@@ -480,6 +470,7 @@ export class Batch {
     async setFileList(files: File[]) {
         return this.getFileList(files).then((transfers) => {
             console.log('got files', transfers);
+            // transfers.forEach(t => console.log(`[${t.status}] ${t.file.dir}/${t.file.fullname}:${t.file.isDir}, ${t.subDirectory} (${t.newSub})`))
             this.files.replace(transfers);
         }).catch((err) => {
             return Promise.reject(err);

@@ -4,7 +4,6 @@ import { Deferred } from '../utils/deferred';
 import { i18next } from '../locale/i18n';
 import { getLocalizedError } from '../locale/error';
 import { shell, ipcRenderer } from 'electron';
-import * as process from 'process';
 import { AppState } from "./appState";
 import { TSORT_METHOD_NAME, TSORT_ORDER } from "../services/FsSort";
 
@@ -438,7 +437,7 @@ export class FileState {
     @action
     @needsConnection
     async list(path: string): Promise<File[]> {
-        return this.api.list(path)
+        return this.api.list(path, true)
             .catch(this.handleError)
     }
 
@@ -540,7 +539,7 @@ export class FileState {
         }
     }
 
-    shellOpenFile(path: string):boolean {
+    shellOpenFile(path: string): boolean {
         console.log('need to open file', path);
         return shell.openItem(path);
     }

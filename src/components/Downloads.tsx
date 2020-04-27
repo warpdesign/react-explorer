@@ -12,6 +12,7 @@ import classnames from 'classnames';
 import { intentClass } from '@blueprintjs/core/lib/esm/common/classes';
 import { AppAlert } from './AppAlert';
 import CONFIG from '../config/appConfig'
+import { isWin } from '../utils/platform';
 
 const TYPE_ICONS: { [key: string]: IconName } = {
     'img': 'media',
@@ -244,7 +245,7 @@ class DownloadsClass extends React.Component<IProps, IState> {
 
             const intent = this.getIntent(transfer);
             const className = intentClass(intent);
-
+            const sep = isWin ? '\\' : '/';
             const node: ITreeNode =
             {
                 id: transfer.id,
@@ -265,7 +266,7 @@ class DownloadsClass extends React.Component<IProps, IState> {
                     node.childNodes.push({
                         id: id,
                         icon: file.file.isDir ? 'folder-close' : this.getFileIcon(filetype),
-                        label: file.subDirectory ? (file.subDirectory + '/' + file.file.fullname) : file.file.fullname,
+                        label: file.subDirectory ? (file.subDirectory + sep + file.file.fullname) : file.file.fullname,
                         secondaryLabel: this.createFileRightLabel(file),
                         nodeData: {
                             transfer: file,

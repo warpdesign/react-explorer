@@ -4,20 +4,17 @@ import { Toolbar } from './Toolbar';
 import { Statusbar } from './Statusbar';
 import { AppState } from "../state/appState";
 import { LoginDialog } from "./dialogs/LoginDialog";
-import { FileState } from "../state/fileState";
 import { Loader } from "./Loader";
 import { FileTable } from "./FileTable";
 import classnames from 'classnames';
 import { DropTargetSpec, DropTargetConnector, DropTargetMonitor, DropTargetCollector, ConnectDropTarget, DropTarget } from "react-dnd";
-import { DraggedObject } from './RowRenderer';
 import { TabList } from "./TabList";
 import { ViewState } from "../state/viewState";
 import { AppToaster } from "./AppToaster";
 import { Intent } from "@blueprintjs/core";
 import { getLocalizedError } from "../locale/error";
 import { withNamespaces, WithNamespaces } from "react-i18next";
-import { FsLocal, LocalApi } from "../services/plugins/FsLocal";
-import { getFS } from "../services/Fs";
+import { LocalApi } from "../services/plugins/FsLocal";
 
 interface SideViewProps extends WithNamespaces {
     hide: boolean;
