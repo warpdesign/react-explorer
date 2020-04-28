@@ -393,22 +393,6 @@ describe('FsLocal', () => {
 
         afterAll(() => mock.restore());
 
-        // -   "atime": 2020-04-19T16:54:07.529Z,
-        // -   "atimeMs": 1587315247529,
-        // -   "birthtime": 2020-04-19T16:54:07.529Z,
-        // -   "birthtimeMs": 1587315247529,
-        // -   "blksize": 4096,
-        // -   "blocks": 0,
-        // -   "ctime": 2020-04-19T16:54:07.529Z,
-        // -   "ctimeMs": 1587315247529,
-        //     -   "gid": 1140567832,
-        // -   "mtime": 2020-04-19T16:54:07.529Z,
-        // -   "mtimeMs": 1587315247529,
-        // -   "nlink": 1,
-        // -   "rdev": 0,
-        // -   "size": 0,
-        // -   "uid": 138850138,
-
         it('should return stat for existing file', async () => {
             const path = `${TESTS_DIR}/file`;
             expect.assertions(1);
@@ -421,7 +405,7 @@ describe('FsLocal', () => {
                 name: 'file',
                 extension: '',
                 cDate: fsStat.ctime,
-                bDate: fsStat.ctime,
+                bDate: fsStat.birthtime,
                 mDate: fsStat.mtime,
                 length: fsStat.size,
                 isDir: false,
