@@ -2,6 +2,9 @@ os:
     - mac
     - linux
     - windows
+jobs:
+  allow_failures:
+    - os: windows
 language: node_js
 node_js:
     - 11.10.1
