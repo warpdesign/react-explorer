@@ -6,8 +6,9 @@
     "scripts": {
         "build": "webpack --config ./webpack.config.e2e.js",
         "watch": "webpack --config ./webpack.config.e2e.js --watch",
-        "server-old": "ws -d ./build-e2e -p 8080",
-        "server": "pm2 start \"npx ws -d ./build-e2e -p 8080\" --name cy-server",
+        "server": "npm run start-server && npm run wait-server",
+        "start-server": "pm2 start --name cy-server node_modules/local-web-server/bin/cli.js -- -p 8080 -d ./build-e2e",
+        "wait-server": "wait-on http://localhost:8080",
         "cypress:open": "cypress open",
         "cypress:run": "cypress run --config video=false"
     },
@@ -25,6 +26,7 @@
     },
     "devDependencies": {
         "cypress": "^3.5.0",
-        "pm2": "^4.1.2"
+        "pm2": "^4.1.2",
+        "wait-on": "^4.0.2"
     }
 }

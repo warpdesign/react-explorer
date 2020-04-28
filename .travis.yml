@@ -1,3 +1,10 @@
+os:
+    - mac
+    - linux
+    - windows
+jobs:
+  allow_failures:
+    - os: windows
 language: node_js
 node_js:
     - 11.10.1
@@ -7,6 +14,14 @@ addons:
     apt:
         packages:
             - libgconf-2-4
+before_install:
+    - |-
+        case $TRAVIS_OS_NAME in
+        windows)
+            set NODE_OPTIONS=
+            ;;
+        esac
+
 install:
     - npm ci
     - cd e2e && npm ci && npm run build
