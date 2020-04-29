@@ -64,7 +64,6 @@
         "@types/react-i18next": "^8.1.0",
         "@types/react-virtualized": "^9.21.4",
         "@types/webpack-env": "^1.14.0",
-        "awesome-typescript-loader": "^5.2.1",
         "aws-sdk": "^2.514.0",
         "clean-webpack-plugin": "^2.0.2",
         "copy-webpack-plugin": "^5.0.4",
