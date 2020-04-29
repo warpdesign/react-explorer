@@ -1,7 +1,6 @@
 import { FsGeneric } from './plugins/FsGeneric';
 import { FsLocal } from './plugins/FsLocal';
-import { FsSimpleFtp } from './plugins/FsSimpleFtp';
-import { Readable, Writable } from 'stream';
+import { Readable } from 'stream';
 import { isWin } from '../utils/platform';
 
 // console.log('fslocal', FsLocal);

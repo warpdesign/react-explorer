@@ -1,5 +1,6 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
 const CleanWebpackPlugin = require('clean-webpack-plugin');
 const TerserPlugin = require('terser-webpack-plugin');
 const CopyPlugin = require('copy-webpack-plugin');
@@ -41,7 +42,18 @@ const baseConfig = {
     module: {
         rules: [
             // All files with a '.ts' or '.tsx' extension will be handled by 'awesome-typescript-loader'.
-            { test: /\.tsx?$/, use: ["awesome-typescript-loader", "data-cy-loader"] },
+            { test: /\.tsx?$/, use: [
+                {
+                    loader: "ts-loader",
+                    options: {
+                        // disable type checker - we will use it in fork plugin
+                        transpileOnly: true
+                    }
+                },
+                {
+                    loader: "data-cy-loader"
+                }
+            ]},
 
             // All output '.js' files will have any sourcemaps re-processed by 'source-map-loader'.
             { enforce: "pre", test: /\.js$/, loader: "source-map-loader" },
@@ -92,6 +104,7 @@ module.exports = [
             target: 'electron-main',
             entry: { main: './src/electron/main.ts' },
             plugins: [
+                new ForkTsCheckerWebpackPlugin(),
                 new CleanWebpackPlugin({
                     cleanOnceBeforeBuildPatterns: [path.join(process.cwd(), 'dist/**/*')],
                     dangerouslyAllowCleanPatternsOutsideProject: true,
@@ -112,6 +125,7 @@ module.exports = [
             target: 'electron-renderer',
             entry: { gui: './src/gui/index.tsx' },
             plugins: [
+                new ForkTsCheckerWebpackPlugin(),
                 new HtmlWebpackPlugin({
                     title: 'React-Explorer',
                     template: 'index.html'

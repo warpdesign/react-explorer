@@ -6,7 +6,7 @@ import { I18nextProvider } from "react-i18next";
 import { i18next } from "../locale/i18n";
 import { SettingsState } from "../state/settingsState";
 import { Provider } from "mobx-react";
-import { DragDropContextProvider } from "react-dnd";
+import { DndProvider } from "react-dnd";
 import HTML5Backend from "react-dnd-html5-backend";
 import { remote } from "electron";
 
@@ -49,13 +49,13 @@ class App {
         document.body.classList.add("loaded");
 
         ReactDOM.render(
-            <DragDropContextProvider backend={HTML5Backend}>
+            <DndProvider backend={HTML5Backend}>
                 <I18nextProvider i18n={i18next}>
                     <Provider settingsState={this.settingsState}>
                         <ExplorerApp initialSettings={initialSettings}></ExplorerApp>
                     </Provider>
                 </I18nextProvider>
-            </DragDropContextProvider>,
+            </DndProvider>,
             document.getElementById("root")
         );
     };
