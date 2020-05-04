@@ -7,7 +7,6 @@ import { isPackage, isLinux } from '../utils/platform';
 import { WindowSettings } from './windowSettings';
 
 // declare var __dirname: string
-declare const ENV: { [key: string]: string | boolean | number | object };
 
 const ENV_E2E = !!process.env.E2E;
 const SOURCE_PATH = './build';
@@ -79,15 +78,15 @@ const ElectronApp = {
 
         settings.manage(this.mainWindow);
 
-        if (!settings.getCustom()) {
-            settings.setCustom({
+        if (!settings.custom) {
+            settings.custom = {
                 splitView: false,
-            });
+            };
         }
 
-        console.log(settings.getCustom());
+        console.log(settings.custom);
 
-        this.mainWindow.initialSettings = settings.getCustom();
+        this.mainWindow.initialSettings = settings.custom;
 
         // this.mainWindow.loadURL(HTML_PATH);
         this.mainWindow.loadFile(HTML_PATH);
@@ -206,7 +205,7 @@ const ElectronApp = {
             const { id, settings } = data;
             const state = WindowSettings.getSettings(id);
             console.log('got state', state);
-            state.setCustom(settings);
+            state.custom = settings;
         });
     },
 

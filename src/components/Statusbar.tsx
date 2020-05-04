@@ -1,33 +1,29 @@
-import * as React from "react";
+import * as React from 'react';
 import { observer, inject } from 'mobx-react';
-import { InputGroup, ControlGroup, Button, ButtonGroup, Popover, Intent, Alert, ProgressBar, Classes, Tooltip, IconName } from '@blueprintjs/core';
-import { AppState } from "../state/appState";
-import { AppToaster } from "./AppToaster";
+import { InputGroup, ControlGroup, Button, Intent, Tooltip, IconName } from '@blueprintjs/core';
+import { AppState } from '../state/appState';
+import { AppToaster } from './AppToaster';
 import { withNamespaces, WithNamespaces } from 'react-i18next';
 import classnames from 'classnames';
-import { ViewState } from "../state/viewState";
+import { ViewState } from '../state/viewState';
 
-interface IProps extends WithNamespaces {
-
-};
-
-interface InjectedProps extends IProps {
+interface InjectedProps extends WithNamespaces {
     viewState: ViewState;
-    appState: AppState
+    appState: AppState;
 }
 
 @inject('viewState', 'appState')
 @observer
-export class StatusbarClass extends React.Component<IProps> {
-    constructor(props: IProps) {
+export class StatusbarClass extends React.Component<WithNamespaces> {
+    constructor(props: WithNamespaces) {
         super(props);
     }
 
-    private get injected() {
+    private get injected(): InjectedProps {
         return this.props as InjectedProps;
     }
 
-    private onClipboardCopy = () => {
+    private onClipboardCopy = (): void => {
         const { appState, viewState } = this.injected;
         const { t } = this.props;
 
@@ -35,10 +31,10 @@ export class StatusbarClass extends React.Component<IProps> {
 
         AppToaster.show({
             message: t('COMMON.CP_COPIED', { count: num }),
-            icon: "tick",
-            intent: Intent.NONE
+            icon: 'tick',
+            intent: Intent.NONE,
         });
-    }
+    };
 
     // shouldComponentUpdate() {
     //     console.time('Statusbar Render');
@@ -49,14 +45,14 @@ export class StatusbarClass extends React.Component<IProps> {
     //     console.timeEnd('Statusbar Render');
     // }
 
-    public render() {
+    public render(): React.ReactNode {
         const { viewState } = this.injected;
         const fileCache = viewState.getVisibleCache();
         const disabled = !fileCache.selected.length;
         const numDirs = fileCache.files.filter((file) => file.fullname !== '..' && file.isDir).length;
         const numFiles = fileCache.files.filter((file) => !file.isDir).length;
         const numSelected = fileCache.selected.length;
-        const iconName = (fileCache.getFS() && fileCache.getFS().icon || 'offline') as IconName;
+        const iconName = ((fileCache.getFS() && fileCache.getFS().icon) || 'offline') as IconName;
         const offline = classnames('status-bar', { offline: fileCache.status === 'offline' });
         const { t } = this.props;
 
@@ -66,11 +62,12 @@ export class StatusbarClass extends React.Component<IProps> {
                     data-cy-paste-bt
                     disabled={disabled}
                     icon="clipboard"
-                    intent={!disabled && Intent.PRIMARY || Intent.NONE}
+                    intent={(!disabled && Intent.PRIMARY) || Intent.NONE}
                     onClick={this.onClipboardCopy}
                     minimal={true}
                 />
-            </Tooltip>);
+            </Tooltip>
+        );
 
         return (
             <ControlGroup>
@@ -82,7 +79,7 @@ export class StatusbarClass extends React.Component<IProps> {
                     className={offline}
                 />
             </ControlGroup>
-        )
+        );
     }
 }
 

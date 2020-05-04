@@ -11,7 +11,7 @@
         "experimentalDecorators": true,
         "resolveJsonModule": true,
         "esModuleInterop": true,
-        "types": ["node", "jest", "webpack", "webpack-env"]
+        "types": ["node", "electron", "jest", "webpack", "webpack-env"],
     },
     "include": ["./src/**/*"],
     "exclude": ["**/*.spec.ts", "**/*.test.ts"]

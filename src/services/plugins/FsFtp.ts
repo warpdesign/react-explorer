@@ -1,18 +1,17 @@
-import { FsApi, File, ICredentials, Fs, filetype } from '../Fs';
+import { FsApi, File, Credentials, Fs, filetype } from '../Fs';
 import * as ftp from 'ftp';
 import * as path from 'path';
 import * as fs from 'fs';
 import { Transform } from 'stream';
-import { remote } from 'electron';
 import { throttle } from '../../utils/throttle';
-import { Logger, JSObject } from "../../components/Log";
+import { Logger, JSObject } from '../../components/Log';
 import { EventEmitter } from 'events';
 import { isWin, DOWNLOADS_DIR } from '../../utils/platform';
 import * as nodePath from 'path';
 
 const FtpUrl = /^(ftp\:\/\/)*(ftp\.[a-z]+\.[a-z]{2,3}|[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})$/i;
 const ServerPart = /^(ftp\:\/\/)*(ftp\.[a-z]+\.[a-z]{2,3}|[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})/i;
-const invalidChars = /^[\.]+$/ig;
+const invalidChars = /^[\.]+$/gi;
 
 function join(path1: string, path2: string) {
     let prefix = '';
@@ -37,7 +36,7 @@ class Client {
     public host: string;
     public status: 'busy' | 'ready' | 'offline' = 'offline';
     public api: FtpAPI = null;
-    public options: ICredentials;
+    public options: Credentials;
 
     private readyResolve: () => any;
     private readyReject: (err: any) => any;
@@ -59,8 +58,9 @@ class Client {
 
     // TODO: return promise if client is not connected ??
     static getFreeClient(hostname: string) {
-        let client = Client.clients.find((client) => client.host === hostname && !client.api
-            && client.status === 'ready');
+        let client = Client.clients.find(
+            (client) => client.host === hostname && !client.api && client.status === 'ready',
+        );
 
         if (!client) {
             client = Client.addClient(hostname, {});
@@ -101,9 +101,14 @@ class Client {
         Logger.error(...this.getLoggerArgs(params));
     }
 
-    public login(options: ICredentials): Promise<any> {
+    public login(options: Credentials): Promise<any> {
         if (!this.connected) {
-            this.log('connecting to', this.host, 'with options', Object.assign({ host: this.host, ...options }, { password: '****' }));
+            this.log(
+                'connecting to',
+                this.host,
+                'with options',
+                Object.assign({ host: this.host, ...options }, { password: '****' }),
+            );
             this.options = options;
             this.readyPromise = new Promise((resolve, reject) => {
                 this.readyResolve = resolve;
@@ -192,7 +197,7 @@ class Client {
     }
 
     private onGreeting(greeting: string) {
-        for (let line of greeting.split('\n')) {
+        for (const line of greeting.split('\n')) {
             this.log(line);
         }
     }
@@ -212,40 +217,42 @@ class Client {
             // We could also use MLSD instead but unfortunately it's
             // not implemented in node-ftp
             // see: https://github.com/warpdesign/react-ftp/wiki/FTP-LIST-command
-            this.client.list("", (err: Error, list: any[]) => {
+            this.client.list('', (err: Error, list: any[]) => {
                 this.status = 'ready';
 
                 if (err) {
                     this.error('error calling list for', newpath);
                     reject(err);
                 } else {
-                    const files: File[] = list.filter((ftpFile) => !ftpFile.name.match(/^[\.]{1,2}$/)).map((ftpFile) => {
-                        const format = nodePath.parse(ftpFile.name);
-                        const ext = format.ext.toLowerCase();
-                        const mDate = new Date(ftpFile.date);
+                    const files: File[] = list
+                        .filter((ftpFile) => !ftpFile.name.match(/^[\.]{1,2}$/))
+                        .map((ftpFile) => {
+                            const format = nodePath.parse(ftpFile.name);
+                            const ext = format.ext.toLowerCase();
+                            const mDate = new Date(ftpFile.date);
 
-                        const file: File = {
-                            dir: path,
-                            name: ftpFile.name,
-                            fullname: ftpFile.name,
-                            isDir: ftpFile.type === 'd',
-                            length: parseInt(ftpFile.size, 10),
-                            cDate: mDate,
-                            mDate: mDate,
-                            bDate: mDate,
-                            extension: '',
-                            mode: 0,
-                            readonly: false,
-                            type: ftpFile.type !== 'd' && filetype(0, 0, 0, ext) || '',
-                            isSym: false,
-                            target: null,
-                            id: {
-                                ino: mDate.getTime(),
-                                dev: new Date().getTime()
-                            }
-                        };
-                        return file;
-                    });
+                            const file: File = {
+                                dir: path,
+                                name: ftpFile.name,
+                                fullname: ftpFile.name,
+                                isDir: ftpFile.type === 'd',
+                                length: parseInt(ftpFile.size, 10),
+                                cDate: mDate,
+                                mDate: mDate,
+                                bDate: mDate,
+                                extension: '',
+                                mode: 0,
+                                readonly: false,
+                                type: (ftpFile.type !== 'd' && filetype(0, 0, 0, ext)) || '',
+                                isSym: false,
+                                target: null,
+                                id: {
+                                    ino: mDate.getTime(),
+                                    dev: new Date().getTime(),
+                                },
+                            };
+                            return file;
+                        });
 
                     resolve(files);
                 }
@@ -267,7 +274,7 @@ class Client {
                         dir = dir.replace(/\\/g, '/');
                     }
                     // const joint = join(this.host, (dir || newpath));
-                    const joint = newpath === '/' ? join(oldPath, (dir || newpath)) : oldPath;
+                    const joint = newpath === '/' ? join(oldPath, dir || newpath) : oldPath;
                     resolve(joint);
                 } else {
                     reject(err);
@@ -301,7 +308,9 @@ class Client {
                 } else {
                     console.log('creating stream');
                     const writeStream = fs.createWriteStream(dest);
-                    readStream.once('close', function () { resolve(dest); });
+                    readStream.once('close', function () {
+                        resolve(dest);
+                    });
                     readStream.pipe(writeStream);
                     readStream.on('data', (chunk) => console.log('data', chunk.length));
                 }
@@ -326,16 +335,20 @@ class Client {
                     resolve(readStream);
                 }
             });
-        })
+        });
     }
 
     public putStream(readStream: fs.ReadStream, path: string, progress: (pourcent: number) => void): Promise<void> {
         this.status = 'busy';
 
         let bytesRead = 0;
-        const throttledProgress = throttle(() => { progress(bytesRead) }, 800);
+        const throttledProgress = throttle(() => {
+            progress(bytesRead);
+        }, 800);
 
-        readStream.once('close', function () { console.log('get ended!'); });
+        readStream.once('close', function () {
+            console.log('get ended!');
+        });
         const reportProgress = new Transform({
             transform(chunk, encoding, callback) {
                 bytesRead += chunk.length;
@@ -343,7 +356,7 @@ class Client {
                 console.log('data', bytesRead / 1024, 'Ko');
                 callback(null, chunk);
             },
-            highWaterMark: 16384 * 31
+            highWaterMark: 16384 * 31,
         });
 
         return new Promise((resolve, reject) => {
@@ -376,7 +389,7 @@ class Client {
                         oldName: oldName,
                         newName: newName,
                         code: err.code,
-                        message: err.message
+                        message: err.message,
                     });
                 }
             });
@@ -448,7 +461,7 @@ class Client {
                 if (err) {
                     reject(err);
                 } else {
-                    resolve(bytes)
+                    resolve(bytes);
                 }
             });
         });
@@ -461,7 +474,7 @@ class FtpAPI implements FsApi {
     connected = false;
     // main client: the one which will issue list/cd commands *only*
     master: Client = null;
-    loginOptions: ICredentials = null;
+    loginOptions: Credentials = null;
 
     eventList = new Array<string>();
     emitter: EventEmitter;
@@ -489,20 +502,20 @@ class FtpAPI implements FsApi {
     isDirectoryNameValid(dirName: string): boolean {
         console.log('FTP.isDirectoryNameValid');
         return !invalidChars.test(dirName);
-    };
+    }
 
     resolve(newPath: string): string {
         return newPath.replace(/\/\.\.$/, '');
-    };
+    }
 
     join(path: string, path2: string): string {
         return join(path, path2);
-    };
+    }
 
     size(source: string, files: string[]): Promise<number> {
         console.warn('FTP.size not implemented');
         return Promise.resolve(0);
-    };
+    }
 
     // copy(source: string, files: string[], dest: string): Promise<any> & cp.ProgressEmitter {
     //     console.log('TODO: FsFtp.copy');
@@ -520,17 +533,17 @@ class FtpAPI implements FsApi {
     makedir(parent: string, name: string): Promise<string> {
         console.log('FsFtp.makedir');
         return this.master.mkdir(parent, name);
-    };
+    }
 
     delete(source: string, files: File[]): Promise<number> {
         debugger;
         return new Promise(async (resolve, reject) => {
-            const fileList = files.filter(file => !file.isDir);
-            const dirList = files.filter(file => file.isDir);
+            const fileList = files.filter((file) => !file.isDir);
+            const dirList = files.filter((file) => file.isDir);
 
             debugger;
 
-            for (let file of fileList) {
+            for (const file of fileList) {
                 try {
                     debugger;
                     const fullPath = this.join(source, file.fullname);
@@ -541,10 +554,10 @@ class FtpAPI implements FsApi {
                 }
             }
 
-            for (let dir of dirList) {
+            for (const dir of dirList) {
                 try {
                     debugger;
-                    const fullPath = this.join(dir.dir, dir.fullname)
+                    const fullPath = this.join(dir.dir, dir.fullname);
                     await this.master.cd(fullPath);
                     debugger;
                     const files = await this.master.list(fullPath);
@@ -564,17 +577,17 @@ class FtpAPI implements FsApi {
             debugger;
             resolve(fileList.length + dirList.length);
         });
-    };
+    }
 
     rename(source: string, file: File, newName: string): Promise<string> {
         console.log('FsFtp.rename');
         return this.master.rename(source, file.fullname, newName);
-    };
+    }
 
     isDir(path: string): Promise<boolean> {
         console.warn('FsFtp.isDir not implemented: always returns true');
         return Promise.resolve(true);
-    };
+    }
 
     exists(path: string): Promise<boolean> {
         console.warn('FsFtp.exists not implemented: always returns true');
@@ -585,10 +598,10 @@ class FtpAPI implements FsApi {
     list(dir: string): Promise<File[]> {
         console.log('FsFtp.readDirectory', dir);
         return this.master.list(dir);
-    };
+    }
 
     async makeSymlink(targetPath: string, path: string, transferId?: number): Promise<boolean> {
-        console.log("FsFtp.makeSymlink")
+        console.log('FsFtp.makeSymlink');
         return true;
     }
 
@@ -605,7 +618,7 @@ class FtpAPI implements FsApi {
             mode: 777,
             isDir: false,
             readonly: false,
-            type: ''
+            type: '',
         } as File);
     }
 
@@ -614,7 +627,7 @@ class FtpAPI implements FsApi {
         const resolved = this.resolve(path);
         console.log('FsFtp.cd resolved', resolved);
         return this.master.cd(resolved);
-    };
+    }
 
     get(file_path: string, file: string): Promise<string> {
         const dest = path.join(DOWNLOADS_DIR, file);
@@ -622,7 +635,7 @@ class FtpAPI implements FsApi {
         return this.master.get(this.join(file_path, file), dest);
     }
 
-    login(server?: string, credentials?: ICredentials): Promise<void> {
+    login(server?: string, credentials?: Credentials): Promise<void> {
         if (server) {
             this.updateServer(server);
             // user: string, password: string, port: number
@@ -667,7 +680,7 @@ class FtpAPI implements FsApi {
         // free client
         this.master.api = null;
         // remove all listeners
-        for (let event of this.eventList) {
+        for (const event of this.eventList) {
             this.emitter.removeAllListeners(event);
         }
         // close any connections ?
@@ -690,7 +703,7 @@ class FtpAPI implements FsApi {
         } catch (err) {
             console.log('FsLocal.getStream error', err);
             return Promise.reject(err);
-        };
+        }
     }
 
     async putStream(readStream: fs.ReadStream, dstPath: string, progress: (bytesRead: number) => void): Promise<void> {
@@ -707,7 +720,7 @@ class FtpAPI implements FsApi {
         } catch (err) {
             console.log('FsFtp.putStream error', err);
             return Promise.reject(err);
-        };
+        }
     }
 
     getHostname(str: string) {
@@ -716,13 +729,11 @@ class FtpAPI implements FsApi {
         return info.hostname.toLowerCase();
     }
 
-    getParentTree(dir: string): Array<{ dir: string, fullname: string }> {
+    getParentTree(dir: string): Array<{ dir: string; fullname: string }> {
         console.error('TODO: implement me');
         const numParts = dir.replace(/^\//, '').split('/').length;
         const folders = [];
-        for (let i = 0; i < numParts; ++i) {
-
-        }
+        for (let i = 0; i < numParts; ++i) {}
         return [];
     }
 
@@ -752,14 +763,14 @@ class FtpAPI implements FsApi {
         this.connected = false;
         this.emitter.emit('close');
     }
-};
+}
 
 export const FsFtp: Fs = {
     icon: 'globe-network',
     name: 'ftp',
     description: 'Fs that just implements fs over ftp',
     options: {
-        needsRefresh: true
+        needsRefresh: true,
     },
     canread(str: string): boolean {
         const info = new URL(str);
@@ -770,13 +781,13 @@ export const FsFtp: Fs = {
         const info = new URL(str);
         return `${info.protocol}//${info.hostname}`;
     },
-    credentials(str: string): ICredentials {
+    credentials(str: string): Credentials {
         const info = new URL(str);
 
         return {
             port: parseInt(info.port, 10) || 21,
             password: info.password,
-            user: info.username
+            user: info.username,
         };
     },
     displaypath(str: string) {
@@ -784,8 +795,8 @@ export const FsFtp: Fs = {
         const split = info.pathname.split('/');
         return {
             fullPath: str,
-            shortPath: split.slice(-1)[0] || '/'
+            shortPath: split.slice(-1)[0] || '/',
         };
     },
-    API: FtpAPI
-}
+    API: FtpAPI,
+};

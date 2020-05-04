@@ -1,11 +1,11 @@
-import { observable, action, runInAction, computed } from "mobx";
-import { FsApi, File } from "../services/Fs";
-import { FileTransfer } from "./fileTransfer";
-import { Deferred } from "../utils/deferred";
-import { getLocalizedError } from "../locale/error";
-import { Readable } from "stream";
-import { getSelectionRange } from "../utils/fileUtils";
-import { isWin } from "../utils/platform";
+import { observable, action, runInAction, computed } from 'mobx';
+import { FsApi, File } from '../services/Fs';
+import { FileTransfer } from './fileTransfer';
+import { Deferred } from '../utils/deferred';
+import { getLocalizedError } from '../locale/error';
+import { Readable } from 'stream';
+import { getSelectionRange } from '../utils/fileUtils';
+import { isWin } from '../utils/platform';
 
 const MAX_TRANSFERS = 2;
 const MAX_ERRORS = 5;
@@ -14,7 +14,7 @@ const RENAME_SUFFIX = '_';
 type Status = 'started' | 'queued' | 'error' | 'done' | 'cancelled' | 'calculating';
 
 export class Batch {
-    static maxId: number = 1;
+    static maxId = 1;
     public srcFs: FsApi;
     public dstFs: FsApi;
     public dstPath: string;
@@ -26,9 +26,9 @@ export class Batch {
     public errors = 0;
 
     @observable
-    public size: number = 0;
+    public size = 0;
 
-    public files = observable<FileTransfer>([]);
+    public elements = observable<FileTransfer>([]);
 
     public streams = new Array<Readable>();
 
@@ -36,7 +36,7 @@ export class Batch {
     public status: Status = 'queued';
 
     @observable
-    public progress: number = 0;
+    public progress = 0;
 
     get isStarted(): boolean {
         return !this.status.match(/error|done/);
@@ -47,10 +47,10 @@ export class Batch {
     }
 
     get numErrors(): number {
-        return this.files.reduce((acc, val) => acc + ((val.error || val.status === 'cancelled') && 1 || 0), 0);
+        return this.elements.reduce((acc, val) => acc + (((val.error || val.status === 'cancelled') && 1) || 0), 0);
     }
 
-    public isExpanded: boolean = false;
+    public isExpanded = false;
 
     private transferDef: Deferred<any>;
 
@@ -76,7 +76,7 @@ export class Batch {
         // console.log('destroy batch, new maxId', Batch.maxId);
         this.status = 'done';
         return Promise.resolve(this.numErrors === 0);
-    }
+    };
 
     @action
     start(): Promise<boolean> {
@@ -91,9 +91,7 @@ export class Batch {
         }
 
         // return this.transferDef.promise;
-        return this.transferDef.promise.then(
-            this.onEndTransfer
-        ).catch((err: Error) => {
+        return this.transferDef.promise.then(this.onEndTransfer).catch((err: Error) => {
             console.log('error transfer', err);
             this.status = 'error';
             return Promise.reject(err);
@@ -105,11 +103,11 @@ export class Batch {
         // TODO: escape '(' & ')' in subDir if needed
         const escapedSubDir = isWin ? subDir.replace(/\\/g, '\\\\') : subDir;
         const regExp = new RegExp(`^(${escapedSubDir})`);
-        const files = this.files.filter((file) => file.subDirectory.match(regExp) !== null);
+        const files = this.elements.filter((file) => file.subDirectory.match(regExp) !== null);
 
         // destination directory for these files could not be created: we cancel these transfers
         if (cancel) {
-            for (let file of files) {
+            for (const file of files) {
                 file.status = 'cancelled';
                 this.transfersDone++;
             }
@@ -122,7 +120,7 @@ export class Batch {
                 newPrefix = parts.join('/');
             }
 
-            for (let transfer of files) {
+            for (const transfer of files) {
                 // enable files inside this directory
                 if (transfer.subDirectory === subDir) {
                     transfer.ready = true;
@@ -137,16 +135,16 @@ export class Batch {
     }
 
     getNextTransfer() {
-        return this.files.find((file) => file.ready && file.status === 'queued');
+        return this.elements.find((file) => file.ready && file.status === 'queued');
     }
 
     /**
      * Gets the next transfer(s) and starts them, where:
      * num transfers = min(MAX_TRANSFERS, slotsAvailable)
-     * 
+     *
      */
     queueNextTransfers() {
-        const max = (Math.min(MAX_TRANSFERS, this.slotsAvailable));
+        const max = Math.min(MAX_TRANSFERS, this.slotsAvailable);
 
         for (let i = 0; i < max; ++i) {
             const transfer = this.getNextTransfer();
@@ -163,10 +161,10 @@ export class Batch {
         transfer.error = getLocalizedError(err);
         this.errors++;
         // return this.transferDef.reject(err);
-    }
+    };
 
     removeStream(stream: Readable) {
-        const index = this.streams.findIndex(item => item === stream);
+        const index = this.streams.findIndex((item) => item === stream);
         if (index > -1) {
             this.streams.splice(index, 1);
         }
@@ -207,9 +205,9 @@ export class Batch {
 
         if (!isDir) {
             if (isSym) {
-                const linkPath = dstFs.join(fullDstPath, newFilename)
+                const linkPath = dstFs.join(fullDstPath, newFilename);
                 try {
-                    await srcFs.makeSymlink(transfer.file.target, linkPath, this.id)
+                    await srcFs.makeSymlink(transfer.file.target, linkPath, this.id);
                     transfer.status = 'done';
                 } catch (err) {
                     this.onTransferError(transfer, err);
@@ -234,9 +232,14 @@ export class Batch {
                     //     stream.destroy();
                     // });
 
-                    await dstFs.putStream(stream, dstFs.join(fullDstPath, newFilename), (bytesRead: number) => {
-                        this.onData(transfer, bytesRead);
-                    }, this.id);
+                    await dstFs.putStream(
+                        stream,
+                        dstFs.join(fullDstPath, newFilename),
+                        (bytesRead: number) => {
+                            this.onData(transfer, bytesRead);
+                        },
+                        this.id,
+                    );
 
                     console.log('endPutStream', fullDstPath);
                     this.removeStream(stream);
@@ -264,7 +267,11 @@ export class Batch {
             // console.log('isDir', fullDstPath);
             transfer.status = 'done';
             // make transfers with this directory ready
-            this.updatePendingTransfers(srcFs.join(transfer.subDirectory, wantedName), newFilename, (transfer as FileTransfer).status !== 'done');
+            this.updatePendingTransfers(
+                srcFs.join(transfer.subDirectory, wantedName),
+                newFilename,
+                (transfer as FileTransfer).status !== 'done',
+            );
         }
 
         if (this.status === 'cancelled') {
@@ -274,12 +281,12 @@ export class Batch {
         this.transfersDone++;
         this.slotsAvailable++;
         // console.log('finished', transfer.file.fullname, 'slotsAvailable', this.slotsAvailable, 'done', this.transfersDone);
-        if (this.status !== 'error' && this.transfersDone < this.files.length) {
+        if (this.status !== 'error' && this.transfersDone < this.elements.length) {
             this.queueNextTransfers();
         } else {
-            if (this.numErrors === this.files.length) {
+            if (this.numErrors === this.elements.length) {
                 this.transferDef.reject({
-                    code: ''
+                    code: '',
                 });
             } else {
                 this.transferDef.resolve();
@@ -295,7 +302,7 @@ export class Batch {
         const dstFs = this.dstFs;
         // create directory if does not exist
         const wantedName = transfer.file.fullname;
-        let dirPath = dstFs.join(dstPath, wantedName);
+        const dirPath = dstFs.join(dstPath, wantedName);
         let newName = wantedName;
         let stats = null;
         let exists = false;
@@ -368,16 +375,16 @@ export class Batch {
 
     @action
     cancelFiles() {
-        const todo = this.files.filter(file => !!file.status.match(/queued/));
+        const todo = this.elements.filter((file) => !!file.status.match(/queued/));
 
-        for (let file of todo) {
+        for (const file of todo) {
             file.status = 'cancelled';
         }
     }
 
     @action
     destroyRunningStreams() {
-        for (let stream of this.streams) {
+        for (const stream of this.streams) {
             stream.destroy();
         }
     }
@@ -395,7 +402,7 @@ export class Batch {
     @action
     calcTotalSize() {
         let size = 0;
-        for (let fileTransfer of this.files) {
+        for (const fileTransfer of this.elements) {
             // directory's length is the space used for dir meta data: we don't need (nor copy) that
             if (!fileTransfer.file.isDir) {
                 size += fileTransfer.file.length;
@@ -418,26 +425,26 @@ export class Batch {
         let transfers: FileTransfer[] = [];
 
         // add files
-        for (let file of files) {
+        for (const file of files) {
             transfers.push({
                 file,
                 status: 'queued',
                 progress: 0,
                 subDirectory,
                 newSub: subDirectory,
-                ready: subDirectory === ''
+                ready: subDirectory === '',
             });
         }
 
         // dir: need to call list for each directry to get files
-        for (let dir of dirs) {
+        for (const dir of dirs) {
             const transfer: FileTransfer = {
                 file: dir,
                 status: 'queued',
                 progress: 0,
                 subDirectory,
                 newSub: subDirectory,
-                ready: subDirectory === ''
+                ready: subDirectory === '',
             };
 
             transfers.push(transfer);
@@ -468,13 +475,15 @@ export class Batch {
 
     @action
     async setFileList(files: File[]) {
-        return this.getFileList(files).then((transfers) => {
-            console.log('got files', transfers);
-            // transfers.forEach(t => console.log(`[${t.status}] ${t.file.dir}/${t.file.fullname}:${t.file.isDir}, ${t.subDirectory} (${t.newSub})`))
-            this.files.replace(transfers);
-        }).catch((err) => {
-            return Promise.reject(err);
-        });
+        return this.getFileList(files)
+            .then((transfers) => {
+                console.log('got files', transfers);
+                // transfers.forEach(t => console.log(`[${t.status}] ${t.file.dir}/${t.file.fullname}:${t.file.isDir}, ${t.subDirectory} (${t.newSub})`))
+                this.elements.replace(transfers);
+            })
+            .catch((err) => {
+                return Promise.reject(err);
+            });
     }
 
     @action
@@ -482,7 +491,7 @@ export class Batch {
         // console.log('dataThrottled', bytesRead);
         const previousProgress = file.progress;
         file.progress = bytesRead;
-        this.progress += previousProgress ? (bytesRead - previousProgress) : bytesRead;
+        this.progress += previousProgress ? bytesRead - previousProgress : bytesRead;
         // console.log('progress', this.progress, this.progress === this.size ? -1 : this.progress/this.size);
         // remote.getCurrentWindow().setProgressBar(this.progress === this.size ? -1 : this.progress / this.size);
     }
