@@ -38,16 +38,12 @@ export class Batch {
     @observable
     public progress = 0;
 
-    get isStarted(): boolean {
+    isStarted(): boolean {
         return !this.status.match(/error|done/);
     }
 
-    get hasEnded(): boolean {
+    hasEnded(): boolean {
         return !!this.status.match(/done|error/);
-    }
-
-    get numErrors(): number {
-        return this.elements.reduce((acc, val) => acc + (((val.error || val.status === 'cancelled') && 1) || 0), 0);
     }
 
     public isExpanded = false;
@@ -75,7 +71,7 @@ export class Batch {
         // console.log('transfer ended ! duration=', Math.round((new Date().getTime() - this.startDate.getTime()) / 1000), 'sec(s)');
         // console.log('destroy batch, new maxId', Batch.maxId);
         this.status = 'done';
-        return Promise.resolve(this.numErrors === 0);
+        return Promise.resolve(this.errors === 0);
     };
 
     @action
@@ -284,7 +280,7 @@ export class Batch {
         if (this.status !== 'error' && this.transfersDone < this.elements.length) {
             this.queueNextTransfers();
         } else {
-            if (this.numErrors === this.elements.length) {
+            if (this.errors === this.elements.length) {
                 this.transferDef.reject({
                     code: '',
                 });
@@ -378,6 +374,7 @@ export class Batch {
         const todo = this.elements.filter((file) => !!file.status.match(/queued/));
 
         for (const file of todo) {
+            this.errors++;
             file.status = 'cancelled';
         }
     }

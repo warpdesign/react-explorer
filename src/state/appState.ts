@@ -311,7 +311,7 @@ export class AppState {
         const num = this.transfers.filter(
             transfer =>
                 transfer.progress &&
-                transfer.isStarted &&
+                transfer.isStarted() &&
                 now.getTime() - transfer.startDate.getTime() >= SHOW_BADGE_DELAY
         ).length;
         return num;
