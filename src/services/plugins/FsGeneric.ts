@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { FsApi, File, Credentials, Fs } from '../Fs';
 import * as fs from 'fs';
 
@@ -22,7 +23,7 @@ class GenericApi implements FsApi {
         return true;
     }
 
-    cd(path: string, transferId = -1) {
+    cd(path: string, transferId = -1): Promise<string> {
         return Promise.resolve(path);
     }
 
@@ -92,7 +93,9 @@ class GenericApi implements FsApi {
         }
     }
 
-    off() {}
+    off(): void {
+        //
+    }
 
     isRoot(path: string): boolean {
         return path === '/';
@@ -124,11 +127,14 @@ class GenericApi implements FsApi {
         return [];
     }
 
-    sanityze(path: string) {
+    sanityze(path: string): string {
         return path;
     }
 
-    on(event: string, cb: (data: any) => void): void {}
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    on(event: string, cb: (data: any) => void): void {
+        //
+    }
 }
 
 export const FsGeneric: Fs = {

@@ -1,10 +1,10 @@
-import { FSWatcher, watch } from "fs";
-import { debounce } from "../../utils/debounce";
+import { FSWatcher, watch } from 'fs';
+import { debounce } from '../../utils/debounce';
 import { ipcRenderer } from 'electron';
 
 export type WatcherCB = (filename: string) => void;
 
-export interface IWatcher {
+export interface Watcher {
     path: string;
     callbacks: WatcherCB[];
     ref: FSWatcher;
@@ -15,10 +15,10 @@ export interface IWatcher {
 const CB_FIRE_RATE = 500;
 
 export const LocalWatch = {
-    watchers: new Array<IWatcher>(),
-    getWatcher(path: string, createIfNull = false): IWatcher | null {
+    watchers: new Array<Watcher>(),
+    getWatcher(path: string, createIfNull = false): Watcher | null {
         // console.log('LocalWatch.getWatcher', path, createIfNull);
-        const watcher = this.watchers.find((watcher: IWatcher) => watcher.path === path);
+        const watcher = this.watchers.find((watcher: Watcher) => watcher.path === path);
         if (!watcher) {
             return createIfNull ? this.addWatcher(path) : null;
         } else {
@@ -29,34 +29,35 @@ export const LocalWatch = {
         const watcher = this.getWatcher(path, false);
         return watcher.callbacks;
     },
-    createCallback(path: string) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    createCallback(path: string): () => any {
         // console.log('LocalWatch.createCallback', path);
-        return debounce((_: string, filename: string) => {
+        return debounce((_: string, filename: string): void => {
             // console.log('changeCallback', eventType, filename);
             const callbacks = this.getCallbacks(path);
-            for (let cb of callbacks) {
+            for (const cb of callbacks) {
                 cb(filename);
             }
         }, CB_FIRE_RATE);
     },
-    addWatcher(path: string): IWatcher {
+    addWatcher(path: string): Watcher {
         // console.log('LocalWatch.addWatcher', path);
         const watcher = {
             path,
             callbacks: new Array<WatcherCB>(),
-            ref: watch(path, { recursive: false }, this.createCallback(path))
+            ref: watch(path, { recursive: false }, this.createCallback(path)),
         };
 
         this.watchers.push(watcher);
 
         return watcher;
     },
-    watchPath(path: string, callback: WatcherCB) {
+    watchPath(path: string, callback: WatcherCB): void {
         // console.log('LocalWatch.watchPath', path);
         const watcher = this.getWatcher(path, true);
         watcher.callbacks.push(callback);
     },
-    stopWatchingPath(path: string, callback: WatcherCB) {
+    stopWatchingPath(path: string, callback: WatcherCB): void {
         // console.log('LocalWatch.stopWatchingPath', path);
         const watcher = this.getWatcher(path);
         if (watcher) {
@@ -66,18 +67,18 @@ export const LocalWatch = {
             if (!watcher.callbacks.length) {
                 // console.log('no more callbacks: closing watch and removing watcher');
                 watcher.ref.close();
-                this.watchers = this.watchers.filter((w: IWatcher) => w !== watcher);
+                this.watchers = this.watchers.filter((w: Watcher) => w !== watcher);
             }
         } else {
             // console.log('LocalWatch.noWatcher');
         }
     },
-    closeAll() {
+    closeAll(): void {
         console.log('LocalWatch.closeAall', this.watchers.length);
-        for (let watcher of this.watchers) {
+        for (const watcher of this.watchers) {
             watcher.ref.close();
         }
-    }
+    },
 };
 
 if (ipcRenderer) {

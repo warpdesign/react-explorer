@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { FsApi, File, Credentials, Fs, filetype } from '../Fs';
 import { Client as FtpClient, FileInfo, FTPResponse } from 'basic-ftp';
 import * as fs from 'fs';
@@ -6,10 +7,12 @@ import { EventEmitter } from 'events';
 import * as nodePath from 'path';
 import { isWin } from '../../utils/platform';
 
-// DEBUG !!
-declare let window: any;
+function serverPart(str: string, lowerCase = true): string {
+    const info = new URL(str);
+    return `${info.protocol}//${info.hostname}`;
+}
 
-function join(path1: string, path2: string) {
+function join(path1: string, path2: string): string {
     let prefix = '';
 
     if (path1.match(/^ftp:\/\//)) {
@@ -26,12 +29,14 @@ function join(path1: string, path2: string) {
     }
 }
 
-function canTimeout(target: any, key: any, descriptor: any) {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any,@typescript-eslint/explicit-function-return-type
+function canTimeout(target: any, key: string, descriptor: PropertyDescriptor) {
     if (descriptor === undefined) {
         descriptor = Object.getOwnPropertyDescriptor(target, key);
     }
     const originalMethod = descriptor.value;
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/explicit-function-return-type
     descriptor.value = function decorator(...args: any) {
         console.log('canTimeout:', key, '()');
         return originalMethod.apply(this, args).catch(async (err: Error) => {
@@ -61,7 +66,7 @@ function canTimeout(target: any, key: any, descriptor: any) {
 
 class Client {
     static instances = new Array<Client>();
-    static getFreeClient(server: string, api: SimpleFtpApi, transferId = -1) {
+    static getFreeClient(server: string, api: SimpleFtpApi, transferId = -1): Client {
         let instance = Client.instances.find(
             (client) => client.server === server && !client.api && client.transferId === transferId,
         );
@@ -74,7 +79,7 @@ class Client {
 
         return instance;
     }
-    static freeClient(client: Client) {
+    static freeClient(client: Client): void {
         const index = Client.instances.findIndex((c) => client === c);
         if (index > -1) {
             const removed = Client.instances.splice(index, 1);
@@ -97,12 +102,12 @@ class Client {
         this.transferId = transferId;
     }
 
-    isConnected() {
+    isConnected(): boolean {
         return /*!this.ftpClient.closed && */ this.connected;
     }
 
     @canTimeout
-    async login(server: string, loginOptions: Credentials): Promise<any> {
+    async login(server: string, loginOptions: Credentials): Promise<void> {
         const host = this.api.getHostname(server);
         const socketConnected = this.ftpClient.ftp.socket.bytesRead !== 0;
         console.log(
@@ -129,7 +134,7 @@ class Client {
         }
     }
 
-    onLoggedIn(server: string, loginOptions: Credentials) {
+    onLoggedIn(server: string, loginOptions: Credentials): void {
         this.loginOptions = loginOptions;
         this.connected = true;
         this.server = server;
@@ -154,7 +159,7 @@ class Client {
     //     }
     // }
 
-    close() {
+    close(): void {
         // if (this.checkTimeout) {
         //     window.clearInterval(this.checkTimeout);
         //     this.checkTimeout = 0;
@@ -162,7 +167,7 @@ class Client {
         // TODO: remove from the list too ?
     }
 
-    async getNewFtpClient(login = true) {
+    async getNewFtpClient(login = true): Promise<void> {
         console.log('creating new FtpClient');
         this.ftpClient = new FtpClient();
         this.ftpClient.ftp.verbose = true;
@@ -181,7 +186,7 @@ class Client {
     }
 
     @canTimeout
-    cd(path: string) {
+    cd(path: string): Promise<FTPResponse> {
         console.log('Client.cd()');
         return this.ftpClient.cd(path);
     }
@@ -209,7 +214,7 @@ class SimpleFtpApi implements FsApi {
     eventList = new Array<string>();
     emitter: EventEmitter;
 
-    async getClient(transferId = -1) {
+    async getClient(transferId = -1): Promise<Client> {
         if (transferId > -1) {
             const client = Client.getFreeClient(this.server || this.master.server, this, transferId);
 
@@ -221,7 +226,7 @@ class SimpleFtpApi implements FsApi {
     }
 
     constructor(serverUrl: string) {
-        const serverpart = FsSimpleFtp.serverpart(serverUrl);
+        const serverpart = serverPart(serverUrl);
 
         this.master = Client.getFreeClient(serverpart, this);
         // TODO: get master if available
@@ -244,7 +249,7 @@ class SimpleFtpApi implements FsApi {
         // return pathPart;
     }
 
-    getHostname(str: string) {
+    getHostname(str: string): string {
         const info = new URL(str);
 
         return info.hostname.toLowerCase();
@@ -294,7 +299,7 @@ class SimpleFtpApi implements FsApi {
         return Promise.resolve(10);
     }
 
-    login(server?: string, credentials?: Credentials): Promise<any> {
+    login(server?: string, credentials?: Credentials): Promise<void> {
         if (!this.connected) {
             // TODO: use existing master ?
             const loginOptions = credentials || this.loginOptions;
@@ -419,7 +424,7 @@ class SimpleFtpApi implements FsApi {
         try {
             // create a duplex stream
             const transform = new Transform({
-                transform(chunk, encoding, callback) {
+                transform(chunk, encoding, callback): void {
                     callback(null, chunk);
                 },
             });
@@ -451,10 +456,11 @@ class SimpleFtpApi implements FsApi {
         return [];
     }
 
-    sanityze(path: string) {
+    sanityze(path: string): string {
         return path;
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     on(event: string, cb: (data: any) => void): void {
         if (this.eventList.indexOf(event) < 0) {
             this.eventList.push(event);
@@ -463,7 +469,7 @@ class SimpleFtpApi implements FsApi {
         this.emitter.on(event, cb);
     }
 
-    off() {
+    off(): void {
         console.log('*** off');
         // remove all listeners
         for (const event of this.eventList) {
@@ -493,8 +499,7 @@ export const FsSimpleFtp: Fs = {
         return info.protocol === 'ftp:';
     },
     serverpart(str: string, lowerCase = true): string {
-        const info = new URL(str);
-        return `${info.protocol}//${info.hostname}`;
+        return serverPart(str, lowerCase);
     },
     credentials(str: string): Credentials {
         const info = new URL(str);
@@ -505,7 +510,7 @@ export const FsSimpleFtp: Fs = {
             user: info.username,
         };
     },
-    displaypath(str: string) {
+    displaypath(str: string): { shortPath: string; fullPath: string } {
         const info = new URL(str);
         const split = info.pathname.split('/');
         return {

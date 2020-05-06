@@ -8,12 +8,11 @@ import { Logger, JSObject } from '../../components/Log';
 import { EventEmitter } from 'events';
 import { isWin, DOWNLOADS_DIR } from '../../utils/platform';
 import * as nodePath from 'path';
+import { LocalizedError } from '../../locale/error';
 
-const FtpUrl = /^(ftp\:\/\/)*(ftp\.[a-z]+\.[a-z]{2,3}|[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})$/i;
-const ServerPart = /^(ftp\:\/\/)*(ftp\.[a-z]+\.[a-z]{2,3}|[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})/i;
 const invalidChars = /^[\.]+$/gi;
 
-function join(path1: string, path2: string) {
+function join(path1: string, path2: string): string {
     let prefix = '';
 
     if (path1.match(/^ftp:\/\//)) {
@@ -31,6 +30,7 @@ function join(path1: string, path2: string) {
 }
 
 class Client {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     private client: any;
     public connected: boolean;
     public host: string;
@@ -38,15 +38,18 @@ class Client {
     public api: FtpAPI = null;
     public options: Credentials;
 
-    private readyResolve: () => any;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    private readyResolve: (value?: any) => any;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     private readyReject: (err: any) => any;
-    private readyPromise: Promise<any>;
-    private previousError: any;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    private readyPromise: Promise<void>;
+    private previousError: LocalizedError = null;
 
     static clients: Array<Client> = [];
 
-    static addClient(hostname: string, options: any = {}) {
-        const client = new Client(hostname, options);
+    static addClient(hostname: string): Client {
+        const client = new Client(hostname);
 
         Client.clients.push(client);
 
@@ -57,13 +60,13 @@ class Client {
     static id = 0;
 
     // TODO: return promise if client is not connected ??
-    static getFreeClient(hostname: string) {
+    static getFreeClient(hostname: string): Client {
         let client = Client.clients.find(
             (client) => client.host === hostname && !client.api && client.status === 'ready',
         );
 
         if (!client) {
-            client = Client.addClient(hostname, {});
+            client = Client.addClient(hostname);
         } else {
             console.log('using existing client');
         }
@@ -71,7 +74,7 @@ class Client {
         return client;
     }
 
-    constructor(host: string, options: any = {}) {
+    constructor(host: string) {
         console.log('creating ftp client');
         this.instanceId = Client.id++;
         this.host = host;
@@ -85,23 +88,23 @@ class Client {
         return [`[${this.host}:${this.instanceId}]`, ...params];
     }
 
-    success(...params: (string | number | boolean | JSObject)[]) {
+    success(...params: (string | number | boolean | JSObject)[]): void {
         Logger.success(...this.getLoggerArgs(params));
     }
 
-    log(...params: (string | number | boolean | JSObject)[]) {
+    log(...params: (string | number | boolean | JSObject)[]): void {
         Logger.log(...this.getLoggerArgs(params));
     }
 
-    warn(...params: (string | number | boolean | JSObject)[]) {
+    warn(...params: (string | number | boolean | JSObject)[]): void {
         Logger.warn(...this.getLoggerArgs(params));
     }
 
-    error(...params: (string | number | boolean | JSObject)[]) {
+    error(...params: (string | number | boolean | JSObject)[]): void {
         Logger.error(...this.getLoggerArgs(params));
     }
 
-    public login(options: Credentials): Promise<any> {
+    public login(options: Credentials): Promise<void> {
         if (!this.connected) {
             this.log(
                 'connecting to',
@@ -120,14 +123,14 @@ class Client {
         return this.readyPromise;
     }
 
-    private bindEvents() {
+    private bindEvents(): void {
         this.client.on('ready', this.onReady.bind(this));
         this.client.on('error', this.onError.bind(this));
         this.client.on('close', this.onClose.bind(this));
         this.client.on('greeting', this.onGreeting.bind(this));
     }
 
-    private onReady() {
+    private onReady(): void {
         this.success('ready, setting transfer mode to binary');
         this.client.binary((err: Error) => {
             if (err) {
@@ -139,7 +142,7 @@ class Client {
         });
     }
 
-    private onClose() {
+    private onClose(): void {
         this.warn('close');
         this.connected = false;
         this.status = 'offline';
@@ -149,14 +152,14 @@ class Client {
         }
     }
 
-    private goOffline(error: any) {
+    private goOffline(error: LocalizedError): void {
         this.status = 'offline';
         if (this.readyReject) {
             this.readyReject(error);
         }
     }
 
-    private onError(error: any) {
+    private onError(error: LocalizedError): void {
         this.log(typeof error.code);
         this.error('onError', `${error.code}: ${error.message}`);
         switch (error.code) {
@@ -187,7 +190,7 @@ class Client {
             default:
                 // sometimes error.code is undefined or is a string (!!)
                 this.warn('unhandled error code:', error.code);
-                if (error && error.match(/Timeout/)) {
+                if (error && (error as string).match(/Timeout/)) {
                     this.warn('Connection timeout ?');
                 }
                 break;
@@ -196,7 +199,7 @@ class Client {
         this.previousError = error;
     }
 
-    private onGreeting(greeting: string) {
+    private onGreeting(greeting: string): void {
         for (const line of greeting.split('\n')) {
             this.log(line);
         }
@@ -217,6 +220,7 @@ class Client {
             // We could also use MLSD instead but unfortunately it's
             // not implemented in node-ftp
             // see: https://github.com/warpdesign/react-ftp/wiki/FTP-LIST-command
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             this.client.list('', (err: Error, list: any[]) => {
                 this.status = 'ready';
 
@@ -225,34 +229,36 @@ class Client {
                     reject(err);
                 } else {
                     const files: File[] = list
-                        .filter((ftpFile) => !ftpFile.name.match(/^[\.]{1,2}$/))
-                        .map((ftpFile) => {
-                            const format = nodePath.parse(ftpFile.name);
-                            const ext = format.ext.toLowerCase();
-                            const mDate = new Date(ftpFile.date);
+                        .filter((ftpFile): boolean => !ftpFile.name.match(/^[\.]{1,2}$/))
+                        .map(
+                            (ftpFile): File => {
+                                const format = nodePath.parse(ftpFile.name);
+                                const ext = format.ext.toLowerCase();
+                                const mDate = new Date(ftpFile.date);
 
-                            const file: File = {
-                                dir: path,
-                                name: ftpFile.name,
-                                fullname: ftpFile.name,
-                                isDir: ftpFile.type === 'd',
-                                length: parseInt(ftpFile.size, 10),
-                                cDate: mDate,
-                                mDate: mDate,
-                                bDate: mDate,
-                                extension: '',
-                                mode: 0,
-                                readonly: false,
-                                type: (ftpFile.type !== 'd' && filetype(0, 0, 0, ext)) || '',
-                                isSym: false,
-                                target: null,
-                                id: {
-                                    ino: mDate.getTime(),
-                                    dev: new Date().getTime(),
-                                },
-                            };
-                            return file;
-                        });
+                                const file: File = {
+                                    dir: path,
+                                    name: ftpFile.name,
+                                    fullname: ftpFile.name,
+                                    isDir: ftpFile.type === 'd',
+                                    length: parseInt(ftpFile.size, 10),
+                                    cDate: mDate,
+                                    mDate: mDate,
+                                    bDate: mDate,
+                                    extension: '',
+                                    mode: 0,
+                                    readonly: false,
+                                    type: (ftpFile.type !== 'd' && filetype(0, 0, 0, ext)) || '',
+                                    isSym: false,
+                                    target: null,
+                                    id: {
+                                        ino: mDate.getTime(),
+                                        dev: new Date().getTime(),
+                                    },
+                                };
+                                return file;
+                            },
+                        );
 
                     resolve(files);
                 }
@@ -266,6 +272,7 @@ class Client {
             const oldPath = path;
             const newpath = this.pathpart(path);
 
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             this.client.cwd(newpath, (err: any, dir: string) => {
                 if (!err) {
                     // some ftp servers return windows-like paths
@@ -308,7 +315,7 @@ class Client {
                 } else {
                     console.log('creating stream');
                     const writeStream = fs.createWriteStream(dest);
-                    readStream.once('close', function () {
+                    readStream.once('close', function (): void {
                         resolve(dest);
                     });
                     readStream.pipe(writeStream);
@@ -342,15 +349,15 @@ class Client {
         this.status = 'busy';
 
         let bytesRead = 0;
-        const throttledProgress = throttle(() => {
+        const throttledProgress = throttle((): void => {
             progress(bytesRead);
         }, 800);
 
-        readStream.once('close', function () {
+        readStream.once('close', function (): void {
             console.log('get ended!');
         });
         const reportProgress = new Transform({
-            transform(chunk, encoding, callback) {
+            transform(chunk, encoding, callback): void {
                 bytesRead += chunk.length;
                 throttledProgress();
                 console.log('data', bytesRead / 1024, 'Ko');
@@ -381,7 +388,8 @@ class Client {
 
         this.log('rename', oldPath, newPath);
         return new Promise((resolve, reject) => {
-            return this.client.rename(oldPath, newPath, (err: any) => {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            return this.client.rename(oldPath, newPath, (err: any): void => {
                 if (!err) {
                     resolve(newName);
                 } else {
@@ -402,7 +410,7 @@ class Client {
 
         this.log('mkdir', path, newPath);
         return new Promise((resolve, reject) => {
-            this.client.mkdir(newPath, true, (err: Error) => {
+            this.client.mkdir(newPath, true, (err: Error): void => {
                 if (err) {
                     reject(err);
                 } else {
@@ -412,7 +420,7 @@ class Client {
         });
     }
 
-    public delete(ftpPath: string, isDir: boolean) {
+    public delete(ftpPath: string, isDir: boolean): Promise<void> {
         debugger;
         const path = this.pathpart(ftpPath);
         return new Promise((resolve, reject) => {
@@ -457,7 +465,7 @@ class Client {
     public size(ftpPath: string): Promise<number> {
         const path = this.pathpart(ftpPath);
         return new Promise((resolve, reject) => {
-            this.client.size(path, (err: Error, bytes: number) => {
+            this.client.size(path, (err: Error, bytes: number): void => {
                 if (err) {
                     reject(err);
                 } else {
@@ -484,7 +492,7 @@ class FtpAPI implements FsApi {
         this.updateServer(serverUrl);
     }
 
-    updateServer(url: string) {
+    updateServer(url: string): void {
         this.hostname = this.getHostname(url);
 
         this.master = Client.getFreeClient(this.hostname);
@@ -512,6 +520,7 @@ class FtpAPI implements FsApi {
         return join(path, path2);
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     size(source: string, files: string[]): Promise<number> {
         console.warn('FTP.size not implemented');
         return Promise.resolve(0);
@@ -584,6 +593,7 @@ class FtpAPI implements FsApi {
         return this.master.rename(source, file.fullname, newName);
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     isDir(path: string): Promise<boolean> {
         console.warn('FsFtp.isDir not implemented: always returns true');
         return Promise.resolve(true);
@@ -600,11 +610,13 @@ class FtpAPI implements FsApi {
         return this.master.list(dir);
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     async makeSymlink(targetPath: string, path: string, transferId?: number): Promise<boolean> {
         console.log('FsFtp.makeSymlink');
         return true;
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     async stat(fullPath: string): Promise<File> {
         console.warn('FsFtp.stat: TODO');
         return Promise.resolve({
@@ -629,10 +641,10 @@ class FtpAPI implements FsApi {
         return this.master.cd(resolved);
     }
 
-    get(file_path: string, file: string): Promise<string> {
+    get(filePath: string, file: string): Promise<string> {
         const dest = path.join(DOWNLOADS_DIR, file);
-        console.log('need to get file', this.join(file_path, file), 'to', dest);
-        return this.master.get(this.join(file_path, file), dest);
+        console.log('need to get file', this.join(filePath, file), 'to', dest);
+        return this.master.get(this.join(filePath, file), dest);
     }
 
     login(server?: string, credentials?: Credentials): Promise<void> {
@@ -675,7 +687,7 @@ class FtpAPI implements FsApi {
         }
     }
 
-    off() {
+    off(): void {
         console.log('*** free');
         // free client
         this.master.api = null;
@@ -723,7 +735,7 @@ class FtpAPI implements FsApi {
         }
     }
 
-    getHostname(str: string) {
+    getHostname(str: string): string {
         const info = new URL(str);
 
         return info.hostname.toLowerCase();
@@ -732,12 +744,11 @@ class FtpAPI implements FsApi {
     getParentTree(dir: string): Array<{ dir: string; fullname: string }> {
         console.error('TODO: implement me');
         const numParts = dir.replace(/^\//, '').split('/').length;
-        const folders = [];
         for (let i = 0; i < numParts; ++i) {}
         return [];
     }
 
-    sanityze(path: string) {
+    sanityze(path: string): string {
         // first remove credentials from here
         const info = new URL(path);
         if (info.username) {
@@ -751,6 +762,7 @@ class FtpAPI implements FsApi {
         return path;
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     on(event: string, cb: (data: any) => void): void {
         if (this.eventList.indexOf(event) < 0) {
             this.eventList.push(event);
@@ -759,7 +771,7 @@ class FtpAPI implements FsApi {
         this.emitter.on(event, cb);
     }
 
-    onClose() {
+    onClose(): void {
         this.connected = false;
         this.emitter.emit('close');
     }
@@ -777,7 +789,7 @@ export const FsFtp: Fs = {
         console.log('FsFtp.canread', str, info.protocol, info.protocol === 'ftp:');
         return info.protocol === 'ftp:';
     },
-    serverpart(str: string, lowerCase = true): string {
+    serverpart(str: string): string {
         const info = new URL(str);
         return `${info.protocol}//${info.hostname}`;
     },
