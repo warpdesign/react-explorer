@@ -1,8 +1,8 @@
-import { IconName } from "@blueprintjs/core";
-import { observable } from "mobx";
-import * as drivelist from "drivelist";
-import { IconNames } from "@blueprintjs/icons";
-import { ALL_DIRS } from "../utils/platform";
+import { IconName } from '@blueprintjs/core';
+import { observable } from 'mobx';
+import * as drivelist from 'drivelist';
+import { IconNames } from '@blueprintjs/icons';
+import { ALL_DIRS } from '../utils/platform';
 
 const CHECK_FOR_DRIVES_DELAY = 5000;
 
@@ -18,35 +18,39 @@ export interface Favorite {
 export class FavoritesState {
     shortcuts = observable<Favorite>([]);
     places = observable<Favorite>([]);
-    previousPlaces:drivelist.Drive[] = [];
+    previousPlaces: drivelist.Drive[] = [];
 
-    buildShortcuts() {
-        this.shortcuts.replace(Object.entries(ALL_DIRS).map((dir:string[]) => ({
-            label: dir[0],
-            path: dir[1],
-            icon: IconNames.DATABASE
-        })));
+    buildShortcuts(): void {
+        this.shortcuts.replace(
+            Object.entries(ALL_DIRS).map((dir: string[]) => ({
+                label: dir[0],
+                path: dir[1],
+                icon: IconNames.DATABASE,
+            })),
+        );
     }
 
-    async getDrivesList() {
+    async getDrivesList(): Promise<drivelist.Drive[]> {
         const drives = await drivelist.list();
-        return drives.filter((drive:drivelist.Drive) => drive.mountpoints && drive.mountpoints.length);
+        return drives.filter((drive: drivelist.Drive) => drive.mountpoints && drive.mountpoints.length);
     }
 
-    async buildPlaces(drives:drivelist.Drive[]) {
-        this.places.replace(drives.map((drive:drivelist.Drive) => {
-            const mountpoint = drive.mountpoints[0];
+    async buildPlaces(drives: drivelist.Drive[]): Promise<void> {
+        this.places.replace(
+            drives.map((drive: drivelist.Drive) => {
+                const mountpoint = drive.mountpoints[0];
 
-            return {
-                // Some mountpoints may not have a label (eg. win: c:\)
-                label: mountpoint.label || mountpoint.path,
-                path: mountpoint.path,
-                icon: (drive.isRemovable || drive.isVirtual) ? IconNames.FLOPPY_DISK : IconNames.DATABASE
-            } as Favorite;
-        }));
+                return {
+                    // Some mountpoints may not have a label (eg. win: c:\)
+                    label: mountpoint.label || mountpoint.path,
+                    path: mountpoint.path,
+                    icon: drive.isRemovable || drive.isVirtual ? IconNames.FLOPPY_DISK : IconNames.DATABASE,
+                } as Favorite;
+            }),
+        );
     }
 
-    launchTimeout(immediate = false) {
+    launchTimeout(immediate = false): void {
         if (immediate) {
             this.checkForNewDrives();
         } else {
@@ -54,7 +58,7 @@ export class FavoritesState {
         }
     }
 
-    async buildDrivesList() {
+    async buildDrivesList(): void {
         this.buildShortcuts();
         this.launchTimeout(true);
     }
@@ -62,7 +66,7 @@ export class FavoritesState {
     /**
      * checks if new drives: if new drives are found, re-generate the places
      */
-    async checkForNewDrives() {
+    async checkForNewDrives(): Promise<void> {
         const usableDrives = await this.getDrivesList();
         if (this.hasDriveListChanged(usableDrives)) {
             this.previousPlaces = usableDrives;
@@ -73,17 +77,17 @@ export class FavoritesState {
         this.launchTimeout();
     }
 
-    hasDriveListChanged(newList:drivelist.Drive[]):boolean {
+    hasDriveListChanged(newList: drivelist.Drive[]): boolean {
         if (newList.length !== this.previousPlaces.length) {
             return true;
         } else {
             const newString = newList
-                                .filter((drive:drivelist.Drive) => drive.mountpoints && drive.mountpoints.length)
-                                .reduce((str:string, drive:drivelist.Drive) => str + drive.mountpoints[0].path, '');
+                .filter((drive: drivelist.Drive) => drive.mountpoints && drive.mountpoints.length)
+                .reduce((str: string, drive: drivelist.Drive) => str + drive.mountpoints[0].path, '');
 
             const oldString = this.previousPlaces
-            .filter((drive:drivelist.Drive) => drive.mountpoints && drive.mountpoints.length)
-            .reduce((str:string, drive:drivelist.Drive) => str + drive.mountpoints[0].path, '');
+                .filter((drive: drivelist.Drive) => drive.mountpoints && drive.mountpoints.length)
+                .reduce((str: string, drive: drivelist.Drive) => str + drive.mountpoints[0].path, '');
 
             return oldString !== newString;
         }

@@ -1,4 +1,4 @@
-import { observable, action, runInAction, computed } from 'mobx';
+import { observable, action } from 'mobx';
 import { FsApi, File } from '../services/Fs';
 import { FileTransfer } from './fileTransfer';
 import { Deferred } from '../utils/deferred';
@@ -48,6 +48,7 @@ export class Batch {
 
     public isExpanded = false;
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     private transferDef: Deferred<any>;
 
     private slotsAvailable: number = MAX_TRANSFERS;
@@ -67,7 +68,7 @@ export class Batch {
     }
 
     @action
-    onEndTransfer = () => {
+    onEndTransfer = (): Promise<boolean> => {
         // console.log('transfer ended ! duration=', Math.round((new Date().getTime() - this.startDate.getTime()) / 1000), 'sec(s)');
         // console.log('destroy batch, new maxId', Batch.maxId);
         this.status = 'done';
@@ -75,7 +76,7 @@ export class Batch {
     };
 
     @action
-    start(): Promise<boolean> {
+    start(): Promise<boolean | void> {
         console.log('Starting batch');
         if (this.status === 'queued') {
             this.slotsAvailable = MAX_TRANSFERS;
@@ -95,7 +96,7 @@ export class Batch {
     }
 
     @action
-    updatePendingTransfers(subDir: string, newFilename: string, cancel = false) {
+    updatePendingTransfers(subDir: string, newFilename: string, cancel = false): void {
         // TODO: escape '(' & ')' in subDir if needed
         const escapedSubDir = isWin ? subDir.replace(/\\/g, '\\\\') : subDir;
         const regExp = new RegExp(`^(${escapedSubDir})`);
@@ -130,7 +131,7 @@ export class Batch {
         }
     }
 
-    getNextTransfer() {
+    getNextTransfer(): FileTransfer {
         return this.elements.find((file) => file.ready && file.status === 'queued');
     }
 
@@ -139,7 +140,7 @@ export class Batch {
      * num transfers = min(MAX_TRANSFERS, slotsAvailable)
      *
      */
-    queueNextTransfers() {
+    queueNextTransfers(): void {
         const max = Math.min(MAX_TRANSFERS, this.slotsAvailable);
 
         for (let i = 0; i < max; ++i) {
@@ -151,7 +152,8 @@ export class Batch {
     }
 
     @action
-    onTransferError = (transfer: FileTransfer, err: any) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    onTransferError = (transfer: FileTransfer, err: any): void => {
         // console.log('transfer error', transfer.file.fullname, err);
         transfer.status = 'error';
         transfer.error = getLocalizedError(err);
@@ -159,7 +161,7 @@ export class Batch {
         // return this.transferDef.reject(err);
     };
 
-    removeStream(stream: Readable) {
+    removeStream(stream: Readable): void {
         const index = this.streams.findIndex((item) => item === stream);
         if (index > -1) {
             this.streams.splice(index, 1);
@@ -170,7 +172,7 @@ export class Batch {
     /**
      * Immediately initiates a file transfer, queues the next transfer when it's done
      */
-    async startTransfer(transfer: FileTransfer) {
+    async startTransfer(transfer: FileTransfer): Promise<void> {
         this.slotsAvailable--;
         transfer.status = 'started';
 
@@ -344,6 +346,7 @@ export class Batch {
         return Promise.resolve(newName);
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     async getNewName(wantedName: string, path: string): Promise<string> {
         let i = 1;
         let exists = true;
@@ -370,7 +373,7 @@ export class Batch {
     }
 
     @action
-    cancelFiles() {
+    cancelFiles(): void {
         const todo = this.elements.filter((file) => !!file.status.match(/queued/));
 
         for (const file of todo) {
@@ -380,14 +383,14 @@ export class Batch {
     }
 
     @action
-    destroyRunningStreams() {
+    destroyRunningStreams(): void {
         for (const stream of this.streams) {
             stream.destroy();
         }
     }
 
     @action
-    cancel() {
+    cancel(): void {
         if (this.status !== 'done') {
             this.status = 'cancelled';
             this.cancelFiles();
@@ -397,7 +400,7 @@ export class Batch {
     }
 
     @action
-    calcTotalSize() {
+    calcTotalSize(): void {
         let size = 0;
         for (const fileTransfer of this.elements) {
             // directory's length is the space used for dir meta data: we don't need (nor copy) that
@@ -408,7 +411,7 @@ export class Batch {
         this.size = size;
     }
 
-    getLastPathPart(path: string) {
+    getLastPathPart(path: string): string {
         const parts = path.split('/');
         const lastPart = parts[parts.length - 1];
         // return `… / ${lastPart}`;
@@ -471,7 +474,7 @@ export class Batch {
     }
 
     @action
-    async setFileList(files: File[]) {
+    async setFileList(files: File[]): Promise<void> {
         return this.getFileList(files)
             .then((transfers) => {
                 console.log('got files', transfers);
@@ -484,7 +487,7 @@ export class Batch {
     }
 
     @action
-    onData(file: FileTransfer, bytesRead: number) {
+    onData(file: FileTransfer, bytesRead: number): void {
         // console.log('dataThrottled', bytesRead);
         const previousProgress = file.progress;
         file.progress = bytesRead;

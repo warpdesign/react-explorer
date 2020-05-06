@@ -1,5 +1,5 @@
-import { FileState } from "./fileState";
-import { observable, action } from "mobx";
+import { FileState } from './fileState';
+import { observable, action } from 'mobx';
 
 export class ViewState {
     viewId: number;
@@ -7,14 +7,14 @@ export class ViewState {
     caches = observable<FileState>([]);
 
     @observable
-    isActive: boolean = false;
+    isActive = false;
 
     constructor(viewId: number) {
         this.viewId = viewId;
     }
 
     @action
-    addCache(path: string, index = -1, activateNewCache = false) {
+    addCache(path: string, index = -1, activateNewCache = false): FileState {
         console.log('viewState/addCache', path);
         const cache = new FileState(path, this.viewId);
 
@@ -31,16 +31,16 @@ export class ViewState {
         return cache;
     }
 
-    getVisibleCache() {
-        return this.caches.find(cache => cache.isVisible);
+    getVisibleCache(): FileState {
+        return this.caches.find((cache) => cache.isVisible);
     }
 
-    getVisibleCacheIndex() {
-        return this.caches.findIndex(cache => cache.isVisible);
+    getVisibleCacheIndex(): number {
+        return this.caches.findIndex((cache) => cache.isVisible);
     }
 
     @action
-    setVisibleCache(index: number) {
+    setVisibleCache(index: number): void {
         const previous = this.getVisibleCache();
         const next = this.caches[index];
         // do nothing if previous === next
@@ -56,12 +56,12 @@ export class ViewState {
     }
 
     @action
-    removeCache(index: number) {
+    removeCache(index: number): FileState {
         return this.caches.splice(index, 1)[0];
     }
 
     @action
-    activateNextTab(index: number) {
+    activateNextTab(index: number): void {
         const length = this.caches.length;
         const newActive = length > index ? this.caches[index] : this.caches[length - 1];
         newActive.isVisible = true;
@@ -71,7 +71,7 @@ export class ViewState {
     }
 
     @action
-    cycleTab(direction: 1 | -1) {
+    cycleTab(direction: 1 | -1): void {
         const max = this.caches.length - 1;
 
         // only one tab: do nothing
@@ -91,7 +91,7 @@ export class ViewState {
     }
 
     @action
-    closeOthers(keepIndex: number) {
+    closeOthers(keepIndex: number): void {
         console.log('close others', keepIndex);
         if (this.caches.length > 1) {
             const keepCache = this.getVisibleCache();
@@ -105,7 +105,7 @@ export class ViewState {
     }
 
     @action
-    closeTab(index: number) {
+    closeTab(index: number): void {
         // keep at least one tab for now ?
         if (this.caches.length < 2) {
             return;

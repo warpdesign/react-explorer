@@ -63,20 +63,20 @@ export class FileState {
     current = -1;
 
     @action
-    setStatus(status: TStatus, error = false) {
+    setStatus(status: TStatus, error = false): void {
         this.status = status;
         this.error = error;
     }
 
     @action
-    addPathToHistory(path: string) {
+    addPathToHistory(path: string): void {
         const keep = this.history.slice(0, this.current + 1);
         this.history.replace(keep.concat([path]));
         this.current++;
     }
 
     @action
-    navHistory(dir = -1, force = false) {
+    navHistory(dir = -1, force = false): Promise<string | void> {
         if (!this.history.length) {
             debugger;
             console.warn('attempting to nav in empty history');
@@ -127,7 +127,7 @@ export class FileState {
     private prevApi: FsApi;
     private prevServer: string;
 
-    private loginDefer: Deferred<any>;
+    private loginDefer: Deferred<void>;
 
     constructor(path: string, viewId = -1) {
         this.viewId = viewId;
@@ -137,13 +137,13 @@ export class FileState {
         // console.log(`new FileState('${path}'') -> fs = ${this.fs.name}`);
     }
 
-    private saveContext() {
+    private saveContext(): void {
         this.prevServer = this.server;
         this.prevApi = this.api;
         this.prevFs = this.fs;
     }
 
-    private restoreContext() {
+    private restoreContext(): void {
         this.freeFsEvents();
         this.api = this.prevApi;
         this.bindFsEvents();
@@ -151,18 +151,18 @@ export class FileState {
         this.server = this.prevServer;
     }
 
-    private bindFsEvents() {
+    private bindFsEvents(): void {
         this.api.on('close', () => this.setStatus('offline'));
         // this.api.on('connect', () => this.setStatus('ok'));
     }
 
-    private freeFsEvents() {
+    private freeFsEvents(): void {
         if (this.api) {
             this.api.off();
         }
     }
 
-    onFSChange = (filename: string): void => {
+    onFSChange = (/*filename: string*/): void => {
         // console.log('fsChanged', filename);
         this.reload();
     };
@@ -192,7 +192,7 @@ export class FileState {
     }
 
     @action
-    private updatePath(path: string, skipHistory = false) {
+    private updatePath(path: string, skipHistory = false): void {
         this.previousPath = this.path;
         this.path = path;
 
@@ -205,7 +205,7 @@ export class FileState {
     }
 
     @action
-    revertPath() {
+    revertPath(): void {
         // first revert fs/path
         this.restoreContext();
         // only reload directory if connection hasn't been lost otherwise we enter
@@ -218,7 +218,7 @@ export class FileState {
     }
 
     @action
-    waitForConnection() {
+    waitForConnection(): Promise<void> {
         if (!this.api) {
             debugger;
         }
@@ -241,13 +241,13 @@ export class FileState {
     }
 
     @action
-    onLoginSuccess() {
+    onLoginSuccess(): void {
         this.setStatus('ok');
         this.loginDefer.resolve();
     }
 
     @action
-    async doLogin(server?: string, credentials?: Credentials) {
+    async doLogin(server?: string, credentials?: Credentials): Promise<void> {
         console.log('logging in');
         // this.status = 'busy';
         if (server) {
@@ -270,12 +270,12 @@ export class FileState {
     }
 
     @action
-    clearSelection() {
+    clearSelection(): void {
         this.selected.clear();
     }
 
     @action
-    reset() {
+    reset(): void {
         this.clearSelection();
         this.scrollTop = -1;
         this.selectedId = null;
@@ -283,13 +283,13 @@ export class FileState {
     }
 
     @action
-    setSort(sortMethod: TSORT_METHOD_NAME, sortOrder: TSORT_ORDER) {
+    setSort(sortMethod: TSORT_METHOD_NAME, sortOrder: TSORT_ORDER): void {
         this.sortMethod = sortMethod;
         this.sortOrder = sortOrder;
     }
 
     @action
-    updateSelection(isSameDir: boolean) {
+    updateSelection(isSameDir: boolean): void {
         if (isSameDir) {
             const newSelection = [];
             // cache.selected contains files that can be outdated:
@@ -332,7 +332,7 @@ export class FileState {
     }
 
     @action
-    setSelectedFile(file: File) {
+    setSelectedFile(file: File): void {
         console.log('setSelectedFile', file);
         if (file) {
             this.selectedId = {
@@ -344,7 +344,7 @@ export class FileState {
     }
 
     @action
-    setEditingFile(file: File) {
+    setEditingFile(file: File): void {
         console.log('setEditingFile', file);
         if (file) {
             this.editingId = {
@@ -355,21 +355,22 @@ export class FileState {
         }
     }
 
-    reload() {
+    reload(): void {
         if (this.status !== 'busy') {
             this.cd(this.path, '', true, true).catch(this.emptyCache);
         }
     }
 
     @action
-    emptyCache = () => {
+    emptyCache = (): void => {
         this.files.clear();
         this.clearSelection();
         this.setStatus('ok', true);
         console.log('emptycache');
     };
 
-    handleError = (error: any) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    handleError = (error: any): Promise<void> => {
         console.log('handleError', error);
         this.setStatus('ok');
         const niceError = getLocalizedError(error);
@@ -412,7 +413,7 @@ export class FileState {
                     runInAction(() => {
                         const isSameDir = this.path === path;
 
-                        this.files.replace(files);
+                        this.files.replace(files as File[]);
 
                         this.updatePath(path, skipHistory);
                         this.cmd = '';
@@ -438,13 +439,13 @@ export class FileState {
 
     @action
     @needsConnection
-    async list(path: string): Promise<File[]> {
+    async list(path: string): Promise<File[] | void> {
         return this.api.list(path, true).catch(this.handleError);
     }
 
     @action
     @needsConnection
-    async rename(source: string, file: File, newName: string): Promise<string> {
+    async rename(source: string, file: File, newName: string): Promise<string | void> {
         // // TODO: check for valid filenames
         // try {
         //     await this.waitForConnection();
@@ -466,7 +467,7 @@ export class FileState {
 
     @action
     @needsConnection
-    async exists(path: string): Promise<boolean> {
+    async exists(path: string): Promise<boolean | void> {
         // await this.waitForConnection();
         return this.api
             .exists(path)
@@ -481,7 +482,7 @@ export class FileState {
 
     @action
     @needsConnection
-    async makedir(parent: string, dirName: string): Promise<string> {
+    async makedir(parent: string, dirName: string): Promise<string | void> {
         return this.api
             .makedir(parent, dirName)
             .then((newDir) => {
@@ -496,7 +497,7 @@ export class FileState {
 
     @action
     @needsConnection
-    async delete(source: string, files: File[]): Promise<number> {
+    async delete(source: string, files: File[]): Promise<number | void> {
         return this.api
             .delete(source, files)
             .then((num) => {
@@ -510,7 +511,7 @@ export class FileState {
     }
 
     @needsConnection
-    async size(source: string, files: string[]): Promise<number> {
+    async size(source: string, files: string[]): Promise<number | void> {
         // try {
         //     await this.waitForConnection();
         // } catch (err) {
@@ -525,15 +526,15 @@ export class FileState {
         return this.api.isDir(path);
     }
 
-    isDirectoryNameValid = (dirName: string) => {
+    isDirectoryNameValid = (dirName: string): boolean => {
         return this.api.isDirectoryNameValid(dirName);
     };
 
-    join(path: string, path2: string) {
+    join(path: string, path2: string): string {
         return this.api.join(path, path2);
     }
 
-    async openFile(appState: AppState, cache: FileState, file: File) {
+    async openFile(appState: AppState, cache: FileState, file: File): Promise<void> {
         try {
             const path = await appState.prepareLocalTransfer(cache, [file]);
             if (this.shellOpenFile(path) !== true) {
@@ -552,17 +553,17 @@ export class FileState {
         return shell.openItem(path);
     }
 
-    openDirectory(file: { dir: string; fullname: string }) {
+    openDirectory(file: { dir: string; fullname: string }): Promise<string | void> {
         return this.cd(file.dir, file.fullname).catch(this.handleError);
     }
 
-    openTerminal(path: string) {
+    openTerminal(path: string): void {
         if (this.getFS().name === 'local') {
             ipcRenderer.send('openTerminal', path);
         }
     }
 
-    openParentDirectory() {
+    openParentDirectory(): void {
         if (!this.isRoot()) {
             const parent = { dir: this.path, fullname: '..' };
             this.openDirectory(parent).catch(() => {
