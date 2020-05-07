@@ -6,7 +6,7 @@ describe('fileUtils', () => {
         const range = getSelectionRange(filename);
         expect(range).toEqual({
             start: 0,
-            end: 7
+            end: 7,
         });
     });
 
@@ -15,7 +15,7 @@ describe('fileUtils', () => {
         const range = getSelectionRange(filename);
         expect(range).toEqual({
             start: 1,
-            end: 10
+            end: 10,
         });
     });
 
@@ -24,7 +24,7 @@ describe('fileUtils', () => {
         const range = getSelectionRange(filename);
         expect(range).toEqual({
             start: 0,
-            end: 7
+            end: 7,
         });
     });
 
