@@ -1,0 +1,8 @@
+node_modules
+dist/
+dist-e2e/
+.DS_Store
+build/
+e2e/build-e2e/
+public
+test.js

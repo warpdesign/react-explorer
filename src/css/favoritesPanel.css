@@ -1,18 +1,17 @@
 .favoritesPanel {
-    position:relative;
-    overflow:auto;
-    flex-shrink:0;
-    width:200px;
-    /* border:1px dotted gray; */
+    position: relative;
+    overflow: auto;
+    flex-shrink: 0;
+    width: 200px;
     margin: 0;
     list-style-type: none;
     background: rgba(206, 217, 224, 0.5);
     padding: 0;
-    font-size:13px;
+    font-size: 13px;
 }
 
 .bp3-dark .favoritesPanel {
-    background-color:rgb(41, 56, 66);
+    background-color: rgb(41, 56, 66);
 }
 
 /* .favoritesPanel:before {
@@ -26,12 +25,12 @@
 } */
 
 .favoritesPanel .bp3-tree-node-content-0 {
-    color:#5c7080;
-    pointer-events:none;
+    color: #5c7080;
+    pointer-events: none;
 }
 
 .favoritesPanel .bp3-tree-node-content-0:hover {
-    background-color:transparent;
+    background-color: transparent;
 }
 
 .favoritesPanel .bp3-tree-node-content-0 .bp3-icon {

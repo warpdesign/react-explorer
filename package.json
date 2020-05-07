@@ -55,6 +55,10 @@
         ],
         "*.json": [
             "eslint --fix"
+        ],
+        "*.css": [
+            "prettier --write",
+            "stylelint --fix"
         ]
     },
     "author": {
@@ -102,6 +106,8 @@
         "prettier": "^2.0.5",
         "source-map-loader": "^0.2.4",
         "style-loader": "^0.23.1",
+        "stylelint": "^13.3.3",
+        "stylelint-config-standard": "^20.0.0",
         "terser-webpack-plugin": "^2.2.1",
         "ts-jest": "^24.1.0",
         "ts-loader": "^7.0.1",
