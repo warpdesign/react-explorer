@@ -52,6 +52,9 @@
     "lint-staged": {
         "*.ts?(x)": [
             "eslint --fix"
+        ],
+        "*.json": [
+            "eslint --fix"
         ]
     },
     "author": {

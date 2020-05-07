@@ -224,7 +224,7 @@
             "DESKTOP_DIR": "Desktop",
             "VIDEOS_DIR": "Videos",
             "DOCS_DIR": "Documents"
-        },        
+        },
         "APP_MENUS": {
             "ABOUT": "About React-Explorer",
             "PREFS": "Preferences",

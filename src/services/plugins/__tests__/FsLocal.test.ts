@@ -6,9 +6,10 @@ import { describeUnix, describeWin, itUnix, getPath } from '../../../utils/test/
 
 import mock from 'mock-fs';
 import TmpDir from './fixtures/tmpDir';
-import { FsApi } from '../../Fs';
+import { File } from '../../Fs';
+import { LocalApi } from '../FsLocal';
 
-let localAPI: FsApi;
+let localAPI: LocalApi;
 
 const HOMEDIR = getPath('home');
 const TESTS_DIR = getPath('tests_dir');
@@ -23,7 +24,7 @@ describe('FsLocal', () => {
         beforeAll((): void => {
             localAPI = new FsLocal.API('/', () => {
                 //
-            });
+            }) as LocalApi;
         });
 
         it('unix: dir name cannot start with  ../', function () {
@@ -50,7 +51,7 @@ describe('FsLocal', () => {
         beforeAll((): void => {
             localAPI = new FsLocal.API('/', () => {
                 //
-            });
+            }) as LocalApi;
         });
 
         it('~ resolves to homedir', function () {
@@ -67,7 +68,7 @@ describe('FsLocal', () => {
             mock(TmpDir);
             localAPI = new FsLocal.API('/', () => {
                 //
-            });
+            }) as LocalApi;
         });
 
         afterAll((): void => mock.restore());
@@ -114,7 +115,7 @@ describe('FsLocal', () => {
             mock(TmpDir);
             localAPI = new FsLocal.API('/', () => {
                 //
-            });
+            }) as LocalApi;
         });
 
         afterAll((): void => mock.restore());
@@ -157,7 +158,7 @@ describe('FsLocal', () => {
         beforeAll((): void => {
             localAPI = new FsLocal.API('/', () => {
                 //
-            });
+            }) as LocalApi;
             mock(TmpDir);
         });
 
@@ -215,7 +216,7 @@ describe('FsLocal', () => {
         beforeAll((): void => {
             localAPI = new FsLocal.API('/', () => {
                 //
-            });
+            }) as LocalApi;
             mock(TmpDir);
         });
 
@@ -270,7 +271,7 @@ describe('FsLocal', () => {
         beforeAll((): void => {
             localAPI = new FsLocal.API('/', () => {
                 //
-            });
+            }) as LocalApi;
             mock(TmpDir);
         });
 
@@ -280,7 +281,7 @@ describe('FsLocal', () => {
             expect.assertions(1);
 
             try {
-                await localAPI.rename(`${TESTS_DIR}/sizeTest`, { fullname: '14bytes' }, '1024bytes');
+                await localAPI.rename(`${TESTS_DIR}/sizeTest`, { fullname: '14bytes' } as File, '1024bytes');
             } catch (err) {
                 expect(err.code).toBe('EEXIST');
             }
@@ -290,7 +291,7 @@ describe('FsLocal', () => {
             expect.assertions(1);
 
             try {
-                await localAPI.rename(`${TESTS_DIR}/sizeTest`, { fullname: 'nothing_here' }, 'new_file');
+                await localAPI.rename(`${TESTS_DIR}/sizeTest`, { fullname: 'nothing_here' } as File, 'new_file');
             } catch (err) {
                 expect(err.code).toBe('ENOENT');
             }
@@ -300,7 +301,11 @@ describe('FsLocal', () => {
             expect.assertions(1);
 
             try {
-                await localAPI.rename(`${TESTS_DIR}/deleteTest/folder_denied`, { fullname: 'file2' }, 'new_file');
+                await localAPI.rename(
+                    `${TESTS_DIR}/deleteTest/folder_denied`,
+                    { fullname: 'file2' } as File,
+                    'new_file',
+                );
             } catch (err) {
                 expect(err.code).toBe('EACCES');
             }
@@ -309,14 +314,18 @@ describe('FsLocal', () => {
         it('should allow renaming a protected file', async () => {
             expect.assertions(1);
 
-            const res = await localAPI.rename(`${TESTS_DIR}/deleteTest`, { fullname: 'file_denied' }, 'new_file');
+            const res = await localAPI.rename(
+                `${TESTS_DIR}/deleteTest`,
+                { fullname: 'file_denied' } as File,
+                'new_file',
+            );
             expect(res).toBe('new_file');
         });
 
         it('should rename a file', async () => {
             expect.assertions(1);
 
-            const res = await localAPI.rename(`${TESTS_DIR}`, { fullname: 'file' }, 'new_file');
+            const res = await localAPI.rename(`${TESTS_DIR}`, { fullname: 'file' } as File, 'new_file');
             expect(res).toBe('new_file');
         });
     });
@@ -325,7 +334,7 @@ describe('FsLocal', () => {
         beforeAll((): void => {
             localAPI = new FsLocal.API('/', () => {
                 //
-            });
+            }) as LocalApi;
             mock(TmpDir);
         });
 
@@ -380,7 +389,7 @@ describe('FsLocal', () => {
         beforeAll((): void => {
             localAPI = new FsLocal.API('/', () => {
                 //
-            });
+            }) as LocalApi;
             mock(TmpDir);
         });
 
@@ -403,7 +412,7 @@ describe('FsLocal', () => {
         beforeAll((): void => {
             localAPI = new FsLocal.API('/', () => {
                 //
-            });
+            }) as LocalApi;
             mock(TmpDir);
         });
 
@@ -473,14 +482,14 @@ describe('FsLocal', () => {
         beforeAll((): void => {
             localAPI = new FsLocal.API('/', () => {
                 //
-            });
+            }) as LocalApi;
             jest.spyOn(localAPI, 'onList').mockImplementation(() => {
                 //
             });
             mock(TmpDir);
         });
 
-        afterEach((): void => jest.clearAllMocks());
+        afterEach((): typeof jest => jest.clearAllMocks());
 
         afterAll((): void => {
             mock.restore();
@@ -544,7 +553,7 @@ describe('FsLocal', () => {
         beforeAll((): void => {
             localAPI = new FsLocal.API('/', () => {
                 //
-            });
+            }) as LocalApi;
         });
 
         it('should return false for empty path', () => {
@@ -564,7 +573,7 @@ describe('FsLocal', () => {
         beforeAll((): void => {
             localAPI = new FsLocal.API('C:\\', () => {
                 //
-            });
+            }) as LocalApi;
         });
 
         it('should return false for empty path', () => {
