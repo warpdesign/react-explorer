@@ -6,6 +6,7 @@ import classNames from "classnames";
 import { IReactionDisposer, reaction, toJS } from "mobx";
 import i18next from 'i18next';
 import { USERNAME, isMac } from "../utils/platform";
+import { hasWSL } from "../utils/wsl";
 import Icons from "../constants/icons";
 import { FavoritesState, Favorite } from "../state/favoritesState";
 import { AppState } from "../state/appState";
@@ -32,10 +33,13 @@ interface InjectedProps extends IProps {
 export class LeftPanelClass extends React.Component<IProps, LeftPanelState> {
     favoritesState: FavoritesState;
     disposers:Array<IReactionDisposer> = new Array();
+    // we have to make an async call to check for WSL
+    // so we first set it to false
+    showDistributions: boolean = false;
 
     constructor(props:IProps) {
         super(props);
-
+        
         const { t } = props;
 
         this.state = {
@@ -60,8 +64,30 @@ export class LeftPanelClass extends React.Component<IProps, LeftPanelState> {
 
         this.favoritesState = this.injected.appState.favoritesState;
 
-        this.installReaction();
+        this.installReactions();
         this.bindLanguageChange();
+        this.checkForWSL();
+    }
+
+    private checkForWSL = async (): Promise<boolean> => {
+        console.log('checking for WSL');
+        this.showDistributions = await hasWSL();
+        if (this.showDistributions) {
+            console.log('WSL detected');
+            const { t } = this.props;
+            const { nodes } = this.state;
+
+            nodes.push(                {
+                id: 2,
+                hasCaret: true,
+                isExpanded: true,
+                label: t('FAVORITES_PANEL.LINUX'),
+                childNodes: []
+            });
+
+            this.setState({ nodes });
+        }
+        return this.showDistributions;
     }
 
     private bindLanguageChange = () => {
@@ -76,7 +102,7 @@ export class LeftPanelClass extends React.Component<IProps, LeftPanelState> {
     public onLanguageChanged = (lang: string) => {
         console.log('building nodes', lang);
         this.buildNodes(this.favoritesState);
-    }    
+    }
 
     private get injected() {
         return this.props as InjectedProps;
@@ -87,12 +113,22 @@ export class LeftPanelClass extends React.Component<IProps, LeftPanelState> {
         this.unbindLanguageChange();
     }
 
-    private installReaction() {
+    private installReactions() {
         this.disposers.push(reaction(
             () => toJS(this.favoritesState.places),
             (_: Favorite[]) => {
                 if (!this.props.hide) {
                     console.log('places updated: need to rebuild nodes');
+                    this.buildNodes(this.favoritesState);
+                }
+            })
+        );
+
+        this.disposers.push(reaction(
+            () => toJS(this.favoritesState.distributions),
+            (_: Favorite[]) => {
+                if (!this.props.hide) {
+                    console.log('distributions updated: need to rebuild nodes');
                     this.buildNodes(this.favoritesState);
                 }
             })
@@ -186,6 +222,7 @@ export class LeftPanelClass extends React.Component<IProps, LeftPanelState> {
         const { nodes } = this.state;
         const shortcuts = nodes[0];
         const places = nodes[1];
+        const distributions = nodes[2];
 
         shortcuts.childNodes = favorites.shortcuts.map((shortcut, i) => ({
             id: `s_${shortcut.path}`,
@@ -205,9 +242,22 @@ export class LeftPanelClass extends React.Component<IProps, LeftPanelState> {
             nodeData: place.path
         }));
 
+        if (this.showDistributions && favorites.distributions) {
+            distributions.childNodes = favorites.distributions.map((distrib) => ({
+                id: `p_${distrib.path}`,
+                key: `p_${distrib.path}`,
+                label: <span title={distrib.path}>{distrib.label}</span>,
+                icon: distrib.icon,
+                nodeData: distrib.path
+            }));
+        }
+
         // update root nodes label too
         places.label = t('FAVORITES_PANEL.PLACES');
         shortcuts.label = t('FAVORITES_PANEL.SHORTCUTS');
+        if (distributions) {
+            distributions.label = t('FAVORITES_PANEL.LINUX');
+        }
 
         this.setState(this.state);
     }

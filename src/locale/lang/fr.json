@@ -218,6 +218,7 @@
         "FAVORITES_PANEL": {
             "SHORTCUTS": "Raccourcis",
             "PLACES": "Emplacements",
+            "LINUX": "Linux",
             "DOWNLOADS_DIR": "Téléchargements",
             "MUSIC_DIR": "Musique",
             "PICTURES_DIR": "Images",
