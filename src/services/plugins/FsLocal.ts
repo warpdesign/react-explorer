@@ -242,9 +242,13 @@ export class LocalApi implements FsApi {
     onList(dir: string) {
         if (dir !== this.path) {
             // console.log('stopWatching', this.path);
-            LocalWatch.stopWatchingPath(this.path, this.onFsChange);
+            try {
+                LocalWatch.stopWatchingPath(this.path, this.onFsChange);
+                LocalWatch.watchPath(dir, this.onFsChange);
+            } catch(e) {
+                console.warn('Could not watch path', dir, e);
+            }
             // console.log('watchPath', dir);
-            LocalWatch.watchPath(dir, this.onFsChange);
             this.path = dir;
         }
     }
