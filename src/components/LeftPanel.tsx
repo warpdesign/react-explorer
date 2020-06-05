@@ -13,6 +13,8 @@ import { AppState } from "../state/appState";
 import { AppAlert } from "./AppAlert";
 import CONFIG from '../config/appConfig';
 
+declare var ENV: any;
+
 require("../css/favoritesPanel.css");
 
 interface LeftPanelState {
@@ -66,7 +68,9 @@ export class LeftPanelClass extends React.Component<IProps, LeftPanelState> {
 
         this.installReactions();
         this.bindLanguageChange();
-        this.checkForWSL();
+        if (!ENV.CY) {
+            this.checkForWSL();
+        }
     }
 
     private checkForWSL = async (): Promise<boolean> => {
@@ -77,7 +81,7 @@ export class LeftPanelClass extends React.Component<IProps, LeftPanelState> {
             const { t } = this.props;
             const { nodes } = this.state;
 
-            nodes.push(                {
+            nodes.push({
                 id: 2,
                 hasCaret: true,
                 isExpanded: true,

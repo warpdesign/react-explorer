@@ -20,7 +20,7 @@ export const hasWSL = (): Promise<boolean> => {
 export const getWSLDistributions = (): Promise<string[]> => {
     return new Promise((resolve, reject) => {
         exec('wsl -l -q', (error, stdout, stderr) => {
-            if (!error && !stderr) {
+            if (!error && !stderr && stdout) {
                 const trimmed = stdout.replace(/\0/g, '');
                 resolve(trimmed.split('\r\n').filter(str => str.length))
             } else {

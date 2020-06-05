@@ -82,6 +82,9 @@ export class FavoritesState {
         if (distribs.length !== this.distributions.length) {
             this.buildDistributions(distribs);
         }
+
+                // restart timeout in any case
+                this.launchTimeout(false, this.checkForNewDistributions, CHECK_FOR_WSL_DELAY);
     }
 
     /**
@@ -95,7 +98,7 @@ export class FavoritesState {
         }
 
         // restart timeout in any case
-        this.launchTimeout(true, this.checkForNewDrives, CHECK_FOR_DRIVES_DELAY);
+        this.launchTimeout(false, this.checkForNewDrives, CHECK_FOR_DRIVES_DELAY);
     }
 
     hasDriveListChanged(newList:drivelist.Drive[]):boolean {
