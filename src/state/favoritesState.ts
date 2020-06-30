@@ -44,7 +44,7 @@ export class FavoritesState {
     buildDistributions(distribs: string[]) {
         this.distributions.replace(distribs.map((distrib:string) => ({
             label: distrib,
-            path: WSL_PREFIX + distrib,
+            path: `${WSL_PREFIX}${distrib}\\`,
             icon: IconNames.SOCIAL_MEDIA
         })));
     }

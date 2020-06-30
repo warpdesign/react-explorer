@@ -202,7 +202,7 @@ const ElectronApp = {
             const { id, settings } = data;
             const state = WindowSettings.getSettings(id);
             console.log('got state', state);
-            state.setCustom(settings);
+            state.custom = settings;
         });
     },
 

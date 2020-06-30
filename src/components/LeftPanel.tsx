@@ -148,14 +148,16 @@ export class LeftPanelClass extends React.Component<IProps, LeftPanelState> {
     getNodeFromPath(path:string):ITreeNode<string> {
         const { nodes } = this.state;
         const shortcuts = nodes[0].childNodes;
+        const places = nodes[1].childNodes;
 
-        const found = shortcuts.find(node => node.nodeData === path);
+        const found = shortcuts.find(node => node.nodeData === path) || places.find(node => node.nodeData === path);
         
-        if (found) {
+        if (found || !this.showDistributions) {
             return found;
         } else {
-            const places = nodes[1].childNodes;
-            return places.find(node => node.nodeData === path);
+
+            const distribs = nodes[2].childNodes;
+            return distribs.find(node => node.nodeData === path);
         }
     }
 
@@ -188,7 +190,7 @@ export class LeftPanelClass extends React.Component<IProps, LeftPanelState> {
         if (sameView) {
             const activeCache = appState.getActiveCache();
             if (activeCache && activeCache.status === 'ok') {
-                activeCache.cd(path)
+                activeCache.cd(path);
             }
         } else {
             const winState = appState.winStates[0];
@@ -267,7 +269,6 @@ export class LeftPanelClass extends React.Component<IProps, LeftPanelState> {
     }
 
     render() {
-        console.log('LeftPanel.render');
         const path = this.getActiveCachePath();
         this.setActiveNode(path);
         const { nodes } = this.state;
