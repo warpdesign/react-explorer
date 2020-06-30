@@ -355,6 +355,15 @@ export class LocalApi implements FsApi {
     }
 
     isRoot(path: string): boolean {
+        // We need to make a special case for wsl since \\wsl$ is not a drive, there's root.
+        // Instead we consider the distrib's root dir (eg. \\wsl$\\Debian) as root.
+        if (isWin) {
+            if (path.startsWith('\\\\wsl$\\')) {
+                const parts = path.substr(6).split('\\').filter(Boolean);
+                return parts.length < 2;
+            }
+        }
+
         return !!path.match(isRoot);
     }
 
