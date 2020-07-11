@@ -565,6 +565,7 @@ export class FileState {
     }
 
     isRoot(path = this.path): boolean {
+        console.log('FileCache.isRoot', this.api ? path && this.api.isRoot(path) : false, this.api);
         return this.api ? path && this.api.isRoot(path) : false;
     }
 }

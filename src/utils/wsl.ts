@@ -30,4 +30,19 @@ export const getWSLDistributions = (): Promise<string[]> => {
     });
 };
 
+export const decodeWSLFilename = (str: string) => {
+    return str.replace(/[]/g, function (m: string): string {
+        return ({
+            '': '<',
+            '': '>',
+            '': ':',
+            '': '"',
+            '': '\\',
+            '': '|',
+            '': '?',
+            '': '*'
+        } as { [key: string]: string })[m];
+    });
+}
+
 export const WSL_PREFIX = '\\\\wsl$\\';

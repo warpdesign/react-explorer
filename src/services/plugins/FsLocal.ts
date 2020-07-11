@@ -85,16 +85,22 @@ export class LocalApi implements FsApi {
 
     async makedir(source: string, dirName: string, transferId = -1): Promise<string> {
         return new Promise((resolve, reject) => {
+            console.log('makedir, source:', source, 'dirName:', dirName);
             const unixPath = path.join(source, dirName).replace(/\\/g, "/");
+            console.log('unixPath', unixPath);
             try {
+                console.log('calling mkdir');
                 mkdir(unixPath, (err: any) => {
                     if (err) {
+                        console.log('error creating dir', err);
                         reject(err);
                     } else {
+                        console.log('successfully created dir', err);
                         resolve(path.join(source, dirName));
                     }
                 });
             } catch (err) {
+                console.log('error execing mkdir()', err);
                 reject(err);
             }
         });
@@ -355,15 +361,6 @@ export class LocalApi implements FsApi {
     }
 
     isRoot(path: string): boolean {
-        // We need to make a special case for wsl since \\wsl$ is not a drive, there's root.
-        // Instead we consider the distrib's root dir (eg. \\wsl$\\Debian) as root.
-        if (isWin) {
-            if (path.startsWith('\\\\wsl$\\')) {
-                const parts = path.substr(6).split('\\').filter(Boolean);
-                return parts.length < 2;
-            }
-        }
-
         return !!path.match(isRoot);
     }
 
