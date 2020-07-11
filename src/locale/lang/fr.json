@@ -190,7 +190,7 @@
             "UNKNOWN": "Une erreur est survenue",
             "GENERIC": "{{error.message}} (code {{error.code}})",
             "BAD_FILENAME": "Nom de fichier ou dossier non valide: '{{entry}}'",
-            "WIN_VALID_FILENAME": "Tous les caractères sauf *:<>\\?| sont acceptés",
+            "WIN_VALID_FILENAME": "Tous les caractères sauf *:<>\\?|\" sont acceptés",
             "UNIX_VALID_FILENAME": "Tous les caractères sauf / sont acceptés",
             "DELETE": "Erreur lors de la suppression des fichiers: {{message}}",
             "DELETE_WARN": "Certains fichiers n'ont pu être supprimés",
@@ -218,6 +218,7 @@
         "FAVORITES_PANEL": {
             "SHORTCUTS": "Raccourcis",
             "PLACES": "Emplacements",
+            "LINUX": "Linux",
             "DOWNLOADS_DIR": "Téléchargements",
             "MUSIC_DIR": "Musique",
             "PICTURES_DIR": "Images",

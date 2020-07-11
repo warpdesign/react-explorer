@@ -85,16 +85,22 @@ export class LocalApi implements FsApi {
 
     async makedir(source: string, dirName: string, transferId = -1): Promise<string> {
         return new Promise((resolve, reject) => {
+            console.log('makedir, source:', source, 'dirName:', dirName);
             const unixPath = path.join(source, dirName).replace(/\\/g, "/");
+            console.log('unixPath', unixPath);
             try {
+                console.log('calling mkdir');
                 mkdir(unixPath, (err: any) => {
                     if (err) {
+                        console.log('error creating dir', err);
                         reject(err);
                     } else {
+                        console.log('successfully created dir', err);
                         resolve(path.join(source, dirName));
                     }
                 });
             } catch (err) {
+                console.log('error execing mkdir()', err);
                 reject(err);
             }
         });

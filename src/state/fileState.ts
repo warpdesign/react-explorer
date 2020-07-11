@@ -164,7 +164,7 @@ export class FileState {
     }
 
     onFSChange = (filename: string): void => {
-        // console.log('fsChanged', filename);
+        console.log('fsChanged', filename, this.isVisible);
         this.reload();
     }
 
@@ -377,7 +377,7 @@ export class FileState {
     }
 
     @action
-    async cd(path: string, path2: string = '', skipHistory = false, skipContext = false): Promise<string> {
+    cd(path: string, path2: string = '', skipHistory = false, skipContext = false): Promise<string> {
         // first updates fs (eg. was local fs, is now ftp)
         console.log('fileState: cd', path, this.path);
         if (this.path !== path) {
@@ -400,7 +400,7 @@ export class FileState {
     @action
     @needsConnection
     // changes current path and retrieves file list
-    async cwd(path: string, path2: string = '', skipHistory = false): Promise<string> {
+    cwd(path: string, path2: string = '', skipHistory = false): Promise<string> {
         const joint = path2 ? this.api.join(path, path2) : this.api.sanityze(path);
         this.cmd = 'cwd';
 
@@ -565,6 +565,7 @@ export class FileState {
     }
 
     isRoot(path = this.path): boolean {
+        console.log('FileCache.isRoot', this.api ? path && this.api.isRoot(path) : false, this.api);
         return this.api ? path && this.api.isRoot(path) : false;
     }
 }

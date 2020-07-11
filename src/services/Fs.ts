@@ -1,5 +1,3 @@
-import { FsGeneric } from './plugins/FsGeneric';
-import { FsLocal } from './plugins/FsLocal';
 import { Readable } from 'stream';
 import { isWin } from '../utils/platform';
 
@@ -17,13 +15,6 @@ export function registerFs(fs: Fs): void {
     // console.log('Registering Fs', fs);
     interfaces.push(fs);
 };
-
-if ((process && process.env && process.env.NODE_ENV === 'test') || ENV.CY) {
-    // console.log('**register generic', FsGeneric);
-    registerFs(FsGeneric);
-} else {
-    registerFs(FsLocal);
-}
 
 declare var ENV: any;
 
@@ -152,7 +143,7 @@ export interface FsApi {
 
 export function getFS(path: string): Fs {
     let newfs = interfaces.find((filesystem) => filesystem.canread(path));
-
+    console.log('got FS', newfs);
     // if (!newfs) {
     //     newfs = FsGeneric;
     // }

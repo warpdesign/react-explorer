@@ -9,8 +9,24 @@ import { Provider } from "mobx-react";
 import { DndProvider } from "react-dnd";
 import HTML5Backend from "react-dnd-html5-backend";
 import { remote } from "electron";
+// register Fs that will be available in React-Explorer
+// I guess there is a better place to do that
+import { FsGeneric } from '../services/plugins/FsGeneric';
+import { FsWsl } from '../services/plugins/FsWsl';
+import { FsLocal } from '../services/plugins/FsLocal';
+import { registerFs } from '../services/Fs';
 
 declare var ENV: any;
+
+function initFS() {
+    if ((process && process.env && process.env.NODE_ENV === 'test') || ENV.CY) {
+        // console.log('**register generic', FsGeneric);
+        registerFs(FsGeneric);
+    } else {
+        registerFs(FsWsl);
+        registerFs(FsLocal);
+    }
+}
 
 class App {
     settingsState: SettingsState;
@@ -18,9 +34,10 @@ class App {
     constructor() {
         this.settingsState = new SettingsState(ENV.VERSION);
         if (ENV.NODE_ENV !== "production") {
-            this.createTestFolder().then(this.renderApp);
+            this.createTestFolder()
+                .then(this.init);
         } else {
-            this.renderApp();
+            this.init();
         }
     }
 
@@ -42,6 +59,11 @@ class App {
     getInitialSettings() {
         const window:any = remote.getCurrentWindow();
         return window && window.initialSettings || {};
+    }
+
+    init = () => {
+        initFS();
+        this.renderApp();
     }
 
     renderApp = () => {

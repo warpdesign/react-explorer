@@ -190,7 +190,7 @@
             "UNKNOWN": "An error has occured",
             "GENERIC": "{{error.message}} (code {{error.code}})",
             "BAD_FILENAME": "File or directory name not valid: '{{entry}}'",
-            "WIN_VALID_FILENAME": "All characters except *:<>\\?| can be used",
+            "WIN_VALID_FILENAME": "All characters except *:<>\\?|\" can be used",
             "UNIX_VALID_FILENAME": "All characters except / can be used",
             "DELETE": "Error deleting files: {{message}}",
             "DELETE_WARN": "Some files could not be deleted",
@@ -218,6 +218,7 @@
         "FAVORITES_PANEL": {
             "SHORTCUTS": "Shortcuts",
             "PLACES": "Places",
+            "LINUX": "Linux",
             "DOWNLOADS_DIR": "Downloads",
             "MUSIC_DIR": "Music",
             "PICTURES_DIR": "Images",
