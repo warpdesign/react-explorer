@@ -1,15 +1,9 @@
-import { FsApi, File, ICredentials, Fs, filetype, MakeId } from "../Fs";
+import { File, ICredentials, Fs } from "../Fs";
 import { LocalApi } from './FsLocal';
 import * as fs from "fs";
 import * as path from "path";
-const mkdir = require("mkdirp");
-const del = require("del");
-import { size } from "../../utils/size";
 import { throttle } from "../../utils/throttle";
-const { Transform } = require("stream");
-import { isWin, HOME_DIR } from "../../utils/platform";
-import { LocalWatch } from "./LocalWatch";
-
+import { isWin } from "../../utils/platform";
 const invalidDirChars = /^[\.]+[\/]+(.)*$/gi;
 const invalidFileChars = /\//;
 const SEP = path.sep;
