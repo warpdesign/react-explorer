@@ -13,6 +13,7 @@
 - Dark Mode with automatic detection (macOS Mojave)
 - Open a terminal from any folder
 - Plugin-based: local supported for now, ftp in the works
+- WSL detection on Windows
 
 ## Feature tour
 
@@ -39,6 +40,12 @@ You can create several folders at once by separating them with a forward-slash:
 By right-clicking on a tab's icon you can quickly get access to the parents of the currend folder:
 
 ![parent-folders](./img/feature-rightclick-icon.gif)
+
+### WSL support
+
+React-Explorer will automatically detect and show the list of Linux distributions installed using WSL on Windows:
+
+![parent-folders](./img/feature-wsl.jpg)
 
 ## Requirements
 
