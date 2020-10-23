@@ -7,7 +7,6 @@ import { lineEnding, DOWNLOADS_DIR } from '../utils/platform';
 import { ViewDescriptor } from '../components/TabList';
 import { WinState, WindowSettings } from './winState';
 import { FavoritesState } from './favoritesState';
-import { LocalizedError } from '../locale/error';
 
 declare const ENV: { [key: string]: string | boolean | number | Record<string, unknown> };
 
@@ -122,7 +121,7 @@ export class AppState {
      *
      * @returns {Promise<FileTransfer[]>}
      */
-    prepareClipboardTransferTo(cache: FileState): Promise<boolean> {
+    prepareClipboardTransferTo(cache: FileState): Promise<boolean | void> {
         const options = {
             files: this.clipboard.files,
             srcFs: this.clipboard.srcFs,
@@ -159,7 +158,7 @@ export class AppState {
      *
      * @returns {Promise<void>}
      */
-    prepareTransferTo(srcCache: FileState, dstCache: FileState, files: File[]): Promise<boolean> {
+    prepareTransferTo(srcCache: FileState, dstCache: FileState, files: File[]): Promise<boolean | void> {
         if (!files.length) {
             return;
         }
@@ -171,7 +170,9 @@ export class AppState {
         if (!srcCache) {
             srcPath = files[0].dir;
             const fs = getFS(srcPath);
-            srcApi = new fs.API(srcPath, () => {});
+            srcApi = new fs.API(srcPath, () => {
+                //
+            });
         }
 
         const options = {
@@ -232,7 +233,9 @@ export class AppState {
         } else {
             // first we need to get a FS for local
             const fs = getFS(DOWNLOADS_DIR);
-            const api = new fs.API(DOWNLOADS_DIR, () => {});
+            const api = new fs.API(DOWNLOADS_DIR, () => {
+                //
+            });
 
             const options = {
                 files,
@@ -277,7 +280,7 @@ export class AppState {
         return view.caches.find((cache) => cache.isVisible === true);
     }
 
-    getCachesForView(viewId: number): IObservableArray<FileState> {
+    getCachesForView(viewId: number): FileState[] {
         const winState = this.winStates[0];
         const view = winState.getView(viewId);
         return view.caches;

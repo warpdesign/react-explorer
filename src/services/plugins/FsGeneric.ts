@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { FsApi, File, Credentials, Fs } from '../Fs';
 import * as fs from 'fs';
 
@@ -126,11 +127,14 @@ class GenericApi implements FsApi {
         return [];
     }
 
-    sanityze(path: string) {
+    sanityze(path: string): string {
         return path;
     }
 
-    on(event: string, cb: (data: any) => void): void {}
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    on(event: string, cb: (data: any) => void): void {
+        //
+    }
 }
 
 export const FsGeneric: Fs = {

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { FsApi, File, Credentials, Fs, filetype, MakeId } from '../Fs';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -5,7 +6,7 @@ import mkdir = require('mkdirp');
 import del = require('del');
 import { size } from '../../utils/size';
 import { throttle } from '../../utils/throttle';
-import { Transform } from require('stream');
+import { Transform, TransformCallback } from require('stream');
 import { isWin, HOME_DIR } from '../../utils/platform';
 import { LocalWatch } from './LocalWatch';
 
@@ -18,8 +19,7 @@ const SEP = path.sep;
 const localStart = (isWin && /^(([a-zA-Z]\:)|([\.]*\/|\.)|(\\\\)|~)/) || /^([\.]*\/|\.|~)/;
 const isRoot = (isWin && /((([a-zA-Z]\:)(\\)*)|(\\\\))$/) || /^\/$/;
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const progressFunc = throttle((progress: any, bytesRead: number) => {
+const progressFunc = throttle((progress: (pourcent: number) => void, bytesRead: number) => {
     progress(bytesRead);
 }, 400);
 
@@ -90,7 +90,7 @@ export class LocalApi implements FsApi {
             console.log('unixPath', unixPath);
             try {
                 console.log('calling mkdir');
-                mkdir(unixPath, (err: any) => {
+                mkdir(unixPath, (err: NodeJS.ErrnoException) => {
                     if (err) {
                         console.log('error creating dir', err);
                         reject(err);
@@ -237,7 +237,7 @@ export class LocalApi implements FsApi {
         return Promise.resolve();
     }
 
-    onList(dir: string) {
+    onList(dir: string): void {
         if (dir !== this.path) {
             // console.log('stopWatching', this.path);
             try {
@@ -286,7 +286,7 @@ export class LocalApi implements FsApi {
         const format = path.parse(fullPath);
         let name = fullPath;
         let stats: Partial<fs.Stats> = null;
-        let target_stats = null;
+        let targetStats = null;
 
         try {
             // do not follow symlinks first
@@ -294,7 +294,7 @@ export class LocalApi implements FsApi {
             if (stats.isSymbolicLink()) {
                 // get link target path first
                 name = fs.readlinkSync(fullPath);
-                target_stats = fs.statSync(fullPath);
+                targetStats = fs.statSync(fullPath);
             }
         } catch (err) {
             console.warn('error getting stats for', fullPath, err);
@@ -307,16 +307,16 @@ export class LocalApi implements FsApi {
                 mtime: new Date(),
                 birthtime: new Date(),
                 size: stats ? stats.size : 0,
-                isDirectory: () => isDir,
+                isDirectory: (): boolean => isDir,
                 mode: -1,
-                isSymbolicLink: () => isSymLink,
+                isSymbolicLink: (): boolean => isSymLink,
                 ino: 0,
                 dev: 0,
             };
         }
 
         const extension = path.parse(name).ext.toLowerCase();
-        const mode = target_stats ? target_stats.mode : stats.mode;
+        const mode = targetStats ? targetStats.mode : stats.mode;
 
         const file: File = {
             dir: format.dir,
@@ -328,11 +328,10 @@ export class LocalApi implements FsApi {
             bDate: stats.birthtime,
             length: stats.size,
             mode: mode,
-            isDir: target_stats ? target_stats.isDirectory() : stats.isDirectory(),
+            isDir: targetStats ? targetStats.isDirectory() : stats.isDirectory(),
             readonly: false,
             type:
-                (!(target_stats ? target_stats.isDirectory() : stats.isDirectory()) &&
-                    filetype(mode, 0, 0, extension)) ||
+                (!(targetStats ? targetStats.isDirectory() : stats.isDirectory()) && filetype(mode, 0, 0, extension)) ||
                 '',
             isSym: stats.isSymbolicLink(),
             target: (stats.isSymbolicLink() && name) || null,
@@ -380,7 +379,7 @@ export class LocalApi implements FsApi {
 
             const reportProgress = new Transform({
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                transform(chunk: any, encoding: any, callback: any) {
+                transform(chunk: any, encoding: any, callback: TransformCallback) {
                     bytesRead += chunk.length;
                     progressFunc(progress, bytesRead);
                     callback(null, chunk);
@@ -388,14 +387,14 @@ export class LocalApi implements FsApi {
                 highWaterMark: 16384 * 31,
             });
 
+            const writeStream = fs.createWriteStream(dstPath);
+
             readStream.once('error', (err) => {
                 console.log('error on read stream');
                 readError = true;
                 readStream.destroy();
                 writeStream.destroy(err);
             });
-
-            const writeStream = fs.createWriteStream(dstPath);
 
             readStream.pipe(reportProgress).pipe(writeStream);
 
@@ -468,14 +467,17 @@ export class LocalApi implements FsApi {
         }
     }
 
-    sanityze(path: string) {
+    sanityze(path: string): string {
         return isWin ? (path.match(/\\$/) ? path : path + '\\') : path;
     }
 
-    on(event: string, cb: (data: any) => void): void {}
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    on(event: string, cb: (data: any) => void): void {
+        //
+    }
 }
 
-export function FolderExists(path: string) {
+export function FolderExists(path: string): boolean {
     try {
         return fs.existsSync(path) && fs.lstatSync(path).isDirectory();
     } catch (err) {
@@ -504,7 +506,7 @@ export const FsLocal: Fs = {
             port: 0,
         };
     },
-    displaypath(str: string) {
+    displaypath(str: string): { shortPath: string; fullPath: string } {
         const split = str.split(SEP);
         return {
             fullPath: str,
