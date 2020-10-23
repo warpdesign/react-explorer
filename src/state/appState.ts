@@ -320,7 +320,7 @@ export class AppState {
 
     @action
     // addTransfer(srcFs: FsApi, dstFs: FsApi, files: File[], srcPath: string, dstPath: string) {
-    async addTransfer(options: TransferOptions): Promise<boolean> {
+    async addTransfer(options: TransferOptions): Promise<boolean | void> {
         let isDir = false;
 
         try {

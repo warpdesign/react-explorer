@@ -1,4 +1,4 @@
-const folderSize = require('get-folder-size');
+import folderSize = require('get-folder-size');
 
 export function size(path: string): Promise<number> {
     return new Promise((resolve, reject) => {

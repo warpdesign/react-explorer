@@ -76,7 +76,7 @@ export class FileState {
     }
 
     @action
-    navHistory(dir = -1, force = false): void {
+    navHistory(dir = -1, force = false): Promise<string | void> {
         if (!this.history.length) {
             debugger;
             console.warn('attempting to nav in empty history');
@@ -127,8 +127,7 @@ export class FileState {
     private prevApi: FsApi;
     private prevServer: string;
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    private loginDefer: Deferred<any>;
+    private loginDefer: Deferred<void>;
 
     constructor(path: string, viewId = -1) {
         this.viewId = viewId;
@@ -138,13 +137,13 @@ export class FileState {
         // console.log(`new FileState('${path}'') -> fs = ${this.fs.name}`);
     }
 
-    private saveContext() {
+    private saveContext(): void {
         this.prevServer = this.server;
         this.prevApi = this.api;
         this.prevFs = this.fs;
     }
 
-    private restoreContext() {
+    private restoreContext(): void {
         this.freeFsEvents();
         this.api = this.prevApi;
         this.bindFsEvents();
@@ -152,12 +151,12 @@ export class FileState {
         this.server = this.prevServer;
     }
 
-    private bindFsEvents() {
+    private bindFsEvents(): void {
         this.api.on('close', () => this.setStatus('offline'));
         // this.api.on('connect', () => this.setStatus('ok'));
     }
 
-    private freeFsEvents() {
+    private freeFsEvents(): void {
         if (this.api) {
             this.api.off();
         }
@@ -193,7 +192,7 @@ export class FileState {
     }
 
     @action
-    private updatePath(path: string, skipHistory = false) {
+    private updatePath(path: string, skipHistory = false): void {
         this.previousPath = this.path;
         this.path = path;
 
@@ -371,7 +370,7 @@ export class FileState {
     };
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    handleError = (error: any): void => {
+    handleError = (error: any): Promise<void> => {
         console.log('handleError', error);
         this.setStatus('ok');
         const niceError = getLocalizedError(error);
@@ -414,7 +413,7 @@ export class FileState {
                     runInAction(() => {
                         const isSameDir = this.path === path;
 
-                        this.files.replace(files);
+                        this.files.replace(files as File[]);
 
                         this.updatePath(path, skipHistory);
                         this.cmd = '';
@@ -440,13 +439,13 @@ export class FileState {
 
     @action
     @needsConnection
-    async list(path: string): Promise<File[]> {
+    async list(path: string): Promise<File[] | void> {
         return this.api.list(path, true).catch(this.handleError);
     }
 
     @action
     @needsConnection
-    async rename(source: string, file: File, newName: string): Promise<string> {
+    async rename(source: string, file: File, newName: string): Promise<string | void> {
         // // TODO: check for valid filenames
         // try {
         //     await this.waitForConnection();
@@ -468,7 +467,7 @@ export class FileState {
 
     @action
     @needsConnection
-    async exists(path: string): Promise<boolean> {
+    async exists(path: string): Promise<boolean | void> {
         // await this.waitForConnection();
         return this.api
             .exists(path)
@@ -483,7 +482,7 @@ export class FileState {
 
     @action
     @needsConnection
-    async makedir(parent: string, dirName: string): Promise<string> {
+    async makedir(parent: string, dirName: string): Promise<string | void> {
         return this.api
             .makedir(parent, dirName)
             .then((newDir) => {
@@ -498,7 +497,7 @@ export class FileState {
 
     @action
     @needsConnection
-    async delete(source: string, files: File[]): Promise<number> {
+    async delete(source: string, files: File[]): Promise<number | void> {
         return this.api
             .delete(source, files)
             .then((num) => {
@@ -512,7 +511,7 @@ export class FileState {
     }
 
     @needsConnection
-    async size(source: string, files: string[]): Promise<number> {
+    async size(source: string, files: string[]): Promise<number | void> {
         // try {
         //     await this.waitForConnection();
         // } catch (err) {
@@ -554,7 +553,7 @@ export class FileState {
         return shell.openItem(path);
     }
 
-    openDirectory(file: { dir: string; fullname: string }): Promise<string> {
+    openDirectory(file: { dir: string; fullname: string }): Promise<string | void> {
         return this.cd(file.dir, file.fullname).catch(this.handleError);
     }
 

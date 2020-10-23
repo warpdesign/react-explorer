@@ -1,4 +1,4 @@
-import { observable, action, runInAction, computed } from 'mobx';
+import { observable, action } from 'mobx';
 import { FsApi, File } from '../services/Fs';
 import { FileTransfer } from './fileTransfer';
 import { Deferred } from '../utils/deferred';
@@ -76,7 +76,7 @@ export class Batch {
     };
 
     @action
-    start(): Promise<boolean> {
+    start(): Promise<boolean | void> {
         console.log('Starting batch');
         if (this.status === 'queued') {
             this.slotsAvailable = MAX_TRANSFERS;
@@ -346,6 +346,7 @@ export class Batch {
         return Promise.resolve(newName);
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     async getNewName(wantedName: string, path: string): Promise<string> {
         let i = 1;
         let exists = true;

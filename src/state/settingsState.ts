@@ -1,6 +1,6 @@
-import { observable, action } from "mobx";
+import { observable, action } from 'mobx';
 import { remote } from 'electron';
-import { JSObject } from "../components/Log";
+import { JSObject } from '../components/Log';
 import { i18next, languageList } from '../locale/i18n';
 import { isMojave, isWin, isMac, defaultFolder } from '../utils/platform';
 
@@ -9,14 +9,14 @@ const { systemPreferences } = remote;
 const APP_STORAGE_KEY = 'react-explorer';
 
 const TERMINAL_CMD = {
-    'darwin': 'open -a "%cmd" "%path"',
-    'win': 'start /D "%path" "%cd%" "%cmd"',
-    'linux': 'cd "%path" && "%cmd"'
+    darwin: 'open -a "%cmd" "%path"',
+    win: 'start /D "%path" "%cd%" "%cmd"',
+    linux: 'cd "%path" && "%cmd"',
 };
 const DEFAULT_TERMINAL = {
-    'darwin': 'Terminal.app',
-    'win': 'C:\\Windows\\System32\\cmd.exe',
-    'linux': 'xterm'
+    darwin: 'Terminal.app',
+    win: 'C:\\Windows\\System32\\cmd.exe',
+    linux: 'xterm',
 };
 
 export class SettingsState {
@@ -48,12 +48,11 @@ export class SettingsState {
         this.loadSettings();
     }
 
-    installListeners() {
+    installListeners(): void {
         // systemPreferences may not be defined if running outside of Electron
         if (isMojave && systemPreferences) {
-            systemPreferences.subscribeNotification(
-                'AppleInterfaceThemeChangedNotification',
-                () => this.setActiveTheme()
+            systemPreferences.subscribeNotification('AppleInterfaceThemeChangedNotification', () =>
+                this.setActiveTheme(),
             );
         }
     }
@@ -63,7 +62,7 @@ export class SettingsState {
     }
 
     @action
-    setLanguage(askedLang: string) {
+    setLanguage(askedLang: string): void {
         let lang = askedLang;
 
         // detect language from host OS if set to auto
@@ -84,31 +83,34 @@ export class SettingsState {
     }
 
     @action
-    setDefaultTerminal(cmd: string) {
+    setDefaultTerminal(cmd: string): void {
         this.defaultTerminal = cmd;
         let template = TERMINAL_CMD.linux;
 
         if (isWin) {
             template = TERMINAL_CMD.win;
         } else if (isMac) {
-            template = TERMINAL_CMD.darwin
+            template = TERMINAL_CMD.darwin;
         }
 
         this.terminalTemplate = template.replace('%cmd', cmd.replace(/"/g, '\\"'));
     }
 
-    getTerminalCommand(path: string) {
+    getTerminalCommand(path: string): string {
         return this.terminalTemplate.replace('%path', path.replace(/"/g, '\\"'));
     }
 
-    saveSettings() {
-        localStorage.setItem(APP_STORAGE_KEY, JSON.stringify({
-            lang: this.lang,
-            defaultFolder: this.defaultFolder,
-            darkMode: this.darkMode,
-            defaultTerminal: this.defaultTerminal,
-            version: this.version
-        }));
+    saveSettings(): void {
+        localStorage.setItem(
+            APP_STORAGE_KEY,
+            JSON.stringify({
+                lang: this.lang,
+                defaultFolder: this.defaultFolder,
+                darkMode: this.darkMode,
+                defaultTerminal: this.defaultTerminal,
+                version: this.version,
+            }),
+        );
     }
 
     @action
@@ -130,9 +132,7 @@ export class SettingsState {
 
     @action
     loadSettings(): void {
-        let settings: JSObject;
-
-        settings = this.loadAndUpgradeSettings();
+        const settings: JSObject = this.loadAndUpgradeSettings();
 
         this.darkMode = settings.darkMode;
 
@@ -147,35 +147,37 @@ export class SettingsState {
     }
 
     @action
-    setDefaultFolder(folder: string) {
+    setDefaultFolder(folder: string): void {
         this.defaultFolder = folder;
     }
 
     @action
-    setActiveTheme = (darkMode = this.darkMode) => {
+    setActiveTheme = (darkMode = this.darkMode): void => {
         if (darkMode !== this.darkMode) {
             this.darkMode = darkMode;
         }
 
         if (this.darkMode === 'auto') {
-            this.isDarkModeActive = (isMojave && systemPreferences) ? systemPreferences.isDarkMode() : false;
+            this.isDarkModeActive = isMojave && systemPreferences ? systemPreferences.isDarkMode() : false;
         } else {
             this.isDarkModeActive = this.darkMode;
         }
-    }
+    };
 
-    getDefaultSettings() {
+    getDefaultSettings(): JSObject {
         return {
             lang: 'auto',
             darkMode: isMojave ? 'auto' : false,
             defaultFolder: defaultFolder,
-            defaultTerminal: isMac ? DEFAULT_TERMINAL.darwin : isWin && DEFAULT_TERMINAL.win || DEFAULT_TERMINAL.linux,
-            version: this.version
-        }
+            defaultTerminal: isMac
+                ? DEFAULT_TERMINAL.darwin
+                : (isWin && DEFAULT_TERMINAL.win) || DEFAULT_TERMINAL.linux,
+            version: this.version,
+        };
     }
 
     @action
-    resetSettings() {
+    resetSettings(): void {
         localStorage.removeItem(APP_STORAGE_KEY);
         this.loadSettings();
     }

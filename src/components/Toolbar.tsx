@@ -180,7 +180,7 @@ export class ToolbarClass extends React.Component<Props, PathInputState> {
             if (!navigate) {
                 this.cache.reload();
             } else {
-                this.cache.cd(dir);
+                this.cache.cd(dir as string);
             }
         } catch (err) {
             const { t } = this.props;

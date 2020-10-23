@@ -6,23 +6,6 @@ declare const ENV: { [key: string]: string | boolean | number | Record<string, u
 
 type App = { getPath: (name: string) => string } | Partial<Electron.App>;
 
-function getDefaultFolder() {
-    let defaultFolder = '';
-
-    if (typeof jest !== 'undefined') {
-        defaultFolder = '';
-    } else {
-        defaultFolder =
-            ENV.NODE_ENV === 'production'
-                ? appInstance.getPath('home')
-                : platform === 'win32'
-                ? appInstance.getPath('temp')
-                : '/tmp/react-explorer';
-    }
-
-    return defaultFolder;
-}
-
 function getAppInstance(): App {
     let appInstance: App = app || (remote && remote.app);
 
@@ -39,6 +22,23 @@ function getAppInstance(): App {
 }
 
 const appInstance = getAppInstance();
+
+function getDefaultFolder() {
+    let defaultFolder = '';
+
+    if (typeof jest !== 'undefined') {
+        defaultFolder = '';
+    } else {
+        defaultFolder =
+            ENV.NODE_ENV === 'production'
+                ? appInstance.getPath('home')
+                : platform === 'win32'
+                ? appInstance.getPath('temp')
+                : '/tmp/react-explorer';
+    }
+
+    return defaultFolder;
+}
 
 const META_KEY = 91;
 const CTRL_KEY = 17;
