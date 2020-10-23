@@ -3,7 +3,7 @@ import { ITreeNode, Tree, Icon, Intent, Classes, IconName, ProgressBar } from '@
 import { AppState } from '../state/appState';
 import { inject } from 'mobx-react';
 import { Batch } from '../transfers/batch';
-import { reaction, toJS, IReactionDisposer } from 'mobx';
+import { reaction, toJS, IReactionDisposer, IObservableArray } from 'mobx';
 import i18next from 'i18next';
 import { withNamespaces, WithNamespaces } from 'react-i18next';
 import { formatBytes } from '../utils/formatBytes';
@@ -137,7 +137,7 @@ class DownloadsClass extends React.Component<Props, State> {
         const appState = this.appState;
         const transfer = appState.getTransfer(transferId);
 
-        if (transfer.hasEnded()) {
+        if (transfer.hasEnded) {
             appState.removeTransfer(transferId);
         } else {
             const cancel = await this.showTransferAlert();
@@ -150,7 +150,7 @@ class DownloadsClass extends React.Component<Props, State> {
     onNodeDoubleClick = (node: ITreeNode, nodePath: number[]): void => {
         // no first-level: this is a file
         if (nodePath.length > 1) {
-            const transfer = (node.nodeData as NodeData).transfer;
+            const transfer = (node.nodeData as NodeData).transferElement;
             const batchId = (node.nodeData as NodeData).batchId;
             if (transfer.status === 'done') {
                 this.appState.openTransferedFile(batchId, transfer.file);
@@ -203,11 +203,11 @@ class DownloadsClass extends React.Component<Props, State> {
     createTransferLabel(transfer: Batch, className: string): JSX.Element {
         const { t } = this.injected;
         const sizeFormatted = formatBytes(transfer.size);
-        const transferSize = (transfer.status !== 'calculating' && sizeFormatted) || '';
-        const currentSize = end ? sizeFormatted : formatBytes(transfer.progress);
-        const percent = transfer.status === 'calculating' ? 0 : transfer.progress / transfer.size;
         const ended = transfer.hasEnded;
-        const errors = transfer.numErrors;
+        const transferSize = (transfer.status !== 'calculating' && sizeFormatted) || '';
+        const currentSize = ended ? sizeFormatted : formatBytes(transfer.progress);
+        const percent = transfer.status === 'calculating' ? 0 : transfer.progress / transfer.size;
+        const errors = transfer.errors;
         const rightLabel = ended
             ? errors
                 ? t('DOWNLOADS.FINISHED_ERRORS')

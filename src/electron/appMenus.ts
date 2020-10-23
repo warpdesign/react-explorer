@@ -1,7 +1,7 @@
 import { clipboard, Menu, BrowserWindow, MenuItemConstructorOptions, MenuItem, app, ipcMain, dialog } from 'electron';
 import { isMac, isLinux } from '../utils/platform';
 
-declare const ENV: { [key: string]: string | boolean | number | Record<string, unknow> };
+declare const ENV: { [key: string]: string | boolean | number | Record<string, unknown> };
 
 const ACCELERATOR_EVENT = 'menu_accelerator';
 
@@ -49,7 +49,9 @@ export class AppMenu {
 
     showAboutDialog = (): void => {
         const version = app.getVersion();
-        const detail = this.menuStrings['ABOUT_CONTENT'].replace('${version}', version).replace('${hash}', ENV.HASH);
+        const detail = this.menuStrings['ABOUT_CONTENT']
+            .replace('${version}', version)
+            .replace('${hash}', ENV.HASH as string);
         const buttons = isLinux
             ? [this.menuStrings['COPY'], this.menuStrings['OK']]
             : [this.menuStrings['OK'], this.menuStrings['COPY']];
@@ -243,7 +245,7 @@ export class AppMenu {
             app.setAboutPanelOptions({
                 applicationName: 'React-Explorer',
                 applicationVersion: app.getVersion(),
-                version: ENV.HASH,
+                version: ENV.HASH as string,
             });
 
             windowMenuIndex = 5;

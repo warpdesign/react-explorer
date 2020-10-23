@@ -50,7 +50,7 @@ export interface Fs {
     // static members
     canread(str: string): boolean;
     serverpart(str: string): string;
-    credentials(str: string): ICredentials;
+    credentials(str: string): Credentials;
     displaypath(str: string): { fullPath: string; shortPath: string };
     name: string;
     description: string;
@@ -143,7 +143,7 @@ export interface FsApi {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     on(event: string, cb: (data: any) => void): void;
     off(): void;
-    loginOptions: ICredentials;
+    loginOptions: Credentials;
 }
 
 export function getFS(path: string): Fs {

@@ -43,7 +43,7 @@ class TabListClass extends React.Component<InjectedProps> {
      * }
      */
     tabIcons = Object.keys(Icons).map((dirname: string) => ({
-        regex: new RegExp(`^${Platform[dirname]}$`),
+        regex: new RegExp(`^${ALL_DIRS[dirname]}$`),
         icon: Icons[dirname],
     }));
 

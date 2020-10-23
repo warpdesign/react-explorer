@@ -43,7 +43,7 @@ export class FavoritesState {
         return distribs;
     }
 
-    buildDistributions(distribs: string[]): Promise<drivelist.Drive[]> {
+    buildDistributions(distribs: string[]): void {
         this.distributions.replace(
             distribs.map((distrib: string) => ({
                 label: distrib,
@@ -53,7 +53,7 @@ export class FavoritesState {
         );
     }
 
-    buildPlaces(drives: drivelist.Drive[]): Promise<void> {
+    buildPlaces(drives: drivelist.Drive[]): void {
         this.places.replace(
             drives.map((drive: drivelist.Drive) => {
                 const mountpoint = drive.mountpoints[0];

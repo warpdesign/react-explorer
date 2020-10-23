@@ -3,7 +3,7 @@ import { Tree, ITreeNode } from '@blueprintjs/core';
 import { observer, inject } from 'mobx-react';
 import { withNamespaces, WithNamespaces } from 'react-i18next';
 import classNames from 'classnames';
-import { IReactionDisposer, reaction, toJS } from 'mobx';
+import { IReactionDisposer, reaction, toJS, IObservableArray } from 'mobx';
 import i18next from 'i18next';
 import { USERNAME, isMac } from '../utils/platform';
 import { hasWSL } from '../utils/wsl';

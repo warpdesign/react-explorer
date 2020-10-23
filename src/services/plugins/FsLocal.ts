@@ -6,7 +6,7 @@ import mkdir = require('mkdirp');
 import del = require('del');
 import { size } from '../../utils/size';
 import { throttle } from '../../utils/throttle';
-import { Transform, TransformCallback } from require('stream');
+import { Transform, TransformCallback } from 'stream';
 import { isWin, HOME_DIR } from '../../utils/platform';
 import { LocalWatch } from './LocalWatch';
 

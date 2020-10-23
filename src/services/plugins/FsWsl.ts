@@ -1,9 +1,9 @@
-import { File, ICredentials, Fs } from "../Fs";
+import { File, Credentials, Fs } from '../Fs';
 import { LocalApi } from './FsLocal';
-import * as fs from "fs";
-import * as path from "path";
-import { throttle } from "../../utils/throttle";
-import { isWin } from "../../utils/platform";
+import * as fs from 'fs';
+import * as path from 'path';
+import { throttle } from '../../utils/throttle';
+import { isWin } from '../../utils/platform';
 const invalidDirChars = /^[\.]+[\/]+(.)*$/gi;
 const invalidFileChars = /\//;
 const SEP = path.sep;
@@ -11,10 +11,6 @@ const SEP = path.sep;
 // Since nodeJS will translate unix like paths to windows path, when running under Windows
 // we accept Windows style paths (eg. C:\foo...) and unix paths (eg. /foo or ./foo)
 const wslStart = /^(\\\\wsl\$)/;
-
-const progressFunc = throttle((progress: any, bytesRead: number) => {
-    progress(bytesRead);
-}, 400);
 
 export class WslApi extends LocalApi {
     isRoot(path: string): boolean {
@@ -26,15 +22,10 @@ export class WslApi extends LocalApi {
     }
 
     isDirectoryNameValid(dirName: string): boolean {
-        return !!!dirName.match(invalidDirChars) && dirName !== "/";
+        return !!!dirName.match(invalidDirChars) && dirName !== '/';
     }
 
-    rename(
-        source: string,
-        file: File,
-        newName: string,
-        transferId = -1
-    ): Promise<string> {
+    rename(source: string, file: File, newName: string, transferId = -1): Promise<string> {
         const oldPath = path.join(source, file.fullname);
         const newPath = path.join(source, newName);
 
@@ -42,73 +33,76 @@ export class WslApi extends LocalApi {
             return new Promise((resolve, reject) => {
                 // since node's fs.rename will overwrite the destination
                 // path if it exists, first check that file doesn't exist
-                this.exists(newPath).then(exists => {
-                    if (exists) {
-                        reject({
-                            code: "EEXIST",
-                            oldName: file.fullname
-                        });
-                    } else {
-                        fs.rename(oldPath, newPath, err => {
-                            if (err) {
-                                reject({
-                                    code: err.code,
-                                    message: err.message,
-                                    newName: newName,
-                                    oldName: file.fullname
-                                });
-                            } else {
-                                resolve(newName);
-                            }
-                        });
-                    }
-                })
+                this.exists(newPath)
+                    .then((exists) => {
+                        if (exists) {
+                            reject({
+                                code: 'EEXIST',
+                                oldName: file.fullname,
+                            });
+                        } else {
+                            fs.rename(oldPath, newPath, (err) => {
+                                if (err) {
+                                    reject({
+                                        code: err.code,
+                                        message: err.message,
+                                        newName: newName,
+                                        oldName: file.fullname,
+                                    });
+                                } else {
+                                    resolve(newName);
+                                }
+                            });
+                        }
+                    })
                     .catch((err) => {
                         reject({
                             code: err.code,
                             message: err.message,
                             newName: newName,
-                            oldName: file.fullname
+                            oldName: file.fullname,
                         });
-                    })
+                    });
             });
         } else {
             // reject promise with previous name in case of invalid chars
             return Promise.reject({
                 oldName: file.fullname,
                 newName: newName,
-                code: "BAD_FILENAME"
+                code: 'BAD_FILENAME',
             });
         }
     }
 }
 
 export const FsWsl: Fs = {
-    icon: "database",
-    name: "local-wsl",
-    description: "Local WSL Filesystem",
+    icon: 'database',
+    name: 'local-wsl',
+    description: 'Local WSL Filesystem',
     options: {
-        needsRefresh: false
+        needsRefresh: false,
     },
     canread(str: string): boolean {
         return isWin && !!str.match(wslStart);
     },
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     serverpart(str: string): string {
-        return "local";
+        return 'local';
     },
-    credentials(str: string): ICredentials {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    credentials(str: string): Credentials {
         return {
-            user: "",
-            password: "",
-            port: 0
+            user: '',
+            password: '',
+            port: 0,
         };
     },
     displaypath(str: string) {
         const split = str.split(SEP);
         return {
             fullPath: str,
-            shortPath: split.slice(-1)[0] || str
+            shortPath: split.slice(-1)[0] || str,
         };
     },
-    API: WslApi
+    API: WslApi,
 };

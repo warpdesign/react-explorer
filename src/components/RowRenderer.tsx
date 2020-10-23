@@ -44,7 +44,13 @@ export interface DraggedObject {
     dragFiles: File[];
 }
 
-const fileSource: DragSourceSpec<RowRendererParams, DraggedObject> = {
+export interface CollectedProps {
+    connectDropTarget?: ConnectDropTarget;
+    isOver?: boolean;
+    canDrop?: boolean;
+}
+
+const fileSource: DragSourceSpec<RowRendererProps, DraggedObject> = {
     beginDrag(props: RowRendererProps) {
         return {
             selectedCount: props.selectedCount,

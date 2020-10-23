@@ -45,7 +45,13 @@ export const WindowSettings = {
 
         return this.devtoolsState;
     },
-    getSettings(id: number): windowStateKeeper.State {
+    getSettings(
+        id: number,
+    ): windowStateKeeper.State & {
+        custom?: {
+            splitView?: boolean;
+        };
+    } {
         if (id < this.states.length) {
             return this.states[id];
         } else {

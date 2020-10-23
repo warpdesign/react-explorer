@@ -5,7 +5,7 @@ interface Props {
     active: boolean;
 }
 
-export class Loader extends React.Component<IProps> {
+export class Loader extends React.Component<Props> {
     constructor(props: Props) {
         super(props);
 

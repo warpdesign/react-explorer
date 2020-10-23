@@ -20,13 +20,13 @@ type Error = {
 };
 
 interface LoginState {
-    user: string;
-    password: string;
-    server: string;
-    port: number;
-    connecting: boolean;
-    error: Error;
-    busy: boolean;
+    user?: string;
+    password?: string;
+    server?: string;
+    port?: number;
+    connecting?: boolean;
+    error?: Error;
+    busy?: boolean;
 }
 
 const ENTER_KEY = 13;
@@ -89,7 +89,7 @@ class LoginDialogClass extends React.Component<LoginProps, LoginState> {
         const val = (event.target as HTMLInputElement).value;
         const name = (event.target as HTMLInputElement).name;
         const state: Partial<LoginState> = {};
-        state[name] = val;
+        (state as any)[name] = val;
 
         this.setState(state);
     };

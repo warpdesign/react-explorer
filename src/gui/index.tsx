@@ -58,7 +58,7 @@ class App {
     }
 
     getInitialSettings(): CustomSettings {
-        const window: Electron.BrowserWindow = remote.getCurrentWindow();
+        const window: Electron.BrowserWindow & { initialSettings?: CustomSettings } = remote.getCurrentWindow();
         return (window && window.initialSettings) || {};
     }
 

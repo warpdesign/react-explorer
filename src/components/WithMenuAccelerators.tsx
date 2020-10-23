@@ -15,9 +15,6 @@ export interface Constructor<T> {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Callback = (combo?: string, data?: any) => void;
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface AcceleratorsProps {}
-
 interface Action {
     combo: string;
     callback: Callback;
@@ -28,7 +25,7 @@ export interface AcceleratorProps {
     onClick: Callback;
 }
 
-export interface IMenuAcceleratorComponent extends React.Component {
+export interface MenuAcceleratorComponent extends React.Component {
     /** Components decorated with the `@MenuAccelerator` decorator must implement React's component `render` function. */
     render(): React.ReactElement<HTMLElement> | null | undefined;
 
@@ -39,13 +36,15 @@ export interface IMenuAcceleratorComponent extends React.Component {
     renderMenuAccelerators(): React.ReactElement<Record<string, unknown>>;
 }
 
-export class Accelerators extends React.PureComponent<AcceleratorsProps> {
+export class Accelerators extends React.PureComponent<Record<string, unknown>> {
     render(): React.ReactNode {
         return <div></div>;
     }
 }
 
 export class Accelerator extends React.PureComponent<AcceleratorProps> {
+    combo: string;
+    onClick: Callback;
     render(): React.ReactNode {
         return <div></div>;
     }
@@ -63,7 +62,7 @@ function getDisplayName(ComponentClass: React.ComponentType): string {
 }
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-export function WithMenuAccelerators<T extends IConstructor<IMenuAcceleratorComponent>>(WrappedComponent: T) {
+export function WithMenuAccelerators<T extends Constructor<MenuAcceleratorComponent>>(WrappedComponent: T) {
     if (typeof WrappedComponent.prototype.renderMenuAccelerators !== 'function') {
         console.warn('Classes decorated with the @MenuAccelerators must define the renderMenuAccelerators method.');
     }
@@ -73,7 +72,7 @@ export function WithMenuAccelerators<T extends IConstructor<IMenuAcceleratorComp
 
         actions = new Array<Action>();
 
-        getCallback(combo: string): (combo?: string, data?: any) => Callback {
+        getCallback(combo: string): Callback {
             const action = this.actions.find((action) => action.combo === combo);
             return (action && action.callback) || null;
         }
@@ -87,11 +86,11 @@ export function WithMenuAccelerators<T extends IConstructor<IMenuAcceleratorComp
             }
         };
 
-        setActions(props: { children?: React.ReactElement<Accelerator> }) {
+        setActions(props: { children?: React.ReactElement<Accelerator> }): void {
             this.actions.length = 0;
 
             // get result, save events
-            React.Children.forEach(props.children, (child: React.ReactElement<Accelerator>) => {
+            React.Children.forEach(props.children, (child: React.ReactElement<Accelerator>): void => {
                 if (child) {
                     this.actions.push({
                         combo: child.props.combo,
@@ -117,7 +116,7 @@ export function WithMenuAccelerators<T extends IConstructor<IMenuAcceleratorComp
             ipcRenderer.removeListener(ACCELERATOR_EVENT, this.onAccelerator);
         }
 
-        render(): React.ReactNode {
+        render(): JSX.Element {
             const element = super.render() as JSX.Element;
 
             // TODO: call renderMenuAccelerators

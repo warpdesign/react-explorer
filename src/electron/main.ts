@@ -8,7 +8,6 @@ import { isPackage, isLinux } from '../utils/platform';
 import { WindowSettings } from './windowSettings';
 
 // declare var __dirname: string
-declare const ENV: { [key: string]: string | boolean | number | Record<string, unknow> };
 
 const ENV_E2E = !!process.env.E2E;
 const SOURCE_PATH = './build';
@@ -202,6 +201,7 @@ const ElectronApp = {
         });
         ipcMain.on('cleanedUp', () => this.onCleanUp());
 
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         ipcMain.on('setWindowSettings', (_: Event, data: { [key: string]: any }) => {
             console.log('changeWindowSettings', data);
             const { id, settings } = data;

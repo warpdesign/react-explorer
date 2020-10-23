@@ -282,7 +282,7 @@ export class Batch {
         if (this.status !== 'error' && this.transfersDone < this.elements.length) {
             this.queueNextTransfers();
         } else {
-            if (errors === this.elements.length) {
+            if (this.errors === this.elements.length) {
                 this.transferDef.reject({
                     code: '',
                 });

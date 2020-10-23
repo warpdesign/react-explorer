@@ -34,6 +34,8 @@ require('../css/main.css');
 require('../css/windows.css');
 require('../css/scrollbars.css');
 
+declare const ENV: { [key: string]: string | boolean | number | Record<string, unknown> };
+
 interface AppProps extends WithNamespaces {
     initialSettings: CustomSettings;
 }

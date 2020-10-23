@@ -59,5 +59,13 @@ export const DOCS_DIR = appInstance.getPath('documents');
 export const DESKTOP_DIR = appInstance.getPath('desktop');
 export const PICTURES_DIR = appInstance.getPath('pictures');
 export const VIDEOS_DIR = appInstance.getPath('videos');
-export const ALL_DIRS = { HOME_DIR, DOWNLOADS_DIR, PICTURES_DIR, MUSIC_DIR, DOCS_DIR, DESKTOP_DIR, VIDEOS_DIR };
+export const ALL_DIRS: { [key: string]: string } = {
+    HOME_DIR,
+    DOWNLOADS_DIR,
+    PICTURES_DIR,
+    MUSIC_DIR,
+    DOCS_DIR,
+    DESKTOP_DIR,
+    VIDEOS_DIR,
+};
 export const USERNAME = userInfo().username || 'username';

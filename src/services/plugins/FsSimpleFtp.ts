@@ -226,9 +226,7 @@ class SimpleFtpApi implements FsApi {
     }
 
     constructor(serverUrl: string) {
-        const serverpart = serverpart(serverUrl);
-
-        this.master = Client.getFreeClient(serverpart, this);
+        this.master = Client.getFreeClient(serverPart(serverUrl), this);
         // TODO: get master if available
         // and set connected to true *and* credentials
         this.emitter = new EventEmitter();

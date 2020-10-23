@@ -7,6 +7,7 @@ import { lineEnding, DOWNLOADS_DIR } from '../utils/platform';
 import { ViewDescriptor } from '../components/TabList';
 import { WinState, WindowSettings } from './winState';
 import { FavoritesState } from './favoritesState';
+import { ViewState } from './viewState';
 
 declare const ENV: { [key: string]: string | boolean | number | Record<string, unknown> };
 
@@ -312,7 +313,7 @@ export class AppState {
         const num = this.transfers.filter(
             (transfer) =>
                 transfer.progress &&
-                transfer.isStarted() &&
+                transfer.isStarted &&
                 now.getTime() - transfer.startDate.getTime() >= SHOW_BADGE_DELAY,
         ).length;
         return num;

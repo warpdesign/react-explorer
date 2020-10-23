@@ -392,7 +392,7 @@ export class ToolbarClass extends React.Component<Props, PathInputState> {
         fileCache.openParentDirectory();
     };
 
-    private renderTooltip(): React.ReactNode {
+    private renderTooltip(): JSX.Element {
         const { t } = this.props;
         const localExample = isWin
             ? t('TOOLTIP.PATH.EXAMPLE_WIN')
@@ -411,7 +411,7 @@ export class ToolbarClass extends React.Component<Props, PathInputState> {
         );
     }
 
-    public render(): React.ReactNode {
+    public render(): JSX.Element {
         const { status, path, isOpen, isDeleteOpen, isTooltipOpen } = this.state;
         const { viewState } = this.injected;
 

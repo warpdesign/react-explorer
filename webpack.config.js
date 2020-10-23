@@ -9,56 +9,61 @@ const gitHash = require('./scripts/hash');
 const baseConfig = {
     output: {
         path: path.resolve(__dirname, 'build'),
-        filename: '[name].js'
+        filename: '[name].js',
     },
     node: {
-        __dirname: false
+        __dirname: false,
     },
     // Enable sourcemaps for debugging webpack's output.
-    devtool: "source-map",
-    mode: "development",
+    devtool: 'source-map',
+    mode: 'development',
     resolve: {
         // Add '.ts' and '.tsx' as resolvable extensions.
-        extensions: [".ts", ".tsx", ".js", ".json", ".css"]
+        extensions: ['.ts', '.tsx', '.js', '.json', '.css'],
     },
     resolveLoader: {
         alias: {
-            'data-cy-loader': path.join(__dirname, 'scripts/data-cy-loader.js')
-        }
+            'data-cy-loader': path.join(__dirname, 'scripts/data-cy-loader.js'),
+        },
     },
     module: {
         rules: [
             // All files with a '.ts' or '.tsx' extension will be handled by 'awesome-typescript-loader'.
-            { test: /\.tsx?$/, use: [
-                {
-                    loader: "ts-loader",
-                    options: {
-                        // disable type checker - we will use it in fork plugin
-                        transpileOnly: true
-                    }
-                },
-                {
-                    loader: "data-cy-loader"
-                }
-            ]},
+            {
+                test: /\.tsx?$/,
+                use: [
+                    {
+                        loader: 'ts-loader',
+                        options: {
+                            // disable type checker - we will use it in fork plugin
+                            transpileOnly: true,
+                        },
+                    },
+                    {
+                        loader: 'data-cy-loader',
+                    },
+                ],
+            },
 
             // All output '.js' files will have any sourcemaps re-processed by 'source-map-loader'.
-            { enforce: "pre", test: /\.js$/, loader: "source-map-loader" },
+            { enforce: 'pre', test: /\.js$/, loader: 'source-map-loader' },
             // css loader
             {
                 test: /\.css$/,
-                use: ['style-loader', 'css-loader']
+                use: ['style-loader', 'css-loader'],
             },
             // file loader, for loading files referenced inside css files
             {
                 test: /\.(woff(2)?|ttf|eot|svg)(\?v=\d+\.\d+\.\d+)?$/,
-                use: [{
-                    loader: 'file-loader',
-                    options: {
-                        name: '[name].[ext]',
-                        outputPath: 'fonts/'
-                    }
-                }]
+                use: [
+                    {
+                        loader: 'file-loader',
+                        options: {
+                            name: '[name].[ext]',
+                            outputPath: 'fonts/',
+                        },
+                    },
+                ],
             },
             // images embbeded into css
             {
@@ -67,16 +72,16 @@ const baseConfig = {
                     {
                         loader: 'url-loader',
                         options: {
-                            limit: 8192
-                        }
-                    }
-                ]
+                            limit: 8192,
+                        },
+                    },
+                ],
             },
             {
                 test: /\.node$/,
-                loader: "native-ext-loader"
-            }
-        ]
+                loader: 'native-ext-loader',
+            },
+        ],
     },
 
     // When importing a module whose path matches one of the following, just
@@ -100,11 +105,12 @@ module.exports = [
                     'ENV.CY': false,
                     'ENV.NODE_ENV': JSON.stringify(baseConfig.mode),
                     'ENV.VERSION': JSON.stringify(packageJson.version),
-                    'ENV.HASH': JSON.stringify(gitHash)
-                })
-            ]
+                    'ENV.HASH': JSON.stringify(gitHash),
+                }),
+            ],
         },
-        baseConfig),
+        baseConfig,
+    ),
     Object.assign(
         {
             target: 'electron-renderer',
@@ -113,21 +119,22 @@ module.exports = [
                 new ForkTsCheckerWebpackPlugin(),
                 new HtmlWebpackPlugin({
                     title: 'React-Explorer',
-                    template: 'index.html'
+                    template: 'index.html',
                 }),
                 new webpack.DefinePlugin({
                     'ENV.CY': false,
                     'ENV.NODE_ENV': JSON.stringify(baseConfig.mode),
                     'ENV.VERSION': JSON.stringify(packageJson.version),
-                    'ENV.HASH': JSON.stringify(gitHash)
+                    'ENV.HASH': JSON.stringify(gitHash),
                 }),
                 new CopyPlugin([
                     {
                         from: 'img/icon-512x512.png',
-                        to: 'icon.png'
-                    }
-                ])
-            ]
+                        to: 'icon.png',
+                    },
+                ]),
+            ],
         },
-        baseConfig)
+        baseConfig,
+    ),
 ];

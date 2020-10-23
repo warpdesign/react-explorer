@@ -69,7 +69,8 @@ export function getLocalizedError(error: string | IOError): LocalizedError {
                 ? i18next.t('ERRORS.WIN_VALID_FILENAME')
                 : i18next.t('ERRORS.UNIX_VALID_FILENAME');
 
-            niceError.message = i18next.t('ERRORS.BAD_FILENAME', { entry: error.newName }) + '. ' + acceptedChars;
+            niceError.message =
+                i18next.t('ERRORS.BAD_FILENAME', { entry: (error as IOError).newName }) + '. ' + acceptedChars;
             break;
 
         case 'EHOSTDOWN':

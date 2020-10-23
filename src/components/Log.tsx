@@ -21,7 +21,7 @@ const CLASS_OVERLAY_EXIT = 'bp3-overlay-exit';
 
 function objectPropsToString(el: Printable): string {
     if ((typeof el).match(/number|string|boolean/)) {
-        return el;
+        return el.toString();
     } else {
         const obj = el as JSObject;
         return Object.keys(el)
@@ -147,7 +147,7 @@ export class LogUIClass extends React.Component<WithNamespaces, LogUIState> {
     //     return true;
     // }
 
-    public render(): React.ReactNode {
+    public render(): React.ReactElement {
         const classes = classnames('console', { visible: this.state.visible });
 
         return (

@@ -15,7 +15,7 @@ import { AppState } from '../state/appState';
 import { WithNamespaces, withNamespaces } from 'react-i18next';
 import { inject } from 'mobx-react';
 import i18next from 'i18next';
-import { IReactionDisposer, reaction, toJS, ObservableArray } from 'mobx';
+import { IReactionDisposer, reaction, toJS, IObservableArray } from 'mobx';
 import { File, FileID } from '../services/Fs';
 import { formatBytes } from '../utils/formatBytes';
 import { shouldCatchEvent, isEditable } from '../utils/dom';
@@ -311,7 +311,7 @@ export class FileTableClass extends React.Component<Props, State> {
         return nodes;
     };
 
-    _noRowsRenderer = (): React.ReactNode => {
+    _noRowsRenderer = (): JSX.Element => {
         const { t } = this.injected;
         const status = this.cache.status;
         const error = this.cache.error;
@@ -596,7 +596,7 @@ export class FileTableClass extends React.Component<Props, State> {
         }
     }
 
-    onRowDoubleClick = (data: anRowMouseEventHandlerParamsy): void => {
+    onRowDoubleClick = (data: RowMouseEventHandlerParams): void => {
         this.clearClickTimeout();
         const { rowData, event } = data;
         const file = rowData.nodeData as File;
@@ -833,7 +833,7 @@ export class FileTableClass extends React.Component<Props, State> {
         return RowRenderer(props);
     };
 
-    onScroll = debounce(({ scrollTop }: anScrollParamsy): void => {
+    onScroll = debounce(({ scrollTop }: ScrollParams): void => {
         this.cache.scrollTop = scrollTop;
         // console.log('onScroll: updating scrollTop', scrollTop, this.cache.path);
     }, SCROLL_DEBOUNCE);
@@ -846,7 +846,7 @@ export class FileTableClass extends React.Component<Props, State> {
         }
     };
 
-    render(): React.ReactNode {
+    render(): React.ReactElement {
         const { t } = this.injected;
         const rowCount = this.state.nodes.length;
         const GRID_CLASSES = `data-cy-filetable ${GRID_CLASSNAME} ${CONFIG.CUSTOM_SCROLLBAR_CLASSNAME}`;

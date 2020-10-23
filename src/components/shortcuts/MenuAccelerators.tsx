@@ -181,7 +181,7 @@ class MenuAcceleratorsClass extends React.Component<Props> {
         !isEditable(document.activeElement) && cache && cache.openParentDirectory();
     };
 
-    renderMenuAccelerators(): React.ReactNode {
+    renderMenuAccelerators(): React.ReactElement {
         return (
             <Accelerators>
                 <Accelerator combo="CmdOrCtrl+Shift+C" onClick={this.onCopyPath}></Accelerator>

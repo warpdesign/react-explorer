@@ -143,7 +143,7 @@ export class SideViewClass extends React.Component<InjectedProps> {
         // TODO: check both cache are active?
         appState
             .prepareTransferTo(item.fileState, fileCache, files)
-            .then((noErrors: any) => {
+            .then((noErrors: boolean) => {
                 const { t } = this.injected;
                 if (noErrors) {
                     AppToaster.show({
@@ -161,7 +161,7 @@ export class SideViewClass extends React.Component<InjectedProps> {
                     });
                 }
             })
-            .catch((err: boolean): void => {
+            .catch((err: { code: number | string }): void => {
                 const { t } = this.injected;
                 const localizedError = getLocalizedError(err);
                 const message = err.code
