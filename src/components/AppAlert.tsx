@@ -1,4 +1,3 @@
-
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import { Alert, IAlertProps } from '@blueprintjs/core';
@@ -7,43 +6,43 @@ import { i18next } from '../locale/i18n';
 
 type Message = React.ReactNode | string;
 
-interface IAlerterState extends IAlertProps {
-    message: Message
+interface AlerterState extends IAlertProps {
+    message: Message;
 }
 
 const ENTER_KEY = 13;
 
-class Alerter extends React.Component<{}, IAlerterState> {
+class Alerter extends React.Component<Record<string, unknown>, AlerterState> {
     defer: Deferred<boolean> = null;
 
-    constructor(props: {}) {
+    constructor(props: Record<string, unknown>) {
         super(props);
 
         this.state = {
             message: '',
-            isOpen: false
-        }
+            isOpen: false,
+        };
     }
 
-    public static create(container = document.body) {
-        const containerElement = document.createElement("div");
+    public static create(container = document.body): Promise<React.ReactNode> {
+        const containerElement = document.createElement('div');
         container.appendChild(containerElement);
         // use a ref and return a promise since in the future ReactDOM.render may return void
         return new Promise((resolve) => {
-            ReactDOM.render(<Alerter ref={c => resolve(c)} />, containerElement);
+            ReactDOM.render(<Alerter ref={(c): void => resolve(c)} />, containerElement);
         });
     }
 
-    onClose = (res: boolean) => {
+    onClose = (res: boolean): void => {
         this.setState({
-            isOpen: false
+            isOpen: false,
         });
 
         const defer = this.defer;
         this.defer = null;
 
         defer.resolve(res);
-    }
+    };
 
     async show(message: React.ReactNode | string, options: Partial<IAlertProps>): Promise<boolean> {
         if (!this.defer) {
@@ -59,7 +58,7 @@ class Alerter extends React.Component<{}, IAlerterState> {
         }
     }
 
-    private renderAlert() {
+    private renderAlert(): React.ReactNode {
         const { message, ...alertProps } = this.state;
 
         if (!alertProps.confirmButtonText) {
@@ -68,32 +67,30 @@ class Alerter extends React.Component<{}, IAlerterState> {
 
         alertProps.onOpened = this.addEnterListener;
         alertProps.onClosing = this.removeEnterListener;
-        alertProps.className = "data-cy-alert";
+        alertProps.className = 'data-cy-alert';
 
         return <Alert {...alertProps}>{message}</Alert>;
     }
 
-    public render() {
-        return (
-            <div>{this.renderAlert()}</div>
-        );
+    public render(): React.ReactNode {
+        return <div>{this.renderAlert()}</div>;
     }
 
-    private onKeyUp = (e: KeyboardEvent) => {
+    private onKeyUp = (e: KeyboardEvent): void => {
         if (this.state.isOpen && e.keyCode === ENTER_KEY) {
             this.onClose(true);
         }
-    }
+    };
 
-    addEnterListener = () => {
+    addEnterListener = (): void => {
         document.addEventListener('keyup', this.onKeyUp);
-    }
+    };
 
-    removeEnterListener = () => {
+    removeEnterListener = (): void => {
         document.removeEventListener('keyup', this.onKeyUp);
-    }
+    };
 
-    public componenDidUnmount() {
+    public componenDidUnmount(): void {
         // when this method is called the listener should have already
         // been removed but we never know: the component could be unmounted
         // without calling the onClosing prop
@@ -109,6 +106,6 @@ Alerter.create().then((component: Alerter) => {
 
 export const AppAlert = {
     show(message: React.ReactNode | string, props: Partial<IAlertProps> = {}): Promise<boolean> {
-        return MyAlerter && MyAlerter.show(message, props) || Promise.reject('alerter dom not ready');
-    }
-}
+        return (MyAlerter && MyAlerter.show(message, props)) || Promise.reject('alerter dom not ready');
+    },
+};

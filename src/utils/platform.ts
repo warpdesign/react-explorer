@@ -2,31 +2,36 @@ import { platform } from 'process';
 import { release, userInfo } from 'os';
 import { remote, app } from 'electron';
 
-declare var ENV: any;
+declare const ENV: { [key: string]: string | boolean | number | Record<string, unknown> };
 
-type App = {getPath: (name:string) => string} | Partial<Electron.App>;
+type App = { getPath: (name: string) => string } | Partial<Electron.App>;
 
 function getDefaultFolder() {
-    let defaultFolder = "";
+    let defaultFolder = '';
 
     if (typeof jest !== 'undefined') {
-        defaultFolder = "";
+        defaultFolder = '';
     } else {
-        defaultFolder = ENV.NODE_ENV === 'production' ? appInstance.getPath('home') : (platform === "win32" ? appInstance.getPath('temp') : '/tmp/react-explorer');
+        defaultFolder =
+            ENV.NODE_ENV === 'production'
+                ? appInstance.getPath('home')
+                : platform === 'win32'
+                ? appInstance.getPath('temp')
+                : '/tmp/react-explorer';
     }
 
     return defaultFolder;
 }
 
-function getAppInstance() : App {
-    
-    let appInstance:App = app || remote && remote.app;
-    
+function getAppInstance(): App {
+    let appInstance: App = app || (remote && remote.app);
+
     if (!appInstance) {
-        const getPath:(name:string) => string = require('./test/helpers').getPath;
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        const getPath: (name: string) => string = require('./test/helpers').getPath;
         // simulate getPath for test environment
         appInstance = {
-            getPath
+            getPath,
         };
     }
 
@@ -40,10 +45,10 @@ const CTRL_KEY = 17;
 
 export const isPackage = process.mainModule && process.mainModule.filename.indexOf('app.asar') > -1;
 export const isMac = platform === 'darwin';
-export const isMojave = isMac && ((parseInt(release().split('.')[0], 10) - 4) >= 14);
+export const isMojave = isMac && parseInt(release().split('.')[0], 10) - 4 >= 14;
 export const isWin = platform === 'win32';
 export const isLinux = platform === 'linux';
-export const metaKeyCode = isMac && META_KEY || CTRL_KEY;
+export const metaKeyCode = (isMac && META_KEY) || CTRL_KEY;
 export const lineEnding = isWin ? '\r\n' : '\n';
 export const defaultFolder = getDefaultFolder();
 export const TMP_DIR = appInstance.getPath('temp');
