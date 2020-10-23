@@ -137,7 +137,7 @@ class DownloadsClass extends React.Component<Props, State> {
         const appState = this.appState;
         const transfer = appState.getTransfer(transferId);
 
-        if (transfer.hasEnded) {
+        if (transfer.hasEnded()) {
             appState.removeTransfer(transferId);
         } else {
             const cancel = await this.showTransferAlert();
@@ -181,7 +181,7 @@ class DownloadsClass extends React.Component<Props, State> {
                 : Intent.SUCCESS;
             if (status !== 'started') {
                 // some errors
-                const errors = transfer.numErrors;
+                const errors = transfer.errors;
                 if (errors) {
                     console.log('errors', errors, transfer.elements.length);
                     intent = errors === transfer.elements.length ? Intent.DANGER : Intent.WARNING;
@@ -204,7 +204,7 @@ class DownloadsClass extends React.Component<Props, State> {
         const { t } = this.injected;
         const sizeFormatted = formatBytes(transfer.size);
         const transferSize = (transfer.status !== 'calculating' && sizeFormatted) || '';
-        const currentSize = formatBytes(transfer.progress);
+        const currentSize = end ? sizeFormatted : formatBytes(transfer.progress);
         const percent = transfer.status === 'calculating' ? 0 : transfer.progress / transfer.size;
         const ended = transfer.hasEnded;
         const errors = transfer.numErrors;

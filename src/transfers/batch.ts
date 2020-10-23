@@ -46,10 +46,6 @@ export class Batch {
         return !!this.status.match(/done|error/);
     }
 
-    get numErrors(): number {
-        return this.files.reduce((acc, val) => acc + (((val.error || val.status === 'cancelled') && 1) || 0), 0);
-    }
-
     public isExpanded = false;
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -76,7 +72,7 @@ export class Batch {
         // console.log('transfer ended ! duration=', Math.round((new Date().getTime() - this.startDate.getTime()) / 1000), 'sec(s)');
         // console.log('destroy batch, new maxId', Batch.maxId);
         this.status = 'done';
-        return Promise.resolve(this.numErrors === 0);
+        return Promise.resolve(this.errors === 0);
     };
 
     @action
@@ -283,10 +279,10 @@ export class Batch {
         this.transfersDone++;
         this.slotsAvailable++;
         // console.log('finished', transfer.file.fullname, 'slotsAvailable', this.slotsAvailable, 'done', this.transfersDone);
-        if (this.status !== 'error' && this.transfersDone < this.files.length) {
+        if (this.status !== 'error' && this.transfersDone < this.elements.length) {
             this.queueNextTransfers();
         } else {
-            if (this.numErrors === this.files.length) {
+            if (errors === this.elements.length) {
                 this.transferDef.reject({
                     code: '',
                 });
@@ -380,6 +376,7 @@ export class Batch {
         const todo = this.elements.filter((el) => !!el.status.match(/queued/));
 
         for (const el of todo) {
+            this.errors++;
             el.status = 'cancelled';
         }
     }
@@ -404,7 +401,7 @@ export class Batch {
     @action
     calcTotalSize(): void {
         let size = 0;
-        for (const fileTransfer of this.files) {
+        for (const fileTransfer of this.elements) {
             // directory's length is the space used for dir meta data: we don't need (nor copy) that
             if (!fileTransfer.file.isDir) {
                 size += fileTransfer.file.length;
@@ -481,7 +478,7 @@ export class Batch {
             .then((transfers) => {
                 console.log('got files', transfers);
                 // transfers.forEach(t => console.log(`[${t.status}] ${t.file.dir}/${t.file.fullname}:${t.file.isDir}, ${t.subDirectory} (${t.newSub})`))
-                this.files.replace(transfers);
+                this.elements.replace(transfers);
             })
             .catch((err) => {
                 return Promise.reject(err);
