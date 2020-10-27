@@ -4,8 +4,8 @@
     "description": "",
     "main": "index.js",
     "scripts": {
-        "build": "webpack --config ./webpack.config.e2e.js",
-        "watch": "webpack --config ./webpack.config.e2e.js --watch",
+        "build": "webpack --config ./webpack.config.e2e.ts",
+        "watch": "webpack --config ./webpack.config.e2e.ts --watch",
         "server": "npm run start-server && npm run wait-server",
         "start-server": "pm2 start --name cy-server node_modules/local-web-server/bin/cli.js -- -p 8080 -d ./build-e2e",
         "wait-server": "wait-on http://localhost:8080",
@@ -18,15 +18,17 @@
     "dependencies": {
         "@cypress/webpack-preprocessor": "^4.0.2",
         "clean-webpack-plugin": "^2.0.2",
-        "copy-webpack-plugin": "^5.0.4",
         "local-web-server": "^3.0.7",
         "ts-loader": "^5.3.1",
         "typescript": "^3.5.3",
         "webpack": "^4.27.1"
     },
     "devDependencies": {
+        "@types/copy-webpack-plugin": "^6.0.0",
+        "copy-webpack-plugin": "^6.2.1",
         "cypress": "^3.5.0",
         "pm2": "^4.1.2",
+        "ts-node": "^9.0.0",
         "wait-on": "^4.0.2"
     }
 }

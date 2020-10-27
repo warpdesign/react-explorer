@@ -1,6 +1,4 @@
-import {
-    describeUnix,
-} from "../../utils/test/helpers";
+import { describeUnix } from '../../utils/test/helpers';
 
 import { MakeId, ExeMaskAll, ExeMaskGroup, ExeMaskUser, filetype } from '../Fs';
 
@@ -9,12 +7,12 @@ describe('makeId', () => {
         const stats = {
             ino: 123,
             dev: 456,
-            fullname: 'foo'
+            fullname: 'foo',
         };
 
         expect(MakeId(stats)).toEqual({
             ino: stats.ino,
-            dev: stats.dev
+            dev: stats.dev,
         });
     });
 });

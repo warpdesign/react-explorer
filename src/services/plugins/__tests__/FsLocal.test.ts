@@ -1,21 +1,16 @@
-import { FsLocal } from "../FsLocal";
+import { FsLocal } from '../FsLocal';
 import * as fs from 'fs';
 import { sep } from 'path';
 
-import {
-    describeUnix,
-    describeWin,
-    itUnix,
-    getPath,
-} from "../../../utils/test/helpers";
+import { describeUnix, describeWin, itUnix, getPath } from '../../../utils/test/helpers';
 
 import mock from 'mock-fs';
-import TmpDir from './fixtures/tmpDir'
+import TmpDir from './fixtures/tmpDir';
 
 let localAPI: any;
 
-const HOMEDIR = getPath("home");
-const TESTS_DIR = getPath("tests_dir");
+const HOMEDIR = getPath('home');
+const TESTS_DIR = getPath('tests_dir');
 
 // needed to avoid crashes when console.log
 // is called and mock() has been called
@@ -23,144 +18,144 @@ const TESTS_DIR = getPath("tests_dir");
 console.log('');
 
 describe('FsLocal', () => {
-    describeUnix("isDirectoryNameValid", function () {
+    describeUnix('isDirectoryNameValid', function () {
         beforeAll(() => {
-            localAPI = new FsLocal.API("/", () => { });
+            localAPI = new FsLocal.API('/', () => {});
         });
 
-        it("unix: dir name cannot start with  ../", function () {
-            const isValid = localAPI.isDirectoryNameValid("../");
+        it('unix: dir name cannot start with  ../', function () {
+            const isValid = localAPI.isDirectoryNameValid('../');
 
             expect(isValid).toBe(false);
         });
 
-        it("unix: dir name cannot start with  ./", function () {
-            const isValid = localAPI.isDirectoryNameValid("./");
+        it('unix: dir name cannot start with  ./', function () {
+            const isValid = localAPI.isDirectoryNameValid('./');
 
             expect(isValid).toBe(false);
         });
 
-        it("unix: dir name cannot start with  ../.", function () {
-            const isValid = localAPI.isDirectoryNameValid("../.");
+        it('unix: dir name cannot start with  ../.', function () {
+            const isValid = localAPI.isDirectoryNameValid('../.');
 
             expect(isValid).toBe(false);
         });
     });
 
     // @todo add Windows specific tests for isDirectoryNameValid
-    describe("resolve", function () {
+    describe('resolve', function () {
         beforeAll(() => {
-            localAPI = new FsLocal.API("/", () => { });
+            localAPI = new FsLocal.API('/', () => {});
         });
 
-        it("~ resolves to homedir", function () {
-            const dir = localAPI.resolve("~");
+        it('~ resolves to homedir', function () {
+            const dir = localAPI.resolve('~');
 
             expect(dir).toBe(HOMEDIR);
         });
     });
 
-    describe("cd", function () {
-        const filePath = `${TESTS_DIR}/file`
+    describe('cd', function () {
+        const filePath = `${TESTS_DIR}/file`;
 
         beforeAll(() => {
             mock(TmpDir);
-            localAPI = new FsLocal.API("/", () => { });
+            localAPI = new FsLocal.API('/', () => {});
         });
 
         afterAll(() => mock.restore());
 
-        it("should throw ENOTDIR if is not a directory", async function () {
+        it('should throw ENOTDIR if is not a directory', async function () {
             expect.assertions(1);
 
             try {
                 await localAPI.cd(filePath);
             } catch (err) {
-                expect(err.code).toBe("ENOTDIR");
+                expect(err.code).toBe('ENOTDIR');
             }
         });
 
-        it("should throw if does not exist", async function () {
+        it('should throw if does not exist', async function () {
             expect.assertions(1);
 
             try {
                 await localAPI.cd(`${filePath}__`);
             } catch (err) {
-                expect(err.code).toBe("ENOENT");
+                expect(err.code).toBe('ENOENT');
             }
         });
 
-        it("should return resolved path if exists and is a dir", function () {
+        it('should return resolved path if exists and is a dir', function () {
             const dir = localAPI.resolve(TESTS_DIR);
 
             expect(dir).toBe(TESTS_DIR);
         });
 
-        it("should return resolved homedir path for ~", function () {
+        it('should return resolved homedir path for ~', function () {
             expect.assertions(1);
 
-            const dir = localAPI.resolve("~");
+            const dir = localAPI.resolve('~');
 
             expect(dir).toBe(HOMEDIR);
         });
     });
 
-    describe("size", function () {
+    describe('size', function () {
         const SIZE_PATH = `${TESTS_DIR}/sizeTest`;
 
         beforeAll(() => {
             mock(TmpDir);
-            localAPI = new FsLocal.API("/", () => { });
+            localAPI = new FsLocal.API('/', () => {});
         });
 
         afterAll(() => mock.restore());
 
-        it("should return 0 if no files", async () => {
+        it('should return 0 if no files', async () => {
             expect.assertions(1);
 
             const size = await localAPI.size(__dirname, []);
             expect(size).toBe(0);
         });
 
-        it("should return correct size for 14 bytes file", async () => {
+        it('should return correct size for 14 bytes file', async () => {
             expect.assertions(1);
 
-            const size = await localAPI.size(SIZE_PATH, ["14bytes"]);
+            const size = await localAPI.size(SIZE_PATH, ['14bytes']);
             expect(size).toBe(14);
         });
 
-        it("should return correct size for several 14 + 1024 files", async () => {
+        it('should return correct size for several 14 + 1024 files', async () => {
             expect.assertions(1);
 
-            const size = await localAPI.size(SIZE_PATH, ["14bytes", "1024bytes"]);
+            const size = await localAPI.size(SIZE_PATH, ['14bytes', '1024bytes']);
             expect(size).toBe(1038);
         });
 
-        it("should throw ENOENT if file does not exist", async () => {
+        it('should throw ENOENT if file does not exist', async () => {
             expect.assertions(1);
 
             try {
-                await localAPI.size(SIZE_PATH, ["15bytes"]);
+                await localAPI.size(SIZE_PATH, ['15bytes']);
             } catch (err) {
-                expect(err.code).toBe("ENOENT");
+                expect(err.code).toBe('ENOENT');
             }
         });
     });
 
-    describe("makedir", function () {
+    describe('makedir', function () {
         const MAKEDIR_PATH = `${TESTS_DIR}${sep}makedirTest`;
 
         beforeAll(() => {
-            localAPI = new FsLocal.API("/", () => { });
+            localAPI = new FsLocal.API('/', () => {});
             mock(TmpDir);
         });
 
         afterAll(() => mock.restore());
 
-        it("should return success if folder already exists", async () => {
+        it('should return success if folder already exists', async () => {
             expect.assertions(1);
 
-            const resolved = await localAPI.makedir(MAKEDIR_PATH, "");
+            const resolved = await localAPI.makedir(MAKEDIR_PATH, '');
             expect(resolved).toBe(MAKEDIR_PATH);
         });
 
@@ -176,38 +171,38 @@ describe('FsLocal', () => {
         //     }
         // });
 
-        it("should throw EACCES if source is not readable", async () => {
+        it('should throw EACCES if source is not readable', async () => {
             expect.assertions(1);
 
             try {
-                await localAPI.makedir(`${MAKEDIR_PATH}/denied`, "foo");
+                await localAPI.makedir(`${MAKEDIR_PATH}/denied`, 'foo');
             } catch (err) {
-                expect(err.code).toBe("EACCES");
+                expect(err.code).toBe('EACCES');
             }
         });
 
-        it("should create a single folder", async () => {
+        it('should create a single folder', async () => {
             expect.assertions(1);
 
-            const resolved = await localAPI.makedir(MAKEDIR_PATH, "dir1");
+            const resolved = await localAPI.makedir(MAKEDIR_PATH, 'dir1');
 
             expect(resolved).toBe(`${MAKEDIR_PATH}${sep}dir1`);
         });
 
-        it("should create several folders", async () => {
+        it('should create several folders', async () => {
             expect.assertions(1);
 
-            const resolved = await localAPI.makedir(MAKEDIR_PATH, "dir2/dir3/dir4");
+            const resolved = await localAPI.makedir(MAKEDIR_PATH, 'dir2/dir3/dir4');
 
             expect(resolved).toBe(`${MAKEDIR_PATH}${sep}dir2${sep}dir3${sep}dir4`);
         });
     });
 
-    describe("makeSymLink", () => {
-        const filePath = `${TESTS_DIR}/file`
+    describe('makeSymLink', () => {
+        const filePath = `${TESTS_DIR}/file`;
 
         beforeAll(() => {
-            localAPI = new FsLocal.API("/", () => { });
+            localAPI = new FsLocal.API('/', () => {});
             mock(TmpDir);
         });
 
@@ -260,7 +255,7 @@ describe('FsLocal', () => {
 
     describe('rename', () => {
         beforeAll(() => {
-            localAPI = new FsLocal.API("/", () => { });
+            localAPI = new FsLocal.API('/', () => {});
             mock(TmpDir);
         });
 
@@ -313,7 +308,7 @@ describe('FsLocal', () => {
 
     describe('isDir', () => {
         beforeAll(() => {
-            localAPI = new FsLocal.API("/", () => { });
+            localAPI = new FsLocal.API('/', () => {});
             mock(TmpDir);
         });
 
@@ -366,7 +361,7 @@ describe('FsLocal', () => {
 
     describe('exists', () => {
         beforeAll(() => {
-            localAPI = new FsLocal.API("/", () => { });
+            localAPI = new FsLocal.API('/', () => {});
             mock(TmpDir);
         });
 
@@ -387,7 +382,7 @@ describe('FsLocal', () => {
 
     describe('stat', () => {
         beforeAll(() => {
-            localAPI = new FsLocal.API("/", () => { });
+            localAPI = new FsLocal.API('/', () => {});
             mock(TmpDir);
         });
 
@@ -412,12 +407,12 @@ describe('FsLocal', () => {
                 isSym: false,
                 id: {
                     dev: fsStat.dev,
-                    ino: fsStat.ino
+                    ino: fsStat.ino,
                 },
                 mode: fsStat.mode,
                 readonly: false,
                 target: null,
-                type: ''
+                type: '',
             });
         });
 
@@ -455,12 +450,12 @@ describe('FsLocal', () => {
 
     describe('list', () => {
         beforeAll(() => {
-            localAPI = new FsLocal.API("/", () => { });
-            jest.spyOn(localAPI, 'onList').mockImplementation(() => { });
+            localAPI = new FsLocal.API('/', () => {});
+            jest.spyOn(localAPI, 'onList').mockImplementation(() => {});
             mock(TmpDir);
         });
 
-        afterEach(() => jest.clearAllMocks())
+        afterEach(() => jest.clearAllMocks());
 
         afterAll(() => {
             mock.restore();
@@ -522,7 +517,7 @@ describe('FsLocal', () => {
 
     describeUnix('isRoot', () => {
         beforeAll(() => {
-            localAPI = new FsLocal.API("/", () => { });
+            localAPI = new FsLocal.API('/', () => {});
         });
 
         it('should return false for empty path', () => {
@@ -540,7 +535,7 @@ describe('FsLocal', () => {
 
     describeWin('isRoot', () => {
         beforeAll(() => {
-            localAPI = new FsLocal.API("C:\\", () => { });
+            localAPI = new FsLocal.API('C:\\', () => {});
         });
 
         it('should return false for empty path', () => {
@@ -601,4 +596,4 @@ describe('FsLocal', () => {
 
     //     it("should delete not empty folder + files and resolve", () => {});
     // });
-})
+});

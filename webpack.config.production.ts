@@ -1,29 +1,43 @@
-const path = require('path');
-const HtmlWebpackPlugin = require('html-webpack-plugin');
-const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
-const CopyPlugin = require('copy-webpack-plugin');
-const webpack = require('webpack');
-const packageJson = require('./package.json');
-const gitHash = require('./scripts/hash');
+import webpack from 'webpack';
+import { resolve as _resolve, join } from 'path';
+import HtmlWebpackPlugin from 'html-webpack-plugin';
+import ForkTsCheckerWebpackPlugin from 'fork-ts-checker-webpack-plugin';
+import CleanWebpackPlugin from 'clean-webpack-plugin';
+import TerserPlugin from 'terser-webpack-plugin';
+import CopyPlugin from 'copy-webpack-plugin';
+import { DefinePlugin } from 'webpack';
+import { version } from './package.json';
+import gitHash from './scripts/hash';
 
-const baseConfig = {
+const baseConfig: webpack.Configuration = {
     output: {
-        path: path.resolve(__dirname, 'build'),
+        path: _resolve(__dirname, 'build'),
         filename: '[name].js',
     },
     node: {
         __dirname: false,
     },
-    // Enable sourcemaps for debugging webpack's output.
-    devtool: 'source-map',
-    mode: 'development',
+    mode: 'production',
+    optimization: {
+        minimizer: [
+            new TerserPlugin({
+                // cache: true,
+                parallel: true,
+                terserOptions: {
+                    compress: {
+                        reduce_vars: false,
+                    },
+                },
+            }),
+        ],
+    },
     resolve: {
         // Add '.ts' and '.tsx' as resolvable extensions.
         extensions: ['.ts', '.tsx', '.js', '.json', '.css'],
     },
     resolveLoader: {
         alias: {
-            'data-cy-loader': path.join(__dirname, 'scripts/data-cy-loader.js'),
+            'data-cy-loader': join(__dirname, 'scripts/data-cy-loader.js'),
         },
     },
     module: {
@@ -77,10 +91,6 @@ const baseConfig = {
                     },
                 ],
             },
-            {
-                test: /\.node$/,
-                loader: 'native-ext-loader',
-            },
         ],
     },
 
@@ -94,17 +104,22 @@ const baseConfig = {
     // }
 };
 
-module.exports = [
+export default [
     Object.assign(
         {
             target: 'electron-main',
             entry: { main: './src/electron/main.ts' },
             plugins: [
                 new ForkTsCheckerWebpackPlugin(),
-                new webpack.DefinePlugin({
+                new CleanWebpackPlugin({
+                    cleanOnceBeforeBuildPatterns: [join(process.cwd(), 'dist/**/*')],
+                    dangerouslyAllowCleanPatternsOutsideProject: true,
+                    dry: false,
+                }),
+                new DefinePlugin({
                     'ENV.CY': false,
                     'ENV.NODE_ENV': JSON.stringify(baseConfig.mode),
-                    'ENV.VERSION': JSON.stringify(packageJson.version),
+                    'ENV.VERSION': JSON.stringify(version),
                     'ENV.HASH': JSON.stringify(gitHash),
                 }),
             ],
@@ -121,18 +136,28 @@ module.exports = [
                     title: 'React-Explorer',
                     template: 'index.html',
                 }),
-                new webpack.DefinePlugin({
+                new DefinePlugin({
                     'ENV.CY': false,
                     'ENV.NODE_ENV': JSON.stringify(baseConfig.mode),
-                    'ENV.VERSION': JSON.stringify(packageJson.version),
+                    'ENV.VERSION': JSON.stringify(version),
                     'ENV.HASH': JSON.stringify(gitHash),
                 }),
-                new CopyPlugin([
-                    {
-                        from: 'img/icon-512x512.png',
-                        to: 'icon.png',
-                    },
-                ]),
+                new CopyPlugin({
+                    patterns: [
+                        {
+                            from: 'img/icon.icns',
+                            to: 'icon.icns',
+                        },
+                        {
+                            from: 'img/icon-512x512.png',
+                            to: 'icon.png',
+                        },
+                        {
+                            from: 'img/icon-512x512.ico',
+                            to: 'icon.ico',
+                        },
+                    ],
+                }),
             ],
         },
         baseConfig,
