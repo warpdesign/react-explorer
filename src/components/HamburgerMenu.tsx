@@ -1,29 +1,29 @@
-import * as React from "react";
-import { Menu, MenuItem, MenuDivider } from "@blueprintjs/core";
+import * as React from 'react';
+import { Menu, MenuItem, MenuDivider } from '@blueprintjs/core';
 import { withNamespaces, WithNamespaces } from 'react-i18next';
 
-interface IHamburgerProps extends WithNamespaces {
+interface HamburgerProps extends WithNamespaces {
     onOpenPrefs: () => void;
     onOpenShortcuts: () => void;
-};
+}
 
-export class HamburgerMenuClass extends React.Component<IHamburgerProps>{
-    constructor (props: IHamburgerProps){
+export class HamburgerMenuClass extends React.Component<HamburgerProps> {
+    constructor(props: HamburgerProps) {
         super(props);
     }
 
-    public render() {
+    public render(): React.ReactNode {
         const { t } = this.props;
 
         return (
-        <React.Fragment>
+            <React.Fragment>
                 <Menu className="data-cy-app-menu">
-                <MenuItem text={t('NAV.PREFS')} icon="cog" onClick={this.props.onOpenPrefs}/>
-                <MenuDivider />
-                <MenuItem text={t('NAV.SHORTCUTS')} icon="lightbulb" onClick={this.props.onOpenShortcuts} />
-            </Menu>
-        </React.Fragment>
-        )
+                    <MenuItem text={t('NAV.PREFS')} icon="cog" onClick={this.props.onOpenPrefs} />
+                    <MenuDivider />
+                    <MenuItem text={t('NAV.SHORTCUTS')} icon="lightbulb" onClick={this.props.onOpenShortcuts} />
+                </Menu>
+            </React.Fragment>
+        );
     }
 }
 

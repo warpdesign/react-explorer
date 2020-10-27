@@ -3,7 +3,7 @@ import { ITreeNode, Tree, Icon, Intent, Classes, IconName, ProgressBar } from '@
 import { AppState } from '../state/appState';
 import { inject } from 'mobx-react';
 import { Batch } from '../transfers/batch';
-import { reaction, toJS, IReactionDisposer } from 'mobx';
+import { reaction, toJS, IReactionDisposer, IObservableArray } from 'mobx';
 import i18next from 'i18next';
 import { withNamespaces, WithNamespaces } from 'react-i18next';
 import { formatBytes } from '../utils/formatBytes';
@@ -11,50 +11,55 @@ import { FileTransfer } from '../transfers/fileTransfer';
 import classnames from 'classnames';
 import { intentClass } from '@blueprintjs/core/lib/esm/common/classes';
 import { AppAlert } from './AppAlert';
-import CONFIG from '../config/appConfig'
+import CONFIG from '../config/appConfig';
 import { isWin } from '../utils/platform';
 
 const TYPE_ICONS: { [key: string]: IconName } = {
-    'img': 'media',
-    'any': 'document',
-    'snd': 'music',
-    'vid': 'mobile-video',
-    'exe': 'application',
-    'arc': 'compressed',
-    'doc': 'align-left',
-    'cod': 'code'
+    img: 'media',
+    any: 'document',
+    snd: 'music',
+    vid: 'mobile-video',
+    exe: 'application',
+    arc: 'compressed',
+    doc: 'align-left',
+    cod: 'code',
 };
 
-interface IProps extends WithNamespaces {
+interface Props extends WithNamespaces {
     hide: boolean;
 }
 
-interface InjectedProps extends IProps {
+interface InjectedProps extends Props {
     appState: AppState;
 }
 
-interface expandables {
-    [key: string]: boolean
+interface Expandables {
+    [key: string]: boolean;
 }
 
-interface IState {
-    nodes: ITreeNode[],
-    expandedNodes: expandables
+interface State {
+    nodes: ITreeNode[];
+    expandedNodes: Expandables;
+}
+
+interface NodeData {
+    transferElement: FileTransfer;
+    batchId: number;
 }
 
 @inject('appState')
-class DownloadsClass extends React.Component<IProps, IState> {
+class DownloadsClass extends React.Component<Props, State> {
     private disposer: IReactionDisposer;
     private appState: AppState;
 
-    constructor(props: IProps) {
+    constructor(props: Props) {
         super(props);
 
         this.appState = this.injected.appState;
 
         this.state = {
             nodes: this.getTreeData(this.appState.transfers),
-            expandedNodes: {}
+            expandedNodes: {},
         };
 
         this.installReaction();
@@ -67,40 +72,42 @@ class DownloadsClass extends React.Component<IProps, IState> {
         this.bindLanguageChange();
     }
 
-    private installReaction() {
+    private installReaction(): void {
         this.disposer = reaction(
-            () => { return toJS(this.appState.transfers) },
-            (transfers: Batch[]) => {
+            (): IObservableArray<Batch> => {
+                return toJS(this.appState.transfers);
+            },
+            (transfers: Batch[]): void => {
                 this.setState({ nodes: this.getTreeData(transfers) });
             },
             {
-                delay: 500
-            }
+                delay: 500,
+            },
         );
     }
 
-    private bindLanguageChange = () => {
+    private bindLanguageChange = (): void => {
         i18next.on('languageChanged', this.onLanguageChanged);
-    }
+    };
 
-    private unbindLanguageChange = () => {
+    private unbindLanguageChange = (): void => {
         i18next.off('languageChanged', this.onLanguageChanged);
-    }
+    };
 
-    public onLanguageChanged = (lang: string) => {
+    public onLanguageChanged = (/* lang: string */): void => {
         const nodes = this.getTreeData(this.appState.transfers);
         this.setState({ nodes });
-    }
+    };
 
-    private get injected() {
+    private get injected(): InjectedProps {
         return this.props as InjectedProps;
     }
 
-    componentWillUnMount() {
+    componentWillUnMount(): void {
         this.unbindLanguageChange();
     }
 
-    private handleNodeCollapse = (node: ITreeNode) => {
+    private handleNodeCollapse = (node: ITreeNode): void => {
         const { expandedNodes } = this.state;
         expandedNodes[node.id] = false;
         node.isExpanded = false;
@@ -108,25 +115,25 @@ class DownloadsClass extends React.Component<IProps, IState> {
         this.setState(this.state);
     };
 
-    private handleNodeExpand = (node: ITreeNode) => {
+    private handleNodeExpand = (node: ITreeNode): void => {
         const { expandedNodes } = this.state;
         expandedNodes[node.id] = true;
         node.isExpanded = true;
         this.setState(this.state);
     };
 
-    showTransferAlert() {
+    showTransferAlert(): Promise<boolean> {
         const { t } = this.injected;
 
         return AppAlert.show(t('DIALOG.STOP_TRANSFER.MESSAGE'), {
             cancelButtonText: t('DIALOG.STOP_TRANSFER.BT_CANCEL'),
             confirmButtonText: t('DIALOG.STOP_TRANSFER.BT_OK'),
             intent: Intent.WARNING,
-            icon: "warning-sign"
+            icon: 'warning-sign',
         });
     }
 
-    async onCloseClick(transferId: number, fileId: number) {
+    async onCloseClick(transferId: number): Promise<void> {
         const appState = this.appState;
         const transfer = appState.getTransfer(transferId);
 
@@ -140,18 +147,18 @@ class DownloadsClass extends React.Component<IProps, IState> {
         }
     }
 
-    onNodeDoubleClick = (node: ITreeNode, nodePath: number[], e: React.MouseEvent<HTMLElement>) => {
+    onNodeDoubleClick = (node: ITreeNode, nodePath: number[]): void => {
         // no first-level: this is a file
         if (nodePath.length > 1) {
-            const transfer = (node.nodeData as any).transfer;
-            const batchId = (node.nodeData as any).batchId;
+            const transfer = (node.nodeData as NodeData).transferElement;
+            const batchId = (node.nodeData as NodeData).batchId;
             if (transfer.status === 'done') {
                 this.appState.openTransferedFile(batchId, transfer.file);
             }
         }
-    }
+    };
 
-    onNodeClick = (node: ITreeNode, nodePath: number[], e: React.MouseEvent<HTMLElement>) => {
+    onNodeClick = (node: ITreeNode, nodePath: number[]): void => {
         // first-level node
         if (nodePath.length === 1) {
             const { expandedNodes } = this.state;
@@ -160,20 +167,24 @@ class DownloadsClass extends React.Component<IProps, IState> {
 
             this.setState(this.state);
         }
-    }
+    };
 
-    getIntent(transfer: Batch) {
+    getIntent(transfer: Batch): Intent {
         console.log(transfer.status, transfer);
         const status = transfer.status;
         let intent: Intent = Intent.NONE;
         if (!status.match(/queued|calculating/)) {
-            intent = status.match(/error|cancelled/) ? Intent.DANGER : status.match(/started/) ? Intent.PRIMARY : Intent.SUCCESS;
+            intent = status.match(/error|cancelled/)
+                ? Intent.DANGER
+                : status.match(/started/)
+                ? Intent.PRIMARY
+                : Intent.SUCCESS;
             if (status !== 'started') {
                 // some errors
-                const errors = transfer.numErrors;
+                const errors = transfer.errors;
                 if (errors) {
-                    console.log('errors', errors, transfer.files.length);
-                    intent = errors === transfer.files.length ? Intent.DANGER : Intent.WARNING;
+                    console.log('errors', errors, transfer.elements.length);
+                    intent = errors === transfer.elements.length ? Intent.DANGER : Intent.WARNING;
                 }
             }
         }
@@ -181,34 +192,46 @@ class DownloadsClass extends React.Component<IProps, IState> {
         return intent;
     }
 
-    getTransferIcon(intent: Intent) {
-        return (<Icon icon="dot" className={Classes.TREE_NODE_ICON} intent={intent}></Icon>)
+    getTransferIcon(intent: Intent): JSX.Element {
+        return <Icon icon="dot" className={Classes.TREE_NODE_ICON} intent={intent}></Icon>;
     }
 
     getFileIcon(filetype: string): IconName {
-        return filetype && TYPE_ICONS[filetype] || TYPE_ICONS['any'];
+        return (filetype && TYPE_ICONS[filetype]) || TYPE_ICONS['any'];
     }
 
-    createTransferLabel(transfer: Batch, className: string) {
+    createTransferLabel(transfer: Batch, className: string): JSX.Element {
         const { t } = this.injected;
         const sizeFormatted = formatBytes(transfer.size);
-        const transferSize = transfer.status !== 'calculating' && sizeFormatted || '';
-        const currentSize = formatBytes(transfer.progress);
-        const percent = transfer.status === 'calculating' ? 0 : transfer.progress / transfer.size;
         const ended = transfer.hasEnded;
-        const errors = transfer.numErrors;
-        const rightLabel = ended ? (errors ? t('DOWNLOADS.FINISHED_ERRORS') : t('DOWNLOADS.FINISHED')) : t('DOWNLOADS.PROGRESS', { current: currentSize, size: transferSize });
+        const transferSize = (transfer.status !== 'calculating' && sizeFormatted) || '';
+        const currentSize = ended ? sizeFormatted : formatBytes(transfer.progress);
+        const percent = transfer.status === 'calculating' ? 0 : transfer.progress / transfer.size;
+        const errors = transfer.errors;
+        const rightLabel = ended
+            ? errors
+                ? t('DOWNLOADS.FINISHED_ERRORS')
+                : t('DOWNLOADS.FINISHED')
+            : t('DOWNLOADS.PROGRESS', { current: currentSize, size: transferSize });
 
         return (
             <span className={className}>
                 {!ended && <ProgressBar value={percent} intent={Intent.PRIMARY} animate={false}></ProgressBar>}
                 {rightLabel}
-                <Icon className="action" onClick={(e) => { e.stopPropagation(); this.onCloseClick(transfer.id, -1); }} intent="danger" icon="small-cross" />
+                <Icon
+                    className="action"
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        this.onCloseClick(transfer.id);
+                    }}
+                    intent="danger"
+                    icon="small-cross"
+                />
             </span>
         );
     }
 
-    createFileRightLabel(file: FileTransfer) {
+    createFileRightLabel(file: FileTransfer): JSX.Element {
         const { t } = this.injected;
         const fileProgress = formatBytes(file.progress);
         const fileSize = formatBytes(file.file.length);
@@ -221,57 +244,62 @@ class DownloadsClass extends React.Component<IProps, IState> {
 
         const spanClass = classnames({
             [Classes.INTENT_DANGER]: isError,
-            [Classes.INTENT_SUCCESS]: done
+            [Classes.INTENT_SUCCESS]: done,
         });
 
         if (isError) {
-            errorMessage = isError && file.error && file.error.message || t('DOWNLOADS.ERROR');
+            errorMessage = (isError && file.error && file.error.message) || t('DOWNLOADS.ERROR');
         } else if (isCancelled) {
-            errorMessage = isCancelled && file.error && file.error.message || t('DOWNLOADS.CANCELLED');
+            errorMessage = (isCancelled && file.error && file.error.message) || t('DOWNLOADS.CANCELLED');
         }
 
-        return (<span className={spanClass}>
-            {started && t('DOWNLOADS.PROGRESS', { current: fileProgress, size: fileSize })}
-            {queued && t('DOWNLOADS.QUEUED')}
-            {!started && !queued && (done ? fileSize : errorMessage)}
-        </span>
+        return (
+            <span className={spanClass}>
+                {started && t('DOWNLOADS.PROGRESS', { current: fileProgress, size: fileSize })}
+                {queued && t('DOWNLOADS.QUEUED')}
+                {!started && !queued && (done ? fileSize : errorMessage)}
+            </span>
         );
     }
 
-    getTreeData(transfers: Batch[]) {
+    getTreeData(transfers: Batch[]): ITreeNode[] {
         const treeData: ITreeNode[] = [];
 
-        for (let transfer of transfers) {
-
+        for (const transfer of transfers) {
             const intent = this.getIntent(transfer);
             const className = intentClass(intent);
             const sep = isWin ? '\\' : '/';
-            const node: ITreeNode =
-            {
+            const node: ITreeNode = {
                 id: transfer.id,
                 hasCaret: true,
                 icon: this.getTransferIcon(intent),
-                label: (<span className={className}> {transfer.srcName} ⇢ {transfer.dstName}</span>),
+                label: (
+                    <span className={className}>
+                        {' '}
+                        {transfer.srcName} ⇢ {transfer.dstName}
+                    </span>
+                ),
                 secondaryLabel: this.createTransferLabel(transfer, className),
                 isExpanded: !!this.state.expandedNodes[transfer.id],
-                childNodes: []
+                childNodes: [],
             };
 
             let i = 0;
-            for (let file of transfer.files) {
-                if (!file.file.isDir || file.status === 'error') {
+            for (const element of transfer.elements) {
+                if (!element.file.isDir || element.status === 'error') {
                     const id = transfer.id + '_' + i;
-                    const filetype = file.file.type;
+                    const { file } = element;
+                    const filetype = file.type;
 
                     node.childNodes.push({
                         id: id,
-                        icon: file.file.isDir ? 'folder-close' : this.getFileIcon(filetype),
-                        label: file.subDirectory ? (file.subDirectory + sep + file.file.fullname) : file.file.fullname,
-                        secondaryLabel: this.createFileRightLabel(file),
+                        icon: file.isDir ? 'folder-close' : this.getFileIcon(filetype),
+                        label: element.subDirectory ? element.subDirectory + sep + file.fullname : file.fullname,
+                        secondaryLabel: this.createFileRightLabel(element),
                         nodeData: {
-                            transfer: file,
-                            batchId: transfer.id
-                        }
+                            transferElement: element,
+                            batchId: transfer.id,
+                        },
                     });
                     i++;
                     // <Icon className="action" onClick={() => this.onCloseClick(transfer.id, i)} intent="danger" icon="small-cross" /></span>
@@ -284,11 +312,11 @@ class DownloadsClass extends React.Component<IProps, IState> {
         return treeData;
     }
 
-    componentWillUnmount() {
+    componentWillUnmount(): void {
         this.disposer();
     }
 
-    renderTransferTree() {
+    renderTransferTree(): JSX.Element {
         // console.log('render');
         const { nodes } = this.state;
         const { t } = this.props;
@@ -308,13 +336,10 @@ class DownloadsClass extends React.Component<IProps, IState> {
             return (
                 <div className="downloads empty">
                     <Icon iconSize={80} icon="document" color="#d9dde0"></Icon>
-                    <p style={{ textAlign: 'center' }}>
-                        {t('DOWNLOADS.EMPTY_TITLE')}
-                    </p>
+                    <p style={{ textAlign: 'center' }}>{t('DOWNLOADS.EMPTY_TITLE')}</p>
                 </div>
             );
         }
-
     }
 
     // shouldComponentUpdate() {
@@ -326,7 +351,7 @@ class DownloadsClass extends React.Component<IProps, IState> {
     //     console.timeEnd('Downloads Render');
     // }
 
-    render() {
+    render(): React.ReactNode {
         if (this.props.hide) {
             return null;
         } else {

@@ -1,22 +1,22 @@
-import * as React from "react";
+import * as React from 'react';
 import { remote, MenuItemConstructorOptions, Menu } from 'electron';
 
-interface IProps {
+interface Props {
     template: MenuItemConstructorOptions[];
 }
 
-interface IState {
+interface State {
     isVisible: boolean;
 }
 
-export class ContextMenu extends React.Component<IProps, IState> {
+export class ContextMenu extends React.Component<Props, State> {
     menu: Menu = null;
 
-    constructor(props: IProps) {
+    constructor(props: Props) {
         super(props);
 
         this.state = {
-            isVisible: false
+            isVisible: false,
         };
 
         // generate menu
@@ -25,27 +25,27 @@ export class ContextMenu extends React.Component<IProps, IState> {
         }
     }
 
-    showMenu(template: MenuItemConstructorOptions[] = null) {
+    showMenu(template: MenuItemConstructorOptions[] = null): void {
         if (template) {
             this.menu = remote.Menu.buildFromTemplate(template);
         }
 
         const window = remote.getCurrentWindow();
         this.menu.popup({
-            window
+            window,
         });
     }
 
-    closeMenu() {
+    closeMenu(): void {
         // on the first render, menu isn't opened so there's no need to close it
         this.menu.closePopup();
     }
 
-    componentWillUnmount() {
+    componentWillUnmount(): void {
         this.closeMenu();
     }
 
-    render() {
-        return (<div />);
+    render(): React.ReactNode {
+        return <div />;
     }
 }

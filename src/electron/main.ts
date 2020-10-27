@@ -1,29 +1,28 @@
-import { app, BrowserWindow, ipcMain, ipcRenderer } from 'electron';
-const process = require('process');
+import { app, BrowserWindow, ipcMain } from 'electron';
+import process = require('process');
 import { watch } from 'fs';
-const path = require('path');
+import path = require('path');
+import child_process = require('child_process');
 import { AppMenu, LocaleString } from './appMenus';
 import { isPackage, isLinux } from '../utils/platform';
 import { WindowSettings } from './windowSettings';
 
-declare var __dirname: string
-declare var ENV: any;
+// declare var __dirname: string
 
 const ENV_E2E = !!process.env.E2E;
 const SOURCE_PATH = './build';
-const HTML_URL = `file://${__dirname}/index.html`;
 const HTML_PATH = `${__dirname}/index.html`;
 
 const ElectronApp = {
-    mainWindow: <Electron.BrowserWindow>null,
-    devWindow: <Electron.BrowserWindow>null,
-    appMenu: <AppMenu>null,
+    mainWindow: null as Electron.BrowserWindow,
+    devWindow: null as Electron.BrowserWindow,
+    appMenu: null as AppMenu,
     cleanupCounter: 0,
     forceExit: false,
     /**
      * Listen to Electron app events
      */
-    async init() {
+    init(): void {
         app.on('ready', () => this.onReady());
         // prevent app from exiting at first request: the user may attempt to exit the app
         // while transfers are in progress so we first send a request to the frontend
@@ -59,7 +58,7 @@ const ElectronApp = {
      * - bind close/minimize events
      * - create main menu
      */
-    createMainWindow() {
+    createMainWindow(): void {
         console.log('Create Main Window');
 
         const settings = WindowSettings.getSettings(0);
@@ -73,16 +72,16 @@ const ElectronApp = {
             x: settings.x,
             y: settings.y,
             webPreferences: {
-                nodeIntegration: true
+                nodeIntegration: true,
             },
-            icon: isLinux && path.join(__dirname, 'icon.png') || undefined
+            icon: (isLinux && path.join(__dirname, 'icon.png')) || undefined,
         });
 
         settings.manage(this.mainWindow);
 
         if (!settings.custom) {
             settings.custom = {
-                splitView: false
+                splitView: false,
             };
         }
 
@@ -120,20 +119,21 @@ const ElectronApp = {
     /**
      * Install special React DevTools
      */
-    installReactDevTools() {
+    installReactDevTools(): void {
         console.log('Install React DevTools');
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
         const { default: installExtension, REACT_DEVELOPER_TOOLS } = require('electron-devtools-installer');
 
         installExtension(REACT_DEVELOPER_TOOLS)
-            .then((name: any) => console.log(`Added Extension:  ${name}`))
-            .catch((err: any) => console.log('An error occurred: ', err));
+            .then((name: string) => console.log(`Added Extension:  ${name}`))
+            .catch((err: Error) => console.log('An error occurred: ', err));
     },
     /**
      * Install recursive file watcher to reload the app on fs change events
      * Note that this probably won't work correctly under Linux since fs.watch
      * doesn't support recrusive watch on this OS.
      */
-    installWatcher() {
+    installWatcher(): void {
         if (!ENV_E2E && !isPackage) {
             console.log('Install Code Change Watcher');
             watch(SOURCE_PATH, { recursive: true }, () => this.reloadApp());
@@ -142,7 +142,7 @@ const ElectronApp = {
     /**
      * Clears the session cache and reloads main window without cache
      */
-    reloadApp() {
+    reloadApp(): void {
         const mainWindow = this.mainWindow;
         if (mainWindow) {
             mainWindow.webContents.session.clearCache(() => {
@@ -152,7 +152,7 @@ const ElectronApp = {
     },
     /**
      * Install listeners to handle messages coming from the renderer process:
-     * 
+     *
      * - reloadIgnoringCache: need to reload the main window (dev only)
      * - exit: wants to exit the app
      * - openTerminal(cmd): should open a new terminal process using specified cmd line
@@ -176,7 +176,7 @@ const ElectronApp = {
 
         ipcMain.on('openTerminal', (event: Event, cmd: string) => {
             console.log('running', cmd);
-            const exec = require("child_process").exec;
+            const exec = child_process.exec;
             exec(cmd).unref();
         });
 
@@ -194,10 +194,15 @@ const ElectronApp = {
             }
         });
 
-        ipcMain.on('needsCleanup', () => { console.log('needscleanup'); this.cleanupCounter++; console.log('needscleanup, counter now:', this.cleanupCounter); });
+        ipcMain.on('needsCleanup', () => {
+            console.log('needscleanup');
+            this.cleanupCounter++;
+            console.log('needscleanup, counter now:', this.cleanupCounter);
+        });
         ipcMain.on('cleanedUp', () => this.onCleanUp());
 
-        ipcMain.on('setWindowSettings', (_:Event, data: {[key:string]: any}) => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        ipcMain.on('setWindowSettings', (_: Event, data: { [key: string]: any }) => {
             console.log('changeWindowSettings', data);
             const { id, settings } = data;
             const state = WindowSettings.getSettings(id);
@@ -208,9 +213,9 @@ const ElectronApp = {
 
     /**
      * Called when the app is ready to exit: this will send cleanup event to renderer process
-     * 
+     *
      */
-    cleanupAndExit() {
+    cleanupAndExit(): void {
         console.log('cleanupAndExit');
         if (this.cleanupCounter) {
             console.log('cleanupCounter non zero', this.cleanupCounter);
@@ -220,7 +225,7 @@ const ElectronApp = {
             app.exit();
         }
     },
-    onCleanUp() {
+    onCleanUp(): void {
         this.cleanupCounter--;
         // exit app if everything has been cleaned up
         // otherwise do nothing and wait for cleanup
@@ -235,7 +240,7 @@ const ElectronApp = {
     /**
      * Open the dev tools window
      */
-    openDevTools(force = false) {
+    openDevTools(force = false): void {
         // spectron problem if devtools is opened, see https://github.com/electron/spectron/issues/254
         if ((!ENV_E2E && !isPackage) || force) {
             if (!this.devWindow || this.devWindow.isDestroyed()) {
@@ -264,7 +269,7 @@ const ElectronApp = {
     /**
      * app.ready callback: that's the app's main entry point
      */
-    onReady() {
+    onReady(): void {
         console.log('App Ready');
         if (!ENV_E2E && !isPackage) {
             this.installReactDevTools();
@@ -274,8 +279,8 @@ const ElectronApp = {
         this.createMainWindow();
         this.installWatcher();
         this.openDevTools();
-    }
-}
+    },
+};
 
 console.log(`Electron Version ${app.getVersion()}`);
 ElectronApp.init();

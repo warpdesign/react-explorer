@@ -1,45 +1,40 @@
-import * as React from "react";
-import * as ReactDOM from "react-dom";
-import { withNamespaces, WithNamespaces } from "react-i18next";
-import { Intent } from "@blueprintjs/core";
-import { inject } from "mobx-react";
-import {
-    WithMenuAccelerators,
-    Accelerators,
-    Accelerator
-} from "../WithMenuAccelerators";
-import { isMac } from "../../utils/platform"
-import { isEditable } from "../../utils/dom";
-import { AppState } from "../../state/appState";
-import { FileState } from "../../state/fileState";
-import { AppToaster } from "../AppToaster";
-import { SettingsState } from "../../state/settingsState";
+import * as React from 'react';
+import { withNamespaces, WithNamespaces } from 'react-i18next';
+import { Intent } from '@blueprintjs/core';
+import { inject } from 'mobx-react';
+import { WithMenuAccelerators, Accelerators, Accelerator } from '../WithMenuAccelerators';
+import { isMac } from '../../utils/platform';
+import { isEditable } from '../../utils/dom';
+import { AppState } from '../../state/appState';
+import { FileState } from '../../state/fileState';
+import { AppToaster } from '../AppToaster';
+import { SettingsState } from '../../state/settingsState';
 
-interface IProps extends WithNamespaces {
+interface Props extends WithNamespaces {
     onExitComboDown: () => void;
 }
 
-interface InjectedProps extends IProps {
+interface InjectedProps extends Props {
     appState: AppState;
     settingsState: SettingsState;
 }
 
-@inject("appState", "settingsState")
+@inject('appState', 'settingsState')
 @WithMenuAccelerators
-class MenuAcceleratorsClass extends React.Component<IProps> {
+class MenuAcceleratorsClass extends React.Component<Props> {
     private appState: AppState;
 
-    private get injected() {
+    private get injected(): InjectedProps {
         return this.props as InjectedProps;
     }
 
-    constructor(props: IProps) {
+    constructor(props: Props) {
         super(props);
 
         this.appState = this.injected.appState;
     }
 
-    copyTextToClipboard(fileCache: FileState, filesOnly = false) {
+    copyTextToClipboard(fileCache: FileState, filesOnly = false): void {
         const length = fileCache.selected.length;
 
         this.appState.copySelectedItemsPath(fileCache, filesOnly);
@@ -49,13 +44,13 @@ class MenuAcceleratorsClass extends React.Component<IProps> {
             AppToaster.show(
                 {
                     message: filesOnly
-                        ? t("COMMON.CP_NAMES_COPIED", { count: length })
-                        : t("COMMON.CP_PATHS_COPIED", { count: length }),
-                    icon: "tick",
-                    intent: Intent.NONE
+                        ? t('COMMON.CP_NAMES_COPIED', { count: length })
+                        : t('COMMON.CP_PATHS_COPIED', { count: length }),
+                    icon: 'tick',
+                    intent: Intent.NONE,
                 },
                 undefined,
-                true
+                true,
             );
         }
     }
@@ -66,9 +61,7 @@ class MenuAcceleratorsClass extends React.Component<IProps> {
         if (ignoreStatus || !state) {
             return state;
         } else {
-            return ignoreStatus
-                ? state
-                : (state.status === "ok" && state) || null;
+            return ignoreStatus ? state : (state.status === 'ok' && state) || null;
         }
     }
 
@@ -97,32 +90,30 @@ class MenuAcceleratorsClass extends React.Component<IProps> {
         this.appState.isPrefsOpen = true;
     };
 
-    onReloadFileView = () => {
+    onReloadFileView = (): void => {
         if (this.appState.isExplorer) {
-            console.log("reloading view" /*, this.state.activeView*/);
+            console.log('reloading view' /*, this.state.activeView*/);
             this.appState.refreshActiveView(/*this.state.activeView*/);
         } else {
-            console.log("downloads active, no refresh");
+            console.log('downloads active, no refresh');
         }
     };
 
-    onOpenTerminal = (_: string, data: any) => {
+    onOpenTerminal = (_: string, data: { viewId: number; tabIndex: number }) => {
         let cache: FileState;
 
-        if (typeof data.viewId === "undefined") {
+        if (typeof data.viewId === 'undefined') {
             cache = this.getActiveFileCache();
         } else {
             const winState = this.appState.winStates[0];
             const view = winState.views[data.viewId];
             cache = view.caches[data.tabIndex];
-            if (cache.status !== "ok") {
+            if (cache.status !== 'ok') {
                 cache = null;
             }
         }
 
-        const isOverlayOpen = document.body.classList.contains(
-            "bp3-overlay-open"
-        );
+        const isOverlayOpen = document.body.classList.contains('bp3-overlay-open');
 
         if (cache && !isOverlayOpen && !isEditable(document.activeElement)) {
             const resolvedPath = cache.getAPI().resolve(cache.path);
@@ -132,37 +123,33 @@ class MenuAcceleratorsClass extends React.Component<IProps> {
         }
     };
 
-    cycleTab = (direction: 1|-1) => {
+    cycleTab = (direction: 1 | -1): void => {
         if (this.appState.isExplorer) {
             const winState = this.appState.winStates[0];
             const viewState = winState.getActiveView();
             viewState.cycleTab(direction);
         }
-    }
+    };
 
-    onNextTab = () => {
+    onNextTab = (): void => {
         this.cycleTab(1);
     };
 
-    onPreviousTab = () => {
+    onPreviousTab = (): void => {
         this.cycleTab(-1);
     };
 
-    onNewTab = () => {
+    onNewTab = (): void => {
         if (this.appState.isExplorer) {
             const { settingsState } = this.injected;
             const winState = this.appState.winStates[0];
             const viewState = winState.getActiveView();
-            viewState.addCache(
-                settingsState.defaultFolder,
-                viewState.getVisibleCacheIndex() + 1,
-                true
-            );
-            console.log("need to create a new tab");
+            viewState.addCache(settingsState.defaultFolder, viewState.getVisibleCacheIndex() + 1, true);
+            console.log('need to create a new tab');
         }
     };
 
-    onCloseTab = () => {
+    onCloseTab = (): void => {
         if (this.appState.isExplorer) {
             const winState = this.appState.winStates[0];
             const viewState = winState.getActiveView();
@@ -171,92 +158,47 @@ class MenuAcceleratorsClass extends React.Component<IProps> {
         }
     };
 
-    onToggleSplitView = () => {
+    onToggleSplitView = (): void => {
         if (this.appState.isExplorer) {
             const winState = this.appState.winStates[0];
             winState.toggleSplitViewMode();
         }
-    }
-    
-    onForward = () => {
+    };
+
+    onForward = (): void => {
         const cache = this.getActiveFileCache();
         cache && cache.navHistory(1);
-    }
+    };
 
-    onBack = () => {
+    onBack = (): void => {
         const cache = this.getActiveFileCache();
         cache && cache.navHistory(-1);
-    }
+    };
 
-    onParent = () => {
+    onParent = (): void => {
         const cache = this.getActiveFileCache();
 
         !isEditable(document.activeElement) && cache && cache.openParentDirectory();
-    }
+    };
 
-    renderMenuAccelerators() {
+    renderMenuAccelerators(): React.ReactElement {
         return (
             <Accelerators>
-                <Accelerator
-                    combo="CmdOrCtrl+Shift+C"
-                    onClick={this.onCopyPath}
-                ></Accelerator>
-                <Accelerator
-                    combo="CmdOrCtrl+Shift+N"
-                    onClick={this.onCopyFilename}
-                ></Accelerator>
-                <Accelerator
-                    combo="CmdOrCtrl+S"
-                    onClick={this.onOpenShortcuts}
-                ></Accelerator>
-                <Accelerator
-                    combo="CmdOrCtrl+,"
-                    onClick={this.onOpenPrefs}
-                ></Accelerator>
-                <Accelerator
-                    combo="CmdOrCtrl+R"
-                    onClick={this.onReloadFileView}
-                ></Accelerator>
-                <Accelerator
-                    combo="CmdOrCtrl+Q"
-                    onClick={this.props.onExitComboDown}
-                ></Accelerator>
-                <Accelerator
-                    combo="CmdOrCtrl+K"
-                    onClick={this.onOpenTerminal}
-                ></Accelerator>
-                <Accelerator
-                    combo="Ctrl+Tab"
-                    onClick={this.onNextTab}
-                ></Accelerator>
-                <Accelerator
-                    combo="Ctrl+Shift+Tab"
-                    onClick={this.onPreviousTab}
-                ></Accelerator>
-                <Accelerator
-                    combo="CmdOrCtrl+T"
-                    onClick={this.onNewTab}
-                ></Accelerator>
-                <Accelerator
-                    combo="CmdOrCtrl+W"
-                    onClick={this.onCloseTab}
-                ></Accelerator>
-                <Accelerator
-                    combo="CmdOrCtrl+Shift+Alt+V"
-                    onClick={this.onToggleSplitView}
-                ></Accelerator>
-                <Accelerator
-                    combo={isMac ? "Cmd+Left" : "Alt+Left"}
-                    onClick={this.onBack}
-                ></Accelerator>
-                <Accelerator
-                    combo={isMac ? "Cmd+Right" : "Alt+Right"}
-                    onClick={this.onForward}
-                ></Accelerator>
-                <Accelerator
-                    combo="Backspace"
-                    onClick={this.onParent}
-                ></Accelerator>                
+                <Accelerator combo="CmdOrCtrl+Shift+C" onClick={this.onCopyPath}></Accelerator>
+                <Accelerator combo="CmdOrCtrl+Shift+N" onClick={this.onCopyFilename}></Accelerator>
+                <Accelerator combo="CmdOrCtrl+S" onClick={this.onOpenShortcuts}></Accelerator>
+                <Accelerator combo="CmdOrCtrl+," onClick={this.onOpenPrefs}></Accelerator>
+                <Accelerator combo="CmdOrCtrl+R" onClick={this.onReloadFileView}></Accelerator>
+                <Accelerator combo="CmdOrCtrl+Q" onClick={this.props.onExitComboDown}></Accelerator>
+                <Accelerator combo="CmdOrCtrl+K" onClick={this.onOpenTerminal}></Accelerator>
+                <Accelerator combo="Ctrl+Tab" onClick={this.onNextTab}></Accelerator>
+                <Accelerator combo="Ctrl+Shift+Tab" onClick={this.onPreviousTab}></Accelerator>
+                <Accelerator combo="CmdOrCtrl+T" onClick={this.onNewTab}></Accelerator>
+                <Accelerator combo="CmdOrCtrl+W" onClick={this.onCloseTab}></Accelerator>
+                <Accelerator combo="CmdOrCtrl+Shift+Alt+V" onClick={this.onToggleSplitView}></Accelerator>
+                <Accelerator combo={isMac ? 'Cmd+Left' : 'Alt+Left'} onClick={this.onBack}></Accelerator>
+                <Accelerator combo={isMac ? 'Cmd+Right' : 'Alt+Right'} onClick={this.onForward}></Accelerator>
+                <Accelerator combo="Backspace" onClick={this.onParent}></Accelerator>
             </Accelerators>
         );
     }

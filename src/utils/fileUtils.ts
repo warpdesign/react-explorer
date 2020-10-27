@@ -9,7 +9,7 @@ export interface SelectionRange {
 
 export function getExtensionIndex(filename: string): number {
     let index = -1;
-    for (let ext of Object.keys(Extensions)) {
+    for (const ext of Object.keys(Extensions)) {
         const matches = filename.match(Extensions[ext]);
         if (matches && (index === -1 || matches.index < index)) {
             index = matches.index;
@@ -25,19 +25,19 @@ export function getSelectionRange(filename: string): SelectionRange {
     if (filename.startsWith('.')) {
         return {
             start: 1,
-            end: length
+            end: length,
         };
     } else {
         const index = getExtensionIndex(filename);
         if (index > -1) {
             return {
                 start: 0,
-                end: index
+                end: index,
             };
         } else {
             return {
                 start: 0,
-                end: length
+                end: length,
             };
         }
     }

@@ -1,17 +1,17 @@
-import * as React from "react";
-import { Dialog, Classes, Intent, Button, InputGroup, FormGroup, Label, Checkbox } from "@blueprintjs/core";
-import { debounce } from "../../utils/debounce";
-import { withNamespaces, WithNamespaces } from "react-i18next";
+import * as React from 'react';
+import { Dialog, Classes, Intent, Button, InputGroup, FormGroup } from '@blueprintjs/core';
+import { debounce } from '../../utils/debounce';
+import { withNamespaces, WithNamespaces } from 'react-i18next';
 import { metaKeyCode } from '../../utils/platform';
 
-interface IMakedirProps extends WithNamespaces {
+interface MakedirProps extends WithNamespaces {
     isOpen: boolean;
     parentPath: string;
-    onClose?: (dirName: string, navigate: boolean) => void
-    onValidation: (dir: string) => boolean
-};
+    onClose?: (dirName: string, navigate: boolean) => void;
+    onValidation: (dir: string) => boolean;
+}
 
-interface IMakedirState {
+interface MakedirState {
     path: string;
     ctrlKey: boolean;
     valid: boolean;
@@ -21,85 +21,84 @@ const DEBOUNCE_DELAY = 300;
 
 const ENTER_KEY = 13;
 
-class MakedirDialogClass extends React.Component<IMakedirProps, IMakedirState>{
+class MakedirDialogClass extends React.Component<MakedirProps, MakedirState> {
     mounted = false;
 
-    constructor(props: any) {
+    constructor(props: MakedirProps) {
         super(props);
 
         this.state = {
             path: '',
             ctrlKey: false,
-            valid: true
+            valid: true,
         };
     }
 
-    onKeyUp = (e: KeyboardEvent) => {
+    onKeyUp = (e: KeyboardEvent): void => {
         if (e.keyCode === metaKeyCode) {
             this.setState({ ctrlKey: false });
         } else if (e.keyCode === ENTER_KEY) {
             const { valid, path } = this.state;
             valid && path.length && this.onCreate();
         }
-    }
+    };
 
-    onKeyDown = (e: KeyboardEvent) => {
+    onKeyDown = (e: KeyboardEvent): void => {
         if (e.keyCode === metaKeyCode) {
             this.setState({ ctrlKey: true });
         } else if (e.keyCode === ENTER_KEY && this.state.ctrlKey) {
             const { valid, path } = this.state;
             valid && path.length && this.onCreate();
         }
-    }
+    };
 
     private isValid(path: string): boolean {
         const valid = this.props.onValidation(path);
         return valid;
     }
 
-    private checkPath: (path: string) => any = debounce(
-        (path: string) => {
-            // prevent memleak in case debounce callback is called
-            // after the dialog has been closed
-            if (!this.mounted) {
-                return;
-            }
+    private checkPath: (path: string) => void = debounce((path: string): void => {
+        // prevent memleak in case debounce callback is called
+        // after the dialog has been closed
+        if (!this.mounted) {
+            return;
+        }
 
-            try {
-                const isValid = this.isValid(path);
-                this.setState({ valid: isValid });
-            } catch (error) {
-                console.log('error', error);
-                this.setState({ valid: false });
-            }
-        }, DEBOUNCE_DELAY);
+        try {
+            const isValid = this.isValid(path);
+            this.setState({ valid: isValid });
+        } catch (error) {
+            console.log('error', error);
+            this.setState({ valid: false });
+        }
+    }, DEBOUNCE_DELAY);
 
-    private cancelClose = () => {
-        this.props.onClose("", false);
-    }
+    private cancelClose = (): void => {
+        this.props.onClose('', false);
+    };
 
-    private onCreate = () => {
+    private onCreate = (): void => {
         const { path, ctrlKey } = this.state;
         if (this.isValid(path)) {
             this.props.onClose(path, ctrlKey);
         } else {
             this.setState({ valid: false });
         }
-    }
+    };
 
-    private onPathChange = (event: React.FormEvent<HTMLElement>) => {
+    private onPathChange = (event: React.FormEvent<HTMLElement>): void => {
         const path = (event.target as HTMLInputElement).value;
         this.setState({ path });
         this.checkPath(path);
-    }
+    };
 
-    componentDidMount() {
+    componentDidMount(): void {
         this.mounted = true;
         document.addEventListener('keyup', this.onKeyUp);
         document.addEventListener('keydown', this.onKeyDown);
     }
 
-    componentWillUnmount() {
+    componentWillUnmount(): void {
         document.removeEventListener('keyup', this.onKeyUp);
         document.removeEventListener('keydown', this.onKeyDown);
         this.mounted = false;
@@ -114,17 +113,17 @@ class MakedirDialogClass extends React.Component<IMakedirProps, IMakedirState>{
     //     console.timeEnd('MakedirDialog Render');
     // }
 
-    public render() {
+    public render(): React.ReactNode {
         const { path, valid, ctrlKey } = this.state;
         const { t } = this.props;
 
-        const intent = !valid && 'danger' || 'none';
-        const helperText = !valid && (<span>{t('DIALOG.MAKEDIR.NOT_VALID')}</span>) || (<span>&nbsp;</span>);
+        const intent = (!valid && 'danger') || 'none';
+        const helperText = (!valid && <span>{t('DIALOG.MAKEDIR.NOT_VALID')}</span>) || <span>&nbsp;</span>;
         let { parentPath } = this.props;
 
         let sep = '';
         if (parentPath.match(/\//)) {
-            sep = '/'
+            sep = '/';
         } else {
             sep = '\\';
         }
@@ -169,12 +168,12 @@ class MakedirDialogClass extends React.Component<IMakedirProps, IMakedirState>{
                         <Button onClick={this.cancelClose}>{t('COMMON.CANCEL')}</Button>
 
                         <Button intent={Intent.PRIMARY} onClick={this.onCreate} disabled={!path.length || !valid}>
-                            {!ctrlKey && t('DIALOG.MAKEDIR.CREATE') || t('DIALOG.MAKEDIR.CREATE_READ')}
+                            {(!ctrlKey && t('DIALOG.MAKEDIR.CREATE')) || t('DIALOG.MAKEDIR.CREATE_READ')}
                         </Button>
                     </div>
                 </div>
             </Dialog>
-        )
+        );
     }
 }
 

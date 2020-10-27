@@ -3,44 +3,41 @@ import { homedir, tmpdir } from 'os';
 import { sep } from 'path';
 
 // expects describe to be globally defined: should only be used from test environment
-declare var describe: any;
-declare var it: any;
+// declare var describe: any;
+// declare var it: any;
 
 // assume Unix in that case: may need some tweaks for some exotic platform
 const isUnix = platform !== 'win32';
 const TEST_FILES_DIR = tmpdir() + sep + 'react-explorer-tests';
 
-// call this to perform unix specific tests
-export const describeUnix = (...args: any) => {
-    args[0] += ' (Unix)';
+// call this to perform Unix specific tests
+export const describeUnix = (name: string, fn: jest.EmptyFunction): void => {
     if (isUnix) {
-        describe(...args);
+        describe(`${name} (Unix)`, fn);
     } else {
-        describe.skip(...args);
+        describe.skip(name, fn);
     }
 };
 
-// call this to perform windows specific tests
-export const describeWin = (...args: any) => {
-    args[0] += ' (Win)';
+// call this to perform Windows specific tests
+export const describeWin = (name: string, fn: jest.EmptyFunction) => {
     if (!isUnix) {
-        describe(...args);
+        describe(`${name} (Win)`, fn);
     } else {
-        describe.skip(...args);
+        describe.skip(name, fn);
     }
 };
 
-// call this to perform unix specific tests
-export const itUnix = (...args: any) => {
-    args[0] += ' (Unix)';
+// call this to perform Unix specific tests
+export const itUnix = (name: string, fn?: jest.ProvidesCallback, timeout?: number) => {
     if (isUnix) {
-        it(...args);
+        it(`${name} (Unix)`, fn, timeout);
     } else {
-        it.skip(...args);
+        it.skip(name, fn, timeout);
     }
 };
 
-export const getPath = (id: string) => {
+export const getPath = (id: string): string => {
     switch (id) {
         case 'home':
             return homedir();
@@ -54,4 +51,4 @@ export const getPath = (id: string) => {
         default:
             return tmpdir();
     }
-}
+};

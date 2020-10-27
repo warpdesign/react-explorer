@@ -1,6 +1,7 @@
 export class Deferred<T> {
     public promise: Promise<T>;
-    public resolve: (val?: any) => void;
+    public resolve: (val?: T | PromiseLike<T>) => void;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     public reject: (val?: any) => void;
     /**
      * Creates a new Deferred.
@@ -19,7 +20,8 @@ export class Deferred<T> {
      *
      *
      */
-    static resolve(val:any) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    static resolve(val: any) {
         return Promise.resolve(val);
     }
 }

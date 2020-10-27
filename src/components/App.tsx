@@ -1,41 +1,43 @@
-import { AppState } from "../state/appState";
-import * as React from "react";
-import * as ReactDOM from "react-dom";
-import { platform } from "process";
-import { isMac } from '../utils/platform'
-import { FocusStyleManager, Alert, Classes, Intent } from "@blueprintjs/core";
-import classNames from "classnames";
-import { Provider, observer, inject } from "mobx-react";
-import { SideView } from "./SideView";
-import { LogUI, Logger } from "./Log";
-import { Downloads } from "./Downloads";
-import * as drivelist from "drivelist";
-import { remote, ipcRenderer } from "electron";
-import { withNamespaces, WithNamespaces, Trans } from "react-i18next";
-import { AppToaster } from "./AppToaster";
-import { Nav } from "./Nav";
-import { i18next } from "../locale/i18n";
-import { FileState } from "../state/fileState";
-import { SettingsState } from "../state/settingsState";
-import { PrefsDialog } from "./dialogs/PrefsDialog";
-import { ShortcutsDialog } from "./dialogs/ShortcutsDialog";
-import { LeftPanel } from "./LeftPanel";
-import { shouldCatchEvent } from "../utils/dom";
-import { sendFakeCombo } from "./WithMenuAccelerators";
-import { isPackage, isWin } from "../utils/platform";
-import { ViewDescriptor } from "./TabList";
-import { getLocalizedError } from "../locale/error";
-import { MenuAccelerators } from "./shortcuts/MenuAccelerators";
-import { KeyboardHotkeys } from "./shortcuts/KeyboardHotkeys";
+import { AppState } from '../state/appState';
+import * as React from 'react';
+import { platform } from 'process';
+import { isMac } from '../utils/platform';
+import { FocusStyleManager, Alert, Classes, Intent } from '@blueprintjs/core';
+import classNames from 'classnames';
+import { Provider, observer, inject } from 'mobx-react';
+import { SideView } from './SideView';
+import { LogUI, Logger } from './Log';
+import { Downloads } from './Downloads';
+import * as drivelist from 'drivelist';
+import { remote, ipcRenderer } from 'electron';
+import { withNamespaces, WithNamespaces, Trans } from 'react-i18next';
+import { AppToaster } from './AppToaster';
+import { Nav } from './Nav';
+import { i18next } from '../locale/i18n';
+import { FileState } from '../state/fileState';
+import { SettingsState } from '../state/settingsState';
+import { PrefsDialog } from './dialogs/PrefsDialog';
+import { ShortcutsDialog } from './dialogs/ShortcutsDialog';
+import { LeftPanel } from './LeftPanel';
+import { shouldCatchEvent } from '../utils/dom';
+import { sendFakeCombo } from './WithMenuAccelerators';
+import { isPackage } from '../utils/platform';
+import { ViewDescriptor } from './TabList';
+import { getLocalizedError } from '../locale/error';
+import { MenuAccelerators } from './shortcuts/MenuAccelerators';
+import { KeyboardHotkeys } from './shortcuts/KeyboardHotkeys';
+import { CustomSettings } from '../electron/windowSettings';
 
-require("@blueprintjs/core/lib/css/blueprint.css");
-require("@blueprintjs/icons/lib/css/blueprint-icons.css");
-require("../css/main.css");
-require("../css/windows.css");
-require("../css/scrollbars.css");
+require('@blueprintjs/core/lib/css/blueprint.css');
+require('@blueprintjs/icons/lib/css/blueprint-icons.css');
+require('../css/main.css');
+require('../css/windows.css');
+require('../css/scrollbars.css');
+
+declare const ENV: { [key: string]: string | boolean | number | Record<string, unknown> };
 
 interface AppProps extends WithNamespaces {
-    initialSettings: {[key: string]: any};
+    initialSettings: CustomSettings;
 }
 
 interface InjectedProps extends AppProps {
@@ -44,26 +46,26 @@ interface InjectedProps extends AppProps {
 
 enum KEYS {
     TAB = 9,
-    A = 65
+    A = 65,
 }
 
-declare var ENV: any;
+// declare let ENV: any;
 
 declare global {
     interface Window {
         appState: AppState;
         settingsState: SettingsState;
-        remote: any;
-        drivelist:any;
+        remote: Electron.Remote;
+        drivelist: any;
     }
 }
 
-@inject("settingsState")
+@inject('settingsState')
 @observer
 class App extends React.Component<AppProps> {
     private appState: AppState;
 
-    private get injected() {
+    private get injected(): InjectedProps {
         return this.props as InjectedProps;
     }
 
@@ -88,11 +90,11 @@ class App extends React.Component<AppProps> {
         // and the view would need to be created on the fly
         const defaultViews: Array<ViewDescriptor> = [
             { viewId: 0, path: path },
-            { viewId: 1, path: path }
+            { viewId: 1, path: path },
         ];
 
         this.appState = new AppState(defaultViews, {
-            splitView: props.initialSettings.splitView
+            splitView: props.initialSettings.splitView,
         });
 
         if (ENV.CY) {
@@ -103,16 +105,16 @@ class App extends React.Component<AppProps> {
         }
 
         Logger.success(
-            `React-Explorer ${ENV.VERSION} - CY: ${ENV.CY} - NODE_ENV: ${ENV.NODE_ENV} - lang: ${i18next.language}`
+            `React-Explorer ${ENV.VERSION} - CY: ${ENV.CY} - NODE_ENV: ${ENV.NODE_ENV} - lang: ${i18next.language}`,
         );
         Logger.success(`hash=${ENV.HASH}`);
         Logger.success(
-            `lang=${settingsState.lang}, darkMode=${settingsState.darkMode}, defaultFolder=${settingsState.defaultFolder}`
+            `lang=${settingsState.lang}, darkMode=${settingsState.darkMode}, defaultFolder=${settingsState.defaultFolder}`,
         );
         Logger.success(`package=${isPackage}`);
     }
 
-    onShortcutsCombo = (e: KeyboardEvent) => {
+    onShortcutsCombo = (e: KeyboardEvent): void => {
         // Little hack to prevent pressing tab key from focus an element:
         // we prevent the propagation of the tab key keydown event
         // but this will then prevent the menu accelerators from working
@@ -121,19 +123,18 @@ class App extends React.Component<AppProps> {
         // the app accessible.
         let caught = false;
         if (e.ctrlKey) {
-            switch(true) {
+            switch (true) {
                 case !ENV.CY && !isMac && e.keyCode === KEYS.A && shouldCatchEvent(e):
                     caught = true;
-                    sendFakeCombo("CmdOrCtrl+A");
+                    sendFakeCombo('CmdOrCtrl+A');
                     break;
 
                 case e.keyCode === KEYS.TAB:
                     caught = true;
-                    const combo = e.shiftKey ? "Ctrl+Shift+Tab" : "Ctrl+Tab";
+                    const combo = e.shiftKey ? 'Ctrl+Shift+Tab' : 'Ctrl+Tab';
                     sendFakeCombo(combo);
                     break;
             }
-
         } else if (shouldCatchEvent(e) && e.which === 191 && e.shiftKey) {
             caught = true;
         }
@@ -145,40 +146,40 @@ class App extends React.Component<AppProps> {
         }
     };
 
-    onCopyEvent = (e: Event) => {
-        console.log("copied event received!");
+    onCopyEvent = (e: Event): void => {
+        console.log('copied event received!');
         if (shouldCatchEvent(e)) {
             this.onCopy();
         }
     };
 
-    onPasteEvent = (e: Event) => {
-        console.log("paste event received!");
+    onPasteEvent = (e: Event): void => {
+        console.log('paste event received!');
         if (shouldCatchEvent(e)) {
             this.onPaste();
         }
     };
 
-    addListeners() {
+    addListeners(): void {
         // prevent builtin hotkeys dialog from opening: there are numerous problems with it
-        document.addEventListener("keydown", this.onShortcutsCombo, true);
+        document.addEventListener('keydown', this.onShortcutsCombo, true);
         // we need to listen to paste event because when selecting the copy/paste menuItem,
         // Electron won't call the menuItem.onClick event
-        document.addEventListener("copy", this.onCopyEvent);
-        document.addEventListener("paste", this.onPasteEvent);
+        document.addEventListener('copy', this.onCopyEvent);
+        document.addEventListener('paste', this.onPasteEvent);
         // sent when the window has been closed
-        ipcRenderer.on("exitRequest", (e: Event) => this.onExitRequest());
+        ipcRenderer.on('exitRequest', () => this.onExitRequest());
     }
 
-    showDownloadsTab = () => {
+    showDownloadsTab = (): void => {
         this.appState.showDownloadsTab();
     };
 
-    showExplorerTab = () => {
+    showExplorerTab = (): void => {
         this.appState.showExplorerTab();
     };
 
-    setActiveView(view: number) {
+    setActiveView(view: number): void {
         const winState = this.appState.winStates[0];
         winState.setActiveView(view);
     }
@@ -188,20 +189,18 @@ class App extends React.Component<AppProps> {
      * this prevents doing unwanted actions like selected elements when the
      * user simply wants to activate an inactive sideview
      */
-    handleClick = (e: React.MouseEvent) => {
-        const sideview = (e.target as HTMLElement).closest(".sideview");
-        const filetable = (e.target as HTMLElement).closest(
-            ".fileListSizerWrapper"
-        );
+    handleClick = (e: React.MouseEvent): void => {
+        const sideview = (e.target as HTMLElement).closest('.sideview');
+        const filetable = (e.target as HTMLElement).closest('.fileListSizerWrapper');
 
         if (sideview) {
-            const num = parseInt(sideview.id.replace("view_", ""), 10);
+            const num = parseInt(sideview.id.replace('view_', ''), 10);
             const winState = this.appState.winStates[0];
             const view = winState.getView(num);
             if (!view.isActive) {
                 // prevent selecting a row when the view gets activated
                 if (filetable) {
-                    console.log("preventing event propagation", e.target);
+                    console.log('preventing event propagation', e.target);
                     e.stopPropagation();
                 }
                 this.setActiveView(num);
@@ -209,52 +208,49 @@ class App extends React.Component<AppProps> {
         }
     };
 
-    onExitComboDown = () => {
+    onExitComboDown = (): void => {
         this.onExitRequest();
     };
 
-    onExitRequest = () => {
-        console.log("exitRequest");
+    onExitRequest = (): void => {
+        console.log('exitRequest');
         if (this.appState && this.appState.pendingTransfers) {
             this.setState({ isExitDialogOpen: true });
         } else {
-            console.log("sending readyToExit event");
-            ipcRenderer.send("readyToExit");
+            console.log('sending readyToExit event');
+            ipcRenderer.send('readyToExit');
         }
     };
 
-    componentDidMount() {
+    componentDidMount(): void {
         // listen for events from main electron process as well as webview
         this.addListeners();
         this.setDarkThemeClass();
         this.setPlatformClass();
     }
 
-    componentWillUnmount() {
-        document.removeEventListener("keydown", this.onShortcutsCombo);
-        document.removeEventListener("copy", this.onCopyEvent);
-        document.removeEventListener("paste", this.onPasteEvent);
-        ipcRenderer.removeAllListeners("exitRequest");
+    componentWillUnmount(): void {
+        document.removeEventListener('keydown', this.onShortcutsCombo);
+        document.removeEventListener('copy', this.onCopyEvent);
+        document.removeEventListener('paste', this.onPasteEvent);
+        ipcRenderer.removeAllListeners('exitRequest');
     }
 
-    componentDidUpdate() {
+    componentDidUpdate(): void {
         this.setDarkThemeClass();
 
         if (!ENV.CY) {
-            const progress =
-                (this.appState.pendingTransfers &&
-                    this.appState.totalTransferProgress) ||
-                -1;
+            const progress = (this.appState.pendingTransfers && this.appState.totalTransferProgress) || -1;
             remote.getCurrentWindow().setProgressBar(progress);
         }
     }
 
-    onExitDialogClose = (valid: boolean) => {
+    onExitDialogClose = (valid: boolean): void => {
         this.appState.isExitDialogOpen = false;
         if (!valid) {
             this.showDownloadsTab();
         } else {
-            ipcRenderer.send("readyToExit");
+            ipcRenderer.send('readyToExit');
         }
     };
 
@@ -264,13 +260,11 @@ class App extends React.Component<AppProps> {
         if (ignoreStatus || !state) {
             return state;
         } else {
-            return ignoreStatus
-                ? state
-                : (state.status === "ok" && state) || null;
+            return ignoreStatus ? state : (state.status === 'ok' && state) || null;
         }
     }
 
-    onCopy = () => {
+    onCopy = (): void => {
         const fileCache: FileState = this.getActiveFileCache();
 
         if (fileCache) {
@@ -279,12 +273,12 @@ class App extends React.Component<AppProps> {
 
             AppToaster.show(
                 {
-                    message: t("COMMON.CP_COPIED", { count: num }),
-                    icon: "tick",
-                    intent: Intent.NONE
+                    message: t('COMMON.CP_COPIED', { count: num }),
+                    icon: 'tick',
+                    intent: Intent.NONE,
                 },
                 undefined,
-                true
+                true,
             );
         }
     };
@@ -296,21 +290,21 @@ class App extends React.Component<AppProps> {
         if (fileCache && !fileCache.error && appState.clipboard.files.length) {
             this.appState
                 .prepareClipboardTransferTo(fileCache)
-                .then((noErrors: any) => {
+                .then((noErrors: boolean) => {
                     const { t } = this.injected;
                     if (noErrors) {
                         AppToaster.show({
-                            message: t("COMMON.COPY_FINISHED"),
-                            icon: "tick",
+                            message: t('COMMON.COPY_FINISHED'),
+                            icon: 'tick',
                             intent: Intent.SUCCESS,
-                            timeout: 3000
+                            timeout: 3000,
                         });
                     } else {
                         AppToaster.show({
-                            message: t("COMMON.COPY_WARNING"),
-                            icon: "warning-sign",
+                            message: t('COMMON.COPY_WARNING'),
+                            icon: 'warning-sign',
                             intent: Intent.WARNING,
-                            timeout: 5000
+                            timeout: 5000,
                         });
                     }
                 })
@@ -318,30 +312,30 @@ class App extends React.Component<AppProps> {
                     const { t } = this.injected;
                     const localizedError = getLocalizedError(err);
                     const message = err.code
-                        ? t("ERRORS.COPY_ERROR", {
-                              message: localizedError.message
+                        ? t('ERRORS.COPY_ERROR', {
+                              message: localizedError.message,
                           })
-                        : t("ERRORS.COPY_UNKNOWN_ERROR");
+                        : t('ERRORS.COPY_UNKNOWN_ERROR');
 
                     AppToaster.show({
                         message: message,
-                        icon: "error",
+                        icon: 'error',
                         intent: Intent.DANGER,
-                        timeout: 5000
+                        timeout: 5000,
                     });
                 });
         }
     };
 
-    closePrefs = () => {
+    closePrefs = (): void => {
         this.appState.isPrefsOpen = false;
     };
 
-    closeShortcuts = () => {
+    closeShortcuts = (): void => {
         this.appState.isShortcutsOpen = false;
     };
 
-    setDarkThemeClass() {
+    setDarkThemeClass(): void {
         const { settingsState } = this.injected;
         if (settingsState.isDarkModeActive) {
             document.body.classList.add(Classes.DARK);
@@ -350,16 +344,12 @@ class App extends React.Component<AppProps> {
         }
     }
 
-    setPlatformClass() {
+    setPlatformClass(): void {
         document.body.classList.add(platform);
     }
 
-    render() {
-        const {
-            isPrefsOpen,
-            isShortcutsOpen,
-            isExitDialogOpen
-        } = this.appState;
+    render(): React.ReactNode {
+        const { isPrefsOpen, isShortcutsOpen, isExitDialogOpen } = this.appState;
         const { settingsState } = this.injected;
         const isExplorer = this.appState.isExplorer;
         const count = this.appState.pendingTransfers;
@@ -368,7 +358,7 @@ class App extends React.Component<AppProps> {
         const isSplitView = winState.splitView;
         const mainClass = classNames('main', {
             singleView: !isSplitView,
-            dualView: isSplitView
+            dualView: isSplitView,
         });
         const viewStateLeft = winState.views[0];
         const viewStateRight = winState.views[1];
@@ -384,8 +374,8 @@ class App extends React.Component<AppProps> {
             <Provider appState={this.appState}>
                 <React.Fragment>
                     <Alert
-                        cancelButtonText={t("DIALOG.QUIT.BT_KEEP_TRANSFERS")}
-                        confirmButtonText={t("DIALOG.QUIT.BT_STOP_TRANSFERS")}
+                        cancelButtonText={t('DIALOG.QUIT.BT_KEEP_TRANSFERS')}
+                        confirmButtonText={t('DIALOG.QUIT.BT_STOP_TRANSFERS')}
                         icon="warning-sign"
                         intent={Intent.WARNING}
                         onClose={this.onExitDialogClose}
@@ -393,32 +383,20 @@ class App extends React.Component<AppProps> {
                     >
                         <p>
                             <Trans i18nKey="DIALOG.QUIT.CONTENT" count={count}>
-                                There are <b>{{ count }}</b> transfers{" "}
-                                <b>in progress</b>.<br />
+                                There are <b>{{ count }}</b> transfers <b>in progress</b>.<br />
                                 <br />
-                                Exiting the app now will <b>cancel</b> the
-                                downloads.
+                                Exiting the app now will <b>cancel</b> the downloads.
                             </Trans>
                         </p>
                     </Alert>
-                    <PrefsDialog
-                        isOpen={isPrefsOpen}
-                        onClose={this.closePrefs}
-                    ></PrefsDialog>
-                    <ShortcutsDialog
-                        isOpen={isShortcutsOpen}
-                        onClose={this.closeShortcuts}
-                    ></ShortcutsDialog>
+                    <PrefsDialog isOpen={isPrefsOpen} onClose={this.closePrefs}></PrefsDialog>
+                    <ShortcutsDialog isOpen={isShortcutsOpen} onClose={this.closeShortcuts}></ShortcutsDialog>
                     <MenuAccelerators onExitComboDown={this.onExitComboDown} />
                     <KeyboardHotkeys />
                     <Nav></Nav>
                     <div onClickCapture={this.handleClick} className={mainClass}>
                         <LeftPanel hide={!isExplorer}></LeftPanel>
-                        <SideView
-                            viewState={viewStateLeft}
-                            hide={!isExplorer}
-                            onPaste={this.onPaste}
-                        />
+                        <SideView viewState={viewStateLeft} hide={!isExplorer} onPaste={this.onPaste} />
                         <SideView
                             viewState={viewStateRight}
                             hide={!isExplorer || !isSplitView}

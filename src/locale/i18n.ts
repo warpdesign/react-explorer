@@ -1,10 +1,10 @@
 import i18next from 'i18next';
 import { ipcRenderer } from 'electron';
 
-const locales: any = {};
+const locales: i18next.Resource = {};
 
-function importAllLocales(r: any) {
-    r.keys().forEach((key: any) => {
+function importAllLocales(r: __WebpackModuleApi.RequireContext) {
+    r.keys().forEach((key: string) => {
         const code = key.match(/([a-zA-Z]+)\.json$/)[1];
         locales[code] = r(key);
     });
@@ -12,28 +12,27 @@ function importAllLocales(r: any) {
 
 importAllLocales(require['context']('./lang/', true, /\.json$/));
 
-i18next
-    .init({
-        lng: 'en',
-        // we init with resources
-        resources: locales,
-        fallbackLng: 'en',
-        debug: true,
+i18next.init({
+    lng: 'en',
+    // we init with resources
+    resources: locales,
+    fallbackLng: 'en',
+    debug: true,
 
-        // have a common namespace used around the full app
-        ns: ['translations'],
-        defaultNS: 'translations',
+    // have a common namespace used around the full app
+    ns: ['translations'],
+    defaultNS: 'translations',
 
-        interpolation: {
-            escapeValue: false, // not needed for react!!
-            formatSeparator: ','
-        },
-        react: {
-            wait: true
-        }
-    });
+    interpolation: {
+        escapeValue: false, // not needed for react!!
+        formatSeparator: ',',
+    },
+    react: {
+        wait: true,
+    },
+});
 
-i18next.on('languageChanged', () => {
+i18next.on('languageChanged', (): void => {
     ipcRenderer.send('languageChanged', i18next.t('APP_MENUS', { returnObjects: true }));
 });
 

@@ -1,47 +1,47 @@
-import * as React from "react";
-import { Tree, ITreeNode } from "@blueprintjs/core";
-import { observer, inject } from "mobx-react";
+import * as React from 'react';
+import { Tree, ITreeNode } from '@blueprintjs/core';
+import { observer, inject } from 'mobx-react';
 import { withNamespaces, WithNamespaces } from 'react-i18next';
-import classNames from "classnames";
-import { IReactionDisposer, reaction, toJS } from "mobx";
+import classNames from 'classnames';
+import { IReactionDisposer, reaction, toJS, IObservableArray } from 'mobx';
 import i18next from 'i18next';
-import { USERNAME, isMac } from "../utils/platform";
-import { hasWSL } from "../utils/wsl";
-import Icons from "../constants/icons";
-import { FavoritesState, Favorite } from "../state/favoritesState";
-import { AppState } from "../state/appState";
-import { AppAlert } from "./AppAlert";
+import { USERNAME, isMac } from '../utils/platform';
+import { hasWSL } from '../utils/wsl';
+import Icons from '../constants/icons';
+import { FavoritesState, Favorite } from '../state/favoritesState';
+import { AppState } from '../state/appState';
+import { AppAlert } from './AppAlert';
 import CONFIG from '../config/appConfig';
 
-declare var ENV: any;
+declare const ENV: { [key: string]: string | boolean | number | Record<string, unknown> };
 
-require("../css/favoritesPanel.css");
+require('../css/favoritesPanel.css');
 
 interface LeftPanelState {
     nodes: ITreeNode<string>[];
     selectedNode: ITreeNode<string>;
 }
 
-interface IProps extends WithNamespaces {
+interface Props extends WithNamespaces {
     hide: boolean;
 }
 
-interface InjectedProps extends IProps {
+interface InjectedProps extends Props {
     appState: AppState;
 }
 
 @inject('appState')
 @observer
-export class LeftPanelClass extends React.Component<IProps, LeftPanelState> {
+export class LeftPanelClass extends React.Component<Props, LeftPanelState> {
     favoritesState: FavoritesState;
-    disposers:Array<IReactionDisposer> = new Array();
+    disposers: Array<IReactionDisposer> = [];
     // we have to make an async call to check for WSL
     // so we first set it to false
-    showDistributions: boolean = false;
+    showDistributions = false;
 
-    constructor(props:IProps) {
+    constructor(props: Props) {
         super(props);
-        
+
         const { t } = props;
 
         this.state = {
@@ -51,17 +51,17 @@ export class LeftPanelClass extends React.Component<IProps, LeftPanelState> {
                     hasCaret: true,
                     isExpanded: true,
                     label: t('FAVORITES_PANEL.SHORTCUTS'),
-                    childNodes: []
+                    childNodes: [],
                 },
                 {
                     id: 1,
                     hasCaret: true,
                     isExpanded: true,
                     label: t('FAVORITES_PANEL.PLACES'),
-                    childNodes: []
-                }
+                    childNodes: [],
+                },
             ],
-            selectedNode: null
+            selectedNode: null,
         };
 
         this.favoritesState = this.injected.appState.favoritesState;
@@ -86,86 +86,87 @@ export class LeftPanelClass extends React.Component<IProps, LeftPanelState> {
                 hasCaret: true,
                 isExpanded: true,
                 label: t('FAVORITES_PANEL.LINUX'),
-                childNodes: []
+                childNodes: [],
             });
 
             this.setState({ nodes });
         }
         return this.showDistributions;
-    }
+    };
 
-    private bindLanguageChange = () => {
+    private bindLanguageChange = (): void => {
         console.log('languageChanged');
         i18next.on('languageChanged', this.onLanguageChanged);
-    }
+    };
 
-    private unbindLanguageChange = () => {
+    private unbindLanguageChange = (): void => {
         i18next.off('languageChanged', this.onLanguageChanged);
-    }
+    };
 
-    public onLanguageChanged = (lang: string) => {
+    public onLanguageChanged = (lang: string): void => {
         console.log('building nodes', lang);
         this.buildNodes(this.favoritesState);
-    }
+    };
 
-    private get injected() {
+    private get injected(): InjectedProps {
         return this.props as InjectedProps;
     }
 
-    componentWillUnmount() {
-        this.disposers.forEach(disposer => disposer());
+    componentWillUnmount(): void {
+        this.disposers.forEach((disposer) => disposer());
         this.unbindLanguageChange();
     }
 
-    private installReactions() {
-        this.disposers.push(reaction(
-            () => toJS(this.favoritesState.places),
-            (_: Favorite[]) => {
-                if (!this.props.hide) {
-                    console.log('places updated: need to rebuild nodes');
-                    this.buildNodes(this.favoritesState);
-                }
-            })
+    private installReactions(): void {
+        this.disposers.push(
+            reaction(
+                (): IObservableArray<Favorite> => toJS(this.favoritesState.places),
+                (/*_: Favorite[]*/): void => {
+                    if (!this.props.hide) {
+                        console.log('places updated: need to rebuild nodes');
+                        this.buildNodes(this.favoritesState);
+                    }
+                },
+            ),
         );
 
-        this.disposers.push(reaction(
-            () => toJS(this.favoritesState.distributions),
-            (_: Favorite[]) => {
-                if (!this.props.hide) {
-                    console.log('distributions updated: need to rebuild nodes');
-                    this.buildNodes(this.favoritesState);
-                }
-            })
+        this.disposers.push(
+            reaction(
+                (): IObservableArray<Favorite> => toJS(this.favoritesState.distributions),
+                (/*_: Favorite[]*/): void => {
+                    if (!this.props.hide) {
+                        console.log('distributions updated: need to rebuild nodes');
+                        this.buildNodes(this.favoritesState);
+                    }
+                },
+            ),
         );
     }
 
     /**
-     * 
+     *
      * @param path string attempts to find the first node with the given path
-     * 
+     *
      * @returns ITreeNode<string> | null
      */
-    getNodeFromPath(path:string):ITreeNode<string> {
-        const { nodes } = this.state;
+    getNodeFromPath(path: string): ITreeNode<string> {
+        const { nodes } = this.state;
         const shortcuts = nodes[0].childNodes;
         const places = nodes[1].childNodes;
 
-        const found = shortcuts.find(node => node.nodeData === path) || places.find(node => node.nodeData === path);
-        
+        const found = shortcuts.find((node) => node.nodeData === path) || places.find((node) => node.nodeData === path);
+
         if (found || !this.showDistributions) {
             return found;
         } else {
-
             const distribs = nodes[2].childNodes;
-            return distribs.find(node => node.nodeData === path);
+            return distribs.find((node) => node.nodeData === path);
         }
     }
 
-    setActiveNode(path:string) {
-        const { nodes } = this.state;
-        nodes.forEach(node => 
-            node.childNodes.forEach(childNode => childNode.isSelected = false)
-        );
+    setActiveNode(path: string): void {
+        const { nodes } = this.state;
+        nodes.forEach((node) => node.childNodes.forEach((childNode) => (childNode.isSelected = false)));
 
         // get active path based on path
         const selectedNode = this.getNodeFromPath(path);
@@ -174,7 +175,7 @@ export class LeftPanelClass extends React.Component<IProps, LeftPanelState> {
         }
     }
 
-    getActiveCachePath():string {
+    getActiveCachePath(): string {
         const { appState } = this.injected;
         const activeCache = appState.getActiveCache();
 
@@ -185,7 +186,7 @@ export class LeftPanelClass extends React.Component<IProps, LeftPanelState> {
         }
     }
 
-    openFavorite(path: string, sameView: boolean):void {
+    openFavorite(path: string, sameView: boolean): void {
         const { appState } = this.injected;
         if (sameView) {
             const activeCache = appState.getActiveCache();
@@ -208,36 +209,38 @@ export class LeftPanelClass extends React.Component<IProps, LeftPanelState> {
         }
     }
 
-    onNodeClick = async (node: ITreeNode<string>, _: number[], e: React.MouseEvent<HTMLElement>) => {
+    onNodeClick = async (node: ITreeNode<string>, _: number[], e: React.MouseEvent<HTMLElement>): Promise<void> => {
         try {
             await this.openFavorite(node.nodeData, !(isMac ? e.altKey : e.ctrlKey));
-        } catch(err) {
+        } catch (err) {
             AppAlert.show(`${err.message} (${err.code})`, {
-                intent: 'danger'
+                intent: 'danger',
             });
         }
-    }
+    };
 
-    onNodeToggle = (node: ITreeNode<string>) => {
+    onNodeToggle = (node: ITreeNode<string>): void => {
         node.isExpanded = !node.isExpanded;
         this.setState(this.state);
-    }
+    };
 
-    buildNodes(favorites:FavoritesState) {
+    buildNodes(favorites: FavoritesState): void {
         const { t } = this.props;
         const { nodes } = this.state;
         const shortcuts = nodes[0];
         const places = nodes[1];
         const distributions = nodes[2];
 
-        shortcuts.childNodes = favorites.shortcuts.map((shortcut, i) => ({
+        shortcuts.childNodes = favorites.shortcuts.map((shortcut) => ({
             id: `s_${shortcut.path}`,
             key: `s_${shortcut.path}`,
-            label: <span title={shortcut.path}>
+            label: (
+                <span title={shortcut.path}>
                     {shortcut.label === 'HOME_DIR' ? USERNAME : t(`FAVORITES_PANEL.${shortcut.label}`)}
-                    </span>,
+                </span>
+            ),
             icon: Icons[shortcut.label],
-            nodeData: shortcut.path
+            nodeData: shortcut.path,
         }));
 
         places.childNodes = favorites.places.map((place) => ({
@@ -245,7 +248,7 @@ export class LeftPanelClass extends React.Component<IProps, LeftPanelState> {
             key: `p_${place.path}`,
             label: <span title={place.path}>{place.label}</span>,
             icon: place.icon,
-            nodeData: place.path
+            nodeData: place.path,
         }));
 
         if (this.showDistributions && favorites.distributions) {
@@ -254,7 +257,7 @@ export class LeftPanelClass extends React.Component<IProps, LeftPanelState> {
                 key: `p_${distrib.path}`,
                 label: <span title={distrib.path}>{distrib.label}</span>,
                 icon: distrib.icon,
-                nodeData: distrib.path
+                nodeData: distrib.path,
             }));
         }
 
@@ -268,20 +271,23 @@ export class LeftPanelClass extends React.Component<IProps, LeftPanelState> {
         this.setState(this.state);
     }
 
-    render() {
+    render(): React.ReactNode {
         const path = this.getActiveCachePath();
         this.setActiveNode(path);
         const { nodes } = this.state;
         const classnames = classNames(`favoritesPanel ${CONFIG.CUSTOM_SCROLLBAR_CLASSNAME}`, {
-            hidden: this.props.hide
+            hidden: this.props.hide,
         });
 
-        return <Tree 
-            contents={nodes}
-            onNodeClick={this.onNodeClick}
-            onNodeCollapse={this.onNodeToggle}
-            onNodeExpand={this.onNodeToggle}
-            className={classnames} />;
+        return (
+            <Tree
+                contents={nodes}
+                onNodeClick={this.onNodeClick}
+                onNodeCollapse={this.onNodeToggle}
+                onNodeExpand={this.onNodeToggle}
+                className={classnames}
+            />
+        );
     }
 }
 

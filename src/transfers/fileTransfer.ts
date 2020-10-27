@@ -1,4 +1,5 @@
-import { File } from "../services/Fs";
+import { File } from '../services/Fs';
+import { LocalizedError } from '../locale/error';
 
 export interface FileTransfer {
     file: File;
@@ -7,5 +8,5 @@ export interface FileTransfer {
     subDirectory: string;
     newSub: string;
     ready: boolean;
-    error?: Error
+    error?: LocalizedError;
 }

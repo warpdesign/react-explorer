@@ -1,41 +1,41 @@
-import * as React from "react";
-import { Dialog, Classes, Intent, Button, InputGroup, FormGroup, Colors } from "@blueprintjs/core";
-import { inject } from "mobx-react";
-import { FileState } from "../../state/fileState";
-import { withNamespaces, WithNamespaces } from "react-i18next";
+import * as React from 'react';
+import { Dialog, Classes, Intent, Button, InputGroup, FormGroup, Colors } from '@blueprintjs/core';
+import { inject } from 'mobx-react';
+import { FileState } from '../../state/fileState';
+import { withNamespaces, WithNamespaces } from 'react-i18next';
 
-interface ILoginProps extends WithNamespaces {
+interface LoginProps extends WithNamespaces {
     isOpen: boolean;
-    onClose?: (user: string, password: string) => void
-    onValidation: (dir: string) => boolean
-};
+    onClose?: (user: string, password: string) => void;
+    onValidation: (dir: string) => boolean;
+}
 
-interface InjectedProps extends ILoginProps {
+interface InjectedProps extends LoginProps {
     fileCache: FileState;
 }
 
 type Error = {
     message: string;
-    code: number
+    code: number;
 };
 
-interface ILoginState {
-    user: string;
-    password: string;
-    server: string;
-    port: number;
-    connecting: boolean;
-    error: Error;
-    busy: boolean;
+interface LoginState {
+    user?: string;
+    password?: string;
+    server?: string;
+    port?: number;
+    connecting?: boolean;
+    error?: Error;
+    busy?: boolean;
 }
 
 const ENTER_KEY = 13;
 
 @inject('fileCache')
-class LoginDialogClass extends React.Component<ILoginProps, ILoginState> {
+class LoginDialogClass extends React.Component<LoginProps, LoginState> {
     private input: HTMLInputElement | null = null;
 
-    constructor(props: any) {
+    constructor(props: LoginProps) {
         super(props);
 
         const fileCache = this.injected.fileCache;
@@ -47,70 +47,69 @@ class LoginDialogClass extends React.Component<ILoginProps, ILoginState> {
             server: fileCache.server,
             error: null as Error,
             busy: false,
-            port: 21
+            port: 21,
         };
 
         this.state = Object.assign(defaultState, fileCache.credentials);
     }
 
-    private get injected() {
+    private get injected(): InjectedProps {
         return this.props as InjectedProps;
     }
 
-    onKeyUp = (e: KeyboardEvent) => {
+    onKeyUp = (e: KeyboardEvent): void => {
         if (e.keyCode === ENTER_KEY) {
             // we assume anonymous login if no username specified
             if (this.canLogin()) {
                 this.onLogin();
             }
         }
-    }
+    };
 
-    private cancelClose = () => {
+    private cancelClose = (): void => {
         console.log('handleClose');
         if (!this.state.busy) {
-            this.props.onClose("", "");
+            this.props.onClose('', '');
         }
-    }
+    };
 
-    private onLogin = () => {
+    private onLogin = (): void => {
         const { user, password, port, server } = this.state;
         const { fileCache } = this.injected;
         console.log('onLogin', user, '****');
         this.setState({ busy: true, error: null });
 
-        fileCache.doLogin(server, { user, password, port })
-            .catch((err) => {
-                this.setState({ error: err, busy: false });
-                this.input.focus();
-            });
-    }
+        fileCache.doLogin(server, { user, password, port }).catch((err) => {
+            this.setState({ error: err, busy: false });
+            this.input.focus();
+        });
+    };
 
-    private onInputChange = (event: React.FormEvent<HTMLElement>) => {
+    private onInputChange = (event: React.FormEvent<HTMLElement>): void => {
         const val = (event.target as HTMLInputElement).value;
         const name = (event.target as HTMLInputElement).name;
-        const state: any = {};
-        state[name] = val;
+        const state: Partial<LoginState> = {};
+        (state as any)[name] = val;
 
         this.setState(state);
-    }
+    };
 
-    private refHandler = (input: HTMLInputElement) => {
+    private refHandler = (input: HTMLInputElement): void => {
         this.input = input;
-    }
+    };
 
-    private canLogin = () => {
+    private canLogin = (): boolean => {
         const { busy, user, password, server } = this.state;
 
-        return server.length && !busy && !!(!user.length || (user.length && password.length));
-    }
+        return !!server.length && !busy && !!(!user.length || (user.length && password.length));
+    };
 
-    componentDidMount() {
+    componentDidMount(): void {
         this.setState({ error: null, busy: false });
         document.addEventListener('keyup', this.onKeyUp);
     }
 
-    componentWillUnmount() {
+    componentWillUnmount(): void {
         document.removeEventListener('keyup', this.onKeyUp);
     }
 
@@ -123,7 +122,7 @@ class LoginDialogClass extends React.Component<ILoginProps, ILoginState> {
     //     console.timeEnd('Login Render');
     // }
 
-    public render() {
+    public render(): React.ReactNode {
         const { user, password, busy, error, port, server } = this.state;
         const { t } = this.props;
 
@@ -144,12 +143,12 @@ class LoginDialogClass extends React.Component<ILoginProps, ILoginState> {
                 className="loginDialog"
             >
                 <div className={Classes.DIALOG_BODY}>
-                    {error && (<p className="error" style={{ backgroundColor: Colors.RED4 }}>{t('ERRORS.GENERIC', { error })}</p>)}
-                    <FormGroup
-                        inline={true}
-                        labelFor="server"
-                        labelInfo={t('DIALOG.LOGIN.SERVER')}
-                    >
+                    {error && (
+                        <p className="error" style={{ backgroundColor: Colors.RED4 }}>
+                            {t('ERRORS.GENERIC', { error })}
+                        </p>
+                    )}
+                    <FormGroup inline={true} labelFor="server" labelInfo={t('DIALOG.LOGIN.SERVER')}>
                         <InputGroup
                             onChange={this.onInputChange}
                             placeholder={t('DIALOG.LOGIN.SERVER_NAME')}
@@ -164,7 +163,7 @@ class LoginDialogClass extends React.Component<ILoginProps, ILoginState> {
                         inline={true}
                         labelFor="user"
                         labelInfo={t('DIALOG.LOGIN.USERNAME')}
-                        helperText={(<span>{t('DIALOG.LOGIN.HINT_USERNAME')}</span>)}
+                        helperText={<span>{t('DIALOG.LOGIN.HINT_USERNAME')}</span>}
                     >
                         <InputGroup
                             onChange={this.onInputChange}
@@ -195,11 +194,7 @@ class LoginDialogClass extends React.Component<ILoginProps, ILoginState> {
                             leftIcon="lock"
                         />
                     </FormGroup>
-                    <FormGroup
-                        inline={true}
-                        labelFor="port"
-                        labelInfo={t('DIALOG.LOGIN.PORT')}
-                    >
+                    <FormGroup inline={true} labelFor="port" labelInfo={t('DIALOG.LOGIN.PORT')}>
                         <InputGroup
                             onChange={this.onInputChange}
                             disabled={busy}
@@ -213,14 +208,21 @@ class LoginDialogClass extends React.Component<ILoginProps, ILoginState> {
                 </div>
                 <div className={Classes.DIALOG_FOOTER}>
                     <div className={Classes.DIALOG_FOOTER_ACTIONS}>
-                        <Button onClick={this.cancelClose} disabled={busy}>{t('COMMON.CANCEL')}</Button>
-                        <Button loading={busy} intent={Intent.PRIMARY} onClick={this.onLogin} disabled={!this.canLogin()}>
+                        <Button onClick={this.cancelClose} disabled={busy}>
+                            {t('COMMON.CANCEL')}
+                        </Button>
+                        <Button
+                            loading={busy}
+                            intent={Intent.PRIMARY}
+                            onClick={this.onLogin}
+                            disabled={!this.canLogin()}
+                        >
                             {t('DIALOG.LOGIN.LOGIN')}
                         </Button>
                     </div>
                 </div>
             </Dialog>
-        )
+        );
     }
 }
 

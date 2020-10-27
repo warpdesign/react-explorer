@@ -1,15 +1,25 @@
 import { i18next } from './i18n';
 import { isWin } from '../utils/platform';
 
-export function getLocalizedError(error: any) {
-    let niceError = error;
+export interface LocalizedError {
+    code?: string | number;
+    message?: string;
+}
 
-    if (typeof error.code === 'undefined') {
-        debugger;
-        niceError = {};
+export interface IOError {
+    code: string | number;
+    newName?: string;
+}
+
+export function getLocalizedError(error: string | IOError): LocalizedError {
+    // let niceError = error;
+    const niceError: LocalizedError = {};
+
+    if (typeof error === 'string') {
+        const str = error as string;
 
         switch (true) {
-            case /EHOSTDOWN/.test(error):
+            case /EHOSTDOWN/.test(str):
                 niceError.code = 'EHOSTDOWN';
                 break;
 
@@ -17,6 +27,8 @@ export function getLocalizedError(error: any) {
                 niceError.code = 'NOCODE';
                 break;
         }
+    } else {
+        niceError.code = (error as IOError).code;
     }
 
     switch (niceError.code) {
@@ -53,9 +65,12 @@ export function getLocalizedError(error: any) {
             break;
 
         case 'BAD_FILENAME':
-            const acceptedChars = isWin ? i18next.t('ERRORS.WIN_VALID_FILENAME') : i18next.t('ERRORS.UNIX_VALID_FILENAME');
+            const acceptedChars = isWin
+                ? i18next.t('ERRORS.WIN_VALID_FILENAME')
+                : i18next.t('ERRORS.UNIX_VALID_FILENAME');
 
-            niceError.message = i18next.t('ERRORS.BAD_FILENAME', { entry: error.newName }) + '. ' + acceptedChars;
+            niceError.message =
+                i18next.t('ERRORS.BAD_FILENAME', { entry: (error as IOError).newName }) + '. ' + acceptedChars;
             break;
 
         case 'EHOSTDOWN':

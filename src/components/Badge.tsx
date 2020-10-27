@@ -1,20 +1,20 @@
 import * as React from 'react';
 import { Intent, Spinner } from '@blueprintjs/core';
 
-interface IProps {
+interface Props {
     intent?: Intent;
     text?: string;
     progress?: number;
 }
 
-export class Badge extends React.Component<IProps> {
+export class Badge extends React.Component<Props> {
     static defaultProps = {
         intent: Intent.NONE,
         text: '1',
-        progress: 0
-    }
+        progress: 0,
+    };
 
-    constructor(props:IProps) {
+    constructor(props: Props) {
         super(props);
     }
 
@@ -27,12 +27,15 @@ export class Badge extends React.Component<IProps> {
     //     console.timeEnd('Badge Render');
     // }
 
-    render() {
+    render(): React.ReactNode {
         const { intent, text, progress } = this.props;
 
         if (text) {
             return (
-                <div className={`bp3-badge bp3-intent-${intent}`}><span className="bp3-badge-content">{text}</span><Spinner size={20} value={progress}></Spinner></div>
+                <div className={`bp3-badge bp3-intent-${intent}`}>
+                    <span className="bp3-badge-content">{text}</span>
+                    <Spinner size={20} value={progress}></Spinner>
+                </div>
             );
         } else {
             return null;
