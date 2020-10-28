@@ -189,7 +189,7 @@ class PrefsDialogClass extends React.Component<PrefsProps, State> {
     testTerminal = (): void => {
         const { settingsState } = this.injected;
         const path = settingsState.getTerminalCommand(HOME_DIR);
-        ipcRenderer.send('openTerminal', path);
+        ipcRenderer.invoke('openTerminal', path);
     };
 
     public render(): React.ReactNode {

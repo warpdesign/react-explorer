@@ -1,6 +1,6 @@
 import { FSWatcher, watch } from 'fs';
 import { debounce } from '../../utils/debounce';
-import { ipcRenderer } from 'electron';
+import { ipcRenderer, ipcMain } from 'electron';
 
 export type WatcherCB = (filename: string) => void;
 
@@ -82,11 +82,11 @@ export const LocalWatch = {
 };
 
 if (ipcRenderer) {
-    ipcRenderer.send('needsCleanup');
+    ipcRenderer.invoke('needsCleanup');
     ipcRenderer.on('cleanup', () => {
         console.log('cleanup received, closing watchers');
         LocalWatch.closeAll();
         console.log('cleanup received, sending cleanedUp');
-        ipcRenderer.send('cleanedUp');
+        ipcRenderer.invoke('cleanedUp');
     });
 }

@@ -218,7 +218,7 @@ class App extends React.Component<AppProps> {
             this.setState({ isExitDialogOpen: true });
         } else {
             console.log('sending readyToExit event');
-            ipcRenderer.send('readyToExit');
+            ipcRenderer.invoke('readyToExit');
         }
     };
 
@@ -250,7 +250,7 @@ class App extends React.Component<AppProps> {
         if (!valid) {
             this.showDownloadsTab();
         } else {
-            ipcRenderer.send('readyToExit');
+            ipcRenderer.invoke('readyToExit');
         }
     };
 

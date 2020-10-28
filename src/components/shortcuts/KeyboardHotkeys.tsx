@@ -102,7 +102,7 @@ class KeyboardHotkeysClass extends React.Component<WithNamespaces> {
     };
 
     onOpenDevTools = (): void => {
-        ipcRenderer.send('openDevTools');
+        ipcRenderer.invoke('openDevTools');
     };
 
     onShowHistory = (): void => {

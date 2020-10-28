@@ -679,7 +679,7 @@ export class FileTableClass extends React.Component<Props, State> {
             this.selectAll();
         } else {
             // need to select all text: send message
-            ipcRenderer.send('selectAll');
+            ipcRenderer.invoke('selectAll');
         }
     };
 
