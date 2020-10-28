@@ -164,23 +164,23 @@ const ElectronApp = {
 
         ipcMain.on('reloadIgnoringCache', () => this.reloadApp());
 
-        ipcMain.on('readyToExit', () => {
+        ipcMain.handle('readyToExit', () => {
             console.log('readyToExit');
             this.cleanupAndExit();
         });
 
-        ipcMain.on('openDevTools', () => {
+        ipcMain.handle('openDevTools', () => {
             console.log('should open dev tools');
             this.openDevTools(true);
         });
 
-        ipcMain.on('openTerminal', (event: Event, cmd: string) => {
+        ipcMain.handle('openTerminal', (event: Event, cmd: string) => {
             console.log('running', cmd);
             const exec = child_process.exec;
             exec(cmd).unref();
         });
 
-        ipcMain.on('languageChanged', (e: Event, strings: LocaleString) => {
+        ipcMain.handle('languageChanged', (e: Event, strings: LocaleString) => {
             if (this.appMenu) {
                 this.appMenu.createMenu(strings);
             } else {
@@ -188,21 +188,21 @@ const ElectronApp = {
             }
         });
 
-        ipcMain.on('selectAll', () => {
+        ipcMain.handle('selectAll', () => {
             if (this.mainWindow) {
                 this.mainWindow.webContents.selectAll();
             }
         });
 
-        ipcMain.on('needsCleanup', () => {
+        ipcMain.handle('needsCleanup', () => {
             console.log('needscleanup');
             this.cleanupCounter++;
             console.log('needscleanup, counter now:', this.cleanupCounter);
         });
-        ipcMain.on('cleanedUp', () => this.onCleanUp());
+        ipcMain.handle('cleanedUp', () => this.onCleanUp());
 
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        ipcMain.on('setWindowSettings', (_: Event, data: { [key: string]: any }) => {
+        ipcMain.handle('setWindowSettings', (_: Event, data: { [key: string]: any }) => {
             console.log('changeWindowSettings', data);
             const { id, settings } = data;
             const state = WindowSettings.getSettings(id);

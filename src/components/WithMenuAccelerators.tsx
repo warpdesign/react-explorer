@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { ipcRenderer, remote } from 'electron';
+import { ipcRenderer, remote, IpcRendererEvent } from 'electron';
 
 const ACCELERATOR_EVENT = 'menu_accelerator';
 
@@ -78,7 +78,7 @@ export function WithMenuAccelerators<T extends Constructor<MenuAcceleratorCompon
         }
 
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        onAccelerator = (e: MenuAcceleratorEvent, data: { combo: string; data: any }) => {
+        onAccelerator = (e: IpcRendererEvent, data: { combo: string; data: any }) => {
             // check if combo is valid
             const callback = this.getCallback(data.combo);
             if (typeof callback === 'function') {

@@ -559,7 +559,7 @@ export class FileState {
 
     openTerminal(path: string): void {
         if (this.getFS().name === 'local') {
-            ipcRenderer.send('openTerminal', path);
+            ipcRenderer.invoke('openTerminal', path);
         }
     }
 

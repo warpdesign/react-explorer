@@ -158,7 +158,9 @@ export class SettingsState {
         }
 
         if (this.darkMode === 'auto') {
-            this.isDarkModeActive = isMojave && systemPreferences ? systemPreferences.isDarkMode() : false;
+            // CHECKME!
+            // this.isDarkModeActive = isMojave && systemPreferences ? systemPreferences.isDarkMode() : false;
+            this.isDarkModeActive = isMojave && remote.nativeTheme.shouldUseDarkColors;
         } else {
             this.isDarkModeActive = this.darkMode;
         }

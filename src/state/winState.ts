@@ -37,7 +37,7 @@ export class WinState {
 
         // send new value to main process
         console.log('calling setWindowSettings', this.toJSON);
-        ipcRenderer.send('setWindowSettings', this.toJSON);
+        ipcRenderer.invoke('setWindowSettings', this.toJSON);
     }
 
     @computed

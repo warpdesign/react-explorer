@@ -1,5 +1,5 @@
 module.exports = {
-    exec: function(_, cb) {
+    exec: function (_, cb) {
         cb();
-    }
+    },
 };

@@ -47,7 +47,7 @@ export class AppMenu {
         ipcMain.emit('reloadIgnoringCache');
     };
 
-    showAboutDialog = (): void => {
+    showAboutDialog = async (): void => {
         const version = app.getVersion();
         const detail = this.menuStrings['ABOUT_CONTENT']
             .replace('${version}', version)
@@ -57,24 +57,20 @@ export class AppMenu {
             : [this.menuStrings['OK'], this.menuStrings['COPY']];
         const defaultId = buttons.indexOf(this.menuStrings['OK']);
 
-        dialog.showMessageBox(
-            null,
-            {
-                title: this.menuStrings['ABOUT_TITLE'],
-                type: 'question',
-                message: this.menuStrings['ABOUT_TITLE'],
-                detail,
-                buttons,
-                noLink: true,
-                defaultId,
-            },
-            (result): void => {
-                // copy details to clipboard if copy button was pressed
-                if (result !== defaultId) {
-                    clipboard.writeText(detail);
-                }
-            },
-        );
+        const { response } = await dialog.showMessageBox(null, {
+            title: this.menuStrings['ABOUT_TITLE'],
+            type: 'question',
+            message: this.menuStrings['ABOUT_TITLE'],
+            detail,
+            buttons,
+            noLink: true,
+            defaultId,
+        });
+
+        // copy details to clipboard if copy button was pressed
+        if (response !== defaultId) {
+            clipboard.writeText(detail);
+        }
     };
 
     getMenuTemplate(): MenuItemConstructorOptions[] {

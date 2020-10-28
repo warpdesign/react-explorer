@@ -33,7 +33,7 @@ i18next.init({
 });
 
 i18next.on('languageChanged', (): void => {
-    ipcRenderer.send('languageChanged', i18next.t('APP_MENUS', { returnObjects: true }));
+    ipcRenderer.invoke('languageChanged', i18next.t('APP_MENUS', { returnObjects: true }));
 });
 
 const languageList = Object.keys(locales);
