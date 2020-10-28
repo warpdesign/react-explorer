@@ -54,7 +54,6 @@ export class Accelerator extends React.PureComponent<AcceleratorProps> {
 export function sendFakeCombo(combo: string, data?: any): void {
     console.log('sending fake combo');
     const id = remote.getCurrentWindow().id;
-    // CHECKME!
     ipcRenderer.sendTo(id, ACCELERATOR_EVENT, Object.assign({ combo: combo, data }));
 }
 

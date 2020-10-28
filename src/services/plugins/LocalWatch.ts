@@ -1,6 +1,6 @@
 import { FSWatcher, watch } from 'fs';
 import { debounce } from '../../utils/debounce';
-import { ipcRenderer, ipcMain } from 'electron';
+import { ipcRenderer } from 'electron';
 
 export type WatcherCB = (filename: string) => void;
 

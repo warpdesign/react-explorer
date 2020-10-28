@@ -174,11 +174,6 @@ const ElectronApp = {
             this.openDevTools(true);
         });
 
-        // ipcMain.on('openTerminal', (event: Event, cmd: string) => {
-        //     console.log('running', cmd);
-        //     const exec = child_process.exec;
-        //     exec(cmd).unref();
-        // });
         ipcMain.handle('openTerminal', (event: Event, cmd: string) => {
             console.log('running', cmd);
             const exec = child_process.exec;

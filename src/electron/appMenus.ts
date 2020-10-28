@@ -217,7 +217,6 @@ export class AppMenu {
 
         if (isMac) {
             (template as MenuItemConstructorOptions[]).unshift({
-                // CHECKME!
                 label: app.getName(),
                 submenu: [
                     {
