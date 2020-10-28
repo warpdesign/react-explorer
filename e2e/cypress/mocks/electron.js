@@ -1,41 +1,50 @@
 module.exports = {
     ipcRenderer: {
-        send: function() {
-
+        send: function () {
+            //
         },
-        sendTo: function() {
-
+        sendTo: function () {
+            //
         },
-        on: function(event, method) {
-            document.addEventListener(event, function(e) {
+        on: function (event, method) {
+            document.addEventListener(event, function (e) {
                 method(e, { data: e.data, combo: e.combo });
             });
-        }
+        },
+        invoke: function () {
+            //
+        },
     },
     remote: {
         getCurrentWindow: () => ({
-            id: 9
+            id: 9,
         }),
         Menu: {
-            buildFromTemplate: function() {
+            buildFromTemplate: function () {
                 return {
-                    popup: function() {
-
+                    popup: function () {
+                        //
                     },
-                    closePopup: function() {
-
-                    }
+                    closePopup: function () {
+                        //
+                    },
                 };
-            }
+            },
         },
         app: {
-            getLocale: function() {
-                return "en";
+            getLocale: function () {
+                return 'en';
             },
-            getPath: function(str) {
-                return "/cy/" + str;
-            }
-        }
-    }
+            getPath: function (str) {
+                return '/cy/' + str;
+            },
+            getName: function () {
+                return 'React-Explorer (Cypress)';
+            },
+        },
+        // new in 7.0
+        nativeTheme: {
+            shouldUseDarkColors: false,
+        },
+    },
 };
-

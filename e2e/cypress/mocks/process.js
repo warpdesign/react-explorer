@@ -1,4 +1,4 @@
 module.exports = {
-    process: "React-Explorer",
-    platform: __PLATFORM__
-}
+    process: 'React-Explorer',
+    platform: __PLATFORM__,
+};
