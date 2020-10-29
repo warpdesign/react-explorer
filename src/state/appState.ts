@@ -210,7 +210,7 @@ export class AppState {
         const batch = this.transfers.find((transfer) => transfer.id === batchId);
         const api = batch.dstFs;
         const path = api.join(file.dir, file.fullname);
-        shell.openItem(path);
+        shell.openPath(path);
     }
 
     /**
