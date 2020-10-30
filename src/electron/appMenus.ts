@@ -18,10 +18,10 @@ export class AppMenu {
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    sendComboEvent = (menuItem: MenuItem & { accelerator: string }, data?: any) => {
+    sendComboEvent = (menuItem: MenuItem & { accelerator: string }) => {
         const accel = menuItem.accelerator || '';
         console.log('sending', menuItem.label, accel);
-        this.win.webContents.send(ACCELERATOR_EVENT, Object.assign({ combo: accel, data }));
+        this.win.webContents.send(ACCELERATOR_EVENT, Object.assign({ combo: accel, data: undefined }));
     };
 
     sendSelectAll = (): void => {
