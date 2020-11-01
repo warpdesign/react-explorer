@@ -45,6 +45,9 @@ module.exports = {
         // new in 7.0
         nativeTheme: {
             shouldUseDarkColors: false,
+            on: () => {
+                //
+            }
         },
     },
 };
