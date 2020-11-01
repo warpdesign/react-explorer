@@ -7,11 +7,13 @@ import { AppMenu, LocaleString } from './appMenus';
 import { isPackage, isLinux } from '../utils/platform';
 import { WindowSettings } from './windowSettings';
 
-// declare var __dirname: string
-
 const ENV_E2E = !!process.env.E2E;
 const SOURCE_PATH = './build';
 const HTML_PATH = `${__dirname}/index.html`;
+
+// allow non-content-aware native modules, needed for drivelist
+// see: https://github.com/balena-io-modules/drivelist/issues/373
+app.allowRendererProcessReuse = false;
 
 const ElectronApp = {
     mainWindow: null as Electron.BrowserWindow,
@@ -271,9 +273,12 @@ const ElectronApp = {
      */
     onReady(): void {
         console.log('App Ready');
-        if (!ENV_E2E && !isPackage) {
-            this.installReactDevTools();
-        }
+        // react-devtools doesn't work properly with file:// scheme, starting with Electron 9
+        // see: https://github.com/electron/electron/issues/24011 &
+        // https://github.com/electron/electron/pull/25151
+        // if (!ENV_E2E && !isPackage) {
+        //     this.installReactDevTools();
+        // }
 
         this.installIpcMainListeners();
         this.createMainWindow();

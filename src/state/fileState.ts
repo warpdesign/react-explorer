@@ -537,7 +537,8 @@ export class FileState {
     async openFile(appState: AppState, cache: FileState, file: File): Promise<void> {
         try {
             const path = await appState.prepareLocalTransfer(cache, [file]);
-            if (this.shellOpenFile(path) !== true) {
+            const error = await this.shellOpenFile(path);
+            if (error !== false) {
                 throw {
                     message: i18next.t('ERRORS.SHELL_OPEN_FAILED', { path }),
                     code: 'NO_CODE',
@@ -548,9 +549,10 @@ export class FileState {
         }
     }
 
-    shellOpenFile(path: string): boolean {
+    async shellOpenFile(path: string): Promise<boolean> {
         console.log('need to open file', path);
-        return shell.openItem(path);
+        const error = await shell.openPath(path);
+        return !!error;
     }
 
     openDirectory(file: { dir: string; fullname: string }): Promise<string | void> {
