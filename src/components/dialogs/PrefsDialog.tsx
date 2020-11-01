@@ -6,6 +6,7 @@ import { SettingsState } from '../../state/settingsState';
 import { inject } from 'mobx-react';
 import { Select, ItemRenderer } from '@blueprintjs/select';
 import { FsLocal, FolderExists } from '../../services/plugins/FsLocal';
+import { AppAlert } from '../AppAlert';
 import { ipcRenderer } from 'electron';
 import { HOME_DIR } from '../../utils/platform';
 
@@ -186,10 +187,17 @@ class PrefsDialogClass extends React.Component<PrefsProps, State> {
         settingsState.saveSettings();
     };
 
-    testTerminal = (): void => {
-        const { settingsState } = this.injected;
+    testTerminal = async (): Promise<void> => {
+        const { settingsState, t } = this.injected;
         const path = settingsState.getTerminalCommand(HOME_DIR);
-        ipcRenderer.invoke('openTerminal', path);
+        const error: { code: number; terminal: string } = await ipcRenderer.invoke('openTerminal', path);
+        if (error) {
+            const { code, terminal } = error;
+            AppAlert.show(t('DIALOG.PREFS.TEST_TERMINAL_FAILED', { terminal, code }), {
+                intent: Intent.DANGER,
+                icon: 'error',
+            });
+        }
     };
 
     public render(): React.ReactNode {

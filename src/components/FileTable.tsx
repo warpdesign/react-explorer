@@ -177,11 +177,11 @@ export class FileTableClass extends React.Component<Props, State> {
     public componentDidUpdate(): void {
         const scrollTop = this.state.position === -1 ? this.cache.scrollTop : null;
         const viewState = this.injected.viewState;
-        if (!viewState.viewId) {
-            console.log('componentDidUpdate', this.state.position, this.cache.scrollTop, scrollTop);
-        }
+        // if (!viewState.viewId) {
+        //     console.log('componentDidUpdate', this.state.position, this.cache.scrollTop, scrollTop);
+        // }
 
-        // edge case: previous saved scrollTop isn't good anymore
+        // edge case: previous saved scrollTop isn't valid anymore
         // eg. files have been deleted, or selected item has been renamed,
         // so that using previous scrollTop would hide the selected item
         // if (/*scrollTop !== null && scrollTop > -1*/1) {

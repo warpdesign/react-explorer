@@ -559,9 +559,10 @@ export class FileState {
         return this.cd(file.dir, file.fullname).catch(this.handleError);
     }
 
-    openTerminal(path: string): void {
+    async openTerminal(path: string): Promise<boolean> {
         if (this.getFS().name === 'local') {
-            ipcRenderer.invoke('openTerminal', path);
+            const error: { code: number } = await ipcRenderer.invoke('openTerminal', path);
+            return !!error;
         }
     }
 

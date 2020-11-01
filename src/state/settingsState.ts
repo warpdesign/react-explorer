@@ -49,7 +49,7 @@ export class SettingsState {
     }
 
     installListeners(): void {
-        remote.nativeTheme.on('updated', () => console.log('updated') || this.setActiveTheme());
+        remote.nativeTheme.on('updated', () => this.setActiveTheme());
     }
 
     getParam(name: string): JSObject {

@@ -70,7 +70,8 @@
                 "INVALID_FOLDER": "Nom de dossier invalide ou introuvable",
                 "DEFAULT_TERMINAL": "Terminal externe",
                 "DEFAULT_TERMINAL_HELP": "Spécifie le type de terminal à lancer",
-                "TEST_TERMINAL": "Cliquez ici pour lancer le terminal specifié"
+                "TEST_TERMINAL": "Cliquez ici pour lancer le terminal specifié",
+                "TEST_TERMINAL_FAILED": "Impossible de lancer le terminal spécifié: {{terminal}} (code de retour: {{code}})"
             },
             "DELETE": {
                 "CONFIRM": "Etes-vous sûr de vouloir supprimer <1>{{count}}</1> fichier(s)/dossier(s) ?<3 /><4 />Cette action supprimera de manière <6>permanente</6> les éléments sélectionnés."
@@ -199,7 +200,8 @@
             "NODEST": "la destination de la copie n'est pas accessible",
             "COPY_ERROR": "La copie n'a pu s'effectuer: {{message}}",
             "COPY_UNKNOWN_ERROR": "Impossible de copier les fichiers demandés.",
-            "SHELL_OPEN_FAILED": "Impossible d'ouvrir le fichier: {{path}}"
+            "SHELL_OPEN_FAILED": "Impossible d'ouvrir le fichier: {{path}}",
+            "OPEN_TERMINAL_FAILED": "Impossible d'ouvrir le terminal. Vérifiez le chemin du terminal dans les paramètres."
         },
         "MAIN_PROCESS": {
             "PRESS_TO_EXIT": "Maintenez la touche ⌘Q enfoncée pour quitter"
