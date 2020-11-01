@@ -49,12 +49,7 @@ export class SettingsState {
     }
 
     installListeners(): void {
-        // systemPreferences may not be defined if running outside of Electron
-        if (isMojave && systemPreferences) {
-            systemPreferences.subscribeNotification('AppleInterfaceThemeChangedNotification', () =>
-                this.setActiveTheme(),
-            );
-        }
+        remote.nativeTheme.on('updated', () => console.log('updated') || this.setActiveTheme());
     }
 
     getParam(name: string): JSObject {
@@ -160,7 +155,7 @@ export class SettingsState {
         if (this.darkMode === 'auto') {
             // CHECKME!
             // this.isDarkModeActive = isMojave && systemPreferences ? systemPreferences.isDarkMode() : false;
-            this.isDarkModeActive = isMojave && remote.nativeTheme.shouldUseDarkColors;
+            this.isDarkModeActive = remote.nativeTheme.shouldUseDarkColors;
         } else {
             this.isDarkModeActive = this.darkMode;
         }
