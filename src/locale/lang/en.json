@@ -70,7 +70,8 @@
                 "INVALID_FOLDER": "Invalid folder name or non-existing folder",
                 "DEFAULT_TERMINAL": "External terminal",
                 "DEFAULT_TERMINAL_HELP": "Customizes what kind of terminal to launch",
-                "TEST_TERMINAL": "Click here to launch the specified external terminal"
+                "TEST_TERMINAL": "Click here to launch the specified external terminal",
+                "TEST_TERMINAL_FAILED": "Unable to start specified terminal: {{terminal}} (return code: {{code}})"
             },
             "DELETE": {
                 "CONFIRM": "Are you sure you want to delete <1>{{count}}</1> file(s)/folder(s)?<3 /><4 />This action will <6>permanentaly</6> delete the selected elements."
@@ -199,7 +200,8 @@
             "NODEST": "copy target could not be accessed",
             "COPY_ERROR": "Couldn't copy files: {{message}}",
             "COPY_UNKNOWN_ERROR": "Error while copying files.",
-            "SHELL_OPEN_FAILED": "Could not open file: {{path}}"
+            "SHELL_OPEN_FAILED": "Could not open file: {{path}}",
+            "OPEN_TERMINAL_FAILED": "Could not open terminal. Check that the path is correct in the settings."
         },
         "MAIN_PROCESS": {
             "PRESS_TO_EXIT": "Keep pressing ⌘Q to exit"

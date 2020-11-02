@@ -99,27 +99,36 @@ class MenuAcceleratorsClass extends React.Component<Props> {
         }
     };
 
-    onOpenTerminal = (_: string, data: { viewId: number; tabIndex: number }) => {
+    onOpenTerminal = async (_: string, data: { viewId: number; tabIndex: number }) => {
         let cache: FileState;
 
-        if (typeof data.viewId === 'undefined') {
+        if (!data || typeof data.viewId === 'undefined') {
             cache = this.getActiveFileCache();
         } else {
             const winState = this.appState.winStates[0];
             const view = winState.views[data.viewId];
             cache = view.caches[data.tabIndex];
-            if (cache.status !== 'ok') {
-                cache = null;
-            }
+        }
+
+        if (cache.status !== 'ok' || cache.error) {
+            return;
         }
 
         const isOverlayOpen = document.body.classList.contains('bp3-overlay-open');
 
         if (cache && !isOverlayOpen && !isEditable(document.activeElement)) {
             const resolvedPath = cache.getAPI().resolve(cache.path);
-            const { settingsState } = this.injected;
+            const { settingsState, t } = this.injected;
             const terminalCmd = settingsState.getTerminalCommand(resolvedPath);
-            cache.openTerminal(terminalCmd);
+            const error = await cache.openTerminal(terminalCmd);
+            if (error) {
+                AppToaster.show({
+                    message: t('ERRORS.OPEN_TERMINAL_FAILED'),
+                    icon: 'warning-sign',
+                    intent: Intent.WARNING,
+                    timeout: 0,
+                });
+            }
         }
     };
 

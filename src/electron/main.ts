@@ -176,11 +176,22 @@ const ElectronApp = {
             this.openDevTools(true);
         });
 
-        ipcMain.handle('openTerminal', (event: Event, cmd: string) => {
-            console.log('running', cmd);
-            const exec = child_process.exec;
-            exec(cmd).unref();
-        });
+        ipcMain.handle(
+            'openTerminal',
+            (event: Event, cmd: string): Promise<{ code: number; terminal: string }> => {
+                console.log('running', cmd);
+                const exec = child_process.exec;
+                return new Promise((resolve) => {
+                    exec(cmd, (error: child_process.ExecException) => {
+                        if (error) {
+                            resolve({ code: error.code, terminal: cmd });
+                        } else {
+                            resolve();
+                        }
+                    }).unref();
+                });
+            },
+        );
 
         ipcMain.handle('languageChanged', (e: Event, strings: LocaleString) => {
             if (this.appMenu) {
