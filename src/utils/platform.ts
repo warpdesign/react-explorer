@@ -1,5 +1,5 @@
 import { platform } from 'process';
-import { release, userInfo } from 'os';
+import { release, arch, userInfo } from 'os';
 import { remote, app } from 'electron';
 
 declare const ENV: { [key: string]: string | boolean | number | Record<string, unknown> };
@@ -69,3 +69,11 @@ export const ALL_DIRS: { [key: string]: string } = {
     VIDEOS_DIR,
 };
 export const USERNAME = userInfo().username || 'username';
+export const VERSIONS = {
+    platform,
+    release: release(),
+    arch: arch(),
+    electron: process.versions['electron'],
+    chrome: process.versions['chrome'],
+    node: process.version,
+};

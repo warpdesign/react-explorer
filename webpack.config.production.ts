@@ -9,6 +9,8 @@ import { DefinePlugin } from 'webpack';
 import { version } from './package.json';
 import gitHash from './scripts/hash';
 
+const buildDate = Date.now();
+
 const baseConfig: webpack.Configuration = {
     output: {
         path: _resolve(__dirname, 'build'),
@@ -121,6 +123,7 @@ export default [
                     'ENV.NODE_ENV': JSON.stringify(baseConfig.mode),
                     'ENV.VERSION': JSON.stringify(version),
                     'ENV.HASH': JSON.stringify(gitHash),
+                    'ENV.BUILD_DATE': JSON.stringify(buildDate),
                 }),
             ],
         },
@@ -141,6 +144,7 @@ export default [
                     'ENV.NODE_ENV': JSON.stringify(baseConfig.mode),
                     'ENV.VERSION': JSON.stringify(version),
                     'ENV.HASH': JSON.stringify(gitHash),
+                    'ENV.BUILD_DATE': JSON.stringify(buildDate),
                 }),
                 new CopyPlugin({
                     patterns: [
