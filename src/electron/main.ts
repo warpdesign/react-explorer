@@ -193,9 +193,9 @@ const ElectronApp = {
             },
         );
 
-        ipcMain.handle('languageChanged', (e: Event, strings: LocaleString) => {
+        ipcMain.handle('languageChanged', (e: Event, strings: LocaleString, lang: string) => {
             if (this.appMenu) {
-                this.appMenu.createMenu(strings);
+                this.appMenu.createMenu(strings, lang);
             } else {
                 console.log('languageChanged but app not ready :(');
             }

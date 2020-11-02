@@ -252,7 +252,7 @@
             "FORCE_RELOAD_APP": "Force Reload App",
             "KEYBOARD_SHORTCUTS": "Keyboard Map",
             "ABOUT_TITLE": "React-Explorer",
-            "ABOUT_CONTENT": "Version ${version}\n\n${hash}",
+            "ABOUT_CONTENT": "Version ${version}\nCommit: ${hash}\nDate: ${date}\nElectron: ${electron}\nChrome: ${chrome}\nNode: ${node}\nOS: ${platform} ${arch} ${release}",
             "ZOOM": "Zoom",
             "MINIMIZE": "Minimize",
             "SELECT_NEXT_TAB": "Select next tab",

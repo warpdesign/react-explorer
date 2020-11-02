@@ -4,9 +4,9 @@ import CopyPlugin from 'copy-webpack-plugin';
 import { DefinePlugin } from 'webpack';
 import { version } from './package.json';
 import gitHash from '../scripts/hash';
-import { release } from 'os';
+import { release, arch } from 'os';
+import { version as node } from 'process';
 const MOCKS_PATH = 'cypress/mocks/';
-const RELEASE = release();
 import { platform as PLATFORM } from 'process';
 import { readdirSync } from 'fs';
 
@@ -136,8 +136,11 @@ export default [
                     'ENV.NODE_ENV': JSON.stringify(baseConfig.mode),
                     'ENV.VERSION': JSON.stringify(version),
                     'ENV.HASH': JSON.stringify(gitHash),
-                    __RELEASE__: JSON.stringify(RELEASE),
+                    'ENV.BUILD_DATE': JSON.stringify(Date.now()),
+                    __RELEASE__: JSON.stringify(release()),
                     __PLATFORM__: JSON.stringify(PLATFORM),
+                    __ARCH__: JSON.stringify(arch()),
+                    __NODE__: JSON.stringify(node),
                 }),
                 new CopyPlugin({
                     patterns: [

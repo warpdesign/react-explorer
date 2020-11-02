@@ -1,5 +1,5 @@
 import { clipboard, Menu, BrowserWindow, MenuItemConstructorOptions, MenuItem, app, ipcMain, dialog } from 'electron';
-import { isMac, isLinux } from '../utils/platform';
+import { isMac, isLinux, VERSIONS } from '../utils/platform';
 
 declare const ENV: { [key: string]: string | boolean | number | Record<string, unknown> };
 
@@ -11,6 +11,7 @@ export interface LocaleString {
 
 export class AppMenu {
     win: BrowserWindow;
+    lang: string;
     menuStrings: LocaleString;
 
     constructor(win: BrowserWindow) {
@@ -47,17 +48,27 @@ export class AppMenu {
         ipcMain.emit('reloadIgnoringCache');
     };
 
+    getVersionString = (): string =>
+        this.menuStrings['ABOUT_CONTENT']
+            .replace('${version}', app.getVersion())
+            .replace('${hash}', ENV.HASH as string)
+            .replace('${date}', new Date(Number(ENV.BUILD_DATE as string)).toLocaleString(this.lang))
+            .replace('${electron}', VERSIONS.electron)
+            .replace('${platform}', VERSIONS.platform)
+            .replace('${release}', VERSIONS.release)
+            .replace('${arch}', VERSIONS.arch)
+            .replace('${chrome}', VERSIONS.chrome)
+            .replace('${node}', VERSIONS.node);
+
     showAboutDialog = async (): void => {
-        const version = app.getVersion();
-        const detail = this.menuStrings['ABOUT_CONTENT']
-            .replace('${version}', version)
-            .replace('${hash}', ENV.HASH as string);
+        const detail = this.getVersionString();
+
         const buttons = isLinux
             ? [this.menuStrings['COPY'], this.menuStrings['OK']]
             : [this.menuStrings['OK'], this.menuStrings['COPY']];
         const defaultId = buttons.indexOf(this.menuStrings['OK']);
 
-        const { response } = await dialog.showMessageBox(null, {
+        const { response } = await dialog.showMessageBox(this.win, {
             title: this.menuStrings['ABOUT_TITLE'],
             type: 'question',
             message: this.menuStrings['ABOUT_TITLE'],
@@ -221,7 +232,7 @@ export class AppMenu {
                 submenu: [
                     {
                         label: menuStrings['ABOUT'],
-                        role: 'about',
+                        click: this.showAboutDialog,
                     },
                     { type: 'separator' },
                     {
@@ -241,7 +252,7 @@ export class AppMenu {
             app.setAboutPanelOptions({
                 applicationName: 'React-Explorer',
                 applicationVersion: app.getVersion(),
-                version: ENV.HASH as string,
+                version: this.getVersionString(),
             });
 
             windowMenuIndex = 5;
@@ -296,8 +307,9 @@ export class AppMenu {
         return template as MenuItemConstructorOptions[];
     }
 
-    createMenu(menuStrings: LocaleString): void {
+    createMenu(menuStrings: LocaleString, lang: string): void {
         this.menuStrings = menuStrings;
+        this.lang = lang;
 
         const menuTemplate = this.getMenuTemplate();
 

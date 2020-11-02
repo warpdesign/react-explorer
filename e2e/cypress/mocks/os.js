@@ -5,6 +5,12 @@ module.exports = {
     release: function () {
         return __RELEASE__;
     },
+    platform: function () {
+        return __PLATFORM__;
+    },
+    arch: function () {
+        return __ARCH__;
+    },
     tmpdir: function () {
         return '/tmpdir';
     },
