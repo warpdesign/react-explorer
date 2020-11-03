@@ -43,7 +43,6 @@ function getDefaultFolder() {
 const META_KEY = 91;
 const CTRL_KEY = 17;
 
-export const isPackage = process.mainModule && process.mainModule.filename.indexOf('app.asar') > -1;
 export const isMac = platform === 'darwin';
 export const isMojave = isMac && parseInt(release().split('.')[0], 10) - 4 >= 14;
 export const isWin = platform === 'win32';
