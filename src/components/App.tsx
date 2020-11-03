@@ -21,7 +21,6 @@ import { ShortcutsDialog } from './dialogs/ShortcutsDialog';
 import { LeftPanel } from './LeftPanel';
 import { shouldCatchEvent } from '../utils/dom';
 import { sendFakeCombo } from './WithMenuAccelerators';
-import { isPackage } from '../utils/platform';
 import { ViewDescriptor } from './TabList';
 import { getLocalizedError } from '../locale/error';
 import { MenuAccelerators } from './shortcuts/MenuAccelerators';
@@ -111,7 +110,6 @@ class App extends React.Component<AppProps> {
         Logger.success(
             `lang=${settingsState.lang}, darkMode=${settingsState.darkMode}, defaultFolder=${settingsState.defaultFolder}`,
         );
-        Logger.success(`package=${isPackage}`);
     }
 
     onShortcutsCombo = (e: KeyboardEvent): void => {

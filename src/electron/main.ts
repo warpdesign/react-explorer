@@ -1,14 +1,13 @@
 import { app, BrowserWindow, ipcMain } from 'electron';
 import process = require('process');
-import { watch } from 'fs';
 import path = require('path');
 import child_process = require('child_process');
 import { AppMenu, LocaleString } from './appMenus';
-import { isPackage, isLinux } from '../utils/platform';
+import { isLinux } from '../utils/platform';
 import { WindowSettings } from './windowSettings';
 
+declare const ENV: { [key: string]: string | boolean | number | Record<string, unknown> };
 const ENV_E2E = !!process.env.E2E;
-const SOURCE_PATH = './build';
 const HTML_PATH = `${__dirname}/index.html`;
 
 // allow non-content-aware native modules, needed for drivelist
@@ -135,12 +134,12 @@ const ElectronApp = {
      * Note that this probably won't work correctly under Linux since fs.watch
      * doesn't support recrusive watch on this OS.
      */
-    installWatcher(): void {
-        if (!ENV_E2E && !isPackage) {
-            console.log('Install Code Change Watcher');
-            watch(SOURCE_PATH, { recursive: true }, () => this.reloadApp());
-        }
-    },
+    // installWatcher(): void {
+    //     if (!ENV_E2E && !isPackage) {
+    //         console.log('Install Code Change Watcher');
+    //         watch(SOURCE_PATH, { recursive: true }, () => this.reloadApp());
+    //     }
+    // },
     /**
      * Clears the session cache and reloads main window without cache
      */
@@ -255,7 +254,7 @@ const ElectronApp = {
      */
     openDevTools(force = false): void {
         // spectron problem if devtools is opened, see https://github.com/electron/spectron/issues/254
-        if ((!ENV_E2E && !isPackage) || force) {
+        if ((!ENV_E2E && ENV.NODE_ENV) !== 'production' || force) {
             if (!this.devWindow || this.devWindow.isDestroyed()) {
                 const winState = WindowSettings.getDevToolsSettings();
 
@@ -293,7 +292,6 @@ const ElectronApp = {
 
         this.installIpcMainListeners();
         this.createMainWindow();
-        this.installWatcher();
         this.openDevTools();
     },
 };
