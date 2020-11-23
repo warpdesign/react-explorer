@@ -74,6 +74,7 @@ const ElectronApp = {
             y: settings.y,
             webPreferences: {
                 nodeIntegration: true,
+                enableRemoteModule: true,
             },
             icon: (isLinux && path.join(__dirname, 'icon.png')) || undefined,
         });
