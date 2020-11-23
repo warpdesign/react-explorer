@@ -54,18 +54,27 @@ export class FavoritesState {
     }
 
     buildPlaces(drives: drivelist.Drive[]): void {
-        this.places.replace(
-            drives.map((drive: drivelist.Drive) => {
-                const mountpoint = drive.mountpoints[0];
-
-                return {
-                    // Some mountpoints may not have a label (eg. win: c:\)
-                    label: mountpoint.label || mountpoint.path,
-                    path: mountpoint.path,
+        // on macOS (bigSur/+), drivelist (9.2.1) returns
+        // the same volume multiple times so we filter
+        // out the list based on the volume name
+        const lookupTable: string[] = [];
+        const filteredList: Favorite[] = drives.reduce((elements, drive) => {
+            const mountpoint = drive.mountpoints[0];
+            const path = mountpoint.path;
+            const label: string = mountpoint.label || path;
+            if (lookupTable.indexOf(label) === -1) {
+                lookupTable.push(label);
+                const favorite: Favorite = {
+                    label: label || path,
+                    path: path,
                     icon: drive.isRemovable || drive.isVirtual ? IconNames.FLOPPY_DISK : IconNames.DATABASE,
-                } as Favorite;
-            }),
-        );
+                };
+                elements.push(favorite);
+            }
+            return elements;
+        }, []);
+
+        this.places.replace(filteredList);
     }
 
     launchTimeout(immediate = false, callback: () => void, timeout: number): void {
