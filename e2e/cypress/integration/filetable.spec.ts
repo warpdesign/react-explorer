@@ -297,12 +297,6 @@ describe('filetable', () => {
             cy.get('@stub_openFile0').should('be.called');
         });
 
-        it('should open parent directory if backspace is pressed', () => {
-            cy.get('body').type('{backspace}');
-
-            cy.get('@stub_openParentDirectory0').should('be.called');
-        });
-
         it('should select all files if mod + a is pressed', () => {
             cy.get('body')
                 .type(`${MOD_KEY}a`)

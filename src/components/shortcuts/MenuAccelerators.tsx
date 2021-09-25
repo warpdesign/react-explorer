@@ -186,7 +186,6 @@ class MenuAcceleratorsClass extends React.Component<Props> {
 
     onParent = (): void => {
         const cache = this.getActiveFileCache();
-
         !isEditable(document.activeElement) && cache && cache.openParentDirectory();
     };
 
