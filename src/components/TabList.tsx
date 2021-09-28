@@ -123,10 +123,10 @@ class TabListClass extends React.Component<InjectedProps> {
         }
     };
 
-    onFolderItemClick = (menuItem: MenuItem & { id: string }): void => {
+    onFolderItemClick = (menuItem: MenuItem & { id: string }, cacheIndex: number): void => {
         const { viewState } = this.injected;
-        const cache = viewState.getVisibleCache();
-        if (menuItem.id) {
+        const cache = viewState.caches[cacheIndex];
+        if (cache && menuItem.id) {
             cache
                 .openDirectory({
                     dir: cache.path,
@@ -154,7 +154,7 @@ class TabListClass extends React.Component<InjectedProps> {
                 return {
                     label: el.name,
                     id: el.fullname,
-                    click: this.onFolderItemClick,
+                    click: (menuItem: MenuItem & { id: string }) => this.onFolderItemClick(menuItem, index),
                 };
             },
         );
