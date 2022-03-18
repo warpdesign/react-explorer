@@ -379,13 +379,15 @@ export class FileState {
     };
 
     @action
-    cd(path: string, path2 = '', skipHistory = false, skipContext = false): Promise<string> {
+    cd(path: string, path2 = '', skipHistory = false, skipContext = false, forceNewFs = false): Promise<string> {
         // first updates fs (eg. was local fs, is now ftp)
-        console.log('fileState: cd', path, this.path);
-        if (this.path !== path) {
-            if (this.getNewFS(path, skipContext)) {
+        console.log('fileState: cd', path, this.path, path2, forceNewFs);
+        if (this.path !== path || forceNewFs) {
+            debugger;
+            if (this.getNewFS(forceNewFs ? this.api.join(path, path2) : path, skipContext)) {
                 this.server = this.fs.serverpart(path);
                 this.credentials = this.fs.credentials(path);
+                debugger;
             } else {
                 debugger;
                 // this.navHistory(0);
@@ -395,7 +397,6 @@ export class FileState {
                 });
             }
         }
-
         return this.cwd(path, path2, skipHistory);
     }
 
@@ -403,6 +404,7 @@ export class FileState {
     @needsConnection
     // changes current path and retrieves file list
     cwd(path: string, path2 = '', skipHistory = false): Promise<string> {
+        debugger;
         const joint = path2 ? this.api.join(path, path2) : this.api.sanityze(path);
         this.cmd = 'cwd';
 
@@ -534,11 +536,17 @@ export class FileState {
         return this.api.join(path, path2);
     }
 
-    async openFile(appState: AppState, cache: FileState, file: File): Promise<void> {
-        // TODO:
-        // - check if an FS can handle it, if so: openDirectory
-        // - if not, shellOpen
+    async openFile(appState: AppState, cache: FileState, file: File, forceShellOpen = false): Promise<void> {
         try {
+            // double-clicking on an archive (eg. zip) may read its contents
+            // instead of using the shell to open (eg. uncompress) the file
+            const fs = getFS(this.api.join(file.dir, file.fullname));
+            if (fs && !forceShellOpen) {
+                console.log('fs.name', fs.name);
+                await this.openDirectory(file, true);
+                return;
+            }
+
             const path = await appState.prepareLocalTransfer(cache, [file]);
             const error = await this.shellOpenFile(path);
             if (error !== false) {
@@ -558,8 +566,8 @@ export class FileState {
         return !!error;
     }
 
-    openDirectory(file: { dir: string; fullname: string }): Promise<string | void> {
-        return this.cd(file.dir, file.fullname).catch(this.handleError);
+    openDirectory(file: { dir: string; fullname: string }, forceNewFs = false): Promise<string | void> {
+        return this.cd(file.dir, file.fullname, false, false, forceNewFs).catch(this.handleError);
     }
 
     async openTerminal(path: string): Promise<boolean> {

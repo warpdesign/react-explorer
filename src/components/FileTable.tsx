@@ -611,8 +611,7 @@ export class FileTableClass extends React.Component<Props, State> {
 
         try {
             if (!file.isDir) {
-                // TODO: if alt pressed, open File, otherwise
-                await this.cache.openFile(appState, this.cache, file);
+                await this.cache.openFile(appState, this.cache, file, forceShellOpen);
             } else {
                 const cache = useInactiveCache ? appState.getInactiveViewVisibleCache() : this.cache;
 

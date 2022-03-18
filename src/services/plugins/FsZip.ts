@@ -15,7 +15,7 @@ const invalidDirChars = (isWin && /[\*:<>\?|"]+/gi) || /^[\.]+[\/]+(.)*$/gi;
 const invalidFileChars = (isWin && /[\*:<>\?|"]+/gi) || /\//;
 const SEP = path.sep;
 
-const endZip = /\.zip$/i;
+const endZip = /\.zip[\/]*$/i;
 const isRoot = (isWin && /((([a-zA-Z]\:)(\\)*)|(\\\\))$/) || /^\/$/;
 
 const progressFunc = throttle((progress: (pourcent: number) => void, bytesRead: number) => {
@@ -27,8 +27,13 @@ export class ZipApi implements FsApi {
     // current path
     path: string;
     zip: StreamZip.StreamZipAsync;
+    entries: { [name: string]: StreamZip.ZipEntry } = null;
     loginOptions: Credentials = null;
     onFsChange: (filename: string) => void;
+
+    async getEntries() {
+        this.entries = await this.zip.entries();
+    }
 
     constructor(path: string, onFsChange: (filename: string) => void) {
         console.log(`new zip(${path})`);
@@ -56,9 +61,18 @@ export class ZipApi implements FsApi {
         return path.resolve(dir);
     }
 
-    cd(path: string, transferId = -1): Promise<string> {
+    async cd(path: string, transferId = -1): Promise<string> {
         console.warn(`TODO: zip.cd(${path})`);
+        if (!this.entries) {
+            await this.getEntries();
+        }
+        debugger;
         const resolvedPath = this.resolve(path);
+        if (resolvedPath === this.path) {
+            return Promise.resolve(resolvedPath);
+        }
+
+        return Promise.resolve(resolvedPath);
         // const resolvedPath = this.resolve(path);
         // return this.isDir(resolvedPath)
         //     .then((isDir: boolean) => {
@@ -75,6 +89,7 @@ export class ZipApi implements FsApi {
 
     size(source: string, files: string[], transferId = -1): Promise<number> {
         console.warn('TODO: zip.size');
+        return Promise.resolve(0);
         // return new Promise(async (resolve, reject) => {
         //     try {
         //         let bytes = 0;
@@ -90,6 +105,7 @@ export class ZipApi implements FsApi {
 
     async makedir(source: string, dirName: string, transferId = -1): Promise<string> {
         console.warn('TODO: zip.makedir');
+        return Promise.resolve('');
         // return new Promise((resolve, reject) => {
         //     console.log('makedir, source:', source, 'dirName:', dirName);
         //     const unixPath = path.join(source, dirName).replace(/\\/g, '/');
@@ -114,6 +130,7 @@ export class ZipApi implements FsApi {
 
     delete(source: string, files: File[], transferId = -1): Promise<number> {
         console.log('TODO: zip.delete');
+        return Promise.resolve(0);
         // const toDelete = files.map((file) => path.join(source, file.fullname));
 
         // return new Promise(async (resolve, reject) => {
@@ -132,6 +149,7 @@ export class ZipApi implements FsApi {
 
     rename(source: string, file: File, newName: string, transferId = -1): Promise<string> {
         console.warn('TODO: zip.rename');
+        return Promise.resolve('');
         // const oldPath = path.join(source, file.fullname);
         // const newPath = path.join(source, newName);
 
@@ -182,6 +200,7 @@ export class ZipApi implements FsApi {
 
     async makeSymlink(targetPath: string, path: string, transferId = -1): Promise<boolean> {
         console.warn('TODO: zip.makeSymLink');
+        return Promise.resolve(false);
         // return new Promise<boolean>((resolve, reject) =>
         //     fs.symlink(targetPath, path, (err) => {
         //         if (err) {
@@ -195,6 +214,7 @@ export class ZipApi implements FsApi {
 
     async isDir(path: string, transferId = -1): Promise<boolean> {
         console.warn('TODO: zip.isDir');
+        return Promise.resolve(false);
         // const lstat = fs.lstatSync(path);
         // const stat = fs.statSync(path);
         // return stat.isDirectory() || lstat.isDirectory();
@@ -202,6 +222,7 @@ export class ZipApi implements FsApi {
 
     async exists(path: string, transferId = -1): Promise<boolean> {
         console.warn('TODO: zip.exists');
+        return Promise.resolve(false);
         // try {
         //     fs.statSync(path);
         //     return true;
@@ -216,6 +237,7 @@ export class ZipApi implements FsApi {
 
     async stat(fullPath: string, transferId = -1): Promise<File> {
         console.warn('TODO: zip.stat');
+        return Promise.resolve({} as File);
         // try {
         //     const format = path.parse(fullPath);
         //     const stats = fs.lstatSync(fullPath);
@@ -266,6 +288,7 @@ export class ZipApi implements FsApi {
 
     async list(dir: string, watchDir = false, transferId = -1): Promise<File[]> {
         console.warn('TODO: zip.list');
+        return Promise.resolve([]);
         // try {
         //     await this.isDir(dir);
         //     return new Promise<File[]>((resolve, reject) => {
@@ -298,6 +321,7 @@ export class ZipApi implements FsApi {
 
     static fileFromPath(fullPath: string): File {
         console.log('TODO: zip::fileFromPath');
+        return {} as File;
         // const format = path.parse(fullPath);
         // let name = fullPath;
         // let stats: Partial<fs.Stats> = null;
@@ -357,8 +381,7 @@ export class ZipApi implements FsApi {
     }
 
     isRoot(path: string): boolean {
-        console.log('TODO: zip.isRoot');
-        // return !!path.match(isRoot);
+        return !!path.match(isRoot);
     }
 
     off(): void {
@@ -370,6 +393,7 @@ export class ZipApi implements FsApi {
     // TODO add error handling
     async getStream(path: string, file: string, transferId = -1): Promise<fs.ReadStream> {
         console.warn('TODO: zip.getStream');
+        return Promise.reject('TODO: zip.getStream');
         // try {
         //     // console.log('opening read stream', this.join(path, file));
         //     const stream = fs.createReadStream(this.join(path, file), {
@@ -520,7 +544,7 @@ export const FsZip: Fs = {
         console.log('FsZip.canread', str, !!str.match(endZip));
         return !!str.match(endZip);
     },
-    serverpart(str: string): string {
+    serverpart(): string {
         return 'zip';
     },
     credentials(str: string): Credentials {

@@ -148,12 +148,11 @@ export interface FsApi {
     loginOptions: Credentials;
 }
 
-export function getFS(path: string): Fs {
-    const newfs = interfaces.find((filesystem) => filesystem.canread(path));
+export function getFS(path: string, ignoredFs: string[] = []): Fs {
+    const newfs = interfaces.find(
+        (filesystem) => ignoredFs.indexOf(filesystem.name) === -1 && filesystem.canread(path),
+    );
     console.log('got FS', newfs);
-    // if (!newfs) {
-    //     newfs = FsGeneric;
-    // }
 
     return newfs;
 }

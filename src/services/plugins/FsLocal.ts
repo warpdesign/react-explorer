@@ -493,7 +493,6 @@ export const FsLocal: Fs = {
         needsRefresh: false,
     },
     canread(str: string): boolean {
-        // console.log('FsLocal.canread', str, !!str.match(localStart));
         return !!str.match(localStart);
     },
     serverpart(str: string): string {
