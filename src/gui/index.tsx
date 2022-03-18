@@ -15,6 +15,7 @@ import child_process from 'child_process';
 import { FsGeneric } from '../services/plugins/FsGeneric';
 import { FsWsl } from '../services/plugins/FsWsl';
 import { FsLocal } from '../services/plugins/FsLocal';
+import { FsZip } from '../services/plugins/FsZip';
 import { registerFs } from '../services/Fs';
 
 declare const ENV: { [key: string]: string | boolean | number | Record<string, unknown> };
@@ -24,6 +25,7 @@ function initFS() {
         // console.log('**register generic', FsGeneric);
         registerFs(FsGeneric);
     } else {
+        registerFs(FsZip);
         registerFs(FsWsl);
         registerFs(FsLocal);
     }

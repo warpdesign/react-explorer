@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
+import { IconName } from '@blueprintjs/core';
 import { Readable } from 'stream';
 import { isWin } from '../utils/platform';
 
@@ -42,6 +43,7 @@ export interface File {
 
 export interface FsOptions {
     needsRefresh: boolean;
+    handledExtensions?: RegExp;
 }
 
 export interface Fs {
@@ -54,7 +56,7 @@ export interface Fs {
     displaypath(str: string): { fullPath: string; shortPath: string };
     name: string;
     description: string;
-    icon: string;
+    icon: IconName;
     options: FsOptions;
 }
 

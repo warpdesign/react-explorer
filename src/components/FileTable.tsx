@@ -602,15 +602,16 @@ export class FileTableClass extends React.Component<Props, State> {
         const file = rowData.nodeData as File;
 
         if ((event.target as HTMLElement) !== this.editingElement) {
-            this.openFileOrDirectory(file, event.shiftKey);
+            this.openFileOrDirectory(file, event.shiftKey, event.altKey);
         }
     };
 
-    async openFileOrDirectory(file: File, useInactiveCache: boolean): Promise<void> {
+    async openFileOrDirectory(file: File, useInactiveCache: boolean, forceShellOpen = false): Promise<void> {
         const { appState } = this.injected;
 
         try {
             if (!file.isDir) {
+                // TODO: if alt pressed, open File, otherwise
                 await this.cache.openFile(appState, this.cache, file);
             } else {
                 const cache = useInactiveCache ? appState.getInactiveViewVisibleCache() : this.cache;
@@ -669,7 +670,7 @@ export class FileTableClass extends React.Component<Props, State> {
 
         if (this.isViewActive() && position > -1) {
             const file = nodes[position].nodeData as File;
-            this.openFileOrDirectory(file, e.shiftKey);
+            this.openFileOrDirectory(file, e.shiftKey, e.altKey);
         }
     };
 

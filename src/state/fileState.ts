@@ -535,6 +535,9 @@ export class FileState {
     }
 
     async openFile(appState: AppState, cache: FileState, file: File): Promise<void> {
+        // TODO:
+        // - check if an FS can handle it, if so: openDirectory
+        // - if not, shellOpen
         try {
             const path = await appState.prepareLocalTransfer(cache, [file]);
             const error = await this.shellOpenFile(path);
