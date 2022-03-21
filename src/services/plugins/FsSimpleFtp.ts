@@ -490,6 +490,7 @@ export const FsSimpleFtp: Fs = {
     description: 'Fs that implements ft connection on top of simple-ftp',
     options: {
         needsRefresh: true,
+        directAccess: false,
     },
     canread(str: string): boolean {
         const info = new URL(str);

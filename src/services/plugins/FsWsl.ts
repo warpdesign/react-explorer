@@ -81,6 +81,7 @@ export const FsWsl: Fs = {
     description: 'Local WSL Filesystem',
     options: {
         needsRefresh: false,
+        directAccess: true,
     },
     canread(str: string): boolean {
         return isWin && !!str.match(wslStart);

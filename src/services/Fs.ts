@@ -44,6 +44,7 @@ export interface File {
 export interface FsOptions {
     needsRefresh: boolean;
     handledExtensions?: RegExp;
+    directAccess: boolean;
 }
 
 export interface Fs {

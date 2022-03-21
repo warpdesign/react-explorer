@@ -67,12 +67,19 @@ export class ZipApi implements FsApi {
             await this.getEntries();
         }
         debugger;
+        // get resolvedPath & check it's a directory (if path === this.path, or this.entries[path].isFile())
         const resolvedPath = this.resolve(path);
-        if (resolvedPath === this.path) {
-            return Promise.resolve(resolvedPath);
+        if (resolvedPath !== this.path) {
+            try {
+                const entry = this.entries[path];
+                if (entry.isFile) {
+                    throw { code: 'ENOTDIR' };
+                }
+            } catch {
+                throw { code: 'ENOTDIR' };
+            }
         }
-
-        return Promise.resolve(resolvedPath);
+        return resolvedPath;
         // const resolvedPath = this.resolve(path);
         // return this.isDir(resolvedPath)
         //     .then((isDir: boolean) => {
@@ -214,7 +221,13 @@ export class ZipApi implements FsApi {
 
     async isDir(path: string, transferId = -1): Promise<boolean> {
         console.warn('TODO: zip.isDir');
-        return Promise.resolve(false);
+        try {
+            debugger;
+            return this.entries[path].isDirectory;
+        } catch (e) {
+            console.log('error', e);
+            debugger;
+        }
         // const lstat = fs.lstatSync(path);
         // const stat = fs.statSync(path);
         // return stat.isDirectory() || lstat.isDirectory();
@@ -287,8 +300,15 @@ export class ZipApi implements FsApi {
     }
 
     async list(dir: string, watchDir = false, transferId = -1): Promise<File[]> {
-        console.warn('TODO: zip.list');
+        console.warn('TODO: zip.list', dir);
+        const pathInsideZip = dir.substring(this.path.length);
+
+        const entriesInPath = Object.keys(this.entries).filter((path) => {
+            const split = path.split(/[\/\\]/);
+            return split.length < 2 || split[2].length === 0;
+        });
         return Promise.resolve([]);
+        // filter entries
         // try {
         //     await this.isDir(dir);
         //     return new Promise<File[]>((resolve, reject) => {
@@ -539,6 +559,7 @@ export const FsZip: Fs = {
     options: {
         needsRefresh: false,
         handledExtensions: /\.zip$/i,
+        directAccess: false,
     },
     canread(str: string): boolean {
         console.log('FsZip.canread', str, !!str.match(endZip));

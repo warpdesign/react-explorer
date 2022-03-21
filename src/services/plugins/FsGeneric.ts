@@ -143,6 +143,7 @@ export const FsGeneric: Fs = {
     description: 'Fs that just implements the FsInterface but does nothing',
     options: {
         needsRefresh: false,
+        directAccess: true,
     },
     canread(str: string): boolean {
         return true;

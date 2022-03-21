@@ -491,6 +491,7 @@ export const FsLocal: Fs = {
     description: 'Local Filesystem',
     options: {
         needsRefresh: false,
+        directAccess: true,
     },
     canread(str: string): boolean {
         return !!str.match(localStart);
