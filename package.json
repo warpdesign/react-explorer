@@ -80,7 +80,7 @@
         "clean-webpack-plugin": "^2.0.2",
         "copy-webpack-plugin": "^6.2.1",
         "css-loader": "^1.0.1",
-        "electron": "^11.0.2",
+        "electron": "^13.6.6",
         "electron-builder": "^22.9.1",
         "electron-devtools-installer": "^3.1.1",
         "eslint": "^7.11.0",
