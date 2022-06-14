@@ -238,8 +238,10 @@ class App extends React.Component<AppProps> {
         this.setDarkThemeClass();
 
         if (!ENV.CY) {
+            debugger;
             const progress = (this.appState.pendingTransfers && this.appState.totalTransferProgress) || -1;
-            remote.getCurrentWindow().setProgressBar(progress);
+            // remote.getCurrentWindow().setProgressBar(progress);
+            ipcRenderer.invoke('window:setProgressBar', progress);
         }
     }
 

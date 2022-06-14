@@ -5,6 +5,7 @@ import child_process = require('child_process');
 import { AppMenu, LocaleString } from './appMenus';
 import { isLinux } from '../utils/platform';
 import { WindowSettings } from './windowSettings';
+import { Remote } from './remote';
 
 declare const ENV: { [key: string]: string | boolean | number | Record<string, unknown> };
 const ENV_E2E = !!process.env.E2E;
@@ -117,6 +118,8 @@ const ElectronApp = {
         // });
 
         this.appMenu = new AppMenu(this.mainWindow);
+
+        Remote.init();
     },
     /**
      * Install special React DevTools

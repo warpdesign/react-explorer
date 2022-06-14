@@ -5,13 +5,14 @@ import { WithNamespaces, withNamespaces } from 'react-i18next';
 import { ViewState } from '../state/viewState';
 import { sendFakeCombo } from './WithMenuAccelerators';
 import { ContextMenu } from './ContextMenu';
-import { MenuItemConstructorOptions, MenuItem } from 'electron';
+import { MenuItemConstructorOptions, MenuItem, ipcRenderer } from 'electron';
 import { SettingsState } from '../state/settingsState';
 // import { DOWNLOADS_DIR, HOME_DIR, DOCS_DIR, DESKTOP_DIR, MUSIC_DIR, PICTURES_DIR, VIDEOS_DIR } from '../utils/platform';
 import { ALL_DIRS } from '../utils/platform';
 import Icons from '../constants/icons';
 import { AppAlert } from './AppAlert';
 import { LocalizedError } from '../locale/error';
+import { IpcRendererEvent } from 'electron/renderer';
 
 /**
  * Describes a view, the path is the path to its first tab: right now each view is created with only
@@ -50,6 +51,20 @@ class TabListClass extends React.Component<InjectedProps> {
     constructor(props: InjectedProps) {
         super(props);
     }
+
+    componentDidMount(): void {
+        // add listener
+        ipcRenderer.on('context-menu-tab-list:click', this.contextMenuHandler);
+    }
+
+    componentWillUnmount(): void {
+        // remove listener
+        ipcRenderer.removeListener('context-menu-tab-list:click', this.contextMenuHandler);
+    }
+
+    contextMenuHandler = (event: IpcRendererEvent, command: string) => {
+        this.onItemClick(command);
+    };
 
     get injected(): InjectedProps {
         return this.props as InjectedProps;
@@ -96,12 +111,14 @@ class TabListClass extends React.Component<InjectedProps> {
 
     onContextMenu = (menuIndex: number): void => {
         const tabMenuTemplate = this.getTabMenu();
+        console.log('onContextMenu', tabMenuTemplate);
         this.menuIndex = menuIndex;
-        this.menuRef.current.showMenu(tabMenuTemplate);
+        // this.menuRef.current.showMenu(tabMenuTemplate);
+        ipcRenderer.invoke('Menu:buildFromTemplate', tabMenuTemplate);
     };
 
-    onItemClick = (menuItem: MenuItem & { id: string }): void => {
-        switch (menuItem.id) {
+    onItemClick = (id: string): void => {
+        switch (id) {
             case 'CLOSE_TAB':
                 this.closeTab(this.menuIndex);
                 break;
@@ -120,6 +137,8 @@ class TabListClass extends React.Component<InjectedProps> {
             // case 'OPEN_EXPLORER':
             //     break;
             // case 'COPY_PATH':
+            default:
+                console.warn('unknown tab context menu command', id);
         }
     };
 
@@ -169,7 +188,7 @@ class TabListClass extends React.Component<InjectedProps> {
             {
                 label: t('TABS.NEW'),
                 id: 'NEW_TAB',
-                click: this.onItemClick,
+                // click: this.onItemClick,
             },
             {
                 type: 'separator',
@@ -177,7 +196,7 @@ class TabListClass extends React.Component<InjectedProps> {
             {
                 label: t('TABS.REFRESH'),
                 id: 'REFRESH',
-                click: this.onItemClick,
+                // click: this.onItemClick,
             },
             {
                 type: 'separator',
@@ -185,12 +204,12 @@ class TabListClass extends React.Component<InjectedProps> {
             {
                 label: t('TABS.CLOSE'),
                 id: 'CLOSE_TAB',
-                click: this.onItemClick,
+                // click: this.onItemClick,
             },
             {
                 label: t('TABS.CLOSE_OTHERS'),
                 id: 'CLOSE_OTHERS',
-                click: this.onItemClick,
+                // click: this.onItemClick,
             },
             {
                 type: 'separator',
@@ -198,7 +217,7 @@ class TabListClass extends React.Component<InjectedProps> {
             {
                 label: t('APP_MENUS.OPEN_TERMINAL'),
                 id: 'OPEN_TERMINAL',
-                click: this.onItemClick,
+                // click: this.onItemClick,
             },
         ];
     }
