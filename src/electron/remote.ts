@@ -40,7 +40,11 @@ const handlers: Handlers = {
             console.log('Menu:buildFromTemplate', template);
             template.forEach((menu) => {
                 if (menu.id) {
-                    menu.click = (e) => event.sender.send('context-menu-tab-list:click', e.id);
+                    menu.click = (e) => {
+                        const [id, args] = e.id.split('///');
+                        console.log('sending', id, args);
+                        event.sender.send('context-menu-tab-list:click', id, args);
+                    };
                 }
             });
             const menu = Menu.buildFromTemplate(template);

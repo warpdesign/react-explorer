@@ -62,8 +62,8 @@ class TabListClass extends React.Component<InjectedProps> {
         ipcRenderer.removeListener('context-menu-tab-list:click', this.contextMenuHandler);
     }
 
-    contextMenuHandler = (event: IpcRendererEvent, command: string) => {
-        this.onItemClick(command);
+    contextMenuHandler = (event: IpcRendererEvent, command: string, param?: string) => {
+        this.onItemClick(command, param);
     };
 
     get injected(): InjectedProps {
@@ -117,7 +117,7 @@ class TabListClass extends React.Component<InjectedProps> {
         ipcRenderer.invoke('Menu:buildFromTemplate', tabMenuTemplate);
     };
 
-    onItemClick = (id: string): void => {
+    onItemClick = (id: string, param?: string): void => {
         switch (id) {
             case 'CLOSE_TAB':
                 this.closeTab(this.menuIndex);
@@ -134,6 +134,10 @@ class TabListClass extends React.Component<InjectedProps> {
             case 'OPEN_TERMINAL':
                 this.openTerminal();
                 break;
+            case 'OPEN_FOLDER':
+                this.onFolderItemClick(param);
+                // console.log('need to open folder', param);
+                break;
             // case 'OPEN_EXPLORER':
             //     break;
             // case 'COPY_PATH':
@@ -142,14 +146,14 @@ class TabListClass extends React.Component<InjectedProps> {
         }
     };
 
-    onFolderItemClick = (menuItem: MenuItem & { id: string }): void => {
+    onFolderItemClick = (path: string): void => {
         const { viewState } = this.injected;
         const cache = viewState.getVisibleCache();
-        if (menuItem.id) {
+        if (path) {
             cache
                 .openDirectory({
                     dir: cache.path,
-                    fullname: menuItem.id,
+                    fullname: path,
                 })
                 .catch((err: LocalizedError) => {
                     AppAlert.show(`${err.message} (${err.code})`, {
@@ -172,13 +176,14 @@ class TabListClass extends React.Component<InjectedProps> {
             (el: { dir: string; fullname: string; name: string }) => {
                 return {
                     label: el.name,
-                    id: el.fullname,
-                    click: this.onFolderItemClick,
+                    id: `OPEN_FOLDER///${el.fullname}`,
+                    // click: this.onFolderItemClick,
                 };
             },
         );
 
-        this.menuFolderRef.current.showMenu(template);
+        // this.menuFolderRef.current.showMenu(template);
+        ipcRenderer.invoke('Menu:buildFromTemplate', template);
     };
 
     getTabMenu(): MenuItemConstructorOptions[] {
