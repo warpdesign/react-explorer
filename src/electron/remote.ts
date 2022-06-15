@@ -1,8 +1,8 @@
-import { app, ipcMain, BrowserWindow, MenuItemConstructorOptions, Menu } from 'electron';
+import { app, ipcMain, BrowserWindow, MenuItemConstructorOptions, Menu, nativeTheme } from 'electron';
 import { IpcMainEvent } from 'electron/main';
 
 interface HandlerList {
-    [key: string]: (event: IpcMainEvent, ...args: any) => Promise<unknown> | void;
+    [key: string]: (event: IpcMainEvent, ...args: any) => Promise<unknown> | void | number | boolean;
 }
 
 interface Handlers {
@@ -21,18 +21,19 @@ const handlers: Handlers = {
             console.log(!!window);
             window && window.setProgressBar(progress);
         },
-        getId() {
+        getId(event) {
             console.log('window:getId');
-        },
-    },
-    nativeTheme: {
-        on() {
-            console.log('nativeTheme:on');
+            return event.sender.id;
         },
     },
     app: {
         getPath() {
             console.log('app:getPath');
+        },
+    },
+    nativeTheme: {
+        shouldUseDarkColors() {
+            return nativeTheme.shouldUseDarkColors;
         },
     },
     Menu: {

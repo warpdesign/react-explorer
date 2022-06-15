@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain } from 'electron';
+import { app, BrowserWindow, ipcMain, nativeTheme } from 'electron';
 import process = require('process');
 import path = require('path');
 import child_process = require('child_process');
@@ -227,6 +227,14 @@ const ElectronApp = {
         });
     },
 
+    installNativeThemeListener(): void {
+        nativeTheme.on('updated', () => {
+            BrowserWindow.getAllWindows().forEach((window) => {
+                window.webContents.send('nativeTheme:updated', nativeTheme.shouldUseDarkColors);
+            });
+        });
+    },
+
     /**
      * Called when the app is ready to exit: this will send cleanup event to renderer process
      *
@@ -295,6 +303,7 @@ const ElectronApp = {
         // }
 
         this.installIpcMainListeners();
+        this.installNativeThemeListener();
         this.createMainWindow();
         this.openDevTools();
     },
