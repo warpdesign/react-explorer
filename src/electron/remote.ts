@@ -1,8 +1,15 @@
 import { app, ipcMain, BrowserWindow, MenuItemConstructorOptions, Menu, nativeTheme } from 'electron';
 import { IpcMainEvent } from 'electron/main';
+import { WindowSettings } from './windowSettings';
+import * as OS from './osSupport';
+
+type Primitive = number | string | boolean;
 
 interface HandlerList {
-    [key: string]: (event: IpcMainEvent, ...args: any) => Promise<unknown> | void | number | boolean;
+    [key: string]: (
+        event: IpcMainEvent,
+        ...args: any
+    ) => Promise<unknown> | void | Primitive | Record<string, Primitive | Record<string, Primitive>>;
 }
 
 interface Handlers {
@@ -25,10 +32,18 @@ const handlers: Handlers = {
             console.log('window:getId');
             return event.sender.id;
         },
+        getInitialSettings(event) {
+            console.log(WindowSettings.getSettings(event.sender.id).custom);
+            return WindowSettings.getSettings(event.sender.id).custom;
+        },
     },
     app: {
-        getPath() {
-            console.log('app:getPath');
+        // getPath(event, name: 'home' | 'appData' | 'userData' | 'cache' | 'temp' | 'exe' | 'module' | 'desktop' | 'documents' | 'downloads' | 'music' | 'pictures' | 'videos' | 'recent' | 'logs' | 'pepperFlashSystemPlugin' | 'crashDumps') {
+        //     console.log('app:getPath');
+        //     return app.getPath(name);
+        // },
+        getLocale() {
+            return app.getLocale();
         },
     },
     nativeTheme: {
@@ -56,19 +71,33 @@ const handlers: Handlers = {
     },
 };
 
-export const Remote = {
-    done: false,
-    init() {
-        if (this.done) {
-            return;
-        }
+const syncHandlers: Handlers = {
+    app: {
+        getOS(event) {
+            console.log('app:getOS');
+            event.returnValue = OS;
+        },
+    },
+};
 
-        Object.keys(handlers).forEach((domain) => {
-            Object.keys(handlers[domain]).forEach((fnName) => {
-                console.log('registring', `${domain}:${fnName}`);
-                ipcMain.handle(`${domain}:${fnName}`, handlers[domain][fnName]);
+export const Remote = {
+    init() {
+        return new Promise<void>((resolve) => {
+            Object.keys(handlers).forEach((domain) => {
+                Object.keys(handlers[domain]).forEach((fnName) => {
+                    console.log('registring', `${domain}:${fnName}`);
+                    ipcMain.handle(`${domain}:${fnName}`, handlers[domain][fnName]);
+                });
             });
+
+            Object.keys(syncHandlers).forEach((domain) => {
+                Object.keys(syncHandlers[domain]).forEach((fnName) => {
+                    console.log('registring', `${domain}:${fnName}`);
+                    ipcMain.on(`${domain}:${fnName}`, syncHandlers[domain][fnName]);
+                });
+            });
+
+            resolve();
         });
-        this.done = true;
     },
 };

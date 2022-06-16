@@ -3,7 +3,7 @@ import process = require('process');
 import path = require('path');
 import child_process = require('child_process');
 import { AppMenu, LocaleString } from './appMenus';
-import { isLinux } from '../utils/platform';
+import { isLinux } from './osSupport';
 import { WindowSettings } from './windowSettings';
 import { Remote } from './remote';
 
@@ -60,19 +60,18 @@ const ElectronApp = {
      * - bind close/minimize events
      * - create main menu
      */
-    createMainWindow(): void {
+    async createMainWindow(): Promise<void> {
         console.log('Create Main Window');
 
-        const settings = WindowSettings.getSettings(0);
-        // console.log('settings', settings);
+        await Remote.init();
 
         this.mainWindow = new BrowserWindow({
             minWidth: WindowSettings.DEFAULTS.minWidth,
             minHeight: WindowSettings.DEFAULTS.minHeight,
-            width: settings.width,
-            height: settings.height,
-            x: settings.x,
-            y: settings.y,
+            // width: settings.width,
+            // height: settings.height,
+            // x: settings.x,
+            // y: settings.y,
             webPreferences: {
                 nodeIntegration: true,
                 enableRemoteModule: true,
@@ -80,9 +79,20 @@ const ElectronApp = {
             icon: (isLinux && path.join(__dirname, 'icon.png')) || undefined,
         });
 
+        const settings = WindowSettings.getSettings(this.mainWindow.id);
+        console.log('settings', settings.x);
+
         settings.manage(this.mainWindow);
 
+        this.mainWindow.setBounds({
+            width: settings.width,
+            height: settings.height,
+            x: settings.x || this.mainWindow.getBounds().x,
+            y: settings.y || this.mainWindow.getBounds().y,
+        });
+
         if (!settings.custom) {
+            console.log('custom settings not found: resetting');
             settings.custom = {
                 splitView: false,
             };
@@ -90,7 +100,7 @@ const ElectronApp = {
 
         console.log(settings.custom);
 
-        this.mainWindow.initialSettings = settings.custom;
+        // this.mainWindow.initialSettings = settings.custom;
 
         // this.mainWindow.loadURL(HTML_PATH);
         this.mainWindow.loadFile(HTML_PATH);
@@ -118,8 +128,6 @@ const ElectronApp = {
         // });
 
         this.appMenu = new AppMenu(this.mainWindow);
-
-        Remote.init();
     },
     /**
      * Install special React DevTools
@@ -218,10 +226,10 @@ const ElectronApp = {
         ipcMain.handle('cleanedUp', () => this.onCleanUp());
 
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        ipcMain.handle('setWindowSettings', (_: Event, data: { [key: string]: any }) => {
-            console.log('changeWindowSettings', data);
-            const { id, settings } = data;
-            const state = WindowSettings.getSettings(id);
+        ipcMain.handle('setWindowSettings', (event, data: { [key: string]: any }) => {
+            const { settings } = data;
+            console.log('changeWindowSettings', event.sender.id, settings);
+            const state = WindowSettings.getSettings(event.sender.id);
             console.log('got state', state);
             state.custom = settings;
         });
@@ -293,7 +301,7 @@ const ElectronApp = {
     /**
      * app.ready callback: that's the app's main entry point
      */
-    onReady(): void {
+    async onReady(): Promise<void> {
         console.log('App Ready');
         // react-devtools doesn't work properly with file:// scheme, starting with Electron 9
         // see: https://github.com/electron/electron/issues/24011 &
@@ -304,7 +312,7 @@ const ElectronApp = {
 
         this.installIpcMainListeners();
         this.installNativeThemeListener();
-        this.createMainWindow();
+        await this.createMainWindow();
         this.openDevTools();
     },
 };

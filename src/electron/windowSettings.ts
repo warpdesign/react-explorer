@@ -52,7 +52,7 @@ export const WindowSettings = {
             splitView?: boolean;
         };
     } {
-        if (id < this.states.length) {
+        if (id < this.states.length && this.states[id]) {
             return this.states[id];
         } else {
             const state = windowStateKeeper({

@@ -57,12 +57,14 @@ export class SettingsState {
     }
 
     @action
-    setLanguage(askedLang: string): void {
+    async setLanguage(askedLang: string): Promise<void> {
         let lang = askedLang;
 
         // detect language from host OS if set to auto
         if (lang === 'auto') {
-            lang = remote.app.getLocale();
+            lang = await ipcRenderer.invoke('app:getLocale');
+            console.log('detectedLanguage', lang);
+            // remote.app.getLocale();
         }
 
         // fallback to English if preferred language
