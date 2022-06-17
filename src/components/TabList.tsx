@@ -4,10 +4,8 @@ import { inject, observer } from 'mobx-react';
 import { WithNamespaces, withNamespaces } from 'react-i18next';
 import { ViewState } from '../state/viewState';
 import { sendFakeCombo } from './WithMenuAccelerators';
-import { ContextMenu } from './ContextMenu';
-import { MenuItemConstructorOptions, MenuItem, ipcRenderer } from 'electron';
+import { MenuItemConstructorOptions, ipcRenderer } from 'electron';
 import { SettingsState } from '../state/settingsState';
-// import { DOWNLOADS_DIR, HOME_DIR, DOCS_DIR, DESKTOP_DIR, MUSIC_DIR, PICTURES_DIR, VIDEOS_DIR } from '../utils/platform';
 import { ALL_DIRS } from '../utils/platform';
 import Icons from '../constants/icons';
 import { AppAlert } from './AppAlert';
@@ -31,8 +29,6 @@ interface InjectedProps extends WithNamespaces {
 @inject('viewState', 'settingsState')
 @observer
 class TabListClass extends React.Component<InjectedProps> {
-    menuRef: React.RefObject<ContextMenu> = React.createRef();
-    menuFolderRef: React.RefObject<ContextMenu> = React.createRef();
     menuIndex = 0;
 
     /**
@@ -111,9 +107,7 @@ class TabListClass extends React.Component<InjectedProps> {
 
     onContextMenu = (menuIndex: number): void => {
         const tabMenuTemplate = this.getTabMenu();
-        console.log('onContextMenu', tabMenuTemplate);
         this.menuIndex = menuIndex;
-        // this.menuRef.current.showMenu(tabMenuTemplate);
         ipcRenderer.invoke('Menu:buildFromTemplate', tabMenuTemplate);
     };
 
@@ -136,7 +130,6 @@ class TabListClass extends React.Component<InjectedProps> {
                 break;
             case 'OPEN_FOLDER':
                 this.onFolderItemClick(param);
-                // console.log('need to open folder', param);
                 break;
             // case 'OPEN_EXPLORER':
             //     break;
@@ -177,12 +170,10 @@ class TabListClass extends React.Component<InjectedProps> {
                 return {
                     label: el.name,
                     id: `OPEN_FOLDER///${el.fullname}`,
-                    // click: this.onFolderItemClick,
                 };
             },
         );
 
-        // this.menuFolderRef.current.showMenu(template);
         ipcRenderer.invoke('Menu:buildFromTemplate', template);
     };
 
@@ -193,7 +184,6 @@ class TabListClass extends React.Component<InjectedProps> {
             {
                 label: t('TABS.NEW'),
                 id: 'NEW_TAB',
-                // click: this.onItemClick,
             },
             {
                 type: 'separator',
@@ -201,7 +191,6 @@ class TabListClass extends React.Component<InjectedProps> {
             {
                 label: t('TABS.REFRESH'),
                 id: 'REFRESH',
-                // click: this.onItemClick,
             },
             {
                 type: 'separator',
@@ -209,12 +198,10 @@ class TabListClass extends React.Component<InjectedProps> {
             {
                 label: t('TABS.CLOSE'),
                 id: 'CLOSE_TAB',
-                // click: this.onItemClick,
             },
             {
                 label: t('TABS.CLOSE_OTHERS'),
                 id: 'CLOSE_OTHERS',
-                // click: this.onItemClick,
             },
             {
                 type: 'separator',
@@ -222,7 +209,6 @@ class TabListClass extends React.Component<InjectedProps> {
             {
                 label: t('APP_MENUS.OPEN_TERMINAL'),
                 id: 'OPEN_TERMINAL',
-                // click: this.onItemClick,
             },
         ];
     }
@@ -247,8 +233,6 @@ class TabListClass extends React.Component<InjectedProps> {
 
         return (
             <ButtonGroup fill className="tablist" alignText="center">
-                <ContextMenu ref={this.menuRef} template={null}></ContextMenu>
-                <ContextMenu ref={this.menuFolderRef} template={null}></ContextMenu>
                 {caches.map((cache, index) => {
                     const closeIcon = caches.length > 1 && (
                         <Icon

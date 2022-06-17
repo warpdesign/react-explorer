@@ -54,8 +54,6 @@ class App {
     }
 
     getInitialSettings(): Promise<CustomSettings> {
-        // const window: Electron.BrowserWindow & { initialSettings?: CustomSettings } = remote.getCurrentWindow();
-        // return (window && window.initialSettings) || {};
         return ipcRenderer.invoke('window:getInitialSettings');
     }
 

@@ -29,39 +29,4 @@ module.exports = {
             //
         },
     },
-    remote: {
-        getCurrentWindow: () => ({
-            id: 9,
-        }),
-        Menu: {
-            buildFromTemplate: function () {
-                return {
-                    popup: function () {
-                        //
-                    },
-                    closePopup: function () {
-                        //
-                    },
-                };
-            },
-        },
-        app: {
-            getLocale: function () {
-                return 'en';
-            },
-            getPath: function (str) {
-                return '/cy/' + str;
-            },
-            getName: function () {
-                return 'React-Explorer (Cypress)';
-            },
-        },
-        // new in 7.0
-        nativeTheme: {
-            shouldUseDarkColors: false,
-            on: () => {
-                //
-            }
-        },
-    },
 };

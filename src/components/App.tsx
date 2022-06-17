@@ -9,7 +9,7 @@ import { SideView } from './SideView';
 import { LogUI, Logger } from './Log';
 import { Downloads } from './Downloads';
 import * as drivelist from 'drivelist';
-import { remote, ipcRenderer } from 'electron';
+import { ipcRenderer } from 'electron';
 import { withNamespaces, WithNamespaces, Trans } from 'react-i18next';
 import { AppToaster } from './AppToaster';
 import { Nav } from './Nav';
@@ -54,7 +54,6 @@ declare global {
     interface Window {
         appState: AppState;
         settingsState: SettingsState;
-        remote: Electron.Remote;
         drivelist: any;
         renderer: Electron.IpcRenderer;
     }
@@ -100,7 +99,6 @@ class App extends React.Component<AppProps> {
         if (ENV.CY) {
             window.appState = this.appState;
             window.settingsState = settingsState;
-            window.remote = remote;
             window.drivelist = drivelist;
             window.renderer = ipcRenderer;
         }
