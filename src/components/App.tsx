@@ -56,6 +56,7 @@ declare global {
         settingsState: SettingsState;
         remote: Electron.Remote;
         drivelist: any;
+        renderer: Electron.IpcRenderer;
     }
 }
 
@@ -101,6 +102,7 @@ class App extends React.Component<AppProps> {
             window.settingsState = settingsState;
             window.remote = remote;
             window.drivelist = drivelist;
+            window.renderer = ipcRenderer;
         }
 
         Logger.success(

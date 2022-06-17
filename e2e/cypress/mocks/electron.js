@@ -11,7 +11,21 @@ module.exports = {
                 method(e, { data: e.data, combo: e.combo });
             });
         },
-        invoke: function () {
+        invoke: function (command) {
+            switch (command) {
+                case 'window:getInitialSettings':
+                    return {
+                        splitView: false,
+                    };
+                case 'window:getId':
+                    return 0;
+                case 'nativeTheme:shouldUseDarkColors':
+                    return false;
+                case 'openTerminal':
+                    return {};
+            }
+        },
+        sendSync: function () {
             //
         },
     },
