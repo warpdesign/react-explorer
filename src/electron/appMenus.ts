@@ -1,5 +1,5 @@
 import { clipboard, Menu, BrowserWindow, MenuItemConstructorOptions, MenuItem, app, ipcMain, dialog } from 'electron';
-import { isMac, isLinux, VERSIONS } from '../utils/platform';
+import { isMac, isLinux, VERSIONS } from './osSupport';
 
 declare const ENV: { [key: string]: string | boolean | number | Record<string, unknown> };
 

@@ -1,78 +1,57 @@
+import { ipcRenderer } from 'electron';
 import { platform } from 'process';
-import { release, arch, userInfo } from 'os';
-import { remote, app } from 'electron';
 
-declare const ENV: { [key: string]: string | boolean | number | Record<string, unknown> };
-
-type App = { getPath: (name: string) => string } | Partial<Electron.App>;
-
-function getAppInstance(): App {
-    let appInstance: App = app || (remote && remote.app);
-
-    if (!appInstance) {
-        // eslint-disable-next-line @typescript-eslint/no-var-requires
-        const getPath: (name: string) => string = require('./test/helpers').getPath;
-        // simulate getPath for test environment
-        appInstance = {
-            getPath,
-        };
-    }
-
-    return appInstance;
-}
-
-const appInstance = getAppInstance();
-
-function getDefaultFolder() {
-    let defaultFolder = '';
-
-    if (typeof jest !== 'undefined') {
-        defaultFolder = '';
-    } else {
-        defaultFolder =
-            ENV.NODE_ENV === 'production'
-                ? appInstance.getPath('home')
-                : platform === 'win32'
-                ? appInstance.getPath('temp')
-                : '/tmp/react-explorer';
-    }
-
-    return defaultFolder;
-}
-
-const META_KEY = 91;
-const CTRL_KEY = 17;
-
-export const isMac = platform === 'darwin';
-export const isMojave = isMac && parseInt(release().split('.')[0], 10) - 4 >= 14;
-export const isWin = platform === 'win32';
-export const isLinux = platform === 'linux';
-export const metaKeyCode = (isMac && META_KEY) || CTRL_KEY;
-export const lineEnding = isWin ? '\r\n' : '\n';
-export const defaultFolder = getDefaultFolder();
-export const TMP_DIR = appInstance.getPath('temp');
-export const HOME_DIR = appInstance.getPath('home');
-export const DOWNLOADS_DIR = appInstance.getPath('downloads');
-export const MUSIC_DIR = appInstance.getPath('music');
-export const DOCS_DIR = appInstance.getPath('documents');
-export const DESKTOP_DIR = appInstance.getPath('desktop');
-export const PICTURES_DIR = appInstance.getPath('pictures');
-export const VIDEOS_DIR = appInstance.getPath('videos');
-export const ALL_DIRS: { [key: string]: string } = {
-    HOME_DIR,
-    DOWNLOADS_DIR,
-    PICTURES_DIR,
-    MUSIC_DIR,
-    DOCS_DIR,
-    DESKTOP_DIR,
-    VIDEOS_DIR,
+const OS = ipcRenderer.sendSync('app:getOS') || {
+    isMac: platform === 'darwin',
+    isMojave: false,
+    isWin: platform === 'win32',
+    isLinux: platform === 'linux',
+    metaKeyCode: platform === 'darwin' ? 91 : 17,
+    lineEnding: platform === 'win32' ? '\r\n' : '\n',
+    defaultFolder: '/',
+    TMP_DIR: '/tmp',
+    HOME_DIR: '/cy/home',
+    DOWNLOADS_DIR: '/cy/downloads',
+    MUSIC_DIR: '/cy/music',
+    DOCS_DIR: '/cy/documents',
+    DESKTOP_DIR: '/cy/desktop',
+    PICTURES_DIR: '/cy/pictures',
+    VIDEOS_DIR: '/cy/videos',
+    ALL_DIRS: {
+        HOME_DIR: '/cy/home',
+        DOWNLOADS_DIR: '/cy/downloads',
+        PICTURES_DIR: '/cy/pictures',
+        MUSIC_DIR: '/cy/music',
+        DOCS_DIR: '/cy/documents',
+        DESKTOP_DIR: '/cy/desktop',
+        VIDEOS_DIR: '/cy/videos',
+    },
+    USERNAME: 'cypress',
+    VERSIONS: {
+        platform,
+        release: 'xx',
+        arch: 'arch',
+        electron: 'electron',
+        chrome: 'chrome version',
+        node: 'node version',
+    },
 };
-export const USERNAME = userInfo().username || 'username';
-export const VERSIONS = {
-    platform,
-    release: release(),
-    arch: arch(),
-    electron: process.versions['electron'],
-    chrome: process.versions['chrome'],
-    node: process.version,
-};
+
+export const isMac = OS.isMac;
+export const isMojave = OS.isMojave;
+export const isWin = OS.isWin;
+export const isLinux = OS.isLinux;
+export const metaKeyCode = OS.metaKeyCode;
+export const lineEnding = OS.lineEnding;
+export const defaultFolder = OS.defaultFolder;
+export const TMP_DIR = OS.TMP_DIR;
+export const HOME_DIR = OS.HOME_DIR;
+export const DOWNLOADS_DIR = OS.DOWNLOADS_DIR;
+export const MUSIC_DIR = OS.MUSIC_DIR;
+export const DOCS_DIR = OS.DOCS_DIR;
+export const DESKTOP_DIR = OS.DESKTOP_DIR;
+export const PICTURES_DIR = OS.PICTURES_DIR;
+export const VIDEOS_DIR = OS.VIDEOS_DIR;
+export const ALL_DIRS: { [key: string]: string } = OS.ALL_DIRS;
+export const USERNAME = OS.USERNAME;
+export const VERSIONS = OS.VERSIONS;

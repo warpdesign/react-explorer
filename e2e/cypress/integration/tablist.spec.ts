@@ -31,12 +31,13 @@ describe('tablist', () => {
                 }
             }
 
-            cy.stub(win.remote.Menu, 'buildFromTemplate')
-                .as('stub_buildFromTemplate')
-                .returns({
-                    // remote menu stubs
-                    popup: cy.stub().as('stub_popup'),
-                });
+            // cy.stub(win.remote.Menu, 'buildFromTemplate')
+            //     .as('stub_buildFromTemplate')
+            //     .returns({
+            //         // remote menu stubs
+            //         popup: cy.stub().as('stub_popup'),
+            //     });
+            cy.stub(win.renderer, 'invoke').as('stub_invoke');
         });
     }
 
@@ -79,9 +80,9 @@ describe('tablist', () => {
 
         cy.get('#view_0 .tablist').contains('/').find('[icon]').rightclick();
 
-        cy.get('@stub_buildFromTemplate').should('be.calledOnce').and('be.calledWith', []);
+        cy.get('@stub_invoke').should('be.calledOnce').and('be.calledWith', 'Menu:buildFromTemplate', []);
 
-        cy.get('@stub_popup').should('be.calledOnce');
+        // cy.get('@stub_popup').should('be.calledOnce');
     });
 
     it('right-click on the tab should show the tab menu', () => {
@@ -89,10 +90,12 @@ describe('tablist', () => {
 
         cy.get('#view_0 .tablist').contains('/').find('.bp3-button-text').rightclick('right');
 
-        cy.get('@stub_buildFromTemplate')
+        cy.get('@stub_invoke')
             .should('be.calledOnce')
             .then((stub: any) => {
-                expect(stub.getCalls()[0].args[0].length).to.equal(8);
+                // check we have the correct number of elements in the menu template
+                // NOTE: I guess we can do a lot better than that!
+                expect(stub.getCalls()[0].args[1].length).to.equal(8);
             });
     });
 

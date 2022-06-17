@@ -43,7 +43,6 @@ export class WinState {
     @computed
     get toJSON(): JSObject {
         return {
-            id: this.id,
             settings: {
                 splitView: this.splitView,
             },

@@ -7,7 +7,7 @@ import { SettingsState } from '../state/settingsState';
 import { Provider } from 'mobx-react';
 import { DndProvider } from 'react-dnd';
 import HTML5Backend from 'react-dnd-html5-backend';
-import { remote } from 'electron';
+import { ipcRenderer } from 'electron';
 import { CustomSettings } from '../electron/windowSettings';
 import child_process from 'child_process';
 // register Fs that will be available in React-Explorer
@@ -34,11 +34,7 @@ class App {
 
     constructor() {
         this.settingsState = new SettingsState(ENV.VERSION as string);
-        if (ENV.NODE_ENV !== 'production') {
-            this.createTestFolder().then(this.init);
-        } else {
-            this.init();
-        }
+        this.init();
     }
 
     // debug stuff
@@ -57,18 +53,21 @@ class App {
         });
     }
 
-    getInitialSettings(): CustomSettings {
-        const window: Electron.BrowserWindow & { initialSettings?: CustomSettings } = remote.getCurrentWindow();
-        return (window && window.initialSettings) || {};
+    getInitialSettings(): Promise<CustomSettings> {
+        return ipcRenderer.invoke('window:getInitialSettings');
     }
 
-    init = (): void => {
+    init = async (): Promise<void> => {
+        if (ENV.NODE_ENV !== 'production') {
+            await this.createTestFolder();
+        }
         initFS();
         this.renderApp();
     };
 
-    renderApp = (): void => {
-        const initialSettings = this.getInitialSettings();
+    renderApp = async (): Promise<void> => {
+        const initialSettings = await this.getInitialSettings();
+        console.log('initialSettings', initialSettings);
         document.body.classList.add('loaded');
 
         ReactDOM.render(

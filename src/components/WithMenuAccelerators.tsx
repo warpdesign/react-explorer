@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { ipcRenderer, remote, IpcRendererEvent } from 'electron';
+import { ipcRenderer, IpcRendererEvent } from 'electron';
 
 const ACCELERATOR_EVENT = 'menu_accelerator';
 
@@ -51,9 +51,8 @@ export class Accelerator extends React.PureComponent<AcceleratorProps> {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function sendFakeCombo(combo: string, data?: any): void {
-    console.log('sending fake combo');
-    const id = remote.getCurrentWindow().id;
+export async function sendFakeCombo(combo: string, data?: any): Promise<void> {
+    const id = await ipcRenderer.invoke('window:getId');
     ipcRenderer.sendTo(id, ACCELERATOR_EVENT, Object.assign({ combo: combo, data }));
 }
 

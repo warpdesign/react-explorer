@@ -1,10 +1,8 @@
 import { observable, action } from 'mobx';
-import { remote } from 'electron';
+import { remote, ipcRenderer } from 'electron';
 import { JSObject } from '../components/Log';
 import { i18next, languageList } from '../locale/i18n';
 import { isMojave, isWin, isMac, defaultFolder } from '../utils/platform';
-
-const { systemPreferences } = remote;
 
 const APP_STORAGE_KEY = 'react-explorer';
 
@@ -49,7 +47,9 @@ export class SettingsState {
     }
 
     installListeners(): void {
-        remote.nativeTheme.on('updated', () => this.setActiveTheme());
+        ipcRenderer.on('nativeTheme:updated', (event, shouldUseDarkColors) => {
+            this.setActiveTheme();
+        });
     }
 
     getParam(name: string): JSObject {
@@ -57,12 +57,14 @@ export class SettingsState {
     }
 
     @action
-    setLanguage(askedLang: string): void {
+    async setLanguage(askedLang: string): Promise<void> {
         let lang = askedLang;
 
         // detect language from host OS if set to auto
         if (lang === 'auto') {
-            lang = remote.app.getLocale();
+            lang = await ipcRenderer.invoke('app:getLocale');
+            console.log('detectedLanguage', lang);
+            // remote.app.getLocale();
         }
 
         // fallback to English if preferred language
@@ -147,7 +149,7 @@ export class SettingsState {
     }
 
     @action
-    setActiveTheme = (darkMode = this.darkMode): void => {
+    setActiveTheme = async (darkMode = this.darkMode): Promise<void> => {
         if (darkMode !== this.darkMode) {
             this.darkMode = darkMode;
         }
@@ -155,7 +157,7 @@ export class SettingsState {
         if (this.darkMode === 'auto') {
             // CHECKME!
             // this.isDarkModeActive = isMojave && systemPreferences ? systemPreferences.isDarkMode() : false;
-            this.isDarkModeActive = remote.nativeTheme.shouldUseDarkColors;
+            this.isDarkModeActive = await ipcRenderer.invoke('nativeTheme:shouldUseDarkColors');
         } else {
             this.isDarkModeActive = this.darkMode;
         }
