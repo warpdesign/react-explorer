@@ -1,7 +1,7 @@
 import { ipcRenderer } from 'electron';
 import { platform } from 'process';
 
-const OS = ipcRenderer.sendSync('app:getOS') || {
+const OS = (ipcRenderer && ipcRenderer.sendSync('app:getOS')) || {
     isMac: platform === 'darwin',
     isMojave: false,
     isWin: platform === 'win32',

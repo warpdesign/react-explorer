@@ -11,10 +11,6 @@ declare const ENV: { [key: string]: string | boolean | number | Record<string, u
 const ENV_E2E = !!process.env.E2E;
 const HTML_PATH = `${__dirname}/index.html`;
 
-// allow non-content-aware native modules, needed for drivelist
-// see: https://github.com/balena-io-modules/drivelist/issues/373
-app.allowRendererProcessReuse = false;
-
 const ElectronApp = {
     mainWindow: null as Electron.BrowserWindow,
     devWindow: null as Electron.BrowserWindow,
@@ -74,7 +70,7 @@ const ElectronApp = {
             // y: settings.y,
             webPreferences: {
                 nodeIntegration: true,
-                enableRemoteModule: true,
+                contextIsolation: false,
             },
             icon: (isLinux && path.join(__dirname, 'icon.png')) || undefined,
         });
