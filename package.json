@@ -29,7 +29,7 @@
         ]
     },
     "scripts": {
-        "test": "jest",
+        "test": "npx jest",
         "test:e2e": "npm run server:stop && cd e2e && npm run build && npm run server && npm run cypress:run --config video=false && pm2 stop cy-server",
         "test:all": "npm run test:e2e && npm run test",
         "build": "webpack --watch",
@@ -94,6 +94,7 @@
         "html-webpack-plugin": "^3.2.0",
         "husky": "^3.0.9",
         "jest": "^24.9.0",
+        "jest-cli": "^24.9.0",
         "lint-staged": "^10.4.2",
         "local-web-server": "^3.0.7",
         "mock-fs": "github:warpdesign/mock-fs",
