@@ -1,7 +1,5 @@
 name: Cypress & Jest CI
-
 on: [push, pull_request]
-    
 jobs:
   test:
     strategy:
