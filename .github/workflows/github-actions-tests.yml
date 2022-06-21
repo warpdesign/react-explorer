@@ -18,5 +18,6 @@ jobs:
       - run: |
           npm ci
           cd e2e && npm ci && npm run build
+          npm run server & npx wait-on http://localhost:8080
           npm run cypress:run --config video=false
           cd .. && npm test
