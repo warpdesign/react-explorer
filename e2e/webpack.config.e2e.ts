@@ -1,6 +1,5 @@
 import { resolve as _resolve } from 'path';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
-import CopyPlugin from 'copy-webpack-plugin';
 import { DefinePlugin } from 'webpack';
 import { version } from './package.json';
 import gitHash from '../scripts/hash';
@@ -141,14 +140,6 @@ export default [
                     __PLATFORM__: JSON.stringify(PLATFORM),
                     __ARCH__: JSON.stringify(arch()),
                     __NODE__: JSON.stringify(node),
-                }),
-                new CopyPlugin({
-                    patterns: [
-                        {
-                            from: '../img/icon-512x512.png',
-                            to: 'icon.png',
-                        },
-                    ],
                 }),
             ],
         },
