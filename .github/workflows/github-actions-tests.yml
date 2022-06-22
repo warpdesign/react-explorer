@@ -13,6 +13,9 @@ jobs:
             experimental: true
     runs-on: ${{ matrix.os }}
     continue-on-error: ${{ matrix.experimental }}
+    defaults:
+      run:
+        working-directory: ./e2e
     steps:
       - uses: actions/checkout@v3
 
@@ -20,9 +23,16 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
-      - run: |
-          npm ci
-          cd e2e && npm ci && npm run build
-          npm run server & npx wait-on http://localhost:8080
-          npm run cypress:run --config video=false
-          cd .. && npm test
+      - name: Install node_modules
+        run: npm ci
+      - name: Install e2e node_modules
+        run: npm ci
+      - name: Build E2E version
+        run: npm run build
+      - name: Run & wait for server
+        run: npm run server & npx wait-on http://localhost:8080
+      - name: Cypress tests
+        run: npm run cypress:run --config video=false
+      - name: Integration tests
+        working-directory: ./
+        run: npm test
