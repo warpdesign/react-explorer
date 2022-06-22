@@ -24,6 +24,7 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
       - name: Install node_modules
+        working-directory: ./
         run: npm ci
       - name: Install e2e node_modules
         run: npm ci
