@@ -8,9 +8,9 @@ jobs:
         node-version: [14.x]
         os: [ubuntu-latest, macos-latest]
         experimental: [false]
-        include:
-          - os: windows-latest
-            experimental: true
+        # include:
+        #   - os: windows-latest
+        #     experimental: true
     runs-on: ${{ matrix.os }}
     continue-on-error: ${{ matrix.experimental }}
     defaults:
