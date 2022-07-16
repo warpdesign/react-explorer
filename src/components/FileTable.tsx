@@ -781,12 +781,6 @@ export class FileTableClass extends React.Component<Props, State> {
             case KEYS.PageUp:
                 this.scrollPage(e.keyCode === KEYS.PageUp);
                 break;
-
-            case KEYS.Backspace:
-                if (!this.editingElement && !this.cache.isRoot()) {
-                    this.cache.openParentDirectory();
-                }
-                break;
         }
     };
 

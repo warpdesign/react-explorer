@@ -29,6 +29,7 @@ describe('combo hotkeys', () => {
             const { appState } = win;
             const winState = appState.winStates[0];
             const view = winState.views[0];
+            const cache = view.caches[0];
 
             winState.splitView = true;
 
@@ -46,6 +47,7 @@ describe('combo hotkeys', () => {
             cy.stub(view, 'closeTab').as('closeTab');
             // stub first win.toggleSplitView
             cy.spy(winState, 'toggleSplitViewMode').as('toggleSplitViewMode');
+            cy.stub(cache, 'openParentDirectory').as('openParentDirectory').resolves();
         });
     }
 
@@ -64,8 +66,8 @@ describe('combo hotkeys', () => {
         resetSelection();
         getCaches();
         // load files
-        cy.CDAndList(0, '/');
-        cy.get('#view_0 [data-cy-path]').invoke('val', '/').focus().blur();
+        cy.CDAndList(0, '/foo/bar/');
+        cy.get('#view_0 [data-cy-path]').invoke('val', '/foo/bar/').focus().blur();
     });
 
     it('should not show toast message on copy path if no file selected', () => {
@@ -195,5 +197,16 @@ describe('combo hotkeys', () => {
         cy.get('#view_0').should('be.visible').and('not.have.class', 'active');
 
         cy.get('#view_1').should('be.visible').and('have.class', 'active');
+
+        cy.triggerFakeCombo('CmdOrCtrl+Shift+Alt+V');
+    });
+
+    it('should open parent directory when pressing backspace', () => {
+        cy.triggerFakeCombo('Backspace');
+
+        // regression test for #226
+        cy.get('body').type('{backspace}');
+
+        cy.get('@openParentDirectory').should('be.calledOnce');
     });
 });
