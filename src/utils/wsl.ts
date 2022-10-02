@@ -3,6 +3,18 @@ import { exec } from 'child_process';
 
 const WSL_EXE = 'wsl.exe';
 
+export interface WslDistribution {
+    name: string;
+    hasINotify: boolean;
+}
+
+const hasINotify = (name: string): Promise<boolean> =>
+    new Promise((resolve) => {
+        exec(`wsl.exe -d ${name} -- inotifywait`, ({ code }) => {
+            resolve(code <= 1);
+        });
+    });
+
 export const hasWSL = (): Promise<boolean> => {
     return new Promise((resolve) => {
         if (!isWin) {
@@ -19,12 +31,24 @@ export const hasWSL = (): Promise<boolean> => {
     });
 };
 
-export const getWSLDistributions = (): Promise<string[]> => {
-    return new Promise((resolve, reject) => {
-        exec(`${WSL_EXE} -l -q`, (error, stdout, stderr) => {
+export const getWSLDistributions = (): Promise<WslDistribution[]> => {
+    return new Promise((resolve) => {
+        exec(`${WSL_EXE} -l -q`, async (error, stdout, stderr) => {
             if (!error && !stderr && stdout) {
                 const trimmed = stdout.replace(/\0/g, '');
-                resolve(trimmed.split('\r\n').filter((str) => str.length));
+                const distribs = await Promise.all(
+                    trimmed
+                        .split('\r\n')
+                        .filter((str) => str.length)
+                        .map(async (name) => {
+                            return {
+                                name,
+                                hasINotify: await hasINotify(name),
+                            } as WslDistribution;
+                        }),
+                );
+
+                resolve(distribs);
             } else {
                 resolve([]);
             }

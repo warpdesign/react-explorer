@@ -3,7 +3,7 @@ import { observable } from 'mobx';
 import * as drivelist from 'drivelist';
 import { IconNames } from '@blueprintjs/icons';
 import { ALL_DIRS } from '../utils/platform';
-import { WSL_PREFIX, getWSLDistributions } from '../utils/wsl';
+import { WSL_PREFIX, getWSLDistributions, WslDistribution } from '../utils/wsl';
 
 const CHECK_FOR_DRIVES_DELAY = 5000;
 const CHECK_FOR_WSL_DELAY = 30000;
@@ -15,6 +15,7 @@ export interface Favorite {
     isReadOnly?: boolean;
     isRemovable?: boolean;
     isVirtual?: boolean;
+    hasINotify?: boolean;
 }
 
 export class FavoritesState {
@@ -38,19 +39,17 @@ export class FavoritesState {
         return drives.filter((drive: drivelist.Drive) => drive.mountpoints && drive.mountpoints.length);
     }
 
-    async getDistributionList(): Promise<string[]> {
-        const distribs = await getWSLDistributions();
-        return distribs;
-    }
-
-    buildDistributions(distribs: string[]): void {
+    buildDistributions(distribs: WslDistribution[]): void {
         this.distributions.replace(
-            distribs.map((distrib: string) => ({
-                label: distrib,
-                path: `${WSL_PREFIX}${distrib}\\`,
+            distribs.map(({ name, hasINotify }) => ({
+                label: name,
+                path: `${WSL_PREFIX}${name}\\`,
                 icon: IconNames.SOCIAL_MEDIA,
+                hasINotify,
             })),
         );
+
+        console.log('build WSL distributions', this.distributions);
     }
 
     buildPlaces(drives: drivelist.Drive[]): void {
@@ -80,20 +79,19 @@ export class FavoritesState {
     launchTimeout(immediate = false, callback: () => void, timeout: number): void {
         if (immediate) {
             callback();
-            // this.checkForNewDrives();
         } else {
-            setTimeout(() => callback() /*this.checkForNewDrives()*/, timeout);
+            setTimeout(callback, timeout);
         }
     }
 
-    async buildDrivesList(): void {
+    buildDrivesList(): void {
         this.buildShortcuts();
         this.launchTimeout(true, this.checkForNewDrives, CHECK_FOR_DRIVES_DELAY);
         this.launchTimeout(true, this.checkForNewDistributions, CHECK_FOR_WSL_DELAY);
     }
 
     checkForNewDistributions = async (): Promise<void> => {
-        const distribs = await this.getDistributionList();
+        const distribs = await getWSLDistributions();
         if (distribs.length !== this.distributions.length) {
             this.buildDistributions(distribs);
         }
