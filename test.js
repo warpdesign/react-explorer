@@ -29,9 +29,28 @@ const process = require('child_process')
 //   console.log('error', e.status)
 // }
 
-process.exec('wsl.exe -d Ubuntu-22.04 -- inotifywait', ({ code }) => {
-  console.log(code === 127)
-})
+// process.exec('wsl.exe -d Ubuntu-22.04 -- inotifywait -e delete -e move -e create /tmp', (error, stdout) => {
+//   console.log('stdout', stdout)
+//   console.log(error?.code === 127)
+// })
+
+try {
+  const child = process.spawn('c:\\windows\\system32\\wsl.exe', ['-d', 'Ubuntu-22.04', '--', 'inotifywait', '-e', 'delete', '-e', 'move', '-e', 'create', '-m', '/tmp'], {
+    // stdio: 'ignore'
+  })
+  child.on('error', (e) => console.log('error', e))
+  child.on('close', (e) => console.log('error', e))
+  child.stdout.on('data', (data) => {
+    console.log(`yo`)
+  })
+  // setTimeout(() => {
+  //   console.log('need to kill process')
+  //   child.kill('SIGKILL')
+  // }, 5000)
+} catch(e) {
+  console.log('error creating child', e)
+}
+
 
 // fs.mkdir('//wsl$/Ubuntu-20.04/tmp/\"', 0777, (err) => {
 //   console.log('res', err);

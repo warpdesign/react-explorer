@@ -1,12 +1,38 @@
 import { isWin } from './platform';
-import { exec } from 'child_process';
+import { throttle } from './throttle';
+import { exec, spawn } from 'child_process';
 
-const WSL_EXE = 'wsl.exe';
+const WSL_EXE = 'C:\\Windows\\System32\\wsl.exe';
+const THROTTLE_DELAY = 1000;
 
 export interface WslDistribution {
     name: string;
     hasINotify: boolean;
 }
+
+export const watchWSLFolder = (path: string, distrib: string, callback: () => void) => {
+    const child = spawn(WSL_EXE, [
+        '-d',
+        distrib,
+        '--',
+        'inotifywait',
+        '-e',
+        'delete',
+        '-e',
+        'move',
+        '-e',
+        'create',
+        '-m',
+        path,
+    ]);
+    child.on('error', (e) => console.log('error', e));
+    child.on('close', (e) => console.log('error', e));
+    child.stdout.on('data', throttle(callback, THROTTLE_DELAY));
+
+    return {
+        close: child.kill,
+    };
+};
 
 const hasINotify = (name: string): Promise<boolean> =>
     new Promise((resolve) => {

@@ -2,11 +2,11 @@ import { File, Credentials, Fs } from '../Fs';
 import { LocalApi } from './FsLocal';
 import * as fs from 'fs';
 import * as path from 'path';
-import { throttle } from '../../utils/throttle';
 import { isWin } from '../../utils/platform';
 const invalidDirChars = /^[\.]+[\/]+(.)*$/gi;
 const invalidFileChars = /\//;
 const SEP = path.sep;
+import { WslWatch } from './WslWatch';
 
 // Since nodeJS will translate unix like paths to windows path, when running under Windows
 // we accept Windows style paths (eg. C:\foo...) and unix paths (eg. /foo or ./foo)
@@ -71,6 +71,17 @@ export class WslApi extends LocalApi {
                 newName: newName,
                 code: 'BAD_FILENAME',
             });
+        }
+    }
+    onList(dir: string): void {
+        if (dir !== this.path) {
+            try {
+                WslWatch.stopWatchingPath(this.path, this.onFsChange);
+                WslWatch.watchPath(dir, this.onFsChange);
+            } catch (e) {
+                console.warn('Could not watch path', dir, e);
+            }
+            this.path = dir;
         }
     }
 }
