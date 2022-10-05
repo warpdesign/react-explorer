@@ -98,7 +98,7 @@
         "local-web-server": "^3.0.7",
         "mock-fs": "github:warpdesign/mock-fs",
         "native-ext-loader": "^2.3.0",
-        "pm2": "^4.1.2",
+        "pm2": "^5.2.0",
         "prettier": "^2.1.2",
         "source-map-loader": "^0.2.4",
         "style-loader": "^0.23.1",
