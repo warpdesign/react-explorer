@@ -27,7 +27,7 @@
         "@types/copy-webpack-plugin": "^6.0.0",
         "copy-webpack-plugin": "^6.2.1",
         "cypress": "^3.5.0",
-        "pm2": "^4.1.2",
+        "pm2": "^5.2.0",
         "ts-node": "^9.0.0",
         "wait-on": "^4.0.2"
     }
