@@ -366,7 +366,10 @@ describe('filetable', () => {
                     .invoke('text')
                     .then((selectedFilename: any) => {
                         const expectedSelection = 'archive';
-                        const actualSelection = selectedFilename.substr(selection.baseOffset, selection.extentOffset);
+                        const actualSelection = selectedFilename.substring(
+                            selection.baseOffset,
+                            selection.extentOffset,
+                        );
                         expect(actualSelection).to.equal(expectedSelection);
                     });
             });

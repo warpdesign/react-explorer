@@ -53,24 +53,24 @@ export const LocalWatch = {
         return watcher;
     },
     watchPath(path: string, callback: WatcherCB): void {
-        // console.log('LocalWatch.watchPath', path);
+        console.log('LocalWatch.watchPath', path);
         const watcher = this.getWatcher(path, true);
         watcher.callbacks.push(callback);
     },
     stopWatchingPath(path: string, callback: WatcherCB): void {
-        // console.log('LocalWatch.stopWatchingPath', path);
+        console.log('LocalWatch.stopWatchingPath', path);
         const watcher = this.getWatcher(path);
         if (watcher) {
-            // console.log('LocalWatch.stopWatchingPath avant', watcher.callbacks.length);
+            console.log('LocalWatch.stopWatchingPath avant', watcher.callbacks.length);
             watcher.callbacks = watcher.callbacks.filter((cb: WatcherCB) => cb !== callback);
-            // console.log('LocalWatch.stopWatchingPath apres', watcher.callbacks.length);
+            console.log('LocalWatch.stopWatchingPath apres', watcher.callbacks.length);
             if (!watcher.callbacks.length) {
-                // console.log('no more callbacks: closing watch and removing watcher');
+                console.log('no more callbacks: closing watch and removing watcher');
                 watcher.ref.close();
                 this.watchers = this.watchers.filter((w: Watcher) => w !== watcher);
             }
         } else {
-            // console.log('LocalWatch.noWatcher');
+            console.log('LocalWatch.noWatcher');
         }
     },
     closeAll(): void {
