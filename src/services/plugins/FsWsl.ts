@@ -13,11 +13,28 @@ import { WslWatch } from './WslWatch';
 const wslStart = /^(\\\\wsl\$)/;
 
 export class WslApi extends LocalApi {
+    distributionId: string;
+
+    constructor(path: string, onFsChange: (filename: string) => void) {
+        super(path, onFsChange);
+        this.distributionId = path.substring(6).split('\\')[1];
+        console.log(path, path.substring(6), path.substring(6).split('\\'));
+        console.log('distributionId = ', this.distributionId);
+    }
+
+    toLinux(path: string): string {
+        if (!path) {
+            return '';
+        }
+        const linuxPath = path.substring(6).split('\\').slice(2).join('/');
+        return `/${linuxPath}`;
+    }
+
     isRoot(path: string): boolean {
         // We need to make a special case for wsl since \\wsl$ is not a drive, there's no root.
         // Instead we consider the distrib's root dir (eg. \\wsl$\\Debian) as root.
-        const parts = path.substr(6).split('\\').filter(Boolean);
-        console.log('wsl isroot', parts.length < 2);
+        const parts = path.substring(6).split('\\').filter(Boolean);
+        console.log('wsl isroot', parts.length < 2, path.substring(6).split('\\'));
         return parts.length < 2;
     }
 
@@ -74,15 +91,26 @@ export class WslApi extends LocalApi {
         }
     }
     onList(dir: string): void {
+        console.log('onList', 'dir', dir, 'this.path', this.path);
         if (dir !== this.path) {
             try {
-                WslWatch.stopWatchingPath(this.path, this.onFsChange);
-                WslWatch.watchPath(dir, this.onFsChange);
+                const previousPath = this.toLinux(this.path);
+                const newPath = this.toLinux(dir);
+                console.log(`previousPath=${previousPath}, newPath=${newPath}`);
+                previousPath && WslWatch.stopWatchingPath(previousPath, this.distributionId, this.onFsChange);
+                WslWatch.watchPath(newPath, this.distributionId, this.onFsChange);
             } catch (e) {
                 console.warn('Could not watch path', dir, e);
             }
             this.path = dir;
         }
+    }
+    off(): void {
+        // console.log("off", this.path);
+        // console.log("stopWatchingPath", this.path);
+        // TODO: strip wsl$\\ from path :)
+        const path = this.toLinux(this.path);
+        WslWatch.stopWatchingPath(path, this.distributionId, this.onFsChange);
     }
 }
 

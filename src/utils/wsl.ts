@@ -3,7 +3,7 @@ import { throttle } from './throttle';
 import { exec, spawn } from 'child_process';
 
 const WSL_EXE = 'C:\\Windows\\System32\\wsl.exe';
-const THROTTLE_DELAY = 1000;
+const THROTTLE_DELAY = 800;
 
 export interface WslDistribution {
     name: string;
@@ -11,6 +11,7 @@ export interface WslDistribution {
 }
 
 export const watchWSLFolder = (path: string, distrib: string, callback: () => void) => {
+    console.log('watchingWSLFolder', path, `(distrib=${distrib})`);
     const child = spawn(WSL_EXE, [
         '-d',
         distrib,
@@ -26,11 +27,11 @@ export const watchWSLFolder = (path: string, distrib: string, callback: () => vo
         path,
     ]);
     child.on('error', (e) => console.log('error', e));
-    child.on('close', (e) => console.log('error', e));
+    child.on('close', (e) => console.log('close', e));
     child.stdout.on('data', throttle(callback, THROTTLE_DELAY));
 
     return {
-        close: child.kill,
+        close: () => child.kill(),
     };
 };
 
