@@ -60,7 +60,7 @@ export class AppMenu {
             .replace('${chrome}', VERSIONS.chrome)
             .replace('${node}', VERSIONS.node);
 
-    showAboutDialog = async (): void => {
+    showAboutDialog = async (): Promise<void> => {
         const detail = this.getVersionString();
 
         const buttons = isLinux

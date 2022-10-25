@@ -6,7 +6,7 @@ import { i18next } from '../locale/i18n';
 import { SettingsState } from '../state/settingsState';
 import { Provider } from 'mobx-react';
 import { DndProvider } from 'react-dnd';
-import HTML5Backend from 'react-dnd-html5-backend';
+import { HTML5Backend } from 'react-dnd-html5-backend';
 import { ipcRenderer } from 'electron';
 import { CustomSettings } from '../electron/windowSettings';
 import child_process from 'child_process';

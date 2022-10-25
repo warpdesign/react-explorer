@@ -12,7 +12,6 @@ const buildDate = Date.now();
 const baseConfig: webpack.Configuration = {
     output: {
         path: _resolve(__dirname, 'build'),
-        filename: '[name].js',
     },
     node: {
         __dirname: false,
@@ -34,13 +33,17 @@ const baseConfig: webpack.Configuration = {
             // All files with a '.ts' or '.tsx' extension will be handled by 'awesome-typescript-loader'.
             {
                 test: /\.tsx?$/,
+                exclude: /(node_modules)/,
+                resolve: {
+                    fullySpecified: false,
+                },
                 use: [
                     {
-                        loader: 'ts-loader',
-                        options: {
-                            // disable type checker - we will use it in fork plugin
-                            transpileOnly: true,
-                        },
+                        loader: 'swc-loader',
+                        // options: {
+                        //     // disable type checker - we will use it in fork plugin
+                        //     transpileOnly: true,
+                        // },
                     },
                     {
                         loader: 'data-cy-loader',
@@ -58,27 +61,37 @@ const baseConfig: webpack.Configuration = {
             // file loader, for loading files referenced inside css files
             {
                 test: /\.(woff(2)?|ttf|eot|svg)(\?v=\d+\.\d+\.\d+)?$/,
-                use: [
-                    {
-                        loader: 'file-loader',
-                        options: {
-                            name: '[name].[ext]',
-                            outputPath: 'fonts/',
-                        },
-                    },
-                ],
+                type: 'asset/resource',
+                generator: {
+                    filename: 'fonts/[hash][ext][query]',
+                },
+                // use: [
+                //     {
+                //         loader: 'file-loader',
+                //         options: {
+                //             name: '[name].[ext]',
+                //             outputPath: 'fonts/',
+                //         },
+                //     },
+                // ],
             },
             // images embbeded into css
             {
                 test: /\.(png|jpg|gif)$/i,
-                use: [
-                    {
-                        loader: 'url-loader',
-                        options: {
-                            limit: 8192,
-                        },
+                type: 'asset/inline',
+                parser: {
+                    dataUrlCondition: {
+                        maxSize: 8192,
                     },
-                ],
+                },
+                // use: [
+                //     {
+                //         loader: 'url-loader',
+                //         options: {
+                //             limit: 8192,
+                //         },
+                //     },
+                // ],
             },
             {
                 test: /\.node$/,
