@@ -40,10 +40,6 @@ const baseConfig: webpack.Configuration = {
                 use: [
                     {
                         loader: 'swc-loader',
-                        // options: {
-                        //     // disable type checker - we will use it in fork plugin
-                        //     transpileOnly: true,
-                        // },
                     },
                     {
                         loader: 'data-cy-loader',
@@ -65,15 +61,6 @@ const baseConfig: webpack.Configuration = {
                 generator: {
                     filename: 'fonts/[hash][ext][query]',
                 },
-                // use: [
-                //     {
-                //         loader: 'file-loader',
-                //         options: {
-                //             name: '[name].[ext]',
-                //             outputPath: 'fonts/',
-                //         },
-                //     },
-                // ],
             },
             // images embbeded into css
             {
@@ -84,14 +71,6 @@ const baseConfig: webpack.Configuration = {
                         maxSize: 8192,
                     },
                 },
-                // use: [
-                //     {
-                //         loader: 'url-loader',
-                //         options: {
-                //             limit: 8192,
-                //         },
-                //     },
-                // ],
             },
             {
                 test: /\.node$/,
