@@ -116,6 +116,7 @@
         "webpack-cli": "^4.10.0"
     },
     "dependencies": {
+        "@babel/runtime": "^7.20.1",
         "@blueprintjs/core": "^3.18.0",
         "@blueprintjs/select": "^3.10.0",
         "@types/mkdirp": "^0.5.2",
