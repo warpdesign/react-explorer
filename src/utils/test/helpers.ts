@@ -40,7 +40,7 @@ export const itUnix = (name: string, fn?: jest.ProvidesCallback, timeout?: numbe
 export const getPath = (id: string): string => {
     switch (id) {
         case 'home':
-            return homedir();
+            return '/cy/home';
 
         case 'temp':
             return tmpdir();

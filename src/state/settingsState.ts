@@ -1,5 +1,5 @@
 import { observable, action } from 'mobx';
-import { remote, ipcRenderer } from 'electron';
+import { ipcRenderer } from 'electron';
 import { JSObject } from '../components/Log';
 import { i18next, languageList } from '../locale/i18n';
 import { isMojave, isWin, isMac, defaultFolder } from '../utils/platform';

@@ -239,7 +239,7 @@ export class ToolbarClass extends React.Component<Props, PathInputState> {
                     cache.reload();
                 }
             }
-        } catch (err: LocalizedError) {
+        } catch (err) {
             this.onDeleteError(err);
         }
 

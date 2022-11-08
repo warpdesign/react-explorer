@@ -1,0 +1,42 @@
+name: Cypress & Jest CI
+on: [push]
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: [14.x]
+        os: [ubuntu-latest, macos-latest]
+        experimental: [false]
+        # include:
+        #   - os: windows-latest
+        #     experimental: true
+    runs-on: ${{ matrix.os }}
+    continue-on-error: ${{ matrix.experimental }}
+    defaults:
+      run:
+        working-directory: ./e2e
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          persist-credentials: false
+
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+      - name: Install node_modules
+        working-directory: ./
+        run: npm ci
+      - name: Install e2e node_modules
+        run: npm ci
+      - name: Build E2E version
+        run: npm run build
+      - name: Run & wait for server
+        run: npm run server & npx wait-on http://localhost:8080
+      - name: Cypress tests
+        run: npm run cypress:run --config video=false
+      - name: Integration tests
+        working-directory: ./
+        run: npm test

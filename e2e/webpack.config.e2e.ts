@@ -1,12 +1,11 @@
-import { resolve as _resolve } from 'path';
+import { resolve as _resolve, join } from 'path';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
-import CopyPlugin from 'copy-webpack-plugin';
-import { DefinePlugin } from 'webpack';
+import { DefinePlugin, ProvidePlugin } from 'webpack';
 import { version } from './package.json';
 import gitHash from '../scripts/hash';
 import { release, arch } from 'os';
 import { version as node } from 'process';
-const MOCKS_PATH = 'cypress/mocks/';
+const MOCKS_PATH = './cypress/mocks/';
 import { platform as PLATFORM } from 'process';
 import { readdirSync } from 'fs';
 
@@ -45,10 +44,11 @@ function webpackAliases(mockPath) {
     }, {});
 }
 
+const aliases = webpackAliases(MOCKS_PATH);
+
 const baseConfig = {
     output: {
         path: _resolve(__dirname, 'build-e2e'),
-        filename: '[name].js',
     },
     externals: {
         path: '{}',
@@ -65,22 +65,28 @@ const baseConfig = {
     resolve: {
         // Add '.ts' and '.tsx' as resolvable extensions.
         extensions: ['.ts', '.tsx', '.js', '.json', '.css'],
-        alias: webpackAliases(MOCKS_PATH),
+        alias: {
+            // TODO: use proper polyfills instead of incomplete custom ones
+            ...aliases,
+        },
+        fallback: {
+            // needed for rimraf
+            fs: require.resolve('fs'),
+            stream: require.resolve('stream-browserify'),
+            assert: require.resolve('assert/'),
+            util: require.resolve('util/'),
+        },
     },
-
     module: {
         rules: [
-            // All files with a '.ts' or '.tsx' extension will be handled by 'awesome-typescript-loader'.
             {
                 test: /\.tsx?$/,
+                resolve: {
+                    fullySpecified: false,
+                },
                 use: [
                     {
-                        loader: 'ts-loader',
-                        options: {
-                            // disable type checker - we will use it in fork plugin
-                            transpileOnly: true,
-                            configFile: _resolve('./build-tsconfig.json'),
-                        },
+                        loader: 'swc-loader',
                     },
                 ],
             },
@@ -95,27 +101,20 @@ const baseConfig = {
             // file loader, for loading files referenced inside css files
             {
                 test: /\.(woff(2)?|ttf|eot|svg)(\?v=\d+\.\d+\.\d+)?$/,
-                use: [
-                    {
-                        loader: 'file-loader',
-                        options: {
-                            name: '[name].[ext]',
-                            outputPath: 'fonts/',
-                        },
-                    },
-                ],
+                type: 'asset/resource',
+                generator: {
+                    filename: 'fonts/[hash][ext][query]',
+                },
             },
             // images embbeded into css
             {
                 test: /\.(png|jpg|gif)$/i,
-                use: [
-                    {
-                        loader: 'url-loader',
-                        options: {
-                            limit: 8192,
-                        },
+                type: 'asset/inline',
+                parser: {
+                    dataUrlCondition: {
+                        maxSize: 8192,
                     },
-                ],
+                },
             },
         ],
     },
@@ -142,13 +141,11 @@ export default [
                     __ARCH__: JSON.stringify(arch()),
                     __NODE__: JSON.stringify(node),
                 }),
-                new CopyPlugin({
-                    patterns: [
-                        {
-                            from: '../img/icon-512x512.png',
-                            to: 'icon.png',
-                        },
-                    ],
+                new ProvidePlugin({
+                    // some code don't import process and access it directly
+                    // so we have to provide the module as having the alias
+                    // won't work in this case (fs.realpath for example)
+                    process: (aliases as any).process,
                 }),
             ],
         },
