@@ -4,4 +4,5 @@ dist-e2e/
 .DS_Store
 build/
 e2e/build-e2e/
+e2e/cypress/screenshots/
 public

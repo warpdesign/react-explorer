@@ -6,4 +6,7 @@ module.exports = {
         chrome: 'cypress chrome',
         electron: 'cypress electron',
     },
+    env: {
+        
+    }
 };

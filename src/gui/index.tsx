@@ -9,6 +9,7 @@ import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { ipcRenderer } from 'electron';
 import { CustomSettings } from '../electron/windowSettings';
+import process from 'process';
 import child_process from 'child_process';
 // register Fs that will be available in React-Explorer
 // I guess there is a better place to do that

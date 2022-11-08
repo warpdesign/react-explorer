@@ -74,7 +74,7 @@ describe('combo hotkeys', () => {
         // no selection: triggering fake combo should not show toast message
         cy.triggerFakeCombo('CmdOrCtrl+Shift+C');
 
-        cy.get(`.${Classes.TOAST}`).should('not.be.visible');
+        cy.get(`.${Classes.TOAST}`).should('not.exist');
 
         cy.get('@copySelectedItemsPath').should('be.calledWith', caches[0], false);
     });
@@ -120,7 +120,7 @@ describe('combo hotkeys', () => {
 
         // wait for dialog to be closed otherwise
         // it could still be visible in next it()
-        cy.get('.shortcutsDialog').should('not.be.visible');
+        cy.get('.shortcutsDialog').should('not.exist');
     });
 
     it('should open prefs dialog', () => {
@@ -133,7 +133,7 @@ describe('combo hotkeys', () => {
 
         // wait for dialog to be closed otherwise
         // it could still be visible in next it()
-        cy.get('.shortcutsDialog').should('not.be.visible');
+        cy.get('.shortcutsDialog').should('not.exist');
     });
 
     it('should reload file view', () => {

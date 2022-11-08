@@ -40,7 +40,7 @@ describe('toolbar', () => {
         cy.get('#view_0 [data-cy-path]').invoke('val', '/').focus();
     });
 
-    it('nav buttons are disabled', () => {
+    it('nav buttons should be disabled', () => {
         cy.get('#view_0 [data-cy-backward]').should('be.disabled');
         cy.get('#view_0 [data-cy-forward]').should('be.disabled');
 
@@ -48,15 +48,7 @@ describe('toolbar', () => {
         cy.get('#view_1 [data-cy-forward]').should('be.disabled');
     });
 
-    it('type path and enter calls cd', () => {
-        cy.get('#view_0 [data-cy-path]').type('/other_folder{enter}');
-
-        cy.get('@stub_cd0').should('be.called');
-
-        cy.get('.data-cy-alert').should('be.visible').find('.bp3-button').click();
-    });
-
-    it('type path and escape clears path with previous value', () => {
+    it('should restore previous input value when typing a new path and pressing escape', () => {
         cy.get('#view_0 [data-cy-path]').as('input').invoke('val').as('previous_value');
 
         cy.get('@input').type('/sdfdsgsdg{esc}');
@@ -68,7 +60,7 @@ describe('toolbar', () => {
         cy.get('@stub_cd0').should('not.be.called');
     });
 
-    it('type non valid path should show alert then focus input', () => {
+    it('should show an alert then focus input when typing a non valid path', () => {
         cy.get('#view_0 [data-cy-path]').type(':{enter}');
 
         cy.get('.data-cy-alert').should('be.visible').find('.bp3-button').click();
@@ -78,14 +70,14 @@ describe('toolbar', () => {
         cy.get('@stub_cd0').should('be.called');
     });
 
-    it('path should get updated when fileState is updated', () => {
+    it('should update the paht when the fileState is updated', () => {
         cy.window().then((win) => {
             win.appState.winStates[0].views[0].caches[0].updatePath('/newPath');
             cy.get('#view_0 [data-cy-path]').should('have.value', '/newPath');
         });
     });
 
-    it('clicking on reload should reload path', () => {
+    it('should reload path when clicking on reload button', () => {
         cy.get('#view_0 .data-cy-reload').click();
 
         cy.get('@stub_reload0').should('be.called');
