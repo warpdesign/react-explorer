@@ -118,8 +118,9 @@ class MenuAcceleratorsClass extends React.Component<Props> {
             const resolvedPath = cache.getAPI().resolve(cache.path)
             const { settingsState, t } = this.injected
             const terminalCmd = settingsState.getTerminalCommand(resolvedPath)
-            const error = await cache.openTerminal(terminalCmd)
-            if (error) {
+            try {
+                await cache.openTerminal(terminalCmd)
+            } catch (e) {
                 AppToaster.show({
                     message: t('ERRORS.OPEN_TERMINAL_FAILED'),
                     icon: 'warning-sign',
