@@ -27,8 +27,11 @@ button.small:hover{
     z-index:1;
 }
 
-.toolbar > .bp3-popover-wrapper{
-    flex-shrink:1;
+/* needed to make the pathbar full-width
+ * FIXME: we shouldn't hack css like this
+ */
+.toolbar > .bp4-popover2-target {
+    flex-grow: 1;
 }
 
 /* auto resize layout */

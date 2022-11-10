@@ -37,15 +37,6 @@ export const FileMenuClass = inject('appState')(
                 this.props.onFileAction('delete')
             }
 
-            // shouldComponentUpdate() {
-            //     console.time('FileMenu Render');
-            //     return true;
-            // }
-
-            // componentDidUpdate() {
-            //     console.timeEnd('FileMenu Render');
-            // }
-
             public render(): React.ReactNode {
                 const { appState } = this.injected
                 const clipboardLength = appState.clipboard.files.length

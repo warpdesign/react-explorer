@@ -6,13 +6,12 @@ import {
     ControlGroup,
     Button,
     ButtonGroup,
-    Popover,
     Intent,
     Alert,
-    Tooltip,
     Position,
     HotkeysTarget2,
 } from '@blueprintjs/core'
+import { Tooltip2, Popover2 } from '@blueprintjs/popover2'
 import { AppState } from '../state/appState'
 import { FileMenu } from './FileMenu'
 import { MakedirDialog } from './dialogs/MakedirDialog'
@@ -368,7 +367,7 @@ export const ToolbarClass = inject(
                         : (isMac && t('TOOLTIP.PATH.EXAMPLE_MAC')) || t('TOOLTIP.PATH.EXAMPLE_LINUX')
 
                     return (
-                        <div>
+                        <React.Fragment>
                             <p>{t('TOOLTIP.PATH.TITLE1')}</p>
                             <p>{t('TOOLTIP.PATH.TITLE2')}</p>
                             <ul>
@@ -376,7 +375,7 @@ export const ToolbarClass = inject(
                                 {/* <li>{t('TOOLTIP.PATH.FTP1')}</li>
                         <li>{t('TOOLTIP.PATH.FTP2')}</li> */}
                             </ul>
-                        </div>
+                        </React.Fragment>
                     )
                 }
 
@@ -444,13 +443,13 @@ export const ToolbarClass = inject(
                                         rightIcon="arrow-up"
                                     ></Button>
 
-                                    <Popover
+                                    <Popover2
                                         content={<FileMenu selectedItems={selected} onFileAction={this.onFileAction} />}
                                     >
                                         <Button rightIcon="caret-down" icon="cog" text="" />
-                                    </Popover>
+                                    </Popover2>
                                 </ButtonGroup>
-                                <Tooltip
+                                <Tooltip2
                                     content={this.renderTooltip()}
                                     position={Position.BOTTOM}
                                     hoverOpenDelay={1500}
@@ -472,7 +471,7 @@ export const ToolbarClass = inject(
                                         onMouseLeave={this.onPathLeave}
                                         onMouseMove={this.onPathMouseMove}
                                     />
-                                </Tooltip>
+                                </Tooltip2>
                                 {isOpen && (
                                     <MakedirDialog
                                         isOpen={isOpen}

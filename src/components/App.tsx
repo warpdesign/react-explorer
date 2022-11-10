@@ -26,10 +26,11 @@ import { getLocalizedError } from '../locale/error'
 import { MenuAccelerators } from './shortcuts/MenuAccelerators'
 import { KeyboardHotkeys } from './shortcuts/KeyboardHotkeys'
 import { CustomSettings } from '../electron/windowSettings'
-import { action, runInAction } from 'mobx'
+import { runInAction } from 'mobx'
 
 require('@blueprintjs/core/lib/css/blueprint.css')
 require('@blueprintjs/icons/lib/css/blueprint-icons.css')
+require('@blueprintjs/popover2/lib/css/blueprint-popover2.css')
 require('../css/main.css')
 require('../css/windows.css')
 require('../css/scrollbars.css')
@@ -334,10 +335,12 @@ const App = inject('settingsState')(
 
             setDarkThemeClass(): void {
                 const { settingsState } = this.injected
+                // FIXME: we have to add bp4-dark class as well because new Popover2 has bp4 prefix
+                // This hopefully can be removed once we upgrade to blueprint v4
                 if (settingsState.isDarkModeActive) {
-                    document.body.classList.add(Classes.DARK)
+                    document.body.classList.add(Classes.DARK, 'bp4-dark')
                 } else {
-                    document.body.classList.remove(Classes.DARK)
+                    document.body.classList.remove(Classes.DARK, 'bp4-dark')
                 }
             }
 

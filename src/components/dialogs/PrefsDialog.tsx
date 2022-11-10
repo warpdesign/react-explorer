@@ -1,5 +1,6 @@
 import * as React from 'react'
-import { Dialog, Classes, Intent, Button, InputGroup, FormGroup, MenuItem, Tooltip } from '@blueprintjs/core'
+import { Dialog, Classes, Intent, Button, InputGroup, FormGroup, MenuItem } from '@blueprintjs/core'
+import { Tooltip2 } from '@blueprintjs/popover2'
 import { debounce } from '../../utils/debounce'
 import { withNamespaces, WithNamespaces } from 'react-i18next'
 import { SettingsState } from '../../state/settingsState'
@@ -9,7 +10,6 @@ import { FsLocal, FolderExists } from '../../services/plugins/FsLocal'
 import { AppAlert } from '../AppAlert'
 import { ipcRenderer } from 'electron'
 import { HOME_DIR } from '../../utils/platform'
-import { action } from 'mobx'
 
 const DEBOUNCE_DELAY = 300
 
@@ -212,9 +212,9 @@ class PrefsDialogClass extends React.Component<PrefsProps, State> {
             : t('DIALOG.PREFS.BRIGHT')
         const intent: Intent = isFolderValid ? Intent.NONE : Intent.DANGER
         const testTerminalButton = (
-            <Tooltip content={t('DIALOG.PREFS.TEST_TERMINAL')}>
+            <Tooltip2 content={t('DIALOG.PREFS.TEST_TERMINAL')}>
                 <Button icon="play" intent={Intent.PRIMARY} minimal={true} onClick={this.testTerminal} />
-            </Tooltip>
+            </Tooltip2>
         )
 
         return (
