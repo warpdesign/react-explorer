@@ -1,120 +1,123 @@
-import { FileState } from './fileState';
-import { observable, action } from 'mobx';
+import { FileState } from './fileState'
+import { observable, action, makeObservable } from 'mobx'
 
 export class ViewState {
-    viewId: number;
+    viewId: number
 
-    caches = observable<FileState>([]);
+    caches = observable<FileState>([])
 
-    @observable
-    isActive = false;
+    isActive = false
 
     constructor(viewId: number) {
-        this.viewId = viewId;
+        makeObservable(this, {
+            isActive: observable,
+            addCache: action,
+            setVisibleCache: action,
+            removeCache: action,
+            activateNextTab: action,
+            cycleTab: action,
+            closeOthers: action,
+            closeTab: action,
+        })
+
+        this.viewId = viewId
     }
 
-    @action
     addCache(path: string, index = -1, activateNewCache = false): FileState {
-        console.log('viewState/addCache', path);
-        const cache = new FileState(path, this.viewId);
+        console.log('viewState/addCache', path)
+        const cache = new FileState(path, this.viewId)
 
         if (index === -1) {
-            this.caches.push(cache);
+            this.caches.push(cache)
         } else {
-            this.caches.splice(index, 0, cache);
+            this.caches.splice(index, 0, cache)
         }
 
         if (activateNewCache) {
-            this.setVisibleCache(index > -1 ? index : this.caches.length - 1);
+            this.setVisibleCache(index > -1 ? index : this.caches.length - 1)
         }
 
-        return cache;
+        return cache
     }
 
     getVisibleCache(): FileState {
-        return this.caches.find((cache) => cache.isVisible);
+        return this.caches.find((cache) => cache.isVisible)
     }
 
     getVisibleCacheIndex(): number {
-        return this.caches.findIndex((cache) => cache.isVisible);
+        return this.caches.findIndex((cache) => cache.isVisible)
     }
 
-    @action
     setVisibleCache(index: number): void {
-        const previous = this.getVisibleCache();
-        const next = this.caches[index];
+        const previous = this.getVisibleCache()
+        const next = this.caches[index]
         // do nothing if previous === next
         if (previous !== next) {
             if (previous) {
-                previous.isVisible = false;
+                previous.isVisible = false
             }
-            next.isVisible = true;
+            next.isVisible = true
             if (!next.history.length && next.path.length) {
-                next.cd(next.path);
+                next.cd(next.path)
             }
         }
     }
 
-    @action
     removeCache(index: number): FileState {
-        return this.caches.splice(index, 1)[0];
+        return this.caches.splice(index, 1)[0]
     }
 
-    @action
     activateNextTab(index: number): void {
-        const length = this.caches.length;
-        const newActive = length > index ? this.caches[index] : this.caches[length - 1];
-        newActive.isVisible = true;
+        const length = this.caches.length
+        const newActive = length > index ? this.caches[index] : this.caches[length - 1]
+        newActive.isVisible = true
         if (!newActive.history.length) {
-            newActive.cd(newActive.path);
+            newActive.cd(newActive.path)
         }
     }
 
-    @action
     cycleTab(direction: 1 | -1): void {
-        const max = this.caches.length - 1;
+        const max = this.caches.length - 1
 
         // only one tab: do nothing
         if (!max) {
-            return;
+            return
         }
 
-        let index = this.getVisibleCacheIndex() + direction;
+        let index = this.getVisibleCacheIndex() + direction
 
         if (index < 0) {
-            index = max;
+            index = max
         } else if (index > max) {
-            index = 0;
+            index = 0
         }
 
-        this.setVisibleCache(index);
+        this.setVisibleCache(index)
     }
 
-    @action
     closeOthers(keepIndex: number): void {
-        console.log('close others', keepIndex);
+        console.log('close others', keepIndex)
         if (this.caches.length > 1) {
-            const keepCache = this.getVisibleCache();
-            const newArray = this.caches.filter((cache, index) => index === keepIndex);
-            this.caches.replace(newArray);
+            const keepCache = this.getVisibleCache()
+            const newArray = this.caches.filter((cache, index) => index === keepIndex)
+            this.caches.replace(newArray)
 
             if (keepCache.isVisible) {
-                this.activateNextTab(keepIndex);
+                this.activateNextTab(keepIndex)
             }
         }
     }
 
-    @action
     closeTab(index: number): void {
         // keep at least one tab for now ?
         if (this.caches.length < 2) {
-            return;
+            return
         }
-        const removed = this.removeCache(index);
+        const removed = this.removeCache(index)
 
         // only activate next cache if the one removed was the visible one
         if (removed.isVisible) {
-            this.activateNextTab(index);
+            this.activateNextTab(index)
         }
     }
 }

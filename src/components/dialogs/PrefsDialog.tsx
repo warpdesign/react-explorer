@@ -1,53 +1,52 @@
-import * as React from 'react';
-import { Dialog, Classes, Intent, Button, InputGroup, FormGroup, MenuItem, Tooltip } from '@blueprintjs/core';
-import { debounce } from '../../utils/debounce';
-import { withNamespaces, WithNamespaces } from 'react-i18next';
-import { SettingsState } from '../../state/settingsState';
-import { inject } from 'mobx-react';
-import { Select, ItemRenderer } from '@blueprintjs/select';
-import { FsLocal, FolderExists } from '../../services/plugins/FsLocal';
-import { AppAlert } from '../AppAlert';
-import { ipcRenderer } from 'electron';
-import { HOME_DIR } from '../../utils/platform';
+import * as React from 'react'
+import { Dialog, Classes, Intent, Button, InputGroup, FormGroup, MenuItem, Tooltip } from '@blueprintjs/core'
+import { debounce } from '../../utils/debounce'
+import { withNamespaces, WithNamespaces } from 'react-i18next'
+import { SettingsState } from '../../state/settingsState'
+import { inject } from 'mobx-react'
+import { Select, ItemRenderer } from '@blueprintjs/select'
+import { FsLocal, FolderExists } from '../../services/plugins/FsLocal'
+import { AppAlert } from '../AppAlert'
+import { ipcRenderer } from 'electron'
+import { HOME_DIR } from '../../utils/platform'
 
-const DEBOUNCE_DELAY = 300;
+const DEBOUNCE_DELAY = 300
 
 interface PrefsProps extends WithNamespaces {
-    isOpen: boolean;
-    onClose: () => void;
+    isOpen: boolean
+    onClose: () => void
 }
 
 interface InjectedProps extends PrefsProps {
-    settingsState: SettingsState;
+    settingsState: SettingsState
 }
 
 interface State {
-    defaultFolder: string;
-    darkMode: boolean | 'auto';
-    lang: string;
-    isFolderValid: boolean;
-    defaultTerminal: string;
+    defaultFolder: string
+    darkMode: boolean | 'auto'
+    lang: string
+    isFolderValid: boolean
+    defaultTerminal: string
 }
 
 interface Language {
-    lang: string;
-    code: string;
+    lang: string
+    code: string
 }
 
 interface Theme {
-    name: string;
-    code: boolean | 'auto';
+    name: string
+    code: boolean | 'auto'
 }
 
-const LanguageSelect = Select.ofType<Language>();
-const ThemeSelect = Select.ofType<Theme>();
+const LanguageSelect = Select.ofType<Language>()
+const ThemeSelect = Select.ofType<Theme>()
 
-@inject('settingsState')
 class PrefsDialogClass extends React.Component<PrefsProps, State> {
     constructor(props: PrefsProps) {
-        super(props);
+        super(props)
 
-        const { settingsState } = this.injected;
+        const { settingsState } = this.injected
 
         this.state = {
             lang: settingsState.lang,
@@ -55,55 +54,55 @@ class PrefsDialogClass extends React.Component<PrefsProps, State> {
             defaultFolder: settingsState.defaultFolder,
             isFolderValid: FsLocal.canread(settingsState.defaultFolder) && FolderExists(settingsState.defaultFolder),
             defaultTerminal: settingsState.defaultTerminal,
-        };
+        }
     }
 
     private get injected(): InjectedProps {
-        return this.props as InjectedProps;
+        return this.props as InjectedProps
     }
 
     private checkPath: () => void = debounce(() => {
-        const { defaultFolder } = this.state;
-        const { settingsState } = this.injected;
-        const isFolderValid = FsLocal.canread(defaultFolder) && FolderExists(defaultFolder);
+        const { defaultFolder } = this.state
+        const { settingsState } = this.injected
+        const isFolderValid = FsLocal.canread(defaultFolder) && FolderExists(defaultFolder)
         if (defaultFolder !== settingsState.defaultFolder) {
-            this.setState({ isFolderValid });
+            this.setState({ isFolderValid })
             // need to save settings
             if (isFolderValid) {
-                settingsState.setDefaultFolder(defaultFolder);
-                settingsState.saveSettings();
+                settingsState.setDefaultFolder(defaultFolder)
+                settingsState.saveSettings()
             }
         } else if (!this.state.isFolderValid) {
             // remove error
-            this.setState({ isFolderValid });
+            this.setState({ isFolderValid })
         }
-    }, DEBOUNCE_DELAY);
+    }, DEBOUNCE_DELAY)
 
     private cancelClose = (): void => {
-        console.log('handleClose');
-        const { defaultFolder } = this.state;
-        const { settingsState } = this.injected;
+        console.log('handleClose')
+        const { defaultFolder } = this.state
+        const { settingsState } = this.injected
         if (defaultFolder !== settingsState.defaultFolder) {
-            this.setState({ defaultFolder: settingsState.defaultFolder, isFolderValid: true });
+            this.setState({ defaultFolder: settingsState.defaultFolder, isFolderValid: true })
         }
-        this.props.onClose();
-    };
+        this.props.onClose()
+    }
 
     onFolderChange = (event: React.FormEvent<HTMLElement>): void => {
-        const path = (event.target as HTMLInputElement).value;
+        const path = (event.target as HTMLInputElement).value
         // set error since path will be checked async
-        this.setState({ defaultFolder: path });
-        this.checkPath();
-    };
+        this.setState({ defaultFolder: path })
+        this.checkPath()
+    }
 
     onFolderBlur = (): void => {
-        const { isFolderValid } = this.state;
-        const { settingsState } = this.injected;
+        const { isFolderValid } = this.state
+        const { settingsState } = this.injected
 
         if (!isFolderValid) {
-            this.setState({ defaultFolder: settingsState.defaultFolder, isFolderValid: true });
+            this.setState({ defaultFolder: settingsState.defaultFolder, isFolderValid: true })
         }
-    };
+    }
 
     renderLanguageItem: ItemRenderer<Language> = (lang, { handleClick, modifiers }) => {
         return (
@@ -114,29 +113,29 @@ class PrefsDialogClass extends React.Component<PrefsProps, State> {
                 onClick={handleClick}
                 text={lang.lang}
             />
-        );
-    };
+        )
+    }
 
     renderThemeItem: ItemRenderer<Theme> = (theme, { handleClick, modifiers }) => {
         return (
             <MenuItem active={modifiers.active} key={theme.code.toString()} onClick={handleClick} text={theme.name} />
-        );
-    };
+        )
+    }
 
     getSortedLanguages(): Array<Language> {
-        const { t } = this.props;
-        const auto = [{ code: 'auto', lang: t('COMMON.AUTO') }];
+        const { t } = this.props
+        const auto = [{ code: 'auto', lang: t('COMMON.AUTO') }]
         const languages = t('LANG', { returnObjects: true }).sort((lang1: Language, lang2: Language) => {
             if (lang1.lang < lang2.lang) {
-                return -1;
-            } else return lang1.lang > lang2.lang ? 1 : 0;
-        });
+                return -1
+            } else return lang1.lang > lang2.lang ? 1 : 0
+        })
 
-        return auto.concat(languages);
+        return auto.concat(languages)
     }
 
     getThemeList(): Array<Theme> {
-        const { t } = this.props;
+        const { t } = this.props
 
         return [
             {
@@ -151,71 +150,71 @@ class PrefsDialogClass extends React.Component<PrefsProps, State> {
                 code: false,
                 name: t('DIALOG.PREFS.BRIGHT'),
             },
-        ];
+        ]
     }
 
     onLanguageSelect = (newLang: Language): void => {
-        const { settingsState } = this.injected;
-        this.setState({ lang: newLang.code });
-        settingsState.setLanguage(newLang.code);
-        settingsState.saveSettings();
-    };
+        const { settingsState } = this.injected
+        this.setState({ lang: newLang.code })
+        settingsState.setLanguage(newLang.code)
+        settingsState.saveSettings()
+    }
 
     onThemeSelect = (newTheme: Theme): void => {
-        const { settingsState } = this.injected;
-        this.setState({ darkMode: newTheme.code });
-        settingsState.setActiveTheme(newTheme.code);
-        settingsState.saveSettings();
-    };
+        const { settingsState } = this.injected
+        this.setState({ darkMode: newTheme.code })
+        settingsState.setActiveTheme(newTheme.code)
+        settingsState.saveSettings()
+    }
 
     onResetPrefs = (): void => {
-        const { settingsState } = this.injected;
-        settingsState.resetSettings();
+        const { settingsState } = this.injected
+        settingsState.resetSettings()
         this.setState({
             lang: settingsState.lang,
             darkMode: settingsState.darkMode,
             defaultFolder: settingsState.defaultFolder,
             defaultTerminal: settingsState.defaultTerminal,
-        });
-    };
+        })
+    }
 
     onTerminalChange = (event: React.FormEvent<HTMLElement>): void => {
-        const { settingsState } = this.injected;
-        const terminal = (event.target as HTMLInputElement).value;
-        this.setState({ defaultTerminal: terminal });
-        settingsState.setDefaultTerminal(terminal);
-        settingsState.saveSettings();
-    };
+        const { settingsState } = this.injected
+        const terminal = (event.target as HTMLInputElement).value
+        this.setState({ defaultTerminal: terminal })
+        settingsState.setDefaultTerminal(terminal)
+        settingsState.saveSettings()
+    }
 
     testTerminal = async (): Promise<void> => {
-        const { settingsState, t } = this.injected;
-        const path = settingsState.getTerminalCommand(HOME_DIR);
-        const error: { code: number; terminal: string } = await ipcRenderer.invoke('openTerminal', path);
+        const { settingsState, t } = this.injected
+        const path = settingsState.getTerminalCommand(HOME_DIR)
+        const error: { code: number; terminal: string } = await ipcRenderer.invoke('openTerminal', path)
         if (error) {
-            const { code, terminal } = error;
+            const { code, terminal } = error
             AppAlert.show(t('DIALOG.PREFS.TEST_TERMINAL_FAILED', { terminal, code }), {
                 intent: Intent.DANGER,
                 icon: 'error',
-            });
+            })
         }
-    };
+    }
 
     public render(): React.ReactNode {
-        const { t } = this.props;
-        const { isFolderValid, defaultFolder, defaultTerminal, darkMode, lang } = this.state;
-        const languageItems = this.getSortedLanguages();
-        const selectedLanguage = languageItems.find((language: Language) => language.code === lang);
-        const themeItems = this.getThemeList();
-        const selectedTheme = themeItems.find((theme: Theme) => theme.code === darkMode);
+        const { t } = this.props
+        const { isFolderValid, defaultFolder, defaultTerminal, darkMode, lang } = this.state
+        const languageItems = this.getSortedLanguages()
+        const selectedLanguage = languageItems.find((language: Language) => language.code === lang)
+        const themeItems = this.getThemeList()
+        const selectedTheme = themeItems.find((theme: Theme) => theme.code === darkMode)
         const activeTheme = this.injected.settingsState.isDarkModeActive
             ? t('DIALOG.PREFS.DARK')
-            : t('DIALOG.PREFS.BRIGHT');
-        const intent: Intent = isFolderValid ? Intent.NONE : Intent.DANGER;
+            : t('DIALOG.PREFS.BRIGHT')
+        const intent: Intent = isFolderValid ? Intent.NONE : Intent.DANGER
         const testTerminalButton = (
             <Tooltip content={t('DIALOG.PREFS.TEST_TERMINAL')}>
                 <Button icon="play" intent={Intent.PRIMARY} minimal={true} onClick={this.testTerminal} />
             </Tooltip>
-        );
+        )
 
         return (
             <Dialog
@@ -325,10 +324,10 @@ class PrefsDialogClass extends React.Component<PrefsProps, State> {
                     </div>
                 </div>
             </Dialog>
-        );
+        )
     }
 }
 
-const PrefsDialog = withNamespaces()(PrefsDialogClass);
+const PrefsDialog = withNamespaces()(inject('settingsState')(PrefsDialogClass))
 
-export { PrefsDialog };
+export { PrefsDialog }

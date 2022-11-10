@@ -1,100 +1,108 @@
-import { observable, action } from 'mobx';
-import { ipcRenderer } from 'electron';
-import { JSObject } from '../components/Log';
-import { i18next, languageList } from '../locale/i18n';
-import { isMojave, isWin, isMac, defaultFolder } from '../utils/platform';
+import { observable, action, makeObservable } from 'mobx'
+import { ipcRenderer } from 'electron'
+import { JSObject } from '../components/Log'
+import { i18next, languageList } from '../locale/i18n'
+import { isMojave, isWin, isMac, defaultFolder } from '../utils/platform'
 
-const APP_STORAGE_KEY = 'react-explorer';
+const APP_STORAGE_KEY = 'react-explorer'
 
 const TERMINAL_CMD = {
     darwin: 'open -a "%cmd" "%path"',
     win: 'start /D "%path" "%cd%" "%cmd"',
     linux: 'cd "%path" && "%cmd"',
-};
+}
 const DEFAULT_TERMINAL = {
     darwin: 'Terminal.app',
     win: 'C:\\Windows\\System32\\cmd.exe',
     linux: 'xterm',
-};
+}
 
 export class SettingsState {
-    @observable
-    lang: string;
+    lang: string
 
-    @observable
     // this is the asked mode
-    darkMode: boolean | 'auto';
+    darkMode: boolean | 'auto'
 
     // this is the current active mode
-    @observable
-    isDarkModeActive: boolean;
+    isDarkModeActive: boolean
 
-    @observable
-    defaultFolder: string;
+    defaultFolder: string
 
-    @observable
-    defaultTerminal: string;
+    defaultTerminal: string
 
-    terminalTemplate: string;
+    terminalTemplate: string
 
-    version: string;
+    version: string
 
     constructor(version: string) {
-        this.version = version;
+        makeObservable(this, {
+            lang: observable,
+            darkMode: observable,
+            isDarkModeActive: observable,
+            defaultFolder: observable,
+            defaultTerminal: observable,
+            setLanguage: action,
+            setDefaultTerminal: action,
+            loadAndUpgradeSettings: action,
+            loadSettings: action,
+            setDefaultFolder: action,
+            setActiveTheme: action,
+            resetSettings: action,
+        })
 
-        this.installListeners();
-        this.loadSettings();
+        this.version = version
+
+        this.installListeners()
+        this.loadSettings()
     }
 
     installListeners(): void {
         ipcRenderer.on('nativeTheme:updated', (event, shouldUseDarkColors) => {
-            this.setActiveTheme();
-        });
+            this.setActiveTheme()
+        })
     }
 
     getParam(name: string): JSObject {
-        return JSON.parse(localStorage.getItem(name));
+        return JSON.parse(localStorage.getItem(name))
     }
 
-    @action
     async setLanguage(askedLang: string): Promise<void> {
-        let lang = askedLang;
+        let lang = askedLang
 
         // detect language from host OS if set to auto
         if (lang === 'auto') {
-            lang = await ipcRenderer.invoke('app:getLocale');
-            console.log('detectedLanguage', lang);
+            lang = await ipcRenderer.invoke('app:getLocale')
+            console.log('detectedLanguage', lang)
             // remote.app.getLocale();
         }
 
         // fallback to English if preferred language
         // isn't available
         if (languageList.indexOf(lang) < 0) {
-            lang = 'en';
+            lang = 'en'
         }
 
         // finally set requested language
-        i18next.changeLanguage(lang);
+        i18next.changeLanguage(lang)
 
-        this.lang = i18next.language;
+        this.lang = i18next.language
     }
 
-    @action
     setDefaultTerminal(cmd: string): void {
-        this.defaultTerminal = cmd;
-        let template = TERMINAL_CMD.linux;
+        this.defaultTerminal = cmd
+        let template = TERMINAL_CMD.linux
 
         if (isWin) {
-            template = TERMINAL_CMD.win;
+            template = TERMINAL_CMD.win
         } else if (isMac) {
-            template = TERMINAL_CMD.darwin;
+            template = TERMINAL_CMD.darwin
         }
 
-        this.terminalTemplate = template.replace('%cmd', cmd.replace(/"/g, '\\"'));
+        this.terminalTemplate = template.replace('%cmd', cmd.replace(/"/g, '\\"'))
     }
 
     getTerminalCommand(path: string): string {
-        return this.terminalTemplate.replace('%path', path.replace(/"/g, '\\"'));
+        return this.terminalTemplate.replace('%path', path.replace(/"/g, '\\"'))
     }
 
     saveSettings(): void {
@@ -107,61 +115,57 @@ export class SettingsState {
                 defaultTerminal: this.defaultTerminal,
                 version: this.version,
             }),
-        );
+        )
     }
 
-    @action
     loadAndUpgradeSettings(): JSObject {
-        let settings = this.getParam(APP_STORAGE_KEY);
+        let settings = this.getParam(APP_STORAGE_KEY)
 
         // no settings set: first time the app is run
         if (settings === null) {
-            settings = this.getDefaultSettings();
+            settings = this.getDefaultSettings()
         } else if (!settings.version || settings.version < this.version) {
             // get default settings
-            const defaultSettings = this.getDefaultSettings();
+            const defaultSettings = this.getDefaultSettings()
             // override default settings with current settings
-            settings = Object.assign(defaultSettings, settings);
+            settings = Object.assign(defaultSettings, settings)
         }
 
-        return settings;
+        return settings
     }
 
-    @action
     loadSettings(): void {
-        const settings: JSObject = this.loadAndUpgradeSettings();
+        const settings: JSObject = this.loadAndUpgradeSettings()
 
-        this.darkMode = settings.darkMode;
+        this.darkMode = settings.darkMode
 
-        this.setActiveTheme();
-        this.setLanguage(settings.lang);
-        this.setDefaultFolder(settings.defaultFolder);
-        this.setDefaultTerminal(settings.defaultTerminal);
+        this.setActiveTheme()
+        this.setLanguage(settings.lang)
+        this.setDefaultFolder(settings.defaultFolder)
+        this.setDefaultTerminal(settings.defaultTerminal)
 
         // we should only save settings in case it's the first time the app is run
         // or an upgrade was needed
-        this.saveSettings();
+        this.saveSettings()
     }
 
-    @action
     setDefaultFolder(folder: string): void {
-        this.defaultFolder = folder;
+        this.defaultFolder = folder
     }
 
-    @action
     setActiveTheme = async (darkMode = this.darkMode): Promise<void> => {
         if (darkMode !== this.darkMode) {
-            this.darkMode = darkMode;
+            this.darkMode = darkMode
         }
 
         if (this.darkMode === 'auto') {
             // CHECKME!
             // this.isDarkModeActive = isMojave && systemPreferences ? systemPreferences.isDarkMode() : false;
-            this.isDarkModeActive = await ipcRenderer.invoke('nativeTheme:shouldUseDarkColors');
+            this.isDarkModeActive = await ipcRenderer.invoke('nativeTheme:shouldUseDarkColors')
         } else {
-            this.isDarkModeActive = this.darkMode;
+            this.isDarkModeActive = this.darkMode
         }
-    };
+    }
 
     getDefaultSettings(): JSObject {
         return {
@@ -172,12 +176,11 @@ export class SettingsState {
                 ? DEFAULT_TERMINAL.darwin
                 : (isWin && DEFAULT_TERMINAL.win) || DEFAULT_TERMINAL.linux,
             version: this.version,
-        };
+        }
     }
 
-    @action
     resetSettings(): void {
-        localStorage.removeItem(APP_STORAGE_KEY);
-        this.loadSettings();
+        localStorage.removeItem(APP_STORAGE_KEY)
+        this.loadSettings()
     }
 }

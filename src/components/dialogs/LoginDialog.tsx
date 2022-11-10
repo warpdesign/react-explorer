@@ -1,44 +1,43 @@
-import * as React from 'react';
-import { Dialog, Classes, Intent, Button, InputGroup, FormGroup, Colors } from '@blueprintjs/core';
-import { inject } from 'mobx-react';
-import { FileState } from '../../state/fileState';
-import { withNamespaces, WithNamespaces } from 'react-i18next';
+import * as React from 'react'
+import { Dialog, Classes, Intent, Button, InputGroup, FormGroup, Colors } from '@blueprintjs/core'
+import { inject } from 'mobx-react'
+import { FileState } from '../../state/fileState'
+import { withNamespaces, WithNamespaces } from 'react-i18next'
 
 interface LoginProps extends WithNamespaces {
-    isOpen: boolean;
-    onClose?: (user: string, password: string) => void;
-    onValidation: (dir: string) => boolean;
+    isOpen: boolean
+    onClose?: (user: string, password: string) => void
+    onValidation: (dir: string) => boolean
 }
 
 interface InjectedProps extends LoginProps {
-    fileCache: FileState;
+    fileCache: FileState
 }
 
 type Error = {
-    message: string;
-    code: number;
-};
-
-interface LoginState {
-    user?: string;
-    password?: string;
-    server?: string;
-    port?: number;
-    connecting?: boolean;
-    error?: Error;
-    busy?: boolean;
+    message: string
+    code: number
 }
 
-const ENTER_KEY = 13;
+interface LoginState {
+    user?: string
+    password?: string
+    server?: string
+    port?: number
+    connecting?: boolean
+    error?: Error
+    busy?: boolean
+}
 
-@inject('fileCache')
+const ENTER_KEY = 13
+
 class LoginDialogClass extends React.Component<LoginProps, LoginState> {
-    private input: HTMLInputElement | null = null;
+    private input: HTMLInputElement | null = null
 
     constructor(props: LoginProps) {
-        super(props);
+        super(props)
 
-        const fileCache = this.injected.fileCache;
+        const fileCache = this.injected.fileCache
 
         const defaultState = {
             user: '',
@@ -48,69 +47,69 @@ class LoginDialogClass extends React.Component<LoginProps, LoginState> {
             error: null as Error,
             busy: false,
             port: 21,
-        };
+        }
 
-        this.state = Object.assign(defaultState, fileCache.credentials);
+        this.state = Object.assign(defaultState, fileCache.credentials)
     }
 
     private get injected(): InjectedProps {
-        return this.props as InjectedProps;
+        return this.props as InjectedProps
     }
 
     onKeyUp = (e: KeyboardEvent): void => {
         if (e.keyCode === ENTER_KEY) {
             // we assume anonymous login if no username specified
             if (this.canLogin()) {
-                this.onLogin();
+                this.onLogin()
             }
         }
-    };
+    }
 
     private cancelClose = (): void => {
-        console.log('handleClose');
+        console.log('handleClose')
         if (!this.state.busy) {
-            this.props.onClose('', '');
+            this.props.onClose('', '')
         }
-    };
+    }
 
     private onLogin = (): void => {
-        const { user, password, port, server } = this.state;
-        const { fileCache } = this.injected;
-        console.log('onLogin', user, '****');
-        this.setState({ busy: true, error: null });
+        const { user, password, port, server } = this.state
+        const { fileCache } = this.injected
+        console.log('onLogin', user, '****')
+        this.setState({ busy: true, error: null })
 
         fileCache.doLogin(server, { user, password, port }).catch((err) => {
-            this.setState({ error: err, busy: false });
-            this.input.focus();
-        });
-    };
+            this.setState({ error: err, busy: false })
+            this.input.focus()
+        })
+    }
 
     private onInputChange = (event: React.FormEvent<HTMLElement>): void => {
-        const val = (event.target as HTMLInputElement).value;
-        const name = (event.target as HTMLInputElement).name;
-        const state: Partial<LoginState> = {};
-        (state as any)[name] = val;
+        const val = (event.target as HTMLInputElement).value
+        const name = (event.target as HTMLInputElement).name
+        const state: Partial<LoginState> = {}
+        ;(state as any)[name] = val
 
-        this.setState(state);
-    };
+        this.setState(state)
+    }
 
     private refHandler = (input: HTMLInputElement): void => {
-        this.input = input;
-    };
+        this.input = input
+    }
 
     private canLogin = (): boolean => {
-        const { busy, user, password, server } = this.state;
+        const { busy, user, password, server } = this.state
 
-        return !!server.length && !busy && !!(!user.length || (user.length && password.length));
-    };
+        return !!server.length && !busy && !!(!user.length || (user.length && password.length))
+    }
 
     componentDidMount(): void {
-        this.setState({ error: null, busy: false });
-        document.addEventListener('keyup', this.onKeyUp);
+        this.setState({ error: null, busy: false })
+        document.addEventListener('keyup', this.onKeyUp)
     }
 
     componentWillUnmount(): void {
-        document.removeEventListener('keyup', this.onKeyUp);
+        document.removeEventListener('keyup', this.onKeyUp)
     }
 
     // shouldComponentUpdate() {
@@ -123,11 +122,11 @@ class LoginDialogClass extends React.Component<LoginProps, LoginState> {
     // }
 
     public render(): React.ReactNode {
-        const { user, password, busy, error, port, server } = this.state;
-        const { t } = this.props;
+        const { user, password, busy, error, port, server } = this.state
+        const { t } = this.props
 
         if (error) {
-            console.log(error.code, error.message);
+            console.log(error.code, error.message)
         }
 
         return (
@@ -222,10 +221,10 @@ class LoginDialogClass extends React.Component<LoginProps, LoginState> {
                     </div>
                 </div>
             </Dialog>
-        );
+        )
     }
 }
 
-const LoginDialog = withNamespaces()(LoginDialogClass);
+const LoginDialog = withNamespaces()(inject('fileCache')(LoginDialogClass))
 
-export { LoginDialog };
+export { LoginDialog }

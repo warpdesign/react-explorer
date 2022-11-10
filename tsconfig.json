@@ -4,14 +4,15 @@
     "sourceMap": true,
     "noImplicitAny": true,
     "module": "commonjs",
-    "target": "es5",
+    "target": "es2020",
     "jsx": "react",
     "removeComments": true,
-    "lib": ["es2017", "dom"],
+    "lib": ["es6", "dom"],
     "experimentalDecorators": true,
     "resolveJsonModule": true,
     "esModuleInterop": true,
-    "types": ["node", "electron", "jest", "webpack", "webpack-env"]
+    "types": ["node", "electron", "jest", "webpack", "webpack-env"],
+    "useDefineForClassFields": true
   },
   "include": ["./src/**/*"],
   "exclude": ["**/*.spec.ts", "**/*.test.ts"]

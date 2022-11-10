@@ -1,42 +1,40 @@
-import * as React from 'react';
-import { withNamespaces, WithNamespaces } from 'react-i18next';
-import { ipcRenderer } from 'electron';
-import { Intent, HotkeysTarget, Hotkeys, Hotkey, IHotkeysProps } from '@blueprintjs/core';
-import { inject } from 'mobx-react';
-import { AppState } from '../../state/appState';
-import { FileState } from '../../state/fileState';
-import { AppToaster } from '../AppToaster';
-import { SettingsState } from '../../state/settingsState';
-import { Logger } from '../Log';
-import { isMac } from '../../utils/platform';
+import * as React from 'react'
+import { withNamespaces, WithNamespaces } from 'react-i18next'
+import { ipcRenderer } from 'electron'
+import { Intent, HotkeysTarget2 } from '@blueprintjs/core'
+import { inject } from 'mobx-react'
+import { AppState } from '../../state/appState'
+import { FileState } from '../../state/fileState'
+import { AppToaster } from '../AppToaster'
+import { SettingsState } from '../../state/settingsState'
+import { Logger } from '../Log'
+import { isMac } from '../../utils/platform'
 
 interface InjectedProps extends WithNamespaces {
-    appState: AppState;
-    settingsState: SettingsState;
+    appState: AppState
+    settingsState: SettingsState
 }
 
-@inject('appState', 'settingsState')
-@HotkeysTarget
 class KeyboardHotkeysClass extends React.Component<WithNamespaces> {
-    private appState: AppState;
+    private appState: AppState
 
     private get injected(): InjectedProps {
-        return this.props as InjectedProps;
+        return this.props as InjectedProps
     }
 
     constructor(props: WithNamespaces) {
-        super(props);
+        super(props)
 
-        this.appState = this.injected.appState;
+        this.appState = this.injected.appState
     }
 
     copyTextToClipboard(fileCache: FileState, filesOnly = false): void {
-        const length = fileCache.selected.length;
+        const length = fileCache.selected.length
 
-        this.appState.copySelectedItemsPath(fileCache, filesOnly);
+        this.appState.copySelectedItemsPath(fileCache, filesOnly)
 
         if (length) {
-            const { t } = this.injected;
+            const { t } = this.injected
             AppToaster.show(
                 {
                     message: filesOnly
@@ -47,17 +45,17 @@ class KeyboardHotkeysClass extends React.Component<WithNamespaces> {
                 },
                 undefined,
                 true,
-            );
+            )
         }
     }
 
     private getActiveFileCache(ignoreStatus = false): FileState {
-        const state = this.appState.isExplorer && this.appState.getActiveCache();
+        const state = this.appState.isExplorer && this.appState.getActiveCache()
 
         if (ignoreStatus || !state) {
-            return state;
+            return state
         } else {
-            return ignoreStatus ? state : (state.status === 'ok' && state) || null;
+            return ignoreStatus ? state : (state.status === 'ok' && state) || null
         }
     }
 
@@ -65,167 +63,172 @@ class KeyboardHotkeysClass extends React.Component<WithNamespaces> {
      * Event Handlers
      */
     onShowDownloadsTab = (): void => {
-        this.appState.showDownloadsTab();
-    };
+        this.appState.showDownloadsTab()
+    }
 
     onShowExplorerTab = (): void => {
-        this.appState.showExplorerTab();
-    };
+        this.appState.showExplorerTab()
+    }
 
     onNextView = (): void => {
-        const winState = this.appState.winStates[0];
+        const winState = this.appState.winStates[0]
         // do nothing if single view
         if (winState.splitView) {
             // get the view that's not active
-            const nextView = winState.getInactiveView();
+            const nextView = winState.getInactiveView()
 
-            winState.setActiveView(nextView.viewId);
+            winState.setActiveView(nextView.viewId)
         }
-    };
+    }
 
     onBackwardHistory = (): void => {
-        const cache = this.getActiveFileCache();
-        console.log('onBackwardHistory');
+        const cache = this.getActiveFileCache()
+        console.log('onBackwardHistory')
         if (cache) {
-            console.log('if cache');
-            cache.navHistory(-1);
+            console.log('if cache')
+            cache.navHistory(-1)
         }
-    };
+    }
 
     onForwardHistory = (): void => {
-        const cache = this.getActiveFileCache();
-        console.log('onForwardHistory');
+        const cache = this.getActiveFileCache()
+        console.log('onForwardHistory')
         if (cache) {
-            console.log('if cache');
-            cache.navHistory(1);
+            console.log('if cache')
+            cache.navHistory(1)
         }
-    };
+    }
 
     onOpenDevTools = (): void => {
-        ipcRenderer.invoke('openDevTools');
-    };
+        ipcRenderer.invoke('openDevTools')
+    }
 
     onShowHistory = (): void => {
-        const fileCache: FileState = this.getActiveFileCache(true);
+        const fileCache: FileState = this.getActiveFileCache(true)
 
         if (fileCache && fileCache.status === 'ok') {
-            console.log('showHistory');
+            console.log('showHistory')
             fileCache.history.forEach((path, i) => {
-                const str = (fileCache.current === i && path + ' *') || path;
-                Logger.log(str);
-            });
+                const str = (fileCache.current === i && path + ' *') || path
+                Logger.log(str)
+            })
         }
-    };
+    }
 
     onDebugCache = (): void => {
         // let i = 0;
         // for (let cache of this.appState.views[0].caches) {
-        const cache = this.getActiveFileCache();
-        console.log('====');
-        console.log('cache selected length', cache.selected.length);
-        console.log('cache.selectedId', cache.selectedId);
-        console.log('cache.editingId', cache.editingId);
-        console.log('===');
-        console.log(cache.selected);
-        console.log(cache);
+        const cache = this.getActiveFileCache()
+        console.log('====')
+        console.log('cache selected length', cache.selected.length)
+        console.log('cache.selectedId', cache.selectedId)
+        console.log('cache.editingId', cache.editingId)
+        console.log('===')
+        console.log(cache.selected)
+        console.log(cache)
         // }
-    };
-
-    public renderHotkeys(): React.ReactElement<IHotkeysProps> {
-        const t = this.props.t;
-
-        return (
-            <Hotkeys>
-                <Hotkey
-                    global={true}
-                    combo="alt + mod + l"
-                    label={t('SHORTCUT.MAIN.DOWNLOADS_TAB')}
-                    onKeyDown={this.onShowDownloadsTab}
-                />
-
-                <Hotkey
-                    global={true}
-                    combo="alt + mod + e"
-                    label={t('SHORTCUT.MAIN.EXPLORER_TAB')}
-                    onKeyDown={this.onShowExplorerTab}
-                />
-                <Hotkey
-                    global={true}
-                    combo="ctrl + shift + right"
-                    label={t('SHORTCUT.MAIN.NEXT_VIEW')}
-                    onKeyDown={this.onNextView}
-                />
-                <Hotkey
-                    global={true}
-                    combo="ctrl + shift + left"
-                    label={t('SHORTCUT.MAIN.PREVIOUS_VIEW')}
-                    onKeyDown={this.onNextView}
-                />
-                {isMac && (
-                    <Hotkey
-                        global={true}
-                        combo="mod + left"
-                        label={t('SHORTCUT.ACTIVE_VIEW.BACKWARD_HISTORY')}
-                        onKeyDown={this.onBackwardHistory}
-                    />
-                )}
-                {!isMac && (
-                    <Hotkey
-                        global={true}
-                        combo="alt + left"
-                        label={t('SHORTCUT.ACTIVE_VIEW.BACKWARD_HISTORY')}
-                        onKeyDown={this.onBackwardHistory}
-                    />
-                )}
-                {isMac && (
-                    <Hotkey
-                        global={true}
-                        combo="mod + right"
-                        label={t('SHORTCUT.ACTIVE_VIEW.FORWARD_HISTORY')}
-                        onKeyDown={this.onForwardHistory}
-                    />
-                )}
-                {!isMac && (
-                    <Hotkey
-                        global={true}
-                        combo="alt + right"
-                        label={t('SHORTCUT.ACTIVE_VIEW.FORWARD_HISTORY')}
-                        onKeyDown={this.onForwardHistory}
-                    />
-                )}
-                <Hotkey
-                    global={true}
-                    combo="alt + mod + i"
-                    label={t('SHORTCUT.OPEN_DEVTOOLS')}
-                    onKeyDown={this.onOpenDevTools}
-                />
-                {/* debug only shortcuts */}
-                <Hotkey
-                    global={true}
-                    combo="mod + h"
-                    label={t('SHORTCUT.ACTIVE_VIEW.VIEW_HISTORY')}
-                    preventDefault={true}
-                    onKeyDown={this.onShowHistory}
-                    group={t('SHORTCUT.GROUP.ACTIVE_VIEW')}
-                />
-                <Hotkey
-                    global={true}
-                    combo="mod + p"
-                    label="view cache"
-                    preventDefault={true}
-                    onKeyDown={this.onDebugCache}
-                    group={t('SHORTCUT.GROUP.ACTIVE_VIEW')}
-                />
-            </Hotkeys>
-        ) as React.ReactElement<IHotkeysProps>;
     }
+
+    private hotkeys = [
+        {
+            global: true,
+            combo: 'alt + mod + l',
+            label: this.injected.t('SHORTCUT.MAIN.DOWNLOADS_TAB'),
+            onKeyDown: this.onShowDownloadsTab,
+        },
+        {
+            global: true,
+            combo: 'alt + mod + e',
+            label: this.injected.t('SHORTCUT.MAIN.EXPLORER_TAB'),
+            onKeyDown: this.onShowExplorerTab,
+        },
+        {
+            global: true,
+            combo: 'ctrl + shift + right',
+            label: this.injected.t('SHORTCUT.MAIN.NEXT_VIEW'),
+            onKeyDown: this.onNextView,
+        },
+        {
+            global: true,
+            combo: 'ctrl + shift + left',
+            label: this.injected.t('SHORTCUT.MAIN.PREVIOUS_VIEW'),
+            onKeyDown: this.onNextView,
+        },
+        ...(isMac
+            ? [
+                  {
+                      global: true,
+                      combo: 'mod + left',
+                      label: this.injected.t('SHORTCUT.ACTIVE_VIEW.BACKWARD_HISTORY'),
+                      onKeyDown: this.onBackwardHistory,
+                  },
+              ]
+            : []),
+        ...(!isMac
+            ? [
+                  {
+                      global: true,
+                      combo: 'alt + left',
+                      label: this.injected.t('SHORTCUT.ACTIVE_VIEW.BACKWARD_HISTORY'),
+                      onKeyDown: this.onBackwardHistory,
+                  },
+              ]
+            : []),
+        ...(isMac
+            ? [
+                  {
+                      global: true,
+                      combo: 'mod + right',
+                      label: this.injected.t('SHORTCUT.ACTIVE_VIEW.FORWARD_HISTORY'),
+                      onKeyDown: this.onForwardHistory,
+                  },
+              ]
+            : []),
+        ...(!isMac
+            ? [
+                  {
+                      global: true,
+                      combo: 'alt + right',
+                      label: this.injected.t('SHORTCUT.ACTIVE_VIEW.FORWARD_HISTORY'),
+                      onKeyDown: this.onForwardHistory,
+                  },
+              ]
+            : []),
+        {
+            global: true,
+            combo: 'alt + mod + i',
+            label: this.injected.t('SHORTCUT.OPEN_DEVTOOLS'),
+            onKeyDown: this.onOpenDevTools,
+        },
+        /* debug only shortcuts */
+        {
+            global: true,
+            combo: 'mod + h',
+            label: this.injected.t('SHORTCUT.ACTIVE_VIEW.VIEW_HISTORY'),
+            preventDefault: true,
+            onKeyDown: this.onShowHistory,
+            group: this.injected.t('SHORTCUT.GROUP.ACTIVE_VIEW'),
+        },
+        {
+            global: true,
+            combo: 'mod + p',
+            label: 'view cache',
+            preventDefault: true,
+            onKeyDown: this.onDebugCache,
+            group: this.injected.t('SHORTCUT.GROUP.ACTIVE_VIEW'),
+        },
+    ]
 
     render(): JSX.Element {
         // we need to render something otherwise hotkeys won't work
-        return <div />;
+        return (
+            <HotkeysTarget2 hotkeys={this.hotkeys}>
+                <div />
+            </HotkeysTarget2>
+        )
     }
 }
 
-const KeyboardHotkeys = withNamespaces()(KeyboardHotkeysClass);
+const KeyboardHotkeys = withNamespaces()(inject('appState', 'settingsState')(KeyboardHotkeysClass))
 
-export { KeyboardHotkeys };
+export { KeyboardHotkeys }
