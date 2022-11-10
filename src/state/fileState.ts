@@ -1,5 +1,5 @@
 import { observable, action, runInAction, makeObservable } from 'mobx'
-import { FsApi, Fs, getFS, File, Credentials, needsConnection, FileID } from '../services/Fs'
+import { FsApi, Fs, getFS, File, Credentials, withConnection, FileID } from '../services/Fs'
 import { Deferred } from '../utils/deferred'
 import { i18next } from '../locale/i18n'
 import { getLocalizedError } from '../locale/error'
@@ -52,6 +52,28 @@ export class FileState {
     // history stuff
     history = observable<string>([])
     current = -1
+
+    waitForConnection = async () => {
+        if (!this.api) {
+            debugger
+        }
+        if (!this.api.isConnected()) {
+            this.loginDefer = new Deferred()
+
+            // automatially reconnect if we got credentials
+            if (this.api.loginOptions) {
+                this.doLogin()
+            } else {
+                // otherwise show login dialog
+                this.setStatus('login')
+            }
+
+            return this.loginDefer.promise
+        } else {
+            this.setStatus('busy')
+            return Promise.resolve()
+        }
+    }
 
     setStatus(status: TStatus, error = false): void {
         this.status = status
@@ -240,28 +262,6 @@ export class FileState {
         }
     }
 
-    waitForConnection(): Promise<void> {
-        if (!this.api) {
-            debugger
-        }
-        if (!this.api.isConnected()) {
-            this.loginDefer = new Deferred()
-
-            // automatially reconnect if we got credentials
-            if (this.api.loginOptions) {
-                this.doLogin()
-            } else {
-                // otherwise show login dialog
-                this.setStatus('login')
-            }
-
-            return this.loginDefer.promise
-        } else {
-            this.setStatus('busy')
-            return Promise.resolve()
-        }
-    }
-
     onLoginSuccess(): void {
         this.setStatus('ok')
         this.loginDefer.resolve()
@@ -411,9 +411,8 @@ export class FileState {
         return this.cwd(path, path2, skipHistory)
     }
 
-    @needsConnection
     // changes current path and retrieves file list
-    cwd(path: string, path2 = '', skipHistory = false): Promise<string> {
+    cwd = withConnection((path: string, path2 = '', skipHistory = false): Promise<string> => {
         const joint = path2 ? this.api.join(path, path2) : this.api.sanityze(path)
         this.cmd = 'cwd'
 
@@ -446,15 +445,13 @@ export class FileState {
                 //return Promise.reject(localizedError);
                 throw localizedError
             })
-    }
+    }, this.waitForConnection)
 
-    @needsConnection
-    async list(path: string): Promise<File[] | void> {
+    list = withConnection((path: string): Promise<File[] | void> => {
         return this.api.list(path, true).catch(this.handleError)
-    }
+    }, this.waitForConnection)
 
-    @needsConnection
-    async rename(source: string, file: File, newName: string): Promise<string | void> {
+    rename = withConnection((source: string, file: File, newName: string): Promise<string | void> => {
         // // TODO: check for valid filenames
         // try {
         //     await this.waitForConnection();
@@ -472,11 +469,9 @@ export class FileState {
                 return newName
             })
             .catch(this.handleError)
-    }
+    }, this.waitForConnection)
 
-    @needsConnection
-    async exists(path: string): Promise<boolean | void> {
-        // await this.waitForConnection();
+    exists = withConnection((path: string): Promise<boolean | void> => {
         return this.api
             .exists(path)
             .then((exists) => {
@@ -486,10 +481,9 @@ export class FileState {
                 return exists
             })
             .catch(this.handleError)
-    }
+    }, this.waitForConnection)
 
-    @needsConnection
-    async makedir(parent: string, dirName: string): Promise<string | void> {
+    makedir = withConnection((parent: string, dirName: string): Promise<string | void> => {
         return this.api
             .makedir(parent, dirName)
             .then((newDir) => {
@@ -500,10 +494,9 @@ export class FileState {
                 return newDir
             })
             .catch(this.handleError)
-    }
+    }, this.waitForConnection)
 
-    @needsConnection
-    async delete(source: string, files: File[]): Promise<number | void> {
+    delete = withConnection((source: string, files: File[]): Promise<number | void> => {
         return this.api
             .delete(source, files)
             .then((num) => {
@@ -514,23 +507,15 @@ export class FileState {
                 return num
             })
             .catch(this.handleError)
-    }
+    }, this.waitForConnection)
 
-    @needsConnection
-    async size(source: string, files: string[]): Promise<number | void> {
-        // try {
-        //     await this.waitForConnection();
-        // } catch (err) {
-        //     return this.size(source, files);
-        // }
-
+    size = withConnection((source: string, files: string[]): Promise<number | void> => {
         return this.api.size(source, files).catch(this.handleError)
-    }
+    }, this.waitForConnection)
 
-    async isDir(path: string): Promise<boolean> {
-        await this.waitForConnection()
+    isDir = withConnection((path: string): Promise<boolean> => {
         return this.api.isDir(path)
-    }
+    }, this.waitForConnection)
 
     isDirectoryNameValid = (dirName: string): boolean => {
         return this.api.isDirectoryNameValid(dirName)

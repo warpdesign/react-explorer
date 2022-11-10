@@ -111,7 +111,6 @@ interface InjectedProps extends Props {
     settingsState: SettingsState
 }
 
-@WithMenuAccelerators
 export class FileTableClass extends React.Component<Props, State> {
     private viewState: ViewState
     private disposers: Array<IReactionDisposer> = []
@@ -896,6 +895,8 @@ export class FileTableClass extends React.Component<Props, State> {
     }
 }
 
-const FileTable = withNamespaces()(inject('appState', 'viewState', 'settingsState')(FileTableClass))
+const FileTable = withNamespaces()(
+    inject('appState', 'viewState', 'settingsState')(WithMenuAccelerators(FileTableClass)),
+)
 
 export { FileTable }

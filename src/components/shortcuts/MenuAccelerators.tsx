@@ -19,7 +19,6 @@ interface InjectedProps extends Props {
     settingsState: SettingsState
 }
 
-@WithMenuAccelerators
 class MenuAcceleratorsClass extends React.Component<Props> {
     private appState: AppState
 
@@ -215,6 +214,8 @@ class MenuAcceleratorsClass extends React.Component<Props> {
     }
 }
 
-const MenuAccelerators = withNamespaces()(inject('appState', 'settingsState')(MenuAcceleratorsClass))
+const MenuAccelerators = withNamespaces()(
+    inject('appState', 'settingsState')(WithMenuAccelerators(MenuAcceleratorsClass)),
+)
 
 export { MenuAccelerators }
