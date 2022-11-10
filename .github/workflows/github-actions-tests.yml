@@ -6,7 +6,7 @@ jobs:
       fail-fast: false
       matrix:
         node-version: [14.x]
-        os: [ubuntu-latest, macos-latest]
+        os: [ubuntu-latest]
         experimental: [false]
         # include:
         #   - os: windows-latest
