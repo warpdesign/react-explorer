@@ -49,7 +49,7 @@ const fileTarget: DropTargetSpec<InjectedProps> = {
     },
     drop(props, monitor, component): void {
         const item = monitor.getItem()
-        const sideView = component.wrappedInstance
+        const sideView = component
         sideView.onDrop(item)
     },
 }

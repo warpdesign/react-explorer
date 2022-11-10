@@ -1,15 +1,15 @@
-import { app, BrowserWindow, ipcMain, nativeTheme } from 'electron';
-import process = require('process');
-import path = require('path');
-import child_process = require('child_process');
-import { AppMenu, LocaleString } from './appMenus';
-import { isLinux } from './osSupport';
-import { WindowSettings } from './windowSettings';
-import { Remote } from './remote';
+import { app, BrowserWindow, ipcMain, nativeTheme } from 'electron'
+import process = require('process')
+import path = require('path')
+import child_process = require('child_process')
+import { AppMenu, LocaleString } from './appMenus'
+import { isLinux } from './osSupport'
+import { WindowSettings } from './windowSettings'
+import { Remote } from './remote'
 
-declare const ENV: { [key: string]: string | boolean | number | Record<string, unknown> };
-const ENV_E2E = !!process.env.E2E;
-const HTML_PATH = `${__dirname}/index.html`;
+declare const ENV: { [key: string]: string | boolean | number | Record<string, unknown> }
+const ENV_E2E = !!process.env.E2E
+const HTML_PATH = `${__dirname}/index.html`
 
 const ElectronApp = {
     mainWindow: null as Electron.BrowserWindow,
@@ -21,34 +21,34 @@ const ElectronApp = {
      * Listen to Electron app events
      */
     init(): void {
-        app.on('ready', () => this.onReady());
+        app.on('ready', () => this.onReady())
         // prevent app from exiting at first request: the user may attempt to exit the app
         // while transfers are in progress so we first send a request to the frontend
         // if no transfers are in progress, exit confirmation is received which makes the app close
         app.on('before-quit', (e) => {
             // TODO: detect interrupt
-            console.log('before quit');
+            console.log('before quit')
             if (!this.forceExit) {
-                console.log('no forceExit, sending exitRequest to renderer');
-                e.preventDefault();
-                this.mainWindow.webContents.send('exitRequest');
+                console.log('no forceExit, sending exitRequest to renderer')
+                e.preventDefault()
+                this.mainWindow.webContents.send('exitRequest')
             } else {
-                console.log('forceExit is true, calling cleanupAndExit');
-                this.cleanupAndExit();
+                console.log('forceExit is true, calling cleanupAndExit')
+                this.cleanupAndExit()
             }
-        });
+        })
 
         app.on('activate', (e) => {
             if (this.mainWindow) {
-                this.mainWindow.restore();
+                this.mainWindow.restore()
             }
-        });
+        })
 
         // when interrupt is received we have to force exit
         process.on('SIGINT', function () {
-            console.log('*** BREAK');
-            this.forceExit = true;
-        });
+            console.log('*** BREAK')
+            this.forceExit = true
+        })
     },
     /**
      * Create React-Explorer main window and:
@@ -57,9 +57,9 @@ const ElectronApp = {
      * - create main menu
      */
     async createMainWindow(): Promise<void> {
-        console.log('Create Main Window');
+        console.log('Create Main Window')
 
-        await Remote.init();
+        await Remote.init()
 
         this.mainWindow = new BrowserWindow({
             minWidth: WindowSettings.DEFAULTS.minWidth,
@@ -73,69 +73,69 @@ const ElectronApp = {
                 contextIsolation: false,
             },
             icon: (isLinux && path.join(__dirname, 'icon.png')) || undefined,
-        });
+        })
 
-        const settings = WindowSettings.getSettings(this.mainWindow.id);
-        console.log('settings', settings.x);
+        const settings = WindowSettings.getSettings(this.mainWindow.id)
+        console.log('settings', settings.x)
 
-        settings.manage(this.mainWindow);
+        settings.manage(this.mainWindow)
 
         this.mainWindow.setBounds({
             width: settings.width,
             height: settings.height,
             x: settings.x || this.mainWindow.getBounds().x,
             y: settings.y || this.mainWindow.getBounds().y,
-        });
+        })
 
         if (!settings.custom) {
-            console.log('custom settings not found: resetting');
+            console.log('custom settings not found: resetting')
             settings.custom = {
                 splitView: false,
-            };
+            }
         }
 
-        console.log(settings.custom);
+        console.log(settings.custom)
 
         // this.mainWindow.initialSettings = settings.custom;
 
         // this.mainWindow.loadURL(HTML_PATH);
-        this.mainWindow.loadFile(HTML_PATH);
+        this.mainWindow.loadFile(HTML_PATH)
 
         // this.mainWindow.on('close', () => app.quit());
 
         // Prevent the window from closing in case transfers are in progress
         this.mainWindow.on('close', (e: Event) => {
-            console.log('on:close');
+            console.log('on:close')
             if (!this.forceExit) {
-                console.log('exit request and no force: sending back exitRequest');
-                e.preventDefault();
-                this.mainWindow.webContents.send('exitRequest');
+                console.log('exit request and no force: sending back exitRequest')
+                e.preventDefault()
+                this.mainWindow.webContents.send('exitRequest')
             } else {
-                console.log('forceExit: let go exit event');
+                console.log('forceExit: let go exit event')
             }
-        });
+        })
 
         this.mainWindow.on('minimize', () => {
-            this.mainWindow.minimize();
-        });
+            this.mainWindow.minimize()
+        })
 
         // this.mainWindpw.on('page-title-updated', (e: Event) => {
         //     e.preventDefault();
         // });
 
-        this.appMenu = new AppMenu(this.mainWindow);
+        this.appMenu = new AppMenu(this.mainWindow)
     },
     /**
      * Install special React DevTools
      */
     installReactDevTools(): void {
-        console.log('Install React DevTools');
+        console.log('Install React DevTools')
         // eslint-disable-next-line @typescript-eslint/no-var-requires
-        const { default: installExtension, REACT_DEVELOPER_TOOLS } = require('electron-devtools-installer');
+        const { default: installExtension, REACT_DEVELOPER_TOOLS } = require('electron-devtools-installer')
 
         installExtension(REACT_DEVELOPER_TOOLS)
             .then((name: string) => console.log(`Added Extension:  ${name}`))
-            .catch((err: Error) => console.log('An error occurred: ', err));
+            .catch((err: Error) => console.log('An error occurred: ', err))
     },
     /**
      * Install recursive file watcher to reload the app on fs change events
@@ -152,11 +152,11 @@ const ElectronApp = {
      * Clears the session cache and reloads main window without cache
      */
     reloadApp(): void {
-        const mainWindow = this.mainWindow;
+        const mainWindow = this.mainWindow
         if (mainWindow) {
             mainWindow.webContents.session.clearCache(() => {
-                mainWindow.webContents.reloadIgnoringCache();
-            });
+                mainWindow.webContents.reloadIgnoringCache()
+            })
         }
     },
     /**
@@ -169,74 +169,71 @@ const ElectronApp = {
      * - selectAll: wants to generate a selectAll event
      */
     installIpcMainListeners() {
-        console.log('Install ipcMain Listeners');
+        console.log('Install ipcMain Listeners')
 
-        ipcMain.on('reloadIgnoringCache', () => this.reloadApp());
+        ipcMain.on('reloadIgnoringCache', () => this.reloadApp())
 
         ipcMain.handle('readyToExit', () => {
-            console.log('readyToExit');
-            this.cleanupAndExit();
-        });
+            console.log('readyToExit')
+            this.cleanupAndExit()
+        })
 
         ipcMain.handle('openDevTools', () => {
-            console.log('should open dev tools');
-            this.openDevTools(true);
-        });
+            console.log('should open dev tools')
+            this.openDevTools(true)
+        })
 
-        ipcMain.handle(
-            'openTerminal',
-            (event: Event, cmd: string): Promise<{ code: number; terminal: string }> => {
-                console.log('running', cmd);
-                const exec = child_process.exec;
-                return new Promise((resolve) => {
-                    exec(cmd, (error: child_process.ExecException) => {
-                        if (error) {
-                            resolve({ code: error.code, terminal: cmd });
-                        } else {
-                            resolve();
-                        }
-                    }).unref();
-                });
-            },
-        );
+        ipcMain.handle('openTerminal', (event: Event, cmd: string): Promise<void> => {
+            console.log('running', cmd)
+            const exec = child_process.exec
+            return new Promise((resolve, reject) => {
+                exec(cmd, (error: child_process.ExecException) => {
+                    if (error) {
+                        reject({ code: error.code, terminal: cmd })
+                    } else {
+                        resolve()
+                    }
+                }).unref()
+            })
+        })
 
         ipcMain.handle('languageChanged', (e: Event, strings: LocaleString, lang: string) => {
             if (this.appMenu) {
-                this.appMenu.createMenu(strings, lang);
+                this.appMenu.createMenu(strings, lang)
             } else {
-                console.log('languageChanged but app not ready :(');
+                console.log('languageChanged but app not ready :(')
             }
-        });
+        })
 
         ipcMain.handle('selectAll', () => {
             if (this.mainWindow) {
-                this.mainWindow.webContents.selectAll();
+                this.mainWindow.webContents.selectAll()
             }
-        });
+        })
 
         ipcMain.handle('needsCleanup', () => {
-            console.log('needscleanup');
-            this.cleanupCounter++;
-            console.log('needscleanup, counter now:', this.cleanupCounter);
-        });
-        ipcMain.handle('cleanedUp', () => this.onCleanUp());
+            console.log('needscleanup')
+            this.cleanupCounter++
+            console.log('needscleanup, counter now:', this.cleanupCounter)
+        })
+        ipcMain.handle('cleanedUp', () => this.onCleanUp())
 
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         ipcMain.handle('setWindowSettings', (event, data: { [key: string]: any }) => {
-            const { settings } = data;
-            console.log('changeWindowSettings', event.sender.id, settings);
-            const state = WindowSettings.getSettings(event.sender.id);
-            console.log('got state', state);
-            state.custom = settings;
-        });
+            const { settings } = data
+            console.log('changeWindowSettings', event.sender.id, settings)
+            const state = WindowSettings.getSettings(event.sender.id)
+            console.log('got state', state)
+            state.custom = settings
+        })
     },
 
     installNativeThemeListener(): void {
         nativeTheme.on('updated', () => {
             BrowserWindow.getAllWindows().forEach((window) => {
-                window.webContents.send('nativeTheme:updated', nativeTheme.shouldUseDarkColors);
-            });
-        });
+                window.webContents.send('nativeTheme:updated', nativeTheme.shouldUseDarkColors)
+            })
+        })
     },
 
     /**
@@ -244,25 +241,25 @@ const ElectronApp = {
      *
      */
     cleanupAndExit(): void {
-        console.log('cleanupAndExit');
+        console.log('cleanupAndExit')
         if (this.cleanupCounter) {
-            console.log('cleanupCounter non zero', this.cleanupCounter);
-            this.mainWindow.webContents.send('cleanup');
+            console.log('cleanupCounter non zero', this.cleanupCounter)
+            this.mainWindow.webContents.send('cleanup')
         } else {
-            console.log('cleanupCount zero: exit');
-            app.exit();
+            console.log('cleanupCount zero: exit')
+            app.exit()
         }
     },
     onCleanUp(): void {
-        this.cleanupCounter--;
+        this.cleanupCounter--
         // exit app if everything has been cleaned up
         // otherwise do nothing and wait for cleanup
-        console.log('onCleanUp, counter now', this.cleanupCounter);
+        console.log('onCleanUp, counter now', this.cleanupCounter)
         if (!this.cleanupCounter) {
-            console.log('cleanupCounter equals to zero, calling app.exit()');
-            app.exit();
+            console.log('cleanupCounter equals to zero, calling app.exit()')
+            app.exit()
         } else {
-            console.log('cleanupCounter non zero, cancel exit', this.cleanupCounter);
+            console.log('cleanupCounter non zero, cancel exit', this.cleanupCounter)
         }
     },
     /**
@@ -272,24 +269,24 @@ const ElectronApp = {
         // spectron problem if devtools is opened, see https://github.com/electron/spectron/issues/254
         if ((!ENV_E2E && ENV.NODE_ENV) !== 'production' || force) {
             if (!this.devWindow || this.devWindow.isDestroyed()) {
-                const winState = WindowSettings.getDevToolsSettings();
+                const winState = WindowSettings.getDevToolsSettings()
 
                 this.devWindow = new BrowserWindow({
                     width: winState.width,
                     height: winState.height,
                     x: winState.x,
                     y: winState.y,
-                });
+                })
 
-                winState.manage(this.devWindow);
+                winState.manage(this.devWindow)
 
-                this.mainWindow.webContents.setDevToolsWebContents(this.devWindow.webContents);
-                this.mainWindow.webContents.openDevTools({ mode: 'detach' });
+                this.mainWindow.webContents.setDevToolsWebContents(this.devWindow.webContents)
+                this.mainWindow.webContents.openDevTools({ mode: 'detach' })
             } else {
                 if (this.devWindow.isMinimized()) {
-                    this.devWindow.restore();
+                    this.devWindow.restore()
                 } else {
-                    this.devWindow.focus();
+                    this.devWindow.focus()
                 }
             }
         }
@@ -298,7 +295,7 @@ const ElectronApp = {
      * app.ready callback: that's the app's main entry point
      */
     async onReady(): Promise<void> {
-        console.log('App Ready');
+        console.log('App Ready')
         // react-devtools doesn't work properly with file:// scheme, starting with Electron 9
         // see: https://github.com/electron/electron/issues/24011 &
         // https://github.com/electron/electron/pull/25151
@@ -306,12 +303,12 @@ const ElectronApp = {
         //     this.installReactDevTools();
         // }
 
-        this.installIpcMainListeners();
-        this.installNativeThemeListener();
-        await this.createMainWindow();
-        this.openDevTools();
+        this.installIpcMainListeners()
+        this.installNativeThemeListener()
+        await this.createMainWindow()
+        this.openDevTools()
     },
-};
+}
 
-console.log(`Electron Version ${app.getVersion()}`);
-ElectronApp.init();
+console.log(`Electron Version ${app.getVersion()}`)
+ElectronApp.init()
