@@ -23,7 +23,11 @@ import { registerFs } from '../services/Fs'
 declare const ENV: { [key: string]: string | boolean | number | Record<string, unknown> }
 
 configure({
-    enforceActions: 'never',
+    enforceActions: 'observed',
+    computedRequiresReaction: true,
+    reactionRequiresObservable: true,
+    // observableRequiresReaction: true,
+    safeDescriptors: ENV.CY ? false : true,
 })
 
 function initFS() {

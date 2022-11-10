@@ -1,4 +1,4 @@
-import { action, observable, computed, makeObservable } from 'mobx'
+import { action, observable, computed, makeObservable, runInAction } from 'mobx'
 import { File, FsApi, getFS } from '../services/Fs'
 import { FileState } from './fileState'
 import { Batch } from '../transfers/batch'
@@ -347,24 +347,18 @@ export class AppState {
         console.log('addTransfer', options.files, options.srcFs, options.dstFs, options.dstPath)
 
         const batch = new Batch(options.srcFs, options.dstFs, options.srcPath, options.dstPath)
-        this.transfers.unshift(batch)
+        runInAction(() => this.transfers.unshift(batch))
         return batch.setFileList(options.files).then(() => {
             batch.calcTotalSize()
             batch.status = 'queued'
-            // console.log('got file list !');
-            // start transfer ?
-            // setInterval(() => {
-            //     runInAction(() => {
-            //         console.log('progress up');
-            //         batch.updateProgress();
-            //     });
-            // }, 1000);
             const activeTransfers = this.transfers.filter((transfer) => !transfer.status.match(/error|done/))
             // CHECKME
-            if (this.activeTransfers.length === 1) {
-                this.activeTransfers.clear()
-            }
-            this.activeTransfers.push(batch)
+            runInAction(() => {
+                if (this.activeTransfers.length === 1) {
+                    this.activeTransfers.clear()
+                }
+                this.activeTransfers.push(batch)
+            })
 
             return batch.start()
         })

@@ -9,6 +9,7 @@ import { FsLocal, FolderExists } from '../../services/plugins/FsLocal'
 import { AppAlert } from '../AppAlert'
 import { ipcRenderer } from 'electron'
 import { HOME_DIR } from '../../utils/platform'
+import { action } from 'mobx'
 
 const DEBOUNCE_DELAY = 300
 

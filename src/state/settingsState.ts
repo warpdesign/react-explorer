@@ -1,4 +1,4 @@
-import { observable, action, makeObservable } from 'mobx'
+import { observable, action, makeObservable, runInAction } from 'mobx'
 import { ipcRenderer } from 'electron'
 import { JSObject } from '../components/Log'
 import { i18next, languageList } from '../locale/i18n'
@@ -161,9 +161,14 @@ export class SettingsState {
         if (this.darkMode === 'auto') {
             // CHECKME!
             // this.isDarkModeActive = isMojave && systemPreferences ? systemPreferences.isDarkMode() : false;
-            this.isDarkModeActive = await ipcRenderer.invoke('nativeTheme:shouldUseDarkColors')
+            const mode = await ipcRenderer.invoke('nativeTheme:shouldUseDarkColors')
+            runInAction(() => {
+                this.isDarkModeActive = mode
+            })
         } else {
-            this.isDarkModeActive = this.darkMode
+            runInAction(() => {
+                this.isDarkModeActive = this.darkMode as boolean
+            })
         }
     }
 

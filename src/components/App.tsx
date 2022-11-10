@@ -26,6 +26,7 @@ import { getLocalizedError } from '../locale/error'
 import { MenuAccelerators } from './shortcuts/MenuAccelerators'
 import { KeyboardHotkeys } from './shortcuts/KeyboardHotkeys'
 import { CustomSettings } from '../electron/windowSettings'
+import { action, runInAction } from 'mobx'
 
 require('@blueprintjs/core/lib/css/blueprint.css')
 require('@blueprintjs/icons/lib/css/blueprint-icons.css')
@@ -47,8 +48,6 @@ enum KEYS {
     TAB = 9,
     A = 65,
 }
-
-// declare let ENV: any;
 
 declare global {
     interface Window {
@@ -326,11 +325,11 @@ const App = inject('settingsState')(
             }
 
             closePrefs = (): void => {
-                this.appState.isPrefsOpen = false
+                runInAction(() => (this.appState.isPrefsOpen = false))
             }
 
             closeShortcuts = (): void => {
-                this.appState.isShortcutsOpen = false
+                runInAction(() => (this.appState.isShortcutsOpen = false))
             }
 
             setDarkThemeClass(): void {

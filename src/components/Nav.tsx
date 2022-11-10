@@ -6,6 +6,7 @@ import { withNamespaces, WithNamespaces } from 'react-i18next'
 import { HamburgerMenu } from './HamburgerMenu'
 import { Badge } from './Badge'
 import { AppState } from '../state/appState'
+import { runInAction } from 'mobx'
 
 interface InjectedProps extends WithNamespaces {
     appState: AppState
@@ -50,11 +51,11 @@ const NavComponent = inject('appState')(
             }
 
             onOpenPrefs = (): void => {
-                this.appState.isPrefsOpen = true
+                runInAction(() => (this.appState.isPrefsOpen = true))
             }
 
             onOpenShortcuts = (): void => {
-                this.appState.isShortcutsOpen = true
+                runInAction(() => (this.appState.isShortcutsOpen = true))
             }
 
             render(): React.ReactNode {

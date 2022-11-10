@@ -1,4 +1,4 @@
-import { observable, action, makeObservable } from 'mobx'
+import { observable, action, makeObservable, runInAction } from 'mobx'
 import { FsApi, File } from '../services/Fs'
 import { FileTransfer } from './fileTransfer'
 import { Deferred } from '../utils/deferred'
@@ -130,14 +130,16 @@ export class Batch {
 
             for (const transfer of elements) {
                 // enable files inside this directory
-                if (transfer.subDirectory === subDir) {
-                    transfer.ready = true
-                }
-                // for all files (ie. this directory & subdirectories)
-                // rename this part if needed
-                if (newPrefix) {
-                    transfer.newSub = transfer.subDirectory.replace(regExp, newPrefix)
-                }
+                runInAction(() => {
+                    if (transfer.subDirectory === subDir) {
+                        transfer.ready = true
+                    }
+                    // for all files (ie. this directory & subdirectories)
+                    // rename this part if needed
+                    if (newPrefix) {
+                        transfer.newSub = transfer.subDirectory.replace(regExp, newPrefix)
+                    }
+                })
             }
         }
     }
@@ -165,8 +167,10 @@ export class Batch {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     onTransferError = (transfer: FileTransfer, err: any): void => {
         // console.log('transfer error', transfer.file.fullname, err);
-        transfer.status = 'error'
-        transfer.error = getLocalizedError(err)
+        runInAction(() => {
+            transfer.status = 'error'
+            transfer.error = getLocalizedError(err)
+        })
         this.errors++
         // return this.transferDef.reject(err);
     }
@@ -180,7 +184,7 @@ export class Batch {
 
     async startTransfer(transfer: FileTransfer): Promise<void> {
         this.slotsAvailable--
-        transfer.status = 'started'
+        runInAction(() => (transfer.status = 'started'))
 
         const dstFs = this.dstFs
         const srcFs = this.srcFs
@@ -212,7 +216,7 @@ export class Batch {
                 const linkPath = dstFs.join(fullDstPath, newFilename)
                 try {
                     await srcFs.makeSymlink(transfer.file.target, linkPath, this.id)
-                    transfer.status = 'done'
+                    runInAction(() => (transfer.status = 'done'))
                 } catch (err) {
                     this.onTransferError(transfer, err)
                 }
@@ -247,7 +251,7 @@ export class Batch {
 
                     console.log('endPutStream', fullDstPath)
                     this.removeStream(stream)
-                    transfer.status = 'done'
+                    runInAction(() => (transfer.status = 'done'))
                 } catch (err) {
                     console.log('error with streams', err)
                     this.removeStream(stream)
@@ -269,7 +273,7 @@ export class Batch {
             }
         } else {
             // console.log('isDir', fullDstPath);
-            transfer.status = 'done'
+            runInAction(() => (transfer.status = 'done'))
             // make transfers with this directory ready
             this.updatePendingTransfers(
                 srcFs.join(transfer.subDirectory, wantedName),
