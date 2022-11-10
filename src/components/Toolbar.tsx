@@ -71,7 +71,6 @@ export const ToolbarClass = inject(
                     super(props)
 
                     const { viewState } = this.injected
-                    debugger
                     const fileCache = viewState.getVisibleCache()
 
                     this.state = {
