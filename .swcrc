@@ -7,7 +7,6 @@
       "parser": {
         "syntax": "typescript",
         "tsx": true,
-        "decorators": true,
       }
     }
   }

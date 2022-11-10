@@ -8,7 +8,6 @@
     "jsx": "react",
     "removeComments": true,
     "lib": ["es6", "dom"],
-    "experimentalDecorators": true,
     "resolveJsonModule": true,
     "esModuleInterop": true,
     "types": ["node", "electron", "jest", "webpack", "webpack-env"],
