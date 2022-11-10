@@ -1,9 +1,12 @@
 {
     "jsc": {
+      "target": "es2020",
+      "transform": {
+        "useDefineForClassFields": true
+      },
       "parser": {
         "syntax": "typescript",
         "tsx": true,
-        "decorators": true
       }
     }
   }

@@ -1,114 +1,114 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { FsApi, File, Credentials, Fs, filetype } from '../Fs';
-import { Client as FtpClient, FileInfo, FTPResponse } from 'basic-ftp';
-import * as fs from 'fs';
-import { Transform, Readable, Writable } from 'stream';
-import { EventEmitter } from 'events';
-import * as nodePath from 'path';
-import { isWin } from '../../utils/platform';
+import { FsApi, File, Credentials, Fs, filetype } from '../Fs'
+import { Client as FtpClient, FileInfo, FTPResponse } from 'basic-ftp'
+import * as fs from 'fs'
+import { Transform, Readable, Writable } from 'stream'
+import { EventEmitter } from 'events'
+import * as nodePath from 'path'
+import { isWin } from '../../utils/platform'
 
 function serverPart(str: string, lowerCase = true): string {
-    const info = new URL(str);
-    return `${info.protocol}//${info.hostname}`;
+    const info = new URL(str)
+    return `${info.protocol}//${info.hostname}`
 }
 
 function join(path1: string, path2: string): string {
-    let prefix = '';
+    let prefix = ''
 
     if (path1.match(/^ftp:\/\//)) {
-        prefix = 'ftp://';
-        path1 = path1.replace('ftp://', '');
+        prefix = 'ftp://'
+        path1 = path1.replace('ftp://', '')
     }
 
     // since under Windows path.join will use '\' as separator
     // we replace it with '/'
     if (isWin) {
-        return prefix + nodePath.join(path1, path2).replace(/\\/g, '/');
+        return prefix + nodePath.join(path1, path2).replace(/\\/g, '/')
     } else {
-        return prefix + nodePath.join(path1, path2);
+        return prefix + nodePath.join(path1, path2)
     }
 }
 // eslint-disable-next-line @typescript-eslint/no-explicit-any,@typescript-eslint/explicit-function-return-type
 function canTimeout(target: any, key: any, descriptor: any) {
     if (descriptor === undefined) {
-        descriptor = Object.getOwnPropertyDescriptor(target, key);
+        descriptor = Object.getOwnPropertyDescriptor(target, key)
     }
-    const originalMethod = descriptor.value;
+    const originalMethod = descriptor.value
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/explicit-function-return-type
     descriptor.value = function decorator(...args: any) {
-        console.log('canTimeout:', key, '()');
+        console.log('canTimeout:', key, '()')
         return originalMethod.apply(this, args).catch(async (err: Error) => {
-            console.log('key', key);
+            console.log('key', key)
 
             if (this.ftpClient.closed) {
-                const isLogin = key === 'login';
-                console.warn('timeout detected: attempt to get a new client and reconnect');
+                const isLogin = key === 'login'
+                console.warn('timeout detected: attempt to get a new client and reconnect')
                 // if we are in the login process, do not attempt to login again, only create a new client
-                await this.getNewFtpClient(!isLogin);
-                console.log('after new client', this.ftpClient, this.ftpClient.closed);
+                await this.getNewFtpClient(!isLogin)
+                console.log('after new client', this.ftpClient, this.ftpClient.closed)
                 // do not recall the login process otherwise we could end up in an infinite loop
                 // in case internet is down or EPIPE error
                 if (!isLogin) {
-                    console.log('calling decorator again');
-                    return decorator.apply(this, args);
+                    console.log('calling decorator again')
+                    return decorator.apply(this, args)
                 } else {
-                    return Promise.reject(err);
+                    return Promise.reject(err)
                 }
             } else {
-                console.log('caught error but client not closed ?', err);
-                return Promise.reject(err);
+                console.log('caught error but client not closed ?', err)
+                return Promise.reject(err)
             }
-        });
-    };
+        })
+    }
 }
 
 class Client {
-    static instances = new Array<Client>();
+    static instances = new Array<Client>()
     static getFreeClient(server: string, api: SimpleFtpApi, transferId = -1): Client {
         let instance = Client.instances.find(
             (client) => client.server === server && !client.api && client.transferId === transferId,
-        );
+        )
         if (!instance) {
-            instance = new Client(server, api, transferId);
-            Client.instances.push(instance);
+            instance = new Client(server, api, transferId)
+            Client.instances.push(instance)
         } else {
-            instance.api = api;
+            instance.api = api
         }
 
-        return instance;
+        return instance
     }
     static freeClient(client: Client): void {
-        const index = Client.instances.findIndex((c) => client === c);
+        const index = Client.instances.findIndex((c) => client === c)
         if (index > -1) {
-            const removed = Client.instances.splice(index, 1);
+            const removed = Client.instances.splice(index, 1)
             // remove ref to api to avoid memory leak
-            removed[0].api = null;
+            removed[0].api = null
         }
     }
-    api: SimpleFtpApi;
-    server: string;
-    transferId: number;
-    ftpClient: FtpClient;
-    loginOptions: Credentials;
-    connected: boolean;
+    api: SimpleFtpApi
+    server: string
+    transferId: number
+    ftpClient: FtpClient
+    loginOptions: Credentials
+    connected: boolean
 
     constructor(server: string, api: SimpleFtpApi, transferId = -1) {
-        this.ftpClient = new FtpClient();
-        this.ftpClient.ftp.verbose = true;
-        this.server = server;
-        this.api = api;
-        this.transferId = transferId;
+        this.ftpClient = new FtpClient()
+        this.ftpClient.ftp.verbose = true
+        this.server = server
+        this.api = api
+        this.transferId = transferId
     }
 
     isConnected(): boolean {
-        return /*!this.ftpClient.closed && */ this.connected;
+        return /*!this.ftpClient.closed && */ this.connected
     }
 
     @canTimeout
     async login(server: string, loginOptions: Credentials): Promise<void> {
-        const host = this.api.getHostname(server);
-        const socketConnected = this.ftpClient.ftp.socket.bytesRead !== 0;
+        const host = this.api.getHostname(server)
+        const socketConnected = this.ftpClient.ftp.socket.bytesRead !== 0
         console.log(
             'canTimeout/login()',
             server,
@@ -117,26 +117,26 @@ class Client {
             socketConnected,
             'ftp.closed',
             this.ftpClient.closed,
-        );
+        )
 
         // WORKAROUND: FtpError 530 causes any subsequent call to access
         // to throw a ISCONN error, preventing any login to be successful.
         // To avoid that we detect that the client is already connected
         // and only call login()/useDefaultSettings() in that case
         if (!socketConnected) {
-            await this.ftpClient.access(Object.assign(loginOptions, { host }));
-            await this.onLoggedIn(server, loginOptions);
+            await this.ftpClient.access(Object.assign(loginOptions, { host }))
+            await this.onLoggedIn(server, loginOptions)
         } else {
-            await this.ftpClient.login(loginOptions.user, loginOptions.password);
-            await this.ftpClient.useDefaultSettings();
-            await this.onLoggedIn(server, loginOptions);
+            await this.ftpClient.login(loginOptions.user, loginOptions.password)
+            await this.ftpClient.useDefaultSettings()
+            await this.onLoggedIn(server, loginOptions)
         }
     }
 
     onLoggedIn(server: string, loginOptions: Credentials) {
-        this.loginOptions = loginOptions;
-        this.connected = true;
-        this.server = server;
+        this.loginOptions = loginOptions
+        this.connected = true
+        this.server = server
         // problem: this cannot be called while a task (list/cd/...) is already in progress
         // this.scheduleNoOp();
     }
@@ -164,83 +164,83 @@ class Client {
         //     this.checkTimeout = 0;
         // }
         // TODO: remove from the list too ?
-        console.log('close');
+        console.log('close')
     }
 
     async getNewFtpClient(login = true): Promise<void> {
-        console.log('creating new FtpClient');
-        this.ftpClient = new FtpClient();
-        this.ftpClient.ftp.verbose = true;
+        console.log('creating new FtpClient')
+        this.ftpClient = new FtpClient()
+        this.ftpClient.ftp.verbose = true
 
         if (login) {
-            console.log('calling login');
-            return this.login(this.server, this.loginOptions);
+            console.log('calling login')
+            return this.login(this.server, this.loginOptions)
         }
     }
 
     /* API mirror starts here */
     @canTimeout
     list(): Promise<FileInfo[]> {
-        console.log('Client.list()');
-        return this.ftpClient.list();
+        console.log('Client.list()')
+        return this.ftpClient.list()
     }
 
     @canTimeout
     cd(path: string): Promise<FTPResponse> {
-        console.log('Client.cd()');
-        return this.ftpClient.cd(path);
+        console.log('Client.cd()')
+        return this.ftpClient.cd(path)
     }
 
     @canTimeout
     getStream(path: string, writeStream: Writable): Promise<Readable> {
-        this.ftpClient.download(writeStream, path);
-        return Promise.resolve(this.ftpClient.ftp.dataSocket);
+        this.ftpClient.download(writeStream, path)
+        return Promise.resolve(this.ftpClient.ftp.dataSocket)
     }
 
     @canTimeout
     getFile(path: string, writeStream: Writable): Promise<FTPResponse> {
-        return this.ftpClient.download(writeStream, path);
+        return this.ftpClient.download(writeStream, path)
     }
 }
 
 class SimpleFtpApi implements FsApi {
-    type = 1;
-    master: Client;
-    loginOptions: Credentials = null;
-    server = '';
-    connected = false;
+    type = 1
+    master: Client
+    loginOptions: Credentials = null
+    server = ''
+    connected = false
 
     // events
-    eventList = new Array<string>();
-    emitter: EventEmitter;
+    eventList = new Array<string>()
+    emitter: EventEmitter
 
     async getClient(transferId = -1): Promise<Client> {
         if (transferId > -1) {
-            const client = Client.getFreeClient(this.server || this.master.server, this, transferId);
+            const client = Client.getFreeClient(this.server || this.master.server, this, transferId)
 
-            await client.login(this.master.server, this.loginOptions || this.master.loginOptions);
-            return client;
+            await client.login(this.master.server, this.loginOptions || this.master.loginOptions)
+            return client
         } else {
-            return this.master;
+            return this.master
         }
     }
 
     constructor(serverUrl: string) {
-        this.master = Client.getFreeClient(serverPart(serverUrl), this);
+        this.master = Client.getFreeClient(serverPart(serverUrl), this)
         // TODO: get master if available
         // and set connected to true *and* credentials
-        this.emitter = new EventEmitter();
+        this.emitter = new EventEmitter()
     }
 
     public pathpart(path: string): string {
         // we have to encode any % character other they may be
         // lost when calling decodeURIComponent
         try {
-            const info = new URL(path.replace(/%/g, '%25'));
-            return decodeURIComponent(info.pathname);
+            const info = new URL(path.replace(/%/g, '%25'))
+            return decodeURIComponent(info.pathname)
         } catch (err) {
-            console.error('error getting pathpart for', path);
-            return '';
+            console.error('error getting pathpart for', path)
+            return ''
         }
 
         // const pathPart = path.replace(ServerPart, '');
@@ -248,98 +248,98 @@ class SimpleFtpApi implements FsApi {
     }
 
     getHostname(str: string): string {
-        const info = new URL(str);
+        const info = new URL(str)
 
-        return info.hostname.toLowerCase();
+        return info.hostname.toLowerCase()
     }
 
     isDirectoryNameValid(dirName: string): boolean {
-        debugger;
-        console.log('SimpleFtpFs.isDirectoryNameValid');
-        return true;
+        debugger
+        console.log('SimpleFtpFs.isDirectoryNameValid')
+        return true
     }
 
     resolve(newPath: string): string {
-        return newPath;
+        return newPath
     }
 
     join(path: string, path2: string): string {
-        return join(path, path2);
+        return join(path, path2)
     }
 
     isConnected(): boolean {
         if (!(this.master && this.master.isConnected())) {
-            console.log('not connected');
+            console.log('not connected')
         }
-        return this.master && this.master.isConnected();
+        return this.master && this.master.isConnected()
     }
 
     cd(path: string, transferId = -1): Promise<string> {
         return new Promise(async (resolve, reject) => {
-            const newpath = this.pathpart(path);
+            const newpath = this.pathpart(path)
             try {
-                await this.getClient(transferId);
-                await this.master.cd(newpath);
+                await this.getClient(transferId)
+                await this.master.cd(newpath)
 
                 // if (dir) {
                 //     dir = dir.replace(/\\/g, '/');
                 // }
-                const joint = newpath === '/' ? join(path, newpath) : path;
-                resolve(joint);
+                const joint = newpath === '/' ? join(path, newpath) : path
+                resolve(joint)
             } catch (err) {
-                reject(err);
+                reject(err)
             }
-        });
+        })
     }
 
     size(source: string, files: string[], transferId = -1): Promise<number> {
-        console.log('SimpleFtpFs.size');
-        return Promise.resolve(10);
+        console.log('SimpleFtpFs.size')
+        return Promise.resolve(10)
     }
 
     login(server?: string, credentials?: Credentials): Promise<void> {
         if (!this.connected) {
             // TODO: use existing master ?
-            const loginOptions = credentials || this.loginOptions;
-            const newServer = server || this.server;
-            console.log('connecting to', newServer, 'user=', loginOptions.user, 'password=', '***');
+            const loginOptions = credentials || this.loginOptions
+            const newServer = server || this.server
+            console.log('connecting to', newServer, 'user=', loginOptions.user, 'password=', '***')
 
             return this.master.login(newServer, loginOptions).then(() => {
-                console.log('connected');
-                this.loginOptions = loginOptions;
-                this.server = newServer;
-            });
+                console.log('connected')
+                this.loginOptions = loginOptions
+                this.server = newServer
+            })
         }
     }
 
     makedir(parent: string, dirName: string, transferId = -1): Promise<string> {
-        console.log('FsSimpleFtp.makedir');
-        return Promise.resolve('');
+        console.log('FsSimpleFtp.makedir')
+        return Promise.resolve('')
     }
 
     delete(src: string, files: File[], transferId = -1): Promise<number> {
-        console.log('FsSimpleFtp.delete');
-        return Promise.resolve(files.length);
+        console.log('FsSimpleFtp.delete')
+        return Promise.resolve(files.length)
     }
 
     rename(source: string, file: File, newName: string, transferId = -1): Promise<string> {
-        console.log('FsSimpleFtp.rename');
-        return Promise.resolve(newName);
+        console.log('FsSimpleFtp.rename')
+        return Promise.resolve(newName)
     }
 
     isDir(path: string, transferId = -1): Promise<boolean> {
-        console.log('FsSimpleFtp.isDir');
-        return Promise.resolve(true);
+        console.log('FsSimpleFtp.isDir')
+        return Promise.resolve(true)
     }
 
     exists(path: string, transferId = -1): Promise<boolean> {
-        console.log('FsSimpleFtp.exists');
-        return Promise.resolve(true);
+        console.log('FsSimpleFtp.exists')
+        return Promise.resolve(true)
     }
 
     async makeSymlink(targetPath: string, path: string, transferId?: number): Promise<boolean> {
-        console.log('FsSimpleFtp.makeSymlink');
-        return true;
+        console.log('FsSimpleFtp.makeSymlink')
+        return true
     }
 
     async stat(fullPath: string, transferId = -1): Promise<File> {
@@ -355,22 +355,22 @@ class SimpleFtpApi implements FsApi {
             isDir: false,
             readonly: false,
             type: '',
-        } as File);
+        } as File)
     }
 
     list(path: string, watchDir = false, transferId = -1): Promise<File[]> {
         return new Promise(async (resolve, reject) => {
-            const newpath = this.pathpart(path);
+            const newpath = this.pathpart(path)
 
             try {
-                const client = await this.getClient(transferId);
-                const ftpFiles: FileInfo[] = await client.list();
+                const client = await this.getClient(transferId)
+                const ftpFiles: FileInfo[] = await client.list()
                 const files = ftpFiles
                     .filter((ftpFile) => !ftpFile.name.match(/^[\.]{1,2}$/))
                     .map((ftpFile) => {
-                        const format = nodePath.parse(ftpFile.name);
-                        const ext = format.ext.toLowerCase();
-                        const mDate = new Date(ftpFile.date);
+                        const format = nodePath.parse(ftpFile.name)
+                        const ext = format.ext.toLowerCase()
+                        const mDate = new Date(ftpFile.date)
 
                         const file: File = {
                             dir: path,
@@ -391,11 +391,11 @@ class SimpleFtpApi implements FsApi {
                                 ino: mDate.getTime(),
                                 dev: new Date().getTime(),
                             },
-                        };
-                        return file;
-                    });
+                        }
+                        return file
+                    })
 
-                resolve(files);
+                resolve(files)
                 // if (appendParent && !this.isRoot(newpath)) {
                 //     const parent = { ...Parent, dir: path };
 
@@ -404,17 +404,17 @@ class SimpleFtpApi implements FsApi {
                 //     resolve(files);
                 // }
             } catch (err) {
-                reject(err);
+                reject(err)
             }
-        });
+        })
     }
 
     isRoot(path: string): boolean {
         try {
-            const parsed = new URL(path);
-            return parsed.pathname === '/';
+            const parsed = new URL(path)
+            return parsed.pathname === '/'
         } catch (err) {
-            return path === '/';
+            return path === '/'
         }
     }
 
@@ -423,16 +423,16 @@ class SimpleFtpApi implements FsApi {
             // create a duplex stream
             const transform = new Transform({
                 transform(chunk, encoding, callback): void {
-                    callback(null, chunk);
+                    callback(null, chunk)
                 },
-            });
-            const joint = this.join(path, file);
-            const client = await this.getClient(transferId);
-            client.getStream(this.pathpart(joint), transform);
-            return Promise.resolve(transform);
+            })
+            const joint = this.join(path, file)
+            const client = await this.getClient(transferId)
+            client.getStream(this.pathpart(joint), transform)
+            return Promise.resolve(transform)
         } catch (err) {
-            console.log('FsSimpleFtp.getStream error', err);
-            return Promise.reject(err);
+            console.log('FsSimpleFtp.getStream error', err)
+            return Promise.reject(err)
         }
     }
 
@@ -442,40 +442,40 @@ class SimpleFtpApi implements FsApi {
         progress: (bytesRead: number) => void,
         transferId = -1,
     ): Promise<void> {
-        debugger;
-        return Promise.resolve();
+        debugger
+        return Promise.resolve()
     }
 
     getParentTree(dir: string): Array<{ dir: string; fullname: string }> {
-        console.error('TODO: implement me');
-        const numParts = dir.replace(/^\//, '').split('/').length;
-        const folders = [];
+        console.error('TODO: implement me')
+        const numParts = dir.replace(/^\//, '').split('/').length
+        const folders = []
         for (let i = 0; i < numParts; ++i) {}
-        return [];
+        return []
     }
 
     sanityze(path: string): string {
-        return path;
+        return path
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     on(event: string, cb: (data: any) => void): void {
         if (this.eventList.indexOf(event) < 0) {
-            this.eventList.push(event);
+            this.eventList.push(event)
         }
 
-        this.emitter.on(event, cb);
+        this.emitter.on(event, cb)
     }
 
     off(): void {
-        console.log('*** off');
+        console.log('*** off')
         // remove all listeners
         for (const event of this.eventList) {
-            this.emitter.removeAllListeners(event);
+            this.emitter.removeAllListeners(event)
         }
 
         if (this.master) {
-            this.master.api = null;
+            this.master.api = null
             // this.master.close();
         }
         // TODO: save this.master + this.loginOptions
@@ -492,30 +492,30 @@ export const FsSimpleFtp: Fs = {
         needsRefresh: true,
     },
     canread(str: string): boolean {
-        const info = new URL(str);
-        console.log('FsFtp.canread', str, info.protocol, info.protocol === 'ftp:');
-        return info.protocol === 'ftp:';
+        const info = new URL(str)
+        console.log('FsFtp.canread', str, info.protocol, info.protocol === 'ftp:')
+        return info.protocol === 'ftp:'
     },
     serverpart(str: string, lowerCase = true): string {
-        const info = new URL(str);
-        return `${info.protocol}//${info.hostname}`;
+        const info = new URL(str)
+        return `${info.protocol}//${info.hostname}`
     },
     credentials(str: string): Credentials {
-        const info = new URL(str);
+        const info = new URL(str)
 
         return {
             port: parseInt(info.port, 10) || 21,
             password: info.password,
             user: info.username,
-        };
+        }
     },
     displaypath(str: string): { shortPath: string; fullPath: string } {
-        const info = new URL(str);
-        const split = info.pathname.split('/');
+        const info = new URL(str)
+        const split = info.pathname.split('/')
         return {
             fullPath: str,
             shortPath: split.slice(-1)[0] || '/',
-        };
+        }
     },
     API: SimpleFtpApi,
-};
+}

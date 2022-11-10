@@ -1,50 +1,49 @@
-import * as React from 'react';
-import { observer } from 'mobx-react';
-import { observable, runInAction } from 'mobx';
-import { debounce } from '../utils/debounce';
-import { Intent, HotkeysTarget, Hotkeys, Hotkey, Classes, IHotkeysProps } from '@blueprintjs/core';
-import { WithNamespaces, withNamespaces } from 'react-i18next';
-import { shouldCatchEvent } from '../utils/dom';
-import classnames from 'classnames';
+import * as React from 'react'
+import { observable, runInAction } from 'mobx'
+import { debounce } from '../utils/debounce'
+import { Intent, HotkeysTarget2 } from '@blueprintjs/core'
+import { WithNamespaces, withNamespaces } from 'react-i18next'
+import { shouldCatchEvent } from '../utils/dom'
+import classnames from 'classnames'
 
-require('../css/log.css');
+require('../css/log.css')
 
 export interface JSObject extends Object {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    [key: string]: any;
+    [key: string]: any
 }
 
-type Printable = string | number | boolean | JSObject;
+type Printable = string | number | boolean | JSObject
 
 //
-const CLASS_OVERLAY_EXIT = 'bp3-overlay-exit';
+const CLASS_OVERLAY_EXIT = 'bp3-overlay-exit'
 
 function objectPropsToString(el: Printable): string {
     if ((typeof el).match(/number|string|boolean/)) {
-        return el.toString();
+        return el.toString()
     } else {
-        const obj = el as JSObject;
+        const obj = el as JSObject
         return Object.keys(el)
             .map((prop) => obj[prop])
-            .join(',');
+            .join(',')
     }
 }
 
 export const Logger = {
     logs: observable.array([]),
     log(...params: Printable[]): void {
-        pushLog(params, 'none');
+        pushLog(params, 'none')
     },
     warn(...params: Printable[]): void {
-        pushLog(params, 'warning');
+        pushLog(params, 'warning')
     },
     success(...params: Printable[]): void {
-        pushLog(params, 'success');
+        pushLog(params, 'success')
     },
     error(...params: Printable[]): void {
-        pushLog(params, 'danger');
+        pushLog(params, 'danger')
     },
-};
+}
 
 function pushLog(lines: Printable[], intent: Intent): void {
     // since this method may be called from a render
@@ -58,88 +57,71 @@ function pushLog(lines: Printable[], intent: Intent): void {
                 date: new Date(),
                 line: lines.map((line: Printable) => objectPropsToString(line)).join(' '),
                 intent: intent,
-            });
-        });
-    });
+            })
+        })
+    })
 }
 
 interface LogUIState {
-    visible: boolean;
+    visible: boolean
 }
 
-const ESCAPE_KEY = 27;
-const DEBOUNCE_DELAY = 500;
+const ESCAPE_KEY = 27
+const DEBOUNCE_DELAY = 500
 
-@HotkeysTarget
-@observer
 export class LogUIClass extends React.Component<WithNamespaces, LogUIState> {
-    private consoleDiv: HTMLDivElement;
-    private valid: boolean;
-    private lastScrollTop = 0;
-    private keepScrollPos = false;
+    private consoleDiv: HTMLDivElement
+    private valid: boolean
+    private lastScrollTop = 0
+    private keepScrollPos = false
     private checkScroll: (event: React.FormEvent<HTMLElement>) => void = debounce((): void => {
-        const scrollTop = this.consoleDiv.scrollTop;
+        const scrollTop = this.consoleDiv.scrollTop
         if (!scrollTop || scrollTop !== this.consoleDiv.scrollHeight - this.consoleDiv.clientHeight) {
-            this.keepScrollPos = true;
+            this.keepScrollPos = true
         } else {
-            this.keepScrollPos = false;
+            this.keepScrollPos = false
         }
 
         // if state was visible, first keep scroll position
-        this.lastScrollTop = scrollTop;
-    }, DEBOUNCE_DELAY);
+        this.lastScrollTop = scrollTop
+    }, DEBOUNCE_DELAY)
 
     constructor(props: WithNamespaces) {
-        super(props);
+        super(props)
         this.state = {
             visible: false,
-        };
+        }
     }
 
     onKeyUp = (e: KeyboardEvent): void => {
         if (e.keyCode === ESCAPE_KEY && this.valid) {
-            this.setState({ visible: !this.state.visible });
+            this.setState({ visible: !this.state.visible })
         }
-    };
+    }
 
     onKeyDown = (e: KeyboardEvent): void => {
         if (e.keyCode === ESCAPE_KEY && shouldCatchEvent(e)) {
-            this.valid = true;
+            this.valid = true
         } else {
-            this.valid = false;
+            this.valid = false
         }
-    };
+    }
 
     componentDidUpdate(): void {
         // console.timeEnd('Log Render');
         // here we keep previous scroll position in case scrolling was anywhere but at the end
         this.consoleDiv.scrollTop = this.keepScrollPos
             ? this.lastScrollTop
-            : this.consoleDiv.scrollHeight - this.consoleDiv.clientHeight;
+            : this.consoleDiv.scrollHeight - this.consoleDiv.clientHeight
     }
 
     toggleConsole = (event: KeyboardEvent): void => {
-        const element = event.target as HTMLElement;
+        const element = event.target as HTMLElement
 
         if (this.state.visible || !element.className.match(CLASS_OVERLAY_EXIT))
             this.setState({
                 visible: !this.state.visible,
-            });
-    };
-
-    renderHotkeys(): React.ReactElement<IHotkeysProps> {
-        const { t } = this.props;
-
-        return (
-            <Hotkeys>
-                <Hotkey
-                    global={true}
-                    combo="escape"
-                    label={t('SHORTCUT.LOG.TOGGLE')}
-                    onKeyDown={this.toggleConsole}
-                ></Hotkey>
-            </Hotkeys>
-        ) as React.ReactElement<IHotkeysProps>;
+            })
     }
 
     // shouldComponentUpdate() {
@@ -147,41 +129,52 @@ export class LogUIClass extends React.Component<WithNamespaces, LogUIState> {
     //     return true;
     // }
 
+    private hotkeys = [
+        {
+            global: true,
+            combo: 'escape',
+            label: this.props.t('SHORTCUT.LOG.TOGGLE'),
+            onKeyDown: this.toggleConsole,
+        },
+    ]
+
     public render(): React.ReactElement {
-        const classes = classnames('console', { visible: this.state.visible });
+        const classes = classnames('console', { visible: this.state.visible })
 
         return (
-            <div
-                ref={(el) => {
-                    this.consoleDiv = el;
-                }}
-                onScroll={this.checkScroll}
-                className={classes}
-            >
-                {Logger.logs.map((line, i) => {
-                    const lineClass = classnames('consoleLine', line.intent);
-                    return (
-                        <div key={i} className={lineClass}>
-                            {/* <span className="consoleDate">{line.date}</span> */}
-                            {line.line}
-                        </div>
-                    );
-                })}
-            </div>
-        );
+            <HotkeysTarget2 hotkeys={this.hotkeys}>
+                <div
+                    ref={(el) => {
+                        this.consoleDiv = el
+                    }}
+                    onScroll={this.checkScroll}
+                    className={classes}
+                >
+                    {Logger.logs.map((line, i) => {
+                        const lineClass = classnames('consoleLine', line.intent)
+                        return (
+                            <div key={i} className={lineClass}>
+                                {/* <span className="consoleDate">{line.date}</span> */}
+                                {line.line}
+                            </div>
+                        )
+                    })}
+                </div>
+            </HotkeysTarget2>
+        )
     }
 }
 
 export function log(target: any, key: string, descriptor: PropertyDescriptor): PropertyDescriptor {
-    const originalMethod = descriptor.value;
+    const originalMethod = descriptor.value
     descriptor.value = function (...args: any[]) {
-        console.log(`${key} was called with:`, ...args);
-        const result = originalMethod.apply(this, ...args);
-        return result;
-    };
-    return descriptor;
+        console.log(`${key} was called with:`, ...args)
+        const result = originalMethod.apply(this, ...args)
+        return result
+    }
+    return descriptor
 }
 
-const LogUI = withNamespaces()(LogUIClass);
+const LogUI = withNamespaces()(LogUIClass)
 
-export { LogUI };
+export { LogUI }

@@ -1,61 +1,61 @@
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
-import { Readable } from 'stream';
-import { isWin } from '../utils/platform';
+import { Readable } from 'stream'
+import { isWin } from '../utils/platform'
 
 // console.log('fslocal', FsLocal);
 
-const interfaces: Array<Fs> = [];
+const interfaces: Array<Fs> = []
 
 export interface Credentials {
-    user?: string;
-    password?: string;
-    port?: number;
+    user?: string
+    password?: string
+    port?: number
 }
 
 export function registerFs(fs: Fs): void {
     // console.log('Registering Fs', fs);
-    interfaces.push(fs);
+    interfaces.push(fs)
 }
 
 export interface FileID {
-    ino: number;
-    dev: number;
+    ino: number
+    dev: number
 }
 
 export interface File {
-    dir: string;
-    name: string;
-    fullname: string;
-    extension: string;
-    target: string;
-    cDate: Date;
-    mDate: Date;
-    bDate: Date;
-    length: number;
-    mode: number;
-    isDir: boolean;
-    readonly: boolean;
-    type: FileType;
-    isSym: boolean;
-    id: FileID;
+    dir: string
+    name: string
+    fullname: string
+    extension: string
+    target: string
+    cDate: Date
+    mDate: Date
+    bDate: Date
+    length: number
+    mode: number
+    isDir: boolean
+    readonly: boolean
+    type: FileType
+    isSym: boolean
+    id: FileID
 }
 
 export interface FsOptions {
-    needsRefresh: boolean;
+    needsRefresh: boolean
 }
 
 export interface Fs {
     // runtime api
-    API: new (path: string, onFsChange: (filename: string) => void) => FsApi;
+    API: new (path: string, onFsChange: (filename: string) => void) => FsApi
     // static members
-    canread(str: string): boolean;
-    serverpart(str: string): string;
-    credentials(str: string): Credentials;
-    displaypath(str: string): { fullPath: string; shortPath: string };
-    name: string;
-    description: string;
-    icon: string;
-    options: FsOptions;
+    canread(str: string): boolean
+    serverpart(str: string): string
+    credentials(str: string): Credentials
+    displaypath(str: string): { fullPath: string; shortPath: string }
+    name: string
+    description: string
+    icon: string
+    options: FsOptions
 }
 
 export const Extensions: { [index: string]: RegExp } = {
@@ -66,94 +66,110 @@ export const Extensions: { [index: string]: RegExp } = {
     vid: /\.([\.]*(webm|avi|mpeg|mpg|mp4|mov|mkv|qt|wmv|vob|ogb|m4v|m4p|asf|mts|m2ts|3gp|flv|anim))+$/,
     cod: /\.([\.]*(json|js|cpp|c|cxx|java|rb|s|tsx|ts|jsx|lua|as|coffee|ps1|py|r|rexx|spt|sptd|go|rs|sh|bash|vbs|cljs))+$/,
     doc: /\.([\.]*(log|last|css|htm|html|rtf|doc|pdf|docx|txt|md|1st|asc|epub|xhtml|xml|amigaguide|info))+$/,
-};
-export const ExeMaskAll = 0o0001;
-export const ExeMaskGroup = 0o0010;
-export const ExeMaskUser = 0o0100;
+}
+export const ExeMaskAll = 0o0001
+export const ExeMaskGroup = 0o0010
+export const ExeMaskUser = 0o0100
 
-export type FileType = 'exe' | 'img' | 'arc' | 'snd' | 'vid' | 'doc' | 'cod' | '';
+export type FileType = 'exe' | 'img' | 'arc' | 'snd' | 'vid' | 'doc' | 'cod' | ''
 
 export function MakeId(stats: { ino: number; dev: number }): FileID {
     return {
         ino: stats.ino,
         dev: stats.dev,
-    };
+    }
 }
 
 function isModeExe(mode: number, gid: number, uid: number): boolean {
     if (isWin || mode === -1) {
-        return false;
+        return false
     }
 
-    const isGroup = gid ? process.getgid && gid === process.getgid() : false;
-    const isUser = uid ? process.getuid && uid === process.getuid() : false;
+    const isGroup = gid ? process.getgid && gid === process.getgid() : false
+    const isUser = uid ? process.getuid && uid === process.getuid() : false
 
-    return !!(mode & ExeMaskAll || (mode & ExeMaskUser && isGroup) || (mode & ExeMaskGroup && isUser));
+    return !!(mode & ExeMaskAll || (mode & ExeMaskUser && isGroup) || (mode & ExeMaskGroup && isUser))
 }
 
 export function filetype(mode: number, gid: number, uid: number, extension: string): FileType {
     if (isModeExe(mode, gid, uid) || extension.match(Extensions.exe)) {
-        return 'exe';
+        return 'exe'
     } else if (extension.match(Extensions.img)) {
-        return 'img';
+        return 'img'
     } else if (extension.match(Extensions.arc)) {
-        return 'arc';
+        return 'arc'
     } else if (extension.match(Extensions.snd)) {
-        return 'snd';
+        return 'snd'
     } else if (extension.match(Extensions.vid)) {
-        return 'vid';
+        return 'vid'
     } else if (extension.match(Extensions.doc)) {
-        return 'doc';
+        return 'doc'
     } else if (extension.match(Extensions.cod)) {
-        return 'cod';
+        return 'cod'
     } else {
-        return '';
+        return ''
     }
 }
 
 export interface FsApi {
     // public API
     // async methods that may require server access
-    list(dir: string, watchDir?: boolean, transferId?: number): Promise<File[]>;
-    cd(path: string, transferId?: number): Promise<string>;
-    delete(parent: string, files: File[], transferId?: number): Promise<number>;
-    makedir(parent: string, name: string, transferId?: number): Promise<string>;
-    rename(parent: string, file: File, name: string, transferId?: number): Promise<string>;
-    stat(path: string, transferId?: number): Promise<File>;
-    isDir(path: string, transferId?: number): Promise<boolean>;
-    exists(path: string, transferId?: number): Promise<boolean>;
-    size(source: string, files: string[], transferId?: number): Promise<number>;
-    makeSymlink(targetPath: string, path: string, transferId?: number): Promise<boolean>;
-    getStream(path: string, file: string, transferId?: number): Promise<Readable>;
+    list(dir: string, watchDir?: boolean, transferId?: number): Promise<File[]>
+    cd(path: string, transferId?: number): Promise<string>
+    delete(parent: string, files: File[], transferId?: number): Promise<number>
+    makedir(parent: string, name: string, transferId?: number): Promise<string>
+    rename(parent: string, file: File, name: string, transferId?: number): Promise<string>
+    stat(path: string, transferId?: number): Promise<File>
+    isDir(path: string, transferId?: number): Promise<boolean>
+    exists(path: string, transferId?: number): Promise<boolean>
+    size(source: string, files: string[], transferId?: number): Promise<number>
+    makeSymlink(targetPath: string, path: string, transferId?: number): Promise<boolean>
+    getStream(path: string, file: string, transferId?: number): Promise<Readable>
     putStream(
         readStream: Readable,
         dstPath: string,
         progress: (bytesRead: number) => void,
         transferId?: number,
-    ): Promise<void>;
-    getParentTree(dir: string): Array<{ dir: string; fullname: string }>;
+    ): Promise<void>
+    getParentTree(dir: string): Array<{ dir: string; fullname: string }>
 
-    resolve(path: string): string;
-    sanityze(path: string): string;
-    join(...paths: string[]): string;
-    login(server?: string, credentials?: Credentials): Promise<void>;
-    isConnected(): boolean;
-    isDirectoryNameValid(dirName: string): boolean;
-    isRoot(path: string): boolean;
+    resolve(path: string): string
+    sanityze(path: string): string
+    join(...paths: string[]): string
+    login(server?: string, credentials?: Credentials): Promise<void>
+    isConnected(): boolean
+    isDirectoryNameValid(dirName: string): boolean
+    isRoot(path: string): boolean
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    on(event: string, cb: (data: any) => void): void;
-    off(): void;
-    loginOptions: Credentials;
+    on(event: string, cb: (data: any) => void): void
+    off(): void
+    loginOptions: Credentials
 }
 
 export function getFS(path: string): Fs {
-    const newfs = interfaces.find((filesystem) => filesystem.canread(path));
-    console.log('got FS', newfs);
+    const newfs = interfaces.find((filesystem) => filesystem.canread(path))
+    console.log('got FS', newfs)
     // if (!newfs) {
     //     newfs = FsGeneric;
     // }
 
-    return newfs;
+    return newfs
+}
+
+export const withConnection = (method: (...args: any[]) => any, waitForConnection: () => any, retries = 2) => {
+    const retry_fn = async (...args: any[]) => {
+        try {
+            await waitForConnection()
+        } catch (e) {
+            console.log('e')
+            debugger
+            retry_fn(...args)
+        }
+
+        return method(...args)
+    }
+
+    return retry_fn
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -161,27 +177,27 @@ export function needsConnection(target: any, key: any, descriptor: any) {
     // save a reference to the original method this way we keep the values currently in the
     // descriptor and don't overwrite what another decorator might have done to the descriptor.
     if (descriptor === undefined) {
-        descriptor = Object.getOwnPropertyDescriptor(target, key);
+        descriptor = Object.getOwnPropertyDescriptor(target, key)
     }
-    const originalMethod = descriptor.value;
+    const originalMethod = descriptor.value
 
     //editing the descriptor/value parameter
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     descriptor.value = async function decorator(...args: any) {
         try {
-            await this.waitForConnection();
+            await this.waitForConnection()
         } catch (err) {
-            console.log(err);
+            console.log(err)
             // TODO: do not recall decorator if no internet
-            debugger;
-            return decorator.apply(this, args);
+            debugger
+            return decorator.apply(this, args)
         }
 
-        return originalMethod.apply(this, args);
-    };
+        return originalMethod.apply(this, args)
+    }
 
     // return edited descriptor as opposed to overwriting the descriptor
-    return descriptor;
+    return descriptor
 }
 
 // in test environment, load the generic fs as first one
