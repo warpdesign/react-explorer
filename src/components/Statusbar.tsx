@@ -1,6 +1,7 @@
 import * as React from 'react'
 import { observer, inject } from 'mobx-react'
-import { InputGroup, ControlGroup, Button, Intent, Tooltip, IconName } from '@blueprintjs/core'
+import { InputGroup, ControlGroup, Button, Intent, IconName } from '@blueprintjs/core'
+import { Tooltip2 } from '@blueprintjs/popover2'
 import { AppState } from '../state/appState'
 import { AppToaster } from './AppToaster'
 import { withNamespaces, WithNamespaces } from 'react-i18next'
@@ -60,7 +61,7 @@ export const StatusbarClass = inject(
                 const { t } = this.props
 
                 const pasteButton = (
-                    <Tooltip content={t('STATUS.CPTOOLTIP', { count: numSelected })} disabled={disabled}>
+                    <Tooltip2 content={t('STATUS.CPTOOLTIP', { count: numSelected })} disabled={disabled}>
                         <Button
                             data-cy-paste-bt
                             disabled={disabled}
@@ -69,7 +70,7 @@ export const StatusbarClass = inject(
                             onClick={this.onClipboardCopy}
                             minimal={true}
                         />
-                    </Tooltip>
+                    </Tooltip2>
                 )
 
                 return (

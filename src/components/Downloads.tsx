@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { ITreeNode, Tree, Icon, Intent, Classes, IconName, ProgressBar } from '@blueprintjs/core'
+import { TreeNodeInfo, Tree, Icon, Intent, Classes, IconName, ProgressBar } from '@blueprintjs/core'
 import { AppState } from '../state/appState'
 import { inject } from 'mobx-react'
 import { Batch } from '../transfers/batch'
@@ -38,7 +38,7 @@ interface Expandables {
 }
 
 interface State {
-    nodes: ITreeNode[]
+    nodes: TreeNodeInfo[]
     expandedNodes: Expandables
 }
 
@@ -106,7 +106,7 @@ class DownloadsClass extends React.Component<Props, State> {
         this.unbindLanguageChange()
     }
 
-    private handleNodeCollapse = (node: ITreeNode): void => {
+    private handleNodeCollapse = (node: TreeNodeInfo): void => {
         const { expandedNodes } = this.state
         expandedNodes[node.id] = false
         node.isExpanded = false
@@ -114,7 +114,7 @@ class DownloadsClass extends React.Component<Props, State> {
         this.setState(this.state)
     }
 
-    private handleNodeExpand = (node: ITreeNode): void => {
+    private handleNodeExpand = (node: TreeNodeInfo): void => {
         const { expandedNodes } = this.state
         expandedNodes[node.id] = true
         node.isExpanded = true
@@ -146,7 +146,7 @@ class DownloadsClass extends React.Component<Props, State> {
         }
     }
 
-    onNodeDoubleClick = (node: ITreeNode, nodePath: number[]): void => {
+    onNodeDoubleClick = (node: TreeNodeInfo, nodePath: number[]): void => {
         // no first-level: this is a file
         if (nodePath.length > 1) {
             const transfer = (node.nodeData as NodeData).transferElement
@@ -157,7 +157,7 @@ class DownloadsClass extends React.Component<Props, State> {
         }
     }
 
-    onNodeClick = (node: ITreeNode, nodePath: number[]): void => {
+    onNodeClick = (node: TreeNodeInfo, nodePath: number[]): void => {
         // first-level node
         if (nodePath.length === 1) {
             const { expandedNodes } = this.state
@@ -261,14 +261,14 @@ class DownloadsClass extends React.Component<Props, State> {
         )
     }
 
-    getTreeData(transfers: Batch[]): ITreeNode[] {
-        const treeData: ITreeNode[] = []
+    getTreeData(transfers: Batch[]): TreeNodeInfo[] {
+        const treeData: TreeNodeInfo[] = []
 
         for (const transfer of transfers) {
             const intent = this.getIntent(transfer)
             const className = intentClass(intent)
             const sep = isWin ? '\\' : '/'
-            const node: ITreeNode = {
+            const node: TreeNodeInfo = {
                 id: transfer.id,
                 hasCaret: true,
                 icon: this.getTransferIcon(intent),
@@ -301,7 +301,6 @@ class DownloadsClass extends React.Component<Props, State> {
                         },
                     })
                     i++
-                    // <Icon className="action" onClick={() => this.onCloseClick(transfer.id, i)} intent="danger" icon="small-cross" /></span>
                 }
             }
 

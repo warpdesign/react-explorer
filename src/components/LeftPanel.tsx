@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { Tree, ITreeNode } from '@blueprintjs/core'
+import { Tree, TreeNodeInfo } from '@blueprintjs/core'
 import { observer, inject } from 'mobx-react'
 import { withNamespaces, WithNamespaces } from 'react-i18next'
 import classNames from 'classnames'
@@ -18,8 +18,8 @@ declare const ENV: { [key: string]: string | boolean | number | Record<string, u
 require('../css/favoritesPanel.css')
 
 interface LeftPanelState {
-    nodes: ITreeNode<string>[]
-    selectedNode: ITreeNode<string>
+    nodes: TreeNodeInfo<string>[]
+    selectedNode: TreeNodeInfo<string>
 }
 
 interface Props extends WithNamespaces {
@@ -147,9 +147,9 @@ export const LeftPanelClass = inject('appState')(
              *
              * @param path string attempts to find the first node with the given path
              *
-             * @returns ITreeNode<string> | null
+             * @returns TreeNodeInfo<string> | null
              */
-            getNodeFromPath(path: string): ITreeNode<string> {
+            getNodeFromPath(path: string): TreeNodeInfo<string> {
                 const { nodes } = this.state
                 const shortcuts = nodes[0].childNodes
                 const places = nodes[1].childNodes
@@ -211,7 +211,7 @@ export const LeftPanelClass = inject('appState')(
             }
 
             onNodeClick = async (
-                node: ITreeNode<string>,
+                node: TreeNodeInfo<string>,
                 _: number[],
                 e: React.MouseEvent<HTMLElement>,
             ): Promise<void> => {
@@ -224,7 +224,7 @@ export const LeftPanelClass = inject('appState')(
                 }
             }
 
-            onNodeToggle = (node: ITreeNode<string>): void => {
+            onNodeToggle = (node: TreeNodeInfo<string>): void => {
                 node.isExpanded = !node.isExpanded
                 this.setState(this.state)
             }
