@@ -1,21 +1,21 @@
-import * as React from 'react';
-import { Dialog, Classes, Button, KeyCombo } from '@blueprintjs/core';
-import { withNamespaces, WithNamespaces } from 'react-i18next';
-import { isMac } from '../../utils/platform';
-import CONFIG from '../../config/appConfig';
+import * as React from 'react'
+import { Dialog, Classes, Button, KeyCombo } from '@blueprintjs/core'
+import { withNamespaces, WithNamespaces } from 'react-i18next'
+import { isMac } from '../../utils/platform'
+import CONFIG from '../../config/appConfig'
 
 interface ShortcutsProps extends WithNamespaces {
-    isOpen: boolean;
-    onClose: () => void;
+    isOpen: boolean
+    onClose: () => void
 }
 
 class ShortcutsDialogClass extends React.Component<ShortcutsProps> {
     constructor(props: ShortcutsProps) {
-        super(props);
+        super(props)
     }
 
     buildList(): Array<Array<{ combo: string; label: string }>> {
-        const { t } = this.props;
+        const { t } = this.props
 
         return [
             // group: t('SHORTCUT.GROUP.GLOBAL'),
@@ -57,16 +57,16 @@ class ShortcutsDialogClass extends React.Component<ShortcutsProps> {
                 { combo: 'mod + t', label: t('APP_MENUS.NEW_TAB') },
                 { combo: 'mod + w', label: t('SHORTCUT.TABS.CLOSE_ACTIVE_TAB') },
             ],
-        ];
+        ]
     }
 
     private onClose = (): void => {
-        this.props.onClose();
-    };
+        this.props.onClose()
+    }
 
     public render(): React.ReactNode {
-        const { t } = this.props;
-        const shortcuts = this.buildList();
+        const { t } = this.props
+        const shortcuts = this.buildList()
 
         return (
             <Dialog
@@ -81,7 +81,7 @@ class ShortcutsDialogClass extends React.Component<ShortcutsProps> {
                 className="shortcutsDialog"
             >
                 <div className={`${Classes.DIALOG_BODY}`}>
-                    <div className={`bp3-hotkey-column ${CONFIG.CUSTOM_SCROLLBAR_CLASSNAME}`}>
+                    <div className={`${Classes.HOTKEY_COLUMN} ${CONFIG.CUSTOM_SCROLLBAR_CLASSNAME}`}>
                         <h4 className={Classes.HEADING}>{t('SHORTCUT.GROUP.GLOBAL')}</h4>
                         {shortcuts[0].map((shortcut) => (
                             <div key={shortcut.combo} className={Classes.HOTKEY}>
@@ -113,10 +113,10 @@ class ShortcutsDialogClass extends React.Component<ShortcutsProps> {
                     </div>
                 </div>
             </Dialog>
-        );
+        )
     }
 }
 
-const ShortcutsDialog = withNamespaces()(ShortcutsDialogClass);
+const ShortcutsDialog = withNamespaces()(ShortcutsDialogClass)
 
-export { ShortcutsDialog };
+export { ShortcutsDialog }

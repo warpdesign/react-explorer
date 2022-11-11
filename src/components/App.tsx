@@ -335,12 +335,10 @@ const App = inject('settingsState')(
 
             setDarkThemeClass(): void {
                 const { settingsState } = this.injected
-                // FIXME: we have to add bp4-dark class as well because new Popover2 has bp4 prefix
-                // This hopefully can be removed once we upgrade to blueprint v4
                 if (settingsState.isDarkModeActive) {
-                    document.body.classList.add(Classes.DARK, 'bp4-dark')
+                    document.body.classList.add(Classes.DARK)
                 } else {
-                    document.body.classList.remove(Classes.DARK, 'bp4-dark')
+                    document.body.classList.remove(Classes.DARK)
                 }
             }
 

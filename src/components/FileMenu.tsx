@@ -8,6 +8,7 @@ import { withNamespaces, WithNamespaces } from 'react-i18next'
 interface FileMenuProps extends WithNamespaces {
     onFileAction: (action: string) => void
     selectedItems: File[]
+    isDisabled: boolean
 }
 
 interface InjectedProps extends FileMenuProps {
@@ -40,18 +41,23 @@ export const FileMenuClass = inject('appState')(
             public render(): React.ReactNode {
                 const { appState } = this.injected
                 const clipboardLength = appState.clipboard.files.length
-                const { selectedItems, t } = this.props
+                const { selectedItems, t, isDisabled } = this.props
 
                 return (
                     <React.Fragment>
                         <Menu>
-                            <MenuItem text={t('COMMON.MAKEDIR')} icon="folder-new" onClick={this.onNewfolder} />
+                            <MenuItem
+                                disabled={isDisabled}
+                                text={t('COMMON.MAKEDIR')}
+                                icon="folder-new"
+                                onClick={this.onNewfolder}
+                            />
                             <MenuDivider />
                             <MenuItem
                                 text={t('FILEMENU.PASTE', { count: clipboardLength })}
                                 icon="duplicate"
                                 onClick={this.onPaste}
-                                disabled={!clipboardLength}
+                                disabled={!clipboardLength || isDisabled}
                             />
                             <MenuDivider />
                             <MenuItem
@@ -59,7 +65,7 @@ export const FileMenuClass = inject('appState')(
                                 onClick={this.onDelete}
                                 intent={(selectedItems.length && 'danger') || 'none'}
                                 icon="delete"
-                                disabled={!selectedItems.length}
+                                disabled={!selectedItems.length || isDisabled}
                             />
                         </Menu>
                     </React.Fragment>

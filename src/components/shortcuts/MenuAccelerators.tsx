@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { withNamespaces, WithNamespaces } from 'react-i18next'
-import { Intent } from '@blueprintjs/core'
+import { Classes, Intent } from '@blueprintjs/core'
 import { inject } from 'mobx-react'
 import { WithMenuAccelerators, Accelerators, Accelerator } from '../WithMenuAccelerators'
 import { isMac } from '../../utils/platform'
@@ -112,7 +112,7 @@ class MenuAcceleratorsClass extends React.Component<Props> {
             return
         }
 
-        const isOverlayOpen = document.body.classList.contains('bp3-overlay-open')
+        const isOverlayOpen = document.body.classList.contains(Classes.OVERLAY_OPEN)
 
         if (cache && !isOverlayOpen && !isEditable(document.activeElement)) {
             const resolvedPath = cache.getAPI().resolve(cache.path)

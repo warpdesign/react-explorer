@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { IconName, Icon, HotkeysTarget2 } from '@blueprintjs/core'
+import { IconName, Icon, HotkeysTarget2, Classes } from '@blueprintjs/core'
 import {
     Column,
     Table,
@@ -328,7 +328,7 @@ export class FileTableClass extends React.Component<Props, State> {
         return (
             <div className="name">
                 <Icon icon={icon}></Icon>
-                <span title={title} className="file-label">
+                <span title={title} className="file-label" spellCheck="false">
                     {data.cellData}
                 </span>
             </div>
@@ -630,7 +630,7 @@ export class FileTableClass extends React.Component<Props, State> {
     }
 
     onSelectAll = (): void => {
-        const isOverlayOpen = document.body.classList.contains('bp3-overlay-open')
+        const isOverlayOpen = document.body.classList.contains(Classes.OVERLAY_OPEN)
         if (!isOverlayOpen && !isEditable(document.activeElement)) {
             this.selectAll()
         } else {
@@ -875,7 +875,7 @@ export class FileTableClass extends React.Component<Props, State> {
                                     columnData={{ index: 0, sortMethod: 'name' }}
                                 />
                                 <Column
-                                    className="size bp3-text-small"
+                                    className={`size ${Classes.TEXT_SMALL}`}
                                     width={SIZE_COLUMN_WITDH}
                                     label={t('FILETABLE.COL_SIZE')}
                                     headerRenderer={this.headerRenderer}

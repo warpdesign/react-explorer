@@ -23,8 +23,8 @@ export class Badge extends React.Component<Props> {
 
         if (text) {
             return (
-                <div className={`bp3-badge bp3-intent-${intent}`}>
-                    <span className="bp3-badge-content">{text}</span>
+                <div className={`app-badge bp4-intent-${intent}`}>
+                    <span className="app-badge-content">{text}</span>
                     <Spinner size={20} value={progress}></Spinner>
                 </div>
             )

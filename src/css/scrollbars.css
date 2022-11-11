@@ -21,8 +21,8 @@
     overflow: overlay;
 }
 
-.bp3-dark.win32 .custom-scrollbar::-webkit-scrollbar-thumb,
-.bp3-dark.linux .custom-scrollbar::-webkit-scrollbar-thumb {
+.bp4-dark.win32 .custom-scrollbar::-webkit-scrollbar-thumb,
+.bp4-dark.linux .custom-scrollbar::-webkit-scrollbar-thumb {
     background: rgba(0, 0, 0, .6);
     border: 1px solid rgba(255, 255, 255, .2);
 }
