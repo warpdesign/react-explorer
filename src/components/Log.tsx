@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { observable, runInAction } from 'mobx'
 import { debounce } from '../utils/debounce'
-import { Intent, HotkeysTarget2 } from '@blueprintjs/core'
+import { Intent, HotkeysTarget2, Classes } from '@blueprintjs/core'
 import { WithNamespaces, withNamespaces } from 'react-i18next'
 import { shouldCatchEvent } from '../utils/dom'
 import classnames from 'classnames'
@@ -15,7 +15,7 @@ export interface JSObject extends Object {
 
 type Printable = string | number | boolean | JSObject
 
-//
+// FIXME: is it still needed/working?
 const CLASS_OVERLAY_EXIT = 'bp3-overlay-exit'
 
 function objectPropsToString(el: Printable): string {

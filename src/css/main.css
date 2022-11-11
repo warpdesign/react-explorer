@@ -5,12 +5,12 @@ body{
     user-select: none;
 }
 
-body.bp3-dark {
+body.bp4-dark {
     background-color: #293742;
     color: #f5f8fa;
 }
 
-button.small.bp3-minimal{
+button.small.bp4-minimal{
     transform:scale(.8);
     opacity:.6;
 }
@@ -19,11 +19,11 @@ button.small:hover{
     opacity:1;
 }
 
-.bp3-tree-node-caret-none{
+.bp4-tree-node-caret-none{
     min-width:10px;
 }
 
-.bp3-control-group.toolbar{
+.bp4-control-group.toolbar{
     z-index:1;
 }
 
@@ -41,13 +41,13 @@ button.small:hover{
     flex-grow:1;
 }
 
-.sideview > .bp3-control-group{
+.sideview > .bp4-control-group{
     flex-shrink:0;
     -webkit-user-select: none;
 }
 
-.sideview > .bp3-control-group > :first-child,
-.sideview > .bp3-control-group > :last-child {
+.sideview > .bp4-control-group > :first-child,
+.sideview > .bp4-control-group > :last-child {
     border-radius:0;
 }
 
@@ -132,16 +132,16 @@ button.small:hover{
 }
 
 /* dark theme */
-.bp3-dark #root .singleView .sideview {
+.bp4-dark #root .singleView .sideview {
     border-left: 1px solid rgb(14,25,34);
 }
 
-.bp3-dark #root .sideview,
-.bp3-dark #root .dualView #view_1.inactive {
+.bp4-dark #root .sideview,
+.bp4-dark #root .dualView #view_1.inactive {
     border-color: rgb(14,25,34);
 }
 
-.bp3-dark #root .dualView .sideview.inactive:before {
+.bp4-dark #root .dualView .sideview.inactive:before {
     border-color: rgb(73, 75, 76);
 }
 
@@ -165,19 +165,19 @@ button.small:hover{
     margin-right:0;
 }
 
-.bp3-input-group{
+.bp4-input-group{
     flex-grow:1;
 }
 
-.bp3-popover-wrapper{
+.bp4-popover-wrapper{
     flex-grow:1;
 }
 
-.bp3-popover-wrapper .bp3-popover-target{
+.bp4-popover-wrapper .bp4-popover-target{
     width:100%;
 }
 
-.bp3-navbar .title-group .bp3-intent-primary{
+.bp4-navbar .title-group .bp4-intent-primary{
     pointer-events:none;
 }
 
@@ -194,7 +194,7 @@ button.small:hover{
     align-self: center;
 }
 
-.downloads.empty .bp3-icon{
+.downloads.empty .bp4-icon{
     padding: 20px 12px;
     border: 3px dashed #d9dde0;
     border-radius:8px;
@@ -202,54 +202,54 @@ button.small:hover{
     text-align:center;
 }
 
-.downloads.empty .bp3-icon svg{
+.downloads.empty .bp4-icon svg{
     display:inline;
 }
 
-.downloads .bp3-tree-node-content .action{
+.downloads .bp4-tree-node-content .action{
     vertical-align:text-bottom;
     opacity: .5;
     cursor:pointer;    
 }
 
-.downloads .bp3-tree-node-content:hover .action{
+.downloads .bp4-tree-node-content:hover .action{
     opacity: 1;
 }
 
 /* line height bug ? */
-.bp3-tree-node-caret > span{
+.bp4-tree-node-caret > span{
     vertical-align:top;
 }
 
-#root .bp3-navbar {
+#root .bp4-navbar {
     border-bottom: 1px solid rgb(189, 195, 199);
     background: rgb(246,246,246);
     background: linear-gradient(180deg, rgba(246,246,246,1) 16%, rgba(230,236,239,1) 100%);
     box-shadow:none;
 }
 
-.bp3-dark #root .bp3-navbar {
+.bp4-dark #root .bp4-navbar {
     border-bottom: 1px solid rgb(14,25,34);
     background: rgb(46,46,46);
     background: linear-gradient(180deg, rgba(56,56,56,1) 16%, rgba(40,56,69,1) 100%);
 }
 
-.bp3-navbar .download .bp3-button-text{
+.bp4-navbar .download .bp4-button-text{
     display: flex;
     align-items: center;
 }
 
-.bp3-badge{
+.app-badge{
     display: inline-block;
     margin-left: 10px;
     position: relative;
 }
 
-.bp3-badge .bp3-spinner svg {
+.app-badge .bp4-spinner svg {
     stroke-width: 10;
 }
 
-.bp3-badge-content{
+.app-badge-content{
     position: absolute;
     left: 0;
     color: #106ba3;
@@ -260,47 +260,48 @@ button.small:hover{
     text-align: center;
 }
 
-.bp3-dark .bp3-badge-content {
+.bp4-dark .app-badge-content {
     color: #48aff0;
 }
 
-.bp3-badge .bp3-spinner{
+.app-badge .bp4-spinner{
     display:inline-block;
 }
 
-.bp3-badge.bp3-intent-success{
+.app-badge.bp4-intent-success{
     background-color:#0d8050;
 }
 
-.bp3-badge.bp3-intent-danger{
+.app-badge.bp4-intent-danger{
     background-color:#c23030;
 }
 
-.bp3-badge.bp3-intent-primary{
+.app-badge.bp4-intent-primary{
     background-color:#106ba3;
 }
 
-.bp3-badge.bp3-intent-warning{
+.app-badge.bp4-intent-warning{
     background-color:#bf7326;
 }
 
-.bp3-dark .bp3-badge.bp3-intent-success{
+.bp4-dark .app-badge.bp4-intent-success{
     background-color:#0f9960;
 }
 
-.bp3-dark .bp3-badge.bp3-intent-danger{
+.bp4-dark .app-badge.bp4-intent-danger{
     background-color:#db3737;
 }
 
-.bp3-dark .bp3-badge.bp3-intent-primary{
+.bp4-dark .app-badge.bp4-intent-primary{
     background-color:#137cbd;
 }
 
-.bp3-dark .bp3-badge.bp3-intent-warning{
+.bp4-dark .app-badge.bp4-intent-warning{
     background-color:#d9822b;
 }
 
-.bp3-loader{
+/* app loader */
+.app-loader{
     opacity:0;
     pointer-events:none;
     position:absolute;
@@ -311,17 +312,17 @@ button.small:hover{
     display:flex;
 }
 
-.bp3-loader.active{
+.app-loader.active{
     opacity:1;
     pointer-events:all;
     background-color: rgba(255,255,255,.3);
 }
 
-body.bp3-dark .bp3-loader.active{
+body.bp4-dark .app-loader.active{
     background-color:rgba(41, 55, 66, 0.9);
 }
 
-.bp3-loader .bp3-spinner{
+.app-loader .bp4-spinner{
     flex-grow:1;
     opacity:0;
     transition-property:opacity;
@@ -329,18 +330,18 @@ body.bp3-dark .bp3-loader.active{
     transition-duration:200ms;
 }
 
-.bp3-loader.active .bp3-spinner{
+.app-loader.active .bp4-spinner{
     opacity:1;
 }
 
 /* properly align labels inside every dialog */
-.bp3-dialog-body label.bp3-label {
+.bp4-dialog-body label.bp4-label {
     width: 28%;
     text-align: right;
 }
 
 /* special case for makedir: we want to see the dialog */
-.makedirDialog label.bp3-label{
+.makedirDialog label.bp4-label{
     width:auto;
 }
 
@@ -359,20 +360,20 @@ body.bp3-dark .bp3-loader.active{
 }
 
 /* FIXME: we only used disable state to use the styles associated with disabled state */
-.status-bar .bp3-input:disabled,
-.status-bar .bp3-input.bp3-disabled,
-.status-bar .bp3-button.bp3-disabled,
-.status-bar button.bp3-minimal.bp3-disabled,
-.status-bar button.bp3-minimal.bp3-disabled:hover,
-.status-bar.bp3-input-group.bp3-disabled {
+.status-bar .bp4-input:disabled,
+.status-bar .bp4-input.bp4-disabled,
+.status-bar .bp4-button.bp4-disabled,
+.status-bar button.bp4-minimal.bp4-disabled,
+.status-bar button.bp4-minimal.bp4-disabled:hover,
+.status-bar.bp4-input-group.bp4-disabled {
     cursor:default;
 }
 
-.bp3-dark .status-bar {
+.bp4-dark .status-bar {
     border-top: 1px solid rgb(14,25,34);
 }
 
-.status-bar.offline > .bp3-icon:after{
+.status-bar.offline > .bp4-icon:after{
     border-bottom: 1px solid rgba(255,0,0,.6);
     content: "";
     width: 100%;
@@ -392,11 +393,11 @@ body.bp3-dark .bp3-loader.active{
     cursor:default;
 }
 
-.tablist .bp3-button.tab > * {
+.tablist .bp4-button.tab > * {
     margin-right:0;
 }
 
-.tablist .bp3-button .bp3-icon.folder{
+.tablist .bp4-button .bp4-icon.folder{
     padding: 0 10px;
     margin:0;
     opacity:.9;
@@ -414,50 +415,50 @@ body.bp3-dark .bp3-loader.active{
     opacity:0;
 }
 
-.tablist .bp3-button:hover .closetab{
+.tablist .bp4-button:hover .closetab{
     opacity:1;
 }
 
-.tablist .addtab:hover, .bp3-dark .bp3-button.addtab:hover{
+.tablist .addtab:hover, .bp4-dark .bp4-button.addtab:hover{
     background:transparent;
 }
 
-.tablist.bp3-button-group.bp3-fill .bp3-button:not(.bp3-fixed) {
+.tablist.bp4-button-group.bp4-fill .bp4-button:not(.bp4-fixed) {
     width:13rem;
     flex-grow:0;
 }
 
-.tablist.bp3-button-group.bp3-fill .addtab:not(.bp3-fixed){
+.tablist.bp4-button-group.bp4-fill .addtab:not(.bp4-fixed){
     width:auto;
     flex-grow:0;
 }
 
-.tablist .bp3-button .bp3-button-text{
+.tablist .bp4-button .bp4-button-text{
     flex-grow: 1;
     text-align: center;
 }
 
-.sideview:not(.active) .tablist .bp3-intent-primary{
+.sideview:not(.active) .tablist .bp4-intent-primary{
     background-color: #8A9BA8;
 }
 
-.bp3-dark .sideview:not(.active) .tablist .bp3-intent-primary{
+.bp4-dark .sideview:not(.active) .tablist .bp4-intent-primary{
     background-color: rgb(88, 100, 109);
 }
 
-.sideview > .toolbar > .bp3-button-group > .bp3-button:not([class*="bp3-intent-"]) {
+.sideview > .toolbar > .bp4-button-group > .bp4-button:not([class*="bp4-intent-"]) {
     box-shadow: inset 0 0 0 1px rgba(16, 22, 26, 0.2), inset 0 -1px 0 rgba(16, 22, 26, 0.1);
 }
 
-.sideview > .toolbar > .bp3-button-group > .bp3-button:first-child:not([class*="bp3-intent-"]) {
+.sideview > .toolbar > .bp4-button-group > .bp4-button:first-child:not([class*="bp4-intent-"]) {
     margin-left:-1px;
 }
 
-.sideview > .toolbar > .bp3-button-group > .bp3-button:last-child:not([class*="bp3-intent-"]) {
+.sideview > .toolbar > .bp4-button-group > .bp4-button:last-child:not([class*="bp4-intent-"]) {
     box-shadow:inset 0 -1px 0 rgba(16, 22, 26, 0.1);
 }
 
-.tablist .bp3-button .bp3-button-text{
+.tablist .bp4-button .bp4-button-text{
     overflow:hidden;
     white-space: nowrap;
     text-overflow:ellipsis;
@@ -475,44 +476,44 @@ body.bp3-dark .bp3-loader.active{
 }
 
 /* intent colors on any span */
-span.bp3-intent-success{
+span.bp4-intent-success{
     color:#0d8050;
 }
 
-span.bp3-intent-danger{
+span.bp4-intent-danger{
     color:#c23030;
 }
 
-span.bp3-intent-primary{
+span.bp4-intent-primary{
     color:#106ba3;
 }
 
-span.bp3-intent-warning{
+span.bp4-intent-warning{
     color:#bf7326;
 }
 
-.bp3-dark span.bp3-intent-success{
+.bp4-dark span.bp4-intent-success{
     color:#0f9960;
 }
 
-.bp3-dark span.bp3-intent-danger{
+.bp4-dark span.bp4-intent-danger{
     color:#db3737;
 }
 
-.bp3-dark span.bp3-intent-primary{
+.bp4-dark span.bp4-intent-primary{
     color:#137cbd;
 }
 
-.bp3-dark span.bp3-intent-warning{
+.bp4-dark span.bp4-intent-warning{
     color:#d9822b;
 }
 
 /* patch for linux/win dialogs that may show scrollbar */
-.bp3-overlay-inline .bp3-overlay-content,
-.bp3-overlay-scroll-container .bp3-overlay-content{
+.bp4-overlay-inline .bp4-overlay-content,
+.bp4-overlay-scroll-container .bp4-overlay-content{
     max-height:100%;
 }
 
-.bp3-portal .bp3-overlay.bp3-overlay-scroll-container{
+.bp4-portal .bp4-overlay.bp4-overlay-scroll-container{
     overflow:hidden;
 }

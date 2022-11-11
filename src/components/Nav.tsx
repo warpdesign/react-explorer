@@ -1,6 +1,8 @@
 import * as React from 'react'
 import { inject, observer } from 'mobx-react'
-import { Navbar, Popover, Alignment, Button, Classes, Intent } from '@blueprintjs/core'
+import { Navbar, Alignment, Button, Classes, Intent } from '@blueprintjs/core'
+import { IconNames } from '@blueprintjs/icons'
+import { Popover2 } from '@blueprintjs/popover2'
 import classnames from 'classnames'
 import { withNamespaces, WithNamespaces } from 'react-i18next'
 import { HamburgerMenu } from './HamburgerMenu'
@@ -62,7 +64,7 @@ const NavComponent = inject('appState')(
                 const { t } = this.props
                 const isExplorer = this.appState.isExplorer
                 const count = this.appState.pendingTransfers
-                const badgeText = (count && count + '') || ''
+                const badgeText = (count && count + '') || '10'
                 const badgeProgress = this.appState.totalTransferProgress
                 const downloadClass = classnames(Classes.MINIMAL, 'download')
                 const isSplitViewActive = this.appState.winStates[0].splitView
@@ -98,11 +100,11 @@ const NavComponent = inject('appState')(
                                 active={isSplitViewActive}
                                 intent={(isSplitViewActive && 'primary') || 'none'}
                                 onClick={this.onToggleSplitView}
-                                icon="segmented-control"
+                                icon={IconNames.PANEL_STATS}
                                 title={t('NAV.SPLITVIEW')}
                             />
                             <Navbar.Divider />
-                            <Popover
+                            <Popover2
                                 content={
                                     <HamburgerMenu
                                         onOpenShortcuts={this.onOpenShortcuts}
@@ -111,7 +113,7 @@ const NavComponent = inject('appState')(
                                 }
                             >
                                 <Button className={`data-cy-toggle-app-menu ${Classes.MINIMAL}`} icon="menu" />
-                            </Popover>
+                            </Popover2>
                         </Navbar.Group>
                     </Navbar>
                 )

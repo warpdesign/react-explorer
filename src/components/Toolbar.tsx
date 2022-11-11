@@ -404,7 +404,6 @@ export const ToolbarClass = inject(
 
                     const canGoBackward = current > 0
                     const canGoForward = history.length > 1 && current < history.length - 1
-                    // const loadingSpinner = false ? <Spinner size={Icon.SIZE_STANDARD} /> : undefined;
                     const reloadButton = (
                         <Button
                             className="small data-cy-reload"
@@ -417,7 +416,7 @@ export const ToolbarClass = inject(
                     const count = selected.length
 
                     const isRoot = fileCache.isRoot()
-
+                    console.log(fileCache)
                     return (
                         <HotkeysTarget2 hotkeys={this.hotkeys}>
                             <ControlGroup className="toolbar">
@@ -444,9 +443,15 @@ export const ToolbarClass = inject(
                                     ></Button>
 
                                     <Popover2
-                                        content={<FileMenu selectedItems={selected} onFileAction={this.onFileAction} />}
+                                        content={
+                                            <FileMenu
+                                                isDisabled={!fileCache || fileCache.error}
+                                                selectedItems={selected}
+                                                onFileAction={this.onFileAction}
+                                            />
+                                        }
                                     >
-                                        <Button rightIcon="caret-down" icon="cog" text="" />
+                                        <Button rightIcon="caret-down" icon="cog" />
                                     </Popover2>
                                 </ButtonGroup>
                                 <Tooltip2

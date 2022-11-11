@@ -68,7 +68,7 @@ export class FavoritesState {
                 const favorite: Favorite = {
                     label: label || path,
                     path: path,
-                    icon: drive.isRemovable || drive.isVirtual ? IconNames.FLOPPY_DISK : IconNames.DATABASE,
+                    icon: drive.isRemovable || drive.isVirtual ? IconNames.EJECT : IconNames.DATABASE,
                 }
                 elements.push(favorite)
             }
