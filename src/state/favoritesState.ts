@@ -12,7 +12,7 @@ export interface Favorite {
     label: string
     path: string
     icon?: IconName
-    isReadOnly?: boolean
+    isReadOnly: boolean
     isRemovable?: boolean
     isVirtual?: boolean
     hasINotify?: boolean
@@ -30,6 +30,7 @@ export class FavoritesState {
                 label: dir[0],
                 path: dir[1],
                 icon: IconNames.DATABASE,
+                isReadOnly: false,
             })),
         )
     }
@@ -47,6 +48,7 @@ export class FavoritesState {
                     path: `${WSL_PREFIX}${name}\\`,
                     icon: IconNames.SOCIAL_MEDIA,
                     hasINotify,
+                    isReadOnly: true,
                 })),
             ),
         )
@@ -68,7 +70,8 @@ export class FavoritesState {
                 const favorite: Favorite = {
                     label: label || path,
                     path: path,
-                    icon: drive.isRemovable || drive.isVirtual ? IconNames.EJECT : IconNames.DATABASE,
+                    icon: drive.isRemovable || drive.isVirtual ? IconNames.FLOPPY_DISK : IconNames.DATABASE,
+                    isReadOnly: drive.isReadOnly,
                 }
                 elements.push(favorite)
             }
