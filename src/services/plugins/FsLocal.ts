@@ -1,131 +1,130 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { FsApi, File, Credentials, Fs, filetype, MakeId } from '../Fs';
-import * as fs from 'fs';
-import * as path from 'path';
-import mkdir = require('mkdirp');
-import del = require('del');
-import { size } from '../../utils/size';
-import { throttle } from '../../utils/throttle';
-import { Transform, TransformCallback } from 'stream';
-import { isWin, HOME_DIR } from '../../utils/platform';
-import { LocalWatch } from './LocalWatch';
+import { FsApi, File, Credentials, Fs, filetype, MakeId } from '../Fs'
+import * as fs from 'fs'
+import * as path from 'path'
+import mkdir = require('mkdirp')
+import del = require('del')
+import { size } from '../../utils/size'
+import { throttle } from '../../utils/throttle'
+import { Transform, TransformCallback } from 'stream'
+import { isWin, HOME_DIR } from '../../utils/platform'
+import { LocalWatch } from './LocalWatch'
 
-const invalidDirChars = (isWin && /[\*:<>\?|"]+/gi) || /^[\.]+[\/]+(.)*$/gi;
-const invalidFileChars = (isWin && /[\*:<>\?|"]+/gi) || /\//;
-const SEP = path.sep;
+const invalidDirChars = (isWin && /[\*:<>\?|"]+/gi) || /^[\.]+[\/]+(.)*$/gi
+const invalidFileChars = (isWin && /[\*:<>\?|"]+/gi) || /\//
+const SEP = path.sep
 
 // Since nodeJS will translate unix like paths to windows path, when running under Windows
 // we accept Windows style paths (eg. C:\foo...) and unix paths (eg. /foo or ./foo)
-const localStart = (isWin && /^(([a-zA-Z]\:)|([\.]*\/|\.)|(\\\\)|~)/) || /^([\.]*\/|\.|~)/;
-const isRoot = (isWin && /((([a-zA-Z]\:)(\\)*)|(\\\\))$/) || /^\/$/;
+const localStart = (isWin && /^(([a-zA-Z]\:)|([\.]*\/|\.)|(\\\\)|~)/) || /^([\.]*\/|\.|~)/
+const isRoot = (isWin && /((([a-zA-Z]\:)(\\)*)|(\\\\))$/) || /^\/$/
 
 const progressFunc = throttle((progress: (pourcent: number) => void, bytesRead: number) => {
-    progress(bytesRead);
-}, 400);
+    progress(bytesRead)
+}, 400)
 
 export class LocalApi implements FsApi {
-    type = 0;
+    type = 0
     // current path
-    path: string;
-    loginOptions: Credentials = null;
-    onFsChange: (filename: string) => void;
+    path: string
+    loginOptions: Credentials = null
+    onFsChange: (filename: string) => void
 
     constructor(_: string, onFsChange: (filename: string) => void) {
-        this.path = '';
-        this.onFsChange = onFsChange;
+        this.path = ''
+        this.onFsChange = onFsChange
     }
 
     // local fs doesn't require login
     isConnected(): boolean {
-        return true;
+        return true
     }
 
     isDirectoryNameValid(dirName: string): boolean {
-        return !!!dirName.match(invalidDirChars) && dirName !== '/';
+        return !!!dirName.match(invalidDirChars) && dirName !== '/'
     }
 
     join(...paths: string[]): string {
-        return path.join(...paths);
+        return path.join(...paths)
     }
 
     resolve(newPath: string): string {
         // gh#44: replace ~ with userpath
-        const dir = newPath.replace(/^~/, HOME_DIR);
-        return path.resolve(dir);
+        const dir = newPath.replace(/^~/, HOME_DIR)
+        return path.resolve(dir)
     }
 
     cd(path: string, transferId = -1): Promise<string> {
-        const resolvedPath = this.resolve(path);
+        const resolvedPath = this.resolve(path)
         return this.isDir(resolvedPath)
             .then((isDir: boolean) => {
                 if (isDir) {
-                    return resolvedPath;
+                    return resolvedPath
                 } else {
-                    throw { code: 'ENOTDIR' };
+                    throw { code: 'ENOTDIR' }
                 }
             })
             .catch((err) => {
-                return Promise.reject(err);
-            });
+                return Promise.reject(err)
+            })
     }
 
     size(source: string, files: string[], transferId = -1): Promise<number> {
         return new Promise(async (resolve, reject) => {
             try {
-                let bytes = 0;
+                let bytes = 0
                 for (const file of files) {
-                    bytes += await size(path.join(source, file));
+                    bytes += await size(path.join(source, file))
                 }
-                resolve(bytes);
+                resolve(bytes)
             } catch (err) {
-                reject(err);
+                reject(err)
             }
-        });
+        })
     }
 
     async makedir(source: string, dirName: string, transferId = -1): Promise<string> {
         return new Promise((resolve, reject) => {
-            console.log('makedir, source:', source, 'dirName:', dirName);
-            const unixPath = path.join(source, dirName).replace(/\\/g, '/');
-            console.log('unixPath', unixPath);
+            console.log('makedir, source:', source, 'dirName:', dirName)
+            const unixPath = path.join(source, dirName).replace(/\\/g, '/')
+            console.log('unixPath', unixPath)
             try {
-                console.log('calling mkdir');
+                console.log('calling mkdir')
                 mkdir(unixPath, (err: NodeJS.ErrnoException) => {
                     if (err) {
-                        console.log('error creating dir', err);
-                        reject(err);
+                        console.log('error creating dir', err)
+                        reject(err)
                     } else {
-                        console.log('successfully created dir', err);
-                        resolve(path.join(source, dirName));
+                        console.log('successfully created dir', err)
+                        resolve(path.join(source, dirName))
                     }
-                });
+                })
             } catch (err) {
-                console.log('error execing mkdir()', err);
-                reject(err);
+                console.log('error execing mkdir()', err)
+                reject(err)
             }
-        });
+        })
     }
 
     delete(source: string, files: File[], transferId = -1): Promise<number> {
-        const toDelete = files.map((file) => path.join(source, file.fullname));
+        const toDelete = files.map((file) => path.join(source, file.fullname))
 
         return new Promise(async (resolve, reject) => {
             try {
                 const deleted = await del(toDelete, {
                     force: true,
                     noGlob: true,
-                });
-                resolve(deleted.length);
+                })
+                resolve(deleted.length)
             } catch (err) {
-                // console.log("error delete", err);
-                reject(err);
+                reject(err)
             }
-        });
+        })
     }
 
     rename(source: string, file: File, newName: string, transferId = -1): Promise<string> {
-        const oldPath = path.join(source, file.fullname);
-        const newPath = path.join(source, newName);
+        const oldPath = path.join(source, file.fullname)
+        const newPath = path.join(source, newName)
 
         if (!newName.match(invalidFileChars)) {
             return new Promise((resolve, reject) => {
@@ -137,7 +136,7 @@ export class LocalApi implements FsApi {
                             reject({
                                 code: 'EEXIST',
                                 oldName: file.fullname,
-                            });
+                            })
                         } else {
                             fs.rename(oldPath, newPath, (err) => {
                                 if (err) {
@@ -146,11 +145,11 @@ export class LocalApi implements FsApi {
                                         message: err.message,
                                         newName: newName,
                                         oldName: file.fullname,
-                                    });
+                                    })
                                 } else {
-                                    resolve(newName);
+                                    resolve(newName)
                                 }
-                            });
+                            })
                         }
                     })
                     .catch((err) => {
@@ -159,16 +158,16 @@ export class LocalApi implements FsApi {
                             message: err.message,
                             newName: newName,
                             oldName: file.fullname,
-                        });
-                    });
-            });
+                        })
+                    })
+            })
         } else {
             // reject promise with previous name in case of invalid chars
             return Promise.reject({
                 oldName: file.fullname,
                 newName: newName,
                 code: 'BAD_FILENAME',
-            });
+            })
         }
     }
 
@@ -176,37 +175,37 @@ export class LocalApi implements FsApi {
         return new Promise<boolean>((resolve, reject) =>
             fs.symlink(targetPath, path, (err) => {
                 if (err) {
-                    reject(err);
+                    reject(err)
                 } else {
-                    resolve(true);
+                    resolve(true)
                 }
             }),
-        );
+        )
     }
 
     async isDir(path: string, transferId = -1): Promise<boolean> {
-        const lstat = fs.lstatSync(path);
-        const stat = fs.statSync(path);
-        return stat.isDirectory() || lstat.isDirectory();
+        const lstat = fs.lstatSync(path)
+        const stat = fs.statSync(path)
+        return stat.isDirectory() || lstat.isDirectory()
     }
 
     async exists(path: string, transferId = -1): Promise<boolean> {
         try {
-            fs.statSync(path);
-            return true;
+            fs.statSync(path)
+            return true
         } catch (err) {
             if (err.code === 'ENOENT') {
-                return false;
+                return false
             } else {
-                throw err;
+                throw err
             }
         }
     }
 
     async stat(fullPath: string, transferId = -1): Promise<File> {
         try {
-            const format = path.parse(fullPath);
-            const stats = fs.lstatSync(fullPath);
+            const format = path.parse(fullPath)
+            const stats = fs.lstatSync(fullPath)
             const file: File = {
                 dir: format.dir,
                 fullname: format.base,
@@ -225,82 +224,82 @@ export class LocalApi implements FsApi {
                 isSym: stats.isSymbolicLink(),
                 target: (stats.isSymbolicLink() && fs.readlinkSync(fullPath)) || null,
                 id: MakeId({ ino: stats.ino, dev: stats.dev }),
-            };
+            }
 
-            return file;
+            return file
         } catch (err) {
-            throw err;
+            throw err
         }
     }
 
     login(server?: string, credentials?: Credentials): Promise<void> {
-        return Promise.resolve();
+        return Promise.resolve()
     }
 
     onList(dir: string): void {
         if (dir !== this.path) {
             // console.log('stopWatching', this.path);
             try {
-                LocalWatch.stopWatchingPath(this.path, this.onFsChange);
-                LocalWatch.watchPath(dir, this.onFsChange);
+                LocalWatch.stopWatchingPath(this.path, this.onFsChange)
+                LocalWatch.watchPath(dir, this.onFsChange)
             } catch (e) {
-                console.warn('Could not watch path', dir, e);
+                console.warn('Could not watch path', dir, e)
             }
             // console.log('watchPath', dir);
-            this.path = dir;
+            this.path = dir
         }
     }
 
     async list(dir: string, watchDir = false, transferId = -1): Promise<File[]> {
         try {
-            await this.isDir(dir);
+            await this.isDir(dir)
             return new Promise<File[]>((resolve, reject) => {
                 fs.readdir(dir, (err, items) => {
                     if (err) {
-                        reject(err);
+                        reject(err)
                     } else {
-                        const dirPath = path.resolve(dir);
+                        const dirPath = path.resolve(dir)
 
-                        const files: File[] = [];
+                        const files: File[] = []
 
                         for (let i = 0; i < items.length; i++) {
-                            const file = LocalApi.fileFromPath(path.join(dirPath, items[i]));
-                            files.push(file);
+                            const file = LocalApi.fileFromPath(path.join(dirPath, items[i]))
+                            files.push(file)
                         }
 
-                        watchDir && this.onList(dirPath);
+                        watchDir && this.onList(dirPath)
 
-                        resolve(files);
+                        resolve(files)
                     }
-                });
-            });
+                })
+            })
         } catch (err) {
             throw {
                 code: err.code,
                 message: `Could not access path: ${dir}`,
-            };
+            }
         }
     }
 
     static fileFromPath(fullPath: string): File {
-        const format = path.parse(fullPath);
-        let name = fullPath;
-        let stats: Partial<fs.Stats> = null;
-        let targetStats = null;
+        const format = path.parse(fullPath)
+        let name = fullPath
+        let stats: Partial<fs.Stats> = null
+        let targetStats = null
 
         try {
             // do not follow symlinks first
-            stats = fs.lstatSync(fullPath);
+            stats = fs.lstatSync(fullPath)
             if (stats.isSymbolicLink()) {
                 // get link target path first
-                name = fs.readlinkSync(fullPath);
-                targetStats = fs.statSync(fullPath);
+                name = fs.readlinkSync(fullPath)
+                targetStats = fs.statSync(fullPath)
             }
         } catch (err) {
-            console.warn('error getting stats for', fullPath, err);
+            console.warn('error getting stats for', fullPath, err)
 
-            const isDir = stats ? stats.isDirectory() : false;
-            const isSymLink = stats ? stats.isSymbolicLink() : false;
+            const isDir = stats ? stats.isDirectory() : false
+            const isSymLink = stats ? stats.isSymbolicLink() : false
 
             stats = {
                 ctime: new Date(),
@@ -312,11 +311,11 @@ export class LocalApi implements FsApi {
                 isSymbolicLink: (): boolean => isSymLink,
                 ino: 0,
                 dev: 0,
-            };
+            }
         }
 
-        const extension = path.parse(name).ext.toLowerCase();
-        const mode = targetStats ? targetStats.mode : stats.mode;
+        const extension = path.parse(name).ext.toLowerCase()
+        const mode = targetStats ? targetStats.mode : stats.mode
 
         const file: File = {
             dir: format.dir,
@@ -336,19 +335,19 @@ export class LocalApi implements FsApi {
             isSym: stats.isSymbolicLink(),
             target: (stats.isSymbolicLink() && name) || null,
             id: MakeId({ ino: stats.ino, dev: stats.dev }),
-        };
+        }
 
-        return file;
+        return file
     }
 
     isRoot(path: string): boolean {
-        return !!path.match(isRoot);
+        return !!path.match(isRoot)
     }
 
     off(): void {
         // console.log("off", this.path);
         // console.log("stopWatchingPath", this.path);
-        LocalWatch.stopWatchingPath(this.path, this.onFsChange);
+        LocalWatch.stopWatchingPath(this.path, this.onFsChange)
     }
 
     // TODO add error handling
@@ -357,11 +356,11 @@ export class LocalApi implements FsApi {
             // console.log('opening read stream', this.join(path, file));
             const stream = fs.createReadStream(this.join(path, file), {
                 highWaterMark: 31 * 16384,
-            });
-            return Promise.resolve(stream);
+            })
+            return Promise.resolve(stream)
         } catch (err) {
-            console.log('FsLocal.getStream error', err);
-            return Promise.reject(err);
+            console.log('FsLocal.getStream error', err)
+            return Promise.reject(err)
         }
     }
 
@@ -373,70 +372,71 @@ export class LocalApi implements FsApi {
     ): Promise<void> {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         return new Promise((resolve: (val?: any) => void, reject: (val?: any) => void) => {
-            let finished = false;
-            let readError = false;
-            let bytesRead = 0;
+            let finished = false
+            let readError = false
+            let bytesRead = 0
 
             const reportProgress = new Transform({
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 transform(chunk: any, encoding: any, callback: TransformCallback) {
-                    bytesRead += chunk.length;
-                    progressFunc(progress, bytesRead);
-                    callback(null, chunk);
+                    bytesRead += chunk.length
+                    progressFunc(progress, bytesRead)
+                    callback(null, chunk)
                 },
                 highWaterMark: 16384 * 31,
-            });
+            })
 
-            const writeStream = fs.createWriteStream(dstPath);
+            const writeStream = fs.createWriteStream(dstPath)
 
             readStream.once('error', (err) => {
-                console.log('error on read stream');
-                readError = true;
-                readStream.destroy();
-                writeStream.destroy(err);
-            });
+                console.log('error on read stream')
+                readError = true
+                readStream.destroy()
+                writeStream.destroy(err)
+            })
 
-            readStream.pipe(reportProgress).pipe(writeStream);
+            readStream.pipe(reportProgress).pipe(writeStream)
 
-            writeStream.once('finish', () => {
-                finished = true;
-            });
+            writeStream.once('finish', (...args) => {
+                progress(writeStream.bytesWritten)
+                finished = true
+            })
 
             writeStream.once('error', (err) => {
                 // remove created file if it's empty and there was a problem
                 // accessing the source file: we will report an error to the
                 // user so there's no need to leave an empty file
                 if (readError && !bytesRead && !writeStream.bytesWritten) {
-                    console.log('cleaning up fs');
+                    console.log('cleaning up fs')
                     fs.unlink(dstPath, (err) => {
                         if (!err) {
-                            console.log('cleaned-up fs');
+                            console.log('cleaned-up fs')
                         } else {
-                            console.log('error cleaning-up fs', err);
+                            console.log('error cleaning-up fs', err)
                         }
-                    });
+                    })
                 }
-                reject(err);
-            });
+                reject(err)
+            })
 
             writeStream.once('close', () => {
                 if (finished) {
-                    resolve();
+                    resolve()
                 } else {
-                    reject();
+                    reject()
                 }
-            });
+            })
 
             writeStream.once('error', (err) => {
-                reject(err);
-            });
-        });
+                reject(err)
+            })
+        })
     }
 
     getParentTree(dir: string): Array<{ dir: string; fullname: string; name: string }> {
-        const parts = dir.split(SEP);
-        const max = parts.length - 1;
-        let fullname = '';
+        const parts = dir.split(SEP)
+        const max = parts.length - 1
+        let fullname = ''
 
         if (dir.length === 1) {
             return [
@@ -445,30 +445,30 @@ export class LocalApi implements FsApi {
                     fullname: '',
                     name: dir,
                 },
-            ];
+            ]
         } else {
-            const folders = [];
+            const folders = []
 
             for (let i = 0; i <= max; ++i) {
                 folders.push({
                     dir,
                     fullname,
                     name: parts[max - i] || SEP,
-                });
+                })
 
                 if (!i) {
-                    fullname += '..';
+                    fullname += '..'
                 } else {
-                    fullname += '/..';
+                    fullname += '/..'
                 }
             }
 
-            return folders;
+            return folders
         }
     }
 
     sanityze(path: string): string {
-        return isWin ? (path.match(/\\$/) ? path : path + '\\') : path;
+        return isWin ? (path.match(/\\$/) ? path : path + '\\') : path
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -479,9 +479,9 @@ export class LocalApi implements FsApi {
 
 export function FolderExists(path: string): boolean {
     try {
-        return fs.existsSync(path) && fs.lstatSync(path).isDirectory();
+        return fs.existsSync(path) && fs.lstatSync(path).isDirectory()
     } catch (err) {
-        return false;
+        return false
     }
 }
 
@@ -493,25 +493,24 @@ export const FsLocal: Fs = {
         needsRefresh: false,
     },
     canread(str: string): boolean {
-        // console.log('FsLocal.canread', str, !!str.match(localStart));
-        return !!str.match(localStart);
+        return !!str.match(localStart)
     },
     serverpart(str: string): string {
-        return 'local';
+        return 'local'
     },
     credentials(str: string): Credentials {
         return {
             user: '',
             password: '',
             port: 0,
-        };
+        }
     },
     displaypath(str: string): { shortPath: string; fullPath: string } {
-        const split = str.split(SEP);
+        const split = str.split(SEP)
         return {
             fullPath: str,
             shortPath: split.slice(-1)[0] || str,
-        };
+        }
     },
     API: LocalApi,
-};
+}
