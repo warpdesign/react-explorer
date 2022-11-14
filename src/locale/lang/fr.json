@@ -75,7 +75,11 @@
             },
             "DELETE": {
                 "CONFIRM": "Etes-vous sûr de vouloir supprimer <1>{{count}}</1> fichier(s)/dossier(s) ?<3 /><4 />Cette action supprimera de manière <6>permanente</6> les éléments sélectionnés."
-            }
+            },
+            "SHORTCUTS": {
+                "FILTER_PLACEHOLDER": "Rechercher un raccourci",
+                "NO_RESULTS": "Aucun raccourci pour ce filtre"
+            }            
         },
         "SHORTCUT": {
             "OPEN_DEVTOOLS": "Outils de développement",
