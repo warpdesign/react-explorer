@@ -13,7 +13,7 @@ export interface IOError {
 
 export function getLocalizedError(error: string | IOError): LocalizedError {
     const supportedErrors =
-        /ENOTFOUND|ECONNREFUSED|ENOENT|EPERM|EACCES|EIO|ENOSPC|EEXIST|EHOSTDOWN|ENOTDIR|NODEST|530|550|EROS/
+        /(ENOTFOUND|ECONNREFUSED|ENOENT|EPERM|EACCES|EIO|ENOSPC|EEXIST|EHOSTDOWN|ENOTDIR|NODEST|530|550|EROS)$/
     const niceError: LocalizedError = {}
     const {
         i18next: { t },
