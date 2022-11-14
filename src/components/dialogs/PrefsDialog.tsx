@@ -2,7 +2,7 @@ import * as React from 'react'
 import { Dialog, Classes, Intent, Button, InputGroup, FormGroup, MenuItem } from '@blueprintjs/core'
 import { Tooltip2 } from '@blueprintjs/popover2'
 import { debounce } from '../../utils/debounce'
-import { withNamespaces, WithNamespaces } from 'react-i18next'
+import { withTranslation, WithTranslation } from 'react-i18next'
 import { SettingsState } from '../../state/settingsState'
 import { inject } from 'mobx-react'
 import { Select, ItemRenderer } from '@blueprintjs/select'
@@ -13,7 +13,7 @@ import { HOME_DIR } from '../../utils/platform'
 
 const DEBOUNCE_DELAY = 300
 
-interface PrefsProps extends WithNamespaces {
+interface PrefsProps extends WithTranslation {
     isOpen: boolean
     onClose: () => void
 }
@@ -126,11 +126,13 @@ class PrefsDialogClass extends React.Component<PrefsProps, State> {
     getSortedLanguages(): Array<Language> {
         const { t } = this.props
         const auto = [{ code: 'auto', lang: t('COMMON.AUTO') }]
-        const languages = t('LANG', { returnObjects: true }).sort((lang1: Language, lang2: Language) => {
-            if (lang1.lang < lang2.lang) {
-                return -1
-            } else return lang1.lang > lang2.lang ? 1 : 0
-        })
+        const languages = (t('LANG', { returnObjects: true }) as Array<Language>).sort(
+            (lang1: Language, lang2: Language) => {
+                if (lang1.lang < lang2.lang) {
+                    return -1
+                } else return lang1.lang > lang2.lang ? 1 : 0
+            },
+        )
 
         return auto.concat(languages)
     }
@@ -329,6 +331,6 @@ class PrefsDialogClass extends React.Component<PrefsProps, State> {
     }
 }
 
-const PrefsDialog = withNamespaces()(inject('settingsState')(PrefsDialogClass))
+const PrefsDialog = withTranslation()(inject('settingsState')(PrefsDialogClass))
 
 export { PrefsDialog }

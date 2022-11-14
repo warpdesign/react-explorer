@@ -5,7 +5,7 @@ import { inject } from 'mobx-react'
 import { Batch } from '../transfers/batch'
 import { reaction, toJS, IReactionDisposer, IObservableArray } from 'mobx'
 import i18next from 'i18next'
-import { withNamespaces, WithNamespaces } from 'react-i18next'
+import { withTranslation, WithTranslation } from 'react-i18next'
 import { formatBytes } from '../utils/formatBytes'
 import { FileTransfer } from '../transfers/fileTransfer'
 import classnames from 'classnames'
@@ -25,7 +25,7 @@ const TYPE_ICONS: { [key: string]: IconName } = {
     cod: 'code',
 }
 
-interface Props extends WithNamespaces {
+interface Props extends WithTranslation {
     hide: boolean
 }
 
@@ -349,6 +349,6 @@ class DownloadsClass extends React.Component<Props, State> {
     }
 }
 
-const Downloads = withNamespaces()(inject('appState')(DownloadsClass))
+const Downloads = withTranslation()(inject('appState')(DownloadsClass))
 
 export { Downloads }

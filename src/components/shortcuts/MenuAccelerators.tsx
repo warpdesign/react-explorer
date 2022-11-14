@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { withNamespaces, WithNamespaces } from 'react-i18next'
+import { withTranslation, WithTranslation } from 'react-i18next'
 import { Classes, Intent } from '@blueprintjs/core'
 import { inject } from 'mobx-react'
 import { WithMenuAccelerators, Accelerators, Accelerator } from '../WithMenuAccelerators'
@@ -10,7 +10,7 @@ import { FileState } from '../../state/fileState'
 import { AppToaster } from '../AppToaster'
 import { SettingsState } from '../../state/settingsState'
 
-interface Props extends WithNamespaces {
+interface Props extends WithTranslation {
     onExitComboDown: () => void
 }
 
@@ -215,7 +215,7 @@ class MenuAcceleratorsClass extends React.Component<Props> {
     }
 }
 
-const MenuAccelerators = withNamespaces()(
+const MenuAccelerators = withTranslation()(
     inject('appState', 'settingsState')(WithMenuAccelerators(MenuAcceleratorsClass)),
 )
 

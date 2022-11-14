@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { Tree, TreeNodeInfo } from '@blueprintjs/core'
 import { observer, inject } from 'mobx-react'
-import { withNamespaces, WithNamespaces } from 'react-i18next'
+import { withTranslation, WithTranslation } from 'react-i18next'
 import classNames from 'classnames'
 import { IReactionDisposer, reaction, toJS, IObservableArray } from 'mobx'
 import i18next from 'i18next'
@@ -22,7 +22,7 @@ interface LeftPanelState {
     selectedNode: TreeNodeInfo<string>
 }
 
-interface Props extends WithNamespaces {
+interface Props extends WithTranslation {
     hide: boolean
 }
 
@@ -298,6 +298,6 @@ export const LeftPanelClass = inject('appState')(
     ),
 )
 
-const LeftPanel = withNamespaces()(LeftPanelClass)
+const LeftPanel = withTranslation()(LeftPanelClass)
 
 export { LeftPanel }

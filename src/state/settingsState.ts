@@ -1,7 +1,7 @@
 import { observable, action, makeObservable, runInAction } from 'mobx'
 import { ipcRenderer } from 'electron'
 import { JSObject } from '../components/Log'
-import { i18next, languageList } from '../locale/i18n'
+import { i18n, languageList } from '../locale/i18n'
 import { isMojave, isWin, isMac, defaultFolder } from '../utils/platform'
 
 const APP_STORAGE_KEY = 'react-explorer'
@@ -68,6 +68,7 @@ export class SettingsState {
 
     async setLanguage(askedLang: string): Promise<void> {
         let lang = askedLang
+        const { i18next } = i18n
 
         // detect language from host OS if set to auto
         if (lang === 'auto') {

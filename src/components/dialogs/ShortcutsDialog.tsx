@@ -1,10 +1,10 @@
 import * as React from 'react'
 import { Dialog, Classes, Button, KeyCombo } from '@blueprintjs/core'
-import { withNamespaces, WithNamespaces } from 'react-i18next'
+import { withTranslation, WithTranslation } from 'react-i18next'
 import { isMac } from '../../utils/platform'
 import CONFIG from '../../config/appConfig'
 
-interface ShortcutsProps extends WithNamespaces {
+interface ShortcutsProps extends WithTranslation {
     isOpen: boolean
     onClose: () => void
 }
@@ -117,6 +117,6 @@ class ShortcutsDialogClass extends React.Component<ShortcutsProps> {
     }
 }
 
-const ShortcutsDialog = withNamespaces()(ShortcutsDialogClass)
+const ShortcutsDialog = withTranslation()(ShortcutsDialogClass)
 
 export { ShortcutsDialog }

@@ -2,7 +2,7 @@ import * as React from 'react'
 import { observable, runInAction } from 'mobx'
 import { debounce } from '../utils/debounce'
 import { Intent, HotkeysTarget2, Classes } from '@blueprintjs/core'
-import { WithNamespaces, withNamespaces } from 'react-i18next'
+import { WithTranslation, withTranslation } from 'react-i18next'
 import { shouldCatchEvent } from '../utils/dom'
 import classnames from 'classnames'
 
@@ -69,7 +69,7 @@ interface LogUIState {
 const ESCAPE_KEY = 27
 const DEBOUNCE_DELAY = 500
 
-export class LogUIClass extends React.Component<WithNamespaces, LogUIState> {
+export class LogUIClass extends React.Component<WithTranslation, LogUIState> {
     private consoleDiv: HTMLDivElement
     private valid: boolean
     private lastScrollTop = 0
@@ -86,7 +86,7 @@ export class LogUIClass extends React.Component<WithNamespaces, LogUIState> {
         this.lastScrollTop = scrollTop
     }, DEBOUNCE_DELAY)
 
-    constructor(props: WithNamespaces) {
+    constructor(props: WithTranslation) {
         super(props)
         this.state = {
             visible: false,
@@ -175,6 +175,6 @@ export function log(target: any, key: string, descriptor: PropertyDescriptor): P
     return descriptor
 }
 
-const LogUI = withNamespaces()(LogUIClass)
+const LogUI = withTranslation()(LogUIClass)
 
 export { LogUI }

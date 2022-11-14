@@ -1,107 +1,107 @@
-import * as React from 'react';
-import { Dialog, Classes, Intent, Button, InputGroup, FormGroup } from '@blueprintjs/core';
-import { debounce } from '../../utils/debounce';
-import { withNamespaces, WithNamespaces } from 'react-i18next';
-import { metaKeyCode } from '../../utils/platform';
+import * as React from 'react'
+import { Dialog, Classes, Intent, Button, InputGroup, FormGroup } from '@blueprintjs/core'
+import { debounce } from '../../utils/debounce'
+import { withTranslation, WithTranslation } from 'react-i18next'
+import { metaKeyCode } from '../../utils/platform'
 
-interface MakedirProps extends WithNamespaces {
-    isOpen: boolean;
-    parentPath: string;
-    onClose?: (dirName: string, navigate: boolean) => void;
-    onValidation: (dir: string) => boolean;
+interface MakedirProps extends WithTranslation {
+    isOpen: boolean
+    parentPath: string
+    onClose?: (dirName: string, navigate: boolean) => void
+    onValidation: (dir: string) => boolean
 }
 
 interface MakedirState {
-    path: string;
-    ctrlKey: boolean;
-    valid: boolean;
+    path: string
+    ctrlKey: boolean
+    valid: boolean
 }
 
-const DEBOUNCE_DELAY = 300;
+const DEBOUNCE_DELAY = 300
 
-const ENTER_KEY = 13;
+const ENTER_KEY = 13
 
 class MakedirDialogClass extends React.Component<MakedirProps, MakedirState> {
-    mounted = false;
+    mounted = false
 
     constructor(props: MakedirProps) {
-        super(props);
+        super(props)
 
         this.state = {
             path: '',
             ctrlKey: false,
             valid: true,
-        };
+        }
     }
 
     onKeyUp = (e: KeyboardEvent): void => {
         if (e.keyCode === metaKeyCode) {
-            this.setState({ ctrlKey: false });
+            this.setState({ ctrlKey: false })
         } else if (e.keyCode === ENTER_KEY) {
-            const { valid, path } = this.state;
-            valid && path.length && this.onCreate();
+            const { valid, path } = this.state
+            valid && path.length && this.onCreate()
         }
-    };
+    }
 
     onKeyDown = (e: KeyboardEvent): void => {
         if (e.keyCode === metaKeyCode) {
-            this.setState({ ctrlKey: true });
+            this.setState({ ctrlKey: true })
         } else if (e.keyCode === ENTER_KEY && this.state.ctrlKey) {
-            const { valid, path } = this.state;
-            valid && path.length && this.onCreate();
+            const { valid, path } = this.state
+            valid && path.length && this.onCreate()
         }
-    };
+    }
 
     private isValid(path: string): boolean {
-        const valid = this.props.onValidation(path);
-        return valid;
+        const valid = this.props.onValidation(path)
+        return valid
     }
 
     private checkPath: (path: string) => void = debounce((path: string): void => {
         // prevent memleak in case debounce callback is called
         // after the dialog has been closed
         if (!this.mounted) {
-            return;
+            return
         }
 
         try {
-            const isValid = this.isValid(path);
-            this.setState({ valid: isValid });
+            const isValid = this.isValid(path)
+            this.setState({ valid: isValid })
         } catch (error) {
-            console.log('error', error);
-            this.setState({ valid: false });
+            console.log('error', error)
+            this.setState({ valid: false })
         }
-    }, DEBOUNCE_DELAY);
+    }, DEBOUNCE_DELAY)
 
     private cancelClose = (): void => {
-        this.props.onClose('', false);
-    };
+        this.props.onClose('', false)
+    }
 
     private onCreate = (): void => {
-        const { path, ctrlKey } = this.state;
+        const { path, ctrlKey } = this.state
         if (this.isValid(path)) {
-            this.props.onClose(path, ctrlKey);
+            this.props.onClose(path, ctrlKey)
         } else {
-            this.setState({ valid: false });
+            this.setState({ valid: false })
         }
-    };
+    }
 
     private onPathChange = (event: React.FormEvent<HTMLElement>): void => {
-        const path = (event.target as HTMLInputElement).value;
-        this.setState({ path });
-        this.checkPath(path);
-    };
+        const path = (event.target as HTMLInputElement).value
+        this.setState({ path })
+        this.checkPath(path)
+    }
 
     componentDidMount(): void {
-        this.mounted = true;
-        document.addEventListener('keyup', this.onKeyUp);
-        document.addEventListener('keydown', this.onKeyDown);
+        this.mounted = true
+        document.addEventListener('keyup', this.onKeyUp)
+        document.addEventListener('keydown', this.onKeyDown)
     }
 
     componentWillUnmount(): void {
-        document.removeEventListener('keyup', this.onKeyUp);
-        document.removeEventListener('keydown', this.onKeyDown);
-        this.mounted = false;
+        document.removeEventListener('keyup', this.onKeyUp)
+        document.removeEventListener('keydown', this.onKeyDown)
+        this.mounted = false
     }
 
     // shouldComponentUpdate() {
@@ -114,22 +114,22 @@ class MakedirDialogClass extends React.Component<MakedirProps, MakedirState> {
     // }
 
     public render(): React.ReactNode {
-        const { path, valid, ctrlKey } = this.state;
-        const { t } = this.props;
+        const { path, valid, ctrlKey } = this.state
+        const { t } = this.props
 
-        const intent = (!valid && 'danger') || 'none';
-        const helperText = (!valid && <span>{t('DIALOG.MAKEDIR.NOT_VALID')}</span>) || <span>&nbsp;</span>;
-        let { parentPath } = this.props;
+        const intent = (!valid && 'danger') || 'none'
+        const helperText = (!valid && <span>{t('DIALOG.MAKEDIR.NOT_VALID')}</span>) || <span>&nbsp;</span>
+        let { parentPath } = this.props
 
-        let sep = '';
+        let sep = ''
         if (parentPath.match(/\//)) {
-            sep = '/';
+            sep = '/'
         } else {
-            sep = '\\';
+            sep = '\\'
         }
 
         if (!parentPath.endsWith(sep)) {
-            parentPath += sep;
+            parentPath += sep
         }
 
         return (
@@ -173,10 +173,10 @@ class MakedirDialogClass extends React.Component<MakedirProps, MakedirState> {
                     </div>
                 </div>
             </Dialog>
-        );
+        )
     }
 }
 
-const MakedirDialog = withNamespaces()(MakedirDialogClass);
+const MakedirDialog = withTranslation()(MakedirDialogClass)
 
-export { MakedirDialog };
+export { MakedirDialog }

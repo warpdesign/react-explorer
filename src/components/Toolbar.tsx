@@ -18,7 +18,7 @@ import { MakedirDialog } from './dialogs/MakedirDialog'
 import { AppAlert } from './AppAlert'
 import { Logger } from './Log'
 import { AppToaster } from './AppToaster'
-import { withNamespaces, WithNamespaces, Trans } from 'react-i18next'
+import { withTranslation, WithTranslation, Trans } from 'react-i18next'
 import { WithMenuAccelerators, Accelerators, Accelerator } from './WithMenuAccelerators'
 import { throttle } from '../utils/throttle'
 import { isWin, isMac } from '../utils/platform'
@@ -30,7 +30,7 @@ const TOOLTIP_DELAY = 1200
 const MOVE_EVENT_THROTTLE = 300
 const ERROR_MESSAGE_TIMEOUT = 3500
 
-interface Props extends WithNamespaces {
+interface Props extends WithTranslation {
     onPaste: () => void
     active: boolean
 }
@@ -519,6 +519,6 @@ export const ToolbarClass = inject(
     ),
 )
 
-const Toolbar = withNamespaces()(ToolbarClass)
+const Toolbar = withTranslation()(ToolbarClass)
 
 export { Toolbar }

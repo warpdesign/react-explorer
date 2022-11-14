@@ -2,7 +2,7 @@ import * as React from 'react'
 import * as ReactDOM from 'react-dom'
 import { Alert, AlertProps } from '@blueprintjs/core'
 import { Deferred } from '../utils/deferred'
-import { i18next } from '../locale/i18n'
+import { i18n } from '../locale/i18n'
 
 type Message = React.ReactNode | string
 
@@ -62,7 +62,7 @@ class Alerter extends React.Component<Record<string, unknown>, AlerterState> {
         const { message, ...alertProps } = this.state
 
         if (!alertProps.confirmButtonText) {
-            alertProps.confirmButtonText = i18next.t('COMMON.OK')
+            alertProps.confirmButtonText = i18n.i18next.t('COMMON.OK')
         }
 
         alertProps.onOpened = this.addEnterListener

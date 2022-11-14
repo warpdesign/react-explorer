@@ -20,13 +20,13 @@ import { ViewState } from '../state/viewState'
 import { AppToaster } from './AppToaster'
 import { Intent } from '@blueprintjs/core'
 import { getLocalizedError } from '../locale/error'
-import { withNamespaces, WithNamespaces } from 'react-i18next'
+import { withTranslation, WithTranslation } from 'react-i18next'
 import { LocalApi } from '../services/plugins/FsLocal'
 import { FileState } from '../state/fileState'
 import { File as FsFile } from '../services/Fs'
 import { CollectedProps } from './RowRenderer'
 
-interface SideViewProps extends WithNamespaces {
+interface SideViewProps extends WithTranslation {
     hide: boolean
     viewState: ViewState
     onPaste: () => void
@@ -190,6 +190,6 @@ export const SideViewClass = inject('appState')(
 
 const SideViewDD = DropTarget<InjectedProps>('file', fileTarget, collect)(SideViewClass)
 
-const SideView = withNamespaces()(SideViewDD)
+const SideView = withTranslation()(SideViewDD)
 
 export { SideView }

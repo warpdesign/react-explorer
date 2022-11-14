@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { withNamespaces, WithNamespaces } from 'react-i18next'
+import { withTranslation, WithTranslation } from 'react-i18next'
 import { ipcRenderer } from 'electron'
 import { Intent, HotkeysTarget2 } from '@blueprintjs/core'
 import { inject } from 'mobx-react'
@@ -10,19 +10,19 @@ import { SettingsState } from '../../state/settingsState'
 import { Logger } from '../Log'
 import { isMac } from '../../utils/platform'
 
-interface InjectedProps extends WithNamespaces {
+interface InjectedProps extends WithTranslation {
     appState: AppState
     settingsState: SettingsState
 }
 
-class KeyboardHotkeysClass extends React.Component<WithNamespaces> {
+class KeyboardHotkeysClass extends React.Component<WithTranslation> {
     private appState: AppState
 
     private get injected(): InjectedProps {
         return this.props as InjectedProps
     }
 
-    constructor(props: WithNamespaces) {
+    constructor(props: WithTranslation) {
         super(props)
 
         this.appState = this.injected.appState
@@ -229,6 +229,6 @@ class KeyboardHotkeysClass extends React.Component<WithNamespaces> {
     }
 }
 
-const KeyboardHotkeys = withNamespaces()(inject('appState', 'settingsState')(KeyboardHotkeysClass))
+const KeyboardHotkeys = withTranslation()(inject('appState', 'settingsState')(KeyboardHotkeysClass))
 
 export { KeyboardHotkeys }

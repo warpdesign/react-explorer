@@ -1,19 +1,19 @@
-import * as React from 'react';
-import { Menu, MenuItem, MenuDivider } from '@blueprintjs/core';
-import { withNamespaces, WithNamespaces } from 'react-i18next';
+import * as React from 'react'
+import { Menu, MenuItem, MenuDivider } from '@blueprintjs/core'
+import { withTranslation, WithTranslation } from 'react-i18next'
 
-interface HamburgerProps extends WithNamespaces {
-    onOpenPrefs: () => void;
-    onOpenShortcuts: () => void;
+interface HamburgerProps extends WithTranslation {
+    onOpenPrefs: () => void
+    onOpenShortcuts: () => void
 }
 
 export class HamburgerMenuClass extends React.Component<HamburgerProps> {
     constructor(props: HamburgerProps) {
-        super(props);
+        super(props)
     }
 
     public render(): React.ReactNode {
-        const { t } = this.props;
+        const { t } = this.props
 
         return (
             <React.Fragment>
@@ -23,10 +23,10 @@ export class HamburgerMenuClass extends React.Component<HamburgerProps> {
                     <MenuItem text={t('NAV.SHORTCUTS')} icon="lightbulb" onClick={this.props.onOpenShortcuts} />
                 </Menu>
             </React.Fragment>
-        );
+        )
     }
 }
 
-const HamburgerMenu = withNamespaces()(HamburgerMenuClass);
+const HamburgerMenu = withTranslation()(HamburgerMenuClass)
 
-export { HamburgerMenu };
+export { HamburgerMenu }
