@@ -2,9 +2,9 @@ import * as React from 'react'
 import { Dialog, Classes, Intent, Button, InputGroup, FormGroup, Colors } from '@blueprintjs/core'
 import { inject } from 'mobx-react'
 import { FileState } from '../../state/fileState'
-import { withNamespaces, WithNamespaces } from 'react-i18next'
+import { withTranslation, WithTranslation } from 'react-i18next'
 
-interface LoginProps extends WithNamespaces {
+interface LoginProps extends WithTranslation {
     isOpen: boolean
     onClose?: (user: string, password: string) => void
     onValidation: (dir: string) => boolean
@@ -225,6 +225,6 @@ class LoginDialogClass extends React.Component<LoginProps, LoginState> {
     }
 }
 
-const LoginDialog = withNamespaces()(inject('fileCache')(LoginDialogClass))
+const LoginDialog = withTranslation()(inject('fileCache')(LoginDialogClass))
 
 export { LoginDialog }

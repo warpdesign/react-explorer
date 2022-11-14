@@ -10,10 +10,9 @@ import { LogUI, Logger } from './Log'
 import { Downloads } from './Downloads'
 import * as drivelist from 'drivelist'
 import { ipcRenderer } from 'electron'
-import { withNamespaces, WithNamespaces, Trans } from 'react-i18next'
+import { withTranslation, WithTranslation, Trans } from 'react-i18next'
 import { AppToaster } from './AppToaster'
 import { Nav } from './Nav'
-import { i18next } from '../locale/i18n'
 import { FileState } from '../state/fileState'
 import { SettingsState } from '../state/settingsState'
 import { PrefsDialog } from './dialogs/PrefsDialog'
@@ -37,7 +36,7 @@ require('../css/scrollbars.css')
 
 declare const ENV: { [key: string]: string | boolean | number | Record<string, unknown> }
 
-interface AppProps extends WithNamespaces {
+interface AppProps extends WithTranslation {
     initialSettings: CustomSettings
 }
 
@@ -72,6 +71,7 @@ const App = inject('settingsState')(
                 super(props)
 
                 const { settingsState } = this.injected
+                const { i18n } = this.props
 
                 console.log('App:constructor', props.initialSettings)
 
@@ -104,7 +104,7 @@ const App = inject('settingsState')(
                 }
 
                 Logger.success(
-                    `React-Explorer ${ENV.VERSION} - CY: ${ENV.CY} - NODE_ENV: ${ENV.NODE_ENV} - lang: ${i18next.language}`,
+                    `React-Explorer ${ENV.VERSION} - CY: ${ENV.CY} - NODE_ENV: ${ENV.NODE_ENV} - lang: ${i18n.language}`,
                 )
                 Logger.success(`hash=${ENV.HASH}`)
                 Logger.success(
@@ -412,6 +412,6 @@ const App = inject('settingsState')(
     ),
 )
 
-const ExplorerApp = withNamespaces()(App)
+const ExplorerApp = withTranslation()(App)
 
 export { ExplorerApp }

@@ -3,9 +3,9 @@ import { Menu, MenuItem, MenuDivider } from '@blueprintjs/core'
 import { observer, inject } from 'mobx-react'
 import { AppState } from '../state/appState'
 import { File } from '../services/Fs'
-import { withNamespaces, WithNamespaces } from 'react-i18next'
+import { withTranslation, WithTranslation } from 'react-i18next'
 
-interface FileMenuProps extends WithNamespaces {
+interface FileMenuProps extends WithTranslation {
     onFileAction: (action: string) => void
     selectedItems: File[]
     isDisabled: boolean
@@ -75,6 +75,6 @@ export const FileMenuClass = inject('appState')(
     ),
 )
 
-const FileMenu = withNamespaces()(FileMenuClass)
+const FileMenu = withTranslation()(FileMenuClass)
 
 export { FileMenu }

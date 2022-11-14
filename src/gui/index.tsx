@@ -3,7 +3,7 @@ import * as ReactDOM from 'react-dom'
 import { configure } from 'mobx'
 import { ExplorerApp } from '../components/App'
 import { I18nextProvider } from 'react-i18next'
-import { i18next } from '../locale/i18n'
+import { i18n } from '../locale/i18n'
 import { SettingsState } from '../state/settingsState'
 import { Provider } from 'mobx-react'
 import { DndProvider } from 'react-dnd'
@@ -77,12 +77,14 @@ class App {
 
     renderApp = async (): Promise<void> => {
         const initialSettings = await this.getInitialSettings()
+        // we need for translations to be ready too
+        await i18n.promise
         console.log('initialSettings', initialSettings)
         document.body.classList.add('loaded')
 
         ReactDOM.render(
             <DndProvider backend={HTML5Backend}>
-                <I18nextProvider i18n={i18next}>
+                <I18nextProvider i18n={i18n.i18next}>
                     <Provider settingsState={this.settingsState}>
                         <HotkeysProvider>
                             <ExplorerApp initialSettings={initialSettings}></ExplorerApp>

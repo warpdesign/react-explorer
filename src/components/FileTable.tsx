@@ -12,7 +12,7 @@ import {
     TableCellProps,
 } from 'react-virtualized'
 import { AppState } from '../state/appState'
-import { WithNamespaces, withNamespaces } from 'react-i18next'
+import { WithTranslation, withTranslation } from 'react-i18next'
 import { inject } from 'mobx-react'
 import i18next from 'i18next'
 import { IReactionDisposer, reaction, toJS, IObservableArray } from 'mobx'
@@ -94,7 +94,7 @@ interface State {
     path: string
 }
 
-interface Props extends WithNamespaces {
+interface Props extends WithTranslation {
     hide: boolean
 }
 
@@ -892,7 +892,7 @@ export class FileTableClass extends React.Component<Props, State> {
     }
 }
 
-const FileTable = withNamespaces()(
+const FileTable = withTranslation()(
     inject('appState', 'viewState', 'settingsState')(WithMenuAccelerators(FileTableClass)),
 )
 

@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { ButtonGroup, Button, Icon, IconName } from '@blueprintjs/core'
 import { inject, observer } from 'mobx-react'
-import { WithNamespaces, withNamespaces } from 'react-i18next'
+import { WithTranslation, withTranslation } from 'react-i18next'
 import { ViewState } from '../state/viewState'
 import { sendFakeCombo } from './WithMenuAccelerators'
 import { MenuItemConstructorOptions, ipcRenderer } from 'electron'
@@ -21,7 +21,7 @@ export interface ViewDescriptor {
     path: string
 }
 
-interface InjectedProps extends WithNamespaces {
+interface InjectedProps extends WithTranslation {
     viewState?: ViewState
     settingsState?: SettingsState
 }
@@ -287,6 +287,6 @@ const TabListClass = inject(
     ),
 )
 
-const TabList = withNamespaces()(TabListClass)
+const TabList = withTranslation()(TabListClass)
 
 export { TabList }

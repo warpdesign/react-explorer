@@ -4,22 +4,22 @@ import { Navbar, Alignment, Button, Classes, Intent } from '@blueprintjs/core'
 import { IconNames } from '@blueprintjs/icons'
 import { Popover2 } from '@blueprintjs/popover2'
 import classnames from 'classnames'
-import { withNamespaces, WithNamespaces } from 'react-i18next'
+import { withTranslation, WithTranslation } from 'react-i18next'
 import { HamburgerMenu } from './HamburgerMenu'
 import { Badge } from './Badge'
 import { AppState } from '../state/appState'
 import { runInAction } from 'mobx'
 
-interface InjectedProps extends WithNamespaces {
+interface InjectedProps extends WithTranslation {
     appState: AppState
 }
 
 const NavComponent = inject('appState')(
     observer(
-        class NavComponent extends React.Component<WithNamespaces> {
+        class NavComponent extends React.Component<WithTranslation> {
             appState: AppState = null
 
-            constructor(props: WithNamespaces) {
+            constructor(props: WithTranslation) {
                 super(props)
 
                 this.appState = this.injected.appState
@@ -122,6 +122,6 @@ const NavComponent = inject('appState')(
     ),
 )
 
-const Nav = withNamespaces()(NavComponent)
+const Nav = withTranslation()(NavComponent)
 
 export { Nav }

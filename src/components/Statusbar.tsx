@@ -4,11 +4,11 @@ import { InputGroup, ControlGroup, Button, Intent, IconName } from '@blueprintjs
 import { Tooltip2 } from '@blueprintjs/popover2'
 import { AppState } from '../state/appState'
 import { AppToaster } from './AppToaster'
-import { withNamespaces, WithNamespaces } from 'react-i18next'
+import { withTranslation, WithTranslation } from 'react-i18next'
 import classnames from 'classnames'
 import { ViewState } from '../state/viewState'
 
-interface InjectedProps extends WithNamespaces {
+interface InjectedProps extends WithTranslation {
     viewState: ViewState
     appState: AppState
 }
@@ -18,8 +18,8 @@ export const StatusbarClass = inject(
     'appState',
 )(
     observer(
-        class StatusbarClass extends React.Component<WithNamespaces> {
-            constructor(props: WithNamespaces) {
+        class StatusbarClass extends React.Component<WithTranslation> {
+            constructor(props: WithTranslation) {
                 super(props)
             }
 
@@ -92,6 +92,6 @@ export const StatusbarClass = inject(
     ),
 )
 
-const Statusbar = withNamespaces()(StatusbarClass)
+const Statusbar = withTranslation()(StatusbarClass)
 
 export { Statusbar }

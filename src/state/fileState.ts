@@ -1,7 +1,7 @@
 import { observable, action, runInAction, makeObservable } from 'mobx'
 import { FsApi, Fs, getFS, File, Credentials, withConnection, FileID } from '../services/Fs'
 import { Deferred } from '../utils/deferred'
-import { i18next } from '../locale/i18n'
+import { i18n } from '../locale/i18n'
 import { getLocalizedError } from '../locale/error'
 import { shell, ipcRenderer } from 'electron'
 import { AppState } from './appState'
@@ -402,7 +402,7 @@ export class FileState {
                 debugger
                 // this.navHistory(0);
                 return Promise.reject({
-                    message: i18next.t('ERRORS.CANNOT_READ_FOLDER', { folder: path }),
+                    message: i18n.i18next.t('ERRORS.CANNOT_READ_FOLDER', { folder: path }),
                     code: 'NO_FS',
                 })
             }
@@ -531,7 +531,7 @@ export class FileState {
             const error = await this.shellOpenFile(path)
             if (error !== false) {
                 throw {
-                    message: i18next.t('ERRORS.SHELL_OPEN_FAILED', { path }),
+                    message: i18n.i18next.t('ERRORS.SHELL_OPEN_FAILED', { path }),
                     code: 'NO_CODE',
                 }
             }
