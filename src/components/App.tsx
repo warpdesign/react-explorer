@@ -269,15 +269,16 @@ const App = inject('settingsState')(
                     const { t } = this.injected
                     const num = this.appState.setClipboard(fileCache)
 
-                    AppToaster.show(
-                        {
-                            message: t('COMMON.CP_COPIED', { count: num }),
-                            icon: 'tick',
-                            intent: Intent.NONE,
-                        },
-                        undefined,
-                        true,
-                    )
+                    num &&
+                        AppToaster.show(
+                            {
+                                message: t('COMMON.CP_COPIED', { count: num }),
+                                icon: 'tick',
+                                intent: Intent.NONE,
+                            },
+                            undefined,
+                            true,
+                        )
                 }
             }
 
