@@ -12,7 +12,7 @@
 - Fully localized (French & English available)
 - Dark Mode with automatic detection (macOS Mojave)
 - Open a terminal from any folder
-- Plugin-based: local supported for now, ftp in the works
+- Plugin-based filesystem support
 - WSL detection on Windows
 
 ## Feature tour
@@ -154,7 +154,6 @@ React-Explorer makes use of the following tools/components:
 - [TypeScript](https://typescriptlang.org)
 - [MobX](https://mobx.js.org)
 - [Blueprintjs](https://blueprintjs.com)
-- [basic-ftp](https://github.com/patrickjuchli/basic-ftp)
 - [i18next](https://i18next.com) & [react-i18n](https://github.com/i18next/react-i18next)
 
 ## Licence
