@@ -33,11 +33,12 @@ export const StatusbarClass = inject(
 
                 const num = appState.setClipboard(viewState.getVisibleCache())
 
-                AppToaster.show({
-                    message: t('COMMON.CP_COPIED', { count: num }),
-                    icon: 'tick',
-                    intent: Intent.NONE,
-                })
+                num &&
+                    AppToaster.show({
+                        message: t('COMMON.CP_COPIED', { count: num }),
+                        icon: 'tick',
+                        intent: Intent.NONE,
+                    })
             }
 
             // shouldComponentUpdate() {
