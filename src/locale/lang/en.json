@@ -188,6 +188,7 @@
             "530": "Login authentication failed",
             "550": "File unavailable, not found, not accessible",
             "ENOTDIR": "Path entered is not a directory",
+            "EROS": "Device is read only.",
             "UNKNOWN": "An error has occured",
             "GENERIC": "{{error.message}} (code {{error.code}})",
             "BAD_FILENAME": "File or directory name not valid: '{{entry}}'",
