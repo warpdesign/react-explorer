@@ -191,7 +191,7 @@ export class LocalApi implements FsApi {
 
     async exists(path: string, transferId = -1): Promise<boolean> {
         try {
-            fs.statSync(path)
+            await fs.promises.access(path)
             return true
         } catch (err) {
             if (err.code === 'ENOENT') {
