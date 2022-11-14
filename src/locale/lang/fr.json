@@ -188,6 +188,7 @@
             "530": "Echec de l'authentification",
             "550": "Fichier non disponible, introuvable ou non accessible.",
             "ENOTDIR": "Le chemin entré ne pointe pas vers un dossier",
+            "EROS": "Le périphérique n'autorise pas l'écriture.",
             "UNKNOWN": "Une erreur est survenue",
             "GENERIC": "{{error.message}} (code {{error.code}})",
             "BAD_FILENAME": "Nom de fichier ou dossier non valide: '{{entry}}'",
