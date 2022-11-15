@@ -10,9 +10,13 @@
     "lib": ["es6", "dom"],
     "resolveJsonModule": true,
     "esModuleInterop": true,
-    "types": ["node", "electron", "jest", "webpack", "webpack-env"],
-    "useDefineForClassFields": true
+    "types": ["node", "electron", "jest", "webpack", "webpack-env", "@testing-library/jest-dom"],
+    "useDefineForClassFields": true,
+    "baseUrl": "./src",
+    "paths": {
+      "rtl": ["utils/test/rtl"]
+    }    
   },
   "include": ["./src/**/*"],
-  "exclude": ["**/*.spec.ts", "**/*.test.ts"]
+  "exclude": ["**/*.spec.ts", "**/*.test.ts"],
 }
