@@ -10,16 +10,18 @@ interface ShortcutsProps {
     onClose: () => void
 }
 
-export const buildShortcuts = (t: TFunction<'translation', undefined>) => [
-    // group: t('SHORTCUT.GROUP.GLOBAL'),
-    [
+interface Combo {
+    combo: string
+    label: string
+}
+
+export const buildShortcuts = (t: TFunction<'translation', undefined>) => ({
+    [t('SHORTCUT.GROUP.GLOBAL')]: [
         { combo: 'alt + mod + l', label: t('SHORTCUT.MAIN.DOWNLOADS_TAB') },
         { combo: 'alt + mod + e', label: t('SHORTCUT.MAIN.EXPLORER_TAB') },
         { combo: 'ctrl + alt + right', label: t('SHORTCUT.MAIN.NEXT_VIEW') },
         { combo: 'ctrl + alt + left', label: t('SHORTCUT.MAIN.PREVIOUS_VIEW') },
         { combo: 'mod + r', label: t('SHORTCUT.MAIN.RELOAD_VIEW') },
-        // { combo: isMac && "mod + left" || "alt + left", label: t('SHORTCUT.ACTIVE_VIEW.BACKWARD_HISTORY') },
-        // { combo: isMac && "mod + right" || "alt + right", label: t('SHORTCUT.ACTIVE_VIEW.FORWARD_HISTORY') },
         { combo: 'escape', label: t('SHORTCUT.LOG.TOGGLE') },
         { combo: 'mod + s', label: t('SHORTCUT.MAIN.KEYBOARD_SHORTCUTS') },
         { combo: 'mod + ,', label: t('SHORTCUT.MAIN.PREFERENCES') },
@@ -27,8 +29,7 @@ export const buildShortcuts = (t: TFunction<'translation', undefined>) => [
         { combo: 'mod + q', label: t('SHORTCUT.MAIN.QUIT') },
         { combo: 'mod + alt + shift + v', label: t('NAV.SPLITVIEW') },
     ],
-    // group: t('SHORTCUT.GROUP.ACTIVE_VIEW')
-    [
+    [t('SHORTCUT.GROUP.ACTIVE_VIEW')]: [
         { combo: (isMac && 'mod + left') || 'alt + left', label: t('SHORTCUT.ACTIVE_VIEW.BACKWARD_HISTORY') },
         { combo: (isMac && 'mod + right') || 'alt + right', label: t('SHORTCUT.ACTIVE_VIEW.FORWARD_HISTORY') },
         { combo: 'meta + c', label: t('SHORTCUT.ACTIVE_VIEW.COPY') },
@@ -44,21 +45,36 @@ export const buildShortcuts = (t: TFunction<'translation', undefined>) => [
         { combo: 'mod + k', label: t('SHORTCUT.ACTIVE_VIEW.OPEN_TERMINAL') },
         { combo: 'backspace', label: t('SHORTCUT.ACTIVE_VIEW.PARENT_DIRECTORY') },
     ],
-    [
+    [t('SHORTCUT.GROUP.TABS')]: [
         { combo: 'ctrl + tab', label: t('APP_MENUS.SELECT_NEXT_TAB') },
         { combo: 'ctrl + shift + tab', label: t('APP_MENUS.SELECT_PREVIOUS_TAB') },
         { combo: 'mod + t', label: t('APP_MENUS.NEW_TAB') },
         { combo: 'mod + w', label: t('SHORTCUT.TABS.CLOSE_ACTIVE_TAB') },
     ],
-]
+})
+
+const renderShortcuts = (shortcuts: Combo[]) =>
+    shortcuts.map((shortcut) => (
+        <div key={shortcut.combo} className={Classes.HOTKEY}>
+            <div className={Classes.HOTKEY_LABEL}>{shortcut.label}</div>
+            <KeyCombo combo={shortcut.combo}></KeyCombo>
+        </div>
+    ))
+
+const renderTitle = (title: string) => <h4 className={Classes.HEADING}>{title}</h4>
 
 const ShortcutsDialog = ({ isOpen, onClose }: ShortcutsProps) => {
     const { t, i18n } = useTranslation()
     const [shortcutsList, setShortcutsList] = React.useState(() => buildShortcuts(t))
     const [filter, setFilter] = React.useState('')
-    const shortcuts = shortcutsList.map((shorts) => shorts.filter((shortcut) => shortcut.label.match(filter)))
-    const isEmpty = shortcuts.every((shorts) => shorts.length === 0)
+    const labels = Object.keys(shortcutsList)
+    const shortcuts: { [x: string]: Combo[] } = {}
+    for (const label of labels) {
+        shortcuts[label] = shortcutsList[label].filter((shortcut) => shortcut.label.match(filter))
+    }
 
+    const isEmpty = labels.every((label) => shortcuts[label].length === 0)
+    console.log({ shortcuts })
     React.useEffect(() => {
         setShortcutsList(() => buildShortcuts(t))
     }, [i18n.language])
@@ -88,35 +104,16 @@ const ShortcutsDialog = ({ isOpen, onClose }: ShortcutsProps) => {
                     {isEmpty ? (
                         <Callout>{t('DIALOG.SHORTCUTS.NO_RESULTS')}</Callout>
                     ) : (
-                        <React.Fragment>
-                            {shortcuts[0].length ? (
-                                <h4 className={Classes.HEADING}>{t('SHORTCUT.GROUP.GLOBAL')}</h4>
-                            ) : null}
-                            {shortcuts[0].map((shortcut) => (
-                                <div key={shortcut.combo} className={Classes.HOTKEY}>
-                                    <div className={Classes.HOTKEY_LABEL}>{shortcut.label}</div>
-                                    <KeyCombo combo={shortcut.combo}></KeyCombo>
-                                </div>
-                            ))}
-                            {shortcuts[1].length ? (
-                                <h4 className={Classes.HEADING}>{t('SHORTCUT.GROUP.ACTIVE_VIEW')}</h4>
-                            ) : null}
-                            {shortcuts[1].map((shortcut) => (
-                                <div key={shortcut.combo} className={Classes.HOTKEY}>
-                                    <div className={Classes.HOTKEY_LABEL}>{shortcut.label}</div>
-                                    <KeyCombo combo={shortcut.combo}></KeyCombo>
-                                </div>
-                            ))}
-                            {shortcuts[2].length ? (
-                                <h4 className={Classes.HEADING}>{t('SHORTCUT.GROUP.TABS')}</h4>
-                            ) : null}
-                            {shortcuts[2].map((shortcut) => (
-                                <div key={shortcut.combo} className={Classes.HOTKEY}>
-                                    <div className={Classes.HOTKEY_LABEL}>{shortcut.label}</div>
-                                    <KeyCombo combo={shortcut.combo}></KeyCombo>
-                                </div>
-                            ))}
-                        </React.Fragment>
+                        <>
+                            {labels.map((label) =>
+                                shortcuts[label].length ? (
+                                    <>
+                                        {renderTitle(label)}
+                                        {renderShortcuts(shortcuts[label])}
+                                    </>
+                                ) : null,
+                            )}
+                        </>
                     )}
                 </div>
             </div>
