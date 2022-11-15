@@ -10,7 +10,7 @@ interface ShortcutsProps {
     onClose: () => void
 }
 
-const buildShortcuts = (t: TFunction<'translation', undefined>) => [
+export const buildShortcuts = (t: TFunction<'translation', undefined>) => [
     // group: t('SHORTCUT.GROUP.GLOBAL'),
     [
         { combo: 'alt + mod + l', label: t('SHORTCUT.MAIN.DOWNLOADS_TAB') },
