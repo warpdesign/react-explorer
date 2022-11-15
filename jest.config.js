@@ -10,6 +10,7 @@ module.exports = {
     moduleDirectories: [
       'node_modules',
        'src/utils/test',
+       'src',
       __dirname,
    ],    
 };
