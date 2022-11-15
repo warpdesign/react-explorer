@@ -3,5 +3,13 @@ module.exports = {
     testEnvironment: 'node',
     testRegex: './src/.*\\.(test|spec)?\\.(ts|tsx)$',
     moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
-    preset: 'ts-jest'
+    preset: 'ts-jest',
+    setupFilesAfterEnv: [
+      "<rootDir>/setupTests.ts"
+    ],
+    moduleDirectories: [
+      'node_modules',
+       'src/utils/test',
+      __dirname,
+   ],    
 };
