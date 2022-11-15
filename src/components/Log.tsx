@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { observable, runInAction } from 'mobx'
 import { debounce } from '../utils/debounce'
-import { Intent, HotkeysTarget2, Classes } from '@blueprintjs/core'
+import { Intent, HotkeysTarget2 } from '@blueprintjs/core'
 import { WithTranslation, withTranslation } from 'react-i18next'
 import { shouldCatchEvent } from '../utils/dom'
 import classnames from 'classnames'

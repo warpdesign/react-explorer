@@ -5,7 +5,7 @@ import { debounce } from '../../utils/debounce'
 import { withTranslation, WithTranslation } from 'react-i18next'
 import { SettingsState } from '../../state/settingsState'
 import { inject } from 'mobx-react'
-import { Select, ItemRenderer } from '@blueprintjs/select'
+import { Select2, ItemRenderer } from '@blueprintjs/select'
 import { FsLocal, FolderExists } from '../../services/plugins/FsLocal'
 import { AppAlert } from '../AppAlert'
 import { ipcRenderer } from 'electron'
@@ -39,9 +39,6 @@ interface Theme {
     name: string
     code: boolean | 'auto'
 }
-
-const LanguageSelect = Select.ofType<Language>()
-const ThemeSelect = Select.ofType<Theme>()
 
 class PrefsDialogClass extends React.Component<PrefsProps, State> {
     constructor(props: PrefsProps) {
@@ -233,7 +230,7 @@ class PrefsDialogClass extends React.Component<PrefsProps, State> {
             >
                 <div className={Classes.DIALOG_BODY}>
                     <FormGroup inline={true} label={t('DIALOG.PREFS.LANGUAGE')}>
-                        <LanguageSelect
+                        <Select2<Language>
                             filterable={false}
                             activeItem={selectedLanguage}
                             items={languageItems}
@@ -246,11 +243,11 @@ class PrefsDialogClass extends React.Component<PrefsProps, State> {
                                 rightIcon="caret-down"
                                 text={`${selectedLanguage.lang}`}
                             />
-                        </LanguageSelect>
+                        </Select2>
                     </FormGroup>
 
                     <FormGroup inline={true} label={t('DIALOG.PREFS.THEME')}>
-                        <ThemeSelect
+                        <Select2<Theme>
                             filterable={false}
                             activeItem={selectedTheme}
                             items={themeItems}
@@ -266,7 +263,7 @@ class PrefsDialogClass extends React.Component<PrefsProps, State> {
                                         : `${selectedTheme.name}`
                                 }
                             />
-                        </ThemeSelect>
+                        </Select2>
                     </FormGroup>
 
                     <FormGroup
