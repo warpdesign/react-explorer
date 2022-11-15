@@ -33,6 +33,7 @@ import CONFIG from '../config/appConfig'
 import { getSelectionRange } from '../utils/fileUtils'
 import { throttle } from '../utils/throttle'
 import { FileState } from '../state/fileState'
+import { showFileContextMenu } from './menus/FileContextMenu'
 
 declare const ENV: { [key: string]: string | boolean | number | Record<string, unknown> }
 
@@ -92,6 +93,7 @@ interface State {
     position: number
     // last path that was used
     path: string
+    isContextMenuOpen: boolean
 }
 
 interface Props extends WithTranslation {
@@ -112,7 +114,6 @@ interface InjectedProps extends Props {
 }
 
 export class FileTableClass extends React.Component<Props, State> {
-    private viewState: ViewState
     private disposers: Array<IReactionDisposer> = []
     private editingElement: HTMLElement = null
     private editingFile: File
@@ -127,11 +128,12 @@ export class FileTableClass extends React.Component<Props, State> {
         const cache = this.cache
 
         this.state = {
-            nodes: [], // this.buildNodes(this.cache.files, false),
+            nodes: [],
             selected: 0,
             type: 'local',
             position: -1,
             path: cache.path,
+            isContextMenuOpen: false,
         }
 
         this.installReactions()
@@ -779,6 +781,7 @@ export class FileTableClass extends React.Component<Props, State> {
         props.selectedCount = node.isSelected ? selected : 0
         props.fileCache = fileCache
         props.isDarkModeActive = settingsState.isDarkModeActive
+        props.isSelected = node.isSelected
 
         return RowRenderer(props)
     }
@@ -831,6 +834,15 @@ export class FileTableClass extends React.Component<Props, State> {
             : []),
     ]
 
+    onFileContextMenu = (e: React.MouseEvent) => {
+        const { appState } = this.injected
+        showFileContextMenu({
+            left: e.clientX,
+            top: e.clientY,
+            appState,
+        })
+    }
+
     render(): React.ReactElement {
         const { t } = this.injected
         const rowCount = this.state.nodes.length
@@ -843,6 +855,7 @@ export class FileTableClass extends React.Component<Props, State> {
                     onClick={this.onBlankAreaClick}
                     onKeyDown={this.onInputKeyDown}
                     className={`fileListSizerWrapper`}
+                    onContextMenu={this.onFileContextMenu}
                 >
                     <AutoSizer>
                         {({ width, height }) => (

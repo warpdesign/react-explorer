@@ -1,4 +1,4 @@
-import * as React from 'react';
+import * as React from 'react'
 import {
     DragSource,
     DragSourceMonitor,
@@ -8,46 +8,47 @@ import {
     DragPreviewOptions,
     DragSourceOptions,
     ConnectDropTarget,
-} from 'react-dnd';
-import { createDragPreview } from 'react-dnd-text-dragpreview';
-import { File } from '../services/Fs';
-import { FileState } from '../state/fileState';
-import i18next from 'i18next';
-import { TableRowProps } from 'react-virtualized';
+} from 'react-dnd'
+import { createDragPreview } from 'react-dnd-text-dragpreview'
+import { File } from '../services/Fs'
+import { FileState } from '../state/fileState'
+import i18next from 'i18next'
+import { TableRowProps } from 'react-virtualized'
 
 function collect(
     connect: DragSourceConnector,
     monitor: DragSourceMonitor,
 ): {
-    connectDragPreview: DragElementWrapper<DragPreviewOptions>;
-    connectDragSource: DragElementWrapper<DragSourceOptions>;
-    isDragging: boolean;
+    connectDragPreview: DragElementWrapper<DragPreviewOptions>
+    connectDragSource: DragElementWrapper<DragSourceOptions>
+    isDragging: boolean
 } {
     return {
         connectDragSource: connect.dragSource(),
         connectDragPreview: connect.dragPreview(),
         isDragging: monitor.isDragging(),
-    };
+    }
 }
 
 export interface RowRendererProps extends TableRowProps {
-    selectedCount: number;
-    fileCache: FileState;
-    isDarkModeActive: boolean;
-    connectDragPreview: DragElementWrapper<DragPreviewOptions>;
-    connectDragSource: DragElementWrapper<DragSourceOptions>;
+    selectedCount: number
+    fileCache: FileState
+    isDarkModeActive: boolean
+    isSelected: boolean
+    connectDragPreview: DragElementWrapper<DragPreviewOptions>
+    connectDragSource: DragElementWrapper<DragSourceOptions>
 }
 
 export interface DraggedObject {
     // selectedCount: number;
-    fileState?: FileState;
-    dragFiles: File[];
+    fileState?: FileState
+    dragFiles: File[]
 }
 
 export interface CollectedProps {
-    connectDropTarget?: ConnectDropTarget;
-    isOver?: boolean;
-    canDrop?: boolean;
+    connectDropTarget?: ConnectDropTarget
+    isOver?: boolean
+    canDrop?: boolean
 }
 
 const fileSource: DragSourceSpec<RowRendererProps, DraggedObject> = {
@@ -56,15 +57,15 @@ const fileSource: DragSourceSpec<RowRendererProps, DraggedObject> = {
             selectedCount: props.selectedCount,
             fileState: props.fileCache,
             dragFiles: props.selectedCount > 0 ? props.fileCache.selected.slice(0) : [props.rowData.nodeData],
-        };
+        }
     },
     canDrag: (props: RowRendererProps /*monitor: DragSourceMonitor*/) => {
-        return (props.fileCache && props.fileCache.isVisible) || false;
+        return (props.fileCache && props.fileCache.isVisible) || false
     },
-};
+}
 
 function createPreview(size: number, isDarkModeActive: boolean): HTMLImageElement {
-    const dragText = i18next.t('DRAG.MULTIPLE', { count: size });
+    const dragText = i18next.t('DRAG.MULTIPLE', { count: size })
 
     return createDragPreview(
         dragText,
@@ -85,7 +86,7 @@ function createPreview(size: number, isDarkModeActive: boolean): HTMLImageElemen
                 borderColor: 'rgba(0,0,0,0)',
             },
         ),
-    );
+    )
 }
 
 // interface RowRendererParams {
@@ -103,7 +104,7 @@ function createPreview(size: number, isDarkModeActive: boolean): HTMLImageElemen
 // }
 
 interface A11yProps {
-    [key: string]: string | number | ((e: React.MouseEvent) => void);
+    [key: string]: string | number | ((e: React.MouseEvent) => void)
 }
 
 /**
@@ -127,37 +128,37 @@ export function RowRendererFn({
     connectDragPreview,
     isDarkModeActive,
 }: RowRendererProps): React.ReactElement {
-    const a11yProps: A11yProps = { 'aria-rowindex': index + 1 };
+    const a11yProps: A11yProps = { 'aria-rowindex': index + 1 }
     if (onRowClick || onRowDoubleClick || onRowMouseOut || onRowMouseOver || onRowRightClick) {
-        a11yProps['aria-label'] = 'row';
-        a11yProps.tabIndex = 0;
+        a11yProps['aria-label'] = 'row'
+        a11yProps.tabIndex = 0
 
         if (onRowClick) {
-            a11yProps.onClick = (event: React.MouseEvent<HTMLElement>): void => onRowClick({ event, index, rowData });
+            a11yProps.onClick = (event: React.MouseEvent<HTMLElement>): void => onRowClick({ event, index, rowData })
         }
         if (onRowDoubleClick) {
             a11yProps.onDoubleClick = (event: React.MouseEvent<HTMLElement>): void =>
-                onRowDoubleClick({ event, index, rowData });
+                onRowDoubleClick({ event, index, rowData })
         }
         if (onRowMouseOut) {
             a11yProps.onMouseOut = (event: React.MouseEvent<HTMLElement>): void =>
-                onRowMouseOut({ event, index, rowData });
+                onRowMouseOut({ event, index, rowData })
         }
         if (onRowMouseOver) {
             a11yProps.onMouseOver = (event: React.MouseEvent<HTMLElement>): void =>
-                onRowMouseOver({ event, index, rowData });
+                onRowMouseOver({ event, index, rowData })
         }
         if (onRowRightClick) {
             a11yProps.onContextMenu = (event: React.MouseEvent<HTMLElement>): void =>
-                onRowRightClick({ event, index, rowData });
+                onRowRightClick({ event, index, rowData })
         }
     }
 
     if (fileCache.isVisible) {
         if (selectedCount > 1) {
-            connectDragPreview(createPreview(selectedCount, isDarkModeActive));
+            connectDragPreview(createPreview(selectedCount, isDarkModeActive))
         } else {
-            connectDragPreview(undefined);
+            connectDragPreview(undefined)
         }
     }
 
@@ -165,11 +166,11 @@ export function RowRendererFn({
         <div {...a11yProps} className={className} data-cy-file key={key} role="row" style={style}>
             {columns}
         </div>,
-    );
+    )
 }
 
-const RowRendererDragged = DragSource<RowRendererProps>('file', fileSource, collect)(RowRendererFn);
+const RowRendererDragged = DragSource<RowRendererProps>('file', fileSource, collect)(RowRendererFn)
 
 export function RowRenderer(props: RowRendererProps): JSX.Element {
-    return <RowRendererDragged {...props} />;
+    return <RowRendererDragged {...props} />
 }
