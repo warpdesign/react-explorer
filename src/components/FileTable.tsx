@@ -1,5 +1,6 @@
 import * as React from 'react'
-import { IconName, Icon, HotkeysTarget2, Classes } from '@blueprintjs/core'
+import { IconName, Icon, HotkeysTarget2, Classes, Menu, MenuItem } from '@blueprintjs/core'
+import { ContextMenu2, ContextMenu2ChildrenProps, ContextMenu2ContentProps } from '@blueprintjs/popover2'
 import {
     Column,
     Table,
@@ -18,7 +19,7 @@ import i18next from 'i18next'
 import { IReactionDisposer, reaction, toJS, IObservableArray } from 'mobx'
 import { File, FileID } from '../services/Fs'
 import { formatBytes } from '../utils/formatBytes'
-import { shouldCatchEvent, isEditable } from '../utils/dom'
+import { shouldCatchEvent, isEditable, isInRow } from '../utils/dom'
 import { AppAlert } from './AppAlert'
 import { WithMenuAccelerators, Accelerators, Accelerator } from './WithMenuAccelerators'
 import { isMac } from '../utils/platform'
@@ -33,7 +34,8 @@ import CONFIG from '../config/appConfig'
 import { getSelectionRange } from '../utils/fileUtils'
 import { throttle } from '../utils/throttle'
 import { FileState } from '../state/fileState'
-import { showFileContextMenu } from './menus/FileContextMenu'
+import { FileContextMenu } from './menus/FileContextMenu'
+import classNames from 'classnames'
 
 declare const ENV: { [key: string]: string | boolean | number | Record<string, unknown> }
 
@@ -94,6 +96,8 @@ interface State {
     // last path that was used
     path: string
     isContextMenuOpen: boolean
+    //
+    rightClickFile: File | null
 }
 
 interface Props extends WithTranslation {
@@ -134,6 +138,7 @@ export class FileTableClass extends React.Component<Props, State> {
             position: -1,
             path: cache.path,
             isContextMenuOpen: false,
+            rightClickFile: null,
         }
 
         this.installReactions()
@@ -408,6 +413,7 @@ export class FileTableClass extends React.Component<Props, State> {
     }
 
     onRowClick = (data: RowMouseEventHandlerParams): void => {
+        console.log('onRowClick')
         const { rowData, event, index } = data
         const { nodes, selected } = this.state
         const originallySelected = rowData.isSelected
@@ -562,6 +568,10 @@ export class FileTableClass extends React.Component<Props, State> {
         if ((event.target as HTMLElement) !== this.editingElement) {
             this.openFileOrDirectory(file, event.shiftKey)
         }
+    }
+
+    onRowRightClick = (data: RowMouseEventHandlerParams): void => {
+        this.setState({ rightClickFile: data.rowData.nodeData as File })
     }
 
     async openFileOrDirectory(file: File, useInactiveCache: boolean): Promise<void> {
@@ -834,13 +844,9 @@ export class FileTableClass extends React.Component<Props, State> {
             : []),
     ]
 
-    onFileContextMenu = (e: React.MouseEvent) => {
-        const { appState } = this.injected
-        showFileContextMenu({
-            left: e.clientX,
-            top: e.clientY,
-            appState,
-        })
+    renderFileContextMenu = (props: ContextMenu2ContentProps): JSX.Element => {
+        console.log('file under mouse', this.state.rightClickFile, props.isOpen)
+        return props.isOpen ? <FileContextMenu fileUnderMouse={this.state.rightClickFile} /> : null
     }
 
     render(): React.ReactElement {
@@ -850,56 +856,79 @@ export class FileTableClass extends React.Component<Props, State> {
 
         return (
             <HotkeysTarget2 hotkeys={this.hotkeys}>
-                <div
-                    ref={this.setGridRef}
-                    onClick={this.onBlankAreaClick}
-                    onKeyDown={this.onInputKeyDown}
-                    className={`fileListSizerWrapper`}
-                    onContextMenu={this.onFileContextMenu}
-                >
-                    <AutoSizer>
-                        {({ width, height }) => (
-                            <Table
-                                headerClassName="tableHeader"
-                                headerHeight={ROW_HEIGHT}
-                                height={height}
-                                gridClassName={GRID_CLASSES}
-                                onRowClick={this.onRowClick}
-                                onRowDoubleClick={this.onRowDoubleClick}
-                                onHeaderClick={this.onHeaderClick}
-                                noRowsRenderer={this._noRowsRenderer}
-                                rowClassName={this.rowClassName}
-                                rowHeight={ROW_HEIGHT}
-                                rowGetter={this.rowGetter}
-                                rowCount={rowCount}
-                                // scrollToIndex={position < 0 ? undefined : position}
-                                onScroll={this.onScroll}
-                                rowRenderer={this.rowRenderer}
-                                ref={this.tableRef}
-                                width={width}
-                            >
-                                <Column
-                                    dataKey="name"
-                                    label={t('FILETABLE.COL_NAME')}
-                                    cellRenderer={this.nameRenderer}
-                                    headerRenderer={this.headerRenderer}
-                                    width={NAME_COLUMN_WIDTH}
-                                    flexGrow={1}
-                                    columnData={{ index: 0, sortMethod: 'name' }}
-                                />
-                                <Column
-                                    className={`size ${Classes.TEXT_SMALL}`}
-                                    width={SIZE_COLUMN_WITDH}
-                                    label={t('FILETABLE.COL_SIZE')}
-                                    headerRenderer={this.headerRenderer}
-                                    dataKey="size"
-                                    flexShrink={1}
-                                    columnData={{ index: 1, sortMethod: 'size' }}
-                                />
-                            </Table>
-                        )}
-                    </AutoSizer>
-                </div>
+                <ContextMenu2 content={this.renderFileContextMenu}>
+                    {(ctxMenuProps: ContextMenu2ChildrenProps) => (
+                        <div
+                            ref={(element: HTMLElement) => {
+                                // since we also need to have access to this element
+                                this.setGridRef(element)
+                                const ref = ctxMenuProps.ref as React.MutableRefObject<HTMLElement>
+                                ref.current = element
+                            }}
+                            onClick={this.onBlankAreaClick}
+                            onContextMenu={(e) => {
+                                // reset rightClickFile if we right-click on an empty area
+                                if (!isInRow(e)) {
+                                    this.setState({
+                                        rightClickFile: null,
+                                    })
+                                }
+                                ctxMenuProps.onContextMenu(e)
+                            }}
+                            onKeyDown={this.onInputKeyDown}
+                            className={classNames('fileListSizerWrapper', ctxMenuProps.className)}
+                        >
+                            <>
+                                {ctxMenuProps.popover}
+                                <AutoSizer>
+                                    {({ width, height }) => (
+                                        <>
+                                            <Table
+                                                headerClassName="tableHeader"
+                                                headerHeight={ROW_HEIGHT}
+                                                height={height}
+                                                gridClassName={GRID_CLASSES}
+                                                onRowRightClick={this.onRowRightClick}
+                                                onRowClick={this.onRowClick}
+                                                onRowDoubleClick={this.onRowDoubleClick}
+                                                onHeaderClick={this.onHeaderClick}
+                                                noRowsRenderer={this._noRowsRenderer}
+                                                rowClassName={this.rowClassName}
+                                                rowHeight={ROW_HEIGHT}
+                                                rowGetter={this.rowGetter}
+                                                rowCount={rowCount}
+                                                // scrollToIndex={position < 0 ? undefined : position}
+                                                onScroll={this.onScroll}
+                                                rowRenderer={this.rowRenderer}
+                                                ref={this.tableRef}
+                                                width={width}
+                                            >
+                                                <Column
+                                                    dataKey="name"
+                                                    label={t('FILETABLE.COL_NAME')}
+                                                    cellRenderer={this.nameRenderer}
+                                                    headerRenderer={this.headerRenderer}
+                                                    width={NAME_COLUMN_WIDTH}
+                                                    flexGrow={1}
+                                                    columnData={{ index: 0, sortMethod: 'name' }}
+                                                />
+                                                <Column
+                                                    className={`size ${Classes.TEXT_SMALL}`}
+                                                    width={SIZE_COLUMN_WITDH}
+                                                    label={t('FILETABLE.COL_SIZE')}
+                                                    headerRenderer={this.headerRenderer}
+                                                    dataKey="size"
+                                                    flexShrink={1}
+                                                    columnData={{ index: 1, sortMethod: 'size' }}
+                                                />
+                                            </Table>
+                                        </>
+                                    )}
+                                </AutoSizer>
+                            </>
+                        </div>
+                    )}
+                </ContextMenu2>
             </HotkeysTarget2>
         )
     }

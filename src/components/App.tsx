@@ -96,6 +96,8 @@ const App = inject('settingsState')(
                     splitView: props.initialSettings.splitView,
                 })
 
+                window.appState = this.appState
+
                 if (ENV.CY) {
                     window.appState = this.appState
                     window.settingsState = settingsState
@@ -191,13 +193,17 @@ const App = inject('settingsState')(
                 const sideview = (e.target as HTMLElement).closest('.sideview')
                 const filetable = (e.target as HTMLElement).closest('.fileListSizerWrapper')
 
+                console.log('contextMenuClick!!', e.button)
+
                 if (sideview) {
                     const num = parseInt(sideview.id.replace('view_', ''), 10)
                     const winState = this.appState.winStates[0]
                     const view = winState.getView(num)
                     if (!view.isActive) {
                         // prevent selecting a row when the view gets activated
-                        if (filetable) {
+                        // Note: only do that for left click
+                        // we want right click to activate the inactive view's menu
+                        if (filetable && e.button === 2) {
                             console.log('preventing event propagation', e.target)
                             e.stopPropagation()
                         }
@@ -393,7 +399,11 @@ const App = inject('settingsState')(
                             <MenuAccelerators onExitComboDown={this.onExitComboDown} />
                             <KeyboardHotkeys />
                             <Nav></Nav>
-                            <div onClickCapture={this.handleClick} className={mainClass}>
+                            <div
+                                onClickCapture={this.handleClick}
+                                onContextMenuCapture={this.handleClick}
+                                className={mainClass}
+                            >
                                 <LeftPanel hide={!isExplorer}></LeftPanel>
                                 <SideView viewState={viewStateLeft} hide={!isExplorer} onPaste={this.onPaste} />
                                 <SideView

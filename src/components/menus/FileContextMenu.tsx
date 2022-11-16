@@ -1,53 +1,56 @@
 import React from 'react'
-import { Menu, MenuItem, ContextMenu, MenuDivider } from '@blueprintjs/core'
+import { Menu, MenuItem, MenuDivider } from '@blueprintjs/core'
 import { AppState } from '$src/state/appState'
-
-interface Position {
-    left: number
-    top: number
-}
+import { useStores } from '$src/hooks/useStores'
+import { File, sameID } from '$src/services/Fs'
 
 interface Props {
-    onCopy?: () => void
-    onClose?: () => void
-    onDelete?: () => void
-    onPaste?: () => void
-    appState: AppState
+    fileUnderMouse: File | null
 }
 
-const FileContextMenu = ({ onCopy, onClose, onDelete, onPaste, appState }: Props) => {
+const FileContextMenu = ({ fileUnderMouse }: Props) => {
+    const { appState } = useStores<AppState>('appState')
+
     const numFilesInClipboard = appState.clipboard.files.length
     const cache = appState.getActiveCache()
     const numSelectedFiles = cache.selected.length
+    const isInSelection = fileUnderMouse && !!cache.selected.find((file) => sameID(file, fileUnderMouse))
+    const isPasteEnabled = numFilesInClipboard && ((!fileUnderMouse && !cache.error) || fileUnderMouse?.isDir)
+
+    const onCopy = () => {
+        console.log('onCopy', isInSelection ? 'need to copy to selection' : 'need to copy only selected file')
+    }
+
+    const onPaste = () => {
+        console.log('onPaste')
+    }
+
     // copy enabled:
-    // - file/dir unde rcursor
+    // - file/dir under cursor
     // files to be copied
     // - mouse under selection: selection
     // - mouse under non selected file: file
 
     // paste enabled:
     // clipboard not empty &&
-    // * mouse over file ?
-    //   - (selection.length === 0 && !error)
+    // * mouse over file && file.isDir
     // .   OR
-    //   - (selection.length === 1 && isDir)
     // * mouse over empty area
     //
 
     // delete enabled:
-    // selection.length > 0
+    // - over element
+    // => elements to delete:
+    // - mouse over selection ? => selection
+    // - mouse over non selection ? => single element
     return (
         <Menu>
-            <MenuItem text="Copy" disabled={!numSelectedFiles} />
-            <MenuItem text="Paste" disabled={!numFilesInClipboard} />
+            <MenuItem text="Copy" disabled={!fileUnderMouse} onClick={onCopy} />
+            <MenuItem text="Paste" disabled={!isPasteEnabled} onClick={onPaste} />
             <MenuDivider />
             <MenuItem text="Delete" disabled={!numSelectedFiles} />
         </Menu>
     )
 }
 
-const showFileContextMenu = ({ left, top, ...rest }: Position & Props) => {
-    ContextMenu.show(<FileContextMenu {...rest} />, { left, top })
-}
-
-export { showFileContextMenu }
+export { FileContextMenu }

@@ -1,4 +1,5 @@
 import { Classes } from '@blueprintjs/core'
+import React from 'react'
 
 export function shouldCatchEvent(e: Event): boolean {
     const element = e.target as HTMLElement
@@ -21,4 +22,9 @@ export function isEditable(element: Element): boolean {
 export function getTargetTagName(e: Event): string {
     const element = e.target as HTMLElement
     return element.tagName.toLowerCase()
+}
+
+export function isInRow(e: React.MouseEvent<HTMLElement, MouseEvent>): boolean {
+    const element = e.target as Element
+    return !!element.closest('[role="row"]')
 }
