@@ -1,8 +1,6 @@
-import { Intent } from '@blueprintjs/core'
 import React from 'react'
 import { Trans } from 'react-i18next'
 import { i18n } from '$src/locale/i18n'
-import { AppAlert } from '../AppAlert'
 
 interface Props {
     count: number

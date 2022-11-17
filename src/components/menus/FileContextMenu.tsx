@@ -1,5 +1,5 @@
 import React from 'react'
-import { Menu, MenuItem, MenuDivider } from '@blueprintjs/core'
+import { Menu, MenuItem, MenuDivider, Intent } from '@blueprintjs/core'
 import { AppState } from '$src/state/appState'
 import { useStores } from '$src/hooks/useStores'
 import { File, sameID } from '$src/services/Fs'
@@ -55,10 +55,16 @@ const FileContextMenu = ({ fileUnderMouse }: Props) => {
     // - mouse over non selection ? => single element
     return (
         <Menu>
-            <MenuItem text={t('APP_MENUS.COPY')} disabled={!fileUnderMouse} onClick={onCopy} />
-            <MenuItem text={t('APP_MENUS.PASTE')} disabled={!isPasteEnabled} onClick={onPaste} />
+            <MenuItem icon="duplicate" text={t('APP_MENUS.COPY')} disabled={!fileUnderMouse} onClick={onCopy} />
+            <MenuItem icon="clipboard" text={t('APP_MENUS.PASTE')} disabled={!isPasteEnabled} onClick={onPaste} />
             <MenuDivider />
-            <MenuItem text={t('APP_MENUS.DELETE')} disabled={!fileUnderMouse} onClick={onDelete} />
+            <MenuItem
+                icon="delete"
+                intent={Intent.DANGER}
+                text={t('APP_MENUS.DELETE')}
+                disabled={!fileUnderMouse}
+                onClick={onDelete}
+            />
         </Menu>
     )
 }
