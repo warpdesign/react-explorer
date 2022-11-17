@@ -3,12 +3,14 @@ import { Menu, MenuItem, MenuDivider } from '@blueprintjs/core'
 import { AppState } from '$src/state/appState'
 import { useStores } from '$src/hooks/useStores'
 import { File, sameID } from '$src/services/Fs'
+import { useTranslation } from 'react-i18next'
 
 interface Props {
     fileUnderMouse: File | null
 }
 
 const FileContextMenu = ({ fileUnderMouse }: Props) => {
+    const { t } = useTranslation()
     const { appState } = useStores<AppState>('appState')
     const clipboard = appState.clipboard
     const cache = appState.getActiveCache()
@@ -30,6 +32,7 @@ const FileContextMenu = ({ fileUnderMouse }: Props) => {
 
     const onDelete = () => {
         console.log('onDelete')
+        appState.delete(!isInSelection ? [fileUnderMouse] : undefined)
     }
 
     // copy enabled:
@@ -52,10 +55,10 @@ const FileContextMenu = ({ fileUnderMouse }: Props) => {
     // - mouse over non selection ? => single element
     return (
         <Menu>
-            <MenuItem text="Copy" disabled={!fileUnderMouse} onClick={onCopy} />
-            <MenuItem text="Paste" disabled={!isPasteEnabled} onClick={onPaste} />
+            <MenuItem text={t('APP_MENUS.COPY')} disabled={!fileUnderMouse} onClick={onCopy} />
+            <MenuItem text={t('APP_MENUS.PASTE')} disabled={!isPasteEnabled} onClick={onPaste} />
             <MenuDivider />
-            <MenuItem text="Delete" disabled={!fileUnderMouse} onClick={onDelete} />
+            <MenuItem text={t('APP_MENUS.DELETE')} disabled={!fileUnderMouse} onClick={onDelete} />
         </Menu>
     )
 }

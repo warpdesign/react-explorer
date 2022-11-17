@@ -74,7 +74,8 @@
                 "TEST_TERMINAL_FAILED": "Impossible de lancer le terminal spécifié: {{terminal}} (code de retour: {{code}})"
             },
             "DELETE": {
-                "CONFIRM": "Etes-vous sûr de vouloir supprimer <1>{{count}}</1> fichier(s)/dossier(s) ?<3 /><4 />Cette action supprimera de manière <6>permanente</6> les éléments sélectionnés."
+                "CONFIRM": "Etes-vous sûr de vouloir supprimer <1>{{count}}</1> fichier(s)/dossier(s) ?<3 /><4 />Cette action supprimera de manière <6>permanente</6> les éléments sélectionnés.",
+                "CONFIRM_SIMPLE": "Etes-vous sûr de vouloir supprimer le/les fichier(s)/dossier(s) sélectionné(s) ?<1 /><2 />Cette action supprimera de manière <4>permanente</4> les éléments sélectionnés."
             },
             "SHORTCUTS": {
                 "FILTER_PLACEHOLDER": "Rechercher un raccourci",

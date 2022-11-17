@@ -1,4 +1,4 @@
-import { action, observable, computed, makeObservable, runInAction } from 'mobx'
+import { action, observable, computed, makeObservable, runInAction, toJS } from 'mobx'
 import { shell } from 'electron'
 import { File, FsApi, getFS } from '$src/services/Fs'
 import { FileState } from '$src/state/fileState'
@@ -13,13 +13,15 @@ import type { TFunction } from 'i18next'
 import { i18n } from '$src/locale/i18n'
 import { AppToaster } from '$src/components/AppToaster'
 import { Intent } from '@blueprintjs/core'
-import { getLocalizedError } from '$src/locale/error'
+import { getLocalizedError, LocalizedError } from '$src/locale/error'
+import { showDeleteConfirmDialog } from '$src/components/dialogs/deleteConfirm'
 
 declare const ENV: { [key: string]: string | boolean | number | Record<string, unknown> }
 
 // wait 1 sec before showing badge: this avoids
 // flashing (1) badge when the transfer is very fast
 const SHOW_BADGE_DELAY = 600
+const ERROR_MESSAGE_TIMEOUT = 3500
 
 /**
  * Interface for a transfer
@@ -155,6 +157,57 @@ export class AppState {
                     intent: Intent.DANGER,
                     timeout: 5000,
                 })
+            }
+        }
+    }
+
+    onDeleteError = (err?: LocalizedError) => {
+        if (err) {
+            AppToaster.show({
+                message: this.t('ERRORS.DELETE', { message: err.message }),
+                icon: 'error',
+                intent: Intent.DANGER,
+                timeout: ERROR_MESSAGE_TIMEOUT,
+            })
+        } else {
+            AppToaster.show({
+                message: this.t('ERRORS.DELETE_WARN'),
+                icon: 'warning-sign',
+                intent: Intent.WARNING,
+                timeout: ERROR_MESSAGE_TIMEOUT,
+            })
+        }
+    }
+
+    async delete(files?: File[]): Promise<void> {
+        const confirmed = await showDeleteConfirmDialog({
+            cancelButtonText: this.t('COMMON.CANCEL'),
+            confirmButtonText: this.t('APP_MENUS.DELETE'),
+        })
+
+        if (confirmed) {
+            try {
+                const cache = this.getActiveCache()
+                const toDelete = files || cache.selected
+                const deleted = await cache.delete(cache.path, toDelete)
+
+                console.log('should delete')
+                toDelete.forEach((file) => console.log('** ', toJS(file)))
+                // cache.selected
+
+                if (!deleted) {
+                    this.onDeleteError()
+                } else {
+                    if (deleted !== cache.selected.length) {
+                        // show warning
+                        this.onDeleteError()
+                    }
+                    if (cache.getFS().options.needsRefresh) {
+                        cache.reload()
+                    }
+                }
+            } catch (err) {
+                this.onDeleteError(err)
             }
         }
     }
