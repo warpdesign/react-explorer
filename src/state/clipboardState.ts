@@ -1,10 +1,12 @@
-import { action, observable, computed, makeObservable, runInAction } from 'mobx'
+import { action, observable, makeObservable } from 'mobx'
 import { clipboard } from 'electron'
 import { File, FsApi } from '$src/services/Fs'
-import { lineEnding, DOWNLOADS_DIR } from '$src/utils/platform'
+import { lineEnding } from '$src/utils/platform'
 import { FileState } from '$src/state/fileState'
 import type { TFunction } from 'i18next'
 import { i18n } from '$src/locale/i18n'
+import { Intent } from '@blueprintjs/core'
+import { AppToaster } from '$src/components/AppToaster'
 
 /**
  * Interface for a clipboard entry
@@ -52,6 +54,17 @@ export class ClipboardState {
             const pathnames = files.map((file) => fileState.join((!filenameOnly && file.dir) || '', file.fullname))
             text = pathnames.join(lineEnding)
             clipboard.writeText(text)
+            AppToaster.show(
+                {
+                    message: filenameOnly
+                        ? this.t('COMMON.CP_NAMES_COPIED', { count: length })
+                        : this.t('COMMON.CP_PATHS_COPIED', { count: length }),
+                    icon: 'tick',
+                    intent: Intent.NONE,
+                },
+                undefined,
+                true,
+            )
         }
 
         return text
