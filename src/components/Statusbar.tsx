@@ -29,26 +29,8 @@ export const StatusbarClass = inject(
 
             private onClipboardCopy = (): void => {
                 const { appState, viewState } = this.injected
-                const { t } = this.props
-
-                const num = appState.clipboard.setClipboard(viewState.getVisibleCache())
-
-                num &&
-                    AppToaster.show({
-                        message: t('COMMON.CP_COPIED', { count: num }),
-                        icon: 'tick',
-                        intent: Intent.NONE,
-                    })
+                appState.clipboard.setClipboard(viewState.getVisibleCache())
             }
-
-            // shouldComponentUpdate() {
-            //     console.time('Statusbar Render');
-            //     return true;
-            // }
-
-            // componentDidUpdate() {
-            //     console.timeEnd('Statusbar Render');
-            // }
 
             public render(): React.ReactNode {
                 const { viewState } = this.injected

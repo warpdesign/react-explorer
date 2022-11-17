@@ -20,6 +20,7 @@ const FileContextMenu = ({ fileUnderMouse }: Props) => {
 
     const onCopy = () => {
         console.log('onCopy', isInSelection ? 'need to copy selection' : 'need to copy only selected file')
+        clipboard.setClipboard(cache, !isInSelection ? [fileUnderMouse] : undefined)
     }
 
     const onPaste = () => {

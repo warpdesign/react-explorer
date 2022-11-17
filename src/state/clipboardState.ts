@@ -36,14 +36,24 @@ export class ClipboardState {
         this.t = i18n.i18next.t
     }
 
-    setClipboard(fileState: FileState, files?: File[]): number {
+    setClipboard(fileState: FileState, files?: File[]): void {
         const filesToCopy = files || fileState.selected.slice(0)
+        const length = filesToCopy.length
 
         this.srcFs = fileState.getAPI()
         this.srcPath = fileState.path
         this.files.replace(filesToCopy)
 
-        return filesToCopy.length
+        length &&
+            AppToaster.show(
+                {
+                    message: this.t('COMMON.CP_COPIED', { count: length }),
+                    icon: 'tick',
+                    intent: Intent.NONE,
+                },
+                undefined,
+                true,
+            )
     }
 
     copySelectedItemsPath(fileState: FileState, filenameOnly = false): void {

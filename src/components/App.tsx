@@ -270,19 +270,7 @@ const App = inject('settingsState')(
                 const fileCache: FileState = this.getActiveFileCache()
 
                 if (fileCache) {
-                    const { t } = this.injected
-                    const num = this.appState.clipboard.setClipboard(fileCache)
-
-                    num &&
-                        AppToaster.show(
-                            {
-                                message: t('COMMON.CP_COPIED', { count: num }),
-                                icon: 'tick',
-                                intent: Intent.NONE,
-                            },
-                            undefined,
-                            true,
-                        )
+                    this.appState.clipboard.setClipboard(fileCache)
                 }
             }
 
