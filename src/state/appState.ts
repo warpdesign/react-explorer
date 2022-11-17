@@ -9,6 +9,11 @@ import { WinState, WindowSettings } from '$src/state/winState'
 import { FavoritesState } from '$src/state/favoritesState'
 import { ViewState } from '$src/state/viewState'
 import { ClipboardState } from './clipboardState'
+import type { TFunction } from 'i18next'
+import { i18n } from '$src/locale/i18n'
+import { AppToaster } from '$src/components/AppToaster'
+import { Intent } from '@blueprintjs/core'
+import { getLocalizedError } from '$src/locale/error'
 
 declare const ENV: { [key: string]: string | boolean | number | Record<string, unknown> }
 
@@ -64,6 +69,8 @@ export class AppState {
 
     clipboard: ClipboardState = new ClipboardState()
 
+    t: TFunction
+
     /**
      * Creates the application state
      *
@@ -86,6 +93,8 @@ export class AppState {
             addView: action,
             updateSelection: action,
         })
+
+        this.t = i18n.i18next.t
 
         this.addWindow(options)
 
@@ -111,6 +120,43 @@ export class AppState {
     initViewState(): void {
         const winState = this.winStates[0]
         winState.initState()
+    }
+
+    async paste(destCache: FileState): Promise<void> {
+        if (destCache && !destCache.error && this.clipboard.files.length) {
+            try {
+                const noErrors = await this.prepareClipboardTransferTo(destCache)
+                if (noErrors) {
+                    AppToaster.show({
+                        message: this.t('COMMON.COPY_FINISHED'),
+                        icon: 'tick',
+                        intent: Intent.SUCCESS,
+                        timeout: 3000,
+                    })
+                } else {
+                    AppToaster.show({
+                        message: this.t('COMMON.COPY_WARNING'),
+                        icon: 'warning-sign',
+                        intent: Intent.WARNING,
+                        timeout: 5000,
+                    })
+                }
+            } catch (err) {
+                const localizedError = getLocalizedError(err)
+                const message = err.code
+                    ? this.t('ERRORS.COPY_ERROR', {
+                          message: localizedError.message,
+                      })
+                    : this.t('ERRORS.COPY_UNKNOWN_ERROR')
+
+                AppToaster.show({
+                    message: message,
+                    icon: 'error',
+                    intent: Intent.DANGER,
+                    timeout: 5000,
+                })
+            }
+        }
     }
 
     /**

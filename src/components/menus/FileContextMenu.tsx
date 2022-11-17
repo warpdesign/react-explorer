@@ -25,6 +25,7 @@ const FileContextMenu = ({ fileUnderMouse }: Props) => {
 
     const onPaste = () => {
         console.log('onPaste')
+        appState.paste(cache)
     }
 
     const onDelete = () => {

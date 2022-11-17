@@ -43,7 +43,7 @@ export const StatusbarClass = inject(
                 const offline = classnames('status-bar', { offline: fileCache.status === 'offline' })
                 const { t } = this.props
 
-                const pasteButton = (
+                const copyButton = (
                     <Tooltip2 content={t('STATUS.CPTOOLTIP', { count: numSelected })} disabled={disabled}>
                         <Button
                             data-cy-paste-bt
@@ -61,7 +61,7 @@ export const StatusbarClass = inject(
                         <InputGroup
                             disabled
                             leftIcon={iconName}
-                            rightElement={pasteButton}
+                            rightElement={copyButton}
                             value={`${t('STATUS.FILES', { count: numFiles })}, ${t('STATUS.FOLDERS', {
                                 count: numDirs,
                             })}`}

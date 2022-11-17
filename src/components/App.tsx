@@ -276,46 +276,7 @@ const App = inject('settingsState')(
 
             private onPaste = (): void => {
                 const fileCache: FileState = this.getActiveFileCache()
-                const appState = this.appState
-
-                if (fileCache && !fileCache.error && appState.clipboard.files.length) {
-                    this.appState
-                        .prepareClipboardTransferTo(fileCache)
-                        .then((noErrors: boolean) => {
-                            const { t } = this.injected
-                            if (noErrors) {
-                                AppToaster.show({
-                                    message: t('COMMON.COPY_FINISHED'),
-                                    icon: 'tick',
-                                    intent: Intent.SUCCESS,
-                                    timeout: 3000,
-                                })
-                            } else {
-                                AppToaster.show({
-                                    message: t('COMMON.COPY_WARNING'),
-                                    icon: 'warning-sign',
-                                    intent: Intent.WARNING,
-                                    timeout: 5000,
-                                })
-                            }
-                        })
-                        .catch((err: any) => {
-                            const { t } = this.injected
-                            const localizedError = getLocalizedError(err)
-                            const message = err.code
-                                ? t('ERRORS.COPY_ERROR', {
-                                      message: localizedError.message,
-                                  })
-                                : t('ERRORS.COPY_UNKNOWN_ERROR')
-
-                            AppToaster.show({
-                                message: message,
-                                icon: 'error',
-                                intent: Intent.DANGER,
-                                timeout: 5000,
-                            })
-                        })
-                }
+                this.appState.paste(fileCache)
             }
 
             closePrefs = (): void => {
