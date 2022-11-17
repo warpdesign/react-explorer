@@ -46,13 +46,12 @@ export class ClipboardState {
         return filesToCopy.length
     }
 
-    copySelectedItemsPath(fileState: FileState, filenameOnly = false): string {
+    copySelectedItemsPath(fileState: FileState, filenameOnly = false): void {
         const files = fileState.selected
-        let text = ''
 
         if (files.length) {
             const pathnames = files.map((file) => fileState.join((!filenameOnly && file.dir) || '', file.fullname))
-            text = pathnames.join(lineEnding)
+            const text = pathnames.join(lineEnding)
             clipboard.writeText(text)
             AppToaster.show(
                 {
@@ -66,7 +65,5 @@ export class ClipboardState {
                 true,
             )
         }
-
-        return text
     }
 }

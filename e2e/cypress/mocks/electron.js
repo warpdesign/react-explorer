@@ -29,4 +29,9 @@ module.exports = {
             //
         },
     },
+    clipboard: {
+        writeText: function(text) {
+            //
+        }
+    }
 };

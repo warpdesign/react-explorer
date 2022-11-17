@@ -96,8 +96,6 @@ const App = inject('settingsState')(
                     splitView: props.initialSettings.splitView,
                 })
 
-                window.appState = this.appState
-
                 if (ENV.CY) {
                     window.appState = this.appState
                     window.settingsState = settingsState
