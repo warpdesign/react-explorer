@@ -430,18 +430,18 @@ export class AppState {
         files: [],
     }
 
-    setClipboard(fileState: FileState): number {
-        const files = fileState.selected.slice(0)
+    setClipboard(fileState: FileState, files?: File[]): number {
+        const filesToCopy = files || fileState.selected.slice(0)
 
         this.clipboard = {
             srcFs: fileState.getAPI(),
             srcPath: fileState.path,
-            files,
+            files: filesToCopy,
         }
 
-        console.log('clipboard', files)
+        console.log('clipboard', filesToCopy)
 
-        return files.length
+        return filesToCopy.length
     }
 
     copySelectedItemsPath(fileState: FileState, filenameOnly = false): string {
