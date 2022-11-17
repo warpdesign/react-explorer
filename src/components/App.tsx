@@ -273,7 +273,7 @@ const App = inject('settingsState')(
 
                 if (fileCache) {
                     const { t } = this.injected
-                    const num = this.appState.setClipboard(fileCache)
+                    const num = this.appState.clipboard.setClipboard(fileCache)
 
                     num &&
                         AppToaster.show(

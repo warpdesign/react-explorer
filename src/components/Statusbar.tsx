@@ -31,7 +31,7 @@ export const StatusbarClass = inject(
                 const { appState, viewState } = this.injected
                 const { t } = this.props
 
-                const num = appState.setClipboard(viewState.getVisibleCache())
+                const num = appState.clipboard.setClipboard(viewState.getVisibleCache())
 
                 num &&
                     AppToaster.show({

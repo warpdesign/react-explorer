@@ -1,30 +1,20 @@
 import { action, observable, computed, makeObservable, runInAction } from 'mobx'
-import { File, FsApi, getFS } from '../services/Fs'
-import { FileState } from './fileState'
-import { Batch } from '../transfers/batch'
-import { clipboard, shell } from 'electron'
-import { lineEnding, DOWNLOADS_DIR } from '../utils/platform'
-import { ViewDescriptor } from '../components/TabList'
-import { WinState, WindowSettings } from './winState'
-import { FavoritesState } from './favoritesState'
-import { ViewState } from './viewState'
+import { shell } from 'electron'
+import { File, FsApi, getFS } from '$src/services/Fs'
+import { FileState } from '$src/state/fileState'
+import { Batch } from '$src/transfers/batch'
+import { lineEnding, DOWNLOADS_DIR } from '$src/utils/platform'
+import { ViewDescriptor } from '$src/components/TabList'
+import { WinState, WindowSettings } from '$src/state/winState'
+import { FavoritesState } from '$src/state/favoritesState'
+import { ViewState } from '$src/state/viewState'
+import { ClipboardState } from './clipboardState'
 
 declare const ENV: { [key: string]: string | boolean | number | Record<string, unknown> }
 
 // wait 1 sec before showing badge: this avoids
 // flashing (1) badge when the transfer is very fast
 const SHOW_BADGE_DELAY = 600
-
-/**
- * Interface for a clipboard entry
- *
- * @interface
- */
-interface Clipboard {
-    srcFs: FsApi
-    srcPath: string
-    files: File[]
-}
 
 /**
  * Interface for a transfer
@@ -49,8 +39,6 @@ interface TransferOptions {
  * Transfers are also starting from appState
  */
 export class AppState {
-    caches: FileState[] = []
-
     winStates: WinState[] = observable<WinState>([])
 
     favoritesState: FavoritesState = new FavoritesState()
@@ -74,6 +62,8 @@ export class AppState {
     // current active transfers
     activeTransfers = observable<Batch>([])
 
+    clipboard: ClipboardState = new ClipboardState()
+
     /**
      * Creates the application state
      *
@@ -95,9 +85,6 @@ export class AppState {
             refreshActiveView: action,
             addView: action,
             updateSelection: action,
-            clipboard: observable,
-            setClipboard: action,
-            copySelectedItemsPath: action,
         })
 
         this.addWindow(options)
@@ -422,38 +409,5 @@ export class AppState {
         // for (let selected of cache.selected) {
         //     console.log(selected.fullname, selected.id.dev, selected.id.ino);
         // }
-    }
-
-    clipboard: Clipboard = {
-        srcPath: '',
-        srcFs: null,
-        files: [],
-    }
-
-    setClipboard(fileState: FileState, files?: File[]): number {
-        const filesToCopy = files || fileState.selected.slice(0)
-
-        this.clipboard = {
-            srcFs: fileState.getAPI(),
-            srcPath: fileState.path,
-            files: filesToCopy,
-        }
-
-        console.log('clipboard', filesToCopy)
-
-        return filesToCopy.length
-    }
-
-    copySelectedItemsPath(fileState: FileState, filenameOnly = false): string {
-        const files = fileState.selected
-        let text = ''
-
-        if (files.length) {
-            const pathnames = files.map((file) => fileState.join((!filenameOnly && file.dir) || '', file.fullname))
-            text = pathnames.join(lineEnding)
-            clipboard.writeText(text)
-        }
-
-        return text
     }
 }

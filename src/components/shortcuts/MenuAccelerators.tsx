@@ -35,7 +35,7 @@ class MenuAcceleratorsClass extends React.Component<Props> {
     copyTextToClipboard(fileCache: FileState, filesOnly = false): void {
         const length = fileCache.selected.length
 
-        this.appState.copySelectedItemsPath(fileCache, filesOnly)
+        this.appState.clipboard.copySelectedItemsPath(fileCache, filesOnly)
 
         if (length) {
             const { t } = this.injected
