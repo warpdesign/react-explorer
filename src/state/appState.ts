@@ -1,3 +1,4 @@
+import React from 'react'
 import { action, observable, computed, makeObservable, runInAction, toJS } from 'mobx'
 import { shell } from 'electron'
 import { File, FsApi, getFS } from '$src/services/Fs'
@@ -14,7 +15,8 @@ import { i18n } from '$src/locale/i18n'
 import { AppToaster } from '$src/components/AppToaster'
 import { Intent } from '@blueprintjs/core'
 import { getLocalizedError, LocalizedError } from '$src/locale/error'
-import { showDeleteConfirmDialog } from '$src/components/dialogs/deleteConfirm'
+import { DeleteConfirmDialog } from '$src/components/dialogs/deleteConfirm'
+import { AppAlert } from '$src/components/AppAlert'
 
 declare const ENV: { [key: string]: string | boolean | number | Record<string, unknown> }
 
@@ -180,28 +182,36 @@ export class AppState {
     }
 
     async delete(files?: File[]): Promise<void> {
-        const confirmed = await showDeleteConfirmDialog({
-            cancelButtonText: this.t('COMMON.CANCEL'),
-            confirmButtonText: this.t('APP_MENUS.DELETE'),
-        })
+        const cache = this.getActiveCache()
+        const toDelete = files || cache.selected
+        const confirmed = await AppAlert.show(
+            React.createElement(DeleteConfirmDialog, { count: toDelete.length }, null),
+            {
+                cancelButtonText: this.t('COMMON.CANCEL'),
+                confirmButtonText: this.t('APP_MENUS.DELETE'),
+                icon: 'trash',
+                intent: Intent.DANGER,
+            },
+        )
 
         if (confirmed) {
             try {
-                const cache = this.getActiveCache()
-                const toDelete = files || cache.selected
                 const deleted = await cache.delete(cache.path, toDelete)
-
-                console.log('should delete')
-                toDelete.forEach((file) => console.log('** ', toJS(file)))
-                // cache.selected
 
                 if (!deleted) {
                     this.onDeleteError()
                 } else {
-                    if (deleted !== cache.selected.length) {
+                    if (deleted !== toDelete.length) {
                         // show warning
                         this.onDeleteError()
+                    } else {
+                        AppToaster.show({
+                            message: this.t('COMMON.DELETE_SUCCESS', { count: deleted }),
+                            icon: 'tick',
+                            intent: Intent.SUCCESS,
+                        })
                     }
+
                     if (cache.getFS().options.needsRefresh) {
                         cache.reload()
                     }
