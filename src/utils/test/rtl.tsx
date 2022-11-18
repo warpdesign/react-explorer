@@ -23,9 +23,9 @@ class State {
     }
 }
 
-const renderWithProviders = (jsx: React.ReactElement, options = {}) => {
+const renderWithProviders = (jsx: React.ReactElement, providers = {}) => {
     const settingsState = new State()
-    return render(<Provider settingsState={settingsState}>{jsx}</Provider>)
+    return render(<Provider {...providers}>{jsx}</Provider>)
 }
 
 const AllTheProviders = ({ children }: { children: ReactElement }) => {
@@ -46,5 +46,7 @@ const customRender = (ui: ReactElement, options = {}) => render(ui, { wrapper: A
 // re-export everything
 export * from '@testing-library/react'
 
+const t = i18n.i18next.t
+
 // override render method
-export { customRender as render, LOCALE_EN, userEvent }
+export { customRender as render, LOCALE_EN, userEvent, t }

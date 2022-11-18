@@ -12,5 +12,8 @@ module.exports = {
        'src/utils/test',
        'src',
       __dirname,
-   ],    
+   ],
+   moduleNameMapper: {
+    "\\$src(.*)": "<rootDir>/src/$1"    
+   }
 };
