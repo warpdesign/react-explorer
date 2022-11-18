@@ -16,7 +16,6 @@ const FileContextMenu = ({ fileUnderMouse }: Props) => {
     const cache = appState.getActiveCache()
 
     const numFilesInClipboard = clipboard.files.length
-    const numSelectedFiles = cache.selected.length
     const isInSelection = fileUnderMouse && !!cache.selected.find((file) => sameID(file, fileUnderMouse))
     const isPasteEnabled = numFilesInClipboard && ((!fileUnderMouse && !cache.error) || fileUnderMouse?.isDir)
 

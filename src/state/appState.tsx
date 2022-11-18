@@ -1,5 +1,5 @@
 import React from 'react'
-import { action, observable, computed, makeObservable, runInAction, toJS } from 'mobx'
+import { action, observable, computed, makeObservable, runInAction } from 'mobx'
 import { shell } from 'electron'
 import { File, FsApi, getFS } from '$src/services/Fs'
 import { FileState } from '$src/state/fileState'
@@ -184,15 +184,12 @@ export class AppState {
     async delete(files?: File[]): Promise<void> {
         const cache = this.getActiveCache()
         const toDelete = files || cache.selected
-        const confirmed = await AppAlert.show(
-            React.createElement(DeleteConfirmDialog, { count: toDelete.length }, null),
-            {
-                cancelButtonText: this.t('COMMON.CANCEL'),
-                confirmButtonText: this.t('APP_MENUS.DELETE'),
-                icon: 'trash',
-                intent: Intent.DANGER,
-            },
-        )
+        const confirmed = await AppAlert.show(<DeleteConfirmDialog count={toDelete.length} />, {
+            cancelButtonText: this.t('COMMON.CANCEL'),
+            confirmButtonText: this.t('APP_MENUS.DELETE'),
+            icon: 'trash',
+            intent: Intent.DANGER,
+        })
 
         if (confirmed) {
             try {
