@@ -128,7 +128,7 @@ export const ToolbarClass = inject(
                 private onKeyUp = (event: React.KeyboardEvent<HTMLElement>): void => {
                     this.hideTooltip()
 
-                    if (event.keyCode === KEYS.Escape) {
+                    if (event.key === 'Escape') {
                         // since React events are attached to the root document
                         // event already has bubbled up so we must stop
                         // its immediate propagation
@@ -137,7 +137,7 @@ export const ToolbarClass = inject(
                         this.input.blur()
                         // workaround for Cypress bug https://github.com/cypress-io/cypress/issues/1176
                         // this.onBlur();
-                    } else if (event.keyCode === KEYS.Enter) {
+                    } else if (event.key === 'Enter') {
                         this.onSubmit()
                     }
                 }

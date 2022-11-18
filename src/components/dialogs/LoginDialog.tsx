@@ -57,7 +57,7 @@ class LoginDialogClass extends React.Component<LoginProps, LoginState> {
     }
 
     onKeyUp = (e: KeyboardEvent): void => {
-        if (e.keyCode === ENTER_KEY) {
+        if (e.key === 'Enter') {
             // we assume anonymous login if no username specified
             if (this.canLogin()) {
                 this.onLogin()

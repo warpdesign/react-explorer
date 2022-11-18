@@ -67,13 +67,15 @@ const TYPE_ICONS: { [key: string]: IconName } = {
 }
 
 enum KEYS {
-    Backspace = 8,
-    Enter = 13,
-    Escape = 27,
-    Down = 40,
-    Up = 38,
-    PageDown = 34,
-    PageUp = 33,
+    Backspace = 'BackSpace',
+    Enter = 'Enter',
+    Escape = 'Escape',
+    Down = 'ArrowDown',
+    Up = 'ArrowUp',
+    PageDown = 'PageDown',
+    PageUp = 'PageUp',
+    ArrowUp = 'ArrowUp',
+    ArrowDown = 'ArrowDown',
 }
 
 interface TableRow {
@@ -658,11 +660,11 @@ export class FileTableClass extends React.Component<Props, State> {
     onInputKeyDown = (e: React.KeyboardEvent<HTMLElement>): void => {
         if (this.editingElement) {
             e.nativeEvent.stopImmediatePropagation()
-            if (e.keyCode === KEYS.Escape || e.keyCode === KEYS.Enter) {
-                if (e.keyCode === KEYS.Enter) {
+            if (e.key === 'Escape' || e.key === 'Enter') {
+                if (e.key === 'Enter') {
                     e.preventDefault()
                 }
-                this.onInlineEdit(e.keyCode === KEYS.Escape)
+                this.onInlineEdit(e.key === 'Escape')
             }
         }
     }
@@ -732,11 +734,11 @@ export class FileTableClass extends React.Component<Props, State> {
             return
         }
 
-        switch (e.keyCode) {
-            case KEYS.Down:
-            case KEYS.Up:
-                if (!this.editingElement && (e.keyCode === KEYS.Down || e.keyCode === KEYS.Up)) {
-                    this.moveSelection(e.keyCode === KEYS.Down ? 1 : -1, e.shiftKey)
+        switch (e.key) {
+            case KEYS.ArrowDown:
+            case KEYS.ArrowUp:
+                if (!this.editingElement && (e.key === 'ArrowDown' || e.key === 'ArrowUp')) {
+                    this.moveSelection(e.key === 'ArrowDown' ? 1 : -1, e.shiftKey)
                     e.preventDefault()
                 }
                 break
@@ -747,7 +749,7 @@ export class FileTableClass extends React.Component<Props, State> {
 
             case KEYS.PageDown:
             case KEYS.PageUp:
-                this.scrollPage(e.keyCode === KEYS.PageUp)
+                this.scrollPage(e.key === 'PageUp')
                 break
         }
     }

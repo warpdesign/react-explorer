@@ -94,13 +94,14 @@ export class LogUIClass extends React.Component<WithTranslation, LogUIState> {
     }
 
     onKeyUp = (e: KeyboardEvent): void => {
-        if (e.keyCode === ESCAPE_KEY && this.valid) {
+        if (e.key === 'Escape' && this.valid) {
             this.setState({ visible: !this.state.visible })
         }
     }
 
     onKeyDown = (e: KeyboardEvent): void => {
-        if (e.keyCode === ESCAPE_KEY && shouldCatchEvent(e)) {
+        e.key
+        if (e.key === 'Escape' && shouldCatchEvent(e)) {
             this.valid = true
         } else {
             this.valid = false

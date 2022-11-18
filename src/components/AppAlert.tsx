@@ -10,8 +10,6 @@ interface AlerterState extends AlertProps {
     message: Message
 }
 
-const ENTER_KEY = 13
-
 class Alerter extends React.Component<Record<string, unknown>, AlerterState> {
     defer: Deferred<boolean> = null
 
@@ -77,7 +75,7 @@ class Alerter extends React.Component<Record<string, unknown>, AlerterState> {
     }
 
     private onKeyUp = (e: KeyboardEvent): void => {
-        if (this.state.isOpen && e.keyCode === ENTER_KEY) {
+        if (this.state.isOpen && e.key === 'Enter') {
             this.onClose(true)
         }
     }

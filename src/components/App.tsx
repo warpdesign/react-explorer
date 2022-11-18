@@ -24,6 +24,7 @@ import { MenuAccelerators } from './shortcuts/MenuAccelerators'
 import { KeyboardHotkeys } from './shortcuts/KeyboardHotkeys'
 import { CustomSettings } from '../electron/windowSettings'
 import { runInAction } from 'mobx'
+import { AppAlert } from './AppAlert'
 
 require('@blueprintjs/core/lib/css/blueprint.css')
 require('@blueprintjs/icons/lib/css/blueprint-icons.css')
@@ -227,6 +228,7 @@ const App = inject('settingsState')(
                 this.addListeners()
                 this.setDarkThemeClass()
                 this.setPlatformClass()
+                AppAlert.show('dtc').then(() => console.log('yoo'))
             }
 
             componentWillUnmount(): void {
