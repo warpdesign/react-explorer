@@ -9,10 +9,9 @@ import { HamburgerMenu } from './HamburgerMenu'
 import { Badge } from './Badge'
 import { runInAction } from 'mobx'
 import { useStores } from '../hooks/useStores'
-import type { AppState } from 'state/appState'
 
 const Nav = observer(() => {
-    const { appState } = useStores<AppState>('appState')
+    const { appState } = useStores('appState')
     const { t } = useTranslation()
     const isExplorer = appState.isExplorer
     const count = appState.pendingTransfers

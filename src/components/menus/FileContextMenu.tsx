@@ -11,7 +11,7 @@ interface Props {
 
 const FileContextMenu = ({ fileUnderMouse }: Props) => {
     const { t } = useTranslation()
-    const { appState } = useStores<AppState>('appState')
+    const { appState } = useStores('appState')
     const clipboard = appState.clipboard
     const cache = appState.getActiveCache()
 

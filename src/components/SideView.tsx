@@ -110,11 +110,6 @@ export const SideViewClass = inject('appState')(
 
                 const needLogin = fileCache.status === 'login'
                 const busy = fileCache.status === 'busy'
-                // console.log('renderSideView, needLogin=', needLogin);
-
-                if (dropAndOver) {
-                    // console.log('isOver', viewState.viewId);
-                }
 
                 return connectDropTarget(
                     <div id={divId} className={activeClass}>
