@@ -32,6 +32,7 @@ button.small:hover{
  */
 .toolbar > .bp4-popover2-target {
     flex-grow: 1;
+    flex-shrink: 1;
 }
 
 /* auto resize layout */
