@@ -184,6 +184,11 @@ export class AppState {
     async delete(files?: File[]): Promise<void> {
         const cache = this.getActiveCache()
         const toDelete = files || cache.selected
+
+        if (!toDelete.length) {
+            return
+        }
+
         const confirmed = await AppAlert.show(<DeleteConfirmDialog count={toDelete.length} />, {
             cancelButtonText: this.t('COMMON.CANCEL'),
             confirmButtonText: this.t('APP_MENUS.DELETE'),

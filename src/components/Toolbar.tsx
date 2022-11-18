@@ -1,16 +1,7 @@
 import * as React from 'react'
 import { reaction, IReactionDisposer } from 'mobx'
 import { inject, observer } from 'mobx-react'
-import {
-    InputGroup,
-    ControlGroup,
-    Button,
-    ButtonGroup,
-    Intent,
-    Alert,
-    Position,
-    HotkeysTarget2,
-} from '@blueprintjs/core'
+import { InputGroup, ControlGroup, Button, ButtonGroup, Intent, Position, HotkeysTarget2 } from '@blueprintjs/core'
 import { Tooltip2, Popover2 } from '@blueprintjs/popover2'
 import { AppState } from '../state/appState'
 import { FileMenu } from './FileMenu'
@@ -18,7 +9,7 @@ import { MakedirDialog } from './dialogs/MakedirDialog'
 import { AppAlert } from './AppAlert'
 import { Logger } from './Log'
 import { AppToaster } from './AppToaster'
-import { withTranslation, WithTranslation, Trans } from 'react-i18next'
+import { withTranslation, WithTranslation } from 'react-i18next'
 import { WithMenuAccelerators, Accelerators, Accelerator } from './WithMenuAccelerators'
 import { throttle } from '../utils/throttle'
 import { isWin, isMac } from '../utils/platform'
@@ -44,7 +35,6 @@ interface PathInputState {
     status: -1 | 0 | 1
     path: string
     isOpen: boolean
-    isDeleteOpen: boolean
     isTooltipOpen: boolean
 }
 
@@ -76,7 +66,6 @@ export const ToolbarClass = inject(
                         status: 0,
                         path: fileCache.path,
                         isOpen: false,
-                        isDeleteOpen: false,
                         isTooltipOpen: false,
                     }
 
@@ -192,58 +181,6 @@ export const ToolbarClass = inject(
                     }
                 }
 
-                private deleteCancel = (): void => {
-                    this.setState({ isDeleteOpen: false })
-                }
-
-                private onDeleteError = (err?: LocalizedError) => {
-                    const { t } = this.props
-
-                    if (err) {
-                        AppToaster.show({
-                            message: t('ERRORS.DELETE', { message: err.message }),
-                            icon: 'error',
-                            intent: Intent.DANGER,
-                            timeout: ERROR_MESSAGE_TIMEOUT,
-                        })
-                    } else {
-                        AppToaster.show({
-                            message: t('ERRORS.DELETE_WARN'),
-                            icon: 'warning-sign',
-                            intent: Intent.WARNING,
-                            timeout: ERROR_MESSAGE_TIMEOUT,
-                        })
-                    }
-                }
-
-                private delete = async (): Promise<void> => {
-                    Logger.log('delete selected files')
-                    try {
-                        const { viewState } = this.injected
-                        const fileCache = viewState.getVisibleCache()
-                        const cache = this.cache
-
-                        const deleted = await cache.delete(this.state.path, fileCache.selected)
-
-                        // TODO: reset selection ?
-                        if (!deleted) {
-                            this.onDeleteError()
-                        } else {
-                            if (deleted !== fileCache.selected.length) {
-                                // show warning
-                                this.onDeleteError()
-                            }
-                            if (cache.getFS().options.needsRefresh) {
-                                cache.reload()
-                            }
-                        }
-                    } catch (err) {
-                        this.onDeleteError(err)
-                    }
-
-                    this.setState({ isDeleteOpen: false })
-                }
-
                 private onMakedir = (): void => {
                     const { appState, viewState } = this.injected
 
@@ -256,8 +193,8 @@ export const ToolbarClass = inject(
                     const { appState, viewState } = this.injected
                     const fileCache = viewState.getVisibleCache()
 
-                    if (appState.getActiveCache() === fileCache && fileCache.selected.length) {
-                        this.setState({ isDeleteOpen: true })
+                    if (appState.getActiveCache() === fileCache) {
+                        appState.delete()
                     }
                 }
 
@@ -390,7 +327,7 @@ export const ToolbarClass = inject(
                 ]
 
                 public render(): JSX.Element {
-                    const { status, path, isOpen, isDeleteOpen, isTooltipOpen } = this.state
+                    const { status, path, isOpen, isTooltipOpen } = this.state
                     const { viewState } = this.injected
 
                     const fileCache = viewState.getVisibleCache()
@@ -486,24 +423,6 @@ export const ToolbarClass = inject(
                                     ></MakedirDialog>
                                 )}
 
-                                <Alert
-                                    cancelButtonText={t('COMMON.CANCEL')}
-                                    confirmButtonText={t('APP_MENUS.DELETE')}
-                                    icon="trash"
-                                    intent={Intent.DANGER}
-                                    isOpen={isDeleteOpen}
-                                    onConfirm={this.delete}
-                                    onCancel={this.deleteCancel}
-                                >
-                                    <p>
-                                        <Trans i18nKey="DIALOG.DELETE.CONFIRM" count={count}>
-                                            Are you sure you want to delete <b>{{ count }}</b> file(s)/folder(s)?
-                                            <br />
-                                            <br />
-                                            This action will <b>permanentaly</b> delete the selected elements.
-                                        </Trans>
-                                    </p>
-                                </Alert>
                                 <Button
                                     rightIcon="arrow-right"
                                     className="data-cy-submit-path"
