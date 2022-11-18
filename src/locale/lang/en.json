@@ -30,8 +30,8 @@
             "QUIT": {
                 "BT_STOP_TRANSFERS": "Cancel & quit",
                 "BT_KEEP_TRANSFERS": "Keep transfers",
-                "CONTENT": "There is <1>{{count}}</1> transfer <3>in progress</3>.<5 /><6 />Exiting the app now will <8>cancel</8> the download.",
-                "CONTENT_plural": "There are <1>{{count}}</1> transfers <3>in progress</3>.<5 /><6 />Exiting the app now will <8>cancel</8> all downloads."
+                "CONTENT_one": "There is <1>{{count}}</1> transfer <3>in progress</3>.<5 /><6 />Exiting the app now will <8>cancel</8> the download.",
+                "CONTENT_other": "There are <1>{{count}}</1> transfers <3>in progress</3>.<5 /><6 />Exiting the app now will <8>cancel</8> all downloads."
             },
             "STOP_TRANSFER": {
                 "BT_OK": "Discard transfer",
@@ -122,12 +122,12 @@
             }
         },
         "STATUS": {
-            "CPTOOLTIP": "Copy {{count}} file to the clipboard",
-            "CPTOOLTIP_plural": "Copy {{count}} files to the clipboard",
-            "FILES": "{{count}} file",
-            "FILES_plural": "{{count}} files",
-            "FOLDERS": "{{count}} folder",
-            "FOLDERS_plural": "{{count}} folders"
+            "CPTOOLTIP_one": "Copy {{count}} file to the clipboard",
+            "CPTOOLTIP_other": "Copy {{count}} files to the clipboard",
+            "FILES_one": "{{count}} file",
+            "FILES_other": "{{count}} files",
+            "FOLDERS_one": "{{count}} folder",
+            "FOLDERS_other": "{{count}} folders"
         },
         "TOOLBAR": {
             "BACK": "Goto previously visited folder",
@@ -136,19 +136,19 @@
         },
         "COMMON": {
             "SIZE": {
-                "B": "byte",
-                "B_plural": "bytes",
+                "B_one": "byte",
+                "B_other": "bytes",
                 "KB": "Kb",
                 "MB": "Mb",
                 "GB": "Gb",
                 "TB": "Tb"
             },
-            "CP_COPIED": "{{count}} element has been copied into the clipboard",
-            "CP_COPIED_plural": "{{count}} elements have been copied into the clipboard",
-            "CP_NAMES_COPIED": "Selected element's name has been copied into the clipboard",
-            "CP_NAMES_COPIED_plural": "{{count}} elements' name have been copied into the clipboard",
-            "CP_PATHS_COPIED": "Selected element's path has been copied into the clipboard",
-            "CP_PATHS_COPIED_plural": "{{count}} elements' path have been copied into the clipboard",
+            "CP_COPIED_one": "{{count}} element has been copied into the clipboard",
+            "CP_COPIED_other": "{{count}} elements have been copied into the clipboard",
+            "CP_NAMES_COPIED_one": "Selected element's name has been copied into the clipboard",
+            "CP_NAMES_COPIED_other": "{{count}} elements' name have been copied into the clipboard",
+            "CP_PATHS_COPIED_one": "Selected element's path has been copied into the clipboard",
+            "CP_PATHS_COPIED_other": "{{count}} elements' path have been copied into the clipboard",
             "MAKEDIR": "New Folder",
             "CANCEL": "Cancel",
             "OK": "OK",
@@ -165,10 +165,10 @@
             "COL_SIZE": "Size"
         },
         "FILEMENU": {
-            "PASTE": "Paste {{count}} item",
-            "PASTE_plural": "Paste {{count}} items",
-            "DELETE": "Delete {{count}} item",
-            "DELETE_plural": "Delete {{count}} items"
+            "PASTE_one": "Paste {{count}} item",
+            "PASTE_other": "Paste {{count}} items",
+            "DELETE_one": "Delete {{count}} item",
+            "DELETE_other": "Delete {{count}} items"
         },
         "DOWNLOADS": {
             "EMPTY_TITLE": "No download.",
