@@ -30,8 +30,8 @@
             "QUIT": {
                 "BT_STOP_TRANSFERS": "Arrêter & quitter",
                 "BT_KEEP_TRANSFERS": "Ne pas quitter",
-                "CONTENT": "<1>{{count}}</1> téléchargement est <3>en cours</3>.<5 /><6 />Quiiter l'application maintenant le <8>stoppera</8>.",
-                "CONTENT_plural": "<1>{{count}}</1> téléchargements sont <3>en cours</3>.<5 /><6 />Quiiter l'application maintenant les <8>arrêtera</8>."
+                "CONTENT_one": "<1>{{count}}</1> téléchargement est <3>en cours</3>.<5 /><6 />Quiiter l'application maintenant le <8>stoppera</8>.",
+                "CONTENT_other": "<1>{{count}}</1> téléchargements sont <3>en cours</3>.<5 /><6 />Quiiter l'application maintenant les <8>arrêtera</8>."
             },
             "STOP_TRANSFER": {
                 "BT_OK": "Supprimer le transfert",
@@ -122,12 +122,12 @@
             }
         },
         "STATUS": {
-            "CPTOOLTIP": "Copier {{count}} fichier dans le presse-papier",
-            "CPTOOLTIP_plural": "Copier {{count}} fichiers dans le presse-papier",
-            "FILES": "{{count}} fichier",
-            "FILES_plural": "{{count}} fichiers",
-            "FOLDERS": "{{count}} dossier",
-            "FOLDERS_plural": "{{count}} dossiers"
+            "CPTOOLTIP_one": "Copier {{count}} fichier dans le presse-papier",
+            "CPTOOLTIP_other": "Copier {{count}} fichiers dans le presse-papier",
+            "FILES_one": "{{count}} fichier",
+            "FILES_other": "{{count}} fichiers",
+            "FOLDERS_one": "{{count}} dossier",
+            "FOLDERS_other": "{{count}} dossiers"
         },
         "TOOLBAR": {
             "BACK": "Voir le dossier précédemment consulté",
@@ -136,19 +136,19 @@
         },
         "COMMON": {
             "SIZE": {
-                "B": "octet",
-                "B_plural": "octets",
+                "B_one": "octet",
+                "B_other": "octets",
                 "KB": "Ko",
                 "MB": "Mo",
                 "GB": "Go",
                 "TB": "To"
             },
-            "CP_COPIED": "{{count}} élément a été copié dans le presse-papier",
-            "CP_COPIED_plural": "{{count}} éléments ont été copiés dans le presse-papier",
-            "CP_NAMES_COPIED": "Le nom de l'élément sélectionné a été copié dans le presse-papier",
-            "CP_NAMES_COPIED_plural": "Les noms des {{count}} éléments sélectionnés ont été copiés dans le presse-papier",
-            "CP_PATHS_COPIED": "Le chemin vers l'élément sélectionné a été copié dans le presse-papier",
-            "CP_PATHS_COPIED_plural": "Les chemins des {{count}} éléments sélectionnés ont été copiés dans le presse-papier",
+            "CP_COPIED_one": "{{count}} élément a été copié dans le presse-papier",
+            "CP_COPIED_other": "{{count}} éléments ont été copiés dans le presse-papier",
+            "CP_NAMES_COPIED_one": "Le nom de l'élément sélectionné a été copié dans le presse-papier",
+            "CP_NAMES_COPIED_other": "Les noms des {{count}} éléments sélectionnés ont été copiés dans le presse-papier",
+            "CP_PATHS_COPIED_one": "Le chemin vers l'élément sélectionné a été copié dans le presse-papier",
+            "CP_PATHS_COPIED_other": "Les chemins des {{count}} éléments sélectionnés ont été copiés dans le presse-papier",
             "MAKEDIR": "Nouveau dossier",
             "CANCEL": "Annuler",
             "OK": "OK",
@@ -165,10 +165,10 @@
             "COL_SIZE": "Taille"
         },
         "FILEMENU": {
-            "PASTE": "Coller {{count}} élément",
-            "PASTE_plural": "Coller {{count}} éléments",
-            "DELETE": "Supprimer {{count}} élément",
-            "DELETE_plural": "Supprimer {{count}} éléments"
+            "PASTE_one": "Coller {{count}} élément",
+            "PASTE_other": "Coller {{count}} éléments",
+            "DELETE_one": "Supprimer {{count}} élément",
+            "DELETE_other": "Supprimer {{count}} éléments"
         },
         "DOWNLOADS": {
             "EMPTY_TITLE": "Aucun téléchargement.",
