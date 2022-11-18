@@ -242,15 +242,6 @@ export const ToolbarClass = inject(
                     this.disposer()
                 }
 
-                // shouldComponentUpdate() {
-                //     console.time('Toolbar Render');
-                //     return true;
-                // }
-
-                // componentDidUpdate() {
-                //     console.timeEnd('Toolbar Render');
-                // }
-
                 renderMenuAccelerators(): React.ReactElement {
                     return (
                         <Accelerators>
