@@ -3,7 +3,6 @@ import { observer, inject } from 'mobx-react'
 import { InputGroup, ControlGroup, Button, Intent, IconName } from '@blueprintjs/core'
 import { Tooltip2 } from '@blueprintjs/popover2'
 import { AppState } from '../state/appState'
-import { AppToaster } from './AppToaster'
 import { withTranslation, WithTranslation } from 'react-i18next'
 import classnames from 'classnames'
 import { ViewState } from '../state/viewState'
@@ -29,26 +28,8 @@ export const StatusbarClass = inject(
 
             private onClipboardCopy = (): void => {
                 const { appState, viewState } = this.injected
-                const { t } = this.props
-
-                const num = appState.setClipboard(viewState.getVisibleCache())
-
-                num &&
-                    AppToaster.show({
-                        message: t('COMMON.CP_COPIED', { count: num }),
-                        icon: 'tick',
-                        intent: Intent.NONE,
-                    })
+                appState.clipboard.setClipboard(viewState.getVisibleCache())
             }
-
-            // shouldComponentUpdate() {
-            //     console.time('Statusbar Render');
-            //     return true;
-            // }
-
-            // componentDidUpdate() {
-            //     console.timeEnd('Statusbar Render');
-            // }
 
             public render(): React.ReactNode {
                 const { viewState } = this.injected
@@ -61,7 +42,7 @@ export const StatusbarClass = inject(
                 const offline = classnames('status-bar', { offline: fileCache.status === 'offline' })
                 const { t } = this.props
 
-                const pasteButton = (
+                const copyButton = (
                     <Tooltip2 content={t('STATUS.CPTOOLTIP', { count: numSelected })} disabled={disabled}>
                         <Button
                             data-cy-paste-bt
@@ -79,7 +60,7 @@ export const StatusbarClass = inject(
                         <InputGroup
                             disabled
                             leftIcon={iconName}
-                            rightElement={pasteButton}
+                            rightElement={copyButton}
                             value={`${t('STATUS.FILES', { count: numFiles })}, ${t('STATUS.FOLDERS', {
                                 count: numDirs,
                             })}`}

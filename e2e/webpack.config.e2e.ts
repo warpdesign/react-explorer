@@ -1,16 +1,16 @@
-import { resolve as _resolve, join } from 'path';
-import HtmlWebpackPlugin from 'html-webpack-plugin';
-import { DefinePlugin, ProvidePlugin } from 'webpack';
-import { version } from './package.json';
-import gitHash from '../scripts/hash';
-import { release, arch } from 'os';
-import { version as node } from 'process';
-const MOCKS_PATH = './cypress/mocks/';
-import { platform as PLATFORM } from 'process';
-import { readdirSync } from 'fs';
+import { resolve as _resolve, join } from 'path'
+import HtmlWebpackPlugin from 'html-webpack-plugin'
+import { DefinePlugin, ProvidePlugin } from 'webpack'
+import { version } from './package.json'
+import gitHash from '../scripts/hash'
+import { release, arch } from 'os'
+import { version as node } from 'process'
+const MOCKS_PATH = './cypress/mocks/'
+import { platform as PLATFORM } from 'process'
+import { readdirSync } from 'fs'
 
 function resolveMock(moduleName) {
-    return _resolve(__dirname, `${MOCKS_PATH}${moduleName}.js`);
+    return _resolve(__dirname, `${MOCKS_PATH}${moduleName}.js`)
 }
 
 /**
@@ -36,15 +36,15 @@ function resolveMock(moduleName) {
  * @param {string} mockPath path to the mocks directory
  */
 function webpackAliases(mockPath) {
-    const mockNames = readdirSync(mockPath).map((file) => file.replace('.js', ''));
-    console.log('Generating webpack alias for mocks', mockNames);
+    const mockNames = readdirSync(mockPath).map((file) => file.replace('.js', ''))
+    console.log('Generating webpack alias for mocks', mockNames)
     return mockNames.reduce((acc, name) => {
-        acc[name] = resolveMock(name);
-        return acc;
-    }, {});
+        acc[name] = resolveMock(name)
+        return acc
+    }, {})
 }
 
-const aliases = webpackAliases(MOCKS_PATH);
+const aliases = webpackAliases(MOCKS_PATH)
 
 const baseConfig = {
     output: {
@@ -66,6 +66,7 @@ const baseConfig = {
         // Add '.ts' and '.tsx' as resolvable extensions.
         extensions: ['.ts', '.tsx', '.js', '.json', '.css'],
         alias: {
+            $src: _resolve(__dirname, '../src'),
             // TODO: use proper polyfills instead of incomplete custom ones
             ...aliases,
         },
@@ -118,7 +119,7 @@ const baseConfig = {
             },
         ],
     },
-};
+}
 
 export default [
     Object.assign(
@@ -151,4 +152,4 @@ export default [
         },
         baseConfig,
     ),
-];
+]

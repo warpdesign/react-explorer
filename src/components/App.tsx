@@ -191,13 +191,17 @@ const App = inject('settingsState')(
                 const sideview = (e.target as HTMLElement).closest('.sideview')
                 const filetable = (e.target as HTMLElement).closest('.fileListSizerWrapper')
 
+                console.log('contextMenuClick!!', e.button)
+
                 if (sideview) {
                     const num = parseInt(sideview.id.replace('view_', ''), 10)
                     const winState = this.appState.winStates[0]
                     const view = winState.getView(num)
                     if (!view.isActive) {
                         // prevent selecting a row when the view gets activated
-                        if (filetable) {
+                        // Note: only do that for left click
+                        // we want right click to activate the inactive view's menu
+                        if (filetable && e.button === 2) {
                             console.log('preventing event propagation', e.target)
                             e.stopPropagation()
                         }
@@ -266,64 +270,13 @@ const App = inject('settingsState')(
                 const fileCache: FileState = this.getActiveFileCache()
 
                 if (fileCache) {
-                    const { t } = this.injected
-                    const num = this.appState.setClipboard(fileCache)
-
-                    num &&
-                        AppToaster.show(
-                            {
-                                message: t('COMMON.CP_COPIED', { count: num }),
-                                icon: 'tick',
-                                intent: Intent.NONE,
-                            },
-                            undefined,
-                            true,
-                        )
+                    this.appState.clipboard.setClipboard(fileCache)
                 }
             }
 
             private onPaste = (): void => {
                 const fileCache: FileState = this.getActiveFileCache()
-                const appState = this.appState
-
-                if (fileCache && !fileCache.error && appState.clipboard.files.length) {
-                    this.appState
-                        .prepareClipboardTransferTo(fileCache)
-                        .then((noErrors: boolean) => {
-                            const { t } = this.injected
-                            if (noErrors) {
-                                AppToaster.show({
-                                    message: t('COMMON.COPY_FINISHED'),
-                                    icon: 'tick',
-                                    intent: Intent.SUCCESS,
-                                    timeout: 3000,
-                                })
-                            } else {
-                                AppToaster.show({
-                                    message: t('COMMON.COPY_WARNING'),
-                                    icon: 'warning-sign',
-                                    intent: Intent.WARNING,
-                                    timeout: 5000,
-                                })
-                            }
-                        })
-                        .catch((err: any) => {
-                            const { t } = this.injected
-                            const localizedError = getLocalizedError(err)
-                            const message = err.code
-                                ? t('ERRORS.COPY_ERROR', {
-                                      message: localizedError.message,
-                                  })
-                                : t('ERRORS.COPY_UNKNOWN_ERROR')
-
-                            AppToaster.show({
-                                message: message,
-                                icon: 'error',
-                                intent: Intent.DANGER,
-                                timeout: 5000,
-                            })
-                        })
-                }
+                this.appState.paste(fileCache)
             }
 
             closePrefs = (): void => {
@@ -393,7 +346,11 @@ const App = inject('settingsState')(
                             <MenuAccelerators onExitComboDown={this.onExitComboDown} />
                             <KeyboardHotkeys />
                             <Nav></Nav>
-                            <div onClickCapture={this.handleClick} className={mainClass}>
+                            <div
+                                onClickCapture={this.handleClick}
+                                onContextMenuCapture={this.handleClick}
+                                className={mainClass}
+                            >
                                 <LeftPanel hide={!isExplorer}></LeftPanel>
                                 <SideView viewState={viewStateLeft} hide={!isExplorer} onPaste={this.onPaste} />
                                 <SideView

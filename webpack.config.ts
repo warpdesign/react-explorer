@@ -1,13 +1,13 @@
-import webpack from 'webpack';
-import { resolve as _resolve, join } from 'path';
-import HtmlWebpackPlugin from 'html-webpack-plugin';
-import ForkTsCheckerWebpackPlugin from 'fork-ts-checker-webpack-plugin';
-import CopyPlugin from 'copy-webpack-plugin';
-import { DefinePlugin } from 'webpack';
-import { version } from './package.json';
-import gitHash from './scripts/hash';
+import webpack from 'webpack'
+import { resolve as _resolve, join } from 'path'
+import HtmlWebpackPlugin from 'html-webpack-plugin'
+import ForkTsCheckerWebpackPlugin from 'fork-ts-checker-webpack-plugin'
+import CopyPlugin from 'copy-webpack-plugin'
+import { DefinePlugin } from 'webpack'
+import { version } from './package.json'
+import gitHash from './scripts/hash'
 
-const buildDate = Date.now();
+const buildDate = Date.now()
 
 const baseConfig: webpack.Configuration = {
     output: {
@@ -22,6 +22,9 @@ const baseConfig: webpack.Configuration = {
     resolve: {
         // Add '.ts' and '.tsx' as resolvable extensions.
         extensions: ['.ts', '.tsx', '.js', '.json', '.css'],
+        alias: {
+            $src: _resolve(__dirname, 'src'),
+        },
     },
     resolveLoader: {
         alias: {
@@ -87,7 +90,7 @@ const baseConfig: webpack.Configuration = {
     //     "react": "React",
     //     "react-dom": "ReactDOM"
     // }
-};
+}
 
 export default [
     Object.assign(
@@ -136,4 +139,4 @@ export default [
         },
         baseConfig,
     ),
-];
+]

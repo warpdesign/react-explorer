@@ -149,6 +149,8 @@
             "CP_NAMES_COPIED_other": "{{count}} elements' name have been copied into the clipboard",
             "CP_PATHS_COPIED_one": "Selected element's path has been copied into the clipboard",
             "CP_PATHS_COPIED_other": "{{count}} elements' path have been copied into the clipboard",
+            "DELETE_SUCCESS_one": "The file/folder has been deleted.",
+            "DELETE_SUCCESS_other": "The files/folders have been deleted.",
             "MAKEDIR": "New Folder",
             "CANCEL": "Cancel",
             "OK": "OK",

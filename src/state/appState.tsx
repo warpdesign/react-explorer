@@ -1,30 +1,29 @@
+import React from 'react'
 import { action, observable, computed, makeObservable, runInAction } from 'mobx'
-import { File, FsApi, getFS } from '../services/Fs'
-import { FileState } from './fileState'
-import { Batch } from '../transfers/batch'
-import { clipboard, shell } from 'electron'
-import { lineEnding, DOWNLOADS_DIR } from '../utils/platform'
-import { ViewDescriptor } from '../components/TabList'
-import { WinState, WindowSettings } from './winState'
-import { FavoritesState } from './favoritesState'
-import { ViewState } from './viewState'
+import { shell } from 'electron'
+import { File, FsApi, getFS } from '$src/services/Fs'
+import { FileState } from '$src/state/fileState'
+import { Batch } from '$src/transfers/batch'
+import { DOWNLOADS_DIR } from '$src/utils/platform'
+import { ViewDescriptor } from '$src/components/TabList'
+import { WinState, WindowSettings } from '$src/state/winState'
+import { FavoritesState } from '$src/state/favoritesState'
+import { ViewState } from '$src/state/viewState'
+import { ClipboardState } from './clipboardState'
+import type { TFunction } from 'i18next'
+import { i18n } from '$src/locale/i18n'
+import { AppToaster } from '$src/components/AppToaster'
+import { Intent } from '@blueprintjs/core'
+import { getLocalizedError, LocalizedError } from '$src/locale/error'
+import { DeleteConfirmDialog } from '$src/components/dialogs/deleteConfirm'
+import { AppAlert } from '$src/components/AppAlert'
 
 declare const ENV: { [key: string]: string | boolean | number | Record<string, unknown> }
 
 // wait 1 sec before showing badge: this avoids
 // flashing (1) badge when the transfer is very fast
 const SHOW_BADGE_DELAY = 600
-
-/**
- * Interface for a clipboard entry
- *
- * @interface
- */
-interface Clipboard {
-    srcFs: FsApi
-    srcPath: string
-    files: File[]
-}
+const ERROR_MESSAGE_TIMEOUT = 3500
 
 /**
  * Interface for a transfer
@@ -49,8 +48,6 @@ interface TransferOptions {
  * Transfers are also starting from appState
  */
 export class AppState {
-    caches: FileState[] = []
-
     winStates: WinState[] = observable<WinState>([])
 
     favoritesState: FavoritesState = new FavoritesState()
@@ -74,6 +71,10 @@ export class AppState {
     // current active transfers
     activeTransfers = observable<Batch>([])
 
+    clipboard: ClipboardState = new ClipboardState()
+
+    t: TFunction
+
     /**
      * Creates the application state
      *
@@ -95,10 +96,9 @@ export class AppState {
             refreshActiveView: action,
             addView: action,
             updateSelection: action,
-            clipboard: observable,
-            setClipboard: action,
-            copySelectedItemsPath: action,
         })
+
+        this.t = i18n.i18next.t
 
         this.addWindow(options)
 
@@ -124,6 +124,104 @@ export class AppState {
     initViewState(): void {
         const winState = this.winStates[0]
         winState.initState()
+    }
+
+    async paste(destCache: FileState): Promise<void> {
+        if (destCache && !destCache.error && this.clipboard.files.length) {
+            try {
+                const noErrors = await this.prepareClipboardTransferTo(destCache)
+                if (noErrors) {
+                    AppToaster.show({
+                        message: this.t('COMMON.COPY_FINISHED'),
+                        icon: 'tick',
+                        intent: Intent.SUCCESS,
+                        timeout: 3000,
+                    })
+                } else {
+                    AppToaster.show({
+                        message: this.t('COMMON.COPY_WARNING'),
+                        icon: 'warning-sign',
+                        intent: Intent.WARNING,
+                        timeout: 5000,
+                    })
+                }
+            } catch (err) {
+                const localizedError = getLocalizedError(err)
+                const message = err.code
+                    ? this.t('ERRORS.COPY_ERROR', {
+                          message: localizedError.message,
+                      })
+                    : this.t('ERRORS.COPY_UNKNOWN_ERROR')
+
+                AppToaster.show({
+                    message: message,
+                    icon: 'error',
+                    intent: Intent.DANGER,
+                    timeout: 5000,
+                })
+            }
+        }
+    }
+
+    onDeleteError = (err?: LocalizedError) => {
+        if (err) {
+            AppToaster.show({
+                message: this.t('ERRORS.DELETE', { message: err.message }),
+                icon: 'error',
+                intent: Intent.DANGER,
+                timeout: ERROR_MESSAGE_TIMEOUT,
+            })
+        } else {
+            AppToaster.show({
+                message: this.t('ERRORS.DELETE_WARN'),
+                icon: 'warning-sign',
+                intent: Intent.WARNING,
+                timeout: ERROR_MESSAGE_TIMEOUT,
+            })
+        }
+    }
+
+    async delete(files?: File[]): Promise<void> {
+        const cache = this.getActiveCache()
+        const toDelete = files || cache.selected
+
+        if (!toDelete.length) {
+            return
+        }
+
+        const confirmed = await AppAlert.show(<DeleteConfirmDialog count={toDelete.length} />, {
+            cancelButtonText: this.t('COMMON.CANCEL'),
+            confirmButtonText: this.t('APP_MENUS.DELETE'),
+            icon: 'trash',
+            intent: Intent.DANGER,
+        })
+
+        if (confirmed) {
+            try {
+                const deleted = await cache.delete(cache.path, toDelete)
+
+                if (!deleted) {
+                    this.onDeleteError()
+                } else {
+                    if (deleted !== toDelete.length) {
+                        // show warning
+                        this.onDeleteError()
+                    } else {
+                        AppToaster.show({
+                            message: this.t('COMMON.DELETE_SUCCESS', { count: deleted }),
+                            icon: 'tick',
+                            intent: Intent.SUCCESS,
+                        })
+                    }
+
+                    if (cache.getFS().options.needsRefresh) {
+                        cache.reload()
+                    }
+                }
+            } catch (err) {
+                this.onDeleteError(err)
+            }
+        }
     }
 
     /**
@@ -422,38 +520,5 @@ export class AppState {
         // for (let selected of cache.selected) {
         //     console.log(selected.fullname, selected.id.dev, selected.id.ino);
         // }
-    }
-
-    clipboard: Clipboard = {
-        srcPath: '',
-        srcFs: null,
-        files: [],
-    }
-
-    setClipboard(fileState: FileState): number {
-        const files = fileState.selected.slice(0)
-
-        this.clipboard = {
-            srcFs: fileState.getAPI(),
-            srcPath: fileState.path,
-            files,
-        }
-
-        console.log('clipboard', files)
-
-        return files.length
-    }
-
-    copySelectedItemsPath(fileState: FileState, filenameOnly = false): string {
-        const files = fileState.selected
-        let text = ''
-
-        if (files.length) {
-            const pathnames = files.map((file) => fileState.join((!filenameOnly && file.dir) || '', file.fullname))
-            text = pathnames.join(lineEnding)
-            clipboard.writeText(text)
-        }
-
-        return text
     }
 }

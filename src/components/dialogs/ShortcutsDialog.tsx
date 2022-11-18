@@ -74,7 +74,6 @@ const ShortcutsDialog = ({ isOpen, onClose }: ShortcutsProps) => {
     }
 
     const isEmpty = labels.every((label) => shortcuts[label].length === 0)
-    console.log({ shortcuts })
     React.useEffect(() => {
         setShortcutsList(() => buildShortcuts(t))
     }, [i18n.language])
@@ -107,10 +106,10 @@ const ShortcutsDialog = ({ isOpen, onClose }: ShortcutsProps) => {
                         <>
                             {labels.map((label) =>
                                 shortcuts[label].length ? (
-                                    <>
+                                    <React.Fragment key={`title_${label}`}>
                                         {renderTitle(label)}
                                         {renderShortcuts(shortcuts[label])}
-                                    </>
+                                    </React.Fragment>
                                 ) : null,
                             )}
                         </>

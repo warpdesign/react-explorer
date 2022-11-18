@@ -14,7 +14,8 @@
     "useDefineForClassFields": true,
     "baseUrl": "./src",
     "paths": {
-      "rtl": ["utils/test/rtl"]
+      "rtl": ["utils/test/rtl"],
+      "$src/*": ["./*"]
     }    
   },
   "include": ["./src/**/*"],

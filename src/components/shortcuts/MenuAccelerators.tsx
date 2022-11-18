@@ -33,24 +33,7 @@ class MenuAcceleratorsClass extends React.Component<Props> {
     }
 
     copyTextToClipboard(fileCache: FileState, filesOnly = false): void {
-        const length = fileCache.selected.length
-
-        this.appState.copySelectedItemsPath(fileCache, filesOnly)
-
-        if (length) {
-            const { t } = this.injected
-            AppToaster.show(
-                {
-                    message: filesOnly
-                        ? t('COMMON.CP_NAMES_COPIED', { count: length })
-                        : t('COMMON.CP_PATHS_COPIED', { count: length }),
-                    icon: 'tick',
-                    intent: Intent.NONE,
-                },
-                undefined,
-                true,
-            )
-        }
+        this.appState.clipboard.copySelectedItemsPath(fileCache, filesOnly)
     }
 
     private getActiveFileCache(ignoreStatus = false): FileState {

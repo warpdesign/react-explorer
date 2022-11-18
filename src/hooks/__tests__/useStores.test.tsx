@@ -5,9 +5,10 @@ import React from 'react'
 import { screen } from '@testing-library/react'
 import { useStores } from '../useStores'
 import { render } from 'rtl'
+import { SettingsState } from 'state/settingsState'
 
 const Component = ({ storeName }: { storeName: string }) => {
-    const { settingsState } = useStores(storeName)
+    const { settingsState } = useStores<SettingsState>(storeName)
     return <div>{settingsState.lang}</div>
 }
 
