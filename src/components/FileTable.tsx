@@ -67,7 +67,7 @@ const TYPE_ICONS: { [key: string]: IconName } = {
 }
 
 enum KEYS {
-    Backspace = 'BackSpace',
+    Backspace = 'Backspace',
     Enter = 'Enter',
     Escape = 'Escape',
     Down = 'ArrowDown',
