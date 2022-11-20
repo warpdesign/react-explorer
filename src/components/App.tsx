@@ -121,18 +121,18 @@ const App = inject('settingsState')(
                 let caught = false
                 if (e.ctrlKey) {
                     switch (true) {
-                        case !ENV.CY && !isMac && e.keyCode === KEYS.A && shouldCatchEvent(e):
+                        case !ENV.CY && !isMac && e.key === 'a' && shouldCatchEvent(e):
                             caught = true
                             sendFakeCombo('CmdOrCtrl+A')
                             break
 
-                        case e.keyCode === KEYS.TAB:
+                        case e.key === 'Tab':
                             caught = true
                             const combo = e.shiftKey ? 'Ctrl+Shift+Tab' : 'Ctrl+Tab'
                             sendFakeCombo(combo)
                             break
                     }
-                } else if (shouldCatchEvent(e) && e.which === 191 && e.shiftKey) {
+                } else if (shouldCatchEvent(e) && e.key === '/' && e.shiftKey) {
                     caught = true
                 }
 
