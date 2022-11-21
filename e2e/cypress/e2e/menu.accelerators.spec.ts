@@ -94,7 +94,7 @@ describe('combo hotkeys', () => {
         // no selection: triggering fake combo should not show toast message
         cy.triggerFakeCombo('CmdOrCtrl+Shift+N')
 
-        cy.get(`.${Classes.TOAST}`).should('not.be.visible')
+        cy.get(`.${Classes.TOAST}`).should('not.exist')
 
         cy.get('@copySelectedItemsPath').should('be.calledWith', caches[0], true)
     })

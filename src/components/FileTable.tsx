@@ -1,5 +1,9 @@
 import * as React from 'react'
-import { IconName, Icon, HotkeysTarget2, Classes, Menu, MenuItem } from '@blueprintjs/core'
+import { WithTranslation, withTranslation } from 'react-i18next'
+import { inject } from 'mobx-react'
+import i18next from 'i18next'
+import { IReactionDisposer, reaction, toJS, IObservableArray } from 'mobx'
+import { IconName, Icon, HotkeysTarget2, Classes } from '@blueprintjs/core'
 import { ContextMenu2, ContextMenu2ChildrenProps, ContextMenu2ContentProps } from '@blueprintjs/popover2'
 import {
     Column,
@@ -12,30 +16,27 @@ import {
     ScrollParams,
     TableCellProps,
 } from 'react-virtualized'
-import { AppState } from '../state/appState'
-import { WithTranslation, withTranslation } from 'react-i18next'
-import { inject } from 'mobx-react'
-import i18next from 'i18next'
-import { IReactionDisposer, reaction, toJS, IObservableArray } from 'mobx'
-import { File, FileID } from '../services/Fs'
-import { formatBytes } from '../utils/formatBytes'
-import { shouldCatchEvent, isEditable, isInRow } from '../utils/dom'
+import classNames from 'classnames'
+import { ipcRenderer } from 'electron'
+
+import CONFIG from '$src/config/appConfig'
+import { AppState } from '$src/state/appState'
+import { File, FileID } from '$src/services/Fs'
+import { TSORT_METHOD_NAME, TSORT_ORDER, getSortMethod } from '$src/services/FsSort'
+import { formatBytes } from '$src/utils/formatBytes'
+import { shouldCatchEvent, isEditable, isInRow } from '$src/utils/dom'
 import { AppAlert } from './AppAlert'
 import { WithMenuAccelerators, Accelerators, Accelerator } from './WithMenuAccelerators'
-import { isMac } from '../utils/platform'
-import { ipcRenderer } from 'electron'
-import classnames from 'classnames'
+import { isMac } from '$src/utils/platform'
 import { RowRenderer, RowRendererProps } from './RowRenderer'
-import { SettingsState } from '../state/settingsState'
-import { ViewState } from '../state/viewState'
-import { debounce } from '../utils/debounce'
-import { TSORT_METHOD_NAME, TSORT_ORDER, getSortMethod } from '../services/FsSort'
-import CONFIG from '../config/appConfig'
-import { getSelectionRange } from '../utils/fileUtils'
-import { throttle } from '../utils/throttle'
-import { FileState } from '../state/fileState'
-import { FileContextMenu } from './menus/FileContextMenu'
-import classNames from 'classnames'
+import { SettingsState } from '$src/state/settingsState'
+import { ViewState } from '$src/state/viewState'
+import { debounce } from '$src/utils/debounce'
+import { getSelectionRange } from '$src/utils/fileUtils'
+import { throttle } from '$src/utils/throttle'
+import { FileState } from '$src/state/fileState'
+import { FileContextMenu } from '$src/components/menus/FileContextMenu'
+import Keys from '$src/constants/keys'
 
 declare const ENV: { [key: string]: string | boolean | number | Record<string, unknown> }
 
@@ -64,16 +65,6 @@ const TYPE_ICONS: { [key: string]: IconName } = {
     doc: 'align-left',
     cod: 'code',
     dir: 'folder-close',
-}
-
-enum KEYS {
-    Backspace = 8,
-    Enter = 13,
-    Escape = 27,
-    Down = 40,
-    Up = 38,
-    PageDown = 34,
-    PageUp = 33,
 }
 
 interface TableRow {
@@ -237,7 +228,7 @@ export class FileTableClass extends React.Component<Props, State> {
     buildNodeFromFile(file: File, keepSelection: boolean): TableRow {
         const filetype = file.type
         const isSelected = (keepSelection && this.getSelectedState(file.fullname)) || false
-        const classes = classnames({
+        const classes = classNames({
             isHidden: file.fullname.startsWith('.'),
             isSymlink: file.isSym,
         })
@@ -358,7 +349,7 @@ export class FileTableClass extends React.Component<Props, State> {
         const hasResize = data.columnData.index < 1
         const { sortMethod, sortOrder } = this.cache
         const isSort = data.columnData.sortMethod === sortMethod
-        const classes = classnames('sort', sortOrder)
+        const classes = classNames('sort', sortOrder)
 
         return (
             <React.Fragment key={data.dataKey}>
@@ -374,7 +365,7 @@ export class FileTableClass extends React.Component<Props, State> {
         const error = file && file.nodeData.mode === -1
         const mainClass = data.index === -1 ? 'headerRow' : 'tableRow'
 
-        return classnames(mainClass, file && file.className, {
+        return classNames(mainClass, file && file.className, {
             selected: file && file.isSelected,
             error: error,
             headerRow: data.index === -1,
@@ -658,11 +649,11 @@ export class FileTableClass extends React.Component<Props, State> {
     onInputKeyDown = (e: React.KeyboardEvent<HTMLElement>): void => {
         if (this.editingElement) {
             e.nativeEvent.stopImmediatePropagation()
-            if (e.keyCode === KEYS.Escape || e.keyCode === KEYS.Enter) {
-                if (e.keyCode === KEYS.Enter) {
+            if (e.key === Keys.ESCAPE || e.key === Keys.ENTER) {
+                if (e.key === Keys.ENTER) {
                     e.preventDefault()
                 }
-                this.onInlineEdit(e.keyCode === KEYS.Escape)
+                this.onInlineEdit(e.key === Keys.ESCAPE)
             }
         }
     }
@@ -732,22 +723,22 @@ export class FileTableClass extends React.Component<Props, State> {
             return
         }
 
-        switch (e.keyCode) {
-            case KEYS.Down:
-            case KEYS.Up:
-                if (!this.editingElement && (e.keyCode === KEYS.Down || e.keyCode === KEYS.Up)) {
-                    this.moveSelection(e.keyCode === KEYS.Down ? 1 : -1, e.shiftKey)
+        switch (e.key) {
+            case Keys.DOWN:
+            case Keys.UP:
+                if (!this.editingElement) {
+                    this.moveSelection(e.key === Keys.DOWN ? 1 : -1, e.shiftKey)
                     e.preventDefault()
                 }
                 break
 
-            case KEYS.Enter:
+            case Keys.ENTER:
                 this.getElementAndToggleRename(e)
                 break
 
-            case KEYS.PageDown:
-            case KEYS.PageUp:
-                this.scrollPage(e.keyCode === KEYS.PageUp)
+            case Keys.PAGE_DOWN:
+            case Keys.PAGE_UP:
+                this.scrollPage(e.key === Keys.PAGE_UP)
                 break
         }
     }

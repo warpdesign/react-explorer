@@ -1,12 +1,14 @@
 import * as React from 'react'
 import { observable, runInAction } from 'mobx'
-import { debounce } from '../utils/debounce'
+import classNames from 'classnames'
 import { Intent, HotkeysTarget2 } from '@blueprintjs/core'
 import { WithTranslation, withTranslation } from 'react-i18next'
-import { shouldCatchEvent } from '../utils/dom'
-import classnames from 'classnames'
 
-require('../css/log.css')
+import { debounce } from '$src/utils/debounce'
+import { shouldCatchEvent } from '$src/utils/dom'
+import Keys from '$src/constants/keys'
+
+require('$src/css/log.css')
 
 export interface JSObject extends Object {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -94,13 +96,13 @@ export class LogUIClass extends React.Component<WithTranslation, LogUIState> {
     }
 
     onKeyUp = (e: KeyboardEvent): void => {
-        if (e.keyCode === ESCAPE_KEY && this.valid) {
+        if (e.key === Keys.ESCAPE && this.valid) {
             this.setState({ visible: !this.state.visible })
         }
     }
 
     onKeyDown = (e: KeyboardEvent): void => {
-        if (e.keyCode === ESCAPE_KEY && shouldCatchEvent(e)) {
+        if (e.key === Keys.ESCAPE && shouldCatchEvent(e)) {
             this.valid = true
         } else {
             this.valid = false
@@ -124,11 +126,6 @@ export class LogUIClass extends React.Component<WithTranslation, LogUIState> {
             })
     }
 
-    // shouldComponentUpdate() {
-    //     console.time('Log Render');
-    //     return true;
-    // }
-
     private hotkeys = [
         {
             global: true,
@@ -139,7 +136,7 @@ export class LogUIClass extends React.Component<WithTranslation, LogUIState> {
     ]
 
     public render(): React.ReactElement {
-        const classes = classnames('console', { visible: this.state.visible })
+        const classes = classNames('console', { visible: this.state.visible })
 
         return (
             <HotkeysTarget2 hotkeys={this.hotkeys}>
@@ -151,7 +148,7 @@ export class LogUIClass extends React.Component<WithTranslation, LogUIState> {
                     className={classes}
                 >
                     {Logger.logs.map((line, i) => {
-                        const lineClass = classnames('consoleLine', line.intent)
+                        const lineClass = classNames('consoleLine', line.intent)
                         return (
                             <div key={i} className={lineClass}>
                                 {/* <span className="consoleDate">{line.date}</span> */}

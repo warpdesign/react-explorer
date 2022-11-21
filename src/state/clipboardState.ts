@@ -66,8 +66,8 @@ export class ClipboardState {
             AppToaster.show(
                 {
                     message: filenameOnly
-                        ? this.t('COMMON.CP_NAMES_COPIED', { count: length })
-                        : this.t('COMMON.CP_PATHS_COPIED', { count: length }),
+                        ? this.t('COMMON.CP_NAMES_COPIED', { count: files.length })
+                        : this.t('COMMON.CP_PATHS_COPIED', { count: files.length }),
                     icon: 'tick',
                     intent: Intent.NONE,
                 },

@@ -8,7 +8,7 @@ import i18next from 'i18next'
 import { withTranslation, WithTranslation } from 'react-i18next'
 import { formatBytes } from '../utils/formatBytes'
 import { FileTransfer } from '../transfers/fileTransfer'
-import classnames from 'classnames'
+import classNames from 'classnames'
 import { intentClass } from '@blueprintjs/core/lib/esm/common/classes'
 import { AppAlert } from './AppAlert'
 import CONFIG from '../config/appConfig'
@@ -241,7 +241,7 @@ class DownloadsClass extends React.Component<Props, State> {
         const isCancelled = file.status.match(/cancelled/)
         let errorMessage = ''
 
-        const spanClass = classnames({
+        const spanClass = classNames({
             [Classes.INTENT_DANGER]: isError,
             [Classes.INTENT_SUCCESS]: done,
         })

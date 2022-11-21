@@ -3,14 +3,13 @@ import * as ReactDOM from 'react-dom'
 import { Alert, AlertProps } from '@blueprintjs/core'
 import { Deferred } from '../utils/deferred'
 import { i18n } from '../locale/i18n'
+import Keys from '$src/constants/keys'
 
 type Message = React.ReactNode | string
 
 interface AlerterState extends AlertProps {
     message: Message
 }
-
-const ENTER_KEY = 13
 
 class Alerter extends React.Component<Record<string, unknown>, AlerterState> {
     defer: Deferred<boolean> = null
@@ -77,7 +76,7 @@ class Alerter extends React.Component<Record<string, unknown>, AlerterState> {
     }
 
     private onKeyUp = (e: KeyboardEvent): void => {
-        if (this.state.isOpen && e.keyCode === ENTER_KEY) {
+        if (this.state.isOpen && e.key === Keys.ENTER) {
             this.onClose(true)
         }
     }
