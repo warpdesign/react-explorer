@@ -155,10 +155,9 @@ export function RowRendererFn({
     }
 
     if (fileCache.isVisible) {
-        if (selectedCount > 1) {
-            connectDragPreview(createPreview(selectedCount, isDarkModeActive))
-        } else {
-            connectDragPreview(undefined)
+        const img = selectedCount > 1 ? createPreview(selectedCount, isDarkModeActive) : undefined
+        if (img) {
+            img.onload = () => connectDragPreview(img)
         }
     }
 
