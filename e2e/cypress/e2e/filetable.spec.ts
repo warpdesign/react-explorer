@@ -1,6 +1,9 @@
 /// <reference types="cypress"/>
 
 import { MOD_KEY } from '../support/constants'
+// FIXME: define & use $src alias when we'll figure out how to do it
+// See: https://github.com/cypress-io/cypress/discussions/24751
+import Keys from '../../../src/constants/keys'
 
 const TYPE_ICONS: { [key: string]: string } = {
     img: 'media',
@@ -12,16 +15,6 @@ const TYPE_ICONS: { [key: string]: string } = {
     doc: 'align-left',
     cod: 'code',
     dir: 'folder-close',
-}
-
-enum KEYS {
-    Backspace = 'Backspace',
-    Enter = 'Enter',
-    Escape = 'Escape',
-    Down = 'ArrowDown',
-    Up = 'ArrowUp',
-    PageDown = 'PageDown',
-    PageUp = 'PageUp',
 }
 
 describe('filetable', () => {
@@ -188,7 +181,7 @@ describe('filetable', () => {
         it('should select the next element when pressing arrow down', () => {
             // one press: select the first one
             cy.get('#view_0')
-                .trigger('keydown', { key: KEYS.Down })
+                .trigger('keydown', { key: Keys.DOWN })
                 .find('[data-cy-file]')
                 .first()
                 .should('have.class', 'selected')
@@ -198,7 +191,7 @@ describe('filetable', () => {
 
             // another press, select the second one
             cy.get('#view_0')
-                .trigger('keydown', { key: KEYS.Down })
+                .trigger('keydown', { key: Keys.DOWN })
                 .find('[data-cy-file]')
                 .eq(1)
                 .should('have.class', 'selected')
@@ -209,13 +202,13 @@ describe('filetable', () => {
 
         it('should select the last element when rapidly pressing arrow down key', () => {
             cy.get('#view_0')
-                .trigger('keydown', { key: KEYS.Down })
+                .trigger('keydown', { key: Keys.DOWN })
                 .find('[data-cy-file]')
                 .first()
                 .should('have.class', 'selected')
 
             for (let i = 0; i <= files.length; ++i) {
-                cy.get('#view_0').trigger('keydown', { key: KEYS.Down })
+                cy.get('#view_0').trigger('keydown', { key: Keys.DOWN })
             }
 
             cy.get('#view_0 [data-cy-file]').last().should('have.class', 'selected')
@@ -230,7 +223,7 @@ describe('filetable', () => {
 
             // press arrow down key until the last item is selected: it should now be visible & selected
             for (let i = 0; i <= files.length; ++i) {
-                cy.get('#view_0').trigger('keydown', { key: KEYS.Down })
+                cy.get('#view_0').trigger('keydown', { key: Keys.DOWN })
             }
 
             cy.get('#view_0 [data-cy-file]').last().should('have.class', 'selected').and('be.visible')
@@ -245,13 +238,13 @@ describe('filetable', () => {
             cy.triggerHotkey(`${MOD_KEY}i`)
 
             // activate the first then second element
-            cy.get('#view_0').trigger('keydown', { key: KEYS.Down })
+            cy.get('#view_0').trigger('keydown', { key: Keys.DOWN })
 
-            cy.get('#view_0').trigger('keydown', { key: KEYS.Down })
+            cy.get('#view_0').trigger('keydown', { key: Keys.DOWN })
 
             // activate previous element: should be the second one
             cy.get('#view_0')
-                .trigger('keydown', { key: KEYS.Up })
+                .trigger('keydown', { key: Keys.UP })
                 .find('[data-cy-file]')
                 .eq(1)
                 .should('have.class', 'selected')
@@ -263,7 +256,7 @@ describe('filetable', () => {
         it('should scroll up the table if needed when pressing arrow up key', () => {
             // press arrow down key until the last item is selected: it should now be visible & selected
             for (let i = 0; i <= files.length; ++i) {
-                cy.get('#view_0').trigger('keydown', { key: KEYS.Down })
+                cy.get('#view_0').trigger('keydown', { key: Keys.DOWN })
             }
 
             // check that the first element isn't visible anymore
@@ -271,7 +264,7 @@ describe('filetable', () => {
 
             // press up arrow key until the first item is selected
             for (let i = 0; i <= files.length; ++i) {
-                cy.get('#view_0').trigger('keydown', { key: KEYS.Up })
+                cy.get('#view_0').trigger('keydown', { key: Keys.UP })
             }
 
             // it should now be visible & selected
@@ -341,8 +334,8 @@ describe('filetable', () => {
     describe('rename feature', () => {
         it('should activate rename for selected element if enter key is pressed and a file is selected', () => {
             cy.get('#view_0')
-                .trigger('keydown', { key: KEYS.Down })
-                .trigger('keydown', { key: KEYS.Enter })
+                .trigger('keydown', { key: Keys.DOWN })
+                .trigger('keydown', { key: Keys.ENTER })
                 .find('[data-cy-file]:first')
                 .find('.file-label')
                 .should('have.attr', 'contenteditable', 'true')
@@ -374,8 +367,8 @@ describe('filetable', () => {
 
         it('should call cache.rename when pressing enter in edit mode', () => {
             cy.get('#view_0')
-                .trigger('keydown', { key: KEYS.Down })
-                .trigger('keydown', { key: KEYS.Enter })
+                .trigger('keydown', { key: Keys.DOWN })
+                .trigger('keydown', { key: Keys.ENTER })
                 .find('[data-cy-file]:first')
                 .find('.file-label')
                 .type('bar{enter}')
@@ -389,8 +382,8 @@ describe('filetable', () => {
 
         it('should not call cache.rename & restore previous filename when pressing escape in edit mode', () => {
             cy.get('#view_0')
-                .trigger('keydown', { key: KEYS.Down })
-                .trigger('keydown', { key: KEYS.Enter })
+                .trigger('keydown', { key: Keys.DOWN })
+                .trigger('keydown', { key: Keys.ENTER })
                 .find('[data-cy-file]:first')
                 .find('.file-label')
                 .type('bar{esc}')
@@ -403,8 +396,8 @@ describe('filetable', () => {
 
         it('renaming should be cancelled if rename input field gets blur event while active', () => {
             cy.get('#view_0')
-                .trigger('keydown', { key: KEYS.Down })
-                .trigger('keydown', { key: KEYS.Enter })
+                .trigger('keydown', { key: Keys.DOWN })
+                .trigger('keydown', { key: Keys.ENTER })
                 .find('[data-cy-file]:first')
                 .find('.file-label')
                 .focus()

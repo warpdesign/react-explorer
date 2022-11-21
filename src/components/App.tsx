@@ -4,6 +4,7 @@ import { platform } from 'process'
 import { isMac } from '../utils/platform'
 import { FocusStyleManager, Alert, Classes, Intent } from '@blueprintjs/core'
 import classNames from 'classnames'
+import { runInAction } from 'mobx'
 import { Provider, observer, inject } from 'mobx-react'
 import { SideView } from './SideView'
 import { LogUI, Logger } from './Log'
@@ -23,7 +24,7 @@ import { ViewDescriptor } from './TabList'
 import { MenuAccelerators } from './shortcuts/MenuAccelerators'
 import { KeyboardHotkeys } from './shortcuts/KeyboardHotkeys'
 import { CustomSettings } from '../electron/windowSettings'
-import { runInAction } from 'mobx'
+import Keys from '$src/constants/keys'
 
 require('@blueprintjs/core/lib/css/blueprint.css')
 require('@blueprintjs/icons/lib/css/blueprint-icons.css')
@@ -120,18 +121,18 @@ const App = inject('settingsState')(
                 let caught = false
                 if (e.ctrlKey) {
                     switch (true) {
-                        case !ENV.CY && !isMac && e.key === 'a' && shouldCatchEvent(e):
+                        case !ENV.CY && !isMac && e.key === Keys.A && shouldCatchEvent(e):
                             caught = true
                             sendFakeCombo('CmdOrCtrl+A')
                             break
 
-                        case e.key === 'Tab':
+                        case e.key === Keys.TAB:
                             caught = true
                             const combo = e.shiftKey ? 'Ctrl+Shift+Tab' : 'Ctrl+Tab'
                             sendFakeCombo(combo)
                             break
                     }
-                } else if (shouldCatchEvent(e) && e.key === '/' && e.shiftKey) {
+                } else if (shouldCatchEvent(e) && e.key === Keys.FORWARD_SLASH && e.shiftKey) {
                     caught = true
                 }
 

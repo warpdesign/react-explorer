@@ -1,8 +1,10 @@
 import * as React from 'react'
 import { Dialog, Classes, Intent, Button, InputGroup, FormGroup } from '@blueprintjs/core'
-import { debounce } from '../../utils/debounce'
 import { withTranslation, WithTranslation } from 'react-i18next'
-import { metaKey } from '../../utils/platform'
+
+import { debounce } from '$src/utils/debounce'
+import { metaKey } from '$src/utils/platform'
+import Keys from '$src/constants/keys'
 
 interface MakedirProps extends WithTranslation {
     isOpen: boolean
@@ -37,7 +39,7 @@ class MakedirDialogClass extends React.Component<MakedirProps, MakedirState> {
     onKeyUp = (e: KeyboardEvent): void => {
         if (e.key === metaKey) {
             this.setState({ ctrlKey: false })
-        } else if (e.key === 'Enter') {
+        } else if (e.key === Keys.ENTER) {
             const { valid, path } = this.state
             valid && path.length && this.onCreate()
         }
@@ -46,7 +48,7 @@ class MakedirDialogClass extends React.Component<MakedirProps, MakedirState> {
     onKeyDown = (e: KeyboardEvent): void => {
         if (e.key === metaKey) {
             this.setState({ ctrlKey: true })
-        } else if (e.key === 'Enter' && this.state.ctrlKey) {
+        } else if (e.key === Keys.ENTER && this.state.ctrlKey) {
             const { valid, path } = this.state
             valid && path.length && this.onCreate()
         }

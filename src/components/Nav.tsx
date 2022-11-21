@@ -1,14 +1,15 @@
 import * as React from 'react'
+import { useTranslation } from 'react-i18next'
 import { observer } from 'mobx-react'
+import { runInAction } from 'mobx'
 import { Navbar, Alignment, Button, Classes, Intent } from '@blueprintjs/core'
 import { IconNames } from '@blueprintjs/icons'
 import { Popover2 } from '@blueprintjs/popover2'
-import classnames from 'classnames'
-import { useTranslation } from 'react-i18next'
+import classNames from 'classnames'
+
 import { HamburgerMenu } from './HamburgerMenu'
 import { Badge } from './Badge'
-import { runInAction } from 'mobx'
-import { useStores } from '../hooks/useStores'
+import { useStores } from '$src/hooks/useStores'
 
 const Nav = observer(() => {
     const { appState } = useStores('appState')
@@ -17,7 +18,7 @@ const Nav = observer(() => {
     const count = appState.pendingTransfers
     const badgeText = (count && count + '') || ''
     const badgeProgress = appState.totalTransferProgress
-    const downloadClass = classnames(Classes.MINIMAL, 'download')
+    const downloadClass = classNames(Classes.MINIMAL, 'download')
     const isSplitViewActive = appState.winStates[0].splitView
 
     const showDownloadsTab = (): void => {

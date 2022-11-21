@@ -1,10 +1,11 @@
 import * as React from 'react'
 import { observer } from 'mobx-react'
 import { InputGroup, ControlGroup, Button, Intent, IconName } from '@blueprintjs/core'
-import classnames from 'classnames'
+import classNames from 'classnames'
 import { Tooltip2 } from '@blueprintjs/popover2'
-import { useStores } from '$src/hooks/useStores'
 import { useTranslation } from 'react-i18next'
+
+import { useStores } from '$src/hooks/useStores'
 
 const Statusbar = observer(() => {
     const { appState, viewState } = useStores('appState', 'viewState')
@@ -15,7 +16,7 @@ const Statusbar = observer(() => {
     const numFiles = fileCache.files.filter((file) => !file.isDir).length
     const numSelected = fileCache.selected.length
     const iconName = ((fileCache.getFS() && fileCache.getFS().icon) || 'offline') as IconName
-    const offline = classnames('status-bar', { offline: fileCache.status === 'offline' })
+    const offline = classNames('status-bar', { offline: fileCache.status === 'offline' })
 
     const onClipboardCopy = () => {
         appState.clipboard.setClipboard(viewState.getVisibleCache())

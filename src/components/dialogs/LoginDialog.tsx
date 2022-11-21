@@ -1,8 +1,10 @@
 import * as React from 'react'
 import { Dialog, Classes, Intent, Button, InputGroup, FormGroup, Colors } from '@blueprintjs/core'
 import { inject } from 'mobx-react'
-import { FileState } from '../../state/fileState'
 import { withTranslation, WithTranslation } from 'react-i18next'
+
+import { FileState } from '$src/state/fileState'
+import Keys from '$src/constants/keys'
 
 interface LoginProps extends WithTranslation {
     isOpen: boolean
@@ -57,7 +59,7 @@ class LoginDialogClass extends React.Component<LoginProps, LoginState> {
     }
 
     onKeyUp = (e: KeyboardEvent): void => {
-        if (e.key === 'Enter') {
+        if (e.key === Keys.ENTER) {
             // we assume anonymous login if no username specified
             if (this.canLogin()) {
                 this.onLogin()

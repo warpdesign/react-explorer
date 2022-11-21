@@ -3,19 +3,21 @@ import { reaction, IReactionDisposer } from 'mobx'
 import { inject, observer } from 'mobx-react'
 import { InputGroup, ControlGroup, Button, ButtonGroup, Intent, Position, HotkeysTarget2 } from '@blueprintjs/core'
 import { Tooltip2, Popover2 } from '@blueprintjs/popover2'
-import { AppState } from '../state/appState'
+import { withTranslation, WithTranslation } from 'react-i18next'
+
+import { AppState } from '$src/state/appState'
 import { FileMenu } from './FileMenu'
 import { MakedirDialog } from './dialogs/MakedirDialog'
 import { AppAlert } from './AppAlert'
 import { Logger } from './Log'
 import { AppToaster } from './AppToaster'
-import { withTranslation, WithTranslation } from 'react-i18next'
 import { WithMenuAccelerators, Accelerators, Accelerator } from './WithMenuAccelerators'
-import { throttle } from '../utils/throttle'
-import { isWin, isMac } from '../utils/platform'
-import { ViewState } from '../state/viewState'
-import { FileState } from '../state/fileState'
-import { LocalizedError } from '../locale/error'
+import { throttle } from '$src/utils/throttle'
+import { isWin, isMac } from '$src/utils/platform'
+import { ViewState } from '$src/state/viewState'
+import { FileState } from '$src/state/fileState'
+import { LocalizedError } from '$src/locale/error'
+import Keys from '$src/constants/keys'
 
 const TOOLTIP_DELAY = 1200
 const MOVE_EVENT_THROTTLE = 300
@@ -128,7 +130,7 @@ export const ToolbarClass = inject(
                 private onKeyUp = (event: React.KeyboardEvent<HTMLElement>): void => {
                     this.hideTooltip()
 
-                    if (event.key === 'Escape') {
+                    if (event.key === Keys.ESCAPE) {
                         // since React events are attached to the root document
                         // event already has bubbled up so we must stop
                         // its immediate propagation
@@ -137,7 +139,7 @@ export const ToolbarClass = inject(
                         this.input.blur()
                         // workaround for Cypress bug https://github.com/cypress-io/cypress/issues/1176
                         // this.onBlur();
-                    } else if (event.key === 'Enter') {
+                    } else if (event.key === Keys.ENTER) {
                         this.onSubmit()
                     }
                 }
