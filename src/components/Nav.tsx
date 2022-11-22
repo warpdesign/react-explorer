@@ -13,11 +13,12 @@ import { useStores } from '$src/hooks/useStores'
 
 const Nav = observer(() => {
     const { appState } = useStores('appState')
+    const { transferListState } = appState
     const { t } = useTranslation()
     const isExplorer = appState.isExplorer
-    const count = appState.pendingTransfers
+    const count = appState.transferListState.pendingTransfers
     const badgeText = (count && count + '') || ''
-    const badgeProgress = appState.totalTransferProgress
+    const badgeProgress = transferListState.totalTransferProgress
     const downloadClass = classNames(Classes.MINIMAL, 'download')
     const isSplitViewActive = appState.winStates[0].splitView
 

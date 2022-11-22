@@ -8,13 +8,13 @@ import { withTranslation, WithTranslation } from 'react-i18next'
 import classNames from 'classnames'
 
 import { AppState } from '$src/state/appState'
-import { Batch } from '$src/transfers/batch'
+import type { TransferState, FileTransfer } from '$src/state/transferState'
 import { formatBytes } from '$src/utils/formatBytes'
-import { FileTransfer } from '$src/transfers/fileTransfer'
 import { AppAlert } from '$src/components/AppAlert'
 import CONFIG from '$src/config/appConfig'
 import { isWin } from '$src/utils/platform'
 import { TypeIcons } from '$src/constants/icons'
+import { TransferListState } from '$src/state/transferListState'
 
 interface Props extends WithTranslation {
     hide: boolean
@@ -35,20 +35,22 @@ interface State {
 
 interface NodeData {
     transferElement: FileTransfer
-    batchId: number
+    transferId: number
 }
 
 class DownloadsClass extends React.Component<Props, State> {
     private disposer: IReactionDisposer
     private appState: AppState
+    private transferListState: TransferListState
 
     constructor(props: Props) {
         super(props)
 
         this.appState = this.injected.appState
+        this.transferListState = this.appState.transferListState
 
         this.state = {
-            nodes: this.getTreeData(this.appState.transfers),
+            nodes: this.getTreeData(this.transferListState.transfers),
             expandedNodes: {},
         }
 
@@ -64,10 +66,10 @@ class DownloadsClass extends React.Component<Props, State> {
 
     private installReaction(): void {
         this.disposer = reaction(
-            (): IObservableArray<Batch> => {
-                return toJS(this.appState.transfers)
+            (): IObservableArray<TransferState> => {
+                return toJS(this.transferListState.transfers)
             },
-            (transfers: Batch[]): void => {
+            (transfers: TransferState[]): void => {
                 this.setState({ nodes: this.getTreeData(transfers) })
             },
             {
@@ -85,7 +87,7 @@ class DownloadsClass extends React.Component<Props, State> {
     }
 
     public onLanguageChanged = (/* lang: string */): void => {
-        const nodes = this.getTreeData(this.appState.transfers)
+        const nodes = this.getTreeData(this.transferListState.transfers)
         this.setState({ nodes })
     }
 
@@ -124,15 +126,14 @@ class DownloadsClass extends React.Component<Props, State> {
     }
 
     async onCloseClick(transferId: number): Promise<void> {
-        const appState = this.appState
-        const transfer = appState.getTransfer(transferId)
+        const transfer = this.transferListState.getTransfer(transferId)
 
         if (transfer.hasEnded) {
-            appState.removeTransfer(transferId)
+            this.transferListState.removeTransfer(transferId)
         } else {
             const cancel = await this.showTransferAlert()
             if (cancel) {
-                appState.removeTransfer(transferId)
+                this.transferListState.removeTransfer(transferId)
             }
         }
     }
@@ -141,9 +142,9 @@ class DownloadsClass extends React.Component<Props, State> {
         // no first-level: this is a file
         if (nodePath.length > 1) {
             const transfer = (node.nodeData as NodeData).transferElement
-            const batchId = (node.nodeData as NodeData).batchId
+            const transferId = (node.nodeData as NodeData).transferId
             if (transfer.status === 'done') {
-                this.appState.openTransferedFile(batchId, transfer.file)
+                this.appState.openTransferedFile(transferId, transfer.file)
             }
         }
     }
@@ -159,7 +160,7 @@ class DownloadsClass extends React.Component<Props, State> {
         }
     }
 
-    getIntent(transfer: Batch): Intent {
+    getIntent(transfer: TransferState): Intent {
         console.log(transfer.status, transfer)
         const status = transfer.status
         let intent: Intent = Intent.NONE
@@ -190,7 +191,7 @@ class DownloadsClass extends React.Component<Props, State> {
         return (filetype && TypeIcons[filetype]) || TypeIcons['any']
     }
 
-    createTransferLabel(transfer: Batch, className: string): JSX.Element {
+    createTransferLabel(transfer: TransferState, className: string): JSX.Element {
         const { t } = this.injected
         const sizeFormatted = formatBytes(transfer.size)
         const ended = transfer.hasEnded
@@ -252,7 +253,7 @@ class DownloadsClass extends React.Component<Props, State> {
         )
     }
 
-    getTreeData(transfers: Batch[]): TreeNodeInfo[] {
+    getTreeData(transfers: TransferState[]): TreeNodeInfo[] {
         const treeData: TreeNodeInfo[] = []
 
         for (const transfer of transfers) {
@@ -288,7 +289,7 @@ class DownloadsClass extends React.Component<Props, State> {
                         secondaryLabel: this.createFileRightLabel(element),
                         nodeData: {
                             transferElement: element,
-                            batchId: transfer.id,
+                            transferId: transfer.id,
                         },
                     })
                     i++

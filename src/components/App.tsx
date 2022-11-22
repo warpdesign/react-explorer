@@ -200,7 +200,7 @@ const App = inject('settingsState')(
 
             onExitRequest = (): void => {
                 console.log('exitRequest')
-                if (this.appState && this.appState.pendingTransfers) {
+                if (this.appState && this.appState.transferListState.pendingTransfers) {
                     this.setState({ isExitDialogOpen: true })
                 } else {
                     console.log('sending readyToExit event')
@@ -224,9 +224,11 @@ const App = inject('settingsState')(
 
             componentDidUpdate(): void {
                 this.setDarkThemeClass()
-
                 if (!window.ENV.CY) {
-                    const progress = (this.appState.pendingTransfers && this.appState.totalTransferProgress) || -1
+                    const {
+                        transferListState: { pendingTransfers, totalTransferProgress },
+                    } = this.appState
+                    const progress = (pendingTransfers && totalTransferProgress) || -1
                     ipcRenderer.invoke('window:setProgressBar', progress)
                 }
             }
@@ -288,7 +290,7 @@ const App = inject('settingsState')(
                 const { isPrefsOpen, isShortcutsOpen, isExitDialogOpen } = this.appState
                 const { settingsState } = this.injected
                 const isExplorer = this.appState.isExplorer
-                const count = this.appState.pendingTransfers
+                const count = this.appState.transferListState.pendingTransfers
                 const { t } = this.props
                 const winState = this.appState.winStates[0]
                 const isSplitView = winState.splitView

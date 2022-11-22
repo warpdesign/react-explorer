@@ -1,41 +1,28 @@
 import React from 'react'
-import { action, observable, computed, makeObservable, runInAction } from 'mobx'
+import { Intent } from '@blueprintjs/core'
+import { action, observable, makeObservable } from 'mobx'
+import type { TFunction } from 'i18next'
 import { shell } from 'electron'
-import { File, FsApi, getFS } from '$src/services/Fs'
+
+import { File, getFS } from '$src/services/Fs'
 import { FileState } from '$src/state/fileState'
-import { Batch } from '$src/transfers/batch'
+import { TransferOptions } from '$src/state/transferState'
 import { DOWNLOADS_DIR } from '$src/utils/platform'
 import { ViewDescriptor } from '$src/components/TabList'
 import { WinState, WindowSettings } from '$src/state/winState'
 import { FavoritesState } from '$src/state/favoritesState'
 import { ViewState } from '$src/state/viewState'
-import { ClipboardState } from './clipboardState'
-import type { TFunction } from 'i18next'
+import { ClipboardState } from '$src/state/clipboardState'
 import { i18n } from '$src/locale/i18n'
 import { AppToaster } from '$src/components/AppToaster'
-import { Intent } from '@blueprintjs/core'
-import { getLocalizedError, LocalizedError } from '$src/locale/error'
+import { LocalizedError } from '$src/locale/error'
 import { DeleteConfirmDialog } from '$src/components/dialogs/deleteConfirm'
 import { AppAlert } from '$src/components/AppAlert'
+import { TransferListState } from '$src/state/transferListState'
 
 // wait 1 sec before showing badge: this avoids
 // flashing (1) badge when the transfer is very fast
-const SHOW_BADGE_DELAY = 600
 const ERROR_MESSAGE_TIMEOUT = 3500
-
-/**
- * Interface for a transfer
- *
- * @interface
- */
-interface TransferOptions {
-    srcFs: FsApi
-    dstFs: FsApi
-    files: File[]
-    srcPath: string
-    dstPath: string
-    dstFsName: string
-}
 
 /**
  * Maintains global application state:
@@ -63,13 +50,15 @@ export class AppState {
         winState.toggleSplitViewMode()
     }
 
-    /* transfers */
-    transfers = observable<Batch>([])
+    // /* transfers */
+    // transfers = observable<Batch>([])
 
-    // current active transfers
-    activeTransfers = observable<Batch>([])
+    // // current active transfers
+    // activeTransfers = observable<Batch>([])
 
-    clipboard: ClipboardState = new ClipboardState()
+    clipboard = new ClipboardState()
+
+    transferListState = new TransferListState()
 
     t: TFunction
 
@@ -88,9 +77,6 @@ export class AppState {
             showDownloadsTab: action,
             showExplorerTab: action,
             initViewState: action,
-            totalTransferProgress: computed,
-            pendingTransfers: computed,
-            addTransfer: action,
             refreshActiveView: action,
             addView: action,
             updateSelection: action,
@@ -128,7 +114,8 @@ export class AppState {
         if (destCache && !destCache.error && this.clipboard.files.length) {
             try {
                 const options = this.prepareClipboardTransferTo(destCache)
-                const res = await this.copy(options)
+                // TODOCOPY
+                // const res = await this.copy(options)
                 debugger
             } catch (e) {
                 console.log(e)
@@ -175,61 +162,61 @@ export class AppState {
         }
     }
 
-    copy = async (options: TransferOptions) => {
-        try {
-            // const options = this.prepareTransferTo(srcCache, dstCache, files)
-            const batch = await this.addTransfer(options)
-            const success = await batch.start()
-            // this.refreshAfterCopy()
-            // if (success) {
-            //     if (
-            //         options.dstPath === cache.path &&
-            //         options.dstFsName === cache.getFS().name &&
-            //         cache.getFS().options.needsRefresh
-            //     ) {
-            //         cache.reload()
-            //     }
-            // }
-            debugger
-            console.log('success: show toast ?')
-        } catch (e) {
-            console.log(e)
-            debugger
-        }
+    // copy = async (options: TransferOptions) => {
+    //     try {
+    //         // const options = this.prepareTransferTo(srcCache, dstCache, files)
+    //         const batch = await this.addTransfer(options)
+    //         const success = await batch.start()
+    //         // this.refreshAfterCopy()
+    //         // if (success) {
+    //         //     if (
+    //         //         options.dstPath === cache.path &&
+    //         //         options.dstFsName === cache.getFS().name &&
+    //         //         cache.getFS().options.needsRefresh
+    //         //     ) {
+    //         //         cache.reload()
+    //         //     }
+    //         // }
+    //         debugger
+    //         console.log('success: show toast ?')
+    //     } catch (e) {
+    //         console.log(e)
+    //         debugger
+    //     }
 
-        // .then((noErrors: boolean) => {
-        //     const { t } = this.injected
-        //     if (noErrors) {
-        //         AppToaster.show({
-        //             message: t('COMMON.COPY_FINISHED'),
-        //             icon: 'tick',
-        //             intent: Intent.SUCCESS,
-        //             timeout: 3000,
-        //         })
-        //     } else {
-        //         AppToaster.show({
-        //             message: t('COMMON.COPY_WARNING'),
-        //             icon: 'warning-sign',
-        //             intent: Intent.WARNING,
-        //             timeout: 5000,
-        //         })
-        //     }
-        // })
-        // .catch((err: { code: number | string }): void => {
-        //     const { t } = this.injected
-        //     const localizedError = getLocalizedError(err)
-        //     const message = err.code
-        //         ? t('ERRORS.COPY_ERROR', { message: localizedError.message })
-        //         : t('ERRORS.COPY_UNKNOWN_ERROR')
+    //     // .then((noErrors: boolean) => {
+    //     //     const { t } = this.injected
+    //     //     if (noErrors) {
+    //     //         AppToaster.show({
+    //     //             message: t('COMMON.COPY_FINISHED'),
+    //     //             icon: 'tick',
+    //     //             intent: Intent.SUCCESS,
+    //     //             timeout: 3000,
+    //     //         })
+    //     //     } else {
+    //     //         AppToaster.show({
+    //     //             message: t('COMMON.COPY_WARNING'),
+    //     //             icon: 'warning-sign',
+    //     //             intent: Intent.WARNING,
+    //     //             timeout: 5000,
+    //     //         })
+    //     //     }
+    //     // })
+    //     // .catch((err: { code: number | string }): void => {
+    //     //     const { t } = this.injected
+    //     //     const localizedError = getLocalizedError(err)
+    //     //     const message = err.code
+    //     //         ? t('ERRORS.COPY_ERROR', { message: localizedError.message })
+    //     //         : t('ERRORS.COPY_UNKNOWN_ERROR')
 
-        //     AppToaster.show({
-        //         message: message,
-        //         icon: 'error',
-        //         intent: Intent.DANGER,
-        //         timeout: 5000,
-        //     })
-        // })
-    }
+    //     //     AppToaster.show({
+    //     //         message: message,
+    //     //         icon: 'error',
+    //     //         intent: Intent.DANGER,
+    //     //         timeout: 5000,
+    //     //     })
+    //     // })
+    // }
 
     onDeleteError = (err?: LocalizedError) => {
         if (err) {
@@ -375,12 +362,13 @@ export class AppState {
     /**
      * Opens a file that has been transfered
      *
+     * @param transferId
      * @param file the file to open
      */
-    openTransferedFile(batchId: number, file: File): void {
+    openTransferedFile(transferId: number, file: File): void {
         // TODO: this is duplicate code from appState/prepareLocalTransfer and fileState.openFile()
         // because we don't have a reference to the destination cache
-        const batch = this.transfers.find((transfer) => transfer.id === batchId)
+        const batch = this.transferListState.getTransfer(transferId)
         const api = batch.dstFs
         const path = api.join(file.dir, file.fullname)
         shell.openPath(path)
@@ -420,14 +408,16 @@ export class AppState {
                 dstFsName: fs.name,
             }
 
-            // TODO: use a temporary filename for destination file?
-            return this.addTransfer(options)
-                .then(() => {
-                    return api.join(DOWNLOADS_DIR, files[0].fullname)
-                })
-                .catch((err) => {
-                    return Promise.reject(err)
-                })
+            // TODOCOPY
+            debugger
+            // // TODO: use a temporary filename for destination file?
+            // return this.addTransfer(options)
+            //     .then(() => {
+            //         return api.join(DOWNLOADS_DIR, files[0].fullname)
+            //     })
+            //     .catch((err) => {
+            //         return Promise.reject(err)
+            //     })
         }
     }
 
@@ -460,75 +450,42 @@ export class AppState {
         return view.caches
     }
 
-    get totalTransferProgress(): number {
-        let totalSize = 0
-        let totalProgress = 0
-
-        const runningTransfers = this.activeTransfers
-        // .filter(transfer => !transfer.status.match(/error|done/));
-
-        for (const transfer of runningTransfers) {
-            totalSize += transfer.size
-            totalProgress += transfer.progress
-        }
-
-        return (totalSize && totalProgress / totalSize) || 0
+    async copy(options: TransferOptions) {
+        const batch = await this.transferListState.addTransfer(options)
+        const success = await batch.start()
     }
 
-    getTransfer(transferId: number): Batch {
-        return this.transfers.find((transfer) => transferId === transfer.id)
-    }
+    // async addTransfer(options: TransferOptions): Promise<Batch> {
+    //     let isDir = false
 
-    get pendingTransfers(): number {
-        const now = new Date()
-        const num = this.transfers.filter(
-            (transfer) =>
-                transfer.progress &&
-                transfer.isStarted &&
-                now.getTime() - transfer.startDate.getTime() >= SHOW_BADGE_DELAY,
-        ).length
-        return num
-    }
+    //     try {
+    //         isDir = await options.dstFs.isDir(options.dstPath)
+    //     } catch (err) {
+    //         isDir = false
+    //     }
 
-    async addTransfer(options: TransferOptions): Promise<Batch> {
-        let isDir = false
+    //     if (!isDir) {
+    //         throw {
+    //             code: 'NODEST',
+    //         }
+    //     }
 
-        try {
-            isDir = await options.dstFs.isDir(options.dstPath)
-        } catch (err) {
-            isDir = false
-        }
+    //     console.log('addTransfer', options.files, options.srcFs, options.dstFs, options.dstPath)
 
-        if (!isDir) {
-            throw {
-                code: 'NODEST',
-            }
-        }
+    //     const batch = new Batch(options.srcFs, options.dstFs, options.srcPath, options.dstPath)
+    //     runInAction(() => this.transfers.unshift(batch))
+    //     await batch.prepare(options.files)
 
-        console.log('addTransfer', options.files, options.srcFs, options.dstFs, options.dstPath)
+    //     // CHECKME
+    //     runInAction(() => {
+    //         if (this.activeTransfers.length === 1) {
+    //             this.activeTransfers.clear()
+    //         }
+    //         this.activeTransfers.push(batch)
+    //     })
 
-        const batch = new Batch(options.srcFs, options.dstFs, options.srcPath, options.dstPath)
-        runInAction(() => this.transfers.unshift(batch))
-        await batch.prepare(options.files)
-
-        // CHECKME
-        runInAction(() => {
-            if (this.activeTransfers.length === 1) {
-                this.activeTransfers.clear()
-            }
-            this.activeTransfers.push(batch)
-        })
-
-        return batch
-    }
-
-    removeTransfer(transferId: number): void {
-        const batch = this.transfers.find((transfer) => transfer.id === transferId)
-        if (batch) {
-            batch.cancel()
-            this.transfers.remove(batch)
-        }
-    }
+    //     return batch
+    // }
 
     /* /transfers */
 

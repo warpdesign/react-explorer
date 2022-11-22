@@ -1,11 +1,36 @@
 import { observable, action, makeObservable, runInAction } from 'mobx'
-import { FsApi, File } from '../services/Fs'
-import { FileTransfer } from './fileTransfer'
-import { Deferred } from '../utils/deferred'
-import { getLocalizedError } from '../locale/error'
-import { Readable } from 'stream'
-import { getSelectionRange } from '../utils/fileUtils'
-import { isWin } from '../utils/platform'
+import type { Readable } from 'stream'
+
+import { FsApi, File } from '$src/services/Fs'
+import { Deferred } from '$src/utils/deferred'
+import { getLocalizedError } from '$src/locale/error'
+import { getSelectionRange } from '$src/utils/fileUtils'
+import { isWin } from '$src/utils/platform'
+
+import { LocalizedError } from '$src/locale/error'
+
+export interface FileTransfer {
+    file: File
+    status: 'started' | 'cancelled' | 'error' | 'done' | 'queued'
+    progress: number
+    subDirectory: string
+    newSub: string
+    ready: boolean
+    error?: LocalizedError
+}
+
+export interface TransferOptions {
+    // source data
+    files: File[]
+    srcFs: FsApi
+    srcPath: string
+
+    // destination data
+    dstFs: FsApi
+    dstPath: string
+    // not sure we still need this ?
+    dstFsName: string
+}
 
 const MAX_TRANSFERS = 2
 const MAX_ERRORS = 5
@@ -13,7 +38,7 @@ const RENAME_SUFFIX = '_'
 
 type Status = 'started' | 'queued' | 'error' | 'done' | 'cancelled' | 'calculating'
 
-export class Batch {
+export class TransferState {
     static maxId = 1
     public srcFs: FsApi
     public dstFs: FsApi
@@ -75,14 +100,14 @@ export class Batch {
         this.dstFs = dstFs
         this.dstPath = dstPath
         this.srcPath = srcPath
-        // build batch src/dst names
+        // build transfer src/dst names
         this.srcName = this.getLastPathPart(srcPath)
         this.dstName = this.getLastPathPart(dstPath)
-        this.id = Batch.maxId++
+        this.id = TransferState.maxId++
     }
 
     async start(): Promise<boolean | void> {
-        console.log('Starting batch')
+        console.log('Starting transfer')
         if (this.status === 'queued') {
             this.slotsAvailable = MAX_TRANSFERS
             this.status = 'started'
