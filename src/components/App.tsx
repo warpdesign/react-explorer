@@ -30,9 +30,9 @@ import Keys from '$src/constants/keys'
 require('@blueprintjs/core/lib/css/blueprint.css')
 require('@blueprintjs/icons/lib/css/blueprint-icons.css')
 require('@blueprintjs/popover2/lib/css/blueprint-popover2.css')
-require('../css/main.css')
-require('../css/windows.css')
-require('../css/scrollbars.css')
+require('$src/css/main.css')
+require('$src/css/windows.css')
+require('$src/css/scrollbars.css')
 
 interface AppProps extends WithTranslation {
     initialSettings: CustomSettings

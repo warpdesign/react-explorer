@@ -1,7 +1,9 @@
 import { observable, action, computed, makeObservable } from 'mobx'
-import { ViewState } from './viewState'
 import { ipcRenderer } from 'electron'
-import { JSObject } from '../components/Log'
+
+import { ViewState } from '$src/state/viewState'
+import { JSObject } from '$src/components/Log'
+import { FileState } from '$src/state/fileState'
 
 export interface WindowSettings {
     splitView: boolean
@@ -104,6 +106,16 @@ export class WinState {
      */
     getViewByActive(isActive = true): ViewState {
         return this.views.find((view) => view.isActive === isActive)
+    }
+
+    getVisibleViewByPath(path: string): FileState[] {
+        return this.views.reduce((states: FileState[], view: ViewState) => {
+            const cache = view.getVisibleCache()
+            if (cache?.path === path && cache?.getFS().options.needsRefresh) {
+                states.push(cache)
+            }
+            return states
+        }, [])
     }
 
     getView(viewId: number): ViewState {

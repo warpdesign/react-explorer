@@ -1,5 +1,6 @@
 import { clipboard, Menu, BrowserWindow, MenuItemConstructorOptions, MenuItem, app, ipcMain, dialog } from 'electron'
-import { isMac, isLinux, VERSIONS } from './osSupport'
+
+import { isMac, isLinux, VERSIONS } from '$src/electron/osSupport'
 
 const ACCELERATOR_EVENT = 'menu_accelerator'
 

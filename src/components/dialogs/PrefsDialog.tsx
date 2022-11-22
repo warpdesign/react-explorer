@@ -1,15 +1,16 @@
 import * as React from 'react'
 import { Dialog, Classes, Intent, Button, InputGroup, FormGroup, MenuItem } from '@blueprintjs/core'
 import { Tooltip2 } from '@blueprintjs/popover2'
-import { debounce } from '../../utils/debounce'
-import { withTranslation, WithTranslation } from 'react-i18next'
-import { SettingsState } from '../../state/settingsState'
-import { inject } from 'mobx-react'
 import { Select2, ItemRenderer } from '@blueprintjs/select'
-import { FsLocal, FolderExists } from '../../services/plugins/FsLocal'
-import { AppAlert } from '../AppAlert'
+import { withTranslation, WithTranslation } from 'react-i18next'
+import { inject } from 'mobx-react'
 import { ipcRenderer } from 'electron'
-import { HOME_DIR } from '../../utils/platform'
+
+import { debounce } from '$src/utils/debounce'
+import { SettingsState } from '$src/state/settingsState'
+import { FsLocal, FolderExists } from '$src/services/plugins/FsLocal'
+import { AppAlert } from '$src/components/AppAlert'
+import { HOME_DIR } from '$src/utils/platform'
 
 const DEBOUNCE_DELAY = 300
 

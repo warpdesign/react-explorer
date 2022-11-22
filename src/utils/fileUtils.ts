@@ -1,4 +1,4 @@
-import { Extensions, File } from '../services/Fs'
+import { Extensions } from '$src/services/Fs'
 
 export const REGEX_EXTENSION = /\.(?=[^0-9])/
 

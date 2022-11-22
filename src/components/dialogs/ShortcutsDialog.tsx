@@ -1,9 +1,10 @@
 import * as React from 'react'
 import { Dialog, Classes, Button, KeyCombo, InputGroup, Callout } from '@blueprintjs/core'
-import { useTranslation } from 'react-i18next'
-import { isMac } from '../../utils/platform'
-import CONFIG from '../../config/appConfig'
 import type { TFunction } from 'i18next'
+import { useTranslation } from 'react-i18next'
+
+import { isMac } from '$src/utils/platform'
+import CONFIG from '$src/config/appConfig'
 
 interface ShortcutsProps {
     isOpen: boolean

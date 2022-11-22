@@ -23,6 +23,7 @@ import { TransferListState } from '$src/state/transferListState'
 // wait 1 sec before showing badge: this avoids
 // flashing (1) badge when the transfer is very fast
 const ERROR_MESSAGE_TIMEOUT = 3500
+const SUCCESS_COPY_TIMEOUT = 3000
 
 /**
  * Maintains global application state:
@@ -50,16 +51,11 @@ export class AppState {
         winState.toggleSplitViewMode()
     }
 
-    // /* transfers */
-    // transfers = observable<Batch>([])
-
-    // // current active transfers
-    // activeTransfers = observable<Batch>([])
-
     clipboard = new ClipboardState()
 
     transferListState = new TransferListState()
 
+    // reference to current i18n's instance translate function
     t: TFunction
 
     /**
@@ -93,14 +89,6 @@ export class AppState {
         this.initViewState()
     }
 
-    showDownloadsTab = (): void => {
-        this.isExplorer = false
-    }
-
-    showExplorerTab = (): void => {
-        this.isExplorer = true
-    }
-
     /**
      * initialize each window's state: hardcoded to first window since we only have
      * one window now
@@ -110,17 +98,17 @@ export class AppState {
         winState.initState()
     }
 
+    showDownloadsTab = (): void => {
+        this.isExplorer = false
+    }
+
+    showExplorerTab = (): void => {
+        this.isExplorer = true
+    }
+
     async paste(destCache: FileState): Promise<void> {
         if (destCache && !destCache.error && this.clipboard.files.length) {
-            try {
-                const options = this.prepareClipboardTransferTo(destCache)
-                // TODOCOPY
-                // const res = await this.copy(options)
-                debugger
-            } catch (e) {
-                console.log(e)
-                debugger
-            }
+            this.copy(this.prepareClipboardTransferTo(destCache))
             // TODO: use copy instead
             // try {
             //     await this.addTransfer(options)
@@ -368,8 +356,7 @@ export class AppState {
     openTransferedFile(transferId: number, file: File): void {
         // TODO: this is duplicate code from appState/prepareLocalTransfer and fileState.openFile()
         // because we don't have a reference to the destination cache
-        const batch = this.transferListState.getTransfer(transferId)
-        const api = batch.dstFs
+        const { dstFs: api } = this.transferListState.getTransfer(transferId)
         const path = api.join(file.dir, file.fullname)
         shell.openPath(path)
     }
@@ -451,8 +438,35 @@ export class AppState {
     }
 
     async copy(options: TransferOptions) {
-        const batch = await this.transferListState.addTransfer(options)
-        const success = await batch.start()
+        try {
+            const transfer = await this.transferListState.addTransfer(options)
+            await transfer.start()
+
+            AppToaster.show({
+                message: this.t('COMMON.COPY_FINISHED'),
+                icon: 'tick',
+                intent: Intent.SUCCESS,
+                timeout: SUCCESS_COPY_TIMEOUT,
+            })
+
+            // get visible caches: the ones that are not visible will be automatically refreshed
+            // when set visible
+            const cacheToRefresh = this.winStates[0].getVisibleViewByPath(options.dstPath)
+            for (const cache of cacheToRefresh) {
+                cache.reload()
+            }
+        } catch (err) {
+            if (err.files) {
+                // TODOCOPY: change message if there was only errors
+                AppToaster.show({
+                    message: this.t('COMMON.COPY_WARNING'),
+                    icon: 'warning-sign',
+                    intent: Intent.WARNING,
+                    timeout: ERROR_MESSAGE_TIMEOUT,
+                })
+            }
+        }
+        debugger
     }
 
     // async addTransfer(options: TransferOptions): Promise<Batch> {
@@ -497,7 +511,7 @@ export class AppState {
 
     refreshActiveView(): void {
         const cache = this.getActiveCache()
-        // only refresh view that's ready
+
         if (cache) {
             cache.reload()
         }
@@ -511,16 +525,11 @@ export class AppState {
     addView(path = '', viewId = -1): void {
         const winState = this.winStates[0]
         const view = winState.getOrCreateView(viewId)
-        // let view = this.getView(viewId);
-
-        // if (!view) {
-        //     view = this.createView(viewId);
-        //     this.views[viewId] = view;
-        // }
 
         view.addCache(path)
     }
 
+    // TODO: this should be moved into FileState (!)
     updateSelection(cache: FileState, newSelection: File[]): void {
         console.log('updateSelection', newSelection.length)
         cache.selected.replace(newSelection)
@@ -534,8 +543,5 @@ export class AppState {
         } else {
             cache.setSelectedFile(null)
         }
-        // for (let selected of cache.selected) {
-        //     console.log(selected.fullname, selected.id.dev, selected.id.ino);
-        // }
     }
 }

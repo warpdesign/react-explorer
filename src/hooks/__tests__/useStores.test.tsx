@@ -2,9 +2,10 @@
  * @jest-environment jsdom
  */
 import React from 'react'
-import { screen } from '@testing-library/react'
-import { useStores } from '../useStores'
 import { render } from 'rtl'
+import { screen } from '@testing-library/react'
+
+import { useStores } from '$src/hooks/useStores'
 
 const Component = ({ storeName }: { storeName: string }) => {
     const { settingsState } = useStores(storeName)

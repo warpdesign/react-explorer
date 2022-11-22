@@ -42,7 +42,7 @@ import { TypeIcons } from '$src/constants/icons'
 require('react-virtualized/styles.css')
 require('$src/css/filetable.css')
 
-const CLICK_DELAY = 300
+const CLICK_DELAY = 400
 const SCROLL_DEBOUNCE = 50
 const ARROW_KEYS_REPEAT_DELAY = 5
 const ROW_HEIGHT = 28

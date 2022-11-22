@@ -1,11 +1,12 @@
 import { observable, action, runInAction, makeObservable } from 'mobx'
-import { FsApi, Fs, getFS, File, Credentials, withConnection, FileID } from '../services/Fs'
-import { Deferred } from '../utils/deferred'
-import { i18n } from '../locale/i18n'
-import { getLocalizedError } from '../locale/error'
 import { shell, ipcRenderer } from 'electron'
-import { AppState } from './appState'
-import { TSORT_METHOD_NAME, TSORT_ORDER } from '../services/FsSort'
+
+import { FsApi, Fs, getFS, File, Credentials, withConnection, FileID } from '$src/services/Fs'
+import { Deferred } from '$src/utils/deferred'
+import { i18n } from '$src/locale/i18n'
+import { getLocalizedError } from '$src/locale/error'
+import { AppState } from '$src/state/appState'
+import { TSORT_METHOD_NAME, TSORT_ORDER } from '$src/services/FsSort'
 
 export type TStatus = 'busy' | 'ok' | 'login' | 'offline'
 

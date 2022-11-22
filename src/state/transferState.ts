@@ -6,7 +6,6 @@ import { Deferred } from '$src/utils/deferred'
 import { getLocalizedError } from '$src/locale/error'
 import { getSelectionRange } from '$src/utils/fileUtils'
 import { isWin } from '$src/utils/platform'
-
 import { LocalizedError } from '$src/locale/error'
 
 export interface FileTransfer {
@@ -117,7 +116,7 @@ export class TransferState {
         }
 
         try {
-            await this.transferDef.promise
+            const res = await this.transferDef.promise
             runInAction(() => (this.status = 'done'))
             debugger
             return true
@@ -312,9 +311,11 @@ export class TransferState {
         if (this.status !== 'error' && this.transfersDone < this.elements.length) {
             this.queueNextTransfers()
         } else {
-            if (this.errors === this.elements.length) {
+            if (this.errors) {
+                // reject with the number of success
                 this.transferDef.reject({
-                    code: '',
+                    files: this.elements.length,
+                    errors: this.errors,
                 })
             } else {
                 this.transferDef.resolve()

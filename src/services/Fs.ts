@@ -1,8 +1,7 @@
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
 import { Readable } from 'stream'
-import { isWin } from '../utils/platform'
 
-// console.log('fslocal', FsLocal);
+import { isWin } from '$src/utils/platform'
 
 const interfaces: Array<Fs> = []
 
@@ -13,7 +12,6 @@ export interface Credentials {
 }
 
 export function registerFs(fs: Fs): void {
-    // console.log('Registering Fs', fs);
     interfaces.push(fs)
 }
 
