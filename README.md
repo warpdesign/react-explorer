@@ -1,6 +1,6 @@
 # File manager written in TypeScript & React
 
-[![Build Status](https://www.travis-ci.org/warpdesign/react-explorer.svg?branch=master)](https://www.travis-ci.org/warpdesign/react-explorer)
+![master Tests](https://github.com/warpdesign/react-explorer/.github/workflows/github-actions-tests.yml/badge.svg?branch=master)
 
 ![React-Explorer](./img/react-explorer-theme.png)
 
