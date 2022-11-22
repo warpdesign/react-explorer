@@ -18,8 +18,6 @@ import { getLocalizedError, LocalizedError } from '$src/locale/error'
 import { DeleteConfirmDialog } from '$src/components/dialogs/deleteConfirm'
 import { AppAlert } from '$src/components/AppAlert'
 
-declare const ENV: { [key: string]: string | boolean | number | Record<string, unknown> }
-
 // wait 1 sec before showing badge: this avoids
 // flashing (1) badge when the transfer is very fast
 const SHOW_BADGE_DELAY = 600
@@ -103,8 +101,8 @@ export class AppState {
         this.addWindow(options)
 
         for (const desc of views) {
-            console.log('adding view', desc.viewId, desc.path)
-            this.addView(ENV.CY ? '' : desc.path, desc.viewId)
+            console.log('adding view', desc.viewId, desc.path, window.ENV.CY)
+            this.addView(window.ENV.CY ? '' : desc.path, desc.viewId)
         }
         this.initViewState()
     }
@@ -129,38 +127,108 @@ export class AppState {
     async paste(destCache: FileState): Promise<void> {
         if (destCache && !destCache.error && this.clipboard.files.length) {
             try {
-                const noErrors = await this.prepareClipboardTransferTo(destCache)
-                if (noErrors) {
-                    AppToaster.show({
-                        message: this.t('COMMON.COPY_FINISHED'),
-                        icon: 'tick',
-                        intent: Intent.SUCCESS,
-                        timeout: 3000,
-                    })
-                } else {
-                    AppToaster.show({
-                        message: this.t('COMMON.COPY_WARNING'),
-                        icon: 'warning-sign',
-                        intent: Intent.WARNING,
-                        timeout: 5000,
-                    })
-                }
-            } catch (err) {
-                const localizedError = getLocalizedError(err)
-                const message = err.code
-                    ? this.t('ERRORS.COPY_ERROR', {
-                          message: localizedError.message,
-                      })
-                    : this.t('ERRORS.COPY_UNKNOWN_ERROR')
-
-                AppToaster.show({
-                    message: message,
-                    icon: 'error',
-                    intent: Intent.DANGER,
-                    timeout: 5000,
-                })
+                const options = this.prepareClipboardTransferTo(destCache)
+                const res = await this.copy(options)
+                debugger
+            } catch (e) {
+                console.log(e)
+                debugger
             }
+            // TODO: use copy instead
+            // try {
+            //     await this.addTransfer(options)
+            //     .then((res) => {
+
+            //         return res
+            //     })
+            //     const noErrors = await this.(destCache)
+            //     if (noErrors) {
+            //         AppToaster.show({
+            //             message: this.t('COMMON.COPY_FINISHED'),
+            //             icon: 'tick',
+            //             intent: Intent.SUCCESS,
+            //             timeout: 3000,
+            //         })
+            //     } else {
+            //         AppToaster.show({
+            //             message: this.t('COMMON.COPY_WARNING'),
+            //             icon: 'warning-sign',
+            //             intent: Intent.WARNING,
+            //             timeout: 5000,
+            //         })
+            //     }
+            // } catch (err) {
+            //     const localizedError = getLocalizedError(err)
+            //     const message = err.code
+            //         ? this.t('ERRORS.COPY_ERROR', {
+            //               message: localizedError.message,
+            //           })
+            //         : this.t('ERRORS.COPY_UNKNOWN_ERROR')
+
+            //     AppToaster.show({
+            //         message: message,
+            //         icon: 'error',
+            //         intent: Intent.DANGER,
+            //         timeout: 5000,
+            //     })
+            // }
         }
+    }
+
+    copy = async (options: TransferOptions) => {
+        try {
+            // const options = this.prepareTransferTo(srcCache, dstCache, files)
+            const batch = await this.addTransfer(options)
+            const success = await batch.start()
+            // this.refreshAfterCopy()
+            // if (success) {
+            //     if (
+            //         options.dstPath === cache.path &&
+            //         options.dstFsName === cache.getFS().name &&
+            //         cache.getFS().options.needsRefresh
+            //     ) {
+            //         cache.reload()
+            //     }
+            // }
+            debugger
+            console.log('success: show toast ?')
+        } catch (e) {
+            console.log(e)
+            debugger
+        }
+
+        // .then((noErrors: boolean) => {
+        //     const { t } = this.injected
+        //     if (noErrors) {
+        //         AppToaster.show({
+        //             message: t('COMMON.COPY_FINISHED'),
+        //             icon: 'tick',
+        //             intent: Intent.SUCCESS,
+        //             timeout: 3000,
+        //         })
+        //     } else {
+        //         AppToaster.show({
+        //             message: t('COMMON.COPY_WARNING'),
+        //             icon: 'warning-sign',
+        //             intent: Intent.WARNING,
+        //             timeout: 5000,
+        //         })
+        //     }
+        // })
+        // .catch((err: { code: number | string }): void => {
+        //     const { t } = this.injected
+        //     const localizedError = getLocalizedError(err)
+        //     const message = err.code
+        //         ? t('ERRORS.COPY_ERROR', { message: localizedError.message })
+        //         : t('ERRORS.COPY_UNKNOWN_ERROR')
+
+        //     AppToaster.show({
+        //         message: message,
+        //         icon: 'error',
+        //         intent: Intent.DANGER,
+        //         timeout: 5000,
+        //     })
+        // })
     }
 
     onDeleteError = (err?: LocalizedError) => {
@@ -230,9 +298,9 @@ export class AppState {
      *
      * @param cache file cache to transfer files to
      *
-     * @returns {Promise<FileTransfer[]>}
+     * @returns {TransferOptions}
      */
-    prepareClipboardTransferTo(cache: FileState): Promise<boolean | void> {
+    prepareClipboardTransferTo(cache: FileState): TransferOptions {
         const options = {
             files: this.clipboard.files,
             srcFs: this.clipboard.srcFs,
@@ -242,22 +310,20 @@ export class AppState {
             dstFsName: cache.getFS().name,
         }
 
-        return this.addTransfer(options)
-            .then((res) => {
-                debugger
-                if (
-                    options.dstPath === cache.path &&
-                    options.dstFsName === cache.getFS().name &&
-                    cache.getFS().options.needsRefresh
-                ) {
-                    cache.reload()
-                }
+        return options
 
-                return res
-            })
-            .catch((/*err: LocalizedError*/) => {
-                debugger
-            })
+        // return this.addTransfer(options)
+        //     .then((res) => {
+        //         if (
+        //             options.dstPath === cache.path &&
+        //             options.dstFsName === cache.getFS().name &&
+        //             cache.getFS().options.needsRefresh
+        //         ) {
+        //             cache.reload()
+        //         }
+
+        //         return res
+        //     })
     }
 
     /**
@@ -267,13 +333,9 @@ export class AppState {
      * @param dstCache  file fache to transfer files to
      * @param files the list of files to transfer
      *
-     * @returns {Promise<void>}
+     * @returns {TransferOptions}
      */
-    prepareTransferTo(srcCache: FileState, dstCache: FileState, files: File[]): Promise<boolean | void> {
-        if (!files.length) {
-            return
-        }
-
+    prepareTransferTo(srcCache: FileState, dstCache: FileState, files: File[]): TransferOptions {
         let srcApi = null
         let srcPath = ''
 
@@ -282,7 +344,7 @@ export class AppState {
             srcPath = files[0].dir
             const fs = getFS(srcPath)
             srcApi = new fs.API(srcPath, () => {
-                //
+                // TODO
             })
         }
 
@@ -295,18 +357,19 @@ export class AppState {
             dstFsName: dstCache.getFS().name,
         }
 
-        return this.addTransfer(options)
-            .then((res) => {
-                const fs = dstCache.getFS()
-                if (fs.options.needsRefresh && options.dstPath === dstCache.path && options.dstFsName === fs.name) {
-                    dstCache.reload()
-                }
+        return options
+        // return this.addTransfer(options)
+        //     .then((res) => {
+        //         const fs = dstCache.getFS()
+        //         if (fs.options.needsRefresh && options.dstPath === dstCache.path && options.dstFsName === fs.name) {
+        //             dstCache.reload()
+        //         }
 
-                return res
-            })
-            .catch((/*err*/) => {
-                debugger
-            })
+        //         return res
+        //     })
+        //     .catch((/*err*/) => {
+        //         debugger
+        //     })
     }
 
     /**
@@ -427,7 +490,7 @@ export class AppState {
         return num
     }
 
-    async addTransfer(options: TransferOptions): Promise<boolean | void> {
+    async addTransfer(options: TransferOptions): Promise<Batch> {
         let isDir = false
 
         try {
@@ -437,29 +500,26 @@ export class AppState {
         }
 
         if (!isDir) {
-            return Promise.reject({
+            throw {
                 code: 'NODEST',
-            })
+            }
         }
 
         console.log('addTransfer', options.files, options.srcFs, options.dstFs, options.dstPath)
 
         const batch = new Batch(options.srcFs, options.dstFs, options.srcPath, options.dstPath)
         runInAction(() => this.transfers.unshift(batch))
-        return batch.setFileList(options.files).then(() => {
-            batch.calcTotalSize()
-            batch.status = 'queued'
-            const activeTransfers = this.transfers.filter((transfer) => !transfer.status.match(/error|done/))
-            // CHECKME
-            runInAction(() => {
-                if (this.activeTransfers.length === 1) {
-                    this.activeTransfers.clear()
-                }
-                this.activeTransfers.push(batch)
-            })
+        await batch.prepare(options.files)
 
-            return batch.start()
+        // CHECKME
+        runInAction(() => {
+            if (this.activeTransfers.length === 1) {
+                this.activeTransfers.clear()
+            }
+            this.activeTransfers.push(batch)
         })
+
+        return batch
     }
 
     removeTransfer(transferId: number): void {

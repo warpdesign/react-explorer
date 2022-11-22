@@ -2,12 +2,12 @@ import { app, BrowserWindow, ipcMain, nativeTheme } from 'electron'
 import process = require('process')
 import path = require('path')
 import child_process = require('child_process')
+
 import { AppMenu, LocaleString } from './appMenus'
 import { isLinux } from './osSupport'
 import { WindowSettings } from './windowSettings'
 import { Remote } from './remote'
 
-declare const ENV: { [key: string]: string | boolean | number | Record<string, unknown> }
 const ENV_E2E = !!process.env.E2E
 const HTML_PATH = `${__dirname}/index.html`
 
@@ -267,7 +267,7 @@ const ElectronApp = {
      */
     openDevTools(force = false): void {
         // spectron problem if devtools is opened, see https://github.com/electron/spectron/issues/254
-        if ((!ENV_E2E && ENV.NODE_ENV) !== 'production' || force) {
+        if ((!ENV_E2E && window.ENV.NODE_ENV) !== 'production' || force) {
             if (!this.devWindow || this.devWindow.isDestroyed()) {
                 const winState = WindowSettings.getDevToolsSettings()
 

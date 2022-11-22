@@ -1,14 +1,14 @@
 import * as React from 'react'
+import { HotkeysTarget2 } from '@blueprintjs/core'
 import { withTranslation, WithTranslation } from 'react-i18next'
 import { ipcRenderer } from 'electron'
-import { Intent, HotkeysTarget2 } from '@blueprintjs/core'
 import { inject } from 'mobx-react'
-import { AppState } from '../../state/appState'
-import { FileState } from '../../state/fileState'
-import { AppToaster } from '../AppToaster'
-import { SettingsState } from '../../state/settingsState'
-import { Logger } from '../Log'
-import { isMac } from '../../utils/platform'
+
+import { AppState } from '$src/state/appState'
+import { FileState } from '$src/state/fileState'
+import { SettingsState } from '$src/state/settingsState'
+import { Logger } from '$src/components/Log'
+import { isMac } from '$src/utils/platform'
 
 interface InjectedProps extends WithTranslation {
     appState: AppState

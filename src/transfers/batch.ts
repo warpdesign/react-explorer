@@ -57,7 +57,7 @@ export class Batch {
             size: observable,
             status: observable,
             progress: observable,
-            onEndTransfer: action,
+            prepare: action,
             start: action,
             updatePendingTransfers: action,
             onTransferError: action,
@@ -81,30 +81,27 @@ export class Batch {
         this.id = Batch.maxId++
     }
 
-    onEndTransfer = (): Promise<boolean> => {
-        // console.log('transfer ended ! duration=', Math.round((new Date().getTime() - this.startDate.getTime()) / 1000), 'sec(s)');
-        // console.log('destroy batch, new maxId', Batch.maxId);
-        this.status = 'done'
-        return Promise.resolve(this.errors === 0)
-    }
-
-    start(): Promise<boolean | void> {
+    async start(): Promise<boolean | void> {
         console.log('Starting batch')
         if (this.status === 'queued') {
             this.slotsAvailable = MAX_TRANSFERS
             this.status = 'started'
             this.transferDef = new Deferred()
-
             this.startDate = new Date()
             this.queueNextTransfers()
         }
 
-        // return this.transferDef.promise;
-        return this.transferDef.promise.then(this.onEndTransfer).catch((err: Error) => {
+        try {
+            await this.transferDef.promise
+            runInAction(() => (this.status = 'done'))
+            debugger
+            return true
+        } catch (err) {
+            debugger
             console.log('error transfer', err)
-            this.status = 'error'
-            return Promise.reject(err)
-        })
+            runInAction(() => (this.status = 'error'))
+            throw err
+        }
     }
 
     updatePendingTransfers(subDir: string, newFilename: string, cancel = false): void {
@@ -172,7 +169,6 @@ export class Batch {
             transfer.error = getLocalizedError(err)
         })
         this.errors++
-        // return this.transferDef.reject(err);
     }
 
     removeStream(stream: Readable): void {
@@ -272,7 +268,6 @@ export class Batch {
                 }
             }
         } else {
-            // console.log('isDir', fullDstPath);
             runInAction(() => (transfer.status = 'done'))
             // make transfers with this directory ready
             this.updatePendingTransfers(
@@ -339,12 +334,8 @@ export class Batch {
                 let success = false
                 while (!success && this.status !== 'cancelled') {
                     newName = wantedName + RENAME_SUFFIX + i++
-                    try {
-                        await dstFs.makedir(dstPath, newName, this.id)
-                        success = true
-                    } catch (err) {
-                        return Promise.reject(err)
-                    }
+                    await dstFs.makedir(dstPath, newName, this.id)
+                    success = true
                 }
             }
         } else {
@@ -353,7 +344,7 @@ export class Batch {
             }
         }
 
-        return Promise.resolve(newName)
+        return newName
     }
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -476,19 +467,22 @@ export class Batch {
             }
         }
 
-        return Promise.resolve(transfers)
+        return transfers
     }
 
     async setFileList(files: File[]): Promise<void> {
-        return this.getFileList(files)
-            .then((transfers) => {
-                console.log('got files', transfers)
-                // transfers.forEach(t => console.log(`[${t.status}] ${t.file.dir}/${t.file.fullname}:${t.file.isDir}, ${t.subDirectory} (${t.newSub})`))
-                this.elements.replace(transfers)
-            })
-            .catch((err) => {
-                return Promise.reject(err)
-            })
+        const transfers = await this.getFileList(files)
+        console.log('got files', transfers)
+        // transfers.forEach(t => console.log(`[${t.status}] ${t.file.dir}/${t.file.fullname}:${t.file.isDir}, ${t.subDirectory} (${t.newSub})`))
+        this.elements.replace(transfers)
+    }
+
+    async prepare(files: File[]) {
+        // get full list of files, which means going into each directory
+        // and getting file list recursvely
+        await this.setFileList(files)
+        this.calcTotalSize()
+        this.status = 'queued'
     }
 
     onData(file: FileTransfer, bytesRead: number): void {

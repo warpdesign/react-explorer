@@ -1,9 +1,10 @@
 import * as React from 'react'
 import { Menu, MenuItem, MenuDivider } from '@blueprintjs/core'
 import { observer, inject } from 'mobx-react'
-import { AppState } from '../state/appState'
-import { File } from '../services/Fs'
 import { withTranslation, WithTranslation } from 'react-i18next'
+
+import { AppState } from '$src/state/appState'
+import { File } from '$src/services/Fs'
 
 interface FileMenuProps extends WithTranslation {
     onFileAction: (action: string) => void

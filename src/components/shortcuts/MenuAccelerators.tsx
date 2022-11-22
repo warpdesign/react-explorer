@@ -2,13 +2,14 @@ import * as React from 'react'
 import { withTranslation, WithTranslation } from 'react-i18next'
 import { Classes, Intent } from '@blueprintjs/core'
 import { inject } from 'mobx-react'
-import { WithMenuAccelerators, Accelerators, Accelerator } from '../WithMenuAccelerators'
-import { isMac } from '../../utils/platform'
-import { isEditable } from '../../utils/dom'
-import { AppState } from '../../state/appState'
-import { FileState } from '../../state/fileState'
-import { AppToaster } from '../AppToaster'
-import { SettingsState } from '../../state/settingsState'
+
+import { WithMenuAccelerators, Accelerators, Accelerator } from '$src/components/hoc/WithMenuAccelerators'
+import { isMac } from '$src/utils/platform'
+import { isEditable } from '$src/utils/dom'
+import { AppState } from '$src/state/appState'
+import { FileState } from '$src/state/fileState'
+import { AppToaster } from '$src/components/AppToaster'
+import { SettingsState } from '$src/state/settingsState'
 
 interface Props extends WithTranslation {
     onExitComboDown: () => void

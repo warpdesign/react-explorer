@@ -100,11 +100,11 @@ export default [
             plugins: [
                 new ForkTsCheckerWebpackPlugin(),
                 new DefinePlugin({
-                    'ENV.CY': false,
-                    'ENV.NODE_ENV': JSON.stringify(baseConfig.mode),
-                    'ENV.VERSION': JSON.stringify(version),
-                    'ENV.HASH': JSON.stringify(gitHash),
-                    'ENV.BUILD_DATE': JSON.stringify(buildDate),
+                    'window.ENV.CY': false,
+                    'window.ENV.NODE_ENV': JSON.stringify(baseConfig.mode),
+                    'window.ENV.VERSION': JSON.stringify(version),
+                    'window.ENV.HASH': JSON.stringify(gitHash),
+                    'window.ENV.BUILD_DATE': JSON.stringify(buildDate),
                 }),
             ],
         },
@@ -121,11 +121,11 @@ export default [
                     template: 'index.html',
                 }),
                 new DefinePlugin({
-                    'ENV.CY': false,
-                    'ENV.NODE_ENV': JSON.stringify(baseConfig.mode),
-                    'ENV.VERSION': JSON.stringify(version),
-                    'ENV.HASH': JSON.stringify(gitHash),
-                    'ENV.BUILD_DATE': JSON.stringify(buildDate),
+                    'window.ENV.CY': false,
+                    'window.ENV.NODE_ENV': JSON.stringify(baseConfig.mode),
+                    'window.ENV.VERSION': JSON.stringify(version),
+                    'window.ENV.HASH': JSON.stringify(gitHash),
+                    'window.ENV.BUILD_DATE': JSON.stringify(buildDate),
                 }),
                 new CopyPlugin({
                     patterns: [

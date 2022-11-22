@@ -10,10 +10,11 @@ import {
     ConnectDropTarget,
 } from 'react-dnd'
 import { createDragPreview } from 'react-dnd-text-dragpreview'
-import { File } from '../services/Fs'
-import { FileState } from '../state/fileState'
 import i18next from 'i18next'
 import { TableRowProps } from 'react-virtualized'
+
+import { File } from '$src/services/Fs'
+import { FileState } from '$src/state/fileState'
 
 function collect(
     connect: DragSourceConnector,

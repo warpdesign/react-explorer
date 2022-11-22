@@ -2,15 +2,16 @@ import * as React from 'react'
 import { ButtonGroup, Button, Icon, IconName } from '@blueprintjs/core'
 import { inject, observer } from 'mobx-react'
 import { WithTranslation, withTranslation } from 'react-i18next'
-import { ViewState } from '../state/viewState'
-import { sendFakeCombo } from './WithMenuAccelerators'
 import { MenuItemConstructorOptions, ipcRenderer } from 'electron'
-import { SettingsState } from '../state/settingsState'
-import { ALL_DIRS } from '../utils/platform'
-import Icons from '../constants/icons'
-import { AppAlert } from './AppAlert'
-import { LocalizedError } from '../locale/error'
 import { IpcRendererEvent } from 'electron/renderer'
+
+import { ViewState } from '$src/state/viewState'
+import { sendFakeCombo } from '$src/utils/keyboard'
+import { SettingsState } from '$src/state/settingsState'
+import { ALL_DIRS } from '$src/utils/platform'
+import Icons from '$src/constants/icons'
+import { AppAlert } from '$src/components/AppAlert'
+import { LocalizedError } from '$src/locale/error'
 
 /**
  * Describes a view, the path is the path to its first tab: right now each view is created with only

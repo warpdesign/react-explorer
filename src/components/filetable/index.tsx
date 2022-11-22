@@ -1,10 +1,10 @@
 import * as React from 'react'
+import { ContextMenu2, ContextMenu2ChildrenProps, ContextMenu2ContentProps } from '@blueprintjs/popover2'
+import { IconName, Icon, HotkeysTarget2, Classes } from '@blueprintjs/core'
 import { WithTranslation, withTranslation } from 'react-i18next'
+import { IReactionDisposer, reaction, toJS, IObservableArray } from 'mobx'
 import { inject } from 'mobx-react'
 import i18next from 'i18next'
-import { IReactionDisposer, reaction, toJS, IObservableArray } from 'mobx'
-import { IconName, Icon, HotkeysTarget2, Classes } from '@blueprintjs/core'
-import { ContextMenu2, ContextMenu2ChildrenProps, ContextMenu2ContentProps } from '@blueprintjs/popover2'
 import {
     Column,
     Table,
@@ -25,10 +25,10 @@ import { File, FileID } from '$src/services/Fs'
 import { TSORT_METHOD_NAME, TSORT_ORDER, getSortMethod } from '$src/services/FsSort'
 import { formatBytes } from '$src/utils/formatBytes'
 import { shouldCatchEvent, isEditable, isInRow } from '$src/utils/dom'
-import { AppAlert } from './AppAlert'
-import { WithMenuAccelerators, Accelerators, Accelerator } from './WithMenuAccelerators'
+import { AppAlert } from '$src/components/AppAlert'
+import { WithMenuAccelerators, Accelerators, Accelerator } from '$src/components/hoc/WithMenuAccelerators'
 import { isMac } from '$src/utils/platform'
-import { RowRenderer, RowRendererProps } from './RowRenderer'
+import { RowRenderer, RowRendererProps } from '$src/components/filetable/RowRenderer'
 import { SettingsState } from '$src/state/settingsState'
 import { ViewState } from '$src/state/viewState'
 import { debounce } from '$src/utils/debounce'
@@ -37,11 +37,10 @@ import { throttle } from '$src/utils/throttle'
 import { FileState } from '$src/state/fileState'
 import { FileContextMenu } from '$src/components/menus/FileContextMenu'
 import Keys from '$src/constants/keys'
-
-declare const ENV: { [key: string]: string | boolean | number | Record<string, unknown> }
+import { TypeIcons } from '$src/constants/icons'
 
 require('react-virtualized/styles.css')
-require('../css/filetable.css')
+require('$src/css/filetable.css')
 
 const CLICK_DELAY = 300
 const SCROLL_DEBOUNCE = 50
@@ -54,18 +53,6 @@ const NAME_COLUMN_WIDTH = 10
 
 const LABEL_CLASSNAME = 'file-label'
 const GRID_CLASSNAME = 'filetable-grid'
-
-const TYPE_ICONS: { [key: string]: IconName } = {
-    img: 'media',
-    any: 'document',
-    snd: 'music',
-    vid: 'mobile-video',
-    exe: 'application',
-    arc: 'compressed',
-    doc: 'align-left',
-    cod: 'code',
-    dir: 'folder-close',
-}
 
 interface TableRow {
     name: string
@@ -234,7 +221,7 @@ export class FileTableClass extends React.Component<Props, State> {
         })
 
         const res: TableRow = {
-            icon: (file.isDir && TYPE_ICONS['dir']) || (filetype && TYPE_ICONS[filetype]) || TYPE_ICONS['any'],
+            icon: (file.isDir && TypeIcons['dir']) || (filetype && TypeIcons[filetype]) || TypeIcons['any'],
             name: file.fullname,
             title: file.isSym ? `${file.fullname} → ${file.target}` : file.fullname,
             nodeData: file,
@@ -822,7 +809,7 @@ export class FileTableClass extends React.Component<Props, State> {
             onKeyDown: this.onInvertSelection,
             group: this.injected.t('SHORTCUT.GROUP.ACTIVE_VIEW'),
         },
-        ...(!isMac || ENV.CY
+        ...(!isMac || window.ENV.CY
             ? [
                   {
                       global: true,

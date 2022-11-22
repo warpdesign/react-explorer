@@ -1,14 +1,14 @@
 import * as React from 'react'
-import { useTranslation } from 'react-i18next'
-import { observer } from 'mobx-react'
-import { runInAction } from 'mobx'
 import { Navbar, Alignment, Button, Classes, Intent } from '@blueprintjs/core'
 import { IconNames } from '@blueprintjs/icons'
 import { Popover2 } from '@blueprintjs/popover2'
+import { runInAction } from 'mobx'
+import { observer } from 'mobx-react'
+import { useTranslation } from 'react-i18next'
 import classNames from 'classnames'
 
-import { HamburgerMenu } from './HamburgerMenu'
-import { Badge } from './Badge'
+import { HamburgerMenu } from '$src/components/HamburgerMenu'
+import { Badge } from '$src/components/Badge'
 import { useStores } from '$src/hooks/useStores'
 
 const Nav = observer(() => {

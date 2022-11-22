@@ -1,2 +1,2 @@
 // ftp.d.ts
-declare module 'ftp';
+declare module 'ftp'

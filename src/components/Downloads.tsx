@@ -1,29 +1,20 @@
 import * as React from 'react'
 import { TreeNodeInfo, Tree, Icon, Intent, Classes, IconName, ProgressBar } from '@blueprintjs/core'
-import { AppState } from '../state/appState'
-import { inject } from 'mobx-react'
-import { Batch } from '../transfers/batch'
+import { intentClass } from '@blueprintjs/core/lib/esm/common/classes'
 import { reaction, toJS, IReactionDisposer, IObservableArray } from 'mobx'
+import { inject } from 'mobx-react'
 import i18next from 'i18next'
 import { withTranslation, WithTranslation } from 'react-i18next'
-import { formatBytes } from '../utils/formatBytes'
-import { FileTransfer } from '../transfers/fileTransfer'
 import classNames from 'classnames'
-import { intentClass } from '@blueprintjs/core/lib/esm/common/classes'
-import { AppAlert } from './AppAlert'
-import CONFIG from '../config/appConfig'
-import { isWin } from '../utils/platform'
 
-const TYPE_ICONS: { [key: string]: IconName } = {
-    img: 'media',
-    any: 'document',
-    snd: 'music',
-    vid: 'mobile-video',
-    exe: 'application',
-    arc: 'compressed',
-    doc: 'align-left',
-    cod: 'code',
-}
+import { AppState } from '$src/state/appState'
+import { Batch } from '$src/transfers/batch'
+import { formatBytes } from '$src/utils/formatBytes'
+import { FileTransfer } from '$src/transfers/fileTransfer'
+import { AppAlert } from '$src/components/AppAlert'
+import CONFIG from '$src/config/appConfig'
+import { isWin } from '$src/utils/platform'
+import { TypeIcons } from '$src/constants/icons'
 
 interface Props extends WithTranslation {
     hide: boolean
@@ -196,7 +187,7 @@ class DownloadsClass extends React.Component<Props, State> {
     }
 
     getFileIcon(filetype: string): IconName {
-        return (filetype && TYPE_ICONS[filetype]) || TYPE_ICONS['any']
+        return (filetype && TypeIcons[filetype]) || TypeIcons['any']
     }
 
     createTransferLabel(transfer: Batch, className: string): JSX.Element {

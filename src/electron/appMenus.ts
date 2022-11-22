@@ -1,72 +1,71 @@
-import { clipboard, Menu, BrowserWindow, MenuItemConstructorOptions, MenuItem, app, ipcMain, dialog } from 'electron';
-import { isMac, isLinux, VERSIONS } from './osSupport';
+import { clipboard, Menu, BrowserWindow, MenuItemConstructorOptions, MenuItem, app, ipcMain, dialog } from 'electron'
+import { isMac, isLinux, VERSIONS } from './osSupport'
 
-declare const ENV: { [key: string]: string | boolean | number | Record<string, unknown> };
-
-const ACCELERATOR_EVENT = 'menu_accelerator';
+const ACCELERATOR_EVENT = 'menu_accelerator'
 
 export interface LocaleString {
-    [key: string]: string;
+    [key: string]: string
 }
 
 export class AppMenu {
-    win: BrowserWindow;
-    lang: string;
-    menuStrings: LocaleString;
+    win: BrowserWindow
+    lang: string
+    menuStrings: LocaleString
 
     constructor(win: BrowserWindow) {
-        this.win = win;
+        this.win = win
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     sendComboEvent = (menuItem: MenuItem & { accelerator: string }) => {
-        const accel = menuItem.accelerator || '';
-        console.log('sending', menuItem.label, accel);
-        this.win.webContents.send(ACCELERATOR_EVENT, Object.assign({ combo: accel, data: undefined }));
-    };
+        const accel = menuItem.accelerator || ''
+        console.log('sending', menuItem.label, accel)
+        this.win.webContents.send(ACCELERATOR_EVENT, Object.assign({ combo: accel, data: undefined }))
+    }
 
     sendSelectAll = (): void => {
-        const activeWindow = BrowserWindow.getFocusedWindow();
+        const activeWindow = BrowserWindow.getFocusedWindow()
         if (activeWindow) {
             // do not send select all combo if devtools window is opened
-            console.log('activeWindow', activeWindow.id, this.win === activeWindow);
-            const webContents = activeWindow.webContents;
+            console.log('activeWindow', activeWindow.id, this.win === activeWindow)
+            const webContents = activeWindow.webContents
             // !webContents.getURL().match(/^chrome-devtools:/)
             if (activeWindow === this.win && !webContents.isDevToolsFocused()) {
-                console.log('NOT DevTools');
+                console.log('NOT DevTools')
                 this.sendComboEvent({
                     accelerator: 'CmdOrCtrl+A',
                     label: 'selectAll',
-                } as MenuItem & { accelerator: string });
+                } as MenuItem & { accelerator: string })
             } else {
-                webContents.selectAll();
+                webContents.selectAll()
             }
         }
-    };
+    }
 
     sendReloadEvent = (): void => {
-        ipcMain.emit('reloadIgnoringCache');
-    };
+        ipcMain.emit('reloadIgnoringCache')
+    }
 
     getVersionString = (): string =>
         this.menuStrings['ABOUT_CONTENT']
             .replace('${version}', app.getVersion())
-            .replace('${hash}', ENV.HASH as string)
-            .replace('${date}', new Date(Number(ENV.BUILD_DATE as string)).toLocaleString(this.lang))
+            .replace('${hash}', window.ENV.HASH as string)
+            .replace('${date}', new Date(Number(window.ENV.BUILD_DATE as string)).toLocaleString(this.lang))
             .replace('${electron}', VERSIONS.electron)
             .replace('${platform}', VERSIONS.platform)
             .replace('${release}', VERSIONS.release)
             .replace('${arch}', VERSIONS.arch)
             .replace('${chrome}', VERSIONS.chrome)
-            .replace('${node}', VERSIONS.node);
+            .replace('${node}', VERSIONS.node)
 
     showAboutDialog = async (): Promise<void> => {
-        const detail = this.getVersionString();
+        const detail = this.getVersionString()
 
         const buttons = isLinux
             ? [this.menuStrings['COPY'], this.menuStrings['OK']]
-            : [this.menuStrings['OK'], this.menuStrings['COPY']];
-        const defaultId = buttons.indexOf(this.menuStrings['OK']);
+            : [this.menuStrings['OK'], this.menuStrings['COPY']]
+
+        const defaultId = buttons.indexOf(this.menuStrings['OK'])
 
         const { response } = await dialog.showMessageBox(this.win, {
             title: this.menuStrings['ABOUT_TITLE'],
@@ -76,17 +75,17 @@ export class AppMenu {
             buttons,
             noLink: true,
             defaultId,
-        });
+        })
 
         // copy details to clipboard if copy button was pressed
         if (response !== defaultId) {
-            clipboard.writeText(detail);
+            clipboard.writeText(detail)
         }
-    };
+    }
 
     getMenuTemplate(): MenuItemConstructorOptions[] {
-        const menuStrings = this.menuStrings;
-        let windowMenuIndex = 4;
+        const menuStrings = this.menuStrings
+        let windowMenuIndex = 4
 
         const template = [
             {
@@ -116,7 +115,7 @@ export class AppMenu {
                             this.win.webContents.send(
                                 ACCELERATOR_EVENT,
                                 Object.assign({ combo: 'rename', data: undefined }),
-                            );
+                            )
                         },
                     },
                     {
@@ -224,10 +223,10 @@ export class AppMenu {
                     },
                 ],
             },
-        ];
+        ]
 
         if (isMac) {
-            (template as MenuItemConstructorOptions[]).unshift({
+            ;(template as MenuItemConstructorOptions[]).unshift({
                 label: app.getName(),
                 submenu: [
                     {
@@ -247,48 +246,48 @@ export class AppMenu {
                         click: this.sendComboEvent,
                     },
                 ],
-            });
+            })
 
             app.setAboutPanelOptions({
                 applicationName: 'React-Explorer',
                 applicationVersion: app.getVersion(),
                 version: this.getVersionString(),
-            });
+            })
 
-            windowMenuIndex = 5;
+            windowMenuIndex = 5
 
             // add zoom window/role entry
-            (template[5].submenu as MenuItemConstructorOptions[]).push({
+            ;(template[5].submenu as MenuItemConstructorOptions[]).push({
                 label: menuStrings['ZOOM'],
                 role: 'zoom',
-            });
+            })
         } else {
             // add preference to file menu
-            (template[0].submenu as MenuItemConstructorOptions[]).unshift({
+            ;(template[0].submenu as MenuItemConstructorOptions[]).unshift({
                 label: menuStrings['PREFS'],
                 accelerator: 'CmdOrCtrl+,',
                 click: this.sendComboEvent,
-            });
+            })
 
             // add exit to file menu
-            (template[0].submenu as MenuItemConstructorOptions[]).push(
+            ;(template[0].submenu as MenuItemConstructorOptions[]).push(
                 { type: 'separator' },
                 {
                     label: menuStrings['EXIT'],
                     accelerator: 'CmdOrCtrl+Q',
                     click: this.sendComboEvent,
                 },
-            );
+            )
 
             // add about menuItem
-            (template[5].submenu as MenuItemConstructorOptions[]).push({
+            ;(template[5].submenu as MenuItemConstructorOptions[]).push({
                 label: menuStrings['ABOUT'],
                 click: this.showAboutDialog,
-            });
+            })
         }
 
         // add zoom window/role entry
-        (template[windowMenuIndex].submenu as MenuItemConstructorOptions[]).push(
+        ;(template[windowMenuIndex].submenu as MenuItemConstructorOptions[]).push(
             {
                 type: 'separator',
             },
@@ -302,19 +301,19 @@ export class AppMenu {
                 accelerator: 'Ctrl+Shift+Tab',
                 click: this.sendComboEvent,
             },
-        );
+        )
 
-        return template as MenuItemConstructorOptions[];
+        return template as MenuItemConstructorOptions[]
     }
 
     createMenu(menuStrings: LocaleString, lang: string): void {
-        this.menuStrings = menuStrings;
-        this.lang = lang;
+        this.menuStrings = menuStrings
+        this.lang = lang
 
-        const menuTemplate = this.getMenuTemplate();
+        const menuTemplate = this.getMenuTemplate()
 
-        const menu = Menu.buildFromTemplate(menuTemplate);
+        const menu = Menu.buildFromTemplate(menuTemplate)
 
-        Menu.setApplicationMenu(menu);
+        Menu.setApplicationMenu(menu)
     }
 }

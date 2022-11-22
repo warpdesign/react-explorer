@@ -1,9 +1,9 @@
 import * as React from 'react'
-import { observer } from 'mobx-react'
 import { InputGroup, ControlGroup, Button, Intent, IconName } from '@blueprintjs/core'
-import classNames from 'classnames'
 import { Tooltip2 } from '@blueprintjs/popover2'
+import { observer } from 'mobx-react'
 import { useTranslation } from 'react-i18next'
+import classNames from 'classnames'
 
 import { useStores } from '$src/hooks/useStores'
 

@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { ipcRenderer, IpcRendererEvent } from 'electron'
 
-const ACCELERATOR_EVENT = 'menu_accelerator'
+import { ACCELERATOR_EVENT } from '$src/utils/keyboard'
 
 export interface MenuAcceleratorEvent {
     combo: string
@@ -48,12 +48,6 @@ export class Accelerator extends React.PureComponent<AcceleratorProps> {
     render(): React.ReactNode {
         return <div></div>
     }
-}
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export async function sendFakeCombo(combo: string, data?: any): Promise<void> {
-    const id = await ipcRenderer.invoke('window:getId')
-    ipcRenderer.sendTo(id, ACCELERATOR_EVENT, Object.assign({ combo: combo, data }))
 }
 
 function getDisplayName(ComponentClass: React.ComponentType): string {

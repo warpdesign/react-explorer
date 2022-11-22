@@ -1,12 +1,6 @@
 import * as React from 'react'
 import { inject, Provider, observer } from 'mobx-react'
-import { Toolbar } from './Toolbar'
-import { Statusbar } from './Statusbar'
-import { AppState } from '../state/appState'
-import { LoginDialog } from './dialogs/LoginDialog'
-import { Loader } from './Loader'
-import { FileTable } from './FileTable'
-import classnames from 'classnames'
+import { withTranslation, WithTranslation } from 'react-i18next'
 import {
     DropTargetSpec,
     DropTargetConnector,
@@ -15,16 +9,20 @@ import {
     ConnectDropTarget,
     DropTarget,
 } from 'react-dnd'
-import { TabList } from './TabList'
-import { ViewState } from '../state/viewState'
-import { AppToaster } from './AppToaster'
-import { Intent } from '@blueprintjs/core'
-import { getLocalizedError } from '../locale/error'
-import { withTranslation, WithTranslation } from 'react-i18next'
-import { LocalApi } from '../services/plugins/FsLocal'
-import { FileState } from '../state/fileState'
-import { File as FsFile } from '../services/Fs'
-import { CollectedProps } from './RowRenderer'
+import classNames from 'classnames'
+
+import { Statusbar } from '$src/components/Statusbar'
+import { Toolbar } from '$src/components/Toolbar'
+import { AppState } from '$src/state/appState'
+import { LoginDialog } from '$src/components/dialogs/LoginDialog'
+import { Loader } from '$src/components/Loader'
+import { FileTable } from '$src/components/FileTable'
+import { TabList } from '$src/components/TabList'
+import { ViewState } from '$src/state/viewState'
+import { LocalApi } from '$src/services/plugins/FsLocal'
+import { FileState } from '$src/state/fileState'
+import { File as FsFile } from '$src/services/Fs'
+import { CollectedProps } from '$src/components/filetable/RowRenderer'
 
 interface SideViewProps extends WithTranslation {
     hide: boolean
@@ -100,7 +98,7 @@ export const SideViewClass = inject('appState')(
                 const dropAndOver = isOver && canDrop
                 const divId = 'view_' + viewState.viewId
 
-                const activeClass = classnames('sideview', {
+                const activeClass = classNames('sideview', {
                     active: active,
                     inactive: !active,
                     hidden: this.props.hide,
@@ -128,7 +126,6 @@ export const SideViewClass = inject('appState')(
             onDrop(
                 item: { dragFiles?: FsFile[]; files?: File[]; fileState: FileState } /* DraggedObject | DataTransfer */,
             ) {
-                console.log('onDrop')
                 const appState = this.injected.appState
                 const { viewState } = this.props
                 const fileCache = viewState.getVisibleCache()
@@ -138,40 +135,41 @@ export const SideViewClass = inject('appState')(
                     : item.files.map((webFile: File) => LocalApi.fileFromPath(webFile.path))
 
                 // TODO: check both cache are active?
-                appState
-                    .prepareTransferTo(item.fileState, fileCache, files)
-                    .then((noErrors: boolean) => {
-                        const { t } = this.injected
-                        if (noErrors) {
-                            AppToaster.show({
-                                message: t('COMMON.COPY_FINISHED'),
-                                icon: 'tick',
-                                intent: Intent.SUCCESS,
-                                timeout: 3000,
-                            })
-                        } else {
-                            AppToaster.show({
-                                message: t('COMMON.COPY_WARNING'),
-                                icon: 'warning-sign',
-                                intent: Intent.WARNING,
-                                timeout: 5000,
-                            })
-                        }
-                    })
-                    .catch((err: { code: number | string }): void => {
-                        const { t } = this.injected
-                        const localizedError = getLocalizedError(err)
-                        const message = err.code
-                            ? t('ERRORS.COPY_ERROR', { message: localizedError.message })
-                            : t('ERRORS.COPY_UNKNOWN_ERROR')
+                const options = appState.prepareTransferTo(item.fileState, fileCache, files)
+                appState.copy(options)
+                // .prepareTransferTo(item.fileState, fileCache, files)
+                // .then((noErrors: boolean) => {
+                //     const { t } = this.injected
+                //     if (noErrors) {
+                //         AppToaster.show({
+                //             message: t('COMMON.COPY_FINISHED'),
+                //             icon: 'tick',
+                //             intent: Intent.SUCCESS,
+                //             timeout: 3000,
+                //         })
+                //     } else {
+                //         AppToaster.show({
+                //             message: t('COMMON.COPY_WARNING'),
+                //             icon: 'warning-sign',
+                //             intent: Intent.WARNING,
+                //             timeout: 5000,
+                //         })
+                //     }
+                // })
+                // .catch((err: { code: number | string }): void => {
+                //     const { t } = this.injected
+                //     const localizedError = getLocalizedError(err)
+                //     const message = err.code
+                //         ? t('ERRORS.COPY_ERROR', { message: localizedError.message })
+                //         : t('ERRORS.COPY_UNKNOWN_ERROR')
 
-                        AppToaster.show({
-                            message: message,
-                            icon: 'error',
-                            intent: Intent.DANGER,
-                            timeout: 5000,
-                        })
-                    })
+                //     AppToaster.show({
+                //         message: message,
+                //         icon: 'error',
+                //         intent: Intent.DANGER,
+                //         timeout: 5000,
+                //     })
+                // })
             }
 
             render(): React.ReactNode {
