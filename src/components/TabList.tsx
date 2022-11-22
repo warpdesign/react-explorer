@@ -9,7 +9,7 @@ import { ViewState } from '$src/state/viewState'
 import { sendFakeCombo } from '$src/utils/keyboard'
 import { SettingsState } from '$src/state/settingsState'
 import { ALL_DIRS } from '$src/utils/platform'
-import Icons from '$src/constants/icons'
+import { UserHomeIcons } from '$src/constants/icons'
 import { AppAlert } from '$src/components/AppAlert'
 import { LocalizedError } from '$src/locale/error'
 
@@ -27,6 +27,19 @@ interface InjectedProps extends WithTranslation {
     settingsState?: SettingsState
 }
 
+/**
+ * build a list of { regex, IconName } to match folders with an icon
+ * For eg:
+ * {
+ *    regex: /^/Users/leo$/,
+ *    icon: 'home'
+ * }
+ */
+const TabIcons = Object.keys(UserHomeIcons).map((dirname: string) => ({
+    regex: new RegExp(`^${ALL_DIRS[dirname]}$`),
+    icon: UserHomeIcons[dirname],
+}))
+
 const TabListClass = inject(
     'viewState',
     'settingsState',
@@ -34,19 +47,6 @@ const TabListClass = inject(
     observer(
         class TabListClass extends React.Component<InjectedProps> {
             menuIndex = 0
-
-            /**
-             * build a list of { regex, IconName } to match folders with an icon
-             * For eg:
-             * {
-             *    regex: /^/Users/leo$/,
-             *    icon: 'home'
-             * }
-             */
-            tabIcons = Object.keys(Icons).map((dirname: string) => ({
-                regex: new RegExp(`^${ALL_DIRS[dirname]}$`),
-                icon: Icons[dirname],
-            }))
 
             constructor(props: InjectedProps) {
                 super(props)
@@ -218,7 +218,7 @@ const TabListClass = inject(
             }
 
             getTabIcon(path: string): IconName {
-                for (const obj of this.tabIcons) {
+                for (const obj of TabIcons) {
                     if (obj.regex.test(path)) {
                         return obj.icon as IconName
                     }

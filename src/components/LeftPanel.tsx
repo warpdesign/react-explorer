@@ -8,7 +8,7 @@ import classNames from 'classnames'
 
 import { USERNAME, isMac } from '$src/utils/platform'
 import { hasWSL } from '$src/utils/wsl'
-import Icons from '$src/constants/icons'
+import { UserHomeIcons } from '$src/constants/icons'
 import { FavoritesState, Favorite } from '$src/state/favoritesState'
 import { AppState } from '$src/state/appState'
 import { AppAlert } from '$src/components/AppAlert'
@@ -243,7 +243,7 @@ export const LeftPanelClass = inject('appState')(
                             {shortcut.label === 'HOME_DIR' ? USERNAME : t(`FAVORITES_PANEL.${shortcut.label}`)}
                         </span>
                     ),
-                    icon: Icons[shortcut.label],
+                    icon: UserHomeIcons[shortcut.label],
                     nodeData: shortcut.path,
                 }))
 
