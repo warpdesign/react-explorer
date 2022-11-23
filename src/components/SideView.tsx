@@ -1,4 +1,5 @@
 import * as React from 'react'
+import { Icon, IconSize, Spinner } from '@blueprintjs/core'
 import { inject, Provider, observer } from 'mobx-react'
 import { withTranslation, WithTranslation } from 'react-i18next'
 import {
@@ -15,13 +16,10 @@ import { Statusbar } from '$src/components/Statusbar'
 import { Toolbar } from '$src/components/Toolbar'
 import { AppState } from '$src/state/appState'
 import { LoginDialog } from '$src/components/dialogs/LoginDialog'
-import { Loader } from '$src/components/Loader'
+import { Overlay } from '$src/components/Overlay'
 import { FileTable } from '$src/components/filetable'
 import { TabList } from '$src/components/TabList'
 import { ViewState } from '$src/state/viewState'
-import { LocalApi } from '$src/services/plugins/FsLocal'
-import { FileState } from '$src/state/fileState'
-import { File as FsFile } from '$src/services/Fs'
 import { CollectedProps, DraggedObject } from '$src/components/filetable/RowRenderer'
 
 interface SideViewProps extends WithTranslation {
@@ -108,6 +106,8 @@ export const SideViewClass = inject('appState')(
 
                 const needLogin = fileCache.status === 'login'
                 const busy = fileCache.status === 'busy'
+                const dropOverlayActive = isOver
+                const dropOverlayIcon = isOver && !canDrop ? 'cross' : 'import'
 
                 return connectDropTarget(
                     <div id={divId} className={activeClass}>
@@ -118,7 +118,12 @@ export const SideViewClass = inject('appState')(
                         <Toolbar active={active && !busy} onPaste={this.props.onPaste} />
                         <FileTable hide={this.props.hide} />
                         <Statusbar />
-                        <Loader active={busy}></Loader>
+                        <Overlay active={busy}>
+                            <Spinner />
+                        </Overlay>
+                        <Overlay active={dropOverlayActive}>
+                            <Icon icon={dropOverlayIcon} size={80} color="#d9dde0" />
+                        </Overlay>
                     </div>,
                 )
             }
