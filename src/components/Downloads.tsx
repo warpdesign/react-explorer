@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { TreeNodeInfo, Tree, Icon, Intent, Classes, IconName, ProgressBar } from '@blueprintjs/core'
 import { intentClass } from '@blueprintjs/core/lib/esm/common/classes'
-import { reaction, toJS, IReactionDisposer, IObservableArray } from 'mobx'
+import { reaction, toJS, IReactionDisposer, IObservableArray, runInAction } from 'mobx'
 import { inject } from 'mobx-react'
 import i18next from 'i18next'
 import { withTranslation, WithTranslation } from 'react-i18next'
@@ -125,15 +125,19 @@ class DownloadsClass extends React.Component<Props, State> {
         })
     }
 
+    deleteTransfer(transferId: number) {
+        runInAction(() => this.transferListState.removeTransfer(transferId))
+    }
+
     async onCloseClick(transferId: number): Promise<void> {
         const transfer = this.transferListState.getTransfer(transferId)
 
         if (transfer.hasEnded()) {
-            this.transferListState.removeTransfer(transferId)
+            this.deleteTransfer(transferId)
         } else {
             const cancel = await this.showTransferAlert()
             if (cancel) {
-                this.transferListState.removeTransfer(transferId)
+                this.deleteTransfer(transferId)
             }
         }
     }
