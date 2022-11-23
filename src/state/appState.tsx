@@ -1,43 +1,29 @@
 import React from 'react'
-import { action, observable, computed, makeObservable, runInAction } from 'mobx'
+import { Intent } from '@blueprintjs/core'
+import { action, observable, makeObservable } from 'mobx'
+import type { TFunction } from 'i18next'
 import { shell } from 'electron'
-import { File, FsApi, getFS } from '$src/services/Fs'
+
+import { File } from '$src/services/Fs'
 import { FileState } from '$src/state/fileState'
-import { Batch } from '$src/transfers/batch'
-import { DOWNLOADS_DIR } from '$src/utils/platform'
+import { TransferOptions } from '$src/state/transferState'
 import { ViewDescriptor } from '$src/components/TabList'
 import { WinState, WindowSettings } from '$src/state/winState'
 import { FavoritesState } from '$src/state/favoritesState'
 import { ViewState } from '$src/state/viewState'
-import { ClipboardState } from './clipboardState'
-import type { TFunction } from 'i18next'
+import { ClipboardState } from '$src/state/clipboardState'
 import { i18n } from '$src/locale/i18n'
 import { AppToaster } from '$src/components/AppToaster'
-import { Intent } from '@blueprintjs/core'
-import { getLocalizedError, LocalizedError } from '$src/locale/error'
+import { LocalizedError } from '$src/locale/error'
 import { DeleteConfirmDialog } from '$src/components/dialogs/deleteConfirm'
 import { AppAlert } from '$src/components/AppAlert'
-
-declare const ENV: { [key: string]: string | boolean | number | Record<string, unknown> }
+import { TransferListState } from '$src/state/transferListState'
+import { DraggedObject } from '$src/components/filetable/RowRenderer'
 
 // wait 1 sec before showing badge: this avoids
 // flashing (1) badge when the transfer is very fast
-const SHOW_BADGE_DELAY = 600
 const ERROR_MESSAGE_TIMEOUT = 3500
-
-/**
- * Interface for a transfer
- *
- * @interface
- */
-interface TransferOptions {
-    srcFs: FsApi
-    dstFs: FsApi
-    files: File[]
-    srcPath: string
-    dstPath: string
-    dstFsName: string
-}
+const SUCCESS_COPY_TIMEOUT = 3000
 
 /**
  * Maintains global application state:
@@ -65,14 +51,11 @@ export class AppState {
         winState.toggleSplitViewMode()
     }
 
-    /* transfers */
-    transfers = observable<Batch>([])
+    clipboard = new ClipboardState()
 
-    // current active transfers
-    activeTransfers = observable<Batch>([])
+    transferListState = new TransferListState()
 
-    clipboard: ClipboardState = new ClipboardState()
-
+    // reference to current i18n's instance translate function
     t: TFunction
 
     /**
@@ -90,9 +73,6 @@ export class AppState {
             showDownloadsTab: action,
             showExplorerTab: action,
             initViewState: action,
-            totalTransferProgress: computed,
-            pendingTransfers: computed,
-            addTransfer: action,
             refreshActiveView: action,
             addView: action,
             updateSelection: action,
@@ -103,18 +83,10 @@ export class AppState {
         this.addWindow(options)
 
         for (const desc of views) {
-            console.log('adding view', desc.viewId, desc.path)
-            this.addView(ENV.CY ? '' : desc.path, desc.viewId)
+            console.log('adding view', desc.viewId, desc.path, window.ENV.CY)
+            this.addView(window.ENV.CY ? '' : desc.path, desc.viewId)
         }
         this.initViewState()
-    }
-
-    showDownloadsTab = (): void => {
-        this.isExplorer = false
-    }
-
-    showExplorerTab = (): void => {
-        this.isExplorer = true
     }
 
     /**
@@ -126,40 +98,56 @@ export class AppState {
         winState.initState()
     }
 
-    async paste(destCache: FileState): Promise<void> {
-        if (destCache && !destCache.error && this.clipboard.files.length) {
-            try {
-                const noErrors = await this.prepareClipboardTransferTo(destCache)
-                if (noErrors) {
-                    AppToaster.show({
-                        message: this.t('COMMON.COPY_FINISHED'),
-                        icon: 'tick',
-                        intent: Intent.SUCCESS,
-                        timeout: 3000,
-                    })
-                } else {
-                    AppToaster.show({
-                        message: this.t('COMMON.COPY_WARNING'),
-                        icon: 'warning-sign',
-                        intent: Intent.WARNING,
-                        timeout: 5000,
-                    })
-                }
-            } catch (err) {
-                const localizedError = getLocalizedError(err)
-                const message = err.code
-                    ? this.t('ERRORS.COPY_ERROR', {
-                          message: localizedError.message,
-                      })
-                    : this.t('ERRORS.COPY_UNKNOWN_ERROR')
+    showDownloadsTab = (): void => {
+        this.isExplorer = false
+    }
 
-                AppToaster.show({
-                    message: message,
-                    icon: 'error',
-                    intent: Intent.DANGER,
-                    timeout: 5000,
-                })
+    showExplorerTab = (): void => {
+        this.isExplorer = true
+    }
+
+    drop({ dragFiles, fileState }: DraggedObject, destCache: FileState): void {
+        // TODO: build files from native urls when we'll support dropping files
+        // from a native app
+        //
+        // const files = srcCache
+        //     ? item.dragFiles
+        //     : item.files.map((webFile: File) => LocalApi.fileFromPath(webFile.path))
+        // const options = this.prepareTransferTo(fileState, destCache, dragFiles)
+        // let srcApi = null
+        // let srcPath = ''
+
+        // // native drag and drop
+        // if (!fileState) {
+        //     srcPath = dragFiles[0].dir
+        //     const fs = getFS(srcPath)
+        //     srcApi = new fs.API(srcPath, () => {
+        //         // TODO
+        //     })
+        // }
+
+        const options = {
+            files: dragFiles,
+            srcFs: fileState.getAPI(),
+            srcPath: fileState.path,
+            dstFs: destCache.getAPI(),
+            dstPath: destCache.path,
+            dstFsName: destCache.getFS().name,
+        }
+        this.copy(options)
+    }
+
+    paste(destCache: FileState): void {
+        if (destCache && !destCache.error && this.clipboard.files.length) {
+            const options = {
+                files: this.clipboard.files,
+                srcFs: this.clipboard.srcFs,
+                srcPath: this.clipboard.srcPath,
+                dstFs: destCache.getAPI(),
+                dstPath: destCache.path,
+                dstFsName: destCache.getFS().name,
             }
+            this.copy(options)
         }
     }
 
@@ -225,100 +213,15 @@ export class AppState {
     }
 
     /**
-     * Prepares transferring files from clipboard to specified cache
-     * The source cache is taken from the clipboard
-     *
-     * @param cache file cache to transfer files to
-     *
-     * @returns {Promise<FileTransfer[]>}
-     */
-    prepareClipboardTransferTo(cache: FileState): Promise<boolean | void> {
-        const options = {
-            files: this.clipboard.files,
-            srcFs: this.clipboard.srcFs,
-            srcPath: this.clipboard.srcPath,
-            dstFs: cache.getAPI(),
-            dstPath: cache.path,
-            dstFsName: cache.getFS().name,
-        }
-
-        return this.addTransfer(options)
-            .then((res) => {
-                debugger
-                if (
-                    options.dstPath === cache.path &&
-                    options.dstFsName === cache.getFS().name &&
-                    cache.getFS().options.needsRefresh
-                ) {
-                    cache.reload()
-                }
-
-                return res
-            })
-            .catch((/*err: LocalizedError*/) => {
-                debugger
-            })
-    }
-
-    /**
-     * Prepares transferring files from source to destination cache
-     *
-     * @param srcCache file cache to transfer files from
-     * @param dstCache  file fache to transfer files to
-     * @param files the list of files to transfer
-     *
-     * @returns {Promise<void>}
-     */
-    prepareTransferTo(srcCache: FileState, dstCache: FileState, files: File[]): Promise<boolean | void> {
-        if (!files.length) {
-            return
-        }
-
-        let srcApi = null
-        let srcPath = ''
-
-        // native drag and drop
-        if (!srcCache) {
-            srcPath = files[0].dir
-            const fs = getFS(srcPath)
-            srcApi = new fs.API(srcPath, () => {
-                //
-            })
-        }
-
-        const options = {
-            files,
-            srcFs: (srcCache && srcCache.getAPI()) || srcApi,
-            srcPath: (srcCache && srcCache.path) || srcPath,
-            dstFs: dstCache.getAPI(),
-            dstPath: dstCache.path,
-            dstFsName: dstCache.getFS().name,
-        }
-
-        return this.addTransfer(options)
-            .then((res) => {
-                const fs = dstCache.getFS()
-                if (fs.options.needsRefresh && options.dstPath === dstCache.path && options.dstFsName === fs.name) {
-                    dstCache.reload()
-                }
-
-                return res
-            })
-            .catch((/*err*/) => {
-                debugger
-            })
-    }
-
-    /**
      * Opens a file that has been transfered
      *
+     * @param transferId
      * @param file the file to open
      */
-    openTransferedFile(batchId: number, file: File): void {
+    openTransferredFile(transferId: number, file: File): void {
         // TODO: this is duplicate code from appState/prepareLocalTransfer and fileState.openFile()
         // because we don't have a reference to the destination cache
-        const batch = this.transfers.find((transfer) => transfer.id === batchId)
-        const api = batch.dstFs
+        const { dstFs: api } = this.transferListState.getTransfer(transferId)
         const path = api.join(file.dir, file.fullname)
         shell.openPath(path)
     }
@@ -342,29 +245,31 @@ export class AppState {
             const api = srcCache.getAPI()
             return Promise.resolve(api.join(files[0].dir, files[0].fullname))
         } else {
+            debugger
+            // TODO once we support non local FS
+
             // first we need to get a FS for local
-            const fs = getFS(DOWNLOADS_DIR)
-            const api = new fs.API(DOWNLOADS_DIR, () => {
-                //
-            })
+            // const fs = getFS(DOWNLOADS_DIR)
+            // const api = new fs.API(DOWNLOADS_DIR, () => {
+            //     //
+            // })
+            // const options = {
+            //     files,
+            //     srcFs: srcCache.getAPI(),
+            //     srcPath: srcCache.path,
+            //     dstFs: api,
+            //     dstPath: DOWNLOADS_DIR,
+            //     dstFsName: fs.name,
+            // }
 
-            const options = {
-                files,
-                srcFs: srcCache.getAPI(),
-                srcPath: srcCache.path,
-                dstFs: api,
-                dstPath: DOWNLOADS_DIR,
-                dstFsName: fs.name,
-            }
-
-            // TODO: use a temporary filename for destination file?
-            return this.addTransfer(options)
-                .then(() => {
-                    return api.join(DOWNLOADS_DIR, files[0].fullname)
-                })
-                .catch((err) => {
-                    return Promise.reject(err)
-                })
+            // // TODO: use a temporary filename for destination file?
+            // return this.addTransfer(options)
+            //     .then(() => {
+            //         return api.join(DOWNLOADS_DIR, files[0].fullname)
+            //     })
+            //     .catch((err) => {
+            //         return Promise.reject(err)
+            //     })
         }
     }
 
@@ -397,80 +302,43 @@ export class AppState {
         return view.caches
     }
 
-    get totalTransferProgress(): number {
-        let totalSize = 0
-        let totalProgress = 0
-
-        const runningTransfers = this.activeTransfers
-        // .filter(transfer => !transfer.status.match(/error|done/));
-
-        for (const transfer of runningTransfers) {
-            totalSize += transfer.size
-            totalProgress += transfer.progress
-        }
-
-        return (totalSize && totalProgress / totalSize) || 0
-    }
-
-    getTransfer(transferId: number): Batch {
-        return this.transfers.find((transfer) => transferId === transfer.id)
-    }
-
-    get pendingTransfers(): number {
-        const now = new Date()
-        const num = this.transfers.filter(
-            (transfer) =>
-                transfer.progress &&
-                transfer.isStarted &&
-                now.getTime() - transfer.startDate.getTime() >= SHOW_BADGE_DELAY,
-        ).length
-        return num
-    }
-
-    async addTransfer(options: TransferOptions): Promise<boolean | void> {
-        let isDir = false
-
+    async copy(options: TransferOptions) {
         try {
-            isDir = await options.dstFs.isDir(options.dstPath)
+            const transfer = await this.transferListState.addTransfer(options)
+            await transfer.start()
+
+            AppToaster.show({
+                message: this.t('COMMON.COPY_FINISHED'),
+                icon: 'tick',
+                intent: Intent.SUCCESS,
+                timeout: SUCCESS_COPY_TIMEOUT,
+            })
+
+            // get visible caches: the ones that are not visible will be automatically refreshed
+            // when set visible
+            const cacheToRefresh = this.winStates[0].getVisibleViewByPath(options.dstPath)
+            for (const cache of cacheToRefresh) {
+                cache.reload()
+            }
         } catch (err) {
-            isDir = false
-        }
-
-        if (!isDir) {
-            return Promise.reject({
-                code: 'NODEST',
-            })
-        }
-
-        console.log('addTransfer', options.files, options.srcFs, options.dstFs, options.dstPath)
-
-        const batch = new Batch(options.srcFs, options.dstFs, options.srcPath, options.dstPath)
-        runInAction(() => this.transfers.unshift(batch))
-        return batch.setFileList(options.files).then(() => {
-            batch.calcTotalSize()
-            batch.status = 'queued'
-            const activeTransfers = this.transfers.filter((transfer) => !transfer.status.match(/error|done/))
-            // CHECKME
-            runInAction(() => {
-                if (this.activeTransfers.length === 1) {
-                    this.activeTransfers.clear()
-                }
-                this.activeTransfers.push(batch)
-            })
-
-            return batch.start()
-        })
-    }
-
-    removeTransfer(transferId: number): void {
-        const batch = this.transfers.find((transfer) => transfer.id === transferId)
-        if (batch) {
-            batch.cancel()
-            this.transfers.remove(batch)
+            if (err.files) {
+                debugger
+                console.log(err, err.files)
+                const successCount = err.files - err.errors
+                AppToaster.show({
+                    message: this.t('COMMON.COPY_WARNING', {
+                        count: successCount,
+                    }),
+                    icon: 'warning-sign',
+                    intent: !successCount ? Intent.DANGER : Intent.WARNING,
+                    timeout: ERROR_MESSAGE_TIMEOUT,
+                })
+            } else {
+                // TODOCOPY
+                debugger
+            }
         }
     }
-
-    /* /transfers */
 
     getActiveCache(): FileState {
         const winState = this.winStates[0]
@@ -480,7 +348,7 @@ export class AppState {
 
     refreshActiveView(): void {
         const cache = this.getActiveCache()
-        // only refresh view that's ready
+
         if (cache) {
             cache.reload()
         }
@@ -494,16 +362,11 @@ export class AppState {
     addView(path = '', viewId = -1): void {
         const winState = this.winStates[0]
         const view = winState.getOrCreateView(viewId)
-        // let view = this.getView(viewId);
-
-        // if (!view) {
-        //     view = this.createView(viewId);
-        //     this.views[viewId] = view;
-        // }
 
         view.addCache(path)
     }
 
+    // TODO: this should be moved into FileState (!)
     updateSelection(cache: FileState, newSelection: File[]): void {
         console.log('updateSelection', newSelection.length)
         cache.selected.replace(newSelection)
@@ -517,8 +380,5 @@ export class AppState {
         } else {
             cache.setSelectedFile(null)
         }
-        // for (let selected of cache.selected) {
-        //     console.log(selected.fullname, selected.id.dev, selected.id.ino);
-        // }
     }
 }

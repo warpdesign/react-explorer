@@ -1,39 +1,38 @@
-import { AppState } from '../state/appState'
 import * as React from 'react'
+import { ipcRenderer } from 'electron'
 import { platform } from 'process'
-import { isMac } from '../utils/platform'
 import { FocusStyleManager, Alert, Classes, Intent } from '@blueprintjs/core'
 import classNames from 'classnames'
 import { runInAction } from 'mobx'
 import { Provider, observer, inject } from 'mobx-react'
-import { SideView } from './SideView'
-import { LogUI, Logger } from './Log'
-import { Downloads } from './Downloads'
 import * as drivelist from 'drivelist'
-import { ipcRenderer } from 'electron'
 import { withTranslation, WithTranslation, Trans } from 'react-i18next'
-import { Nav } from './Nav'
-import { FileState } from '../state/fileState'
-import { SettingsState } from '../state/settingsState'
-import { PrefsDialog } from './dialogs/PrefsDialog'
-import { ShortcutsDialog } from './dialogs/ShortcutsDialog'
-import { LeftPanel } from './LeftPanel'
-import { shouldCatchEvent } from '../utils/dom'
-import { sendFakeCombo } from './WithMenuAccelerators'
-import { ViewDescriptor } from './TabList'
-import { MenuAccelerators } from './shortcuts/MenuAccelerators'
-import { KeyboardHotkeys } from './shortcuts/KeyboardHotkeys'
-import { CustomSettings } from '../electron/windowSettings'
+
+import { isMac } from '$src/utils/platform'
+import { SideView } from '$src/components/SideView'
+import { LogUI, Logger } from '$src/components/Log'
+import { Downloads } from '$src/components/Downloads'
+import { Nav } from '$src/components/Nav'
+import { FileState } from '$src/state/fileState'
+import { SettingsState } from '$src/state/settingsState'
+import { PrefsDialog } from '$src/components/dialogs/PrefsDialog'
+import { ShortcutsDialog } from '$src/components/dialogs/ShortcutsDialog'
+import { LeftPanel } from '$src/components/LeftPanel'
+import { shouldCatchEvent } from '$src/utils/dom'
+import { sendFakeCombo } from '$src/utils/keyboard'
+import { ViewDescriptor } from '$src/components/TabList'
+import { MenuAccelerators } from '$src/components/shortcuts/MenuAccelerators'
+import { KeyboardHotkeys } from '$src/components/shortcuts/KeyboardHotkeys'
+import { CustomSettings } from '$src/electron/windowSettings'
+import { AppState } from '$src/state/appState'
 import Keys from '$src/constants/keys'
 
 require('@blueprintjs/core/lib/css/blueprint.css')
 require('@blueprintjs/icons/lib/css/blueprint-icons.css')
 require('@blueprintjs/popover2/lib/css/blueprint-popover2.css')
-require('../css/main.css')
-require('../css/windows.css')
-require('../css/scrollbars.css')
-
-declare const ENV: { [key: string]: string | boolean | number | Record<string, unknown> }
+require('$src/css/main.css')
+require('$src/css/windows.css')
+require('$src/css/scrollbars.css')
 
 interface AppProps extends WithTranslation {
     initialSettings: CustomSettings
@@ -41,20 +40,6 @@ interface AppProps extends WithTranslation {
 
 interface InjectedProps extends AppProps {
     settingsState: SettingsState
-}
-
-enum KEYS {
-    TAB = 9,
-    A = 65,
-}
-
-declare global {
-    interface Window {
-        appState: AppState
-        settingsState: SettingsState
-        drivelist: any
-        renderer: Electron.IpcRenderer
-    }
 }
 
 const App = inject('settingsState')(
@@ -95,7 +80,7 @@ const App = inject('settingsState')(
                     splitView: props.initialSettings.splitView,
                 })
 
-                if (ENV.CY) {
+                if (window.ENV.CY) {
                     window.appState = this.appState
                     window.settingsState = settingsState
                     window.drivelist = drivelist
@@ -103,9 +88,9 @@ const App = inject('settingsState')(
                 }
 
                 Logger.success(
-                    `React-Explorer ${ENV.VERSION} - CY: ${ENV.CY} - NODE_ENV: ${ENV.NODE_ENV} - lang: ${i18n.language}`,
+                    `React-Explorer ${window.ENV.VERSION} - CY: ${window.ENV.CY} - NODE_ENV: ${window.ENV.NODE_ENV} - lang: ${i18n.language}`,
                 )
-                Logger.success(`hash=${ENV.HASH}`)
+                Logger.success(`hash=${window.ENV.HASH}`)
                 Logger.success(
                     `lang=${settingsState.lang}, darkMode=${settingsState.darkMode}, defaultFolder=${settingsState.defaultFolder}`,
                 )
@@ -121,7 +106,7 @@ const App = inject('settingsState')(
                 let caught = false
                 if (e.ctrlKey) {
                     switch (true) {
-                        case !ENV.CY && !isMac && e.key === Keys.A && shouldCatchEvent(e):
+                        case !window.ENV.CY && !isMac && e.key === Keys.A && shouldCatchEvent(e):
                             caught = true
                             sendFakeCombo('CmdOrCtrl+A')
                             break
@@ -215,7 +200,7 @@ const App = inject('settingsState')(
 
             onExitRequest = (): void => {
                 console.log('exitRequest')
-                if (this.appState && this.appState.pendingTransfers) {
+                if (this.appState && this.appState.transferListState.pendingTransfers) {
                     this.setState({ isExitDialogOpen: true })
                 } else {
                     console.log('sending readyToExit event')
@@ -239,9 +224,11 @@ const App = inject('settingsState')(
 
             componentDidUpdate(): void {
                 this.setDarkThemeClass()
-
-                if (!ENV.CY) {
-                    const progress = (this.appState.pendingTransfers && this.appState.totalTransferProgress) || -1
+                if (!window.ENV.CY) {
+                    const {
+                        transferListState: { pendingTransfers, totalTransferProgress },
+                    } = this.appState
+                    const progress = (pendingTransfers && totalTransferProgress) || -1
                     ipcRenderer.invoke('window:setProgressBar', progress)
                 }
             }
@@ -303,7 +290,7 @@ const App = inject('settingsState')(
                 const { isPrefsOpen, isShortcutsOpen, isExitDialogOpen } = this.appState
                 const { settingsState } = this.injected
                 const isExplorer = this.appState.isExplorer
-                const count = this.appState.pendingTransfers
+                const count = this.appState.transferListState.pendingTransfers
                 const { t } = this.props
                 const winState = this.appState.winStates[0]
                 const isSplitView = winState.splitView

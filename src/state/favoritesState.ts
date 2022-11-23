@@ -1,9 +1,10 @@
 import { IconName } from '@blueprintjs/core'
+import { IconNames } from '@blueprintjs/icons'
 import { observable, runInAction } from 'mobx'
 import * as drivelist from 'drivelist'
-import { IconNames } from '@blueprintjs/icons'
-import { ALL_DIRS } from '../utils/platform'
-import { WSL_PREFIX, getWSLDistributions, WslDistribution } from '../utils/wsl'
+
+import { ALL_DIRS } from '$src/utils/platform'
+import { WSL_PREFIX, getWSLDistributions, WslDistribution } from '$src/utils/wsl'
 
 const CHECK_FOR_DRIVES_DELAY = 5000
 const CHECK_FOR_WSL_DELAY = 30000

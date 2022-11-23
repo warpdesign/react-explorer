@@ -1,7 +1,7 @@
-import mock from 'mock-fs';
-import { tmpdir } from 'os';
+import mock from 'mock-fs'
+import { tmpdir } from 'os'
 
-const TEST_FILES_DIR = tmpdir() + '/react-explorer-tests';
+const TEST_FILES_DIR = tmpdir() + '/react-explorer-tests'
 
 const TmpDir = {
     [TEST_FILES_DIR]: {
@@ -45,6 +45,6 @@ const TmpDir = {
             },
         },
     },
-};
+}
 
-export default TmpDir;
+export default TmpDir

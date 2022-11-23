@@ -1,14 +1,15 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { FsApi, File, Credentials, Fs, filetype, MakeId } from '../Fs'
 import * as fs from 'fs'
+import { Transform, TransformCallback } from 'stream'
 import * as path from 'path'
 import mkdir = require('mkdirp')
 import del = require('del')
-import { size } from '../../utils/size'
-import { throttle } from '../../utils/throttle'
-import { Transform, TransformCallback } from 'stream'
-import { isWin, HOME_DIR } from '../../utils/platform'
-import { LocalWatch } from './LocalWatch'
+
+import { FsApi, File, Credentials, Fs, filetype, MakeId } from '$src/services/Fs'
+import { size } from '$src/utils/size'
+import { throttle } from '$src/utils/throttle'
+import { isWin, HOME_DIR } from '$src/utils/platform'
+import { LocalWatch } from '$src/services/plugins/LocalWatch'
 
 const invalidDirChars = (isWin && /[\*:<>\?|"]+/gi) || /^[\.]+[\/]+(.)*$/gi
 const invalidFileChars = (isWin && /[\*:<>\?|"]+/gi) || /\//
@@ -19,7 +20,7 @@ const SEP = path.sep
 const localStart = (isWin && /^(([a-zA-Z]\:)|([\.]*\/|\.)|(\\\\)|~)/) || /^([\.]*\/|\.|~)/
 const isRoot = (isWin && /((([a-zA-Z]\:)(\\)*)|(\\\\))$/) || /^\/$/
 
-const progressFunc = throttle((progress: (pourcent: number) => void, bytesRead: number) => {
+const progressFunc = throttle((progress: (bytes: number) => void, bytesRead: number) => {
     progress(bytesRead)
 }, 400)
 
@@ -238,14 +239,14 @@ export class LocalApi implements FsApi {
 
     onList(dir: string): void {
         if (dir !== this.path) {
-            // console.log('stopWatching', this.path);
+            // console.log('stopWatching', this.path)
             try {
                 LocalWatch.stopWatchingPath(this.path, this.onFsChange)
                 LocalWatch.watchPath(dir, this.onFsChange)
             } catch (e) {
                 console.warn('Could not watch path', dir, e)
             }
-            // console.log('watchPath', dir);
+            // console.log('watchPath', dir)
             this.path = dir
         }
     }
@@ -345,15 +346,15 @@ export class LocalApi implements FsApi {
     }
 
     off(): void {
-        // console.log("off", this.path);
-        // console.log("stopWatchingPath", this.path);
+        // console.log("off", this.path)
+        // console.log("stopWatchingPath", this.path)
         LocalWatch.stopWatchingPath(this.path, this.onFsChange)
     }
 
     // TODO add error handling
     async getStream(path: string, file: string, transferId = -1): Promise<fs.ReadStream> {
         try {
-            // console.log('opening read stream', this.join(path, file));
+            // console.log('opening read stream', this.join(path, file))
             const stream = fs.createReadStream(this.join(path, file), {
                 highWaterMark: 31 * 16384,
             })
@@ -367,7 +368,7 @@ export class LocalApi implements FsApi {
     putStream(
         readStream: fs.ReadStream,
         dstPath: string,
-        progress: (pourcent: number) => void,
+        progress: (bytes: number) => void,
         transferId = -1,
     ): Promise<void> {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any

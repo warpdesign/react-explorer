@@ -2,15 +2,16 @@ import * as React from 'react'
 import { ButtonGroup, Button, Icon, IconName } from '@blueprintjs/core'
 import { inject, observer } from 'mobx-react'
 import { WithTranslation, withTranslation } from 'react-i18next'
-import { ViewState } from '../state/viewState'
-import { sendFakeCombo } from './WithMenuAccelerators'
 import { MenuItemConstructorOptions, ipcRenderer } from 'electron'
-import { SettingsState } from '../state/settingsState'
-import { ALL_DIRS } from '../utils/platform'
-import Icons from '../constants/icons'
-import { AppAlert } from './AppAlert'
-import { LocalizedError } from '../locale/error'
 import { IpcRendererEvent } from 'electron/renderer'
+
+import { ViewState } from '$src/state/viewState'
+import { sendFakeCombo } from '$src/utils/keyboard'
+import { SettingsState } from '$src/state/settingsState'
+import { ALL_DIRS } from '$src/utils/platform'
+import { UserHomeIcons } from '$src/constants/icons'
+import { AppAlert } from '$src/components/AppAlert'
+import { LocalizedError } from '$src/locale/error'
 
 /**
  * Describes a view, the path is the path to its first tab: right now each view is created with only
@@ -26,6 +27,19 @@ interface InjectedProps extends WithTranslation {
     settingsState?: SettingsState
 }
 
+/**
+ * build a list of { regex, IconName } to match folders with an icon
+ * For eg:
+ * {
+ *    regex: /^/Users/leo$/,
+ *    icon: 'home'
+ * }
+ */
+const TabIcons = Object.keys(UserHomeIcons).map((dirname: string) => ({
+    regex: new RegExp(`^${ALL_DIRS[dirname]}$`),
+    icon: UserHomeIcons[dirname],
+}))
+
 const TabListClass = inject(
     'viewState',
     'settingsState',
@@ -33,19 +47,6 @@ const TabListClass = inject(
     observer(
         class TabListClass extends React.Component<InjectedProps> {
             menuIndex = 0
-
-            /**
-             * build a list of { regex, IconName } to match folders with an icon
-             * For eg:
-             * {
-             *    regex: /^/Users/leo$/,
-             *    icon: 'home'
-             * }
-             */
-            tabIcons = Object.keys(Icons).map((dirname: string) => ({
-                regex: new RegExp(`^${ALL_DIRS[dirname]}$`),
-                icon: Icons[dirname],
-            }))
 
             constructor(props: InjectedProps) {
                 super(props)
@@ -217,7 +218,7 @@ const TabListClass = inject(
             }
 
             getTabIcon(path: string): IconName {
-                for (const obj of this.tabIcons) {
+                for (const obj of TabIcons) {
                     if (obj.regex.test(path)) {
                         return obj.icon as IconName
                     }

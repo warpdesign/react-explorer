@@ -1,8 +1,9 @@
 import * as React from 'react'
 import * as ReactDOM from 'react-dom'
 import { Alert, AlertProps } from '@blueprintjs/core'
-import { Deferred } from '../utils/deferred'
-import { i18n } from '../locale/i18n'
+
+import { Deferred } from '$src/utils/deferred'
+import { i18n } from '$src/locale/i18n'
 import Keys from '$src/constants/keys'
 
 type Message = React.ReactNode | string

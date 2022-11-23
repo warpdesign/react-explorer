@@ -1,8 +1,8 @@
-import { i18n } from '../locale/i18n'
+import { i18n } from '$src/locale/i18n'
 
+const { i18next } = i18n
 let translations: { [key: string]: string }
 let byteFormats: Array<string>
-const { i18next } = i18n
 
 export function updateTranslations(): void {
     translations = i18next.t('COMMON.SIZE', { returnObjects: true })

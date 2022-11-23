@@ -1,8 +1,9 @@
 import { observable, action, makeObservable, runInAction } from 'mobx'
 import { ipcRenderer } from 'electron'
-import { JSObject } from '../components/Log'
-import { i18n, languageList } from '../locale/i18n'
-import { isMojave, isWin, isMac, defaultFolder } from '../utils/platform'
+
+import { JSObject } from '$src/components/Log'
+import { i18n, languageList } from '$src/locale/i18n'
+import { isMojave, isWin, isMac, defaultFolder } from '$src/utils/platform'
 
 const APP_STORAGE_KEY = 'react-explorer'
 

@@ -1,37 +1,36 @@
 import * as React from 'react'
 import * as ReactDOM from 'react-dom'
+import { HotkeysProvider } from '@blueprintjs/core'
 import { configure } from 'mobx'
-import { ExplorerApp } from '../components/App'
 import { I18nextProvider } from 'react-i18next'
-import { i18n } from '../locale/i18n'
-import { SettingsState } from '../state/settingsState'
 import { Provider } from 'mobx-react'
 import { DndProvider } from 'react-dnd'
 import { HTML5Backend } from 'react-dnd-html5-backend'
 import { ipcRenderer } from 'electron'
-import { CustomSettings } from '../electron/windowSettings'
-import { HotkeysProvider } from '@blueprintjs/core'
 import process from 'process'
 import child_process from 'child_process'
+
+import { ExplorerApp } from '$src/components/App'
+import { i18n } from '$src/locale/i18n'
+import { SettingsState } from '$src/state/settingsState'
+import { CustomSettings } from '$src/electron/windowSettings'
 // register Fs that will be available in React-Explorer
 // I guess there is a better place to do that
-import { FsGeneric } from '../services/plugins/FsGeneric'
-import { FsWsl } from '../services/plugins/FsWsl'
-import { FsLocal } from '../services/plugins/FsLocal'
-import { registerFs } from '../services/Fs'
-
-declare const ENV: { [key: string]: string | boolean | number | Record<string, unknown> }
+import { FsGeneric } from '$src/services/plugins/FsGeneric'
+import { FsWsl } from '$src/services/plugins/FsWsl'
+import { FsLocal } from '$src/services/plugins/FsLocal'
+import { registerFs } from '$src/services/Fs'
 
 configure({
     enforceActions: 'observed',
     computedRequiresReaction: true,
     reactionRequiresObservable: true,
     // observableRequiresReaction: true,
-    safeDescriptors: ENV.CY ? false : true,
+    safeDescriptors: window.ENV.CY ? false : true,
 })
 
 function initFS() {
-    if ((process && process.env && process.env.NODE_ENV === 'test') || ENV.CY) {
+    if ((process && process.env && process.env.NODE_ENV === 'test') || window.ENV.CY) {
         registerFs(FsGeneric)
     } else {
         registerFs(FsWsl)
@@ -43,7 +42,7 @@ class App {
     settingsState: SettingsState
 
     constructor() {
-        this.settingsState = new SettingsState(ENV.VERSION as string)
+        this.settingsState = new SettingsState(window.ENV.VERSION as string)
         this.init()
     }
 
@@ -68,7 +67,7 @@ class App {
     }
 
     init = async (): Promise<void> => {
-        if (ENV.NODE_ENV !== 'production') {
+        if (window.ENV.NODE_ENV !== 'production') {
             await this.createTestFolder()
         }
         initFS()

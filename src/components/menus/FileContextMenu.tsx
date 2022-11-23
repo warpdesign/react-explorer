@@ -1,8 +1,9 @@
 import React from 'react'
 import { Menu, MenuItem, MenuDivider, Intent } from '@blueprintjs/core'
+import { useTranslation } from 'react-i18next'
+
 import { useStores } from '$src/hooks/useStores'
 import { File, sameID } from '$src/services/Fs'
-import { useTranslation } from 'react-i18next'
 
 interface Props {
     fileUnderMouse: File | null

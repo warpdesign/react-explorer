@@ -1,12 +1,7 @@
 import * as React from 'react'
+import { Icon, IconSize, Spinner } from '@blueprintjs/core'
 import { inject, Provider, observer } from 'mobx-react'
-import { Toolbar } from './Toolbar'
-import { Statusbar } from './Statusbar'
-import { AppState } from '../state/appState'
-import { LoginDialog } from './dialogs/LoginDialog'
-import { Loader } from './Loader'
-import { FileTable } from './FileTable'
-import classnames from 'classnames'
+import { withTranslation, WithTranslation } from 'react-i18next'
 import {
     DropTargetSpec,
     DropTargetConnector,
@@ -15,16 +10,17 @@ import {
     ConnectDropTarget,
     DropTarget,
 } from 'react-dnd'
-import { TabList } from './TabList'
-import { ViewState } from '../state/viewState'
-import { AppToaster } from './AppToaster'
-import { Intent } from '@blueprintjs/core'
-import { getLocalizedError } from '../locale/error'
-import { withTranslation, WithTranslation } from 'react-i18next'
-import { LocalApi } from '../services/plugins/FsLocal'
-import { FileState } from '../state/fileState'
-import { File as FsFile } from '../services/Fs'
-import { CollectedProps } from './RowRenderer'
+import classNames from 'classnames'
+
+import { Statusbar } from '$src/components/Statusbar'
+import { Toolbar } from '$src/components/Toolbar'
+import { AppState } from '$src/state/appState'
+import { LoginDialog } from '$src/components/dialogs/LoginDialog'
+import { Overlay } from '$src/components/Overlay'
+import { FileTable } from '$src/components/filetable'
+import { TabList } from '$src/components/TabList'
+import { ViewState } from '$src/state/viewState'
+import { CollectedProps, DraggedObject } from '$src/components/filetable/RowRenderer'
 
 interface SideViewProps extends WithTranslation {
     hide: boolean
@@ -70,9 +66,6 @@ export const SideViewClass = inject('appState')(
         class SideViewClass extends React.Component<InjectedProps> {
             constructor(props: InjectedProps) {
                 super(props)
-                // TODO: get view
-                // this.view = appState.createView(this.viewId);
-                // TODO: add tabs ??
             }
 
             get injected(): InjectedProps {
@@ -96,11 +89,10 @@ export const SideViewClass = inject('appState')(
                 const fileCache = viewState.getVisibleCache()
                 const appState = this.injected.appState
                 const active = appState.getViewFromCache(fileCache).isActive
-                //  fileCache.active;
                 const dropAndOver = isOver && canDrop
                 const divId = 'view_' + viewState.viewId
 
-                const activeClass = classnames('sideview', {
+                const activeClass = classNames('sideview', {
                     active: active,
                     inactive: !active,
                     hidden: this.props.hide,
@@ -110,6 +102,8 @@ export const SideViewClass = inject('appState')(
 
                 const needLogin = fileCache.status === 'login'
                 const busy = fileCache.status === 'busy'
+                const dropOverlayActive = isOver
+                const dropOverlayIcon = isOver && !canDrop ? 'cross' : 'import'
 
                 return connectDropTarget(
                     <div id={divId} className={activeClass}>
@@ -120,58 +114,20 @@ export const SideViewClass = inject('appState')(
                         <Toolbar active={active && !busy} onPaste={this.props.onPaste} />
                         <FileTable hide={this.props.hide} />
                         <Statusbar />
-                        <Loader active={busy}></Loader>
+                        <Overlay active={busy}>
+                            <Spinner />
+                        </Overlay>
+                        <Overlay active={dropOverlayActive}>
+                            <Icon icon={dropOverlayIcon} size={80} color="#d9dde0" />
+                        </Overlay>
                     </div>,
                 )
             }
 
-            onDrop(
-                item: { dragFiles?: FsFile[]; files?: File[]; fileState: FileState } /* DraggedObject | DataTransfer */,
-            ) {
-                console.log('onDrop')
-                const appState = this.injected.appState
-                const { viewState } = this.props
-                const fileCache = viewState.getVisibleCache()
-                // TODO: build files from native urls
-                const files = item.fileState
-                    ? item.dragFiles
-                    : item.files.map((webFile: File) => LocalApi.fileFromPath(webFile.path))
-
-                // TODO: check both cache are active?
-                appState
-                    .prepareTransferTo(item.fileState, fileCache, files)
-                    .then((noErrors: boolean) => {
-                        const { t } = this.injected
-                        if (noErrors) {
-                            AppToaster.show({
-                                message: t('COMMON.COPY_FINISHED'),
-                                icon: 'tick',
-                                intent: Intent.SUCCESS,
-                                timeout: 3000,
-                            })
-                        } else {
-                            AppToaster.show({
-                                message: t('COMMON.COPY_WARNING'),
-                                icon: 'warning-sign',
-                                intent: Intent.WARNING,
-                                timeout: 5000,
-                            })
-                        }
-                    })
-                    .catch((err: { code: number | string }): void => {
-                        const { t } = this.injected
-                        const localizedError = getLocalizedError(err)
-                        const message = err.code
-                            ? t('ERRORS.COPY_ERROR', { message: localizedError.message })
-                            : t('ERRORS.COPY_UNKNOWN_ERROR')
-
-                        AppToaster.show({
-                            message: message,
-                            icon: 'error',
-                            intent: Intent.DANGER,
-                            timeout: 5000,
-                        })
-                    })
+            onDrop(item: DraggedObject /*| DataTransfer*/) {
+                const { appState, viewState } = this.injected
+                appState.drop(item, viewState.getVisibleCache())
+                debugger
             }
 
             render(): React.ReactNode {

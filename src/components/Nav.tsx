@@ -1,23 +1,24 @@
 import * as React from 'react'
-import { useTranslation } from 'react-i18next'
-import { observer } from 'mobx-react'
-import { runInAction } from 'mobx'
 import { Navbar, Alignment, Button, Classes, Intent } from '@blueprintjs/core'
 import { IconNames } from '@blueprintjs/icons'
 import { Popover2 } from '@blueprintjs/popover2'
+import { runInAction } from 'mobx'
+import { observer } from 'mobx-react'
+import { useTranslation } from 'react-i18next'
 import classNames from 'classnames'
 
-import { HamburgerMenu } from './HamburgerMenu'
-import { Badge } from './Badge'
+import { HamburgerMenu } from '$src/components/HamburgerMenu'
+import { Badge } from '$src/components/Badge'
 import { useStores } from '$src/hooks/useStores'
 
 const Nav = observer(() => {
     const { appState } = useStores('appState')
+    const { transferListState } = appState
     const { t } = useTranslation()
     const isExplorer = appState.isExplorer
-    const count = appState.pendingTransfers
+    const count = appState.transferListState.pendingTransfers
     const badgeText = (count && count + '') || ''
-    const badgeProgress = appState.totalTransferProgress
+    const badgeProgress = transferListState.totalTransferProgress
     const downloadClass = classNames(Classes.MINIMAL, 'download')
     const isSplitViewActive = appState.winStates[0].splitView
 
@@ -51,8 +52,6 @@ const Nav = observer(() => {
     const onOpenShortcuts = (): void => {
         runInAction(() => (appState.isShortcutsOpen = true))
     }
-
-    console.log('render nav', isSplitViewActive)
 
     return (
         <Navbar>

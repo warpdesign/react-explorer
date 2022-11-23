@@ -1,21 +1,20 @@
 import * as React from 'react'
 import { Tree, TreeNodeInfo } from '@blueprintjs/core'
+import { IReactionDisposer, reaction, toJS, IObservableArray } from 'mobx'
 import { observer, inject } from 'mobx-react'
+import i18next from 'i18next'
 import { withTranslation, WithTranslation } from 'react-i18next'
 import classNames from 'classnames'
-import { IReactionDisposer, reaction, toJS, IObservableArray } from 'mobx'
-import i18next from 'i18next'
-import { USERNAME, isMac } from '../utils/platform'
-import { hasWSL } from '../utils/wsl'
-import Icons from '../constants/icons'
-import { FavoritesState, Favorite } from '../state/favoritesState'
-import { AppState } from '../state/appState'
-import { AppAlert } from './AppAlert'
-import CONFIG from '../config/appConfig'
 
-declare const ENV: { [key: string]: string | boolean | number | Record<string, unknown> }
+import { USERNAME, isMac } from '$src/utils/platform'
+import { hasWSL } from '$src/utils/wsl'
+import { UserHomeIcons } from '$src/constants/icons'
+import { FavoritesState, Favorite } from '$src/state/favoritesState'
+import { AppState } from '$src/state/appState'
+import { AppAlert } from '$src/components/AppAlert'
+import CONFIG from '$src/config/appConfig'
 
-require('../css/favoritesPanel.css')
+require('$src/css/favoritesPanel.css')
 
 interface LeftPanelState {
     nodes: TreeNodeInfo<string>[]
@@ -68,7 +67,7 @@ export const LeftPanelClass = inject('appState')(
 
                 this.installReactions()
                 this.bindLanguageChange()
-                if (!ENV.CY) {
+                if (!window.ENV.CY) {
                     this.checkForWSL()
                 }
             }
@@ -244,7 +243,7 @@ export const LeftPanelClass = inject('appState')(
                             {shortcut.label === 'HOME_DIR' ? USERNAME : t(`FAVORITES_PANEL.${shortcut.label}`)}
                         </span>
                     ),
-                    icon: Icons[shortcut.label],
+                    icon: UserHomeIcons[shortcut.label],
                     nodeData: shortcut.path,
                 }))
 

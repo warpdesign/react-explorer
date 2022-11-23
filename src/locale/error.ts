@@ -1,5 +1,5 @@
-import { i18n } from './i18n'
-import { isWin } from '../utils/platform'
+import { i18n } from '$src/locale/i18n'
+import { isWin } from '$src/utils/platform'
 
 export interface LocalizedError {
     code?: string | number

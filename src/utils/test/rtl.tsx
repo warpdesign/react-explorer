@@ -9,7 +9,7 @@ import { i18n } from './i18n'
 import { I18nextProvider } from 'react-i18next'
 import { HotkeysProvider } from '@blueprintjs/core'
 import userEvent from '@testing-library/user-event'
-import en from 'locale/lang/en.json'
+import en from '$src/locale/lang/en.json'
 
 const LOCALE_EN = en.translations
 

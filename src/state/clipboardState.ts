@@ -1,11 +1,12 @@
 import { action, observable, makeObservable } from 'mobx'
+import { Intent } from '@blueprintjs/core'
 import { clipboard } from 'electron'
+import type { TFunction } from 'i18next'
+
 import { File, FsApi } from '$src/services/Fs'
 import { lineEnding } from '$src/utils/platform'
 import { FileState } from '$src/state/fileState'
-import type { TFunction } from 'i18next'
 import { i18n } from '$src/locale/i18n'
-import { Intent } from '@blueprintjs/core'
 import { AppToaster } from '$src/components/AppToaster'
 
 /**

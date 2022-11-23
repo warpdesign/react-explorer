@@ -311,28 +311,30 @@ button.small:hover{
     bottom:0;
     right:0;
     display:flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1;
 }
 
 .app-loader.active{
     opacity:1;
     pointer-events:all;
-    background-color: rgba(255,255,255,.3);
+    background-color: rgba(255,255,255,.9);
 }
 
 body.bp4-dark .app-loader.active{
     background-color:rgba(41, 55, 66, 0.9);
 }
 
-.app-loader .bp4-spinner{
-    flex-grow:1;
-    opacity:0;
-    transition-property:opacity;
-    transition-delay:800ms;
-    transition-duration:200ms;
+.app-loader > * {
+    /* flex-grow: 1; */
+    opacity: 0;
+    transition-property: opacity;
+    transition-duration: 800ms;
 }
 
-.app-loader.active .bp4-spinner{
-    opacity:1;
+.app-loader.active > *{
+    opacity: 1;
 }
 
 /* properly align labels inside every dialog */

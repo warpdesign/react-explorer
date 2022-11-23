@@ -1,15 +1,15 @@
-import webpack from 'webpack';
-import { resolve as _resolve, join } from 'path';
-import HtmlWebpackPlugin from 'html-webpack-plugin';
-import ForkTsCheckerWebpackPlugin from 'fork-ts-checker-webpack-plugin';
-import { CleanWebpackPlugin } from 'clean-webpack-plugin';
-import TerserPlugin from 'terser-webpack-plugin';
-import CopyPlugin from 'copy-webpack-plugin';
-import { DefinePlugin } from 'webpack';
-import { version } from './package.json';
-import gitHash from './scripts/hash';
+import webpack from 'webpack'
+import { resolve as _resolve, join } from 'path'
+import HtmlWebpackPlugin from 'html-webpack-plugin'
+import ForkTsCheckerWebpackPlugin from 'fork-ts-checker-webpack-plugin'
+import { CleanWebpackPlugin } from 'clean-webpack-plugin'
+import TerserPlugin from 'terser-webpack-plugin'
+import CopyPlugin from 'copy-webpack-plugin'
+import { DefinePlugin } from 'webpack'
+import { version } from './package.json'
+import gitHash from './scripts/hash'
 
-const buildDate = Date.now();
+const buildDate = Date.now()
 
 const baseConfig: webpack.Configuration = {
     output: {
@@ -95,7 +95,7 @@ const baseConfig: webpack.Configuration = {
     //     "react": "React",
     //     "react-dom": "ReactDOM"
     // }
-};
+}
 
 export default [
     Object.assign(
@@ -110,11 +110,11 @@ export default [
                     dry: false,
                 }),
                 new DefinePlugin({
-                    'ENV.CY': false,
-                    'ENV.NODE_ENV': JSON.stringify(baseConfig.mode),
-                    'ENV.VERSION': JSON.stringify(version),
-                    'ENV.HASH': JSON.stringify(gitHash),
-                    'ENV.BUILD_DATE': JSON.stringify(buildDate),
+                    'window.ENV.CY': false,
+                    'window.ENV.NODE_ENV': JSON.stringify(baseConfig.mode),
+                    'window.ENV.VERSION': JSON.stringify(version),
+                    'window.ENV.HASH': JSON.stringify(gitHash),
+                    'window.ENV.BUILD_DATE': JSON.stringify(buildDate),
                 }),
             ],
         },
@@ -131,11 +131,11 @@ export default [
                     template: 'index.html',
                 }),
                 new DefinePlugin({
-                    'ENV.CY': false,
-                    'ENV.NODE_ENV': JSON.stringify(baseConfig.mode),
-                    'ENV.VERSION': JSON.stringify(version),
-                    'ENV.HASH': JSON.stringify(gitHash),
-                    'ENV.BUILD_DATE': JSON.stringify(buildDate),
+                    'window.ENV.CY': false,
+                    'window.ENV.NODE_ENV': JSON.stringify(baseConfig.mode),
+                    'window.ENV.VERSION': JSON.stringify(version),
+                    'window.ENV.HASH': JSON.stringify(gitHash),
+                    'window.ENV.BUILD_DATE': JSON.stringify(buildDate),
                 }),
                 new CopyPlugin({
                     patterns: [
@@ -157,4 +157,4 @@ export default [
         },
         baseConfig,
     ),
-];
+]

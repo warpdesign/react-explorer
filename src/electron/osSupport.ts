@@ -2,8 +2,6 @@ import { platform } from 'process'
 import { release, arch, userInfo } from 'os'
 import { app } from 'electron'
 
-declare const ENV: { [key: string]: string | boolean | number | Record<string, unknown> }
-
 type App = { getPath: (name: string) => string } | Electron.App
 
 function getAppInstance(): App {
@@ -31,7 +29,7 @@ function getDefaultFolder() {
         defaultFolder = ''
     } else {
         defaultFolder =
-            ENV.NODE_ENV === 'production'
+            window.ENV.NODE_ENV === 'production'
                 ? appInstance.getPath('home')
                 : platform === 'win32'
                 ? appInstance.getPath('temp')

@@ -1,11 +1,35 @@
-import { observable, action, makeObservable, runInAction } from 'mobx'
-import { FsApi, File } from '../services/Fs'
-import { FileTransfer } from './fileTransfer'
-import { Deferred } from '../utils/deferred'
-import { getLocalizedError } from '../locale/error'
-import { Readable } from 'stream'
-import { getSelectionRange } from '../utils/fileUtils'
-import { isWin } from '../utils/platform'
+import { observable, action, computed, makeObservable, runInAction } from 'mobx'
+import type { Readable } from 'stream'
+
+import { FsApi, File } from '$src/services/Fs'
+import { Deferred } from '$src/utils/deferred'
+import { getLocalizedError } from '$src/locale/error'
+import { getSelectionRange } from '$src/utils/fileUtils'
+import { isWin } from '$src/utils/platform'
+import { LocalizedError } from '$src/locale/error'
+
+export interface FileTransfer {
+    file: File
+    status: 'started' | 'cancelled' | 'error' | 'done' | 'queued'
+    progress: number
+    subDirectory: string
+    newSub: string
+    ready: boolean
+    error?: LocalizedError
+}
+
+export interface TransferOptions {
+    // source data
+    files: File[]
+    srcFs: FsApi
+    srcPath: string
+
+    // destination data
+    dstFs: FsApi
+    dstPath: string
+    // not sure we still need this ?
+    dstFsName: string
+}
 
 const MAX_TRANSFERS = 2
 const MAX_ERRORS = 5
@@ -13,7 +37,7 @@ const RENAME_SUFFIX = '_'
 
 type Status = 'started' | 'queued' | 'error' | 'done' | 'cancelled' | 'calculating'
 
-export class Batch {
+export class TransferState {
     static maxId = 1
     public srcFs: FsApi
     public dstFs: FsApi
@@ -35,11 +59,11 @@ export class Batch {
 
     public progress = 0
 
-    get isStarted(): boolean {
+    isStarted(): boolean {
         return !this.status.match(/error|done/)
     }
 
-    get hasEnded(): boolean {
+    hasEnded(): boolean {
         return !!this.status.match(/done|error/)
     }
 
@@ -57,7 +81,7 @@ export class Batch {
             size: observable,
             status: observable,
             progress: observable,
-            onEndTransfer: action,
+            prepare: action,
             start: action,
             updatePendingTransfers: action,
             onTransferError: action,
@@ -68,6 +92,11 @@ export class Batch {
             calcTotalSize: action,
             setFileList: action,
             onData: action,
+            // We have to make these properties observables even though there are
+            // technically computed values because computed values are ignored
+            // when calling toJS on an object.
+            hasEnded: observable,
+            isStarted: observable,
         })
 
         this.status = 'calculating'
@@ -75,36 +104,32 @@ export class Batch {
         this.dstFs = dstFs
         this.dstPath = dstPath
         this.srcPath = srcPath
-        // build batch src/dst names
+        // build transfer src/dst names
         this.srcName = this.getLastPathPart(srcPath)
         this.dstName = this.getLastPathPart(dstPath)
-        this.id = Batch.maxId++
+        this.id = TransferState.maxId++
     }
 
-    onEndTransfer = (): Promise<boolean> => {
-        // console.log('transfer ended ! duration=', Math.round((new Date().getTime() - this.startDate.getTime()) / 1000), 'sec(s)');
-        // console.log('destroy batch, new maxId', Batch.maxId);
-        this.status = 'done'
-        return Promise.resolve(this.errors === 0)
-    }
-
-    start(): Promise<boolean | void> {
-        console.log('Starting batch')
+    async start(): Promise<boolean | void> {
+        console.log('Starting transfer')
         if (this.status === 'queued') {
             this.slotsAvailable = MAX_TRANSFERS
             this.status = 'started'
             this.transferDef = new Deferred()
-
             this.startDate = new Date()
             this.queueNextTransfers()
         }
 
-        // return this.transferDef.promise;
-        return this.transferDef.promise.then(this.onEndTransfer).catch((err: Error) => {
+        try {
+            const res = await this.transferDef.promise
+            runInAction(() => (this.status = 'done'))
+            return true
+        } catch (err) {
+            debugger
             console.log('error transfer', err)
-            this.status = 'error'
-            return Promise.reject(err)
-        })
+            runInAction(() => (this.status = 'error'))
+            throw err
+        }
     }
 
     updatePendingTransfers(subDir: string, newFilename: string, cancel = false): void {
@@ -172,7 +197,6 @@ export class Batch {
             transfer.error = getLocalizedError(err)
         })
         this.errors++
-        // return this.transferDef.reject(err);
     }
 
     removeStream(stream: Readable): void {
@@ -272,7 +296,6 @@ export class Batch {
                 }
             }
         } else {
-            // console.log('isDir', fullDstPath);
             runInAction(() => (transfer.status = 'done'))
             // make transfers with this directory ready
             this.updatePendingTransfers(
@@ -292,9 +315,11 @@ export class Batch {
         if (this.status !== 'error' && this.transfersDone < this.elements.length) {
             this.queueNextTransfers()
         } else {
-            if (this.errors === this.elements.length) {
+            if (this.errors) {
+                // reject with the number of success
                 this.transferDef.reject({
-                    code: '',
+                    files: this.elements.length,
+                    errors: this.errors,
                 })
             } else {
                 this.transferDef.resolve()
@@ -339,12 +364,8 @@ export class Batch {
                 let success = false
                 while (!success && this.status !== 'cancelled') {
                     newName = wantedName + RENAME_SUFFIX + i++
-                    try {
-                        await dstFs.makedir(dstPath, newName, this.id)
-                        success = true
-                    } catch (err) {
-                        return Promise.reject(err)
-                    }
+                    await dstFs.makedir(dstPath, newName, this.id)
+                    success = true
                 }
             }
         } else {
@@ -353,7 +374,7 @@ export class Batch {
             }
         }
 
-        return Promise.resolve(newName)
+        return newName
     }
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -476,24 +497,30 @@ export class Batch {
             }
         }
 
-        return Promise.resolve(transfers)
+        return transfers
     }
 
     async setFileList(files: File[]): Promise<void> {
-        return this.getFileList(files)
-            .then((transfers) => {
-                console.log('got files', transfers)
-                // transfers.forEach(t => console.log(`[${t.status}] ${t.file.dir}/${t.file.fullname}:${t.file.isDir}, ${t.subDirectory} (${t.newSub})`))
-                this.elements.replace(transfers)
-            })
-            .catch((err) => {
-                return Promise.reject(err)
-            })
+        const transfers = await this.getFileList(files)
+        console.log('got files', transfers)
+        // transfers.forEach(t => console.log(`[${t.status}] ${t.file.dir}/${t.file.fullname}:${t.file.isDir}, ${t.subDirectory} (${t.newSub})`))
+        this.elements.replace(transfers)
     }
 
-    onData(file: FileTransfer, bytesRead: number): void {
-        const previousProgress = file.progress
-        file.progress = bytesRead
-        this.progress += previousProgress ? bytesRead - previousProgress : bytesRead
+    async prepare(files: File[]) {
+        // get full list of files, which means going into each directory
+        // and getting file list recursvely
+        await this.setFileList(files)
+        this.calcTotalSize()
+        runInAction(() => (this.status = 'queued'))
+    }
+
+    onData(transfer: FileTransfer, bytesRead: number): void {
+        if (transfer.status !== 'done') {
+            console.log('onData', bytesRead, transfer.status)
+            const previousProgress = transfer.progress
+            transfer.progress = bytesRead
+            this.progress += bytesRead - previousProgress
+        }
     }
 }

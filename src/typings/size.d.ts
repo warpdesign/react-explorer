@@ -1,2 +1,2 @@
 // size.d.ts
-declare module 'size';
+declare module 'size'

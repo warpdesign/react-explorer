@@ -2,12 +2,12 @@ import { app, BrowserWindow, ipcMain, nativeTheme } from 'electron'
 import process = require('process')
 import path = require('path')
 import child_process = require('child_process')
-import { AppMenu, LocaleString } from './appMenus'
-import { isLinux } from './osSupport'
-import { WindowSettings } from './windowSettings'
-import { Remote } from './remote'
 
-declare const ENV: { [key: string]: string | boolean | number | Record<string, unknown> }
+import { AppMenu, LocaleString } from '$src/electron/appMenus'
+import { isLinux } from '$src/electron/osSupport'
+import { WindowSettings } from '$src/electron//windowSettings'
+import { Remote } from '$src/electron/remote'
+
 const ENV_E2E = !!process.env.E2E
 const HTML_PATH = `${__dirname}/index.html`
 
@@ -96,12 +96,12 @@ const ElectronApp = {
 
         console.log(settings.custom)
 
-        // this.mainWindow.initialSettings = settings.custom;
+        // this.mainWindow.initialSettings = settings.custom
 
-        // this.mainWindow.loadURL(HTML_PATH);
+        // this.mainWindow.loadURL(HTML_PATH)
         this.mainWindow.loadFile(HTML_PATH)
 
-        // this.mainWindow.on('close', () => app.quit());
+        // this.mainWindow.on('close', () => app.quit())
 
         // Prevent the window from closing in case transfers are in progress
         this.mainWindow.on('close', (e: Event) => {
@@ -120,8 +120,8 @@ const ElectronApp = {
         })
 
         // this.mainWindpw.on('page-title-updated', (e: Event) => {
-        //     e.preventDefault();
-        // });
+        //     e.preventDefault()
+        // })
 
         this.appMenu = new AppMenu(this.mainWindow)
     },
@@ -144,8 +144,8 @@ const ElectronApp = {
      */
     // installWatcher(): void {
     //     if (!ENV_E2E && !isPackage) {
-    //         console.log('Install Code Change Watcher');
-    //         watch(SOURCE_PATH, { recursive: true }, () => this.reloadApp());
+    //         console.log('Install Code Change Watcher')
+    //         watch(SOURCE_PATH, { recursive: true }, () => this.reloadApp())
     //     }
     // },
     /**
@@ -267,7 +267,7 @@ const ElectronApp = {
      */
     openDevTools(force = false): void {
         // spectron problem if devtools is opened, see https://github.com/electron/spectron/issues/254
-        if ((!ENV_E2E && ENV.NODE_ENV) !== 'production' || force) {
+        if ((!ENV_E2E && window.ENV.NODE_ENV) !== 'production' || force) {
             if (!this.devWindow || this.devWindow.isDestroyed()) {
                 const winState = WindowSettings.getDevToolsSettings()
 
@@ -300,7 +300,7 @@ const ElectronApp = {
         // see: https://github.com/electron/electron/issues/24011 &
         // https://github.com/electron/electron/pull/25151
         // if (!ENV_E2E && !isPackage) {
-        //     this.installReactDevTools();
+
         // }
 
         this.installIpcMainListeners()

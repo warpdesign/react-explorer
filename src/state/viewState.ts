@@ -1,5 +1,6 @@
-import { FileState } from './fileState'
 import { observable, action, makeObservable } from 'mobx'
+
+import { FileState } from '$src/state/fileState'
 
 export class ViewState {
     viewId: number
