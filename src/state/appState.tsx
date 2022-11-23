@@ -457,13 +457,19 @@ export class AppState {
             }
         } catch (err) {
             if (err.files) {
-                // TODOCOPY: change message if there was only errors
+                console.log(err, err.files)
+                const successCount = err.files - err.errors
                 AppToaster.show({
-                    message: this.t('COMMON.COPY_WARNING'),
+                    message: this.t('COMMON.COPY_WARNING', {
+                        count: successCount,
+                    }),
                     icon: 'warning-sign',
-                    intent: Intent.WARNING,
+                    intent: !successCount ? Intent.DANGER : Intent.WARNING,
                     timeout: ERROR_MESSAGE_TIMEOUT,
                 })
+            } else {
+                // TODOCOPY
+                debugger
             }
         }
         debugger
