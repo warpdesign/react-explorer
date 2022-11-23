@@ -41,9 +41,10 @@ export interface RowRendererProps extends TableRowProps {
 }
 
 export interface DraggedObject {
-    // selectedCount: number;
+    selectedCount: number
     fileState?: FileState
-    dragFiles: File[]
+    dragFiles?: File[]
+    files?: File[]
 }
 
 export interface CollectedProps {

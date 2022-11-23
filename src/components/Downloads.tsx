@@ -144,7 +144,7 @@ class DownloadsClass extends React.Component<Props, State> {
             const transfer = (node.nodeData as NodeData).transferElement
             const transferId = (node.nodeData as NodeData).transferId
             if (transfer.status === 'done') {
-                this.appState.openTransferedFile(transferId, transfer.file)
+                this.appState.openTransferredFile(transferId, transfer.file)
             }
         }
     }

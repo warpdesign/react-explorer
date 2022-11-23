@@ -22,7 +22,7 @@ import { ViewState } from '$src/state/viewState'
 import { LocalApi } from '$src/services/plugins/FsLocal'
 import { FileState } from '$src/state/fileState'
 import { File as FsFile } from '$src/services/Fs'
-import { CollectedProps } from '$src/components/filetable/RowRenderer'
+import { CollectedProps, DraggedObject } from '$src/components/filetable/RowRenderer'
 
 interface SideViewProps extends WithTranslation {
     hide: boolean
@@ -123,20 +123,21 @@ export const SideViewClass = inject('appState')(
                 )
             }
 
-            onDrop(
-                item: { dragFiles?: FsFile[]; files?: File[]; fileState: FileState } /* DraggedObject | DataTransfer */,
-            ) {
-                const appState = this.injected.appState
-                const { viewState } = this.props
-                const fileCache = viewState.getVisibleCache()
+            onDrop(item: DraggedObject /*| DataTransfer*/) {
+                const { appState, viewState } = this.injected
+                appState.drop(item, viewState.getVisibleCache())
+                debugger
+                // appState.drop(item)
+                // const { viewState } = this.props
+                // const fileCache = viewState.getVisibleCache()
                 // TODO: build files from native urls
-                const files = item.fileState
-                    ? item.dragFiles
-                    : item.files.map((webFile: File) => LocalApi.fileFromPath(webFile.path))
+                // const files = item.fileState
+                //     ? item.dragFiles
+                //     : item.files.map((webFile: File) => LocalApi.fileFromPath(webFile.path))
 
                 // TODO: check both cache are active?
-                const options = appState.prepareTransferTo(item.fileState, fileCache, files)
-                appState.copy(options)
+                // const options = appState.prepareTransferTo(item.fileState, fileCache, files)
+                // appState.copy(options)
                 // .prepareTransferTo(item.fileState, fileCache, files)
                 // .then((noErrors: boolean) => {
                 //     const { t } = this.injected

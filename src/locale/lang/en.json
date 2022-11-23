@@ -161,6 +161,7 @@
             "PATH_PLACEHOLDER": "Enter path to load",
             "COPY_FINISHED": "The files have been copied successfully.",
             "COPY_WARNING_zero": "Copy finished: no item could be copied.",
+            "COPY_WARNING_one": "Copy finished: some items could not be copied.",
             "COPY_WARNING_other": "Copy finished: some items could not be copied."
         },
         "FILETABLE": {

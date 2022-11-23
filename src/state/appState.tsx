@@ -19,6 +19,7 @@ import { LocalizedError } from '$src/locale/error'
 import { DeleteConfirmDialog } from '$src/components/dialogs/deleteConfirm'
 import { AppAlert } from '$src/components/AppAlert'
 import { TransferListState } from '$src/state/transferListState'
+import { DraggedObject } from '$src/components/filetable/RowRenderer'
 
 // wait 1 sec before showing badge: this avoids
 // flashing (1) badge when the transfer is very fast
@@ -106,9 +107,46 @@ export class AppState {
         this.isExplorer = true
     }
 
-    async paste(destCache: FileState): Promise<void> {
+    drop({ dragFiles, fileState }: DraggedObject, destCache: FileState): void {
+        // TODO: build files from native urls
+        // const files = srcCache
+        //     ? item.dragFiles
+        //     : item.files.map((webFile: File) => LocalApi.fileFromPath(webFile.path))
+        // const options = this.prepareTransferTo(fileState, destCache, dragFiles)
+        // let srcApi = null
+        // let srcPath = ''
+
+        // // native drag and drop
+        // if (!fileState) {
+        //     srcPath = dragFiles[0].dir
+        //     const fs = getFS(srcPath)
+        //     srcApi = new fs.API(srcPath, () => {
+        //         // TODO
+        //     })
+        // }
+
+        const options = {
+            files: dragFiles,
+            srcFs: fileState.getAPI(),
+            srcPath: fileState.path,
+            dstFs: destCache.getAPI(),
+            dstPath: destCache.path,
+            dstFsName: destCache.getFS().name,
+        }
+        this.copy(options)
+    }
+
+    paste(destCache: FileState): void {
         if (destCache && !destCache.error && this.clipboard.files.length) {
-            this.copy(this.prepareClipboardTransferTo(destCache))
+            const options = {
+                files: this.clipboard.files,
+                srcFs: this.clipboard.srcFs,
+                srcPath: this.clipboard.srcPath,
+                dstFs: destCache.getAPI(),
+                dstPath: destCache.path,
+                dstFsName: destCache.getFS().name,
+            }
+            this.copy(options)
             // TODO: use copy instead
             // try {
             //     await this.addTransfer(options)
@@ -353,7 +391,7 @@ export class AppState {
      * @param transferId
      * @param file the file to open
      */
-    openTransferedFile(transferId: number, file: File): void {
+    openTransferredFile(transferId: number, file: File): void {
         // TODO: this is duplicate code from appState/prepareLocalTransfer and fileState.openFile()
         // because we don't have a reference to the destination cache
         const { dstFs: api } = this.transferListState.getTransfer(transferId)

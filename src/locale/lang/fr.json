@@ -159,6 +159,7 @@
             "PATH_PLACEHOLDER": "Entrer le chemin à visiter",
             "COPY_FINISHED": "La copie a été réalisée avec succès",
             "COPY_WARNING_zero": "Copie terminée: aucun élément n'a pu être copié.",
+            "COPY_WARNING_one": "Copie terminée: certains éléments n'ont pu être copiés.",
             "COPY_WARNING_other": "Copie terminée: certains éléments n'ont pu être copiés."
         },
         "FILETABLE": {
