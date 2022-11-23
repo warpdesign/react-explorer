@@ -40,11 +40,13 @@ export class TransferListState {
         runInAction(() => this.transfers.unshift(transfer))
         await transfer.prepare(options.files)
 
-        // CHECKME
-        if (this.activeTransfers.length === 1) {
-            this.activeTransfers.clear()
-        }
-        this.activeTransfers.push(transfer)
+        runInAction(() => {
+            // CHECKME
+            if (this.activeTransfers.length === 1) {
+                this.activeTransfers.clear()
+            }
+            this.activeTransfers.push(transfer)
+        })
 
         return transfer
     }
@@ -64,12 +66,17 @@ export class TransferListState {
     getRunningTransfers() {
         const time = Date.now()
 
+        this.transfers.forEach((transfer) =>
+            console.log('transfer', transfer.isStarted(), `${transfer.progress} / ${transfer.size}`),
+        )
+
         return this.transfers.filter(
-            ({ startDate, progress, isStarted }) =>
-                progress && isStarted && time - startDate.getTime() >= REFRESH_DELAY,
+            (transfer) =>
+                transfer.progress && transfer.isStarted() && time - transfer.startDate.getTime() >= REFRESH_DELAY,
         ).length
     }
 
+    // used on the nav badge to show global transfers progress
     get totalTransferProgress(): number {
         let totalSize = 0
         let totalProgress = 0

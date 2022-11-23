@@ -128,7 +128,7 @@ class DownloadsClass extends React.Component<Props, State> {
     async onCloseClick(transferId: number): Promise<void> {
         const transfer = this.transferListState.getTransfer(transferId)
 
-        if (transfer.hasEnded) {
+        if (transfer.hasEnded()) {
             this.transferListState.removeTransfer(transferId)
         } else {
             const cancel = await this.showTransferAlert()
@@ -194,7 +194,7 @@ class DownloadsClass extends React.Component<Props, State> {
     createTransferLabel(transfer: TransferState, className: string): JSX.Element {
         const { t } = this.injected
         const sizeFormatted = formatBytes(transfer.size)
-        const ended = transfer.hasEnded
+        const ended = transfer.hasEnded()
         const transferSize = (transfer.status !== 'calculating' && sizeFormatted) || ''
         const currentSize = ended ? sizeFormatted : formatBytes(transfer.progress)
         const percent = transfer.status === 'calculating' ? 0 : transfer.progress / transfer.size
@@ -307,7 +307,6 @@ class DownloadsClass extends React.Component<Props, State> {
     }
 
     renderTransferTree(): JSX.Element {
-        // console.log('render');
         const { nodes } = this.state
         const { t } = this.props
 

@@ -20,7 +20,7 @@ const SEP = path.sep
 const localStart = (isWin && /^(([a-zA-Z]\:)|([\.]*\/|\.)|(\\\\)|~)/) || /^([\.]*\/|\.|~)/
 const isRoot = (isWin && /((([a-zA-Z]\:)(\\)*)|(\\\\))$/) || /^\/$/
 
-const progressFunc = throttle((progress: (pourcent: number) => void, bytesRead: number) => {
+const progressFunc = throttle((progress: (bytes: number) => void, bytesRead: number) => {
     progress(bytesRead)
 }, 400)
 
@@ -368,7 +368,7 @@ export class LocalApi implements FsApi {
     putStream(
         readStream: fs.ReadStream,
         dstPath: string,
-        progress: (pourcent: number) => void,
+        progress: (bytes: number) => void,
         transferId = -1,
     ): Promise<void> {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any

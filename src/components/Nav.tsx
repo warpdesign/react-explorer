@@ -53,8 +53,6 @@ const Nav = observer(() => {
         runInAction(() => (appState.isShortcutsOpen = true))
     }
 
-    console.log('render nav', isSplitViewActive)
-
     return (
         <Navbar>
             <Navbar.Group align={Alignment.LEFT} className="title-group">

@@ -1,4 +1,4 @@
-import { observable, action, makeObservable, runInAction } from 'mobx'
+import { observable, action, computed, makeObservable, runInAction } from 'mobx'
 import type { Readable } from 'stream'
 
 import { FsApi, File } from '$src/services/Fs'
@@ -59,11 +59,11 @@ export class TransferState {
 
     public progress = 0
 
-    get isStarted(): boolean {
+    isStarted(): boolean {
         return !this.status.match(/error|done/)
     }
 
-    get hasEnded(): boolean {
+    hasEnded(): boolean {
         return !!this.status.match(/done|error/)
     }
 
@@ -92,6 +92,11 @@ export class TransferState {
             calcTotalSize: action,
             setFileList: action,
             onData: action,
+            // We have to make these properties observables even though there are
+            // technically computed values because computed values are ignored
+            // when calling toJS on an object.
+            hasEnded: observable,
+            isStarted: observable,
         })
 
         this.status = 'calculating'
@@ -118,7 +123,6 @@ export class TransferState {
         try {
             const res = await this.transferDef.promise
             runInAction(() => (this.status = 'done'))
-            debugger
             return true
         } catch (err) {
             debugger
@@ -508,12 +512,15 @@ export class TransferState {
         // and getting file list recursvely
         await this.setFileList(files)
         this.calcTotalSize()
-        this.status = 'queued'
+        runInAction(() => (this.status = 'queued'))
     }
 
-    onData(file: FileTransfer, bytesRead: number): void {
-        const previousProgress = file.progress
-        file.progress = bytesRead
-        this.progress += previousProgress ? bytesRead - previousProgress : bytesRead
+    onData(transfer: FileTransfer, bytesRead: number): void {
+        if (transfer.status !== 'done') {
+            console.log('onData', bytesRead, transfer.status)
+            const previousProgress = transfer.progress
+            transfer.progress = bytesRead
+            this.progress += bytesRead - previousProgress
+        }
     }
 }

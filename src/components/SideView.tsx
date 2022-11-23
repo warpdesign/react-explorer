@@ -66,9 +66,6 @@ export const SideViewClass = inject('appState')(
         class SideViewClass extends React.Component<InjectedProps> {
             constructor(props: InjectedProps) {
                 super(props)
-                // TODO: get view
-                // this.view = appState.createView(this.viewId);
-                // TODO: add tabs ??
             }
 
             get injected(): InjectedProps {
@@ -92,7 +89,6 @@ export const SideViewClass = inject('appState')(
                 const fileCache = viewState.getVisibleCache()
                 const appState = this.injected.appState
                 const active = appState.getViewFromCache(fileCache).isActive
-                //  fileCache.active;
                 const dropAndOver = isOver && canDrop
                 const divId = 'view_' + viewState.viewId
 
@@ -132,50 +128,6 @@ export const SideViewClass = inject('appState')(
                 const { appState, viewState } = this.injected
                 appState.drop(item, viewState.getVisibleCache())
                 debugger
-                // appState.drop(item)
-                // const { viewState } = this.props
-                // const fileCache = viewState.getVisibleCache()
-                // TODO: build files from native urls
-                // const files = item.fileState
-                //     ? item.dragFiles
-                //     : item.files.map((webFile: File) => LocalApi.fileFromPath(webFile.path))
-
-                // TODO: check both cache are active?
-                // const options = appState.prepareTransferTo(item.fileState, fileCache, files)
-                // appState.copy(options)
-                // .prepareTransferTo(item.fileState, fileCache, files)
-                // .then((noErrors: boolean) => {
-                //     const { t } = this.injected
-                //     if (noErrors) {
-                //         AppToaster.show({
-                //             message: t('COMMON.COPY_FINISHED'),
-                //             icon: 'tick',
-                //             intent: Intent.SUCCESS,
-                //             timeout: 3000,
-                //         })
-                //     } else {
-                //         AppToaster.show({
-                //             message: t('COMMON.COPY_WARNING'),
-                //             icon: 'warning-sign',
-                //             intent: Intent.WARNING,
-                //             timeout: 5000,
-                //         })
-                //     }
-                // })
-                // .catch((err: { code: number | string }): void => {
-                //     const { t } = this.injected
-                //     const localizedError = getLocalizedError(err)
-                //     const message = err.code
-                //         ? t('ERRORS.COPY_ERROR', { message: localizedError.message })
-                //         : t('ERRORS.COPY_UNKNOWN_ERROR')
-
-                //     AppToaster.show({
-                //         message: message,
-                //         icon: 'error',
-                //         intent: Intent.DANGER,
-                //         timeout: 5000,
-                //     })
-                // })
             }
 
             render(): React.ReactNode {
