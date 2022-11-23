@@ -34,6 +34,9 @@ const baseConfig: webpack.Configuration = {
     resolve: {
         // Add '.ts' and '.tsx' as resolvable extensions.
         extensions: ['.ts', '.tsx', '.js', '.json', '.css'],
+        alias: {
+            $src: _resolve(__dirname, 'src'),
+        },
     },
     resolveLoader: {
         alias: {
