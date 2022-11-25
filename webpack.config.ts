@@ -133,6 +133,10 @@ export default [
                             from: 'img/icon-512x512.png',
                             to: 'icon.png',
                         },
+                        {
+                            from: 'node_modules/drivelist/build/Release/drivelist.node',
+                            to: 'drivelist.node',
+                        },
                     ],
                 }),
             ],
