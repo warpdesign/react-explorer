@@ -34,51 +34,37 @@ require('$src/css/main.css')
 require('$src/css/windows.css')
 require('$src/css/scrollbars.css')
 
-interface AppProps extends WithTranslation {
-    initialSettings: CustomSettings
+interface InjectedProps extends WithTranslation {
+    appState: AppState
 }
 
-interface InjectedProps extends AppProps {
-    settingsState: SettingsState
-}
-
-const App = inject('settingsState')(
+const App = inject('appState')(
     observer(
-        class App extends React.Component<AppProps> {
+        class App extends React.Component<WithTranslation> {
             private appState: AppState
+            private settingsState: SettingsState
 
             private get injected(): InjectedProps {
                 return this.props as InjectedProps
             }
 
-            constructor(props: AppProps) {
+            constructor(props: WithTranslation) {
                 super(props)
 
-                const { settingsState } = this.injected
-                const { i18n } = this.props
+                const { appState } = this.injected
+                const { settingsState } = appState
+                this.settingsState = settingsState
+                this.appState = appState
+                const { i18n /* windowSettings: { splitView } */ } = this.props
 
-                console.log('App:constructor', props.initialSettings)
+                const splitView = false
+
+                console.log('App:constructor', { splitView })
 
                 this.state = {}
 
                 // do not show outlines when using the mouse
                 FocusStyleManager.onlyShowFocusOnTabs()
-
-                // TODO: in the future this should be stored somewhere and not hardcoded
-                const path = settingsState.defaultFolder
-                // This is hardcoded for now but could be saved and restored
-                // each time the app is started
-                // NOTE: we always create two views with one tab each,
-                // even if splitView is not set: this could be improved
-                // and the view would need to be created on the fly
-                const defaultViews: Array<ViewDescriptor> = [
-                    { viewId: 0, path: path },
-                    { viewId: 1, path: path },
-                ]
-
-                this.appState = new AppState(defaultViews, {
-                    splitView: props.initialSettings.splitView,
-                })
 
                 if (window.ENV.CY) {
                     window.appState = this.appState
@@ -274,8 +260,7 @@ const App = inject('settingsState')(
             }
 
             setDarkThemeClass(): void {
-                const { settingsState } = this.injected
-                if (settingsState.isDarkModeActive) {
+                if (this.settingsState.isDarkModeActive) {
                     document.body.classList.add(Classes.DARK)
                 } else {
                     document.body.classList.remove(Classes.DARK)
@@ -288,7 +273,6 @@ const App = inject('settingsState')(
 
             render(): React.ReactNode {
                 const { isPrefsOpen, isShortcutsOpen, isExitDialogOpen } = this.appState
-                const { settingsState } = this.injected
                 const isExplorer = this.appState.isExplorer
                 const count = this.appState.transferListState.pendingTransfers
                 const { t } = this.props
@@ -306,10 +290,10 @@ const App = inject('settingsState')(
 
                 // We could modify the body's class from here but it's a bad pratice so we
                 // do it in componentDidUpdate/componentDidMount instead
-                settingsState.isDarkModeActive
+                this.settingsState.isDarkModeActive
 
                 return (
-                    <Provider appState={this.appState}>
+                    <Provider settingsState={this.settingsState}>
                         <React.Fragment>
                             <Alert
                                 cancelButtonText={t('DIALOG.QUIT.BT_KEEP_TRANSFERS')}
@@ -339,11 +323,9 @@ const App = inject('settingsState')(
                             >
                                 <LeftPanel hide={!isExplorer}></LeftPanel>
                                 <SideView viewState={viewStateLeft} hide={!isExplorer} onPaste={this.onPaste} />
-                                <SideView
-                                    viewState={viewStateRight}
-                                    hide={!isExplorer || !isSplitView}
-                                    onPaste={this.onPaste}
-                                />
+                                {isSplitView && (
+                                    <SideView viewState={viewStateRight} hide={!isExplorer} onPaste={this.onPaste} />
+                                )}
                                 <Downloads hide={isExplorer} />
                             </div>
                             <LogUI></LogUI>

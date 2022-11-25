@@ -137,6 +137,7 @@ export class FavoritesState {
     }
 
     constructor() {
+        console.log('****drivelist')
         this.buildDrivesList()
     }
 }

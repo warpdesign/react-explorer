@@ -19,8 +19,6 @@ interface Handlers {
 
 const getWindowFromId = (id: number) => BrowserWindow.getAllWindows().find((win) => win.webContents.id === id)
 
-// don't use deprecated remote module: instead, handle
-// events from renderer
 const handlers: Handlers = {
     window: {
         setProgressBar(event, progress: number) {
@@ -31,7 +29,7 @@ const handlers: Handlers = {
         getId(event) {
             return event.sender.id
         },
-        getInitialSettings(event) {
+        getCustomSettings(event) {
             console.log(WindowSettings.getSettings(event.sender.id).custom)
             return WindowSettings.getSettings(event.sender.id).custom
         },

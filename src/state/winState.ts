@@ -31,16 +31,21 @@ export class WinState {
         })
 
         this.id = WinState.id++
-        this.splitView = options.splitView
+        this.splitView = !!options.splitView
         console.log('WinState', this.id, WinState.id)
     }
 
     toggleSplitViewMode(): void {
         this.splitView = !this.splitView
 
+        // FIXME: when deleting view, the one on the right is removed
+        // this could change
         if (!this.splitView) {
+            // first remove the view
+            this.removeView(1)
             this.setActiveView(0)
         } else {
+            this.getOrCreateView
             this.setActiveView(1)
         }
 
@@ -77,6 +82,11 @@ export class WinState {
         }
 
         return view
+    }
+
+    removeView(viewId: number) {
+        debugger
+        this.views.splice(viewId, 1)
     }
 
     /**

@@ -19,6 +19,8 @@ import { DeleteConfirmDialog } from '$src/components/dialogs/deleteConfirm'
 import { AppAlert } from '$src/components/AppAlert'
 import { TransferListState } from '$src/state/transferListState'
 import { DraggedObject } from '$src/components/filetable/RowRenderer'
+import { SettingsState } from './settingsState'
+import { CustomSettings } from '$src/electron/windowSettings'
 
 // wait 1 sec before showing badge: this avoids
 // flashing (1) badge when the transfer is very fast
@@ -38,6 +40,8 @@ export class AppState {
 
     favoritesState: FavoritesState = new FavoritesState()
 
+    settingsState = new SettingsState(window.ENV.VERSION as string)
+
     isExplorer = true
 
     isPrefsOpen = false
@@ -45,6 +49,10 @@ export class AppState {
     isShortcutsOpen = false
 
     isExitDialogOpen = false
+
+    options: CustomSettings = {
+        splitView: false,
+    }
 
     toggleSplitViewMode(): void {
         const winState = this.winStates[0]
@@ -58,12 +66,7 @@ export class AppState {
     // reference to current i18n's instance translate function
     t: TFunction
 
-    /**
-     * Creates the application state
-     *
-     * @param views The initial paths of the caches that we want to create
-     */
-    constructor(views: Array<ViewDescriptor>, options: WindowSettings) {
+    constructor() {
         makeObservable(this, {
             isExplorer: observable,
             isPrefsOpen: observable,
@@ -76,16 +79,34 @@ export class AppState {
             refreshActiveView: action,
             addView: action,
             updateSelection: action,
+            options: observable,
         })
 
-        this.t = i18n.i18next.t
+        debugger
 
-        this.addWindow(options)
+        this.t = i18n.i18next.t
+    }
+
+    async loadSettingsAndPrepareViews() {
+        this.options = await this.settingsState.getWindowSettings()
+
+        const path = this.settingsState.defaultFolder
+        const views: Array<ViewDescriptor> = [{ viewId: 0, path }]
+
+        console.log({ views })
+        debugger
+
+        this.options.splitView && views.push({ viewId: 1, path })
+
+        this.addWindow({
+            splitView: !!this.options.splitView,
+        })
 
         for (const desc of views) {
             console.log('adding view', desc.viewId, desc.path, window.ENV.CY)
             this.addView(window.ENV.CY ? '' : desc.path, desc.viewId)
         }
+
         this.initViewState()
     }
 
@@ -362,8 +383,13 @@ export class AppState {
     addView(path = '', viewId = -1): void {
         const winState = this.winStates[0]
         const view = winState.getOrCreateView(viewId)
-
+        debugger
         view.addCache(path)
+    }
+
+    removeView(viewId: number): void {
+        const winState = this.winStates[0]
+        winState.removeView(viewId)
     }
 
     // TODO: this should be moved into FileState (!)

@@ -122,8 +122,11 @@ export const LeftPanelClass = inject('appState')(
                         (): IObservableArray<Favorite> => toJS(this.favoritesState.places),
                         (/*_: Favorite[]*/): void => {
                             if (!this.props.hide) {
+                                debugger
                                 console.log('places updated: need to rebuild nodes')
                                 this.buildNodes(this.favoritesState)
+                            } else {
+                                debugger
                             }
                         },
                     ),
@@ -226,6 +229,11 @@ export const LeftPanelClass = inject('appState')(
             onNodeToggle = (node: TreeNodeInfo<string>): void => {
                 node.isExpanded = !node.isExpanded
                 this.setState(this.state)
+            }
+
+            componentDidMount(): void {
+                console.log(this.favoritesState.places.length)
+                this.buildNodes(this.favoritesState)
             }
 
             buildNodes(favorites: FavoritesState): void {

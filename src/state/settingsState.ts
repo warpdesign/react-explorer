@@ -1,6 +1,7 @@
 import { observable, action, makeObservable, runInAction } from 'mobx'
 import { ipcRenderer } from 'electron'
 
+import { CustomSettings } from '$src/electron/windowSettings'
 import { JSObject } from '$src/components/Log'
 import { i18n, languageList } from '$src/locale/i18n'
 import { isMojave, isWin, isMac, defaultFolder } from '$src/utils/platform'
@@ -61,6 +62,10 @@ export class SettingsState {
         ipcRenderer.on('nativeTheme:updated', (event, shouldUseDarkColors) => {
             this.setActiveTheme()
         })
+    }
+
+    getWindowSettings(): Promise<CustomSettings> {
+        return ipcRenderer.invoke('window:getCustomSettings')
     }
 
     getParam(name: string): JSObject {
