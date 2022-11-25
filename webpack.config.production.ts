@@ -154,6 +154,10 @@ export default [
                             from: 'img/icon-512x512.ico',
                             to: 'icon.ico',
                         },
+                        {
+                            from: 'node_modules/drivelist/build/Release/drivelist.node',
+                            to: 'drivelist.node',
+                        },
                     ],
                 }),
             ],
