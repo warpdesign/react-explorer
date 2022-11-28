@@ -94,14 +94,7 @@ const ElectronApp = {
             }
         }
 
-        console.log(settings.custom)
-
-        // this.mainWindow.initialSettings = settings.custom
-
-        // this.mainWindow.loadURL(HTML_PATH)
-        this.mainWindow.loadFile(HTML_PATH)
-
-        // this.mainWindow.on('close', () => app.quit())
+        this.openDevTools()
 
         // Prevent the window from closing in case transfers are in progress
         this.mainWindow.on('close', (e: Event) => {
@@ -119,11 +112,9 @@ const ElectronApp = {
             this.mainWindow.minimize()
         })
 
-        // this.mainWindpw.on('page-title-updated', (e: Event) => {
-        //     e.preventDefault()
-        // })
-
         this.appMenu = new AppMenu(this.mainWindow)
+
+        this.mainWindow.loadFile(HTML_PATH)
     },
     /**
      * Install special React DevTools
@@ -306,7 +297,6 @@ const ElectronApp = {
         this.installIpcMainListeners()
         this.installNativeThemeListener()
         await this.createMainWindow()
-        this.openDevTools()
     },
 }
 
