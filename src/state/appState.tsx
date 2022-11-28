@@ -82,8 +82,6 @@ export class AppState {
             options: observable,
         })
 
-        debugger
-
         this.t = i18n.i18next.t
     }
 
@@ -94,7 +92,6 @@ export class AppState {
         const views: Array<ViewDescriptor> = [{ viewId: 0, path }]
 
         console.log({ views })
-        debugger
 
         this.options.splitView && views.push({ viewId: 1, path })
 
@@ -383,7 +380,6 @@ export class AppState {
     addView(path = '', viewId = -1): void {
         const winState = this.winStates[0]
         const view = winState.getOrCreateView(viewId)
-        debugger
         view.addCache(path)
     }
 

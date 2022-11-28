@@ -41,11 +41,12 @@ export class WinState {
         // FIXME: when deleting view, the one on the right is removed
         // this could change
         if (!this.splitView) {
+            debugger
             // first remove the view
             this.removeView(1)
             this.setActiveView(0)
         } else {
-            this.getOrCreateView
+            this.getOrCreateView(1)
             this.setActiveView(1)
         }
 
@@ -98,7 +99,11 @@ export class WinState {
         console.log('setting active view', viewId)
         const previous = this.getActiveView()
         const next = this.getView(viewId)
-        previous.isActive = false
+
+        // if the active view has been removed, previous is undefined
+        if (previous) {
+            previous.isActive = false
+        }
         next.isActive = true
     }
 

@@ -66,11 +66,11 @@ class App {
             await this.createTestFolder()
         }
         initFS()
-        debugger
+
         await this.appState.loadSettingsAndPrepareViews()
         // we need for translations to be ready too
         await i18n.promise
-        debugger
+
         this.renderApp()
     }
 
