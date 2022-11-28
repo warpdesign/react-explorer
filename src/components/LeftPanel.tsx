@@ -195,15 +195,16 @@ export const LeftPanelClass = inject('appState')(
                     }
                 } else {
                     const winState = appState.winStates[0]
-                    const viewState = winState.getInactiveView()
 
                     if (!winState.splitView) {
                         winState.toggleSplitViewMode()
                     } else {
-                        winState.setActiveView(viewState.viewId)
+                        winState.setActiveView(winState.getInactiveView().viewId)
                     }
 
-                    if (viewState.getVisibleCache().path !== path) {
+                    const viewState = winState.getActiveView()
+                    // this may also be not needed since we add a new view
+                    if (viewState.getVisibleCache()?.path !== path) {
                         viewState.addCache(path, -1, true)
                     }
                 }

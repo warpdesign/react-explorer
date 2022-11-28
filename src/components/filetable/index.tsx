@@ -188,20 +188,24 @@ export class FileTableClass extends React.Component<Props, State> {
     private installReactions(): void {
         this.disposers.push(
             reaction(
-                (): IObservableArray<File> => toJS(this.cache.files),
+                (): IObservableArray<File> => toJS(this?.cache?.files),
                 (files: File[]): void => {
                     const cache = this.cache
-                    // when cache is being (re)loaded, cache.files is empty:
-                    // we don't want to show "empty folder" placeholder
-                    // that case, only when cache is loaded and there are no files
-                    if (cache.cmd === 'cwd' || cache.history.length) {
-                        this.updateNodes(files)
+                    if (cache) {
+                        // when cache is being (re)loaded, cache.files is empty:
+                        // we don't want to show "empty folder" placeholder
+                        // that case, only when cache is loaded and there are no files
+                        if (cache.cmd === 'cwd' || cache.history.length) {
+                            this.updateNodes(files)
+                        }
                     }
                 },
             ),
             reaction(
-                (): boolean => this.cache.error,
-                (): void => this.updateNodes(this.cache.files),
+                (): boolean => this.cache?.error,
+                (): void => {
+                    this.cache && this.updateNodes(this.cache.files)
+                },
             ),
         )
     }

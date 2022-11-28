@@ -283,7 +283,7 @@ const App = inject('appState')(
                     dualView: isSplitView,
                 })
                 const viewStateLeft = winState.views[0]
-                const viewStateRight = winState.views[1]
+                // const viewStateRight = winState.views[1]
 
                 // Access isDarkModeActive without modifying it to make mobx trigger the render
                 // when isDarkModeActive is modified.
@@ -324,7 +324,7 @@ const App = inject('appState')(
                                 <LeftPanel hide={!isExplorer}></LeftPanel>
                                 <SideView viewState={viewStateLeft} hide={!isExplorer} onPaste={this.onPaste} />
                                 {isSplitView && (
-                                    <SideView viewState={viewStateRight} hide={!isExplorer} onPaste={this.onPaste} />
+                                    <SideView viewState={winState.views[1]} hide={!isExplorer} onPaste={this.onPaste} />
                                 )}
                                 <Downloads hide={isExplorer} />
                             </div>

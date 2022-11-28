@@ -65,6 +65,7 @@ export class ViewState {
     }
 
     removeCache(index: number): FileState {
+        // FIXME: stop file watchers
         return this.caches.splice(index, 1)[0]
     }
 

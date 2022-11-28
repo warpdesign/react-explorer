@@ -41,7 +41,6 @@ export class WinState {
         // FIXME: when deleting view, the one on the right is removed
         // this could change
         if (!this.splitView) {
-            debugger
             // first remove the view
             this.removeView(1)
             this.setActiveView(0)
@@ -87,7 +86,8 @@ export class WinState {
 
     removeView(viewId: number) {
         debugger
-        this.views.splice(viewId, 1)
+        const viewToRemove = this.views.splice(viewId, 1)[0]
+        viewToRemove.caches.forEach((cache: FileState, index: number) => viewToRemove.removeCache(index))
     }
 
     /**
