@@ -142,12 +142,11 @@ const ElectronApp = {
     /**
      * Clears the session cache and reloads main window without cache
      */
-    reloadApp(): void {
+    async reloadApp(): Promise<void> {
         const mainWindow = this.mainWindow
         if (mainWindow) {
-            mainWindow.webContents.session.clearCache(() => {
-                mainWindow.webContents.reloadIgnoringCache()
-            })
+            await mainWindow.webContents.session.clearCache()
+            mainWindow.webContents.reloadIgnoringCache()
         }
     },
     /**
