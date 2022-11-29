@@ -70,8 +70,9 @@ const ShortcutsDialog = ({ isOpen, onClose }: ShortcutsProps) => {
     const [filter, setFilter] = React.useState('')
     const labels = Object.keys(shortcutsList)
     const shortcuts: { [x: string]: Combo[] } = {}
+    const regex = new RegExp(filter, 'i')
     for (const label of labels) {
-        shortcuts[label] = shortcutsList[label].filter((shortcut) => shortcut.label.match(filter))
+        shortcuts[label] = shortcutsList[label].filter((shortcut) => shortcut.label.match(regex))
     }
 
     const isEmpty = labels.every((label) => shortcuts[label].length === 0)
