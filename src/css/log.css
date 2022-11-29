@@ -4,8 +4,6 @@
     z-index:9999;
     font-family: sans-serif;
     font-size:13px;
-    background-color:rgb(255,255,255);
-    color:rgb(48, 57, 66); /* #656565 */
     padding:0;
     left:0;
     right:0;
@@ -36,32 +34,30 @@
 }
 
 .consoleLine{
-    border-top:1px solid rgb(240, 240, 240);
+    border-top:1px solid rga(240, 240, 240, .3);
     border-bottom:1px solid transparent;
 }
 
 
 .console .warning{
-    background-color:hsl(50, 100%, 95%);
     color:rgb(101, 95, 3);
 }
 
 .console .danger{
     color:rgb(226, 12, 12);
-    background-color:hsl(0, 100%, 97%);
 }
 
 .console .success:last-child{
     /* border-bottom-color:hsl(130, 24%, 61%); */
-    border-bottom-color:rgb(240, 240, 240);
+    border-bottom-color:rgba(240, 240, 240, .3);
 }
 
 .console .danger:last-child{
-    border-bottom-color:hsl(0, 100%, 92%);
+    border-bottom-color:hsla(0, 100%, 92%, .3);
 }
 
 .console .warning:last-child{
-    border-bottom-color:hsl(50, 100%, 88%);
+    border-bottom-color:hsla(50, 100%, 88%, .3);
 }
 
 .console .none:last-child{

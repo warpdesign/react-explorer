@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { Intent, HotkeysTarget2 } from '@blueprintjs/core'
+import { Intent, HotkeysTarget2, Classes, Colors } from '@blueprintjs/core'
 import { observable, runInAction } from 'mobx'
 import classNames from 'classnames'
 import { WithTranslation, withTranslation } from 'react-i18next'
@@ -53,7 +53,6 @@ function pushLog(lines: Printable[], intent: Intent): void {
     // be sure the state is modified *outside*
     // of any render function
     setTimeout(() => {
-        // console.log.apply(undefined, lines);
         runInAction(() => {
             Logger.logs.push({
                 date: new Date(),
@@ -68,10 +67,14 @@ interface LogUIState {
     visible: boolean
 }
 
+interface Props extends WithTranslation {
+    isDarkModeActive: boolean
+}
+
 const ESCAPE_KEY = 27
 const DEBOUNCE_DELAY = 500
 
-export class LogUIClass extends React.Component<WithTranslation, LogUIState> {
+export class LogUIClass extends React.Component<Props, LogUIState> {
     private consoleDiv: HTMLDivElement
     private valid: boolean
     private lastScrollTop = 0
@@ -88,7 +91,7 @@ export class LogUIClass extends React.Component<WithTranslation, LogUIState> {
         this.lastScrollTop = scrollTop
     }, DEBOUNCE_DELAY)
 
-    constructor(props: WithTranslation) {
+    constructor(props: Props) {
         super(props)
         this.state = {
             visible: false,
@@ -141,6 +144,10 @@ export class LogUIClass extends React.Component<WithTranslation, LogUIState> {
         return (
             <HotkeysTarget2 hotkeys={this.hotkeys}>
                 <div
+                    style={{
+                        backgroundColor: this.props.isDarkModeActive ? Colors.DARK_GRAY3 : Colors.LIGHT_GRAY5,
+                        color: this.props.isDarkModeActive ? Colors.LIGHT_GRAY3 : Colors.DARK_GRAY3,
+                    }}
                     ref={(el) => {
                         this.consoleDiv = el
                     }}
