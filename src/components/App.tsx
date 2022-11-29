@@ -323,7 +323,7 @@ const App = inject('appState')(
                                 )}
                                 <Downloads hide={isExplorer} />
                             </div>
-                            <LogUI></LogUI>
+                            <LogUI isDarkModeActive={this.settingsState.isDarkModeActive}></LogUI>
                         </React.Fragment>
                     </Provider>
                 )
