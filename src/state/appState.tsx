@@ -79,6 +79,7 @@ export class AppState {
             refreshActiveView: action,
             addView: action,
             updateSelection: action,
+            openDirectory: action,
             options: observable,
         })
 
@@ -166,6 +167,32 @@ export class AppState {
                 dstFsName: destCache.getFS().name,
             }
             this.copy(options)
+        }
+    }
+
+    openDirectory(file: { dir: string; fullname: string }, sameView = true) {
+        if (sameView) {
+            const activeCache = this.getActiveCache()
+            if (activeCache && activeCache.status === 'ok') {
+                activeCache.openDirectory(file)
+            }
+        } else {
+            const winState = this.winStates[0]
+
+            if (!winState.splitView) {
+                winState.toggleSplitViewMode()
+            } else {
+                winState.setActiveView(winState.getInactiveView().viewId)
+            }
+
+            const viewState = winState.getActiveView()
+
+            // FIXME this is the only place where we need
+            // a path and not dir + fullname
+            if (viewState.getVisibleCache()?.path !== file.dir) {
+                // use openDirectory
+                viewState.addCache(file.dir, -1, true)
+            }
         }
     }
 

@@ -145,6 +145,7 @@ const TabListClass = inject(
 
             onFolderItemClick = (path: string): void => {
                 const { viewState } = this.injected
+
                 const cache = viewState.getVisibleCache()
                 if (path) {
                     cache

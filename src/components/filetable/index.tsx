@@ -563,9 +563,11 @@ export class FileTableClass extends React.Component<Props, State> {
             if (!file.isDir) {
                 await this.cache.openFile(appState, this.cache, file)
             } else {
-                const cache = useInactiveCache ? appState.getInactiveViewVisibleCache() : this.cache
-
-                await cache.openDirectory(file)
+                const dir = {
+                    dir: this.cache.join(file.dir, file.fullname),
+                    fullname: '',
+                }
+                await appState.openDirectory(dir, !useInactiveCache)
             }
         } catch (error) {
             const { t } = this.injected

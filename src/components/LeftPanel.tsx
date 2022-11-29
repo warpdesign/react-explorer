@@ -188,26 +188,7 @@ export const LeftPanelClass = inject('appState')(
 
             openFavorite(path: string, sameView: boolean): void {
                 const { appState } = this.injected
-                if (sameView) {
-                    const activeCache = appState.getActiveCache()
-                    if (activeCache && activeCache.status === 'ok') {
-                        activeCache.cd(path)
-                    }
-                } else {
-                    const winState = appState.winStates[0]
-
-                    if (!winState.splitView) {
-                        winState.toggleSplitViewMode()
-                    } else {
-                        winState.setActiveView(winState.getInactiveView().viewId)
-                    }
-
-                    const viewState = winState.getActiveView()
-                    // this may also be not needed since we add a new view
-                    if (viewState.getVisibleCache()?.path !== path) {
-                        viewState.addCache(path, -1, true)
-                    }
-                }
+                appState.openDirectory({ dir: path, fullname: '' }, sameView)
             }
 
             onNodeClick = async (

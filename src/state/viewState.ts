@@ -59,7 +59,7 @@ export class ViewState {
             }
             next.isVisible = true
             if (!next.history.length && next.path.length) {
-                next.cd(next.path)
+                next.openDirectory({ dir: next.path, fullname: '' })
             }
         }
     }
