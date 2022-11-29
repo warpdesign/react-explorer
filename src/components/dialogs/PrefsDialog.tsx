@@ -78,7 +78,6 @@ class PrefsDialogClass extends React.Component<PrefsProps, State> {
     }, DEBOUNCE_DELAY)
 
     private cancelClose = (): void => {
-        console.log('handleClose')
         const { defaultFolder } = this.state
         const { settingsState } = this.injected
         if (defaultFolder !== settingsState.defaultFolder) {

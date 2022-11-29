@@ -24,11 +24,14 @@ module.exports = {
                 case 'openTerminal':
                     return {};
 
-                case 'needsCleanup':
-                    return
+                // case 'needsCleanup':
+                //     return
 
-                default:
-                    throw(`Missing electron remote command mock: ${command}`)
+                // case 'app:getLocale':
+                //     return 'en'
+
+                // default:
+                //     throw(`Missing electron remote command mock: ${command}`)
             }
         },
         sendSync: function () {

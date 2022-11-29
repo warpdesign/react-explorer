@@ -111,6 +111,10 @@ export const LeftPanelClass = inject('appState')(
                 return this.props as InjectedProps
             }
 
+            componentDidMount(): void {
+                this.buildNodes(this.favoritesState)
+            }
+
             componentWillUnmount(): void {
                 this.disposers.forEach((disposer) => disposer())
                 this.unbindLanguageChange()
@@ -122,7 +126,6 @@ export const LeftPanelClass = inject('appState')(
                         (): IObservableArray<Favorite> => toJS(this.favoritesState.places),
                         (/*_: Favorite[]*/): void => {
                             if (!this.props.hide) {
-                                console.log('places updated: need to rebuild nodes')
                                 this.buildNodes(this.favoritesState)
                             }
                         },
@@ -134,7 +137,6 @@ export const LeftPanelClass = inject('appState')(
                         (): IObservableArray<Favorite> => toJS(this.favoritesState.distributions),
                         (/*_: Favorite[]*/): void => {
                             if (!this.props.hide) {
-                                console.log('distributions updated: need to rebuild nodes')
                                 this.buildNodes(this.favoritesState)
                             }
                         },

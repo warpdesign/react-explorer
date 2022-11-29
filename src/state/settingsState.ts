@@ -80,7 +80,6 @@ export class SettingsState {
         if (lang === 'auto') {
             lang = await ipcRenderer.invoke('app:getLocale')
             console.log('detectedLanguage', lang)
-            // remote.app.getLocale();
         }
 
         // fallback to English if preferred language
@@ -127,7 +126,6 @@ export class SettingsState {
 
     loadAndUpgradeSettings(): JSObject {
         let settings = this.getParam(APP_STORAGE_KEY)
-
         // no settings set: first time the app is run
         if (settings === null) {
             settings = this.getDefaultSettings()

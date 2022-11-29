@@ -20,10 +20,8 @@ import { ShortcutsDialog } from '$src/components/dialogs/ShortcutsDialog'
 import { LeftPanel } from '$src/components/LeftPanel'
 import { shouldCatchEvent } from '$src/utils/dom'
 import { sendFakeCombo } from '$src/utils/keyboard'
-import { ViewDescriptor } from '$src/components/TabList'
 import { MenuAccelerators } from '$src/components/shortcuts/MenuAccelerators'
 import { KeyboardHotkeys } from '$src/components/shortcuts/KeyboardHotkeys'
-import { CustomSettings } from '$src/electron/windowSettings'
 import { AppState } from '$src/state/appState'
 import Keys from '$src/constants/keys'
 
@@ -159,8 +157,6 @@ const App = inject('appState')(
             handleClick = (e: React.MouseEvent): void => {
                 const sideview = (e.target as HTMLElement).closest('.sideview')
                 const filetable = (e.target as HTMLElement).closest('.fileListSizerWrapper')
-
-                console.log('contextMenuClick!!', e.button)
 
                 if (sideview) {
                     const num = parseInt(sideview.id.replace('view_', ''), 10)

@@ -8,7 +8,7 @@ import { TypeIcons } from '../../../src/constants/icons'
 
 describe('filetable', () => {
     before(() => {
-        cy.visit('http://127.0.0.1:8080')
+        cy.visit('http://127.0.0.1:8080').then(cy.waitForApp)
     })
 
     beforeEach(() => {
