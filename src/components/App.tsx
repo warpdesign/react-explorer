@@ -55,9 +55,8 @@ const App = inject('appState')(
                 const { settingsState } = appState
                 this.settingsState = settingsState
                 this.appState = appState
-                const { i18n /* windowSettings: { splitView } */ } = this.props
-
-                const splitView = false
+                const { i18n } = this.props
+                const splitView = !!appState.options.splitView
 
                 console.log('App:constructor', { splitView })
 

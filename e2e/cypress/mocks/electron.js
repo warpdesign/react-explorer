@@ -13,7 +13,7 @@ module.exports = {
         },
         invoke: function (command) {
             switch (command) {
-                case 'window:getInitialSettings':
+                case 'window:getCustomSettings':
                     return {
                         splitView: false,
                     };
@@ -23,6 +23,12 @@ module.exports = {
                     return false;
                 case 'openTerminal':
                     return {};
+
+                case 'needsCleanup':
+                    return
+
+                default:
+                    throw(`Missing electron remote command mock: ${command}`)
             }
         },
         sendSync: function () {
