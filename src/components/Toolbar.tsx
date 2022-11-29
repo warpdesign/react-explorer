@@ -40,11 +40,6 @@ interface PathInputState {
     isTooltipOpen: boolean
 }
 
-enum KEYS {
-    Escape = 27,
-    Enter = 13,
-}
-
 export const ToolbarClass = inject(
     'appState',
     'viewState',
@@ -87,7 +82,7 @@ export const ToolbarClass = inject(
                 private installReactions(): void {
                     this.disposer = reaction(
                         (): string => {
-                            return this.cache.path
+                            return this.cache?.path || ''
                         },
                         (path): void => {
                             this.setState({ path, status: 0 })

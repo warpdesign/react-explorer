@@ -7,6 +7,7 @@ import { i18n } from '$src/locale/i18n'
 import { getLocalizedError } from '$src/locale/error'
 import { AppState } from '$src/state/appState'
 import { TSORT_METHOD_NAME, TSORT_ORDER } from '$src/services/FsSort'
+import { AppAlert } from '$src/components/AppAlert'
 
 export type TStatus = 'busy' | 'ok' | 'login' | 'offline'
 
@@ -389,6 +390,9 @@ export class FileState {
         this.setStatus('ok')
         const niceError = getLocalizedError(error)
         console.log('orignalCode', error.code, 'newCode', niceError.code)
+        AppAlert.show(i18n.i18next.t('ERRORS.GENERIC', { error }), {
+            intent: 'danger',
+        })
         return Promise.reject(niceError)
     }
 
@@ -400,7 +404,6 @@ export class FileState {
                 this.server = this.fs.serverpart(path)
                 this.credentials = this.fs.credentials(path)
             } else {
-                debugger
                 // this.navHistory(0);
                 return Promise.reject({
                     message: i18n.i18next.t('ERRORS.CANNOT_READ_FOLDER', { folder: path }),
@@ -414,7 +417,7 @@ export class FileState {
 
     // changes current path and retrieves file list
     cwd = withConnection((path: string, path2 = '', skipHistory = false): Promise<string> => {
-        const joint = path2 ? this.api.join(path, path2) : this.api.sanityze(path)
+        const joint = path2 ? this.join(path, path2) : this.api.sanityze(path)
         this.cmd = 'cwd'
 
         return this.api
@@ -561,7 +564,7 @@ export class FileState {
         if (!this.isRoot()) {
             const parent = { dir: this.path, fullname: '..' }
             this.openDirectory(parent).catch(() => {
-                this.updatePath(this.api.join(this.path, '..'), true)
+                this.updatePath(this.join(this.path, '..'), true)
                 this.emptyCache()
             })
         }

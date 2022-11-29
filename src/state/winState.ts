@@ -31,16 +31,21 @@ export class WinState {
         })
 
         this.id = WinState.id++
-        this.splitView = options.splitView
+        this.splitView = !!options.splitView
         console.log('WinState', this.id, WinState.id)
     }
 
     toggleSplitViewMode(): void {
         this.splitView = !this.splitView
 
+        // FIXME: when deleting view, the one on the right is removed
+        // this could change
         if (!this.splitView) {
+            // first remove the view
+            this.removeView(1)
             this.setActiveView(0)
         } else {
+            this.getOrCreateView(1)
             this.setActiveView(1)
         }
 
@@ -79,6 +84,11 @@ export class WinState {
         return view
     }
 
+    removeView(viewId: number) {
+        const viewToRemove = this.views.splice(viewId, 1)[0]
+        viewToRemove.caches.forEach((cache: FileState, index: number) => viewToRemove.removeCache(index))
+    }
+
     /**
      * Changes the active file cache
      *
@@ -88,7 +98,11 @@ export class WinState {
         console.log('setting active view', viewId)
         const previous = this.getActiveView()
         const next = this.getView(viewId)
-        previous.isActive = false
+
+        // if the active view has been removed, previous is undefined
+        if (previous) {
+            previous.isActive = false
+        }
         next.isActive = true
     }
 

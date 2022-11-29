@@ -42,7 +42,7 @@ describe('tablist', () => {
     }
 
     before(() => {
-        return cy.visit('http://127.0.0.1:8080')
+        return cy.visit('http://127.0.0.1:8080').then(cy.waitForApp)
     })
 
     beforeEach(() => {

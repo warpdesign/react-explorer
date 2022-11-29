@@ -30,7 +30,7 @@ describe('toolbar', () => {
     }
 
     before(() => {
-        return cy.visit('http://127.0.0.1:8080')
+        return cy.visit('http://127.0.0.1:8080').then(cy.waitForApp)
     })
 
     beforeEach(() => {
@@ -43,9 +43,6 @@ describe('toolbar', () => {
     it('nav buttons should be disabled', () => {
         cy.get('#view_0 [data-cy-backward]').should('be.disabled')
         cy.get('#view_0 [data-cy-forward]').should('be.disabled')
-
-        cy.get('#view_1 [data-cy-backward]').should('be.disabled')
-        cy.get('#view_1 [data-cy-forward]').should('be.disabled')
     })
 
     it('should restore previous input value when typing a new path and pressing escape', () => {

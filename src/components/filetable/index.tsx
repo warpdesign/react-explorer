@@ -188,20 +188,24 @@ export class FileTableClass extends React.Component<Props, State> {
     private installReactions(): void {
         this.disposers.push(
             reaction(
-                (): IObservableArray<File> => toJS(this.cache.files),
+                (): IObservableArray<File> => toJS(this?.cache?.files),
                 (files: File[]): void => {
                     const cache = this.cache
-                    // when cache is being (re)loaded, cache.files is empty:
-                    // we don't want to show "empty folder" placeholder
-                    // that case, only when cache is loaded and there are no files
-                    if (cache.cmd === 'cwd' || cache.history.length) {
-                        this.updateNodes(files)
+                    if (cache) {
+                        // when cache is being (re)loaded, cache.files is empty:
+                        // we don't want to show "empty folder" placeholder
+                        // that case, only when cache is loaded and there are no files
+                        if (cache.cmd === 'cwd' || cache.history.length) {
+                            this.updateNodes(files)
+                        }
                     }
                 },
             ),
             reaction(
-                (): boolean => this.cache.error,
-                (): void => this.updateNodes(this.cache.files),
+                (): boolean => this.cache?.error,
+                (): void => {
+                    this.cache && this.updateNodes(this.cache.files)
+                },
             ),
         )
     }
@@ -559,9 +563,11 @@ export class FileTableClass extends React.Component<Props, State> {
             if (!file.isDir) {
                 await this.cache.openFile(appState, this.cache, file)
             } else {
-                const cache = useInactiveCache ? appState.getInactiveViewVisibleCache() : this.cache
-
-                await cache.openDirectory(file)
+                const dir = {
+                    dir: this.cache.join(file.dir, file.fullname),
+                    fullname: '',
+                }
+                await appState.openDirectory(dir, !useInactiveCache)
             }
         } catch (error) {
             const { t } = this.injected

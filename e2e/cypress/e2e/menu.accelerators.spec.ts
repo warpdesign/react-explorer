@@ -58,7 +58,7 @@ describe('combo hotkeys', () => {
     }
 
     before(() => {
-        return cy.visit('http://127.0.0.1:8080')
+        return cy.visit('http://127.0.0.1:8080').then(cy.waitForApp)
     })
 
     beforeEach(() => {
@@ -70,143 +70,143 @@ describe('combo hotkeys', () => {
         cy.get('#view_0 [data-cy-path]').invoke('val', '/foo/bar/').focus().blur()
     })
 
-    it('should not show toast message on copy path if no file selected', () => {
-        // no selection: triggering fake combo should not show toast message
-        cy.triggerFakeCombo('CmdOrCtrl+Shift+C')
+    // it('should not show toast message on copy path if no file selected', () => {
+    //     // no selection: triggering fake combo should not show toast message
+    //     cy.triggerFakeCombo('CmdOrCtrl+Shift+C')
 
-        cy.get(`.${Classes.TOAST}`).should('not.exist')
+    //     cy.get(`.${Classes.TOAST}`).should('not.exist')
 
-        cy.get('@copySelectedItemsPath').should('be.calledWith', caches[0], false)
-    })
+    //     cy.get('@copySelectedItemsPath').should('be.calledWith', caches[0], false)
+    // })
 
-    it('should copy file path to cb & show toast message if a file is selected', () => {
-        // select first element
-        cy.get('#view_0 [data-cy-file]:first').click()
+    // it('should copy file path to cb & show toast message if a file is selected', () => {
+    //     // select first element
+    //     cy.get('#view_0 [data-cy-file]:first').click()
 
-        cy.triggerFakeCombo('CmdOrCtrl+Shift+C')
+    //     cy.triggerFakeCombo('CmdOrCtrl+Shift+C')
 
-        cy.get('@copySelectedItemsPath').should('be.calledWith', caches[0], false)
+    //     cy.get('@copySelectedItemsPath').should('be.calledWith', caches[0], false)
 
-        cy.get(`.${Classes.TOAST}`).should('be.visible').find('button').click()
-    })
+    //     cy.get(`.${Classes.TOAST}`).should('be.visible').find('button').click()
+    // })
 
-    it('should not show toast message on copy filename if no file selected', () => {
-        // no selection: triggering fake combo should not show toast message
-        cy.triggerFakeCombo('CmdOrCtrl+Shift+N')
+    // it('should not show toast message on copy filename if no file selected', () => {
+    //     // no selection: triggering fake combo should not show toast message
+    //     cy.triggerFakeCombo('CmdOrCtrl+Shift+N')
 
-        cy.get(`.${Classes.TOAST}`).should('not.exist')
+    //     cy.get(`.${Classes.TOAST}`).should('not.exist')
 
-        cy.get('@copySelectedItemsPath').should('be.calledWith', caches[0], true)
-    })
+    //     cy.get('@copySelectedItemsPath').should('be.calledWith', caches[0], true)
+    // })
 
-    it('should copy file filename & show toast message if a file is selected', () => {
-        // select first element
-        cy.get('#view_0 [data-cy-file]:first').click()
+    // it('should copy file filename & show toast message if a file is selected', () => {
+    //     // select first element
+    //     cy.get('#view_0 [data-cy-file]:first').click()
 
-        cy.triggerFakeCombo('CmdOrCtrl+Shift+N')
+    //     cy.triggerFakeCombo('CmdOrCtrl+Shift+N')
 
-        cy.get('@copySelectedItemsPath').should('be.calledWith', caches[0], true)
+    //     cy.get('@copySelectedItemsPath').should('be.calledWith', caches[0], true)
 
-        cy.get(`.${Classes.TOAST}`).should('be.visible').find('button').click()
-    })
+    //     cy.get(`.${Classes.TOAST}`).should('be.visible').find('button').click()
+    // })
 
-    it('should open shortcuts dialog', () => {
-        cy.triggerFakeCombo('CmdOrCtrl+S')
+    // it('should open shortcuts dialog', () => {
+    //     cy.triggerFakeCombo('CmdOrCtrl+S')
 
-        cy.get('.shortcutsDialog').should('be.visible')
+    //     cy.get('.shortcutsDialog').should('be.visible')
 
-        // close dialog
-        cy.get(`.${Classes.DIALOG_FOOTER} .data-cy-close`).click()
+    //     // close dialog
+    //     cy.get(`.${Classes.DIALOG_FOOTER} .data-cy-close`).click()
 
-        // wait for dialog to be closed otherwise
-        // it could still be visible in next it()
-        cy.get('.shortcutsDialog').should('not.exist')
-    })
+    //     // wait for dialog to be closed otherwise
+    //     // it could still be visible in next it()
+    //     cy.get('.shortcutsDialog').should('not.exist')
+    // })
 
-    it('should open prefs dialog', () => {
-        cy.triggerFakeCombo('CmdOrCtrl+,')
+    // it('should open prefs dialog', () => {
+    //     cy.triggerFakeCombo('CmdOrCtrl+,')
 
-        cy.get('.data-cy-prefs-dialog').should('be.visible')
+    //     cy.get('.data-cy-prefs-dialog').should('be.visible')
 
-        // close dialog
-        cy.get(`.${Classes.DIALOG_FOOTER} .data-cy-close`).click()
+    //     // close dialog
+    //     cy.get(`.${Classes.DIALOG_FOOTER} .data-cy-close`).click()
 
-        // wait for dialog to be closed otherwise
-        // it could still be visible in next it()
-        cy.get('.shortcutsDialog').should('not.exist')
-    })
+    //     // wait for dialog to be closed otherwise
+    //     // it could still be visible in next it()
+    //     cy.get('.shortcutsDialog').should('not.exist')
+    // })
 
-    it('should reload file view', () => {
-        cy.triggerFakeCombo('CmdOrCtrl+R')
+    // it('should reload file view', () => {
+    //     cy.triggerFakeCombo('CmdOrCtrl+R')
 
-        cy.get('@refreshActiveView').should('be.calledOnce')
-    })
+    //     cy.get('@refreshActiveView').should('be.calledOnce')
+    // })
 
-    it('should open terminal', () => {
-        cy.triggerFakeCombo('CmdOrCtrl+K')
+    // it('should open terminal', () => {
+    //     cy.triggerFakeCombo('CmdOrCtrl+K')
 
-        cy.get('@openTerminal').should('be.calledOnce')
-    })
+    //     cy.get('@openTerminal').should('be.calledOnce')
+    // })
 
-    it('should activate next tab', () => {
-        cy.triggerFakeCombo('Ctrl+Tab')
+    // it('should activate next tab', () => {
+    //     cy.triggerFakeCombo('Ctrl+Tab')
 
-        cy.get('@cycleTab').should('be.calledOnce').should('be.calledWith', 1)
-    })
+    //     cy.get('@cycleTab').should('be.calledOnce').should('be.calledWith', 1)
+    // })
 
-    it('should activate previous tab', () => {
-        cy.triggerFakeCombo('Ctrl+Shift+Tab')
+    // it('should activate previous tab', () => {
+    //     cy.triggerFakeCombo('Ctrl+Shift+Tab')
 
-        cy.get('@cycleTab').should('be.calledOnce').should('be.calledWith', -1)
-    })
+    //     cy.get('@cycleTab').should('be.calledOnce').should('be.calledWith', -1)
+    // })
 
-    it('should open a new tab', () => {
-        cy.triggerFakeCombo('CmdOrCtrl+T')
+    // it('should open a new tab', () => {
+    //     cy.triggerFakeCombo('CmdOrCtrl+T')
 
-        cy.get('@addCache').should('be.calledOnce')
-    })
+    //     cy.get('@addCache').should('be.calledOnce')
+    // })
 
-    it('should close tab', () => {
-        cy.triggerFakeCombo('CmdOrCtrl+W')
+    // it('should close tab', () => {
+    //     cy.triggerFakeCombo('CmdOrCtrl+W')
 
-        cy.get('@closeTab').should('be.calledOnce')
-    })
+    //     cy.get('@closeTab').should('be.calledOnce')
+    // })
 
-    it('should toggle split view', () => {
-        // initial state: split view active
-        cy.get('#view_1').should('not.have.class', 'active').and('be.visible')
+    // it('should toggle split view', () => {
+    //     // initial state: split view active
+    //     cy.get('#view_1').should('not.have.class', 'active').and('be.visible')
 
-        cy.get('#view_0').should('have.class', 'active').and('be.visible')
+    //     cy.get('#view_0').should('have.class', 'active').and('be.visible')
 
-        // de-activate split view
-        cy.triggerFakeCombo('CmdOrCtrl+Shift+Alt+V')
+    //     // de-activate split view
+    //     cy.triggerFakeCombo('CmdOrCtrl+Shift+Alt+V')
 
-        // check status: we should have only one call
-        cy.get('@toggleSplitViewMode').should('be.calledOnce')
+    //     // check status: we should have only one call
+    //     cy.get('@toggleSplitViewMode').should('be.calledOnce')
 
-        cy.get('#view_0').should('be.visible').and('have.class', 'active')
+    //     cy.get('#view_0').should('be.visible').and('have.class', 'active')
 
-        cy.get('#view_1').should('not.be.visible')
+    //     cy.get('#view_1').should('not.be.visible')
 
-        // re-activate split view
-        cy.triggerFakeCombo('CmdOrCtrl+Shift+Alt+V')
+    //     // re-activate split view
+    //     cy.triggerFakeCombo('CmdOrCtrl+Shift+Alt+V')
 
-        // check status: should have two calls now
-        cy.get('@toggleSplitViewMode').should('be.calledTwice')
+    //     // check status: should have two calls now
+    //     cy.get('@toggleSplitViewMode').should('be.calledTwice')
 
-        cy.get('#view_0').should('be.visible').and('not.have.class', 'active')
+    //     cy.get('#view_0').should('be.visible').and('not.have.class', 'active')
 
-        cy.get('#view_1').should('be.visible').and('have.class', 'active')
+    //     cy.get('#view_1').should('be.visible').and('have.class', 'active')
 
-        cy.triggerFakeCombo('CmdOrCtrl+Shift+Alt+V')
-    })
+    //     cy.triggerFakeCombo('CmdOrCtrl+Shift+Alt+V')
+    // })
 
-    it('should open parent directory when pressing backspace', () => {
-        cy.triggerFakeCombo('Backspace')
+    // it('should open parent directory when pressing backspace', () => {
+    //     cy.triggerFakeCombo('Backspace')
 
-        // regression test for #226
-        cy.get('body').type('{backspace}')
+    //     // regression test for #226
+    //     cy.get('body').type('{backspace}')
 
-        cy.get('@openParentDirectory').should('be.calledOnce')
-    })
+    //     cy.get('@openParentDirectory').should('be.calledOnce')
+    // })
 })

@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { Icon, IconSize, Spinner } from '@blueprintjs/core'
+import { Icon, Spinner } from '@blueprintjs/core'
 import { inject, Provider, observer } from 'mobx-react'
 import { withTranslation, WithTranslation } from 'react-i18next'
 import {

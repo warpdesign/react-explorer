@@ -1,6 +1,7 @@
 import { observable, action, makeObservable, runInAction } from 'mobx'
 import { ipcRenderer } from 'electron'
 
+import { CustomSettings } from '$src/electron/windowSettings'
 import { JSObject } from '$src/components/Log'
 import { i18n, languageList } from '$src/locale/i18n'
 import { isMojave, isWin, isMac, defaultFolder } from '$src/utils/platform'
@@ -63,6 +64,10 @@ export class SettingsState {
         })
     }
 
+    getWindowSettings(): Promise<CustomSettings> {
+        return ipcRenderer.invoke('window:getCustomSettings')
+    }
+
     getParam(name: string): JSObject {
         return JSON.parse(localStorage.getItem(name))
     }
@@ -75,7 +80,6 @@ export class SettingsState {
         if (lang === 'auto') {
             lang = await ipcRenderer.invoke('app:getLocale')
             console.log('detectedLanguage', lang)
-            // remote.app.getLocale();
         }
 
         // fallback to English if preferred language
@@ -122,7 +126,6 @@ export class SettingsState {
 
     loadAndUpgradeSettings(): JSObject {
         let settings = this.getParam(APP_STORAGE_KEY)
-
         // no settings set: first time the app is run
         if (settings === null) {
             settings = this.getDefaultSettings()

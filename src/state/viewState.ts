@@ -59,13 +59,15 @@ export class ViewState {
             }
             next.isVisible = true
             if (!next.history.length && next.path.length) {
-                next.cd(next.path)
+                next.openDirectory({ dir: next.path, fullname: '' })
             }
         }
     }
 
     removeCache(index: number): FileState {
-        return this.caches.splice(index, 1)[0]
+        const cache = this.caches.splice(index, 1)[0]
+        cache.getAPI().off()
+        return cache
     }
 
     activateNextTab(index: number): void {

@@ -111,6 +111,10 @@ export const LeftPanelClass = inject('appState')(
                 return this.props as InjectedProps
             }
 
+            componentDidMount(): void {
+                this.buildNodes(this.favoritesState)
+            }
+
             componentWillUnmount(): void {
                 this.disposers.forEach((disposer) => disposer())
                 this.unbindLanguageChange()
@@ -122,7 +126,6 @@ export const LeftPanelClass = inject('appState')(
                         (): IObservableArray<Favorite> => toJS(this.favoritesState.places),
                         (/*_: Favorite[]*/): void => {
                             if (!this.props.hide) {
-                                console.log('places updated: need to rebuild nodes')
                                 this.buildNodes(this.favoritesState)
                             }
                         },
@@ -134,7 +137,6 @@ export const LeftPanelClass = inject('appState')(
                         (): IObservableArray<Favorite> => toJS(this.favoritesState.distributions),
                         (/*_: Favorite[]*/): void => {
                             if (!this.props.hide) {
-                                console.log('distributions updated: need to rebuild nodes')
                                 this.buildNodes(this.favoritesState)
                             }
                         },
@@ -188,25 +190,7 @@ export const LeftPanelClass = inject('appState')(
 
             openFavorite(path: string, sameView: boolean): void {
                 const { appState } = this.injected
-                if (sameView) {
-                    const activeCache = appState.getActiveCache()
-                    if (activeCache && activeCache.status === 'ok') {
-                        activeCache.cd(path)
-                    }
-                } else {
-                    const winState = appState.winStates[0]
-                    const viewState = winState.getInactiveView()
-
-                    if (!winState.splitView) {
-                        winState.toggleSplitViewMode()
-                    } else {
-                        winState.setActiveView(viewState.viewId)
-                    }
-
-                    if (viewState.getVisibleCache().path !== path) {
-                        viewState.addCache(path, -1, true)
-                    }
-                }
+                appState.openDirectory({ dir: path, fullname: '' }, sameView)
             }
 
             onNodeClick = async (
