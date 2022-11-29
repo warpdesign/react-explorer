@@ -65,8 +65,9 @@ export class ViewState {
     }
 
     removeCache(index: number): FileState {
-        // FIXME: stop file watchers
-        return this.caches.splice(index, 1)[0]
+        const cache = this.caches.splice(index, 1)[0]
+        cache.getAPI().off()
+        return cache
     }
 
     activateNextTab(index: number): void {
