@@ -152,8 +152,7 @@ class MenuAcceleratorsClass extends React.Component<Props> {
 
     onToggleSplitView = (): void => {
         if (this.appState.isExplorer) {
-            const winState = this.appState.winStates[0]
-            winState.toggleSplitViewMode()
+            this.appState.toggleSplitViewMode()
         }
     }
 

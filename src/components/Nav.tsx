@@ -39,9 +39,9 @@ const Nav = observer(() => {
     }
 
     const onToggleSplitView = (): void => {
+        debugger
         if (appState.isExplorer) {
-            const winState = appState.winStates[0]
-            winState.toggleSplitViewMode()
+            appState.toggleSplitViewMode()
         }
     }
 
