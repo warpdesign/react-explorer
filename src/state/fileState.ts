@@ -387,7 +387,9 @@ export class FileState {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     handleError = (error: any): Promise<void> => {
         console.log('handleError', error)
-        this.setStatus('ok')
+        // we want to show the error on first nav
+        // otherwise we keep previous
+        this.setStatus('ok', this.history.length === 0 || this.error)
         const niceError = getLocalizedError(error)
         console.log('orignalCode', error.code, 'newCode', niceError.code)
         AppAlert.show(i18n.i18next.t('ERRORS.GENERIC', { error }), {
@@ -446,7 +448,6 @@ export class FileState {
                 console.log('error cd/list for path', joint, 'error was', error)
                 this.setStatus('ok', true)
                 const localizedError = getLocalizedError(error)
-                //return Promise.reject(localizedError);
                 throw localizedError
             })
     }, this.waitForConnection)

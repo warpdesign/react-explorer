@@ -54,11 +54,6 @@ export class AppState {
         splitView: false,
     }
 
-    toggleSplitViewMode(): void {
-        const winState = this.winStates[0]
-        winState.toggleSplitViewMode()
-    }
-
     clipboard = new ClipboardState()
 
     transferListState = new TransferListState()
@@ -167,6 +162,16 @@ export class AppState {
                 dstFsName: destCache.getFS().name,
             }
             this.copy(options)
+        }
+    }
+
+    toggleSplitViewMode() {
+        const winState = this.winStates[0]
+        winState.toggleSplitViewMode()
+
+        const view = winState.getActiveView()
+        if (!view.getVisibleCache()) {
+            view.addCache(this.settingsState.defaultFolder, -1, true)
         }
     }
 
