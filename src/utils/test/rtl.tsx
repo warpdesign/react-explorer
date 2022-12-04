@@ -1,6 +1,7 @@
 import React from 'react'
 import type { ReactElement } from 'react'
 import { render } from '@testing-library/react'
+import type { MatcherFunction } from '@testing-library/react'
 import { makeAutoObservable } from 'mobx'
 import { Provider } from 'mobx-react'
 import { DndProvider } from 'react-dnd'
@@ -10,6 +11,8 @@ import { I18nextProvider } from 'react-i18next'
 import { HotkeysProvider } from '@blueprintjs/core'
 import userEvent from '@testing-library/user-event'
 import en from '$src/locale/lang/en.json'
+
+type Query = (f: MatcherFunction) => HTMLElement
 
 const LOCALE_EN = en.translations
 
@@ -43,10 +46,34 @@ const AllTheProviders = ({ children }: { children: ReactElement }) => {
 
 const customRender = (ui: ReactElement, options = {}) => render(ui, { wrapper: AllTheProviders, ...options })
 
+function withMarkup(query: Query) {
+    return (text: string | RegExp) =>
+        query((content: string, node: Element | null) => {
+            const didMatch = (node: Element) => {
+                const expected = node.textContent
+
+                return (typeof text !== 'string' && text.test(expected)) || text === expected
+            }
+
+            const childrenMatch = Array.from(node.children).every((child) => !didMatch(child))
+
+            return didMatch(node) && childrenMatch
+        })
+}
+
+const t = i18n.i18next.t
+const i18next = i18n.i18next
+
+// jest doesn't have require.context so we patch this include
+// to require the expected data
+jest.mock('$src/locale/i18n', () => ({
+    i18n: {
+        i18next,
+    },
+}))
+
 // re-export everything
 export * from '@testing-library/react'
 
-const t = i18n.i18next.t
-
 // override render method
-export { customRender as render, LOCALE_EN, userEvent, t }
+export { customRender as render, withMarkup, LOCALE_EN, userEvent, t, i18next }
