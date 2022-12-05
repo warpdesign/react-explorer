@@ -61,6 +61,11 @@ function withMarkup(query: Query) {
         })
 }
 
+const setup = (jsx: ReactElement) => ({
+    user: userEvent.setup(),
+    ...customRender(jsx),
+})
+
 const t = i18n.i18next.t
 const i18next = i18n.i18next
 
@@ -76,4 +81,4 @@ jest.mock('$src/locale/i18n', () => ({
 export * from '@testing-library/react'
 
 // override render method
-export { customRender as render, withMarkup, LOCALE_EN, userEvent, t, i18next }
+export { customRender as render, setup, withMarkup, LOCALE_EN, userEvent, t, i18next }

@@ -6,7 +6,7 @@ const OS = (ipcRenderer && ipcRenderer.sendSync('app:getOS')) || {
     isMojave: false,
     isWin: platform === 'win32',
     isLinux: platform === 'linux',
-    metaKey: platform === 'darwin' ? 'Meta' : 'Control',
+    optionKey: platform === 'darwin' ? 'Alt' : 'Control',
     lineEnding: platform === 'win32' ? '\r\n' : '\n',
     defaultFolder: '/',
     TMP_DIR: '/tmp',
@@ -41,7 +41,7 @@ export const isMac = OS.isMac
 export const isMojave = OS.isMojave
 export const isWin = OS.isWin
 export const isLinux = OS.isLinux
-export const metaKey = OS.metaKey
+export const optionKey = OS.optionKey
 export const lineEnding = OS.lineEnding
 export const defaultFolder = OS.defaultFolder
 export const TMP_DIR = OS.TMP_DIR

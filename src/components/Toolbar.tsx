@@ -180,8 +180,9 @@ export const ToolbarClass = inject(
 
                 private onMakedir = (): void => {
                     const { appState, viewState } = this.injected
+                    const fileCache = appState.getActiveCache()
 
-                    if (appState.getActiveCache() === viewState.getVisibleCache()) {
+                    if (fileCache === viewState.getVisibleCache() && !fileCache.error) {
                         this.setState({ isOpen: true })
                     }
                 }
