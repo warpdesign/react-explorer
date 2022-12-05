@@ -43,7 +43,7 @@ export const isMac = platform === 'darwin'
 export const isMojave = isMac && parseInt(release().split('.')[0], 10) - 4 >= 14
 export const isWin = platform === 'win32'
 export const isLinux = platform === 'linux'
-export const metaKey = (isMac && 'Meta') || 'Control'
+export const optionKey = (isMac && 'Alt') || 'Control'
 export const lineEnding = isWin ? '\r\n' : '\n'
 // depends on appInstance
 export const defaultFolder = getDefaultFolder()

@@ -39,7 +39,7 @@
                 "MESSAGE": "Supprimer le transfert stoppera toutes les copies en cours."
             },
             "MAKEDIR": {
-                "NOT_VALID": "Nom de dossier non valide",
+                "NOT_VALID": "Nom de dossier non valide.",
                 "TITLE": "Entrer un nom pour le nouveau dossier:",
                 "NAME": "Nom du dossier",
                 "CREATE": "Créer",

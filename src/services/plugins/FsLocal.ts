@@ -24,6 +24,8 @@ const progressFunc = throttle((progress: (bytes: number) => void, bytesRead: num
     progress(bytesRead)
 }, 400)
 
+export const checkDirectoryName = (dirName: string) => !!!dirName.match(invalidDirChars) && dirName !== '/'
+
 export class LocalApi implements FsApi {
     type = 0
     // current path
@@ -42,7 +44,7 @@ export class LocalApi implements FsApi {
     }
 
     isDirectoryNameValid(dirName: string): boolean {
-        return !!!dirName.match(invalidDirChars) && dirName !== '/'
+        return checkDirectoryName(dirName)
     }
 
     join(...paths: string[]): string {

@@ -39,7 +39,7 @@
                 "MESSAGE": "Discarding the transfer will cancel every on-going copy."
             },
             "MAKEDIR": {
-                "NOT_VALID": "Folder name not valid",
+                "NOT_VALID": "Folder name is not valid.",
                 "TITLE": "Enter a name for the new folder:",
                 "NAME": "Folder name",
                 "CREATE": "Create",
