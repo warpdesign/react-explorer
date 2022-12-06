@@ -1,10 +1,12 @@
 import { IconName } from '@blueprintjs/core'
 import { IconNames } from '@blueprintjs/icons'
 import { observable, runInAction } from 'mobx'
-import * as drivelist from 'drivelist'
+import { isMac } from '$src/utils/platform'
+import * as nodeDiskInfo from 'node-disk-info'
 
 import { ALL_DIRS } from '$src/utils/platform'
 import { WSL_PREFIX, getWSLDistributions, WslDistribution } from '$src/utils/wsl'
+import type Drive from 'node-disk-info/dist/classes/drive'
 
 const CHECK_FOR_DRIVES_DELAY = 5000
 const CHECK_FOR_WSL_DELAY = 30000
@@ -19,11 +21,20 @@ export interface Favorite {
     hasINotify?: boolean
 }
 
+export const filterSystemDrive = ({ filesystem, mounted }: Drive) => {
+    // exclude system volumes from the list of devices we want to show
+    if (filesystem.match(/(tmpfs|devfs|map)/) || mounted.match(/^\/(System|boot)/)) {
+        return false
+    } else {
+        return true
+    }
+}
+
 export class FavoritesState {
     shortcuts = observable<Favorite>([])
     places = observable<Favorite>([])
     distributions = observable<Favorite>([])
-    previousPlaces: drivelist.Drive[] = []
+    previousPlaces: Drive[] = []
 
     buildShortcuts(): void {
         this.shortcuts.replace(
@@ -36,9 +47,9 @@ export class FavoritesState {
         )
     }
 
-    async getDrivesList(): Promise<drivelist.Drive[]> {
-        const drives = await drivelist.list()
-        return drives.filter((drive: drivelist.Drive) => drive.mountpoints && drive.mountpoints.length)
+    async getDrivesList(): Promise<Drive[]> {
+        const drives = await nodeDiskInfo.getDiskInfo()
+        return drives.filter(filterSystemDrive)
     }
 
     buildDistributions(distribs: WslDistribution[]): void {
@@ -57,25 +68,18 @@ export class FavoritesState {
         console.log('build WSL distributions', this.distributions)
     }
 
-    buildPlaces(drives: drivelist.Drive[]): void {
-        // on macOS (bigSur/+), drivelist (9.2.1) returns
-        // the same volume multiple times so we filter
-        // out the list based on the volume name
-        const lookupTable: string[] = []
-        const filteredList: Favorite[] = drives.reduce((elements, drive) => {
-            const mountpoint = drive.mountpoints[0]
-            const path = mountpoint.path
-            const label: string = mountpoint.label || path
-            if (lookupTable.indexOf(label) === -1) {
-                lookupTable.push(label)
-                const favorite: Favorite = {
-                    label: label || path,
-                    path: path,
-                    icon: drive.isRemovable || drive.isVirtual ? IconNames.FLOPPY_DISK : IconNames.DATABASE,
-                    isReadOnly: drive.isReadOnly,
-                }
-                elements.push(favorite)
+    buildPlaces(drives: Drive[]): void {
+        const filteredList: Favorite[] = drives.reduce((elements, { mounted }) => {
+            // mac stuff
+            const label = mounted.replace('/Volumes/', '').replace(/^\/$/, isMac ? 'Macintosh HD' : '/')
+            const favorite: Favorite = {
+                label,
+                path: mounted,
+                icon: IconNames.FOLDER_CLOSE,
+                isReadOnly: false,
             }
+            elements.push(favorite)
+
             return elements
         }, [])
 
@@ -120,17 +124,17 @@ export class FavoritesState {
         this.launchTimeout(false, this.checkForNewDrives, CHECK_FOR_DRIVES_DELAY)
     }
 
-    hasDriveListChanged(newList: drivelist.Drive[]): boolean {
+    hasDriveListChanged(newList: Drive[]): boolean {
         if (newList.length !== this.previousPlaces.length) {
             return true
         } else {
             const newString = newList
-                .filter((drive: drivelist.Drive) => drive.mountpoints && drive.mountpoints.length)
-                .reduce((str: string, drive: drivelist.Drive) => str + drive.mountpoints[0].path, '')
+                .filter(filterSystemDrive)
+                .reduce((str: string, { mounted }: Drive) => `${str}${mounted}`, '')
 
             const oldString = this.previousPlaces
-                .filter((drive: drivelist.Drive) => drive.mountpoints && drive.mountpoints.length)
-                .reduce((str: string, drive: drivelist.Drive) => str + drive.mountpoints[0].path, '')
+                .filter(filterSystemDrive)
+                .reduce((str: string, { mounted }: Drive) => `${str}${mounted}`, '')
 
             return oldString !== newString
         }

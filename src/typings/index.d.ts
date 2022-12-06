@@ -8,7 +8,6 @@ declare global {
         // debug
         appState: AppState
         settingsState: SettingsState
-        drivelist: any
         renderer: Electron.IpcRenderer
         // /debug
         ENV: {

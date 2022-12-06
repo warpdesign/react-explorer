@@ -5,7 +5,6 @@ import { FocusStyleManager, Alert, Classes, Intent } from '@blueprintjs/core'
 import classNames from 'classnames'
 import { runInAction } from 'mobx'
 import { Provider, observer, inject } from 'mobx-react'
-import * as drivelist from 'drivelist'
 import { withTranslation, WithTranslation, Trans } from 'react-i18next'
 
 import { isMac } from '$src/utils/platform'
@@ -66,7 +65,6 @@ const App = inject('appState')(
                 if (window.ENV.CY) {
                     window.appState = this.appState
                     window.settingsState = settingsState
-                    window.drivelist = drivelist
                     window.renderer = ipcRenderer
                 }
 
