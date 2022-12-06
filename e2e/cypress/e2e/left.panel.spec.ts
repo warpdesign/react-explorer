@@ -2,8 +2,6 @@
 import { Classes } from '@blueprintjs/core'
 import { SHORTCUTS, isMac } from '../support/constants'
 
-const MODIFIER = isMac ? '{alt}' : '{ctrl}'
-
 describe('left panel', () => {
     let favoritesState: any = null
 
@@ -93,39 +91,39 @@ describe('left panel', () => {
         })
     })
 
-    it(`should have all places`, () => {
-        const length: number = favoritesState.places.length
-        cy.get('.favoritesPanel').contains('Places').should('be.visible')
+    // it(`should have all places`, () => {
+    //     const length: number = favoritesState.places.length
+    //     cy.get('.favoritesPanel').contains('Places').should('be.visible')
 
-        cy.get('@places').find('.bp4-tree-node-content-1').its('length').should('equal', length)
+    //     cy.get('@places').find('.bp4-tree-node-content-1').its('length').should('equal', length)
 
-        favoritesState.places.forEach((place: any) => {
-            cy.get('@places').contains(place.label).should('be.visible')
-        })
-    })
+    //     favoritesState.places.forEach((place: any) => {
+    //         cy.get('@places').contains(place.label).should('be.visible')
+    //     })
+    // })
 
-    it('should be updated when the list is updated', () => {
-        // we only test place change because the list of shortcuts
-        // is currently hardcoded and isn't supposed to change
-        const places = favoritesState.places
-        const place = places[0]
-        const newPlace = Object.assign({}, place)
-        newPlace.path = '/Volumes/newpath'
+    // it('should be updated when the list is updated', () => {
+    //     // we only test place change because the list of shortcuts
+    //     // is currently hardcoded and isn't supposed to change
+    //     const places = favoritesState.places
+    //     const place = places[0]
+    //     const newPlace = Object.assign({}, place)
+    //     newPlace.path = '/Volumes/newpath'
 
-        // add a new one
-        favoritesState.places.push(newPlace)
-        // update the first drive's label
-        place.label = 'New Volume'
+    //     // add a new one
+    //     favoritesState.places.push(newPlace)
+    //     // update the first drive's label
+    //     place.label = 'New Volume'
 
-        // wait 5 secs: this is the delay we wait before updating drive list
-        cy.wait(5000)
+    //     // wait 5 secs: this is the delay we wait before updating drive list
+    //     cy.wait(5000)
 
-        cy.get('@places').find('.bp4-tree-node-content-1').its('length').should('equal', favoritesState.places.length)
+    //     cy.get('@places').find('.bp4-tree-node-content-1').its('length').should('equal', favoritesState.places.length)
 
-        favoritesState.places.forEach((place: any) => {
-            cy.get('@places').contains(place.label).should('be.visible')
-        })
-    })
+    //     favoritesState.places.forEach((place: any) => {
+    //         cy.get('@places').contains(place.label).should('be.visible')
+    //     })
+    // })
 
     it('clicking on a volume should attempt to load its path', () => {
         const path = favoritesState.shortcuts[1].path

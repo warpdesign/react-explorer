@@ -457,12 +457,6 @@ export class FileState {
     }, this.waitForConnection)
 
     rename = withConnection((source: string, file: File, newName: string): Promise<string | void> => {
-        // // TODO: check for valid filenames
-        // try {
-        //     await this.waitForConnection();
-        // } catch (err) {
-        //     return this.rename(source, file, newName);
-        // }
         return this.api
             .rename(source, file, newName)
             .then((newName: string) => {

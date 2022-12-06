@@ -1,5 +1,8 @@
 module.exports = {
     exec: function (_, cb) {
-        cb();
+        cb()
     },
-};
+    execSync: function(_) {
+        return []
+    }
+}
