@@ -1,6 +1,6 @@
 {
     "name": "react-explorer",
-    "version": "2.3.1",
+    "version": "3.0.0-beta.1",
     "description": "Plugin-based file explorer written with React",
     "main": "build/main.js",
     "build": {
@@ -36,9 +36,9 @@
         "server": "pm2 start \"npx ws -d ./build-e2e -p 8080\" --name cy-server",
         "server:stop": "pm2 --silent stop cy-server || true",
         "dist": "webpack --config webpack.config.production.ts && electron-builder -mwl",
-        "dist-win": "webpack --config webpack.config.production.ts && electron-builder -w",
-        "dist-mac": "webpack --config webpack.config.production.ts && electron-builder -m",
-        "dist-linux": "webpack --config webpack.config.production.ts && electron-builder -l",
+        "dist-win": "webpack --config webpack.config.production.ts && electron-builder -w --x64 --arm64",
+        "dist-mac": "webpack --config webpack.config.production.ts && electron-builder -m --universal",
+        "dist-linux": "webpack --config webpack.config.production.ts && electron-builder -l --x64 --arm64",
         "postinstall": "electron-builder install-app-deps && npm run install:e2e",
         "install:e2e": "cd e2e && npm install"
     },
