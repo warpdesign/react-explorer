@@ -199,7 +199,6 @@ export function needsConnection(target: any, key: any, descriptor: any) {
 }
 
 export function sameID({ id: { ino, dev } }: File, { id: { ino: ino2, dev: dev2 } }: File): boolean {
-    console.log(`comparing: ${ino} === ${ino2}, ${dev} === ${dev2} `)
     return ino === ino2 && dev === dev2
 }
 

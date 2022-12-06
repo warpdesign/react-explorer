@@ -1,34 +1,22 @@
 import * as React from 'react'
+import { useState } from 'react'
 import { Dialog, Classes, Intent, Button, InputGroup, FormGroup, MenuItem } from '@blueprintjs/core'
 import { Tooltip2 } from '@blueprintjs/popover2'
 import { Select2, ItemRenderer } from '@blueprintjs/select'
-import { withTranslation, WithTranslation } from 'react-i18next'
-import { inject } from 'mobx-react'
+import { useTranslation } from 'react-i18next'
 import { ipcRenderer } from 'electron'
 
 import { debounce } from '$src/utils/debounce'
-import { SettingsState } from '$src/state/settingsState'
 import { FsLocal, FolderExists } from '$src/services/plugins/FsLocal'
 import { AppAlert } from '$src/components/AppAlert'
 import { HOME_DIR } from '$src/utils/platform'
+import { useStores } from '$src/hooks/useStores'
 
 const DEBOUNCE_DELAY = 300
 
-interface PrefsProps extends WithTranslation {
+interface PrefsProps {
     isOpen: boolean
     onClose: () => void
-}
-
-interface InjectedProps extends PrefsProps {
-    settingsState: SettingsState
-}
-
-interface State {
-    defaultFolder: string
-    darkMode: boolean | 'auto'
-    lang: string
-    isFolderValid: boolean
-    defaultTerminal: string
 }
 
 interface Language {
@@ -41,68 +29,47 @@ interface Theme {
     code: boolean | 'auto'
 }
 
-class PrefsDialogClass extends React.Component<PrefsProps, State> {
-    constructor(props: PrefsProps) {
-        super(props)
+const PrefsDialog = ({ isOpen, onClose }: PrefsProps) => {
+    const { settingsState } = useStores('settingsState')
 
-        const { settingsState } = this.injected
+    const [lang, setLang] = useState(settingsState.lang)
+    const [defaultFolder, setDefaultFolder] = useState(settingsState.defaultFolder)
+    const [darkMode, setDarkMode] = useState(settingsState.darkMode)
+    const [defaultTerminal, setDefaultTerminal] = useState(settingsState.defaultTerminal)
+    const [isFolderValid, setIsFolderValid] = useState(
+        () => FsLocal.canread(defaultFolder) && FolderExists(defaultFolder),
+    )
+    const { t } = useTranslation()
 
-        this.state = {
-            lang: settingsState.lang,
-            darkMode: settingsState.darkMode,
-            defaultFolder: settingsState.defaultFolder,
-            isFolderValid: FsLocal.canread(settingsState.defaultFolder) && FolderExists(settingsState.defaultFolder),
-            defaultTerminal: settingsState.defaultTerminal,
-        }
-    }
-
-    private get injected(): InjectedProps {
-        return this.props as InjectedProps
-    }
-
-    private checkPath: () => void = debounce(() => {
-        const { defaultFolder } = this.state
-        const { settingsState } = this.injected
-        const isFolderValid = FsLocal.canread(defaultFolder) && FolderExists(defaultFolder)
-        if (defaultFolder !== settingsState.defaultFolder) {
-            this.setState({ isFolderValid })
+    const checkPath: (path: string) => void = debounce((path: string) => {
+        const isValid = FsLocal.canread(path) && FolderExists(path)
+        if (path !== settingsState.defaultFolder) {
+            setIsFolderValid(isValid)
             // need to save settings
-            if (isFolderValid) {
-                settingsState.setDefaultFolder(defaultFolder)
+            if (isValid) {
+                settingsState.setDefaultFolder(path)
                 settingsState.saveSettings()
             }
-        } else if (!this.state.isFolderValid) {
+        } else if (!isFolderValid) {
             // remove error
-            this.setState({ isFolderValid })
+            setIsFolderValid(isValid)
         }
     }, DEBOUNCE_DELAY)
 
-    private cancelClose = (): void => {
-        const { defaultFolder } = this.state
-        const { settingsState } = this.injected
-        if (defaultFolder !== settingsState.defaultFolder) {
-            this.setState({ defaultFolder: settingsState.defaultFolder, isFolderValid: true })
-        }
-        this.props.onClose()
-    }
-
-    onFolderChange = (event: React.FormEvent<HTMLElement>): void => {
+    const onFolderChange = (event: React.FormEvent<HTMLElement>): void => {
         const path = (event.target as HTMLInputElement).value
-        // set error since path will be checked async
-        this.setState({ defaultFolder: path })
-        this.checkPath()
+        setDefaultFolder(path)
+        checkPath(path)
     }
 
-    onFolderBlur = (): void => {
-        const { isFolderValid } = this.state
-        const { settingsState } = this.injected
-
+    const onFolderBlur = (): void => {
         if (!isFolderValid) {
-            this.setState({ defaultFolder: settingsState.defaultFolder, isFolderValid: true })
+            setDefaultFolder(settingsState.defaultFolder)
+            setIsFolderValid(true)
         }
     }
 
-    renderLanguageItem: ItemRenderer<Language> = (lang, { handleClick, modifiers }) => {
+    const renderLanguageItem: ItemRenderer<Language> = (lang, { handleClick, modifiers }) => {
         return (
             <MenuItem
                 active={modifiers.active}
@@ -114,14 +81,13 @@ class PrefsDialogClass extends React.Component<PrefsProps, State> {
         )
     }
 
-    renderThemeItem: ItemRenderer<Theme> = (theme, { handleClick, modifiers }) => {
+    const renderThemeItem: ItemRenderer<Theme> = (theme, { handleClick, modifiers }) => {
         return (
             <MenuItem active={modifiers.active} key={theme.code.toString()} onClick={handleClick} text={theme.name} />
         )
     }
 
-    getSortedLanguages(): Array<Language> {
-        const { t } = this.props
+    const getSortedLanguages = (): Array<Language> => {
         const auto = [{ code: 'auto', lang: t('COMMON.AUTO') }]
         const languages = (t('LANG', { returnObjects: true }) as Array<Language>).sort(
             (lang1: Language, lang2: Language) => {
@@ -134,9 +100,7 @@ class PrefsDialogClass extends React.Component<PrefsProps, State> {
         return auto.concat(languages)
     }
 
-    getThemeList(): Array<Theme> {
-        const { t } = this.props
-
+    const getThemeList = (): Array<Theme> => {
         return [
             {
                 code: 'auto',
@@ -153,181 +117,157 @@ class PrefsDialogClass extends React.Component<PrefsProps, State> {
         ]
     }
 
-    onLanguageSelect = (newLang: Language): void => {
-        const { settingsState } = this.injected
-        this.setState({ lang: newLang.code })
+    const onLanguageSelect = (newLang: Language): void => {
+        setLang(newLang.code)
         settingsState.setLanguage(newLang.code)
         settingsState.saveSettings()
     }
 
-    onThemeSelect = (newTheme: Theme): void => {
-        const { settingsState } = this.injected
-        this.setState({ darkMode: newTheme.code })
+    const onThemeSelect = (newTheme: Theme): void => {
+        setDarkMode(newTheme.code)
         settingsState.setActiveTheme(newTheme.code)
         settingsState.saveSettings()
     }
 
-    onResetPrefs = (): void => {
-        const { settingsState } = this.injected
+    const onResetPrefs = (): void => {
         settingsState.resetSettings()
-        this.setState({
-            lang: settingsState.lang,
-            darkMode: settingsState.darkMode,
-            defaultFolder: settingsState.defaultFolder,
-            defaultTerminal: settingsState.defaultTerminal,
-        })
+        setLang(settingsState.lang)
+        setDarkMode(settingsState.darkMode)
+        setDefaultFolder(settingsState.defaultFolder)
+        setDefaultTerminal(settingsState.defaultTerminal)
     }
 
-    onTerminalChange = (event: React.FormEvent<HTMLElement>): void => {
-        const { settingsState } = this.injected
+    const onTerminalChange = (event: React.FormEvent<HTMLElement>): void => {
         const terminal = (event.target as HTMLInputElement).value
-        this.setState({ defaultTerminal: terminal })
+        setDefaultTerminal(terminal)
         settingsState.setDefaultTerminal(terminal)
         settingsState.saveSettings()
     }
 
-    testTerminal = async (): Promise<void> => {
-        const { settingsState, t } = this.injected
+    const testTerminal = async (): Promise<void> => {
         const path = settingsState.getTerminalCommand(HOME_DIR)
-        const error: { code: number; terminal: string } = await ipcRenderer.invoke('openTerminal', path)
-        if (error) {
-            const { code, terminal } = error
+
+        const { code, terminal } = await ipcRenderer.invoke('openTerminal', path)
+
+        code &&
             AppAlert.show(t('DIALOG.PREFS.TEST_TERMINAL_FAILED', { terminal, code }), {
                 intent: Intent.DANGER,
                 icon: 'error',
             })
-        }
     }
 
-    public render(): React.ReactNode {
-        const { t } = this.props
-        const { isFolderValid, defaultFolder, defaultTerminal, darkMode, lang } = this.state
-        const languageItems = this.getSortedLanguages()
-        const selectedLanguage = languageItems.find((language: Language) => language.code === lang)
-        const themeItems = this.getThemeList()
-        const selectedTheme = themeItems.find((theme: Theme) => theme.code === darkMode)
-        const activeTheme = this.injected.settingsState.isDarkModeActive
-            ? t('DIALOG.PREFS.DARK')
-            : t('DIALOG.PREFS.BRIGHT')
-        const intent: Intent = isFolderValid ? Intent.NONE : Intent.DANGER
-        const testTerminalButton = (
-            <Tooltip2 content={t('DIALOG.PREFS.TEST_TERMINAL')}>
-                <Button icon="play" intent={Intent.PRIMARY} minimal={true} onClick={this.testTerminal} />
-            </Tooltip2>
-        )
+    const languageItems = getSortedLanguages()
+    const selectedLanguage = languageItems.find((language: Language) => language.code === lang)
+    const themeItems = getThemeList()
+    const selectedTheme = themeItems.find((theme: Theme) => theme.code === darkMode)
+    const activeTheme = settingsState.isDarkModeActive ? t('DIALOG.PREFS.DARK') : t('DIALOG.PREFS.BRIGHT')
+    const intent: Intent = isFolderValid ? Intent.NONE : Intent.DANGER
+    const testTerminalButton = (
+        <Tooltip2 content={t('DIALOG.PREFS.TEST_TERMINAL')}>
+            <Button icon="play" intent={Intent.PRIMARY} minimal={true} onClick={testTerminal} />
+        </Tooltip2>
+    )
 
-        return (
-            <Dialog
-                icon="cog"
-                className="data-cy-prefs-dialog"
-                title={t('DIALOG.PREFS.TITLE')}
-                isOpen={this.props.isOpen}
-                autoFocus={true}
-                enforceFocus={true}
-                canEscapeKeyClose={true}
-                usePortal={true}
-                onClose={this.cancelClose}
-            >
-                <div className={Classes.DIALOG_BODY}>
-                    <FormGroup inline={true} label={t('DIALOG.PREFS.LANGUAGE')}>
-                        <Select2<Language>
-                            filterable={false}
-                            activeItem={selectedLanguage}
-                            items={languageItems}
-                            itemRenderer={this.renderLanguageItem}
-                            onItemSelect={this.onLanguageSelect}
-                        >
-                            <Button
-                                className="data-cy-language-select"
-                                icon="flag"
-                                rightIcon="caret-down"
-                                text={`${selectedLanguage.lang}`}
-                            />
-                        </Select2>
-                    </FormGroup>
-
-                    <FormGroup inline={true} label={t('DIALOG.PREFS.THEME')}>
-                        <Select2<Theme>
-                            filterable={false}
-                            activeItem={selectedTheme}
-                            items={themeItems}
-                            itemRenderer={this.renderThemeItem}
-                            onItemSelect={this.onThemeSelect}
-                        >
-                            <Button
-                                icon="contrast"
-                                rightIcon="caret-down"
-                                text={
-                                    selectedTheme.code === 'auto'
-                                        ? `${selectedTheme.name} (${activeTheme})`
-                                        : `${selectedTheme.name}`
-                                }
-                            />
-                        </Select2>
-                    </FormGroup>
-
-                    <FormGroup
-                        inline={true}
-                        labelFor="default-folder"
-                        label={t('DIALOG.PREFS.DEFAULT_FOLDER')}
-                        helperText={
-                            isFolderValid ? <span>&nbsp;</span> : <span>{t('DIALOG.PREFS.INVALID_FOLDER')}</span>
-                        }
-                        intent={intent}
+    return (
+        <Dialog
+            icon="cog"
+            className="data-cy-prefs-dialog"
+            title={t('DIALOG.PREFS.TITLE')}
+            isOpen={isOpen}
+            autoFocus={true}
+            enforceFocus={true}
+            canEscapeKeyClose={true}
+            usePortal={true}
+            onClose={onClose}
+        >
+            <div className={Classes.DIALOG_BODY}>
+                <FormGroup inline={true} label={t('DIALOG.PREFS.LANGUAGE')}>
+                    <Select2<Language>
+                        filterable={false}
+                        activeItem={selectedLanguage}
+                        items={languageItems}
+                        itemRenderer={renderLanguageItem}
+                        onItemSelect={onLanguageSelect}
                     >
-                        <InputGroup
-                            onChange={this.onFolderChange}
-                            onBlur={this.onFolderBlur}
-                            value={defaultFolder}
-                            leftIcon="folder-close"
-                            placeholder={t('DIALOG.PREFS.DEFAULT_FOLDER')}
-                            id="default-folder"
-                            name="default-folder"
-                            title={defaultFolder}
-                        />
-                    </FormGroup>
-
-                    <FormGroup
-                        inline={true}
-                        labelFor="default-terminal"
-                        label={t('DIALOG.PREFS.DEFAULT_TERMINAL')}
-                        helperText={t('DIALOG.PREFS.DEFAULT_TERMINAL_HELP')}
-                    >
-                        <InputGroup
-                            onChange={this.onTerminalChange}
-                            value={defaultTerminal}
-                            rightElement={testTerminalButton}
-                            leftIcon="console"
-                            placeholder={t('DIALOG.PREFS.DEFAULT_TERMINAL')}
-                            id="default-terminal"
-                            name="default-terminal"
-                            title={defaultTerminal}
-                        />
-                    </FormGroup>
-
-                    <FormGroup></FormGroup>
-
-                    <FormGroup inline={true} intent="danger" helperText={t('DIALOG.PREFS.RESET_HELP')} label=" ">
                         <Button
-                            icon="trash"
-                            intent="primary"
-                            text={t('DIALOG.PREFS.RESET')}
-                            onClick={this.onResetPrefs}
+                            className="data-cy-language-select"
+                            icon="flag"
+                            rightIcon="caret-down"
+                            text={selectedLanguage.lang}
                         />
-                    </FormGroup>
-                </div>
-                <div className={Classes.DIALOG_FOOTER}>
-                    <div className={Classes.DIALOG_FOOTER_ACTIONS}>
-                        <Button onClick={this.cancelClose} className="data-cy-close">
-                            {t('COMMON.CLOSE')}
-                        </Button>
-                    </div>
-                </div>
-            </Dialog>
-        )
-    }
-}
+                    </Select2>
+                </FormGroup>
 
-const PrefsDialog = withTranslation()(inject('settingsState')(PrefsDialogClass))
+                <FormGroup inline={true} label={t('DIALOG.PREFS.THEME')}>
+                    <Select2<Theme>
+                        filterable={false}
+                        activeItem={selectedTheme}
+                        items={themeItems}
+                        itemRenderer={renderThemeItem}
+                        onItemSelect={onThemeSelect}
+                    >
+                        <Button
+                            icon="contrast"
+                            rightIcon="caret-down"
+                            text={
+                                selectedTheme.code === 'auto'
+                                    ? `${selectedTheme.name} (${activeTheme})`
+                                    : `${selectedTheme.name}`
+                            }
+                        />
+                    </Select2>
+                </FormGroup>
+
+                <FormGroup
+                    inline={true}
+                    labelFor="default-folder"
+                    label={t('DIALOG.PREFS.DEFAULT_FOLDER')}
+                    helperText={isFolderValid ? <span>&nbsp;</span> : <span>{t('DIALOG.PREFS.INVALID_FOLDER')}</span>}
+                    intent={intent}
+                >
+                    <InputGroup
+                        onChange={onFolderChange}
+                        onBlur={onFolderBlur}
+                        value={defaultFolder}
+                        leftIcon="folder-close"
+                        placeholder={t('DIALOG.PREFS.DEFAULT_FOLDER')}
+                        id="default-folder"
+                        name="default-folder"
+                        title={defaultFolder}
+                    />
+                </FormGroup>
+
+                <FormGroup
+                    inline={true}
+                    labelFor="default-terminal"
+                    label={t('DIALOG.PREFS.DEFAULT_TERMINAL')}
+                    helperText={t('DIALOG.PREFS.DEFAULT_TERMINAL_HELP')}
+                >
+                    <InputGroup
+                        onChange={onTerminalChange}
+                        value={defaultTerminal}
+                        rightElement={testTerminalButton}
+                        leftIcon="console"
+                        placeholder={t('DIALOG.PREFS.DEFAULT_TERMINAL')}
+                        id="default-terminal"
+                        name="default-terminal"
+                        title={defaultTerminal}
+                    />
+                </FormGroup>
+
+                <FormGroup inline={true} intent="danger" helperText={t('DIALOG.PREFS.RESET_HELP')} label=" ">
+                    <Button icon="trash" intent="primary" text={t('DIALOG.PREFS.RESET')} onClick={onResetPrefs} />
+                </FormGroup>
+            </div>
+            <div className={Classes.DIALOG_FOOTER}>
+                <div className={Classes.DIALOG_FOOTER_ACTIONS}>
+                    <Button onClick={onClose} className="data-cy-close">
+                        {t('COMMON.CLOSE')}
+                    </Button>
+                </div>
+            </div>
+        </Dialog>
+    )
+}
 
 export { PrefsDialog }

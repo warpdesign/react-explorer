@@ -1,8 +1,8 @@
 import React from 'react'
 import type { ReactElement } from 'react'
-import { render } from '@testing-library/react'
+import { render, screen, configure, waitForElementToBeRemoved } from '@testing-library/react'
+import { within } from '@testing-library/dom'
 import type { MatcherFunction } from '@testing-library/react'
-import { makeAutoObservable } from 'mobx'
 import { Provider } from 'mobx-react'
 import { DndProvider } from 'react-dnd'
 import { HTML5Backend } from 'react-dnd-html5-backend'
@@ -11,40 +11,71 @@ import { I18nextProvider } from 'react-i18next'
 import { HotkeysProvider } from '@blueprintjs/core'
 import userEvent from '@testing-library/user-event'
 import en from '$src/locale/lang/en.json'
+const i18next = i18n.i18next
+
+// jest doesn't have require.context so we patch this include
+// to require the expected data
+jest.mock('$src/locale/i18n', () => ({
+    i18n: {
+        i18next,
+    },
+    languageList: ['en', 'fr'],
+}))
+jest.mock('electron', () => ({
+    ipcRenderer: {
+        on: jest.fn(),
+        sendSync: jest.fn(),
+        invoke: jest.fn(
+            (command: string) =>
+                new Promise((res) => {
+                    switch (command) {
+                        case 'window:getCustomSettings':
+                            res({
+                                splitView: false,
+                            })
+                            break
+
+                        case 'app:getLocale':
+                            res('en')
+                            break
+
+                        case 'nativeTheme:shouldUseDarkColors':
+                            res(false)
+                            break
+
+                        default:
+                            console.warn(`unhandled ipcrenderer ${command}`)
+                    }
+                }),
+        ),
+    },
+}))
+
+jest.mock('$src/utils/debounce', () => ({
+    debounce: (fn: any) => fn,
+}))
+jest.mock('$src/utils/throttle', () => ({
+    throttle: (fn: any) => fn,
+}))
+import { SettingsState } from '$src/state/settingsState'
 
 type Query = (f: MatcherFunction) => HTMLElement
 
 const LOCALE_EN = en.translations
 
-class State {
-    lang = 'fr'
-    darkMode = false
-    splitView = false
-
-    constructor() {
-        makeAutoObservable(this)
-    }
-}
-
-const renderWithProviders = (jsx: React.ReactElement, providers = {}) => {
-    const settingsState = new State()
-    return render(<Provider {...providers}>{jsx}</Provider>)
-}
-
-const AllTheProviders = ({ children }: { children: ReactElement }) => {
-    const settingsState = new State()
-    return (
+const customRender = (
+    ui: ReactElement,
+    { providerProps = { settingsState: new SettingsState('2.31') }, ...renderOptions } = {},
+) =>
+    render(
         <DndProvider backend={HTML5Backend}>
-            <Provider settingsState={settingsState}>
+            <Provider {...providerProps}>
                 <I18nextProvider i18n={i18n.i18next}>
-                    <HotkeysProvider>{children}</HotkeysProvider>
+                    <HotkeysProvider>{ui}</HotkeysProvider>
                 </I18nextProvider>
             </Provider>
-        </DndProvider>
+        </DndProvider>,
     )
-}
-
-const customRender = (ui: ReactElement, options = {}) => render(ui, { wrapper: AllTheProviders, ...options })
 
 function withMarkup(query: Query) {
     return (text: string | RegExp) =>
@@ -61,21 +92,35 @@ function withMarkup(query: Query) {
         })
 }
 
-const setup = (jsx: ReactElement) => ({
-    user: userEvent.setup(),
-    ...customRender(jsx),
-})
+const setup = (jsx: ReactElement, options = {}) => {
+    const user = userEvent.setup()
+
+    const selectBPOption = async (label: string, optionLabel: string) => {
+        // FIXME: we wait for animations and this take quite some time (~ 400ms)
+        // we should find a way to disable them otherwise tests will take a long time
+        const selectButton = screen.getByText(label).nextElementSibling.querySelector('[role="combobox"]')
+        const id = selectButton.getAttribute('aria-controls')
+
+        await user.click(selectButton)
+
+        const select = await screen.findByTestId(id)
+        await user.click(within(select).getByText(optionLabel))
+
+        await waitForElementToBeRemoved(select)
+    }
+
+    return {
+        user,
+        selectBPOption,
+        ...customRender(jsx, options),
+    }
+}
 
 const t = i18n.i18next.t
-const i18next = i18n.i18next
 
-// jest doesn't have require.context so we patch this include
-// to require the expected data
-jest.mock('$src/locale/i18n', () => ({
-    i18n: {
-        i18next,
-    },
-}))
+configure({
+    testIdAttribute: 'id',
+})
 
 // re-export everything
 export * from '@testing-library/react'

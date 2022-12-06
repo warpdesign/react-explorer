@@ -179,7 +179,11 @@ export class SettingsState {
 
     getDefaultSettings(): JSObject {
         return {
-            lang: 'auto',
+            // we don't want to wait for async call to retrieve language
+            // from jest, so we set default lang to en instead.
+            // This allows to inject SettingsState in the app without
+            // having to wait for a promise to resolve.
+            lang: typeof jest === 'undefined' ? 'auto' : 'en',
             darkMode: isMojave ? 'auto' : false,
             defaultFolder: defaultFolder,
             defaultTerminal: isMac
