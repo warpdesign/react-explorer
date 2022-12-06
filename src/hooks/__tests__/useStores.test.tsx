@@ -9,13 +9,14 @@ import { useStores } from '$src/hooks/useStores'
 
 const Component = ({ storeName }: { storeName: string }) => {
     const { settingsState } = useStores(storeName)
+
     return <div>{settingsState.lang}</div>
 }
 
 describe('useStores', () => {
     it('should return mobx store', () => {
         render(<Component storeName="settingsState" />)
-        expect(screen.getByText('fr')).toBeInTheDocument()
+        expect(screen.getByText('en')).toBeInTheDocument()
     })
 
     it('should throw if store could not be found', () => {

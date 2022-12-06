@@ -173,17 +173,16 @@ const ElectronApp = {
             this.openDevTools(true)
         })
 
-        ipcMain.handle('openTerminal', (event: Event, cmd: string): Promise<void> => {
-            console.log('running', cmd)
-            const exec = child_process.exec
+        ipcMain.handle('openTerminal', (event: Event, cmd: string): Promise<{ code: number; terminal: string }> => {
             return new Promise((resolve, reject) => {
-                exec(cmd, (error: child_process.ExecException) => {
-                    if (error) {
-                        reject({ code: error.code, terminal: cmd })
-                    } else {
-                        resolve()
-                    }
-                }).unref()
+                child_process
+                    .exec(cmd, (error: child_process.ExecException) => {
+                        resolve({
+                            code: (error && error.code) || 0,
+                            terminal: cmd,
+                        })
+                    })
+                    .unref()
             })
         })
 
@@ -211,9 +210,7 @@ const ElectronApp = {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         ipcMain.handle('setWindowSettings', (event, data: { [key: string]: any }) => {
             const { settings } = data
-            console.log('changeWindowSettings', event.sender.id, settings)
             const state = WindowSettings.getSettings(event.sender.id)
-            console.log('got state', state)
             state.custom = settings
         })
     },
