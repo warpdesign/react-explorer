@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { Dialog, Classes, Intent, Button, InputGroup, FormGroup } from '@blueprintjs/core'
 import { useTranslation } from 'react-i18next'
 
@@ -22,7 +22,6 @@ const MakedirDialog = ({ onValidation, onClose, isOpen, parentPath }: MakedirPro
         try {
             setIsValid(onValidation(path))
         } catch (error) {
-            console.log('error', error)
             setIsValid(false)
         }
     }
@@ -43,31 +42,19 @@ const MakedirDialog = ({ onValidation, onClose, isOpen, parentPath }: MakedirPro
         checkPath(path)
     }
 
-    useEffect(() => {
-        const onKeyUp = (e: KeyboardEvent): void => {
-            if (e.key === optionKey) {
-                setIsOptionKeyPressed(false)
-            } else if (e.key === Keys.ENTER) {
-                isValid && path.length && onCreate()
-            }
+    const onKeyUp: React.KeyboardEventHandler = (e): void => {
+        if (e.key === optionKey) {
+            setIsOptionKeyPressed(false)
         }
+    }
 
-        const onKeyDown = (e: KeyboardEvent): void => {
-            if (e.key === optionKey) {
-                setIsOptionKeyPressed(true)
-            } else if (e.key === Keys.ENTER && isOptionKeyPressed) {
-                isValid && path.length && onCreate()
-            }
+    const onKeyDown: React.KeyboardEventHandler = (e): void => {
+        if (e.key === optionKey) {
+            setIsOptionKeyPressed(true)
+        } else if (e.key === Keys.ENTER && isOptionKeyPressed) {
+            isValid && path.length && onCreate()
         }
-
-        document.addEventListener('keyup', onKeyUp)
-        document.addEventListener('keydown', onKeyDown)
-
-        return () => {
-            document.removeEventListener('keyup', onKeyUp)
-            document.removeEventListener('keydown', onKeyDown)
-        }
-    }, [])
+    }
 
     const { t } = useTranslation()
 
@@ -92,27 +79,34 @@ const MakedirDialog = ({ onValidation, onClose, isOpen, parentPath }: MakedirPro
             onClose={cancelClose}
             className="makedirDialog"
         >
-            <div className={Classes.DIALOG_BODY}>
-                <p>{t('DIALOG.MAKEDIR.TITLE')}</p>
-                <FormGroup helperText={helperText} inline={true} labelFor="directory-input" labelInfo={`${parentPath}`}>
-                    <InputGroup
-                        onChange={onPathChange}
-                        placeholder={t('DIALOG.MAKEDIR.NAME')}
-                        value={path}
-                        id="directory-input"
-                        name="directory-input"
-                        intent={intent}
-                        autoFocus
-                    />
-                </FormGroup>
-            </div>
-            <div className={Classes.DIALOG_FOOTER}>
-                <div className={Classes.DIALOG_FOOTER_ACTIONS}>
-                    <Button onClick={cancelClose}>{t('COMMON.CANCEL')}</Button>
+            <div onKeyDown={onKeyDown} onKeyUp={onKeyUp}>
+                <div className={Classes.DIALOG_BODY}>
+                    <p>{t('DIALOG.MAKEDIR.TITLE')}</p>
+                    <FormGroup
+                        helperText={helperText}
+                        inline={true}
+                        labelFor="directory-input"
+                        labelInfo={`${parentPath}`}
+                    >
+                        <InputGroup
+                            onChange={onPathChange}
+                            placeholder={t('DIALOG.MAKEDIR.NAME')}
+                            value={path}
+                            id="directory-input"
+                            name="directory-input"
+                            intent={intent}
+                            autoFocus
+                        />
+                    </FormGroup>
+                </div>
+                <div className={Classes.DIALOG_FOOTER}>
+                    <div className={Classes.DIALOG_FOOTER_ACTIONS}>
+                        <Button onClick={cancelClose}>{t('COMMON.CANCEL')}</Button>
 
-                    <Button intent={Intent.PRIMARY} onClick={onCreate} disabled={!path.length || !isValid}>
-                        {(!isOptionKeyPressed && t('DIALOG.MAKEDIR.CREATE')) || t('DIALOG.MAKEDIR.CREATE_READ')}
-                    </Button>
+                        <Button intent={Intent.PRIMARY} onClick={onCreate} disabled={!path.length || !isValid}>
+                            {(!isOptionKeyPressed && t('DIALOG.MAKEDIR.CREATE')) || t('DIALOG.MAKEDIR.CREATE_READ')}
+                        </Button>
+                    </div>
                 </div>
             </div>
         </Dialog>
