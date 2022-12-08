@@ -194,7 +194,7 @@ export class FileTableClass extends React.Component<Props, State> {
                     if (cache) {
                         // when cache is being (re)loaded, cache.files is empty:
                         // we don't want to show "empty folder" placeholder
-                        // that case, only when cache is loaded and there are no files
+                        // in that case, only when cache is loaded and there are no files
                         if (cache.cmd === 'cwd' || cache.history.length) {
                             this.updateNodes(files)
                         }
@@ -283,7 +283,6 @@ export class FileTableClass extends React.Component<Props, State> {
     }
 
     private updateNodes(files: File[]): void {
-        // reselect previously selected file in case of reload/change tab
         const keepSelection = !!this.cache.selected.length
 
         const nodes = this.buildNodes(files, keepSelection)
@@ -401,7 +400,6 @@ export class FileTableClass extends React.Component<Props, State> {
     }
 
     onRowClick = (data: RowMouseEventHandlerParams): void => {
-        console.log('onRowClick')
         const { rowData, event, index } = data
         const { nodes, selected } = this.state
         const originallySelected = rowData.isSelected
@@ -788,7 +786,6 @@ export class FileTableClass extends React.Component<Props, State> {
 
     onScroll = debounce(({ scrollTop }: ScrollParams): void => {
         this.cache.scrollTop = scrollTop
-        // console.log('onScroll: updating scrollTop', scrollTop, this.cache.path);
     }, SCROLL_DEBOUNCE)
 
     rowGetter = (index: Index): TableRow => this.getRow(index.index)
@@ -835,7 +832,6 @@ export class FileTableClass extends React.Component<Props, State> {
     ]
 
     renderFileContextMenu = (props: ContextMenu2ContentProps): JSX.Element => {
-        console.log('file under mouse', this.state.rightClickFile, props.isOpen)
         return props.isOpen ? <FileContextMenu fileUnderMouse={this.state.rightClickFile} /> : null
     }
 

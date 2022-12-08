@@ -6,6 +6,7 @@ import { Tooltip2 } from '@blueprintjs/popover2'
 import { observer } from 'mobx-react'
 import { useTranslation } from 'react-i18next'
 import { useStores } from '$src/hooks/useStores'
+import { filterDirs, filterFiles } from '$src/utils/fileUtils'
 
 const Statusbar = observer(() => {
     const { viewState } = useStores('viewState')
@@ -13,8 +14,8 @@ const Statusbar = observer(() => {
     const fileCache = viewState.getVisibleCache()
     const [viewHiddenFiles, setViewHiddenFiles] = useState(false)
     const isDisabled = fileCache.error || fileCache.status !== 'ok'
-    const numDirs = fileCache.files.filter((file) => file.fullname !== '..' && file.isDir).length
-    const numFiles = fileCache.files.filter((file) => !file.isDir).length
+    const numDirs = filterDirs(fileCache.files, viewHiddenFiles).length
+    const numFiles = filterFiles(fileCache.files, viewHiddenFiles).length
     const hiddenToggleIcon = viewHiddenFiles ? IconNames.EYE_OPEN : IconNames.EYE_OFF
 
     useEffect(() => {

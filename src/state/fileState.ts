@@ -186,8 +186,6 @@ export class FileState {
         this.viewId = viewId
         this.path = path
         this.getNewFS(path)
-        console.log('this.fs', this.fs)
-        // console.log(`new FileState('${path}'') -> fs = ${this.fs.name}`);
     }
 
     private saveContext(): void {
@@ -216,7 +214,6 @@ export class FileState {
     }
 
     onFSChange = (filename: string): void => {
-        console.log('fsChanged', filename, this.isVisible)
         this.reload()
     }
 
@@ -274,7 +271,6 @@ export class FileState {
     }
 
     async doLogin(server?: string, credentials?: Credentials): Promise<void> {
-        console.log('logging in')
         // this.status = 'busy';
         if (server) {
             this.server = this.fs.serverpart(server)
@@ -323,7 +319,9 @@ export class FileState {
                 const newFile = this.files.find(
                     (file) => file.id.dev === selection.id.dev && file.id.ino === selection.id.ino,
                 )
-                if (newFile) {
+                // don't add file to selection list if it is supposed to be hidden and we don't
+                // want to show hidden files
+                if (newFile && (this.showHiddenFiles || !newFile.fullname.startsWith('.'))) {
                     newSelection.push(newFile)
                 }
             }
@@ -354,7 +352,6 @@ export class FileState {
     }
 
     setSelectedFile(file: File): void {
-        console.log('setSelectedFile', file)
         if (file) {
             this.selectedId = {
                 ...file.id,
@@ -365,7 +362,6 @@ export class FileState {
     }
 
     setEditingFile(file: File): void {
-        console.log('setEditingFile', file)
         if (file) {
             this.editingId = {
                 ...file.id,
@@ -404,7 +400,6 @@ export class FileState {
 
     cd(path: string, path2 = '', skipHistory = false, skipContext = false): Promise<string> {
         // first updates fs (eg. was local fs, is now ftp)
-        console.log('fileState: cd', path, this.path)
         if (this.path !== path) {
             if (this.getNewFS(path, skipContext)) {
                 this.server = this.fs.serverpart(path)
@@ -544,7 +539,6 @@ export class FileState {
     }
 
     async shellOpenFile(path: string): Promise<boolean> {
-        console.log('need to open file', path)
         const error = await shell.openPath(path)
         return !!error
     }
@@ -570,11 +564,13 @@ export class FileState {
     }
 
     isRoot(path = this.path): boolean {
-        console.log('FileCache.isRoot', this.api ? path && this.api.isRoot(path) : false, this.api)
         return this.api ? path && this.api.isRoot(path) : false
     }
 
     toggleHiddenFiles(showHiddenFiles: boolean): void {
-        this.showHiddenFiles = showHiddenFiles
+        if (showHiddenFiles !== this.showHiddenFiles) {
+            this.showHiddenFiles = showHiddenFiles
+            this.updateSelection(true)
+        }
     }
 }
