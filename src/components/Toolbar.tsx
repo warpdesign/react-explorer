@@ -372,7 +372,7 @@ export const ToolbarClass = inject(
                                         content={
                                             <FileMenu
                                                 isDisabled={!fileCache || fileCache.error}
-                                                selectedItems={selected}
+                                                selectedItemsLength={selected.length}
                                                 onFileAction={this.onFileAction}
                                             />
                                         }

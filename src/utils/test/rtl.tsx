@@ -1,6 +1,6 @@
 import React from 'react'
 import type { ReactElement } from 'react'
-import { render, screen, configure, waitForElementToBeRemoved } from '@testing-library/react'
+import { render, screen, configure, waitForElementToBeRemoved, RenderOptions } from '@testing-library/react'
 import { within } from '@testing-library/dom'
 import type { MatcherFunction } from '@testing-library/react'
 import { Provider } from 'mobx-react'
@@ -58,14 +58,18 @@ jest.mock('$src/utils/throttle', () => ({
     throttle: (fn: any) => fn,
 }))
 import { SettingsState } from '$src/state/settingsState'
+import { AppState } from '$src/state/appState'
 
-type Query = (f: MatcherFunction) => HTMLElement
-
-const LOCALE_EN = en.translations
+interface ProvidersAndRenderOptions extends RenderOptions {
+    providerProps?: {
+        settingsState?: SettingsState
+        appState?: AppState
+    }
+}
 
 const customRender = (
     ui: ReactElement,
-    { providerProps = { settingsState: new SettingsState('2.31') }, ...renderOptions } = {},
+    { providerProps = { settingsState: new SettingsState('2.31') }, ...renderOptions }: ProvidersAndRenderOptions = {},
 ) =>
     render(
         <DndProvider backend={HTML5Backend}>
@@ -75,9 +79,10 @@ const customRender = (
                 </I18nextProvider>
             </Provider>
         </DndProvider>,
+        renderOptions,
     )
 
-function withMarkup(query: Query) {
+function withMarkup(query: (f: MatcherFunction) => HTMLElement) {
     return (text: string | RegExp) =>
         query((content: string, node: Element | null) => {
             const didMatch = (node: Element) => {
@@ -117,6 +122,7 @@ const setup = (jsx: ReactElement, options = {}) => {
 }
 
 const t = i18n.i18next.t
+const LOCALE_EN = en.translations
 
 configure({
     testIdAttribute: 'id',
