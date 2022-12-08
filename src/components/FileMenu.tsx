@@ -1,81 +1,53 @@
 import * as React from 'react'
 import { Menu, MenuItem, MenuDivider } from '@blueprintjs/core'
-import { observer, inject } from 'mobx-react'
-import { withTranslation, WithTranslation } from 'react-i18next'
+import { observer } from 'mobx-react'
+import { useTranslation } from 'react-i18next'
 
-import { AppState } from '$src/state/appState'
-import { File } from '$src/services/Fs'
+import { useStores } from '$src/hooks/useStores'
 
-interface FileMenuProps extends WithTranslation {
+interface FileMenuProps {
     onFileAction: (action: string) => void
-    selectedItems: File[]
+    selectedItemsLength: number
     isDisabled: boolean
 }
 
-interface InjectedProps extends FileMenuProps {
-    appState: AppState
-}
+export const FileMenu = observer(({ onFileAction, selectedItemsLength, isDisabled }: FileMenuProps) => {
+    const onNewfolder = (): void => {
+        onFileAction('makedir')
+    }
 
-export const FileMenuClass = inject('appState')(
-    observer(
-        class FileMenuClass extends React.Component<FileMenuProps> {
-            constructor(props: FileMenuProps) {
-                super(props)
-            }
+    const onPaste = (): void => {
+        onFileAction('paste')
+    }
 
-            private get injected(): InjectedProps {
-                return this.props as InjectedProps
-            }
+    const onDelete = (): void => {
+        onFileAction('delete')
+    }
 
-            private onNewfolder = (): void => {
-                this.props.onFileAction('makedir')
-            }
+    const { t } = useTranslation()
+    const { appState } = useStores('appState')
+    const clipboardLength = appState.clipboard.files.length
 
-            private onPaste = (): void => {
-                this.props.onFileAction('paste')
-            }
-
-            private onDelete = (): void => {
-                this.props.onFileAction('delete')
-            }
-
-            public render(): React.ReactNode {
-                const { appState } = this.injected
-                const clipboardLength = appState.clipboard.files.length
-                const { selectedItems, t, isDisabled } = this.props
-
-                return (
-                    <React.Fragment>
-                        <Menu>
-                            <MenuItem
-                                disabled={isDisabled}
-                                text={t('COMMON.MAKEDIR')}
-                                icon="folder-new"
-                                onClick={this.onNewfolder}
-                            />
-                            <MenuDivider />
-                            <MenuItem
-                                text={t('FILEMENU.PASTE', { count: clipboardLength })}
-                                icon="duplicate"
-                                onClick={this.onPaste}
-                                disabled={!clipboardLength || isDisabled}
-                            />
-                            <MenuDivider />
-                            <MenuItem
-                                text={t('FILEMENU.DELETE', { count: selectedItems.length })}
-                                onClick={this.onDelete}
-                                intent={(selectedItems.length && 'danger') || 'none'}
-                                icon="delete"
-                                disabled={!selectedItems.length || isDisabled}
-                            />
-                        </Menu>
-                    </React.Fragment>
-                )
-            }
-        },
-    ),
-)
-
-const FileMenu = withTranslation()(FileMenuClass)
-
-export { FileMenu }
+    return (
+        <>
+            <Menu>
+                <MenuItem disabled={isDisabled} text={t('COMMON.MAKEDIR')} icon="folder-new" onClick={onNewfolder} />
+                <MenuDivider />
+                <MenuItem
+                    text={t('FILEMENU.PASTE', { count: clipboardLength })}
+                    icon="duplicate"
+                    onClick={onPaste}
+                    disabled={!clipboardLength || isDisabled}
+                />
+                <MenuDivider />
+                <MenuItem
+                    text={t('FILEMENU.DELETE', { count: selectedItemsLength })}
+                    onClick={onDelete}
+                    intent={(selectedItemsLength && 'danger') || 'none'}
+                    icon="delete"
+                    disabled={!selectedItemsLength || isDisabled}
+                />
+            </Menu>
+        </>
+    )
+})
