@@ -21,6 +21,10 @@ const Statusbar = observer(() => {
         setViewHiddenFiles(false)
     }, [fileCache.path])
 
+    useEffect(() => {
+        fileCache.toggleHiddenFiles(viewHiddenFiles)
+    }, [viewHiddenFiles, fileCache])
+
     const toggleHiddenFilesButton = (
         <Tooltip2
             content={viewHiddenFiles ? t('STATUS.HIDE_HIDDEN_FILES') : t('STATUS.SHOW_HIDDEN_FILES')}
@@ -30,7 +34,8 @@ const Statusbar = observer(() => {
                 data-cy-paste-bt
                 disabled={isDisabled}
                 icon={hiddenToggleIcon}
-                intent={(!isDisabled && Intent.PRIMARY) || Intent.NONE}
+                intent={(!isDisabled && viewHiddenFiles && Intent.PRIMARY) || Intent.NONE}
+                onClick={() => setViewHiddenFiles(!viewHiddenFiles)}
                 minimal={true}
             />
         </Tooltip2>

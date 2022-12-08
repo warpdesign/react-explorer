@@ -44,6 +44,8 @@ export class FileState {
 
     cmd = ''
 
+    showHiddenFiles = false
+
     // @observable
     // active = false;
 
@@ -161,6 +163,7 @@ export class FileState {
             isVisible: observable,
             viewId: observable,
             current: observable,
+            showHiddenFiles: observable,
             setStatus: action,
             addPathToHistory: action,
             navHistory: action,
@@ -177,6 +180,7 @@ export class FileState {
             setEditingFile: action,
             emptyCache: action,
             cd: action,
+            toggleHiddenFiles: action,
         })
 
         this.viewId = viewId
@@ -568,5 +572,9 @@ export class FileState {
     isRoot(path = this.path): boolean {
         console.log('FileCache.isRoot', this.api ? path && this.api.isRoot(path) : false, this.api)
         return this.api ? path && this.api.isRoot(path) : false
+    }
+
+    toggleHiddenFiles(showHiddenFiles: boolean): void {
+        this.showHiddenFiles = showHiddenFiles
     }
 }

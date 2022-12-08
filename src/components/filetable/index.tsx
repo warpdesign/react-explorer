@@ -32,7 +32,7 @@ import { RowRenderer, RowRendererProps } from '$src/components/filetable/RowRend
 import { SettingsState } from '$src/state/settingsState'
 import { ViewState } from '$src/state/viewState'
 import { debounce } from '$src/utils/debounce'
-import { getSelectionRange } from '$src/utils/fileUtils'
+import { filterDirs, filterFiles, getSelectionRange } from '$src/utils/fileUtils'
 import { throttle } from '$src/utils/throttle'
 import { FileState } from '$src/state/fileState'
 import { FileContextMenu } from '$src/components/menus/FileContextMenu'
@@ -208,6 +208,15 @@ export class FileTableClass extends React.Component<Props, State> {
                 },
             ),
         )
+
+        this.disposers.push(
+            reaction(
+                (): boolean => {
+                    return !!this.cache?.showHiddenFiles
+                },
+                (): void => this.cache && this.updateNodes(this.cache.files),
+            ),
+        )
     }
 
     private getSelectedState(name: string): boolean {
@@ -238,11 +247,10 @@ export class FileTableClass extends React.Component<Props, State> {
     }
 
     private buildNodes = (list: File[], keepSelection = false): TableRow[] => {
-        // console.time('buildingNodes');
-        const { sortMethod, sortOrder } = this.cache
+        const { sortMethod, sortOrder, showHiddenFiles } = this.cache
         const SortFn = getSortMethod(sortMethod, sortOrder)
-        const dirs = list.filter((file) => file.isDir)
-        const files = list.filter((file) => !file.isDir)
+        const dirs = filterDirs(list, showHiddenFiles)
+        const files = filterFiles(list, showHiddenFiles)
 
         // if we sort by size, we only sort files by size: folders should still be sorted
         // alphabetically
@@ -250,8 +258,6 @@ export class FileTableClass extends React.Component<Props, State> {
             .sort(sortMethod !== 'size' ? SortFn : getSortMethod('name', 'asc'))
             .concat(files.sort(SortFn))
             .map((file) => this.buildNodeFromFile(file, keepSelection))
-
-        // console.timeEnd('buildingNodes');
 
         return nodes
     }
