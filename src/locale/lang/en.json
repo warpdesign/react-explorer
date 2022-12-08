@@ -122,8 +122,8 @@
             }
         },
         "STATUS": {
-            "CPTOOLTIP_one": "Copy {{count}} file to the clipboard",
-            "CPTOOLTIP_other": "Copy {{count}} files to the clipboard",
+            "SHOW_HIDDEN_FILES": "Show hidden files",
+            "HIDE_HIDDEN_FILES": "Hide hidden files",
             "FILES_one": "{{count}} file",
             "FILES_other": "{{count}} files",
             "FOLDERS_one": "{{count}} folder",

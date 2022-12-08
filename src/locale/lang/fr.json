@@ -122,8 +122,8 @@
             }
         },
         "STATUS": {
-            "CPTOOLTIP_one": "Copier {{count}} fichier dans le presse-papier",
-            "CPTOOLTIP_other": "Copier {{count}} fichiers dans le presse-papier",
+            "SHOW_HIDDEN_FILES": "Afficher les fichiers cachés",
+            "HIDE_HIDDEN_FILES": "Ne pas afficher les fichiers cachés",
             "FILES_one": "{{count}} fichier",
             "FILES_other": "{{count}} fichiers",
             "FOLDERS_one": "{{count}} dossier",

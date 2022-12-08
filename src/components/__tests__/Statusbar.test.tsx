@@ -1,8 +1,8 @@
 /**
  * @jest-environment jsdom
  */
-import React, { PropsWithChildren } from 'react'
-import { screen, render, LOCALE_EN, userEvent, t } from 'rtl'
+import React from 'react'
+import { screen, setup, render, t } from 'rtl'
 import { Provider } from 'mobx-react'
 import { Statusbar } from '../Statusbar'
 
@@ -67,8 +67,8 @@ describe('Statusbar', () => {
     it('clicking on clipboard button should set clipboard', async () => {
         // add a fake file to the selcted files
         cache.selected = [undefined]
-        render(<Wrapper />)
-        await userEvent.click(screen.getByRole('button'))
+        const { user } = setup(<Wrapper />)
+        await user.click(screen.getByRole('button'))
         expect(appState.clipboard.setClipboard).toHaveBeenCalledWith(cache)
         expect(appState.clipboard.setClipboard).toHaveBeenCalledTimes(1)
     })
