@@ -8,14 +8,14 @@ import { filterFiles, filterDirs } from '$src/utils/fileUtils'
 import { File } from '$src/services/Fs'
 import { ViewState } from '$src/state/viewState'
 import { FileState } from '$src/state/fileState'
-import { makeObservable, observable, runInAction } from 'mobx'
+import { action, makeObservable, observable, runInAction } from 'mobx'
 
 describe('Statusbar', () => {
     const cache = makeObservable(
         {
             status: 'ok',
             files: observable<File>([]),
-            toggleHiddenFiles: jest.fn((show: boolean) => {
+            setShowHiddenFiles: jest.fn((show: boolean) => {
                 cache.showHiddenFiles = show
             }),
             showHiddenFiles: false,
@@ -23,6 +23,8 @@ describe('Statusbar', () => {
         } as unknown as FileState,
         {
             path: observable,
+            showHiddenFiles: observable,
+            setShowHiddenFiles: action,
         },
     )
 
@@ -78,20 +80,10 @@ describe('Statusbar', () => {
         expect(screen.getByRole('textbox')).toHaveValue(buildStatusBarText())
     })
 
-    it('toggle hidden files button should be disabled if file cache is not valid', () => {
+    it('toggle hidden files button should be hidden if file cache is not valid', () => {
         cache.status = 'busy'
         render(<Statusbar />, options)
 
-        expect(screen.getByRole('button')).toBeDisabled()
-    })
-
-    it('should not show hidden files when changing directory', async () => {
-        const { user } = setup(<Statusbar />, options)
-        await user.click(screen.getByRole('button'))
-
-        expect(cache.showHiddenFiles).toBe(true)
-        // update path
-        runInAction(() => (cache.path = '/foo'))
-        expect(cache.showHiddenFiles).toBe(false)
+        expect(screen.queryByRole('button')).not.toBeInTheDocument()
     })
 })

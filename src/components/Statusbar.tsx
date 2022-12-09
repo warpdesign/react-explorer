@@ -12,31 +12,24 @@ const Statusbar = observer(() => {
     const { viewState } = useStores('viewState')
     const { t } = useTranslation()
     const fileCache = viewState.getVisibleCache()
-    const [viewHiddenFiles, setViewHiddenFiles] = useState(false)
-    const isDisabled = fileCache.error || fileCache.status !== 'ok'
-    const numDirs = filterDirs(fileCache.files, viewHiddenFiles).length
-    const numFiles = filterFiles(fileCache.files, viewHiddenFiles).length
-    const hiddenToggleIcon = viewHiddenFiles ? IconNames.EYE_OPEN : IconNames.EYE_OFF
+    const { files, showHiddenFiles, error, status } = fileCache
 
-    useEffect(() => {
-        setViewHiddenFiles(false)
-    }, [fileCache.path])
-
-    useEffect(() => {
-        fileCache.toggleHiddenFiles(viewHiddenFiles)
-    }, [viewHiddenFiles, fileCache])
+    const numDirs = filterDirs(files, showHiddenFiles).length
+    const numFiles = filterFiles(files, showHiddenFiles).length
+    const isDisabled = error || status !== 'ok'
+    const hiddenToggleIcon = showHiddenFiles ? IconNames.EYE_OPEN : IconNames.EYE_OFF
 
     const toggleHiddenFilesButton = (
         <Tooltip2
-            content={viewHiddenFiles ? t('STATUS.HIDE_HIDDEN_FILES') : t('STATUS.SHOW_HIDDEN_FILES')}
+            content={showHiddenFiles ? t('STATUS.HIDE_HIDDEN_FILES') : t('STATUS.SHOW_HIDDEN_FILES')}
             disabled={isDisabled}
         >
             <Button
                 data-cy-paste-bt
                 disabled={isDisabled}
                 icon={hiddenToggleIcon}
-                intent={(!isDisabled && viewHiddenFiles && Intent.PRIMARY) || Intent.NONE}
-                onClick={() => setViewHiddenFiles(!viewHiddenFiles)}
+                intent={(!isDisabled && showHiddenFiles && Intent.PRIMARY) || Intent.NONE}
+                onClick={() => fileCache.setShowHiddenFiles(!showHiddenFiles)}
                 minimal={true}
             />
         </Tooltip2>
@@ -46,7 +39,7 @@ const Statusbar = observer(() => {
         <ControlGroup>
             <InputGroup
                 disabled
-                rightElement={toggleHiddenFilesButton}
+                rightElement={!isDisabled && toggleHiddenFilesButton}
                 value={`${t('STATUS.FILES', { count: numFiles })}, ${t('STATUS.FOLDERS', {
                     count: numDirs,
                 })}`}

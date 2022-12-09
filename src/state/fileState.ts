@@ -180,7 +180,7 @@ export class FileState {
             setEditingFile: action,
             emptyCache: action,
             cd: action,
-            toggleHiddenFiles: action,
+            setShowHiddenFiles: action,
         })
 
         this.viewId = viewId
@@ -250,6 +250,10 @@ export class FileState {
             this.scrollTop = 0
             this.selectedId = null
             this.editingId = null
+
+            // hide hidden files when changing directory unless
+            // the directory is being reloaded
+            this.setShowHiddenFiles(false)
         }
     }
 
@@ -567,7 +571,7 @@ export class FileState {
         return this.api ? path && this.api.isRoot(path) : false
     }
 
-    toggleHiddenFiles(showHiddenFiles: boolean): void {
+    setShowHiddenFiles(showHiddenFiles: boolean): void {
         if (showHiddenFiles !== this.showHiddenFiles) {
             this.showHiddenFiles = showHiddenFiles
             this.updateSelection(true)
