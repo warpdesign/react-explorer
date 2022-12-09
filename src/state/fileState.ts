@@ -41,6 +41,7 @@ export class FileState {
     status: TStatus = 'ok'
 
     error = false
+    previousError = false
 
     cmd = ''
 
@@ -81,7 +82,16 @@ export class FileState {
 
     setStatus(status: TStatus, error = false): void {
         this.status = status
-        this.error = error
+        if (!error) {
+            this.previousError = this.error
+            this.error = false
+        } else {
+            if (this.history.length === 0 || this.previousError) {
+                this.error = true
+            }
+        }
+        // this.error = error
+        // this.history.length === 0 || this.error
     }
 
     addPathToHistory(path: string): void {
@@ -393,7 +403,7 @@ export class FileState {
         console.log('handleError', error)
         // we want to show the error on first nav
         // otherwise we keep previous
-        this.setStatus('ok', this.history.length === 0 || this.error)
+        this.setStatus('ok', true)
         const niceError = getLocalizedError(error)
         console.log('orignalCode', error.code, 'newCode', niceError.code)
         AppAlert.show(i18n.i18next.t('ERRORS.GENERIC', { error }), {
