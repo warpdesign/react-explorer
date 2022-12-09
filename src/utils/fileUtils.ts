@@ -1,4 +1,4 @@
-import { Extensions } from '$src/services/Fs'
+import { Extensions, File } from '$src/services/Fs'
 
 export const REGEX_EXTENSION = /\.(?=[^0-9])/
 
@@ -41,4 +41,12 @@ export function getSelectionRange(filename: string): SelectionRange {
             }
         }
     }
+}
+
+export function filterDirs(files: File[], showHiddenFiles: boolean): File[] {
+    return files.filter(({ isDir, fullname }) => (showHiddenFiles || !fullname.startsWith('.')) && isDir)
+}
+
+export function filterFiles(files: File[], showHiddenFiles: boolean): File[] {
+    return files.filter(({ isDir, fullname }) => !isDir && (showHiddenFiles || !fullname.startsWith('.')))
 }

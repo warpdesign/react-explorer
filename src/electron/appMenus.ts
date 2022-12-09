@@ -179,6 +179,12 @@ export class AppMenu {
                         click: this.sendComboEvent,
                     },
                     {
+                        label: menuStrings['TOGGLE_HIDDEN_FILES'],
+                        accelerator: 'CmdOrCtrl+H',
+                        click: this.sendComboEvent,
+                    },
+                    { type: 'separator' },
+                    {
                         label: menuStrings['FORCE_RELOAD_APP'],
                         accelerator: 'CmdOrCtrl+Shift+R',
                         click: this.sendReloadEvent,

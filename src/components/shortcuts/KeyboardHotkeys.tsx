@@ -86,18 +86,6 @@ class KeyboardHotkeysClass extends React.Component<WithTranslation> {
         ipcRenderer.invoke('openDevTools')
     }
 
-    onShowHistory = (): void => {
-        const fileCache: FileState = this.getActiveFileCache(true)
-
-        if (fileCache && fileCache.status === 'ok') {
-            console.log('showHistory')
-            fileCache.history.forEach((path, i) => {
-                const str = (fileCache.current === i && path + ' *') || path
-                Logger.log(str)
-            })
-        }
-    }
-
     onDebugCache = (): void => {
         // let i = 0;
         // for (let cache of this.appState.views[0].caches) {
@@ -184,14 +172,6 @@ class KeyboardHotkeysClass extends React.Component<WithTranslation> {
             onKeyDown: this.onOpenDevTools,
         },
         /* debug only shortcuts */
-        {
-            global: true,
-            combo: 'mod + h',
-            label: this.injected.t('SHORTCUT.ACTIVE_VIEW.VIEW_HISTORY'),
-            preventDefault: true,
-            onKeyDown: this.onShowHistory,
-            group: this.injected.t('SHORTCUT.GROUP.ACTIVE_VIEW'),
-        },
         {
             global: true,
             combo: 'mod + p',

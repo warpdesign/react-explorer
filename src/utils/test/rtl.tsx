@@ -59,11 +59,13 @@ jest.mock('$src/utils/throttle', () => ({
 }))
 import { SettingsState } from '$src/state/settingsState'
 import { AppState } from '$src/state/appState'
+import { ViewState } from '$src/state/viewState'
 
 interface ProvidersAndRenderOptions extends RenderOptions {
     providerProps?: {
         settingsState?: SettingsState
         appState?: AppState
+        viewState?: ViewState
     }
 }
 

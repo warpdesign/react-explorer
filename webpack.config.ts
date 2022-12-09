@@ -16,11 +16,9 @@ const baseConfig: webpack.Configuration = {
     node: {
         __dirname: false,
     },
-    // Enable sourcemaps for debugging webpack's output.
     devtool: 'source-map',
     mode: 'development',
     resolve: {
-        // Add '.ts' and '.tsx' as resolvable extensions.
         extensions: ['.ts', '.tsx', '.js', '.json', '.css'],
         alias: {
             $src: _resolve(__dirname, 'src'),
@@ -33,7 +31,6 @@ const baseConfig: webpack.Configuration = {
     },
     module: {
         rules: [
-            // All files with a '.ts' or '.tsx' extension will be handled by 'awesome-typescript-loader'.
             {
                 test: /\.tsx?$/,
                 exclude: /(node_modules)/,
@@ -74,10 +71,6 @@ const baseConfig: webpack.Configuration = {
                         maxSize: 8192,
                     },
                 },
-            },
-            {
-                test: /\.node$/,
-                loader: 'native-ext-loader',
             },
         ],
     },

@@ -81,6 +81,11 @@ class MenuAcceleratorsClass extends React.Component<Props> {
         }
     }
 
+    onToggleHiddenFiles = (): void => {
+        const fileCache = this.getActiveFileCache()
+        fileCache.setShowHiddenFiles(!fileCache.showHiddenFiles)
+    }
+
     onOpenTerminal = async (_: string, data: { viewId: number; tabIndex: number }) => {
         let cache: FileState
 
@@ -179,6 +184,7 @@ class MenuAcceleratorsClass extends React.Component<Props> {
                 <Accelerator combo="CmdOrCtrl+S" onClick={this.onOpenShortcuts}></Accelerator>
                 <Accelerator combo="CmdOrCtrl+," onClick={this.onOpenPrefs}></Accelerator>
                 <Accelerator combo="CmdOrCtrl+R" onClick={this.onReloadFileView}></Accelerator>
+                <Accelerator combo="CmdOrCtrl+H" onClick={this.onToggleHiddenFiles}></Accelerator>
                 <Accelerator combo="CmdOrCtrl+Q" onClick={this.props.onExitComboDown}></Accelerator>
                 <Accelerator combo="CmdOrCtrl+K" onClick={this.onOpenTerminal}></Accelerator>
                 <Accelerator combo="Ctrl+Tab" onClick={this.onNextTab}></Accelerator>

@@ -122,8 +122,8 @@
             }
         },
         "STATUS": {
-            "CPTOOLTIP_one": "Copy {{count}} file to the clipboard",
-            "CPTOOLTIP_other": "Copy {{count}} files to the clipboard",
+            "SHOW_HIDDEN_FILES": "Show hidden files",
+            "HIDE_HIDDEN_FILES": "Hide hidden files",
             "FILES_one": "{{count}} file",
             "FILES_other": "{{count}} files",
             "FOLDERS_one": "{{count}} folder",
@@ -272,7 +272,8 @@
             "TOGGLE_SPLITVIEW": "Toggle Split View",
             "GO_PARENT": "Parent folder",
             "GO_BACK": "Back",
-            "GO_FORWARD": "Forward"
+            "GO_FORWARD": "Forward",
+            "TOGGLE_HIDDEN_FILES": "Show/Hide Hidden Files"
         }
     }
 }

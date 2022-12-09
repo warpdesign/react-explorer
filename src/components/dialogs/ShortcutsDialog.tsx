@@ -45,6 +45,7 @@ export const buildShortcuts = (t: TFunction<'translation', undefined>) => ({
         { combo: 'mod + d', label: t('SHORTCUT.ACTIVE_VIEW.DELETE') },
         { combo: 'mod + k', label: t('SHORTCUT.ACTIVE_VIEW.OPEN_TERMINAL') },
         { combo: 'backspace', label: t('SHORTCUT.ACTIVE_VIEW.PARENT_DIRECTORY') },
+        { combo: 'mod + u', label: t('APP_MENUS.TOGGLE_HIDDEN_FILES') },
     ],
     [t('SHORTCUT.GROUP.TABS')]: [
         { combo: 'ctrl + tab', label: t('APP_MENUS.SELECT_NEXT_TAB') },

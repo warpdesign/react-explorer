@@ -97,7 +97,6 @@
         "jest-environment-jsdom": "^29.3.1",
         "lint-staged": "^10.4.2",
         "mock-fs": "git+https://git@github.com/warpdesign/mock-fs.git",
-        "native-ext-loader": "^2.3.0",
         "pm2": "^5.2.2",
         "prettier": "^2.7.1",
         "source-map-loader": "^4.0.1",

@@ -32,7 +32,7 @@ import { RowRenderer, RowRendererProps } from '$src/components/filetable/RowRend
 import { SettingsState } from '$src/state/settingsState'
 import { ViewState } from '$src/state/viewState'
 import { debounce } from '$src/utils/debounce'
-import { getSelectionRange } from '$src/utils/fileUtils'
+import { filterDirs, filterFiles, getSelectionRange } from '$src/utils/fileUtils'
 import { throttle } from '$src/utils/throttle'
 import { FileState } from '$src/state/fileState'
 import { FileContextMenu } from '$src/components/menus/FileContextMenu'
@@ -194,7 +194,7 @@ export class FileTableClass extends React.Component<Props, State> {
                     if (cache) {
                         // when cache is being (re)loaded, cache.files is empty:
                         // we don't want to show "empty folder" placeholder
-                        // that case, only when cache is loaded and there are no files
+                        // in that case, only when cache is loaded and there are no files
                         if (cache.cmd === 'cwd' || cache.history.length) {
                             this.updateNodes(files)
                         }
@@ -206,6 +206,15 @@ export class FileTableClass extends React.Component<Props, State> {
                 (): void => {
                     this.cache && this.updateNodes(this.cache.files)
                 },
+            ),
+        )
+
+        this.disposers.push(
+            reaction(
+                (): boolean => {
+                    return !!this.cache?.showHiddenFiles
+                },
+                (): void => this.cache && this.updateNodes(this.cache.files),
             ),
         )
     }
@@ -238,11 +247,10 @@ export class FileTableClass extends React.Component<Props, State> {
     }
 
     private buildNodes = (list: File[], keepSelection = false): TableRow[] => {
-        // console.time('buildingNodes');
-        const { sortMethod, sortOrder } = this.cache
+        const { sortMethod, sortOrder, showHiddenFiles } = this.cache
         const SortFn = getSortMethod(sortMethod, sortOrder)
-        const dirs = list.filter((file) => file.isDir)
-        const files = list.filter((file) => !file.isDir)
+        const dirs = filterDirs(list, showHiddenFiles)
+        const files = filterFiles(list, showHiddenFiles)
 
         // if we sort by size, we only sort files by size: folders should still be sorted
         // alphabetically
@@ -250,8 +258,6 @@ export class FileTableClass extends React.Component<Props, State> {
             .sort(sortMethod !== 'size' ? SortFn : getSortMethod('name', 'asc'))
             .concat(files.sort(SortFn))
             .map((file) => this.buildNodeFromFile(file, keepSelection))
-
-        // console.timeEnd('buildingNodes');
 
         return nodes
     }
@@ -277,7 +283,6 @@ export class FileTableClass extends React.Component<Props, State> {
     }
 
     private updateNodes(files: File[]): void {
-        // reselect previously selected file in case of reload/change tab
         const keepSelection = !!this.cache.selected.length
 
         const nodes = this.buildNodes(files, keepSelection)
@@ -395,7 +400,6 @@ export class FileTableClass extends React.Component<Props, State> {
     }
 
     onRowClick = (data: RowMouseEventHandlerParams): void => {
-        console.log('onRowClick')
         const { rowData, event, index } = data
         const { nodes, selected } = this.state
         const originallySelected = rowData.isSelected
@@ -782,7 +786,6 @@ export class FileTableClass extends React.Component<Props, State> {
 
     onScroll = debounce(({ scrollTop }: ScrollParams): void => {
         this.cache.scrollTop = scrollTop
-        // console.log('onScroll: updating scrollTop', scrollTop, this.cache.path);
     }, SCROLL_DEBOUNCE)
 
     rowGetter = (index: Index): TableRow => this.getRow(index.index)
@@ -829,7 +832,6 @@ export class FileTableClass extends React.Component<Props, State> {
     ]
 
     renderFileContextMenu = (props: ContextMenu2ContentProps): JSX.Element => {
-        console.log('file under mouse', this.state.rightClickFile, props.isOpen)
         return props.isOpen ? <FileContextMenu fileUnderMouse={this.state.rightClickFile} /> : null
     }
 

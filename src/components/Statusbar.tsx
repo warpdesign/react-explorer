@@ -1,35 +1,35 @@
 import * as React from 'react'
-import { InputGroup, ControlGroup, Button, Intent, IconName } from '@blueprintjs/core'
+import { useState, useEffect } from 'react'
+import { InputGroup, ControlGroup, Button, Intent } from '@blueprintjs/core'
+import { IconNames } from '@blueprintjs/icons'
 import { Tooltip2 } from '@blueprintjs/popover2'
 import { observer } from 'mobx-react'
 import { useTranslation } from 'react-i18next'
-import classNames from 'classnames'
-
 import { useStores } from '$src/hooks/useStores'
+import { filterDirs, filterFiles } from '$src/utils/fileUtils'
 
 const Statusbar = observer(() => {
-    const { appState, viewState } = useStores('appState', 'viewState')
+    const { viewState } = useStores('viewState')
     const { t } = useTranslation()
     const fileCache = viewState.getVisibleCache()
-    const disabled = !fileCache.selected.length
-    const numDirs = fileCache.files.filter((file) => file.fullname !== '..' && file.isDir).length
-    const numFiles = fileCache.files.filter((file) => !file.isDir).length
-    const numSelected = fileCache.selected.length
-    const iconName = ((fileCache.getFS() && fileCache.getFS().icon) || 'offline') as IconName
-    const offline = classNames('status-bar', { offline: fileCache.status === 'offline' })
+    const { files, showHiddenFiles, error, status } = fileCache
 
-    const onClipboardCopy = () => {
-        appState.clipboard.setClipboard(viewState.getVisibleCache())
-    }
+    const numDirs = filterDirs(files, showHiddenFiles).length
+    const numFiles = filterFiles(files, showHiddenFiles).length
+    const isDisabled = error || status !== 'ok'
+    const hiddenToggleIcon = showHiddenFiles ? IconNames.EYE_OPEN : IconNames.EYE_OFF
 
-    const copyButton = (
-        <Tooltip2 content={t('STATUS.CPTOOLTIP', { count: numSelected })} disabled={disabled}>
+    const toggleHiddenFilesButton = (
+        <Tooltip2
+            content={showHiddenFiles ? t('STATUS.HIDE_HIDDEN_FILES') : t('STATUS.SHOW_HIDDEN_FILES')}
+            disabled={isDisabled}
+        >
             <Button
                 data-cy-paste-bt
-                disabled={disabled}
-                icon="clipboard"
-                intent={(!disabled && Intent.PRIMARY) || Intent.NONE}
-                onClick={onClipboardCopy}
+                disabled={isDisabled}
+                icon={hiddenToggleIcon}
+                intent={(!isDisabled && showHiddenFiles && Intent.PRIMARY) || Intent.NONE}
+                onClick={() => fileCache.setShowHiddenFiles(!showHiddenFiles)}
                 minimal={true}
             />
         </Tooltip2>
@@ -39,12 +39,11 @@ const Statusbar = observer(() => {
         <ControlGroup>
             <InputGroup
                 disabled
-                leftIcon={iconName}
-                rightElement={copyButton}
+                rightElement={!isDisabled && toggleHiddenFilesButton}
                 value={`${t('STATUS.FILES', { count: numFiles })}, ${t('STATUS.FOLDERS', {
                     count: numDirs,
                 })}`}
-                className={offline}
+                className="status-bar"
             />
         </ControlGroup>
     )
