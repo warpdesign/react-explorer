@@ -270,7 +270,8 @@
             "TOGGLE_SPLITVIEW": "Activer/Désactiver Vue Double",
             "GO_PARENT": "Dossier parent",
             "GO_BACK": "Précédent",
-            "GO_FORWARD": "Suivant"
+            "GO_FORWARD": "Suivant",
+            "TOGGLE_HIDDEN_FILES": "Voir/Cacher Fichiers Cachés"
         }
     }
 }
