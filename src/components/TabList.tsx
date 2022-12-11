@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { useState, useCallback } from 'react'
-import { ButtonGroup, Button, Icon } from '@blueprintjs/core'
+import { ButtonGroup, Button, Icon, IconName } from '@blueprintjs/core'
 import { observer } from 'mobx-react'
 import { MenuItemConstructorOptions, ipcRenderer } from 'electron'
 import { useTranslation } from 'react-i18next'
@@ -9,8 +9,32 @@ import useIpcRendererListener from '$src/hooks/useIpcRendererListener'
 import { sendFakeCombo } from '$src/utils/keyboard'
 import { AppAlert } from '$src/components/AppAlert'
 import { LocalizedError } from '$src/locale/error'
-import { getTabIcon } from '$src/constants/icons'
 import { useStores } from '$src/hooks/useStores'
+import { UserHomeIcons } from '$src/constants/icons'
+import { ALL_DIRS } from '$src/utils/platform'
+
+/**
+ * build a list of { regex, IconName } to match folders with an icon
+ * For eg:
+ * {
+ *    regex: /^/Users/leo$/,
+ *    icon: 'home'
+ * }
+ */
+export const TabIcons = Object.keys(UserHomeIcons).map((dirname: string) => ({
+    regex: new RegExp(`^${ALL_DIRS[dirname]}$`),
+    icon: UserHomeIcons[dirname],
+}))
+
+export const getTabIcon = (path: string): IconName => {
+    for (const obj of TabIcons) {
+        if (obj.regex.test(path)) {
+            return obj.icon as IconName
+        }
+    }
+
+    return 'folder-close'
+}
 
 const TabList = observer(() => {
     const { viewState, settingsState } = useStores('viewState', 'settingsState')
