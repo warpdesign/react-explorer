@@ -7,29 +7,15 @@ interface Props {
     progress?: number
 }
 
-export class Badge extends React.Component<Props> {
-    static defaultProps = {
-        intent: Intent.NONE,
-        text: '1',
-        progress: 0,
-    }
-
-    constructor(props: Props) {
-        super(props)
-    }
-
-    render(): React.ReactNode {
-        const { intent, text, progress } = this.props
-
-        if (text) {
-            return (
-                <div className={`app-badge bp4-intent-${intent}`}>
-                    <span className="app-badge-content">{text}</span>
-                    <Spinner size={20} value={progress}></Spinner>
-                </div>
-            )
-        } else {
-            return null
-        }
+export const Badge = ({ intent = Intent.NONE, text = '', progress = 0 }: Props) => {
+    if (text) {
+        return (
+            <div className={`app-badge bp4-intent-${intent}`}>
+                <span className="app-badge-content">{text}</span>
+                <Spinner size={20} value={progress}></Spinner>
+            </div>
+        )
+    } else {
+        return null
     }
 }
