@@ -70,7 +70,7 @@ describe('FileMenu', () => {
         })
     })
 
-    it.only('should disable individual menu items when disable condition is met', () => {
+    it('should disable individual menu items when disable condition is met', () => {
         const props = { ...PROPS, selectedItemsLength: 0 }
         const options = {
             providerProps: {
