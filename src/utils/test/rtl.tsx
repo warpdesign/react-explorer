@@ -26,6 +26,7 @@ jest.mock('$src/locale/i18n', () => ({
 jest.mock('electron', () => ({
     ipcRenderer: {
         on: jest.fn(),
+        removeListener: jest.fn(),
         sendSync: jest.fn(),
         invoke: jest.fn(
             (command: string) =>

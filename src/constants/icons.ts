@@ -1,5 +1,7 @@
 import { IconName } from '@blueprintjs/core'
 
+import { ALL_DIRS } from '$src/utils/platform'
+
 /**
  * blueprint icon name for user home folders
  */
