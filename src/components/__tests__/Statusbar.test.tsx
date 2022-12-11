@@ -2,65 +2,43 @@
  * @jest-environment jsdom
  */
 import React from 'react'
-import { screen, setup, render, t, waitFor } from 'rtl'
+import { screen, setup, render, t } from 'rtl'
 import { Statusbar } from '../Statusbar'
 import { filterFiles, filterDirs } from '$src/utils/fileUtils'
-import { File } from '$src/services/Fs'
 import { ViewState } from '$src/state/viewState'
-import { FileState } from '$src/state/fileState'
-import { action, makeObservable, observable, runInAction } from 'mobx'
+import { vol } from 'memfs'
 
 describe('Statusbar', () => {
-    const cache = makeObservable(
+    vol.fromJSON(
         {
-            status: 'ok',
-            files: observable<File>([]),
-            setShowHiddenFiles: jest.fn((show: boolean) => {
-                cache.showHiddenFiles = show
-            }),
-            showHiddenFiles: false,
-            path: '/tmp',
-        } as unknown as FileState,
-        {
-            path: observable,
-            showHiddenFiles: observable,
-            setShowHiddenFiles: action,
+            dir1: null,
+            foo1: '',
+            foo2: '',
+            '.hidden': '',
         },
+        '/virtual',
     )
 
     const options = {
         providerProps: {
-            viewState: {
-                getVisibleCache: () => cache,
-            } as unknown as ViewState,
+            viewState: new ViewState(0),
         },
     }
 
     const buildStatusBarText = () => {
+        const cache = options.providerProps.viewState.getVisibleCache()
         const files = filterFiles(cache.files, cache.showHiddenFiles).length
         const folders = filterDirs(cache.files, cache.showHiddenFiles).length
+
         return `${t('STATUS.FILES', { count: files })}, ${t('STATUS.FOLDERS', {
             count: folders,
         })}`
     }
 
-    beforeEach(() => {
-        cache.status = 'ok'
-        cache.showHiddenFiles = false
-        cache.files.replace([
-            {
-                fullname: 'dir1',
-                isDir: true,
-            } as unknown as File,
-            {
-                fullname: 'foo1',
-                isDir: false,
-            } as unknown as File,
-            {
-                fullname: '.foo2',
-                isDir: false,
-            } as unknown as File,
-        ])
+    beforeEach(async () => {
+        options.providerProps.viewState = new ViewState(0)
+        const cache = options.providerProps.viewState.addCache('/virtual', -1, true)
+        await cache.openDirectory({ dir: '/virtual', fullname: '' })
 
         jest.clearAllMocks()
     })
@@ -81,7 +59,7 @@ describe('Statusbar', () => {
     })
 
     it('toggle hidden files button should be hidden if file cache is not valid', () => {
-        cache.status = 'busy'
+        options.providerProps.viewState.getVisibleCache().setStatus('busy')
         render(<Statusbar />, options)
 
         expect(screen.queryByRole('button')).not.toBeInTheDocument()

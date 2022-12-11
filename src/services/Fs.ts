@@ -1,9 +1,10 @@
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
 import { Readable } from 'stream'
+import { FsVirtual } from '$src/services/plugins/FsVirtual'
 
 import { isWin } from '$src/utils/platform'
 
-const interfaces: Array<Fs> = []
+const interfaces: Array<Fs> = [FsVirtual]
 
 export interface Credentials {
     user?: string
@@ -25,7 +26,7 @@ export interface File {
     name: string
     fullname: string
     extension: string
-    target: string
+    target: string | Buffer
     cDate: Date
     mDate: Date
     bDate: Date
@@ -130,7 +131,6 @@ export interface FsApi {
         transferId?: number,
     ): Promise<void>
     getParentTree(dir: string): Array<{ dir: string; fullname: string }>
-
     resolve(path: string): string
     sanityze(path: string): string
     join(...paths: string[]): string
@@ -146,7 +146,6 @@ export interface FsApi {
 
 export function getFS(path: string): Fs {
     const newfs = interfaces.find((filesystem) => filesystem.canread(path))
-    console.log('got FS', newfs)
     // if (!newfs) {
     //     newfs = FsGeneric;
     // }

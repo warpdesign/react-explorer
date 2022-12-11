@@ -12,12 +12,11 @@ import child_process from 'child_process'
 
 import { ExplorerApp } from '$src/components/App'
 import { i18n } from '$src/locale/i18n'
-import { SettingsState } from '$src/state/settingsState'
 // register Fs that will be available in React-Explorer
 // I guess there is a better place to do that
-import { FsGeneric } from '$src/services/plugins/FsGeneric'
 import { FsWsl } from '$src/services/plugins/FsWsl'
 import { FsLocal } from '$src/services/plugins/FsLocal'
+import { FsGeneric } from '$src/services/plugins/FsGeneric'
 import { registerFs } from '$src/services/Fs'
 import { AppState } from '$src/state/appState'
 
@@ -29,9 +28,11 @@ configure({
     safeDescriptors: window.ENV.CY ? false : true,
 })
 
+// TODO: there should be an easy way to automatically register new FS
 function initFS() {
-    if ((process && process.env && process.env.NODE_ENV === 'test') || window.ENV.CY) {
+    if ((process && process.env && process.env.NODE_ENV === 'test') || window.ENV.CY || typeof jest !== 'undefined') {
         registerFs(FsGeneric)
+        // registerFs(FsVirtual)
     } else {
         registerFs(FsWsl)
         registerFs(FsLocal)
@@ -92,8 +93,5 @@ class App {
     }
 }
 
-;(async () => {
-    await new Promise((res) => setTimeout(res, 1000))
-    const app = new App()
-    app.init()
-})()
+const app = new App()
+app.init()

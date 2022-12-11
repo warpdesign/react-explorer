@@ -239,7 +239,7 @@ export class TransferState {
             if (isSym) {
                 const linkPath = dstFs.join(fullDstPath, newFilename)
                 try {
-                    await srcFs.makeSymlink(transfer.file.target, linkPath, this.id)
+                    await srcFs.makeSymlink(transfer.file.target as string, linkPath, this.id)
                     runInAction(() => (transfer.status = 'done'))
                 } catch (err) {
                     this.onTransferError(transfer, err)
