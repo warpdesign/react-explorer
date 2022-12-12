@@ -36,6 +36,7 @@ const PrefsDialog = ({ isOpen, onClose }: PrefsProps) => {
     const [defaultFolder, setDefaultFolder] = useState(settingsState.defaultFolder)
     const [darkMode, setDarkMode] = useState(settingsState.darkMode)
     const [defaultTerminal, setDefaultTerminal] = useState(settingsState.defaultTerminal)
+    // TODO: we could have a default folder that's not using FsLocal
     const [isFolderValid, setIsFolderValid] = useState(
         () => FsLocal.canread(defaultFolder) && FolderExists(defaultFolder),
     )
@@ -43,6 +44,7 @@ const PrefsDialog = ({ isOpen, onClose }: PrefsProps) => {
 
     const checkPath: (path: string) => void = debounce((path: string) => {
         const isValid = FsLocal.canread(path) && FolderExists(path)
+
         if (path !== settingsState.defaultFolder) {
             setIsFolderValid(isValid)
             // need to save settings

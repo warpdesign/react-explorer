@@ -6,7 +6,6 @@ import { I18nextProvider } from 'react-i18next'
 import { Provider } from 'mobx-react'
 import { DndProvider } from 'react-dnd'
 import { HTML5Backend } from 'react-dnd-html5-backend'
-import { ipcRenderer } from 'electron'
 import process from 'process'
 import child_process from 'child_process'
 

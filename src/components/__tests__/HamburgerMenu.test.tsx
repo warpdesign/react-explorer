@@ -5,7 +5,7 @@ import React from 'react'
 import { screen, render, setup, t } from 'rtl'
 import { HamburgerMenu } from '../HamburgerMenu'
 
-describe('Badge', () => {
+describe('HamburgerMenu', () => {
     const PROPS = {
         onOpenPrefs: jest.fn(),
         onOpenShortcuts: jest.fn(),

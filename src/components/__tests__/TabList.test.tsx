@@ -4,7 +4,7 @@
 import React from 'react'
 import { within } from '@testing-library/dom'
 
-import { screen, setup, render, t } from 'rtl'
+import { screen, setup, render, t, isSelected } from 'rtl'
 import { ViewState } from '$src/state/viewState'
 import { ipcRenderer } from 'electron'
 import { vol } from 'memfs'
@@ -33,8 +33,6 @@ describe('TabList', () => {
             settingsState: settingsState as SettingsState,
         },
     }
-
-    const isSelected = (element: HTMLElement) => element.classList.contains(Classes.INTENT_PRIMARY)
 
     beforeEach(async () => {
         options.providerProps.viewState = new ViewState(0)
