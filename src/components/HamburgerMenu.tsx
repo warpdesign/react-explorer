@@ -1,32 +1,22 @@
 import * as React from 'react'
 import { Menu, MenuItem, MenuDivider } from '@blueprintjs/core'
-import { withTranslation, WithTranslation } from 'react-i18next'
+import { useTranslation } from 'react-i18next'
 
-interface HamburgerProps extends WithTranslation {
+interface HamburgerProps {
     onOpenPrefs: () => void
     onOpenShortcuts: () => void
 }
 
-export class HamburgerMenuClass extends React.Component<HamburgerProps> {
-    constructor(props: HamburgerProps) {
-        super(props)
-    }
+export const HamburgerMenu = ({ onOpenPrefs, onOpenShortcuts }: HamburgerProps) => {
+    const { t } = useTranslation()
 
-    public render(): React.ReactNode {
-        const { t } = this.props
-
-        return (
-            <React.Fragment>
-                <Menu className="data-cy-app-menu">
-                    <MenuItem text={t('NAV.PREFS')} icon="cog" onClick={this.props.onOpenPrefs} />
-                    <MenuDivider />
-                    <MenuItem text={t('NAV.SHORTCUTS')} icon="lightbulb" onClick={this.props.onOpenShortcuts} />
-                </Menu>
-            </React.Fragment>
-        )
-    }
+    return (
+        <>
+            <Menu className="data-cy-app-menu">
+                <MenuItem text={t('NAV.PREFS')} icon="cog" onClick={onOpenPrefs} />
+                <MenuDivider />
+                <MenuItem text={t('NAV.SHORTCUTS')} icon="lightbulb" onClick={onOpenShortcuts} />
+            </Menu>
+        </>
+    )
 }
-
-const HamburgerMenu = withTranslation()(HamburgerMenuClass)
-
-export { HamburgerMenu }
