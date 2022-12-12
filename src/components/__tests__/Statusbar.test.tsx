@@ -9,16 +9,6 @@ import { ViewState } from '$src/state/viewState'
 import { vol } from 'memfs'
 
 describe('Statusbar', () => {
-    vol.fromJSON(
-        {
-            dir1: null,
-            foo1: '',
-            foo2: '',
-            '.hidden': '',
-        },
-        '/virtual',
-    )
-
     const options = {
         providerProps: {
             viewState: new ViewState(0),

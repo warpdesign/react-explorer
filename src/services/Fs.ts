@@ -157,13 +157,11 @@ export const withConnection = (method: (...args: any[]) => any, waitForConnectio
     const retry_fn = async (...args: any[]) => {
         try {
             await waitForConnection()
+            return method(...args)
         } catch (e) {
-            console.log('e')
             debugger
-            retry_fn(...args)
+            console.log('withConnection error', { e })
         }
-
-        return method(...args)
     }
 
     return retry_fn

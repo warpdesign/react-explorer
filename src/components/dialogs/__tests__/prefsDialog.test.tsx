@@ -6,6 +6,7 @@ import { setup, screen, LOCALE_EN, waitFor } from 'rtl'
 import { SettingsState } from '$src/state/settingsState'
 import { PrefsDialog } from '../PrefsDialog'
 import { ipcRenderer } from 'electron'
+import * as FsLocalAll from '$src/services/plugins/FsLocal'
 
 describe('PrefsDialog', () => {
     let settingsState: SettingsState
@@ -50,14 +51,17 @@ describe('PrefsDialog', () => {
 
     it('should set default folder', async () => {
         const spy = jest.spyOn(settingsState, 'setDefaultFolder')
+        jest.spyOn(FsLocalAll, 'FolderExists').mockReturnValue(true)
         const { user } = setup(<PrefsDialog {...PROPS} />, { providerProps: { settingsState } })
-        screen.getByPlaceholderText(LOCALE_EN.DIALOG.PREFS.DEFAULT_FOLDER).focus()
+        const defaultFolderInput = screen.getByPlaceholderText(LOCALE_EN.DIALOG.PREFS.DEFAULT_FOLDER)
 
-        await user.paste('tmp/')
+        await user.clear(defaultFolderInput)
+        await user.paste('/virtual/dir1')
 
         await waitFor(() => expect(spy).toHaveBeenCalled())
 
-        expect(settingsState.defaultFolder).toBe('/tmp/')
+        expect(settingsState.defaultFolder).toBe('/virtual/dir1')
+        ;(FsLocalAll.FolderExists as jest.Mock).mockReset()
     })
 
     it('should set terminal', async () => {

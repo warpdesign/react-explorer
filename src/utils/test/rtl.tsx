@@ -8,10 +8,13 @@ import { DndProvider } from 'react-dnd'
 import { HTML5Backend } from 'react-dnd-html5-backend'
 import { i18n } from './i18n'
 import { I18nextProvider } from 'react-i18next'
-import { HotkeysProvider } from '@blueprintjs/core'
+import { Classes, HotkeysProvider } from '@blueprintjs/core'
+import { vol } from 'memfs'
+import userEvent from '@testing-library/user-event'
+import { configure as configureMobx } from 'mobx'
+
 import { registerFs } from '$src/services/Fs'
 import { FsVirtual } from '$src/services/plugins/FsVirtual'
-import userEvent from '@testing-library/user-event'
 import en from '$src/locale/lang/en.json'
 const i18next = i18n.i18next
 
@@ -24,6 +27,9 @@ jest.mock('$src/locale/i18n', () => ({
     languageList: ['en', 'fr'],
 }))
 jest.mock('electron', () => ({
+    shell: {
+        openPath: jest.fn(),
+    },
     ipcRenderer: {
         on: jest.fn(),
         removeListener: jest.fn(),
@@ -128,6 +134,8 @@ const setup = (jsx: ReactElement, options = {}) => {
 
 const wait = (delay = 0) => new Promise((res) => setTimeout(res, delay))
 
+const isSelected = (element: HTMLElement) => element.classList.contains(Classes.INTENT_PRIMARY)
+
 const t = i18n.i18next.t
 const LOCALE_EN = en.translations
 
@@ -135,10 +143,30 @@ configure({
     testIdAttribute: 'id',
 })
 
+// disable safeDescriptors so that we can spy on mobx actions
+configureMobx({ safeDescriptors: false })
+
 registerFs(FsVirtual)
+;(global as unknown as Window).ENV = {
+    CY: false,
+    VERSION: 'jest',
+    HASH: '',
+    NODE_ENV: 'production',
+    BUILD_DATE: new Date().toString(),
+}
+
+vol.fromJSON(
+    {
+        dir1: null,
+        foo1: '',
+        foo2: '',
+        '.hidden': '',
+    },
+    '/virtual',
+)
 
 // re-export everything
 export * from '@testing-library/react'
 
 // override render method
-export { customRender as render, setup, withMarkup, LOCALE_EN, userEvent, t, i18next, wait }
+export { customRender as render, setup, withMarkup, isSelected, LOCALE_EN, userEvent, t, i18next, wait }

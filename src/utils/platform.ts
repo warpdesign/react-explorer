@@ -8,7 +8,7 @@ const OS = (ipcRenderer && ipcRenderer.sendSync('app:getOS')) || {
     isLinux: platform === 'linux',
     optionKey: platform === 'darwin' ? 'Alt' : 'Control',
     lineEnding: platform === 'win32' ? '\r\n' : '\n',
-    defaultFolder: '/',
+    defaultFolder: typeof jest !== 'undefined' ? '/virtual' : '/',
     TMP_DIR: '/tmp',
     HOME_DIR: '/cy/home',
     DOWNLOADS_DIR: '/cy/downloads',

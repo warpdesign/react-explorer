@@ -39,7 +39,6 @@ const Nav = observer(() => {
     }
 
     const onToggleSplitView = (): void => {
-        debugger
         if (appState.isExplorer) {
             appState.toggleSplitViewMode()
         }
