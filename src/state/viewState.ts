@@ -52,6 +52,7 @@ export class ViewState {
     setVisibleCache(index: number): void {
         const previous = this.getVisibleCache()
         const next = this.caches[index]
+
         // do nothing if previous === next
         if (next && previous !== next) {
             if (previous) {

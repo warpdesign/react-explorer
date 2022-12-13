@@ -8,7 +8,7 @@ import { debounce } from '$src/utils/debounce'
 import { shouldCatchEvent } from '$src/utils/dom'
 import Keys from '$src/constants/keys'
 
-require('$src/css/log.css')
+import '$src/css/log.css'
 
 export interface JSObject extends Object {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

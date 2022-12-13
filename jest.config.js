@@ -14,6 +14,7 @@ module.exports = {
       __dirname,
    ],
    moduleNameMapper: {
-    "\\$src(.*)": "<rootDir>/src/$1"    
+    "\\.(s)?css(.*)$": "identity-obj-proxy",    
+    "\\$src(.*)": "<rootDir>/src/$1"
    }
 };

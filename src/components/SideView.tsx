@@ -73,7 +73,7 @@ export const SideView = observer(({ hide, viewState, onPaste }: SideViewProps) =
                 <Toolbar active={active && !busy} onPaste={onPaste} />
                 <FileTable hide={hide} />
                 <Statusbar />
-                <Overlay active={busy}>
+                <Overlay id={`files-loader-${viewState.viewId}`} active={busy}>
                     <Spinner />
                 </Overlay>
                 <Overlay active={dropOverlayActive}>

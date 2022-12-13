@@ -39,8 +39,8 @@ import { FileContextMenu } from '$src/components/menus/FileContextMenu'
 import Keys from '$src/constants/keys'
 import { TypeIcons } from '$src/constants/icons'
 
-require('react-virtualized/styles.css')
-require('$src/css/filetable.css')
+import 'react-virtualized/styles.css'
+import '$src/css/filetable.css'
 
 const CLICK_DELAY = 400
 const SCROLL_DEBOUNCE = 50
@@ -124,8 +124,6 @@ export class FileTableClass extends React.Component<Props, State> {
         // we re-render them after language has changed otherwise FileList
         // gets re-rendered with the wrong language after language has been changed
         this.bindLanguageChange()
-
-        // this.cache.cd(this.cache.path);
     }
 
     get cache(): FileState {

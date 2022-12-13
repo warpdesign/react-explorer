@@ -6,7 +6,6 @@ import { screen, setup, render, t } from 'rtl'
 import { Statusbar } from '../Statusbar'
 import { filterFiles, filterDirs } from '$src/utils/fileUtils'
 import { ViewState } from '$src/state/viewState'
-import { vol } from 'memfs'
 
 describe('Statusbar', () => {
     const options = {
