@@ -93,4 +93,15 @@ describe('MakedirDialog', () => {
 
         expect(PROPS.onClose).toHaveBeenCalledWith(folderName, true)
     })
+
+    it('should call onClose with path when pressing Enter', async () => {
+        const folderName = 'foo'
+        const { user } = setup(<MakedirDialog {...PROPS} />)
+
+        screen.getByPlaceholderText(LOCALE_EN.DIALOG.MAKEDIR.NAME).focus()
+        await user.paste(folderName)
+        await user.keyboard('{Enter>}')
+
+        expect(PROPS.onClose).toHaveBeenCalledWith(folderName, false)
+    })
 })

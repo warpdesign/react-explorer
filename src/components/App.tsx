@@ -24,12 +24,12 @@ import { KeyboardHotkeys } from '$src/components/shortcuts/KeyboardHotkeys'
 import { AppState } from '$src/state/appState'
 import Keys from '$src/constants/keys'
 
-require('@blueprintjs/core/lib/css/blueprint.css')
-require('@blueprintjs/icons/lib/css/blueprint-icons.css')
-require('@blueprintjs/popover2/lib/css/blueprint-popover2.css')
-require('$src/css/main.css')
-require('$src/css/windows.css')
-require('$src/css/scrollbars.css')
+import '@blueprintjs/core/lib/css/blueprint.css'
+import '@blueprintjs/icons/lib/css/blueprint-icons.css'
+import '@blueprintjs/popover2/lib/css/blueprint-popover2.css'
+import '$src/css/main.css'
+import '$src/css/windows.css'
+import '$src/css/scrollbars.css'
 
 interface InjectedProps extends WithTranslation {
     appState: AppState

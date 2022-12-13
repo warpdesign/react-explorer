@@ -339,10 +339,8 @@ export const ToolbarClass = inject(
                         ></Button>
                     )
                     const intent = status === -1 ? 'danger' : 'none'
-                    const count = selected.length
-
                     const isRoot = fileCache.isRoot()
-                    console.log(fileCache)
+
                     return (
                         <HotkeysTarget2 hotkeys={this.hotkeys}>
                             <ControlGroup className="toolbar">

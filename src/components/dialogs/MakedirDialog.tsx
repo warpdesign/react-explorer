@@ -51,7 +51,7 @@ const MakedirDialog = ({ onValidation, onClose, isOpen, parentPath }: MakedirPro
     const onKeyDown: React.KeyboardEventHandler = (e): void => {
         if (e.key === optionKey) {
             setIsOptionKeyPressed(true)
-        } else if (e.key === Keys.ENTER && isOptionKeyPressed) {
+        } else if (e.key === Keys.ENTER) {
             isValid && path.length && onCreate()
         }
     }

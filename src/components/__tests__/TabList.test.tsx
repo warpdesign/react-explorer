@@ -7,25 +7,14 @@ import { within } from '@testing-library/dom'
 import { screen, setup, render, t, isSelected } from 'rtl'
 import { ViewState } from '$src/state/viewState'
 import { ipcRenderer } from 'electron'
-import { vol } from 'memfs'
 
 import { TabList } from '../TabList'
 import { SettingsState } from '$src/state/settingsState'
-import { Classes } from '@blueprintjs/core'
 
 describe('TabList', () => {
     const settingsState = {
         defaultFolder: '/virtual',
     }
-
-    vol.fromJSON(
-        {
-            file1: '',
-            file2: '',
-            dir1: null,
-        },
-        '/virtual',
-    )
 
     const options = {
         providerProps: {

@@ -14,7 +14,7 @@ import { AppState } from '$src/state/appState'
 import { AppAlert } from '$src/components/AppAlert'
 import CONFIG from '$src/config/appConfig'
 
-require('$src/css/favoritesPanel.css')
+import '$src/css/favoritesPanel.css'
 
 interface LeftPanelState {
     nodes: TreeNodeInfo<string>[]

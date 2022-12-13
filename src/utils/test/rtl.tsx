@@ -143,6 +143,19 @@ configure({
     testIdAttribute: 'id',
 })
 
+const originalOffsetHeight = Object.getOwnPropertyDescriptor(HTMLElement.prototype, 'offsetHeight')
+const originalOffsetWidth = Object.getOwnPropertyDescriptor(HTMLElement.prototype, 'offsetWidth')
+
+beforeAll(() => {
+    Object.defineProperty(HTMLElement.prototype, 'offsetHeight', { configurable: true, value: 500 })
+    Object.defineProperty(HTMLElement.prototype, 'offsetWidth', { configurable: true, value: 500 })
+})
+
+afterAll(() => {
+    Object.defineProperty(HTMLElement.prototype, 'offsetHeight', originalOffsetHeight)
+    Object.defineProperty(HTMLElement.prototype, 'offsetWidth', originalOffsetWidth)
+})
+
 // disable safeDescriptors so that we can spy on mobx actions
 configureMobx({ safeDescriptors: false })
 
@@ -169,4 +182,4 @@ vol.fromJSON(
 export * from '@testing-library/react'
 
 // override render method
-export { customRender as render, setup, withMarkup, isSelected, LOCALE_EN, userEvent, t, i18next, wait }
+export { customRender as render, setup, withMarkup, isSelected, LOCALE_EN, userEvent, t, i18next, wait, vol }
