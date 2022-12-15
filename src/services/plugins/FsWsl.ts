@@ -2,7 +2,7 @@ import * as fs from 'fs'
 import * as path from 'path'
 
 import { LocalApi } from '$src/services/plugins/FsLocal'
-import { File, Credentials, Fs } from '$src/services/Fs'
+import { FileDescriptor, Credentials, Fs } from '$src/services/Fs'
 import { isWin } from '$src/utils/platform'
 import { WslWatch } from '$src/services/plugins/WslWatch'
 
@@ -44,7 +44,7 @@ export class WslApi extends LocalApi {
         return !!!dirName.match(invalidDirChars) && dirName !== '/'
     }
 
-    rename(source: string, file: File, newName: string, transferId = -1): Promise<string> {
+    rename(source: string, file: FileDescriptor, newName: string, transferId = -1): Promise<string> {
         const oldPath = path.join(source, file.fullname)
         const newPath = path.join(source, newName)
 

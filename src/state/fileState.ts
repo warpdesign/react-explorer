@@ -1,7 +1,7 @@
 import { observable, action, runInAction, makeObservable } from 'mobx'
 import { shell, ipcRenderer } from 'electron'
 
-import { FsApi, Fs, getFS, File, Credentials, withConnection, FileID } from '$src/services/Fs'
+import { FsApi, Fs, getFS, FileDescriptor, Credentials, withConnection, FileID } from '$src/services/Fs'
 import { Deferred } from '$src/utils/deferred'
 import { i18n } from '$src/locale/i18n'
 import { getLocalizedError } from '$src/locale/error'
@@ -17,9 +17,9 @@ export class FileState {
 
     previousPath: string
 
-    readonly files = observable<File>([])
+    readonly files = observable<FileDescriptor>([])
 
-    readonly selected = observable<File>([])
+    readonly selected = observable<FileDescriptor>([])
 
     // scroll position of fileCache: we need to restore it on
     // cache reload
@@ -365,7 +365,7 @@ export class FileState {
         }
     }
 
-    setSelectedFile(file: File): void {
+    setSelectedFile(file: FileDescriptor): void {
         if (file) {
             this.selectedId = {
                 ...file.id,
@@ -375,7 +375,7 @@ export class FileState {
         }
     }
 
-    setEditingFile(file: File): void {
+    setEditingFile(file: FileDescriptor): void {
         if (file) {
             this.editingId = {
                 ...file.id,
@@ -442,7 +442,7 @@ export class FileState {
                     runInAction(() => {
                         const isSameDir = this.path === path
 
-                        this.files.replace(files as File[])
+                        this.files.replace(files as FileDescriptor[])
 
                         this.updatePath(path, skipHistory)
                         this.cmd = ''
@@ -465,11 +465,11 @@ export class FileState {
             })
     }, this.waitForConnection)
 
-    list = withConnection((path: string): Promise<File[] | void> => {
+    list = withConnection((path: string): Promise<FileDescriptor[] | void> => {
         return this.api.list(path, true).catch(this.handleError)
     }, this.waitForConnection)
 
-    rename = withConnection((source: string, file: File, newName: string): Promise<string | void> => {
+    rename = withConnection((source: string, file: FileDescriptor, newName: string): Promise<string | void> => {
         return this.api
             .rename(source, file, newName)
             .then((newName: string) => {
@@ -508,7 +508,7 @@ export class FileState {
             .catch(this.handleError)
     }, this.waitForConnection)
 
-    delete = withConnection((source: string, files: File[]): Promise<number | void> => {
+    delete = withConnection((source: string, files: FileDescriptor[]): Promise<number | void> => {
         return this.api
             .delete(source, files)
             .then((num) => {
@@ -537,7 +537,7 @@ export class FileState {
         return this.api.join(path, path2)
     }
 
-    async openFile(appState: AppState, cache: FileState, file: File): Promise<void> {
+    async openFile(appState: AppState, cache: FileState, file: FileDescriptor): Promise<void> {
         try {
             const path = await appState.prepareLocalTransfer(cache, [file])
             const error = await this.shellOpenFile(path)

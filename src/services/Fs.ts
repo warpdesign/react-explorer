@@ -21,7 +21,7 @@ export interface FileID {
     dev: number
 }
 
-export interface File {
+export interface FileDescriptor {
     dir: string
     name: string
     fullname: string
@@ -113,12 +113,12 @@ export function filetype(mode: number, gid: number, uid: number, extension: stri
 export interface FsApi {
     // public API
     // async methods that may require server access
-    list(dir: string, watchDir?: boolean, transferId?: number): Promise<File[]>
+    list(dir: string, watchDir?: boolean, transferId?: number): Promise<FileDescriptor[]>
     cd(path: string, transferId?: number): Promise<string>
-    delete(parent: string, files: File[], transferId?: number): Promise<number>
+    delete(parent: string, files: FileDescriptor[], transferId?: number): Promise<number>
     makedir(parent: string, name: string, transferId?: number): Promise<string>
-    rename(parent: string, file: File, name: string, transferId?: number): Promise<string>
-    stat(path: string, transferId?: number): Promise<File>
+    rename(parent: string, file: FileDescriptor, name: string, transferId?: number): Promise<string>
+    stat(path: string, transferId?: number): Promise<FileDescriptor>
     isDir(path: string, transferId?: number): Promise<boolean>
     exists(path: string, transferId?: number): Promise<boolean>
     size(source: string, files: string[], transferId?: number): Promise<number>
@@ -195,7 +195,10 @@ export function needsConnection(target: any, key: any, descriptor: any) {
     return descriptor
 }
 
-export function sameID({ id: { ino, dev } }: File, { id: { ino: ino2, dev: dev2 } }: File): boolean {
+export function sameID(
+    { id: { ino, dev } }: FileDescriptor,
+    { id: { ino: ino2, dev: dev2 } }: FileDescriptor,
+): boolean {
     return ino === ino2 && dev === dev2
 }
 

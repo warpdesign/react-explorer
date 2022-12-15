@@ -13,8 +13,8 @@ import { createDragPreview } from 'react-dnd-text-dragpreview'
 import i18next from 'i18next'
 import { TableRowProps } from 'react-virtualized'
 
-import { File } from '$src/services/Fs'
 import { FileState } from '$src/state/fileState'
+import { DraggedObject } from '$src/types'
 
 function collect(
     connect: DragSourceConnector,
@@ -38,13 +38,6 @@ export interface RowRendererProps extends TableRowProps {
     isSelected: boolean
     connectDragPreview: DragElementWrapper<DragPreviewOptions>
     connectDragSource: DragElementWrapper<DragSourceOptions>
-}
-
-export interface DraggedObject {
-    selectedCount: number
-    fileState?: FileState
-    dragFiles?: File[]
-    files?: File[]
 }
 
 export interface CollectedProps {

@@ -21,14 +21,14 @@ import { ipcRenderer } from 'electron'
 
 import CONFIG from '$src/config/appConfig'
 import { AppState } from '$src/state/appState'
-import { File, FileID } from '$src/services/Fs'
+import { FileDescriptor, FileID } from '$src/services/Fs'
 import { TSORT_METHOD_NAME, TSORT_ORDER, getSortMethod } from '$src/services/FsSort'
 import { formatBytes } from '$src/utils/formatBytes'
 import { shouldCatchEvent, isEditable, isInRow } from '$src/utils/dom'
 import { AppAlert } from '$src/components/AppAlert'
 import { WithMenuAccelerators, Accelerators, Accelerator } from '$src/components/hoc/WithMenuAccelerators'
 import { isMac } from '$src/utils/platform'
-import { RowRenderer, RowRendererProps } from '$src/components/filetable/RowRenderer'
+import { RowRenderer, RowRendererProps } from './RowRenderer'
 import { SettingsState } from '$src/state/settingsState'
 import { ViewState } from '$src/state/viewState'
 import { debounce } from '$src/utils/debounce'
@@ -40,7 +40,8 @@ import Keys from '$src/constants/keys'
 import { TypeIcons } from '$src/constants/icons'
 
 import 'react-virtualized/styles.css'
-import '$src/css/filetable.css'
+import '$src/css/fileview-table.css'
+import { FileViewItem } from '$src/types'
 
 const CLICK_DELAY = 400
 const SCROLL_DEBOUNCE = 50
@@ -54,18 +55,8 @@ const NAME_COLUMN_WIDTH = 10
 const LABEL_CLASSNAME = 'file-label'
 const GRID_CLASSNAME = 'filetable-grid'
 
-interface TableRow {
-    name: string
-    icon: IconName
-    size: string
-    isSelected: boolean
-    nodeData: File
-    className: string
-    title: string
-}
-
 interface State {
-    nodes: TableRow[]
+    nodes: FileViewItem[]
     // number of items selected
     selected: number
     type: string
@@ -75,7 +66,7 @@ interface State {
     path: string
     isContextMenuOpen: boolean
     //
-    rightClickFile: File | null
+    rightClickFile: FileDescriptor | null
 }
 
 interface Props extends WithTranslation {
@@ -95,10 +86,10 @@ interface InjectedProps extends Props {
     settingsState: SettingsState
 }
 
-export class FileTableClass extends React.Component<Props, State> {
+export class FileViewClass extends React.Component<Props, State> {
     private disposers: Array<IReactionDisposer> = []
     private editingElement: HTMLElement = null
-    private editingFile: File
+    private editingFile: FileDescriptor
     private clickTimeout: number
 
     gridElement: HTMLElement
@@ -186,8 +177,8 @@ export class FileTableClass extends React.Component<Props, State> {
     private installReactions(): void {
         this.disposers.push(
             reaction(
-                (): IObservableArray<File> => toJS(this?.cache?.files),
-                (files: File[]): void => {
+                (): IObservableArray<FileDescriptor> => toJS(this?.cache?.files),
+                (files: FileDescriptor[]): void => {
                     const cache = this.cache
                     if (cache) {
                         // when cache is being (re)loaded, cache.files is empty:
@@ -223,7 +214,7 @@ export class FileTableClass extends React.Component<Props, State> {
         return !!cache.selected.find((file) => file.fullname === name)
     }
 
-    buildNodeFromFile(file: File, keepSelection: boolean): TableRow {
+    buildNodeFromFile(file: FileDescriptor, keepSelection: boolean): FileViewItem {
         const filetype = file.type
         const isSelected = (keepSelection && this.getSelectedState(file.fullname)) || false
         const classes = classNames({
@@ -231,7 +222,7 @@ export class FileTableClass extends React.Component<Props, State> {
             isSymlink: file.isSym,
         })
 
-        const res: TableRow = {
+        const res: FileViewItem = {
             icon: (file.isDir && TypeIcons['dir']) || (filetype && TypeIcons[filetype]) || TypeIcons['any'],
             name: file.fullname,
             title: file.isSym ? `${file.fullname} → ${file.target}` : file.fullname,
@@ -244,7 +235,7 @@ export class FileTableClass extends React.Component<Props, State> {
         return res
     }
 
-    private buildNodes = (list: File[], keepSelection = false): TableRow[] => {
+    private buildNodes = (list: FileDescriptor[], keepSelection = false): FileViewItem[] => {
         const { sortMethod, sortOrder, showHiddenFiles } = this.cache
         const SortFn = getSortMethod(sortMethod, sortOrder)
         const dirs = filterDirs(list, showHiddenFiles)
@@ -280,14 +271,14 @@ export class FileTableClass extends React.Component<Props, State> {
         }
     }
 
-    private updateNodes(files: File[]): void {
+    private updateNodes(files: FileDescriptor[]): void {
         const keepSelection = !!this.cache.selected.length
 
         const nodes = this.buildNodes(files, keepSelection)
         this.updateState(nodes, keepSelection)
     }
 
-    private updateState(nodes: TableRow[], keepSelection = false): void {
+    private updateState(nodes: FileViewItem[], keepSelection = false): void {
         const cache = this.cache
         const newPath = (nodes.length && nodes[0].nodeData.dir) || ''
         const position = keepSelection && cache.selectedId ? this.getFilePosition(nodes, cache.selectedId) : -1
@@ -303,14 +294,14 @@ export class FileTableClass extends React.Component<Props, State> {
         })
     }
 
-    getFilePosition(nodes: TableRow[], id: FileID): number {
+    getFilePosition(nodes: FileViewItem[], id: FileID): number {
         return nodes.findIndex((node) => {
             const fileId = node.nodeData.id
             return fileId && fileId.ino === id.ino && fileId.dev === id.dev
         })
     }
 
-    getRow(index: number): TableRow {
+    getRow(index: number): FileViewItem {
         return this.state.nodes[index]
     }
 
@@ -373,7 +364,7 @@ export class FileTableClass extends React.Component<Props, State> {
         }
     }
 
-    setEditElement(element: HTMLElement, file: File): void {
+    setEditElement(element: HTMLElement, file: FileDescriptor): void {
         const cache = this.cache
 
         this.editingElement = element
@@ -401,7 +392,7 @@ export class FileTableClass extends React.Component<Props, State> {
         const { rowData, event, index } = data
         const { nodes, selected } = this.state
         const originallySelected = rowData.isSelected
-        const file = rowData.nodeData as File
+        const file = rowData.nodeData as FileDescriptor
 
         // keep a reference to the target before set setTimeout is called
         // because React appaers to recycle the event object after event handler
@@ -494,10 +485,10 @@ export class FileTableClass extends React.Component<Props, State> {
 
         const selection = nodes
             .filter((node, i) => i !== position && node.isSelected)
-            .map((node) => node.nodeData) as File[]
+            .map((node) => node.nodeData) as FileDescriptor[]
 
         if (position > -1) {
-            const cursorFile = nodes[position].nodeData as File
+            const cursorFile = nodes[position].nodeData as FileDescriptor
             selection.push(cursorFile)
         }
 
@@ -524,7 +515,12 @@ export class FileTableClass extends React.Component<Props, State> {
         }
     }
 
-    toggleInlineRename(element: HTMLElement, originallySelected: boolean, file: File, selectText = true): void {
+    toggleInlineRename(
+        element: HTMLElement,
+        originallySelected: boolean,
+        file: FileDescriptor,
+        selectText = true,
+    ): void {
         if (!file.readonly) {
             if (originallySelected) {
                 element.contentEditable = 'true'
@@ -547,7 +543,7 @@ export class FileTableClass extends React.Component<Props, State> {
     onRowDoubleClick = (data: RowMouseEventHandlerParams): void => {
         this.clearClickTimeout()
         const { rowData, event } = data
-        const file = rowData.nodeData as File
+        const file = rowData.nodeData as FileDescriptor
 
         if ((event.target as HTMLElement) !== this.editingElement) {
             this.openFileOrDirectory(file, event.shiftKey)
@@ -555,10 +551,10 @@ export class FileTableClass extends React.Component<Props, State> {
     }
 
     onRowRightClick = (data: RowMouseEventHandlerParams): void => {
-        this.setState({ rightClickFile: data.rowData.nodeData as File })
+        this.setState({ rightClickFile: data.rowData.nodeData as FileDescriptor })
     }
 
-    async openFileOrDirectory(file: File, useInactiveCache: boolean): Promise<void> {
+    async openFileOrDirectory(file: FileDescriptor, useInactiveCache: boolean): Promise<void> {
         const { appState } = this.injected
 
         try {
@@ -622,7 +618,7 @@ export class FileTableClass extends React.Component<Props, State> {
         const { position, nodes } = this.state
 
         if (this.isViewActive() && position > -1) {
-            const file = nodes[position].nodeData as File
+            const file = nodes[position].nodeData as FileDescriptor
             this.openFileOrDirectory(file, e.shiftKey)
         }
     }
@@ -676,7 +672,7 @@ export class FileTableClass extends React.Component<Props, State> {
         if (this.state.selected > 0) {
             const { position, nodes } = this.state
             const node = nodes[position]
-            const file = nodes[position].nodeData as File
+            const file = nodes[position].nodeData as FileDescriptor
             const element = this.getNodeContentElement(position + 1)
             const span: HTMLElement = element.querySelector(`.${LABEL_CLASSNAME}`)
 
@@ -786,7 +782,7 @@ export class FileTableClass extends React.Component<Props, State> {
         this.cache.scrollTop = scrollTop
     }, SCROLL_DEBOUNCE)
 
-    rowGetter = (index: Index): TableRow => this.getRow(index.index)
+    rowGetter = (index: Index): FileViewItem => this.getRow(index.index)
 
     onBlankAreaClick = (e: React.MouseEvent<HTMLElement>): void => {
         if (e.target === this.gridElement) {
@@ -918,8 +914,8 @@ export class FileTableClass extends React.Component<Props, State> {
     }
 }
 
-const FileTable = withTranslation()(
-    inject('appState', 'viewState', 'settingsState')(WithMenuAccelerators(FileTableClass)),
+const FileView = withTranslation()(
+    inject('appState', 'viewState', 'settingsState')(WithMenuAccelerators(FileViewClass)),
 )
 
-export { FileTable }
+export { FileView }

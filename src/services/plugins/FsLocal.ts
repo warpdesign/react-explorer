@@ -5,7 +5,7 @@ import * as path from 'path'
 import mkdir = require('mkdirp')
 import del = require('del')
 
-import { FsApi, File, Credentials, Fs, filetype, MakeId } from '$src/services/Fs'
+import { FsApi, FileDescriptor, Credentials, Fs, filetype, MakeId } from '$src/services/Fs'
 import { size } from '$src/utils/size'
 import { throttle } from '$src/utils/throttle'
 import { isWin, HOME_DIR } from '$src/utils/platform'
@@ -109,7 +109,7 @@ export class LocalApi implements FsApi {
         })
     }
 
-    delete(source: string, files: File[], transferId = -1): Promise<number> {
+    delete(source: string, files: FileDescriptor[], transferId = -1): Promise<number> {
         const toDelete = files.map((file) => path.join(source, file.fullname))
 
         return new Promise(async (resolve, reject) => {
@@ -125,7 +125,7 @@ export class LocalApi implements FsApi {
         })
     }
 
-    rename(source: string, file: File, newName: string, transferId = -1): Promise<string> {
+    rename(source: string, file: FileDescriptor, newName: string, transferId = -1): Promise<string> {
         const oldPath = path.join(source, file.fullname)
         const newPath = path.join(source, newName)
 
@@ -205,11 +205,11 @@ export class LocalApi implements FsApi {
         }
     }
 
-    async stat(fullPath: string, transferId = -1): Promise<File> {
+    async stat(fullPath: string, transferId = -1): Promise<FileDescriptor> {
         try {
             const format = path.parse(fullPath)
             const stats = fs.lstatSync(fullPath)
-            const file: File = {
+            const file: FileDescriptor = {
                 dir: format.dir,
                 fullname: format.base,
                 name: format.name,
@@ -253,17 +253,17 @@ export class LocalApi implements FsApi {
         }
     }
 
-    async list(dir: string, watchDir = false, transferId = -1): Promise<File[]> {
+    async list(dir: string, watchDir = false, transferId = -1): Promise<FileDescriptor[]> {
         try {
             await this.isDir(dir)
-            return new Promise<File[]>((resolve, reject) => {
+            return new Promise<FileDescriptor[]>((resolve, reject) => {
                 fs.readdir(dir, (err, items) => {
                     if (err) {
                         reject(err)
                     } else {
                         const dirPath = path.resolve(dir)
 
-                        const files: File[] = []
+                        const files: FileDescriptor[] = []
 
                         for (let i = 0; i < items.length; i++) {
                             const file = LocalApi.fileFromPath(path.join(dirPath, items[i]))
@@ -284,7 +284,7 @@ export class LocalApi implements FsApi {
         }
     }
 
-    static fileFromPath(fullPath: string): File {
+    static fileFromPath(fullPath: string): FileDescriptor {
         const format = path.parse(fullPath)
         let name = fullPath
         let stats: Partial<fs.Stats> = null
@@ -320,7 +320,7 @@ export class LocalApi implements FsApi {
         const extension = path.parse(name).ext.toLowerCase()
         const mode = targetStats ? targetStats.mode : stats.mode
 
-        const file: File = {
+        const file: FileDescriptor = {
             dir: format.dir,
             fullname: format.base,
             name: format.name,

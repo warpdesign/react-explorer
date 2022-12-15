@@ -3,10 +3,10 @@ import { Menu, MenuItem, MenuDivider, Intent } from '@blueprintjs/core'
 import { useTranslation } from 'react-i18next'
 
 import { useStores } from '$src/hooks/useStores'
-import { File, sameID } from '$src/services/Fs'
+import { FileDescriptor, sameID } from '$src/services/Fs'
 
 interface Props {
-    fileUnderMouse: File | null
+    fileUnderMouse: FileDescriptor | null
 }
 
 const FileContextMenu = ({ fileUnderMouse }: Props) => {

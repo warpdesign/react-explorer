@@ -57,7 +57,7 @@ describe('SideView', () => {
         // // files loader
         expect(screen.getByTestId('files-loader-0')).toBeInTheDocument()
 
-        // // filetable
+        // // fileview
         const files = Object.keys(vol.toJSON())
             .map((path) => path.replace('/virtual/', ''))
             .filter((file) => !file.startsWith('.'))

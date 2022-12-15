@@ -5,7 +5,7 @@ import { Transform } from 'stream'
 import { EventEmitter } from 'events'
 import * as nodePath from 'path'
 
-import { FsApi, File, Credentials, Fs, filetype } from '$src/services/Fs'
+import { FsApi, FileDescriptor, Credentials, Fs, filetype } from '$src/services/Fs'
 import { throttle } from '$src/utils/throttle'
 import { Logger, JSObject } from '$src/components/Log'
 import { isWin, DOWNLOADS_DIR } from '$src/utils/platform'
@@ -207,7 +207,7 @@ class Client {
         }
     }
 
-    public list(path: string): Promise<File[]> {
+    public list(path: string): Promise<FileDescriptor[]> {
         this.status = 'busy'
 
         this.log('list', path)
@@ -230,14 +230,14 @@ class Client {
                     this.error('error calling list for', newpath)
                     reject(err)
                 } else {
-                    const files: File[] = list
+                    const files: FileDescriptor[] = list
                         .filter((ftpFile) => !ftpFile.name.match(/^[\.]{1,2}$/))
                         .map((ftpFile) => {
                             const format = nodePath.parse(ftpFile.name)
                             const ext = format.ext.toLowerCase()
                             const mDate = new Date(ftpFile.date)
 
-                            const file: File = {
+                            const file: FileDescriptor = {
                                 dir: path,
                                 name: ftpFile.name,
                                 fullname: ftpFile.name,
@@ -546,7 +546,7 @@ class FtpAPI implements FsApi {
         return this.master.mkdir(parent, name)
     }
 
-    delete(source: string, files: File[]): Promise<number> {
+    delete(source: string, files: FileDescriptor[]): Promise<number> {
         debugger
         return new Promise(async (resolve, reject) => {
             const fileList = files.filter((file) => !file.isDir)
@@ -590,7 +590,7 @@ class FtpAPI implements FsApi {
         })
     }
 
-    rename(source: string, file: File, newName: string): Promise<string> {
+    rename(source: string, file: FileDescriptor, newName: string): Promise<string> {
         console.log('FsFtp.rename')
         return this.master.rename(source, file.fullname, newName)
     }
@@ -607,7 +607,7 @@ class FtpAPI implements FsApi {
         // return Promise.resolve(false)
     }
 
-    list(dir: string): Promise<File[]> {
+    list(dir: string): Promise<FileDescriptor[]> {
         console.log('FsFtp.readDirectory', dir)
         return this.master.list(dir)
     }
@@ -619,7 +619,7 @@ class FtpAPI implements FsApi {
     }
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    async stat(fullPath: string): Promise<File> {
+    async stat(fullPath: string): Promise<FileDescriptor> {
         console.warn('FsFtp.stat: TODO')
         return Promise.resolve({
             dir: '',
@@ -633,7 +633,7 @@ class FtpAPI implements FsApi {
             isDir: false,
             readonly: false,
             type: '',
-        } as File)
+        } as FileDescriptor)
     }
 
     cd(path: string): Promise<string> {

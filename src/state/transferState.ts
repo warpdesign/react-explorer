@@ -1,7 +1,7 @@
 import { observable, action, computed, makeObservable, runInAction } from 'mobx'
 import type { Readable } from 'stream'
 
-import { FsApi, File } from '$src/services/Fs'
+import { FsApi, FileDescriptor } from '$src/services/Fs'
 import { Deferred } from '$src/utils/deferred'
 import { getLocalizedError } from '$src/locale/error'
 import { getSelectionRange } from '$src/utils/fileUtils'
@@ -9,7 +9,7 @@ import { isWin } from '$src/utils/platform'
 import { LocalizedError } from '$src/locale/error'
 
 export interface FileTransfer {
-    file: File
+    file: FileDescriptor
     status: 'started' | 'cancelled' | 'error' | 'done' | 'queued'
     progress: number
     subDirectory: string
@@ -20,7 +20,7 @@ export interface FileTransfer {
 
 export interface TransferOptions {
     // source data
-    files: File[]
+    files: FileDescriptor[]
     srcFs: FsApi
     srcPath: string
 
@@ -445,7 +445,7 @@ export class TransferState {
         return lastPart
     }
 
-    async getFileList(srcFiles: File[], subDirectory = ''): Promise<FileTransfer[]> {
+    async getFileList(srcFiles: FileDescriptor[], subDirectory = ''): Promise<FileTransfer[]> {
         // console.log('getting file list');
         const dirs = srcFiles.filter((file) => file.isDir)
         const files = srcFiles.filter((file) => !file.isDir)
@@ -480,7 +480,7 @@ export class TransferState {
             const currentPath = this.srcFs.join(dir.dir, dir.fullname)
             // note: this is needed for FTP only: since Ftp.list(path) has to ignore the path
             // and lists the contents of the CWD (which is changed by calling Ftp.cd())
-            let subFiles: File[] = null
+            let subFiles: FileDescriptor[] = null
             // /note
             try {
                 await this.srcFs.cd(currentPath)
@@ -500,14 +500,14 @@ export class TransferState {
         return transfers
     }
 
-    async setFileList(files: File[]): Promise<void> {
+    async setFileList(files: FileDescriptor[]): Promise<void> {
         const transfers = await this.getFileList(files)
         console.log('got files', transfers)
         // transfers.forEach(t => console.log(`[${t.status}] ${t.file.dir}/${t.file.fullname}:${t.file.isDir}, ${t.subDirectory} (${t.newSub})`))
         this.elements.replace(transfers)
     }
 
-    async prepare(files: File[]) {
+    async prepare(files: FileDescriptor[]) {
         // get full list of files, which means going into each directory
         // and getting file list recursvely
         await this.setFileList(files)
