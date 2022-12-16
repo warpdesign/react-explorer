@@ -28,5 +28,4 @@ export interface DraggedObject {
     selectedCount: number
     fileState?: FileState
     dragFiles?: FileDescriptor[]
-    files?: FileDescriptor[]
 }

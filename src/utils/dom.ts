@@ -1,5 +1,7 @@
 import React from 'react'
 import { Classes } from '@blueprintjs/core'
+import { string } from 'prop-types'
+import { getSelectionRange } from './fileUtils'
 
 export function shouldCatchEvent(e: Event): boolean {
     const element = e.target as HTMLElement
@@ -27,4 +29,17 @@ export function getTargetTagName(e: Event): string {
 export function isInRow(e: React.MouseEvent<HTMLElement, MouseEvent>): boolean {
     const element = e.target as Element
     return !!element.closest('[role="row"]')
+}
+
+export function selectLeftPart(name: string, element: HTMLElement): void {
+    // const filename = this.editingFile.fullname
+    const selectionRange = getSelectionRange(name)
+    const selection = window.getSelection()
+    const range = document.createRange()
+    // const textNode = this.editingElement.childNodes[0]
+
+    range.setStart(element, selectionRange.start)
+    range.setEnd(element, selectionRange.end)
+    selection.empty()
+    selection.addRange(range)
 }

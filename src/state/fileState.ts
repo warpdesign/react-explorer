@@ -191,6 +191,7 @@ export class FileState {
             emptyCache: action,
             cd: action,
             setShowHiddenFiles: action,
+            getSelectedState: observable,
         })
 
         this.viewId = viewId
@@ -241,6 +242,10 @@ export class FileState {
         }
 
         return newfs
+    }
+
+    public getSelectedState(name: string) {
+        return this.selected.find(({ fullname }) => fullname === name)
     }
 
     public getAPI(): FsApi {
