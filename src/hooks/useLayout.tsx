@@ -1,4 +1,4 @@
-import React, { useRef } from 'react'
+import React, { useCallback, useRef } from 'react'
 import type { ReactElement } from 'react'
 
 import { DraggedObject, FileViewItem } from '$src/types'
@@ -35,7 +35,6 @@ export interface LayoutProps {
     status: TStatus
     error: boolean
     itemCount: number
-    // ref: React.RefObject<ReactElement>
     width: number
     height: number
     columns: Column[]
@@ -47,6 +46,8 @@ export interface LayoutReturnProps {
         navigate: (direction: string) => void
         selectAll: () => void
         invertSelection: () => void
+        setEditElement: (index: number) => void
+        setCursor: (index: number) => void
     }
 }
 
@@ -54,14 +55,6 @@ interface Column {
     key: string
     label: string
 }
-
-//
-// t('FILETABLE.COL_SIZE')
-
-// actions
-// - navigate (arrow keys, page up/down)
-// - (de)selectAll
-// - invertSelection
 
 export const useLayout = (name: LayoutName): LayoutReturnProps => {
     const Layout = layouts[name]
@@ -73,11 +66,13 @@ export const useLayout = (name: LayoutName): LayoutReturnProps => {
     // TODO: maybe have a ready event since layoutRef could be null ?
 
     return {
-        Layout: (props: LayoutProps) => <Layout {...props} ref={layoutRef} />,
+        Layout: useCallback((props: LayoutProps) => <Layout {...props} ref={layoutRef} />, [layoutRef, name]),
         actions: {
             navigate: (direction: string) => layoutRef.current.navigate(direction),
             selectAll: () => layoutRef.current.selectAll(),
             invertSelection: () => layoutRef.current.invertSelection(),
+            setEditElement: (index: number) => layoutRef.current.setEditElement(index),
+            setCursor: (index: number) => layoutRef.current.setCursor(index),
         },
     }
 }

@@ -266,8 +266,10 @@ export class LocalApi implements FsApi {
                         const files: FileDescriptor[] = []
 
                         for (let i = 0; i < items.length; i++) {
-                            const file = LocalApi.fileFromPath(path.join(dirPath, items[i]))
-                            files.push(file)
+                            if (items[i] !== '...') {
+                                const file = LocalApi.fileFromPath(path.join(dirPath, items[i]))
+                                files.push(file)
+                            }
                         }
 
                         watchDir && this.onList(dirPath)

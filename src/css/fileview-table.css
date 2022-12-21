@@ -2,6 +2,7 @@
     display:flex;
     flex-grow:1;
     position:relative;
+    overflow: auto;
 }
 
 .fileListSizerWrapper .empty {
@@ -25,18 +26,23 @@
     color:rgba(92, 112, 128, 0.5);
 }
 
+.tableRow {
+    align-items: center;
+    display: flex;
+}
+
 .tableRow .size {
+    margin-right: 10px;
     text-align:right;
-    /* react-virtualized's Column component only allows to set a number for the flex-basis:
-       since styles are set on the style property the only way to set it to "auto" is to use
-       !important :/
-    */
-    flex-basis:auto !important;
+    flex-shrink: 0;
 }
 
 .tableRow .name {
     display:flex;
     align-items: center;
+    margin-left: 10px;
+    flex-grow: 1;
+    flex-shrink: 1;
 }
 
 .tableRow .file-label {

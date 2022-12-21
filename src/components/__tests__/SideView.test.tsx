@@ -20,8 +20,8 @@ describe('SideView', () => {
 
     const buildStatusBarText = () => {
         const cache = PROPS.viewState.getVisibleCache()
-        const files = filterFiles(cache.files, cache.showHiddenFiles).length
-        const folders = filterDirs(cache.files, cache.showHiddenFiles).length
+        const files = filterFiles(cache.files).length
+        const folders = filterDirs(cache.files).length
 
         return `${t('STATUS.FILES', { count: files })}, ${t('STATUS.FOLDERS', {
             count: folders,

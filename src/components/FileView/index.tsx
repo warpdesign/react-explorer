@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 import { ContextMenu2, ContextMenu2ChildrenProps, ContextMenu2ContentProps } from '@blueprintjs/popover2'
 import { IconName, Icon, HotkeysTarget2, Classes } from '@blueprintjs/core'
 import { useTranslation } from 'react-i18next'
@@ -9,7 +9,7 @@ import classNames from 'classnames'
 import { ipcRenderer } from 'electron'
 
 import { AppState } from '$src/state/appState'
-import { FileDescriptor, FileID } from '$src/services/Fs'
+import { FileDescriptor, FileID, sameID } from '$src/services/Fs'
 import { TSORT_METHOD_NAME, TSORT_ORDER, getSortMethod } from '$src/services/FsSort'
 import { formatBytes } from '$src/utils/formatBytes'
 import { shouldCatchEvent, isEditable, isInRow } from '$src/utils/dom'
@@ -32,7 +32,6 @@ import { DraggedObject, FileViewItem } from '$src/types'
 import { HeaderMouseEvent, ItemMouseEvent, useLayout } from '$src/hooks/useLayout'
 import { useStores } from '$src/hooks/useStores'
 
-const CLICK_DELAY = 400
 const SCROLL_DEBOUNCE = 50
 const ARROW_KEYS_REPEAT_DELAY = 5
 
@@ -57,14 +56,23 @@ interface Props {
 
 const FileView = ({ hide }: Props) => {
     const { settingsState, viewState, appState } = useStores('settingsState', 'viewState', 'appState')
+    const { t } = useTranslation()
     const cache = viewState.getVisibleCache()
     const [nodes, setNodes] = useState<FileViewItem[]>([])
-    const [selected, setSelected] = useState<number>(0)
-    const [position, setPosition] = useState<number>(-1)
-    const [path, setPath] = useState<string>(cache.path)
-    const [rightClickFile, setRightClickFile] = useState<FileDescriptor | null>(null)
-    const { t } = useTranslation()
+    const path = cache.path
     const rowCount = nodes.length
+
+    // const [path, setPath] = useState<string>(cache.path)
+    const [rightClickFile, setRightClickFile] = useState<FileDescriptor | null>(null)
+    // const fileviewRef = useRef(null)
+
+    const {
+        Layout,
+        actions: { setCursor },
+    } = useLayout('details')
+
+    const clickRef = useRef(0)
+    const [count, setCount] = useState(0)
     // private disposers: Array<IReactionDisposer> = []
     // private editingFile: FileDescriptor
     // private clickTimeout: number
@@ -79,6 +87,7 @@ const FileView = ({ hide }: Props) => {
                         // we don't want to show "empty folder" placeholder
                         // in that case, only when cache is loaded and there are no files
                         if (cache.cmd === 'cwd' || cache.history.length) {
+                            console.log('reaction 1')
                             updateNodes(files)
                         }
                     }
@@ -87,6 +96,7 @@ const FileView = ({ hide }: Props) => {
             reaction(
                 (): boolean => cache?.error,
                 (): void => {
+                    console.log('reaction 2')
                     cache && updateNodes(cache.files)
                 },
             ),
@@ -94,7 +104,19 @@ const FileView = ({ hide }: Props) => {
                 (): boolean => {
                     return !!cache?.showHiddenFiles
                 },
-                (): void => cache && updateNodes(cache.files),
+                (): void => {
+                    console.log('reaction 3')
+                    cache && updateNodes(cache.files)
+                },
+            ),
+            reaction(
+                () => {
+                    return toJS(cache?.selected)
+                },
+                (): void => {
+                    console.log('reaction 4 (selected files)')
+                    cache && updateNodes(cache.files)
+                },
             ),
         ]
 
@@ -111,7 +133,7 @@ const FileView = ({ hide }: Props) => {
         const nodes = buildNodes(files, keepSelection)
         console.log('WARN: keepSelection not update in state')
         setNodes(nodes)
-        setPath((nodes.length && nodes[0].nodeData.dir) || '')
+        // setPath((nodes.length && nodes[0].nodeData.dir) || '')
         // updateState(nodes, keepSelection)
     }
 
@@ -137,41 +159,12 @@ const FileView = ({ hide }: Props) => {
     }
 
     const buildNodes = (list: FileDescriptor[], keepSelection = false): FileViewItem[] => {
-        const { sortMethod, sortOrder, showHiddenFiles } = cache
-        const SortFn = getSortMethod(sortMethod, sortOrder)
-        const dirs = filterDirs(list, showHiddenFiles)
-        const files = filterFiles(list, showHiddenFiles)
-
         // if we sort by size, we only sort files by size: folders should still be sorted
         // alphabetically
-        const nodes = dirs
-            .sort(sortMethod !== 'size' ? SortFn : getSortMethod('name', 'asc'))
-            .concat(files.sort(SortFn))
-            .map((file) => buildNodeFromFile(file, keepSelection))
+        const nodes = list.map((file) => buildNodeFromFile(file, keepSelection))
 
         return nodes
     }
-
-    const updateState = (nodes: FileViewItem[], keepSelection = false): void => {
-        const newPath = (nodes.length && nodes[0].nodeData.dir) || ''
-        const position = keepSelection && cache.selectedId ? getFilePosition(nodes, cache.selectedId) : -1
-
-        // cancel inlineedit if there was one
-        // DISABLEFORNOW this.clearEditElement()
-        // this.setState({ nodes, selected: keepSelection ? selected : 0, position, path: newPath }, () => {
-        //     if (keepSelection && cache.editingId && position > -1) {
-        //         console.log('DISABLE: updateState() => this.getElementAndToggleRename(undefined, false)')
-        //         // this.getElementAndToggleRename(undefined, false)
-        //     } else if (this.editingElement) {
-        //         this.editingElement = null
-        //     }
-        // })
-    }
-    const getFilePosition = (nodes: FileViewItem[], id: FileID): number =>
-        nodes.findIndex((node) => {
-            const fileId = node.nodeData.id
-            return fileId && fileId.ino === id.ino && fileId.dev === id.dev
-        })
 
     // DISABLE FOR NOW gridElement: HTMLElement
     // tableRef: React.RefObject<Table> = React.createRef()
@@ -255,68 +248,64 @@ const FileView = ({ hide }: Props) => {
     }
 
     const onItemClick = ({ data, index, event }: ItemMouseEvent): void => {
-        // const { rowData, event } = data
-        event.stopPropagation()
-        const originallySelected = data.isSelected
-        const file = data.nodeData as FileDescriptor
+        const file = nodes[index].nodeData
+        console.log(
+            'onItemClick',
+            index,
+            cache.selected.findIndex((selectedFile) => sameID(selectedFile, file)),
+        )
+        // TODO: use OS specific instead of mac only metaKey
+        const toggleSelection = event.metaKey
 
-        // keep a reference to the target before set setTimeout is called
-        // because React appaers to recycle the event object after event handler
-        // has returned
-        const element = event.target as HTMLElement
+        // 1. update view cursor
+        // console.log('setting cursor')
+        // setCursor(index)
 
-        // // do not select parent dir pseudo file
-        // if (this.editingElement === element) {
-        //     return
-        // }
-
-        let newSelected = selected
-        let position = index
-
-        if (!event.shiftKey) {
-            newSelected = 0
-            nodes.forEach((n) => (n.isSelected = false))
-            data.isSelected = true
-
-            // online toggle rename when clicking on the label, not the icon
-            console.warn('toggle rename DISABLED')
-            // if (element.classList.contains(LABEL_CLASSNAME)) {
-            //     this.clearClickTimeout()
-
-            //     // only toggle inline if last selected element was this one
-            //     if (index === this.state.position && originallySelected) {
-            //         this.clickTimeout = window.setTimeout(() => {
-            //             this.toggleInlineRename(element, originallySelected, file)
-            //         }, CLICK_DELAY)
-            //     }
-            // }
+        if (toggleSelection) {
+            cache.toggleSelection(file)
         } else {
-            console.warn('toggle rename else case not implemented !')
-            debugger
-            data.isSelected = !data.isSelected
-            if (!data.isSelected) {
-                // need to update position with last one
-                // will be -1 if no left selected node is
-                position = nodes.findIndex((node) => node.isSelected)
-            }
-            console.warn('onRowClick: this.setEditElement skipped')
-            // this.setEditElement(null, null)
+            // 2. update selection
+            const extendSelection = event.shiftKey
+            cache.addToSelection(file, extendSelection)
         }
 
-        if (data.isSelected) {
-            newSelected++
-        } else if (originallySelected && newSelected > 0) {
-            newSelected--
-        }
-
-        // this.setState({ nodes, selected: newSelected, position }, () => {
-        //     this.updateSelection()
-        // })
-        setNodes(nodes)
-        setSelected(newSelected)
-        setPosition(position)
-        console.warn('DISABLED: should update selection on state update')
+        // no need to update nodes: should be refreshed automatically using reactions
     }
+
+    // const onItemClick = ({ data, index, event }: ItemMouseEvent): void => {
+    //     // event.stopPropagation()
+    //     const originallySelected = data.isSelected
+
+    //     // let newSelected = selected
+    //     let position = index
+
+    //     if (!event.shiftKey) {
+    //         // newSelected = 0
+    //         nodes.forEach((n) => (n.isSelected = false))
+    //         data.isSelected = true
+    //     } else {
+    //         console.warn('toggle rename else case not implemented !')
+    //         debugger
+    //         data.isSelected = !data.isSelected
+    //         // if (!data.isSelected) {
+    //         //     // need to update position with last one
+    //         //     // will be -1 if no left selected node is
+    //         //     position = nodes.findIndex((node) => node.isSelected)
+    //         // }
+    //         console.warn('onRowClick: this.setEditElement skipped')
+    //     }
+
+    //     // if (data.isSelected) {
+    //     //     newSelected++
+    //     // } else if (originallySelected && newSelected > 0) {
+    //     //     newSelected--
+    //     // }
+
+    //     setNodes(nodes)
+    //     // setSelected(newSelected)
+    //     // setPosition(position)
+    //     console.warn('DISABLED: should update selection on state update')
+    // }
 
     // private onInlineEdit(cancel: boolean): void {
     //     const editingElement = this.editingElement
@@ -352,18 +341,18 @@ const FileView = ({ hide }: Props) => {
     //     editingElement.removeAttribute('contenteditable')
     // }
 
-    const updateSelection = (): void => {
-        const selection = nodes
-            .filter((node, i) => i !== position && node.isSelected)
-            .map((node) => node.nodeData) as FileDescriptor[]
+    // const updateSelection = (): void => {
+    //     const selection = nodes
+    //         .filter((node, i) => i !== position && node.isSelected)
+    //         .map((node) => node.nodeData) as FileDescriptor[]
 
-        if (position > -1) {
-            const cursorFile = nodes[position].nodeData as FileDescriptor
-            selection.push(cursorFile)
-        }
+    //     if (position > -1) {
+    //         const cursorFile = nodes[position].nodeData as FileDescriptor
+    //         selection.push(cursorFile)
+    //     }
 
-        appState.updateSelection(cache, selection)
-    }
+    //     appState.updateSelection(cache, selection)
+    // }
 
     // clearContentEditable(): void {
     //     if (this.editingElement) {
@@ -437,8 +426,8 @@ const FileView = ({ hide }: Props) => {
                 node.isSelected = false
             })
             setNodes(nodes)
-            setSelected(0)
-            setPosition(-1)
+            // setSelected(0)
+            // setPosition(-1)
             console.warn('disabled: updateSelection after state update (2)')
             // this.setState({ nodes, selected: 0, position: -1 }, () => {
             //     this.updateSelection()
@@ -447,37 +436,35 @@ const FileView = ({ hide }: Props) => {
     }
 
     const selectAll = (invert = false): void => {
-        let newSelected = selected
-        let newPosition = position
-        if (nodes.length && isViewActive()) {
-            newSelected = 0
-            newPosition = -1
-
-            let i = 0
-            for (const node of nodes) {
-                node.isSelected = invert ? !node.isSelected : true
-                if (node.isSelected) {
-                    newPosition = i
-                    newSelected++
-                }
-                i++
-            }
-
-            setNodes(nodes)
-            setSelected(newSelected)
-            setPosition(newPosition)
-            console.warn('disabled: updateSelection after state update (3)')
-            // this.setState({ nodes, selected, position }, () => {
-            //     this.updateSelection()
-            // })
-        }
+        // let newSelected = selected
+        // let newPosition = position
+        // if (nodes.length && isViewActive()) {
+        //     newSelected = 0
+        //     newPosition = -1
+        //     let i = 0
+        //     for (const node of nodes) {
+        //         node.isSelected = invert ? !node.isSelected : true
+        //         if (node.isSelected) {
+        //             newPosition = i
+        //             newSelected++
+        //         }
+        //         i++
+        //     }
+        //     setNodes(nodes)
+        //     setSelected(newSelected)
+        //     setPosition(newPosition)
+        //     console.warn('disabled: updateSelection after state update (3)')
+        //     // this.setState({ nodes, selected, position }, () => {
+        //     //     this.updateSelection()
+        //     // })
+        // }
     }
 
     const onOpenFile = (e: KeyboardEvent): void => {
-        if (isViewActive() && position > -1) {
-            const file = nodes[position].nodeData as FileDescriptor
-            openFileOrDirectory(file, e.shiftKey)
-        }
+        // if (isViewActive() && position > -1) {
+        //     const file = nodes[position].nodeData as FileDescriptor
+        //     openFileOrDirectory(file, e.shiftKey)
+        // }
     }
 
     const onSelectAll = (): void => {
@@ -622,13 +609,13 @@ const FileView = ({ hide }: Props) => {
 
     const getDraggedProps = (index: number): DraggedObject => {
         const { isSelected, nodeData } = nodes[index]
-        const selectedCount = isSelected ? selected : 0
-        const dragFiles = selectedCount > 0 ? cache.selected.slice(0) : [nodeData]
+        // const selectedCount = isSelected ? selected : 0
+        // const dragFiles = selectedCount > 0 ? cache.selected.slice(0) : [nodeData]
 
         return {
             fileState: cache,
-            dragFiles,
-            selectedCount,
+            dragFiles: [],
+            selectedCount: 0,
         }
     }
 
@@ -673,10 +660,6 @@ const FileView = ({ hide }: Props) => {
         // return props.isOpen ? <FileContextMenu fileUnderMouse={this.state.rightClickFile} /> : null
     }
 
-    const { Layout } = useLayout('details')
-
-    console.log('render...')
-
     return (
         <HotkeysTarget2 hotkeys={hotkeys}>
             <ContextMenu2 content={renderFileContextMenu}>
@@ -699,49 +682,42 @@ const FileView = ({ hide }: Props) => {
                             }
                             ctxMenuProps.onContextMenu(e)
                         }}
-                        // onKeyDown={this.onInputKeyDown}
                         className={classNames('fileListSizerWrapper', ctxMenuProps.className)}
                     >
-                        <>
-                            {ctxMenuProps.popover}
-                            <AutoSizer>
-                                {({ width, height }) => (
-                                    <>
-                                        <Layout
-                                            width={width}
-                                            height={height}
-                                            itemCount={rowCount}
-                                            getItem={getRow}
-                                            getDragProps={getDraggedProps}
-                                            onItemClick={onItemClick}
-                                            onHeaderClick={onHeaderClick}
-                                            onBlankAreaClick={unSelectAll}
-                                            onInlineEdit={() => {
-                                                console.log('TODO: inLineEdit')
-                                            }}
-                                            onItemDoubleClick={() => {
-                                                console.log('TODO: onItemDoubleClick')
-                                            }}
-                                            onItemRightClick={() => {
-                                                console.log('TODO: onItemRightClick')
-                                            }}
-                                            columns={[
-                                                {
-                                                    label: t('FILETABLE.COL_NAME'),
-                                                    key: 'name',
-                                                },
-                                                {
-                                                    label: t('FILETABLE.COL_SIZE'),
-                                                    key: 'size',
-                                                },
-                                            ]}
-                                            status={cache.status}
-                                            error={cache.error}
-                                        />
-                                    </>
-                                )}
-                            </AutoSizer>
-                        </>
+                        {ctxMenuProps.popover}
+                        <Layout
+                            width={0}
+                            height={0}
+                            itemCount={rowCount}
+                            getItem={getRow}
+                            getDragProps={getDraggedProps}
+                            onItemClick={onItemClick}
+                            onItemDoubleClick={() => {
+                                console.log('TODO: onItemDoubleClick')
+                            }}
+                            onHeaderClick={onHeaderClick}
+                            onBlankAreaClick={() => {
+                                console.log('TODO: onBlankAreaClick')
+                            }}
+                            onInlineEdit={() => {
+                                console.log('TODO: inLineEdit')
+                            }}
+                            onItemRightClick={() => {
+                                console.log('TODO: onItemRightClick')
+                            }}
+                            columns={[
+                                {
+                                    label: t('FILETABLE.COL_NAME'),
+                                    key: 'name',
+                                },
+                                {
+                                    label: t('FILETABLE.COL_SIZE'),
+                                    key: 'size',
+                                },
+                            ]}
+                            status={cache.status}
+                            error={cache.error}
+                        />
                     </div>
                 )}
             </ContextMenu2>

@@ -1,13 +1,14 @@
 import { observable, action, runInAction, makeObservable } from 'mobx'
 import { shell, ipcRenderer } from 'electron'
 
-import { FsApi, Fs, getFS, FileDescriptor, Credentials, withConnection, FileID } from '$src/services/Fs'
+import { FsApi, Fs, getFS, FileDescriptor, Credentials, withConnection, FileID, sameID } from '$src/services/Fs'
 import { Deferred } from '$src/utils/deferred'
 import { i18n } from '$src/locale/i18n'
 import { getLocalizedError } from '$src/locale/error'
 import { AppState } from '$src/state/appState'
-import { TSORT_METHOD_NAME, TSORT_ORDER } from '$src/services/FsSort'
+import { getSortMethod, TSORT_METHOD_NAME, TSORT_ORDER } from '$src/services/FsSort'
 import { AppAlert } from '$src/components/AppAlert'
+import { filterDirs, filterFiles, filterHiddenFiles } from '$src/utils/fileUtils'
 
 export type TStatus = 'busy' | 'ok' | 'login' | 'offline'
 
@@ -18,6 +19,7 @@ export class FileState {
     previousPath: string
 
     readonly files = observable<FileDescriptor>([])
+    readonly allFiles = observable<FileDescriptor>([])
 
     readonly selected = observable<FileDescriptor>([])
 
@@ -185,13 +187,16 @@ export class FileState {
             clearSelection: action,
             reset: action,
             setSort: action,
-            updateSelection: action,
+            refreshSelection: action,
+            addToSelection: action,
+            toggleSelection: action,
             setSelectedFile: action,
             setEditingFile: action,
             emptyCache: action,
             cd: action,
             setShowHiddenFiles: action,
             getSelectedState: observable,
+            updateFiles: action,
         })
 
         this.viewId = viewId
@@ -326,7 +331,14 @@ export class FileState {
         this.sortOrder = sortOrder
     }
 
-    updateSelection(isSameDir: boolean): void {
+    // Called when fileCache is updated:
+    // - from filewatch
+    // - because user asked for a refresh
+    // - because the path has been updated
+    //
+    // We either clear the selection (if path has changed)
+    // or keep selected files that are still there
+    refreshSelection(isSameDir: boolean): void {
         if (isSameDir) {
             const newSelection = []
             // cache.selected contains files that can be outdated:
@@ -370,6 +382,56 @@ export class FileState {
         }
     }
 
+    getFileIndex(file: FileDescriptor): number {
+        return this.files.findIndex((currentFile) => sameID(file, currentFile))
+    }
+
+    addToSelection(file: FileDescriptor, extendSelection = false) {
+        console.log('addToSelection', file.fullname)
+        if (!extendSelection) {
+            this.selected.replace([file])
+            console.log('addToSelection added:', this.selected[0].fullname)
+        } else {
+            // find highest selected index
+            const maxIndex = this.selected.reduce((currentIndex, file) => {
+                const index = this.getFileIndex(file)
+                return index > currentIndex ? index : currentIndex
+            }, -1)
+
+            // get fileIndex
+            const fileIndex = this.getFileIndex(file)
+
+            // 0...fileIndex
+            if (maxIndex === -1) {
+                this.selected.replace(this.files.slice(0, fileIndex + 1))
+            } else if (fileIndex > maxIndex) {
+                console.log('range', fileIndex, maxIndex + 1)
+                this.selected.replace(this.files.slice(maxIndex, fileIndex + 1).concat(this.selected))
+            } else {
+                const minIndex = this.selected.reduce((currentIndex, file) => {
+                    const index = this.getFileIndex(file)
+                    return index < currentIndex ? index : currentIndex
+                }, this.files.length)
+
+                if (fileIndex > minIndex) {
+                    this.selected.replace(this.files.slice(minIndex, fileIndex + 1))
+                } else {
+                    this.selected.replace(this.files.slice(fileIndex, minIndex + 1))
+                }
+            }
+        }
+    }
+
+    toggleSelection(file: FileDescriptor) {
+        const found = !!this.selected.some((selectedFile) => sameID(selectedFile, file))
+
+        if (found) {
+            this.selected.remove(file)
+        } else {
+            this.selected.push(file)
+        }
+    }
+
     setSelectedFile(file: FileDescriptor): void {
         if (file) {
             this.selectedId = {
@@ -398,6 +460,7 @@ export class FileState {
 
     emptyCache = (): void => {
         this.files.clear()
+        this.allFiles.clear()
         this.clearSelection()
         this.setStatus('ok', true)
         console.log('emptycache')
@@ -436,38 +499,32 @@ export class FileState {
     }
 
     // changes current path and retrieves file list
-    cwd = withConnection((path: string, path2 = '', skipHistory = false): Promise<string> => {
+    cwd = withConnection(async (path: string, path2 = '', skipHistory = false): Promise<string> => {
         const joint = path2 ? this.join(path, path2) : this.api.sanityze(path)
         this.cmd = 'cwd'
 
-        return this.api
-            .cd(joint)
-            .then((path) => {
-                return this.list(path).then((files) => {
-                    runInAction(() => {
-                        const isSameDir = this.path === path
+        try {
+            const path = await this.api.cd(joint)
+            const files = await this.list(path)
+            runInAction(() => {
+                const isSameDir = this.path === path
 
-                        this.files.replace(files as FileDescriptor[])
-
-                        this.updatePath(path, skipHistory)
-                        this.cmd = ''
-
-                        // update the cache's selection, keeping files that were previously selected
-                        this.updateSelection(isSameDir)
-
-                        this.setStatus('ok')
-                    })
-
-                    return path
-                })
-            })
-            .catch((error) => {
+                this.updateFiles(files)
+                this.updatePath(path, skipHistory)
                 this.cmd = ''
-                console.log('error cd/list for path', joint, 'error was', error)
-                this.setStatus('ok', true)
-                const localizedError = getLocalizedError(error)
-                throw localizedError
+
+                // update the cache's selection, keeping files that were previously selected
+                this.refreshSelection(isSameDir)
+
+                this.setStatus('ok')
             })
+            return path
+        } catch (error) {
+            this.cmd = ''
+            console.log('error cd/list for path', joint, 'error was', error)
+            this.setStatus('ok', true)
+            throw getLocalizedError(error)
+        }
     }, this.waitForConnection)
 
     list = withConnection((path: string): Promise<FileDescriptor[] | void> => {
@@ -587,9 +644,30 @@ export class FileState {
     }
 
     setShowHiddenFiles(showHiddenFiles: boolean): void {
-        if (showHiddenFiles !== this.showHiddenFiles) {
-            this.showHiddenFiles = showHiddenFiles
-            this.updateSelection(true)
+        if (!this.error && this.status === 'ok') {
+            if (showHiddenFiles !== this.showHiddenFiles) {
+                this.showHiddenFiles = showHiddenFiles
+                if (this.showHiddenFiles) {
+                    this.files.replace(this.allFiles)
+                } else {
+                    this.files.replace(filterHiddenFiles(this.allFiles))
+                }
+                this.refreshSelection(true)
+            }
         }
+    }
+
+    updateFiles(newFiles: FileDescriptor[]): void {
+        const dirs = filterDirs(newFiles)
+        const files = filterFiles(newFiles)
+        const SortFn = getSortMethod(this.sortMethod, this.sortOrder)
+
+        const sortedFiles = dirs
+            .sort(this.sortMethod !== 'size' ? SortFn : getSortMethod('name', 'asc'))
+            .concat(files.sort(SortFn))
+
+        this.allFiles.replace(sortedFiles)
+
+        this.files.replace(this.showHiddenFiles ? sortedFiles : filterHiddenFiles(sortedFiles))
     }
 }

@@ -1,4 +1,4 @@
-import React, { forwardRef, useImperativeHandle } from 'react'
+import React, { forwardRef, useImperativeHandle, useRef, useEffect, useState, createRef, MutableRefObject } from 'react'
 import { Classes, Icon } from '@blueprintjs/core'
 import classNames from 'classnames'
 import {
@@ -20,8 +20,10 @@ import { TStatus } from '$src/state/fileState'
 import { TSORT_METHOD_NAME } from '$src/services/FsSort'
 import { useDrag, useDragDropManager } from 'react-dnd'
 import { DraggedObject, FileViewItem } from '$src/types'
+import { useVirtual } from 'react-virtual'
 // import { RowRendererProps } from '../RowRenderer'
 
+const CLICK_DELAY = 400
 const ROW_HEIGHT = 28
 const SIZE_COLUMN_WITDH = 70
 // this is just some small enough value: column will grow
@@ -38,14 +40,18 @@ const makeEvent =
             event,
         })
 
-const Name = (data: TableCellProps): React.ReactNode => {
-    const { icon, title } = data.rowData
+const Size = ({ data: { size } }: { data: FileViewItem }) => {
+    return <div className="size">{size}</div>
+}
+
+const Name = ({ data }: { data: FileViewItem }) => {
+    const { icon, title } = data
 
     return (
         <div className="name">
             <Icon icon={icon}></Icon>
             <span title={title} className="file-label" spellCheck="false">
-                {data.cellData}
+                {data.name}
             </span>
         </div>
     )
@@ -80,11 +86,11 @@ const Header = (data: TableHeaderProps): React.ReactNode => {
     )
 }
 
-const rowClassName = (index: number, item: FileViewItem): string => {
+const rowClassName = (item: FileViewItem): string => {
     const error = item && item.nodeData.mode === -1
-    const mainClass = index === -1 ? 'headerRow' : 'tableRow'
+    // const mainClass = index === -1 ? 'headerRow' : 'tableRow'
 
-    return classNames(mainClass, item && item.className, {
+    return classNames('tableRow', item && item.className, {
         selected: item && item.isSelected,
         error: error,
     })
@@ -111,6 +117,60 @@ const _noRowsRenderer = ({ error, status }: { error: boolean; status: TStatus })
     }
 }
 
+interface CollectedProps {
+    isDragging: boolean
+}
+
+interface RowProps {
+    rowData: FileViewItem
+    onRowClick?: (event: ItemMouseEvent) => void
+    onRowDoubleClick?: (event: ItemMouseEvent) => void
+    index: number
+}
+
+const Row = ({
+    rowData,
+    onRowClick,
+    onRowDoubleClick = () => {
+        console.log('double! ')
+    },
+    index,
+}: RowProps): JSX.Element => {
+    const [{ isDragging }, drag] = useDrag<DraggedObject, unknown, CollectedProps>({
+        type: 'file',
+        item: {
+            fileState: null,
+            dragFiles: [],
+            selectedCount: 0,
+        },
+        collect: (monitor) => ({
+            isDragging: !!monitor.isDragging(),
+        }),
+        //getDragProps(index),
+    })
+    const clickRef: React.MutableRefObject<number> = useRef(0)
+    const clickHandler = makeEvent(index, rowData, onRowClick)
+    const doubleClickHandler = makeEvent(index, rowData, onRowDoubleClick)
+
+    return (
+        <div
+            ref={drag}
+            onClick={(e: React.MouseEvent<HTMLElement>) => {
+                if (e.timeStamp - clickRef.current > CLICK_DELAY) {
+                    clickHandler(e)
+                } else {
+                    doubleClickHandler(e)
+                }
+                clickRef.current = e.timeStamp
+            }}
+            style={{ width: '100%', height: '100%', alignItems: 'center', display: 'flex' }}
+        >
+            <Name data={rowData} />
+            <Size data={rowData} />
+        </div>
+    )
+}
+
 export const TableLayout = forwardRef(
     (
         {
@@ -130,17 +190,34 @@ export const TableLayout = forwardRef(
         }: LayoutProps,
         ref,
     ) => {
-        useImperativeHandle(ref, () => ({
-            navigate: (direction: string) => {
-                console.log(`should navigate to ${direction}`)
-            },
-            selectAll: () => {
-                console.log('should selectAll')
-            },
-            invertSelection: () => {
-                console.log('should invertSelection')
-            },
-        }))
+        const [editElementIndex, setEditElementIndex] = useState(-1)
+        const [cursor, setCursor] = useState(-1)
+        const tableRef = useRef()
+        const rowVirtualizer = useVirtual({
+            size: itemCount,
+            parentRef: tableRef,
+            estimateSize: React.useCallback(() => ROW_HEIGHT, []),
+        })
+
+        useImperativeHandle(
+            ref,
+            () => ({
+                navigate: (direction: string) => {
+                    console.log(`should navigate to ${direction}`)
+                },
+                selectAll: () => {
+                    console.log('should selectAll')
+                },
+                invertSelection: () => {
+                    console.log('should invertSelection')
+                },
+                setEditElement: (index: number) => {
+                    setEditElementIndex(index)
+                },
+                setCursor: (index: number) => setCursor(index),
+            }),
+            [],
+        )
 
         const _onHeaderClick = ({ columnData, event /*, dataKey */ }: HeaderMouseEventHandlerParams): void => {
             const newMethod = columnData.sortMethod as TSORT_METHOD_NAME
@@ -148,39 +225,52 @@ export const TableLayout = forwardRef(
             onHeaderClick({ event, data: newMethod })
         }
 
-        const RowRenderer = ({
-            columns,
-            style,
-            className,
-            index,
-            rowData: data,
-            rowKey,
-        }: TableRowProps & { rowKey?: string }): JSX.Element => {
-            const [_, drag] = useDrag<DraggedObject, unknown, unknown>({
-                type: 'file',
-                item: getDragProps(index),
-            })
+        const onKeyUp = (e: React.KeyboardEvent<HTMLElement>) => {
+            switch (e.key) {
+                case 'Escape':
+                    if (editElementIndex) {
+                        setEditElementIndex(-1)
+                    }
+                    break
 
-            const monitor = useDragDropManager().getMonitor()
-            const isDragging = !!monitor.isDragging()
-
-            return (
-                <div
-                    ref={drag}
-                    onClick={makeEvent(index, data, onItemClick)}
-                    key={rowKey}
-                    role="row"
-                    style={style}
-                    className={className}
-                >
-                    {columns}
-                </div>
-            )
+                default:
+                    console.log(`skipped key=${e.key}`)
+            }
         }
 
         return (
-            <div onClick={onBlankAreaClick}>
-                <Table
+            <div
+                // onClick={onBlankAreaClick}
+                onKeyUp={onKeyUp}
+                ref={tableRef}
+                role="row"
+                style={{
+                    height: `${rowVirtualizer.totalSize}px`,
+                    width: '100%',
+                    position: 'relative',
+                }}
+            >
+                {rowVirtualizer.virtualItems.map((virtualRow) => {
+                    const rowData = getItem(virtualRow.index)
+                    return (
+                        <div
+                            style={{
+                                position: 'absolute',
+                                top: 0,
+                                left: 0,
+                                width: '100%',
+                                height: `${virtualRow.size}px`,
+                                transform: `translateY(${virtualRow.start}px)`,
+                            }}
+                            key={virtualRow.index}
+                            className={rowClassName(rowData)}
+                        >
+                            <Row rowData={rowData} index={virtualRow.index} onRowClick={onItemClick} />
+                            {/* onRowClick={onItemClick} onRowDoubleClick={onItemDoubleClick} */}
+                        </div>
+                    )
+                })}
+                {/* <Table
                     headerClassName="tableHeader"
                     headerHeight={ROW_HEIGHT}
                     height={height}
@@ -216,7 +306,7 @@ export const TableLayout = forwardRef(
                         flexShrink={1}
                         columnData={{ index: 1, sortMethod: columns[1].key }}
                     />
-                </Table>
+                </Table> */}
             </div>
         )
     },

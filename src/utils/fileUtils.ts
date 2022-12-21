@@ -43,10 +43,14 @@ export function getSelectionRange(filename: string): SelectionRange {
     }
 }
 
-export function filterDirs(files: FileDescriptor[], showHiddenFiles: boolean): FileDescriptor[] {
-    return files.filter(({ isDir, fullname }) => (showHiddenFiles || !fullname.startsWith('.')) && isDir)
+export function filterDirs(files: FileDescriptor[]): FileDescriptor[] {
+    return files.filter(({ isDir, fullname }) => isDir)
 }
 
-export function filterFiles(files: FileDescriptor[], showHiddenFiles: boolean): FileDescriptor[] {
-    return files.filter(({ isDir, fullname }) => !isDir && (showHiddenFiles || !fullname.startsWith('.')))
+export function filterFiles(files: FileDescriptor[]): FileDescriptor[] {
+    return files.filter(({ isDir, fullname }) => !isDir)
+}
+
+export function filterHiddenFiles(files: FileDescriptor[]) {
+    return files.filter(({ fullname }: FileDescriptor) => !fullname.startsWith('.'))
 }
