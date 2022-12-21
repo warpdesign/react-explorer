@@ -252,7 +252,7 @@ const FileView = ({ hide }: Props) => {
         console.log(
             'onItemClick',
             index,
-            cache.selected.findIndex((selectedFile) => sameID(selectedFile, file)),
+            cache.selected.findIndex((selectedFile) => sameID(selectedFile.id, file.id)),
         )
         // TODO: use OS specific instead of mac only metaKey
         const toggleSelection = event.metaKey

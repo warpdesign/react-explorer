@@ -195,10 +195,7 @@ export function needsConnection(target: any, key: any, descriptor: any) {
     return descriptor
 }
 
-export function sameID(
-    { id: { ino, dev } }: FileDescriptor,
-    { id: { ino: ino2, dev: dev2 } }: FileDescriptor,
-): boolean {
+export function sameID({ ino, dev }: FileID, { ino: ino2, dev: dev2 }: FileID): boolean {
     return ino === ino2 && dev === dev2
 }
 

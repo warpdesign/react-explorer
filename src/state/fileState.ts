@@ -27,8 +27,8 @@ export class FileState {
     // cache reload
     scrollTop = -1
 
-    // last element that was selected (ie: cursor position)
-    selectedId: FileID = null
+    // id of the last element that was selected
+    cursorFileId: FileID | null = null
     // element that's being edited
     editingId: FileID = null
 
@@ -190,7 +190,7 @@ export class FileState {
             refreshSelection: action,
             addToSelection: action,
             toggleSelection: action,
-            setSelectedFile: action,
+            setCursorFileId: action,
             setEditingFile: action,
             emptyCache: action,
             cd: action,
@@ -268,7 +268,7 @@ export class FileState {
         if (!skipHistory && this.status !== 'login') {
             this.addPathToHistory(path)
             this.scrollTop = 0
-            this.selectedId = null
+            this.setCursorFileId(null)
             this.editingId = null
 
             // hide hidden files when changing directory unless
@@ -322,7 +322,7 @@ export class FileState {
     reset(): void {
         this.clearSelection()
         this.scrollTop = -1
-        this.selectedId = null
+        this.setCursorFileId(null)
         this.editingId = null
     }
 
@@ -357,33 +357,30 @@ export class FileState {
                 }
             }
 
-            if (
-                this.selectedId &&
-                !this.files.find((file) => file.id.dev === this.selectedId.dev && file.id.ino === this.selectedId.ino)
-            ) {
-                this.selectedId = null
+            // if last clicked element isn't in the list of files,
+            // simply reset cursorFileId
+            if (this.cursorFileId && !this.files.find((file) => sameID(this.cursorFileId, file.id))) {
+                this.setCursorFileId(null)
             }
 
             // Do not change the selectedId here, we want to keep it
             if (newSelection.length) {
                 const selectedFile = newSelection[newSelection.length - 1]
                 this.selected.replace(newSelection)
-                this.selectedId = {
-                    ...selectedFile.id,
-                }
+                this.setCursorFileId(selectedFile.id)
             } else {
                 this.selected.clear()
-                this.selectedId = null
+                this.setCursorFileId(null)
             }
         } else {
             this.selected.clear()
-            this.selectedId = null
+            this.setCursorFileId(null)
             this.scrollTop = 0
         }
     }
 
     getFileIndex(file: FileDescriptor): number {
-        return this.files.findIndex((currentFile) => sameID(file, currentFile))
+        return this.files.findIndex((currentFile) => sameID(file.id, currentFile.id))
     }
 
     addToSelection(file: FileDescriptor, extendSelection = false) {
@@ -423,7 +420,7 @@ export class FileState {
     }
 
     toggleSelection(file: FileDescriptor) {
-        const found = !!this.selected.some((selectedFile) => sameID(selectedFile, file))
+        const found = !!this.selected.some((selectedFile) => sameID(selectedFile.id, file.id))
 
         if (found) {
             this.selected.remove(file)
@@ -432,14 +429,8 @@ export class FileState {
         }
     }
 
-    setSelectedFile(file: FileDescriptor): void {
-        if (file) {
-            this.selectedId = {
-                ...file.id,
-            }
-        } else {
-            this.selectedId = null
-        }
+    setCursorFileId(id: FileID): void {
+        this.cursorFileId = id ? { ...id } : null
     }
 
     setEditingFile(file: FileDescriptor): void {

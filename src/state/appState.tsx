@@ -430,9 +430,9 @@ export class AppState {
 
         if (newSelection.length) {
             const file = newSelection.slice(-1)[0]
-            cache.setSelectedFile(file)
+            cache.setCursorFileId(file.id)
         } else {
-            cache.setSelectedFile(null)
+            cache.setCursorFileId(null)
         }
     }
 }
