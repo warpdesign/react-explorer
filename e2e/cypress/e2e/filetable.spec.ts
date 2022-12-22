@@ -42,7 +42,7 @@ describe('filetable', () => {
         cy.window().then((win) => {
             const appState = win.appState
             const views = appState.winStates[0].views
-            cy.spy(appState, 'updateSelection').as('updateSelection')
+
             let count = 0
             for (const view of views) {
                 for (const cache of view.caches) {
@@ -283,16 +283,6 @@ describe('filetable', () => {
             cy.get('body')
                 .type(`${MOD_KEY}a`)
                 .then(() => {
-                    const length = files.length
-                    // check that appState.updateSelection is called with every elements
-                    cy.get('@updateSelection')
-                        .should('be.called')
-                        .and((spy: any) => {
-                            const calls = spy.getCalls()
-                            const { args } = calls[0]
-                            expect(args[1].length).to.equal(length)
-                        })
-
                     // and also check that every visible row is selected
                     cy.get('#view_0 [data-cy-file].selected').filter(':visible').should('have.class', 'selected')
                 })
@@ -304,16 +294,6 @@ describe('filetable', () => {
             cy.get('body')
                 .type(`${MOD_KEY}i`)
                 .then(() => {
-                    // check that appState.updateSelection is called with every elements
-                    cy.get('@updateSelection')
-                        .should('be.called')
-                        .and((spy: any) => {
-                            const calls = spy.getCalls()
-                            // get the last call
-                            const { args } = calls.pop()
-                            expect(args[1].length).to.equal(0)
-                        })
-
                     // and also check that every visible row is selected
                     cy.get('#view_0 [data-cy-file].selected').should('not.exist')
                 })
