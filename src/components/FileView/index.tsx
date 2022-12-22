@@ -60,17 +60,14 @@ const FileView = observer(({ hide }: Props) => {
     const { viewState, appState } = useStores('settingsState', 'viewState', 'appState')
     const { t } = useTranslation()
     const cache = viewState.getVisibleCache()
+    const { files, selected, cursor, path, status, error } = cache
     const keepSelection = !!cache.selected.length
-    const { files, selected, path, status, error } = viewState.getVisibleCache()
     const nodes = files.map((file) =>
         buildNodeFromFile(file, keepSelection && !!selected.find((selectedFile) => sameID(file.id, selectedFile.id))),
     )
     const rowCount = nodes.length
 
     const [rightClickFile, setRightClickFile] = useState<FileDescriptor | null>(null)
-    const cursor = cache.cursor
-
-    console.log({ path: cache.path })
 
     const {
         Layout,
@@ -80,12 +77,9 @@ const FileView = observer(({ hide }: Props) => {
     useKeyDown(
         React.useCallback(
             (event: KeyboardEvent) => {
-                // get current cursor index
                 const index = cache.getFileIndex(cursor)
-                // get nextIndex
                 const nextIndex = getNextIndex(index, event.key as ArrowKey)
                 if (nextIndex > -1 && nextIndex <= rowCount - 1) {
-                    // get next => onItemClick(next)
                     console.log('should select index', nextIndex, rowCount - 1)
                     const file = cache.files[nextIndex]
                     selectFile(file, event.metaKey, event.shiftKey)
@@ -95,36 +89,6 @@ const FileView = observer(({ hide }: Props) => {
         ),
         ['ArrowDown', 'ArrowUp'],
     )
-
-    // DISABLE FOR NOW gridElement: HTMLElement
-    // tableRef: React.RefObject<Table> = React.createRef()
-
-    // since the nodes are only generated after the files are updated
-    // we re-render them after language has changed otherwise FileList
-    // gets re-rendered with the wrong language after language has been changed
-    // this.bindLanguageChange()
-
-    // private bindLanguageChange = (): void => {
-    //     i18next.on('languageChanged', this.onLanguageChanged)
-    // }
-
-    // private unbindLanguageChange = (): void => {
-    //     i18next.off('languageChanged', this.onLanguageChanged)
-    // }
-
-    // public onLanguageChanged = (lang: string): void => {
-    //     this.updateNodes(this.cache.files)
-    // }
-
-    // public componentWillUnmount(): void {
-
-    //     document.removeEventListener('keydown', this.onDocKeyDown)
-    //     this.unbindLanguageChange()
-    // }
-
-    // public componentDidMount(): void {
-    //     document.addEventListener('keydown', this.onDocKeyDown)
-    // }
 
     // public componentDidUpdate(): void {
     //     const scrollTop = this.state.position === -1 ? this.cache.scrollTop : null
@@ -149,13 +113,6 @@ const FileView = observer(({ hide }: Props) => {
     // }
 
     const getRow = (index: number): FileViewItem => nodes[index]
-
-    // clearClickTimeout(): void {
-    //     if (this.clickTimeout) {
-    //         clearTimeout(this.clickTimeout)
-    //         this.clickTimeout = 0
-    //     }
-    // }
 
     // setEditElement(element: HTMLElement, file: FileDescriptor): void {
     //     const cache = this.cache
