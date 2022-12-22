@@ -14,12 +14,12 @@ import {
 
 import '$src/css/fileview-table.css'
 
-import { ItemMouseEvent, LayoutProps } from '$src/hooks/useLayout'
+import { ItemMouseEvent, LayoutActions, LayoutProps } from '$src/hooks/useLayout'
 import CONFIG from '$src/config/appConfig'
 import { TStatus } from '$src/state/fileState'
 import { TSORT_METHOD_NAME } from '$src/services/FsSort'
 import { useDrag, useDragDropManager } from 'react-dnd'
-import { DraggedObject, FileViewItem } from '$src/types'
+import { ArrowKey, DraggedObject, FileViewItem } from '$src/types'
 import { useVirtual } from 'react-virtual'
 // import { RowRendererProps } from '../RowRenderer'
 
@@ -171,7 +171,11 @@ const Row = ({
     )
 }
 
-export const TableLayout = forwardRef(
+interface Toto {
+    blah: string
+}
+
+export const TableLayout = forwardRef<LayoutActions, LayoutProps>(
     (
         {
             onItemClick,
@@ -190,9 +194,8 @@ export const TableLayout = forwardRef(
         }: LayoutProps,
         ref,
     ) => {
-        const [editElementIndex, setEditElementIndex] = useState(-1)
         const [cursor, setCursor] = useState(-1)
-        const tableRef = useRef()
+        const tableRef: React.MutableRefObject<HTMLDivElement> = useRef()
         const rowVirtualizer = useVirtual({
             size: itemCount,
             parentRef: tableRef,
@@ -202,19 +205,30 @@ export const TableLayout = forwardRef(
         useImperativeHandle(
             ref,
             () => ({
-                navigate: (direction: string) => {
-                    console.log(`should navigate to ${direction}`)
+                getNextIndex: (index: number, direction: ArrowKey) => {
+                    console.log(`should navigate to ${direction} index=${index} itemCount=${itemCount}`)
+                    switch (direction) {
+                        case 'ArrowDown':
+                            return index + 1
+
+                        case 'ArrowUp':
+                            return index - 1
+
+                        default:
+                            console.warn(`getNextIndex: unknown direction ${direction}`)
+                            return -1
+                    }
                 },
-                selectAll: () => {
-                    console.log('should selectAll')
-                },
-                invertSelection: () => {
-                    console.log('should invertSelection')
-                },
-                setEditElement: (index: number) => {
-                    setEditElementIndex(index)
-                },
-                setCursor: (index: number) => setCursor(index),
+                // selectAll: () => {
+                //     console.log('should selectAll')
+                // },
+                // invertSelection: () => {
+                //     console.log('should invertSelection')
+                // },
+                // setEditElement: (index: number) => {
+                //     setEditElementIndex(index)
+                // },
+                // setCursor: (index: number) => setCursor(index),
             }),
             [],
         )
@@ -225,23 +239,9 @@ export const TableLayout = forwardRef(
             onHeaderClick({ event, data: newMethod })
         }
 
-        const onKeyUp = (e: React.KeyboardEvent<HTMLElement>) => {
-            switch (e.key) {
-                case 'Escape':
-                    if (editElementIndex) {
-                        setEditElementIndex(-1)
-                    }
-                    break
-
-                default:
-                    console.log(`skipped key=${e.key}`)
-            }
-        }
-
         return (
             <div
                 // onClick={onBlankAreaClick}
-                onKeyUp={onKeyUp}
                 ref={tableRef}
                 role="row"
                 style={{

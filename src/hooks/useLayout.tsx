@@ -1,7 +1,7 @@
 import React, { useCallback, useRef } from 'react'
 import type { ReactElement } from 'react'
 
-import { DraggedObject, FileViewItem } from '$src/types'
+import { ArrowKey, DraggedObject, FileViewItem } from '$src/types'
 import { TSORT_METHOD_NAME } from '$src/services/FsSort'
 import { TStatus } from '$src/state/fileState'
 import { TableLayout } from '$src/components/layouts/TableLayout'
@@ -40,20 +40,25 @@ export interface LayoutProps {
     columns: Column[]
 }
 
+export interface LayoutActions {
+    getNextIndex: (index: number, direction: ArrowKey) => number
+}
+
 export interface LayoutReturnProps {
     Layout: (props: LayoutProps) => ReactElement
-    actions: {
-        navigate: (direction: string) => void
-        selectAll: () => void
-        invertSelection: () => void
-        setEditElement: (index: number) => void
-        setCursor: (index: number) => void
-    }
+    actions: LayoutActions
 }
 
 interface Column {
     key: string
     label: string
+}
+
+const defaultActions: LayoutActions = {
+    getNextIndex: () => {
+        console.warn('cannot call getNextIndex: ref not ready!')
+        return -1
+    },
 }
 
 export const useLayout = (name: LayoutName): LayoutReturnProps => {
@@ -63,16 +68,10 @@ export const useLayout = (name: LayoutName): LayoutReturnProps => {
     }
     const layoutRef = useRef(null)
 
-    // TODO: maybe have a ready event since layoutRef could be null ?
+    // TODO: maybe have a ready event since layoutRef.current could be null ?
 
     return {
         Layout: useCallback((props: LayoutProps) => <Layout {...props} ref={layoutRef} />, [layoutRef, name]),
-        actions: {
-            navigate: (direction: string) => layoutRef.current.navigate(direction),
-            selectAll: () => layoutRef.current.selectAll(),
-            invertSelection: () => layoutRef.current.invertSelection(),
-            setEditElement: (index: number) => layoutRef.current.setEditElement(index),
-            setCursor: (index: number) => layoutRef.current.setCursor(index),
-        },
+        actions: layoutRef.current || defaultActions,
     }
 }

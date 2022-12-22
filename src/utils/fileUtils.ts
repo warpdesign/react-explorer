@@ -1,4 +1,8 @@
+import { TypeIcons } from '$src/constants/icons'
 import { Extensions, FileDescriptor } from '$src/services/Fs'
+import { FileViewItem } from '$src/types'
+import classNames from 'classnames'
+import { formatBytes } from './formatBytes'
 
 export const REGEX_EXTENSION = /\.(?=[^0-9])/
 
@@ -53,4 +57,24 @@ export function filterFiles(files: FileDescriptor[]): FileDescriptor[] {
 
 export function filterHiddenFiles(files: FileDescriptor[]) {
     return files.filter(({ fullname }: FileDescriptor) => !fullname.startsWith('.'))
+}
+
+export function buildNodeFromFile(file: FileDescriptor, isSelected: boolean): FileViewItem {
+    const filetype = file.type
+    const classes = classNames({
+        isHidden: file.fullname.startsWith('.'),
+        isSymlink: file.isSym,
+    })
+
+    const res: FileViewItem = {
+        icon: (file.isDir && TypeIcons['dir']) || (filetype && TypeIcons[filetype]) || TypeIcons['any'],
+        name: file.fullname,
+        title: file.isSym ? `${file.fullname} → ${file.target}` : file.fullname,
+        nodeData: file,
+        className: classes,
+        isSelected: !!isSelected,
+        size: (!file.isDir && formatBytes(file.length)) || '--',
+    }
+
+    return res
 }

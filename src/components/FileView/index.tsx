@@ -19,7 +19,7 @@ import { isMac } from '$src/utils/platform'
 import { SettingsState } from '$src/state/settingsState'
 import { ViewState } from '$src/state/viewState'
 import { debounce } from '$src/utils/debounce'
-import { filterDirs, filterFiles, getSelectionRange } from '$src/utils/fileUtils'
+import { buildNodeFromFile, filterDirs, filterFiles, getSelectionRange } from '$src/utils/fileUtils'
 import { throttle } from '$src/utils/throttle'
 import { FileState } from '$src/state/fileState'
 import { FileContextMenu } from '$src/components/menus/FileContextMenu'
@@ -28,9 +28,11 @@ import { TypeIcons } from '$src/constants/icons'
 
 import 'react-virtualized/styles.css'
 
-import { DraggedObject, FileViewItem } from '$src/types'
+import { ArrowKey, DraggedObject, FileViewItem } from '$src/types'
 import { HeaderMouseEvent, ItemMouseEvent, useLayout } from '$src/hooks/useLayout'
 import { useStores } from '$src/hooks/useStores'
+import { useKeyDown } from '$src/hooks/useKeyDown'
+import { observer } from 'mobx-react'
 
 const SCROLL_DEBOUNCE = 50
 const ARROW_KEYS_REPEAT_DELAY = 5
@@ -54,117 +56,45 @@ interface Props {
     hide: boolean
 }
 
-const FileView = ({ hide }: Props) => {
-    const { settingsState, viewState, appState } = useStores('settingsState', 'viewState', 'appState')
+const FileView = observer(({ hide }: Props) => {
+    const { viewState, appState } = useStores('settingsState', 'viewState', 'appState')
     const { t } = useTranslation()
     const cache = viewState.getVisibleCache()
-    const [nodes, setNodes] = useState<FileViewItem[]>([])
-    const path = cache.path
+    const keepSelection = !!cache.selected.length
+    const { files, selected, path, status, error } = viewState.getVisibleCache()
+    const nodes = files.map((file) =>
+        buildNodeFromFile(file, keepSelection && !!selected.find((selectedFile) => sameID(file.id, selectedFile.id))),
+    )
     const rowCount = nodes.length
 
-    // const [path, setPath] = useState<string>(cache.path)
     const [rightClickFile, setRightClickFile] = useState<FileDescriptor | null>(null)
-    // const fileviewRef = useRef(null)
+    const cursor = cache.cursor
+
+    console.log({ path: cache.path })
 
     const {
         Layout,
-        actions: { setCursor },
+        actions: { getNextIndex },
     } = useLayout('details')
 
-    const clickRef = useRef(0)
-    const [count, setCount] = useState(0)
-    // private disposers: Array<IReactionDisposer> = []
-    // private editingFile: FileDescriptor
-    // private clickTimeout: number
-
-    useEffect(() => {
-        const disposers: Array<IReactionDisposer> = [
-            reaction(
-                (): IObservableArray<FileDescriptor> => toJS(cache?.files),
-                (files: FileDescriptor[]): void => {
-                    if (cache) {
-                        // when cache is being (re)loaded, cache.files is empty:
-                        // we don't want to show "empty folder" placeholder
-                        // in that case, only when cache is loaded and there are no files
-                        if (cache.cmd === 'cwd' || cache.history.length) {
-                            console.log('reaction 1')
-                            updateNodes(files)
-                        }
-                    }
-                },
-            ),
-            reaction(
-                (): boolean => cache?.error,
-                (): void => {
-                    console.log('reaction 2')
-                    cache && updateNodes(cache.files)
-                },
-            ),
-            reaction(
-                (): boolean => {
-                    return !!cache?.showHiddenFiles
-                },
-                (): void => {
-                    console.log('reaction 3')
-                    cache && updateNodes(cache.files)
-                },
-            ),
-            reaction(
-                () => {
-                    return toJS(cache?.selected)
-                },
-                (): void => {
-                    console.log('reaction 4 (selected files)')
-                    cache && updateNodes(cache.files)
-                },
-            ),
-        ]
-
-        return () => {
-            for (const disposer of disposers) {
-                disposer()
-            }
-        }
-    }, [])
-
-    const updateNodes = (files: FileDescriptor[]): void => {
-        const keepSelection = !!cache.selected.length
-
-        const nodes = buildNodes(files, keepSelection)
-        console.log('WARN: keepSelection not update in state')
-        setNodes(nodes)
-        // setPath((nodes.length && nodes[0].nodeData.dir) || '')
-        // updateState(nodes, keepSelection)
-    }
-
-    const buildNodeFromFile = (file: FileDescriptor, keepSelection: boolean): FileViewItem => {
-        const filetype = file.type
-        const isSelected = (keepSelection && cache.getSelectedState(file.fullname)) || false
-        const classes = classNames({
-            isHidden: file.fullname.startsWith('.'),
-            isSymlink: file.isSym,
-        })
-
-        const res: FileViewItem = {
-            icon: (file.isDir && TypeIcons['dir']) || (filetype && TypeIcons[filetype]) || TypeIcons['any'],
-            name: file.fullname,
-            title: file.isSym ? `${file.fullname} → ${file.target}` : file.fullname,
-            nodeData: file,
-            className: classes,
-            isSelected: !!isSelected,
-            size: (!file.isDir && formatBytes(file.length)) || '--',
-        }
-
-        return res
-    }
-
-    const buildNodes = (list: FileDescriptor[], keepSelection = false): FileViewItem[] => {
-        // if we sort by size, we only sort files by size: folders should still be sorted
-        // alphabetically
-        const nodes = list.map((file) => buildNodeFromFile(file, keepSelection))
-
-        return nodes
-    }
+    useKeyDown(
+        React.useCallback(
+            (event: KeyboardEvent) => {
+                // get current cursor index
+                const index = cache.getFileIndex(cursor)
+                // get nextIndex
+                const nextIndex = getNextIndex(index, event.key as ArrowKey)
+                if (nextIndex > -1 && nextIndex <= rowCount - 1) {
+                    // get next => onItemClick(next)
+                    console.log('should select index', nextIndex, rowCount - 1)
+                    const file = cache.files[nextIndex]
+                    selectFile(file, event.metaKey, event.shiftKey)
+                }
+            },
+            [cursor, cache, getNextIndex],
+        ),
+        ['ArrowDown', 'ArrowUp'],
+    )
 
     // DISABLE FOR NOW gridElement: HTMLElement
     // tableRef: React.RefObject<Table> = React.createRef()
@@ -240,11 +170,20 @@ const FileView = ({ hide }: Props) => {
     { columnData: any, dataKey: string, event: Event }
     */
     const onHeaderClick = ({ data: newMethod }: HeaderMouseEvent): void => {
-        console.log({ newMethod })
-        const { sortMethod, sortOrder } = cache
-        const newOrder = sortMethod !== newMethod ? 'asc' : (((sortOrder === 'asc' && 'desc') || 'asc') as TSORT_ORDER)
-        cache.setSort(newMethod, newOrder)
-        updateNodes(cache.files)
+        console.log('TODO: onHeaderClick', { newMethod })
+        // const { sortMethod, sortOrder } = cache
+        // const newOrder = sortMethod !== newMethod ? 'asc' : (((sortOrder === 'asc' && 'desc') || 'asc') as TSORT_ORDER)
+        // cache.setSort(newMethod, newOrder)
+        // updateNodes(cache.files)
+    }
+
+    const selectFile = (file: FileDescriptor, toggleSelection: boolean, extendSelection: boolean) => {
+        if (toggleSelection) {
+            cache.toggleSelection(file)
+        } else {
+            // 2. update selection
+            cache.addToSelection(file, extendSelection)
+        }
     }
 
     const onItemClick = ({ data, index, event }: ItemMouseEvent): void => {
@@ -255,21 +194,10 @@ const FileView = ({ hide }: Props) => {
             cache.selected.findIndex((selectedFile) => sameID(selectedFile.id, file.id)),
         )
         // TODO: use OS specific instead of mac only metaKey
-        const toggleSelection = event.metaKey
-
+        selectFile(file, event.metaKey, event.shiftKey)
         // 1. update view cursor
         // console.log('setting cursor')
         // setCursor(index)
-
-        if (toggleSelection) {
-            cache.toggleSelection(file)
-        } else {
-            // 2. update selection
-            const extendSelection = event.shiftKey
-            cache.addToSelection(file, extendSelection)
-        }
-
-        // no need to update nodes: should be refreshed automatically using reactions
     }
 
     // const onItemClick = ({ data, index, event }: ItemMouseEvent): void => {
@@ -419,20 +347,19 @@ const FileView = ({ hide }: Props) => {
     }
 
     const unSelectAll = (): void => {
-        const selectedNodes = nodes.filter((node) => node.isSelected)
-
-        if (selectedNodes.length && isViewActive()) {
-            selectedNodes.forEach((node) => {
-                node.isSelected = false
-            })
-            setNodes(nodes)
-            // setSelected(0)
-            // setPosition(-1)
-            console.warn('disabled: updateSelection after state update (2)')
-            // this.setState({ nodes, selected: 0, position: -1 }, () => {
-            //     this.updateSelection()
-            // })
-        }
+        // const selectedNodes = nodes.filter((node) => node.isSelected)
+        // if (selectedNodes.length && isViewActive()) {
+        //     selectedNodes.forEach((node) => {
+        //         node.isSelected = false
+        //     })
+        //     setNodes(nodes)
+        //     // setSelected(0)
+        //     // setPosition(-1)
+        //     console.warn('disabled: updateSelection after state update (2)')
+        //     // this.setState({ nodes, selected: 0, position: -1 }, () => {
+        //     //     this.updateSelection()
+        //     // })
+        // }
     }
 
     const selectAll = (invert = false): void => {
@@ -655,23 +582,22 @@ const FileView = ({ hide }: Props) => {
     ]
 
     const renderFileContextMenu = (props: ContextMenu2ContentProps): JSX.Element => {
-        console.log('DISABLE renderFileContextMenu')
         return undefined
         // return props.isOpen ? <FileContextMenu fileUnderMouse={this.state.rightClickFile} /> : null
     }
+
+    // (element: HTMLElement) => {
+    //     // since we also need to have access to this element
+    //     const ref = ctxMenuProps.ref as React.MutableRefObject<HTMLElement>
+    //     ref.current = element
+    // }
 
     return (
         <HotkeysTarget2 hotkeys={hotkeys}>
             <ContextMenu2 content={renderFileContextMenu}>
                 {(ctxMenuProps: ContextMenu2ChildrenProps) => (
                     <div
-                        ref={(element: HTMLElement) => {
-                            // since we also need to have access to this element
-                            console.log('DISABLED FOR NOW: setGridRef')
-                            // this.setGridRef(element)
-                            const ref = ctxMenuProps.ref as React.MutableRefObject<HTMLElement>
-                            ref.current = element
-                        }}
+                        ref={ctxMenuProps.ref}
                         onContextMenu={(e) => {
                             // reset rightClickFile if we right-click on an empty area
                             if (!isInRow(e)) {
@@ -688,7 +614,7 @@ const FileView = ({ hide }: Props) => {
                         <Layout
                             width={0}
                             height={0}
-                            itemCount={rowCount}
+                            itemCount={nodes.length}
                             getItem={getRow}
                             getDragProps={getDraggedProps}
                             onItemClick={onItemClick}
@@ -723,7 +649,7 @@ const FileView = ({ hide }: Props) => {
             </ContextMenu2>
         </HotkeysTarget2>
     )
-}
+})
 
 // const FileView = withTranslation()(
 //     inject('appState', 'viewState', 'settingsState')(WithMenuAccelerators(FileViewClass)),

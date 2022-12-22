@@ -73,7 +73,6 @@ export class AppState {
             initViewState: action,
             refreshActiveView: action,
             addView: action,
-            updateSelection: action,
             openDirectory: action,
             options: observable,
         })
@@ -421,18 +420,18 @@ export class AppState {
     }
 
     // TODO: this should be moved into FileState (!)
-    updateSelection(cache: FileState, newSelection: FileDescriptor[]): void {
-        console.log('updateSelection', newSelection.length)
-        cache.selected.replace(newSelection)
-        for (const selected of cache.selected) {
-            console.log(selected.fullname, selected.id.dev, selected.id.ino)
-        }
+    // updateSelection(cache: FileState, newSelection: FileDescriptor[]): void {
+    //     console.log('updateSelection', newSelection.length)
+    //     cache.selected.replace(newSelection)
+    //     for (const selected of cache.selected) {
+    //         console.log(selected.fullname, selected.id.dev, selected.id.ino)
+    //     }
 
-        if (newSelection.length) {
-            const file = newSelection.slice(-1)[0]
-            cache.setCursorFileId(file.id)
-        } else {
-            cache.setCursorFileId(null)
-        }
-    }
+    //     if (newSelection.length) {
+    //         const file = newSelection.slice(-1)[0]
+    //         cache.setCursor(file)
+    //     } else {
+    //         cache.setCursorFileId(null)
+    //     }
+    // }
 }

@@ -29,3 +29,5 @@ export interface DraggedObject {
     fileState?: FileState
     dragFiles?: FileDescriptor[]
 }
+
+export type ArrowKey = 'ArrowUp' | 'ArrowDown' | 'ArrowLeft' | 'ArrowRight'
