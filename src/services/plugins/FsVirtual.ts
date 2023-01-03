@@ -18,7 +18,7 @@ const SEP = path.sep
 
 // Since nodeJS will translate unix like paths to windows path, when running under Windows
 // we accept Windows style paths (eg. C:\foo...) and unix paths (eg. /foo or ./foo)
-const virtualStart = /^\/virtual/
+const virtualStart = /^\//
 const isRoot = (isWin && /((([a-zA-Z]\:)(\\)*)|(\\\\))$/) || /^\/$/
 
 const progressFunc = throttle((progress: (bytes: number) => void, bytesRead: number) => {

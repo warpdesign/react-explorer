@@ -96,7 +96,7 @@ export class AppState {
 
         for (const desc of views) {
             console.log('adding view', desc.viewId, desc.path, window.ENV.CY)
-            this.addView(window.ENV.CY ? '' : desc.path, desc.viewId)
+            this.addView(desc.path, desc.viewId)
         }
 
         this.initViewState()

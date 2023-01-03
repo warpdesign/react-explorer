@@ -148,7 +148,7 @@ export function getFS(path: string): Fs {
     const newfs = interfaces.find((filesystem) => filesystem.canread(path))
     // if (!newfs) {
     //     newfs = FsGeneric;
-    // }
+    // `
 
     return newfs
 }
