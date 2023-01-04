@@ -48,13 +48,16 @@ describe('toolbar', () => {
     it('should restore previous input value when typing a new path and pressing escape', () => {
         cy.get('#view_0 [data-cy-path]').as('input').invoke('val').as('previous_value')
 
+        // has already been called in beforeEach()
+        cy.get('@stub_cd0').should('be.calledOnce')
+
         cy.get('@input').type('/sdfdsgsdg{esc}')
 
         cy.get('@previous_value').then((value) => {
             cy.get('@input').should('have.value', value)
         })
 
-        cy.get('@stub_cd0').should('not.be.called')
+        cy.get('@stub_cd0').should('be.calledOnce')
     })
 
     it('should show an alert then focus input when typing a non valid path', () => {
@@ -67,7 +70,7 @@ describe('toolbar', () => {
         cy.get('@stub_cd0').should('be.called')
     })
 
-    it('should update the paht when the fileState is updated', () => {
+    it('should update the path when the fileState is updated', () => {
         cy.window().then((win) => {
             win.appState.winStates[0].views[0].caches[0].updatePath('/newPath')
             cy.get('#view_0 [data-cy-path]').should('have.value', '/newPath')

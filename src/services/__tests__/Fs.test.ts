@@ -1,6 +1,6 @@
 import { describeUnix } from '../../utils/test/helpers'
 
-import { MakeId, ExeMaskAll, ExeMaskGroup, ExeMaskUser, filetype, sameID, File, FileID } from '../Fs'
+import { MakeId, ExeMaskAll, ExeMaskGroup, ExeMaskUser, filetype, sameID, FileID } from '../Fs'
 
 describe('makeId', () => {
     it('should return FileID from stats', () => {

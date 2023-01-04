@@ -19,7 +19,7 @@ import { isMac } from '$src/utils/platform'
 import { SettingsState } from '$src/state/settingsState'
 import { ViewState } from '$src/state/viewState'
 import { debounce } from '$src/utils/debounce'
-import { buildNodeFromFile, filterDirs, filterFiles, getSelectionRange } from '$src/utils/fileUtils'
+import { filterDirs, filterFiles, getSelectionRange } from '$src/utils/fileUtils'
 import { throttle } from '$src/utils/throttle'
 import { FileState } from '$src/state/fileState'
 import { FileContextMenu } from '$src/components/menus/FileContextMenu'
@@ -54,6 +54,26 @@ interface State {
 
 interface Props {
     hide: boolean
+}
+
+export function buildNodeFromFile(file: FileDescriptor, isSelected: boolean): FileViewItem {
+    const filetype = file.type
+    const classes = classNames({
+        isHidden: file.fullname.startsWith('.'),
+        isSymlink: file.isSym,
+    })
+
+    const res: FileViewItem = {
+        icon: (file.isDir && TypeIcons['dir']) || (filetype && TypeIcons[filetype]) || TypeIcons['any'],
+        name: file.fullname,
+        title: file.isSym ? `${file.fullname} → ${file.target}` : file.fullname,
+        nodeData: file,
+        className: classes,
+        isSelected: !!isSelected,
+        size: (!file.isDir && formatBytes(file.length)) || '--',
+    }
+
+    return res
 }
 
 const FileView = observer(({ hide }: Props) => {

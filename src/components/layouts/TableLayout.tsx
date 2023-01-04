@@ -148,7 +148,7 @@ const Row = ({
         }),
         //getDragProps(index),
     })
-    const clickRef: React.MutableRefObject<number> = useRef(0)
+    const clickRef: React.MutableRefObject<number> = useRef(-CLICK_DELAY)
     const clickHandler = makeEvent(index, rowData, onRowClick)
     const doubleClickHandler = makeEvent(index, rowData, onRowDoubleClick)
 
@@ -200,6 +200,12 @@ export const TableLayout = forwardRef<LayoutActions, LayoutProps>(
             size: itemCount,
             parentRef: tableRef,
             estimateSize: React.useCallback(() => ROW_HEIGHT, []),
+            overscan: 5,
+            // rangeExtractor: (range) => {
+            //     const { start, end, size } = range
+            //     const length = size > 0 ? (end - start + 1) : 0
+            //     return length ? Array.from({ length }, (_, i) => i + start) : []
+            // }
         })
 
         useImperativeHandle(
@@ -240,37 +246,37 @@ export const TableLayout = forwardRef<LayoutActions, LayoutProps>(
         }
 
         return (
-            <div
-                // onClick={onBlankAreaClick}
-                ref={tableRef}
-                role="row"
-                style={{
-                    height: `${rowVirtualizer.totalSize}px`,
-                    width: '100%',
-                    position: 'relative',
-                }}
-            >
-                {rowVirtualizer.virtualItems.map((virtualRow) => {
-                    const rowData = getItem(virtualRow.index)
-                    return (
-                        <div
-                            style={{
-                                position: 'absolute',
-                                top: 0,
-                                left: 0,
-                                width: '100%',
-                                height: `${virtualRow.size}px`,
-                                transform: `translateY(${virtualRow.start}px)`,
-                            }}
-                            key={virtualRow.index}
-                            className={rowClassName(rowData)}
-                        >
-                            <Row rowData={rowData} index={virtualRow.index} onRowClick={onItemClick} />
-                            {/* onRowClick={onItemClick} onRowDoubleClick={onItemDoubleClick} */}
-                        </div>
-                    )
-                })}
-                {/* <Table
+            <div ref={tableRef} style={{ height: '100%', width: '100%', overflow: 'auto' }}>
+                <div
+                    // onClick={onBlankAreaClick}
+                    style={{
+                        height: `${rowVirtualizer.totalSize}px`,
+                        width: '100%',
+                        position: 'relative',
+                    }}
+                >
+                    {rowVirtualizer.virtualItems.map((virtualRow) => {
+                        const rowData = getItem(virtualRow.index)
+                        return (
+                            <div
+                                style={{
+                                    position: 'absolute',
+                                    top: 0,
+                                    left: 0,
+                                    width: '100%',
+                                    height: `${virtualRow.size}px`,
+                                    transform: `translateY(${virtualRow.start}px)`,
+                                }}
+                                key={virtualRow.index}
+                                data-cy-file
+                                className={rowClassName(rowData)}
+                            >
+                                <Row rowData={rowData} index={virtualRow.index} onRowClick={onItemClick} />
+                                {/* onRowClick={onItemClick} onRowDoubleClick={onItemDoubleClick} */}
+                            </div>
+                        )
+                    })}
+                    {/* <Table
                     headerClassName="tableHeader"
                     headerHeight={ROW_HEIGHT}
                     height={height}
@@ -307,6 +313,7 @@ export const TableLayout = forwardRef<LayoutActions, LayoutProps>(
                         columnData={{ index: 1, sortMethod: columns[1].key }}
                     />
                 </Table> */}
+                </div>
             </div>
         )
     },

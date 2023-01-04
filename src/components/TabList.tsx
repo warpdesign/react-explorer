@@ -184,7 +184,10 @@ const TabList = observer(() => {
                         htmlTitle={t('TABS.CLOSE')}
                         className="closetab"
                         intent="warning"
-                        onClick={(e) => closeTab(index, e)}
+                        onClick={(e) => {
+                            e.stopPropagation()
+                            closeTab(index, e)
+                        }}
                         icon="cross"
                     ></Icon>
                 )

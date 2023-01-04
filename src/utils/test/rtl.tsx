@@ -53,7 +53,7 @@ jest.mock('electron', () => ({
                             break
 
                         default:
-                            console.warn(`unhandled ipcrenderer ${command}`)
+                            console.log(`warning: unhandled ipcrenderer ${command}`)
                     }
                 }),
         ),
@@ -146,15 +146,15 @@ configure({
 const originalOffsetHeight = Object.getOwnPropertyDescriptor(HTMLElement.prototype, 'offsetHeight')
 const originalOffsetWidth = Object.getOwnPropertyDescriptor(HTMLElement.prototype, 'offsetWidth')
 
-beforeAll(() => {
-    Object.defineProperty(HTMLElement.prototype, 'offsetHeight', { configurable: true, value: 500 })
-    Object.defineProperty(HTMLElement.prototype, 'offsetWidth', { configurable: true, value: 500 })
-})
+// beforeAll(() => {
+//     Object.defineProperty(HTMLElement.prototype, 'offsetHeight', { configurable: true, value: 800 })
+//     Object.defineProperty(HTMLElement.prototype, 'offsetWidth', { configurable: true, value: 800 })
+// })
 
-afterAll(() => {
-    Object.defineProperty(HTMLElement.prototype, 'offsetHeight', originalOffsetHeight)
-    Object.defineProperty(HTMLElement.prototype, 'offsetWidth', originalOffsetWidth)
-})
+// afterAll(() => {
+//     Object.defineProperty(HTMLElement.prototype, 'offsetHeight', originalOffsetHeight)
+//     Object.defineProperty(HTMLElement.prototype, 'offsetWidth', originalOffsetWidth)
+// })
 
 // disable safeDescriptors so that we can spy on mobx actions
 configureMobx({ safeDescriptors: false })
@@ -171,6 +171,7 @@ registerFs(FsVirtual)
 vol.fromJSON(
     {
         dir1: null,
+        dir2: null,
         foo1: '',
         foo2: '',
         '.hidden': '',

@@ -1,35 +1,41 @@
 import * as React from 'react'
-import type { ReactElement } from 'react'
 
-const DELAY_BEFORE_SHOWING_OVERLAY = 200
+export const DELAY_BEFORE_SHOWING_OVERLAY = 200
 
 interface Props {
-    active: boolean
-    children: ReactElement
+    shouldShow: boolean
+    children: JSX.Element
     id?: string
     delay?: boolean
 }
 
-export const Overlay = ({ active, children, id = 'overlay', delay = false }: Props) => {
+export const Overlay = ({ shouldShow, children, id = 'overlay', delay = false }: Props) => {
     const ref: React.MutableRefObject<number> = React.useRef(0)
     const [ready, setReady] = React.useState(!delay)
-    const activeClass = ready && active ? 'active' : ''
+    const active = shouldShow && ready && !ref.current
+    const activeClass = active ? 'active' : ''
 
     React.useEffect(() => {
-        if (delay && active && !ref.current) {
+        if (shouldShow && !ready) {
             ref.current = window.setTimeout(() => {
                 ref.current = 0
                 setReady(true)
             }, DELAY_BEFORE_SHOWING_OVERLAY)
-        }
-        return () => clearTimeout(ref.current)
-    }, [active, id])
+        } else {
+            if (ref.current) {
+                clearTimeout(ref.current)
+                ref.current = 0
+            }
 
-    React.useEffect(() => {
-        if (!active && delay) {
-            setReady(false)
+            if (delay) {
+                setReady(false)
+            }
         }
-    }, [active])
+
+        return () => {
+            ref.current && clearTimeout(ref.current)
+        }
+    }, [shouldShow])
 
     return (
         <div className={`app-loader ${activeClass}`} id={id}>

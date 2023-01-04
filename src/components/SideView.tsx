@@ -66,8 +66,6 @@ export const SideView = observer(({ hide, viewState, onPaste }: SideViewProps) =
     const dropOverlayIcon = isOver && !canDrop ? 'cross' : 'import'
     const dropOverlayActive = isOver
 
-    console.log({ dropOverlayActive })
-
     return (
         <Provider viewState={viewState}>
             <div ref={drop} id={divId} className={activeClass}>
@@ -76,10 +74,10 @@ export const SideView = observer(({ hide, viewState, onPaste }: SideViewProps) =
                 <Toolbar active={active && !busy} onPaste={onPaste} />
                 <FileView hide={hide} />
                 <Statusbar />
-                <Overlay id={`files-loader-${viewState.viewId}`} active={busy} delay={true}>
+                <Overlay id={`files-loader-${viewState.viewId}`} shouldShow={busy} delay={true}>
                     <Spinner />
                 </Overlay>
-                <Overlay active={dropOverlayActive} id={`drop-overlay-${viewState.viewId}`}>
+                <Overlay shouldShow={dropOverlayActive} id={`drop-overlay-${viewState.viewId}`}>
                     <Icon icon={dropOverlayIcon} size={80} color="#d9dde0" />
                 </Overlay>
             </div>

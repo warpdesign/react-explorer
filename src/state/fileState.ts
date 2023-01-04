@@ -614,6 +614,7 @@ export class FileState {
     }
 
     openDirectory(file: { dir: string; fullname: string }): Promise<string | void> {
+        console.log(file.dir, file.fullname)
         return this.cd(file.dir, file.fullname).catch(this.handleError)
     }
 

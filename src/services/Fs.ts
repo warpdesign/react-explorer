@@ -1,10 +1,9 @@
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
 import { Readable } from 'stream'
-import { FsVirtual } from '$src/services/plugins/FsVirtual'
 
 import { isWin } from '$src/utils/platform'
 
-const interfaces: Array<Fs> = [FsVirtual]
+const interfaces: Array<Fs> = []
 
 export interface Credentials {
     user?: string

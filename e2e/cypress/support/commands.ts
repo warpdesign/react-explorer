@@ -39,6 +39,7 @@ declare global {
              *    cy.addTab(0).then(button => ...)
              */
             addTab: typeof addTab
+            enterPath: typeof enterPath
             /**
              * Yields tab
              *
@@ -102,16 +103,17 @@ export function getTab(viewId = 0, tabIndex = 0) {
 
 export function CDList(viewId = 0, path: string, splice = 0, fixture = 'files.json') {
     return cy.window().then((win) => {
-        cy.fixture(fixture).then((json) => {
-            if (win.appState) {
-                const files = json.splice(splice)
-                const fileCache = win.appState.winStates[0].views[viewId].caches[0]
-                fileCache.updatePath(path)
-                fileCache.files.replace(files)
-                fileCache.setStatus('ok')
-                return files
-            }
-        })
+        // cy.fixture(fixture).then((json) => {
+        if (win.appState) {
+            // const files = json.splice(splice)
+            const fileCache = win.appState.winStates[0].views[viewId].caches[0]
+            fileCache.openDirectory({ dir: path, fullname: '' })
+            // fileCache.updatePath(path)
+            // fileCache.files.replace(files)
+            // fileCache.setStatus('ok')
+            // return files
+        }
+        // })
     })
 }
 
@@ -144,6 +146,15 @@ export function triggerFakeCombo(combo: string, data = { title: 'hey!' }) {
     return cy.document().trigger('menu_accelerator', { combo, data })
 }
 
+export function enterPath(path: string, viewId = 0, pressEnter = true) {
+    return cy
+        .get(`#view_${viewId} [data-cy-path]`)
+        .type(path + pressEnter ? '{enter}' : '')
+        .focus()
+        .blur()
+}
+
+Cypress.Commands.add('enterPath', enterPath)
 Cypress.Commands.add('CDAndList', CDList)
 Cypress.Commands.add('triggerHotkey', triggerHotkey)
 Cypress.Commands.add('triggerFakeCombo', triggerFakeCombo)

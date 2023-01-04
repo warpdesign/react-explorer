@@ -19,7 +19,6 @@ const ToggleHiddenFilesButton = ({ content, showHiddenFiles, onClick }: Props) =
     return (
         <Tooltip2 content={content}>
             <Button
-                data-cy-paste-bt
                 icon={hiddenToggleIcon}
                 intent={(showHiddenFiles && Intent.PRIMARY) || Intent.NONE}
                 onClick={onClick}

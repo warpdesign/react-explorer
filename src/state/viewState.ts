@@ -74,7 +74,9 @@ export class ViewState {
     activateNextTab(index: number): void {
         const length = this.caches.length
         const newActive = length > index ? this.caches[index] : this.caches[length - 1]
+
         newActive.isVisible = true
+
         if (!newActive.history.length) {
             newActive.cd(newActive.path)
         }
