@@ -81,6 +81,7 @@ const FileView = observer(({ hide }: Props) => {
     const { t } = useTranslation()
     const cache = viewState.getVisibleCache()
     const { files, selected, cursor, path, status, error } = cache
+    const cursorIndex = cache.getFileIndex(cursor)
     const keepSelection = !!cache.selected.length
     const nodes = files.map((file) =>
         buildNodeFromFile(file, keepSelection && !!selected.find((selectedFile) => sameID(file.id, selectedFile.id))),
@@ -97,8 +98,10 @@ const FileView = observer(({ hide }: Props) => {
     useKeyDown(
         React.useCallback(
             (event: KeyboardEvent) => {
-                const index = cache.getFileIndex(cursor)
-                const nextIndex = getNextIndex(index, event.key as ArrowKey)
+                // Prevent arrow keys to trigger generic browser scrolling: we want to handle it
+                // ourselves so that the cursor is always visible.
+                event.preventDefault()
+                const nextIndex = getNextIndex(cursorIndex, event.key as ArrowKey)
                 if (nextIndex > -1 && nextIndex <= rowCount - 1) {
                     console.log('should select index', nextIndex, rowCount - 1)
                     const file = cache.files[nextIndex]
@@ -163,7 +166,11 @@ const FileView = observer(({ hide }: Props) => {
         }
     }
 
+    const onBlankAreaClick = () => cache.reset()
+
     const onItemClick = ({ data, index, event }: ItemMouseEvent): void => {
+        // stop click propagation so that it does not reach the blank area
+        event.stopPropagation()
         const file = nodes[index].nodeData
         console.log(
             'onItemClick',
@@ -589,8 +596,7 @@ const FileView = observer(({ hide }: Props) => {
                     >
                         {ctxMenuProps.popover}
                         <Layout
-                            width={0}
-                            height={0}
+                            cursorIndex={cursorIndex}
                             itemCount={nodes.length}
                             getItem={getRow}
                             getDragProps={getDraggedProps}
@@ -599,9 +605,7 @@ const FileView = observer(({ hide }: Props) => {
                                 console.log('TODO: onItemDoubleClick')
                             }}
                             onHeaderClick={onHeaderClick}
-                            onBlankAreaClick={() => {
-                                console.log('TODO: onBlankAreaClick')
-                            }}
+                            onBlankAreaClick={onBlankAreaClick}
                             onInlineEdit={() => {
                                 console.log('TODO: inLineEdit')
                             }}

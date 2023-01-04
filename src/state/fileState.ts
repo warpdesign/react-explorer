@@ -23,10 +23,6 @@ export class FileState {
 
     readonly selected = observable<FileDescriptor>([])
 
-    // scroll position of fileCache: we need to restore it on
-    // cache reload
-    scrollTop = -1
-
     // the last element that was selected
     cursor: FileDescriptor | null = null
     // element that's being edited
@@ -268,7 +264,6 @@ export class FileState {
 
         if (!skipHistory && this.status !== 'login') {
             this.addPathToHistory(path)
-            this.scrollTop = 0
             this.setCursor(null)
             this.editingId = null
 
@@ -322,7 +317,6 @@ export class FileState {
 
     reset(): void {
         this.clearSelection()
-        this.scrollTop = -1
         this.setCursor(null)
         this.editingId = null
     }
@@ -376,7 +370,6 @@ export class FileState {
         } else {
             this.selected.clear()
             this.setCursor(null)
-            this.scrollTop = 0
         }
     }
 

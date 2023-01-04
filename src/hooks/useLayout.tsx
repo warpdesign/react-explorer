@@ -35,9 +35,8 @@ export interface LayoutProps {
     status: TStatus
     error: boolean
     itemCount: number
-    width: number
-    height: number
     columns: Column[]
+    cursorIndex?: number
 }
 
 export interface LayoutActions {

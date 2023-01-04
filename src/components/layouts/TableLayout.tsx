@@ -186,17 +186,15 @@ export const TableLayout = forwardRef<LayoutActions, LayoutProps>(
             getItem,
             getDragProps,
             itemCount,
-            width,
-            height,
             columns,
             error,
             status,
+            cursorIndex = -1,
         }: LayoutProps,
         ref,
     ) => {
-        const [cursor, setCursor] = useState(-1)
         const tableRef: React.MutableRefObject<HTMLDivElement> = useRef()
-        const rowVirtualizer = useVirtual({
+        const { totalSize, virtualItems, scrollToIndex } = useVirtual({
             size: itemCount,
             parentRef: tableRef,
             estimateSize: React.useCallback(() => ROW_HEIGHT, []),
@@ -239,6 +237,10 @@ export const TableLayout = forwardRef<LayoutActions, LayoutProps>(
             [],
         )
 
+        useEffect(() => {
+            cursorIndex > -1 && scrollToIndex(cursorIndex)
+        }, [cursorIndex])
+
         const _onHeaderClick = ({ columnData, event /*, dataKey */ }: HeaderMouseEventHandlerParams): void => {
             const newMethod = columnData.sortMethod as TSORT_METHOD_NAME
             event.stopPropagation()
@@ -246,16 +248,15 @@ export const TableLayout = forwardRef<LayoutActions, LayoutProps>(
         }
 
         return (
-            <div ref={tableRef} style={{ height: '100%', width: '100%', overflow: 'auto' }}>
+            <div ref={tableRef} style={{ height: '100%', width: '100%', overflow: 'auto' }} onClick={onBlankAreaClick}>
                 <div
-                    // onClick={onBlankAreaClick}
                     style={{
-                        height: `${rowVirtualizer.totalSize}px`,
+                        height: `${totalSize}px`,
                         width: '100%',
                         position: 'relative',
                     }}
                 >
-                    {rowVirtualizer.virtualItems.map((virtualRow) => {
+                    {virtualItems.map((virtualRow) => {
                         const rowData = getItem(virtualRow.index)
                         return (
                             <div
