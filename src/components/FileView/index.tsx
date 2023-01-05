@@ -103,7 +103,6 @@ const FileView = observer(({ hide }: Props) => {
                 event.preventDefault()
                 const nextIndex = getNextIndex(cursorIndex, event.key as ArrowKey)
                 if (nextIndex > -1 && nextIndex <= rowCount - 1) {
-                    console.log('should select index', nextIndex, rowCount - 1)
                     const file = cache.files[nextIndex]
                     selectFile(file, event.metaKey, event.shiftKey)
                 }
@@ -161,7 +160,6 @@ const FileView = observer(({ hide }: Props) => {
         if (toggleSelection) {
             cache.toggleSelection(file)
         } else {
-            // 2. update selection
             cache.addToSelection(file, extendSelection)
         }
     }

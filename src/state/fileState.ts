@@ -378,39 +378,45 @@ export class FileState {
     }
 
     addToSelection(file: FileDescriptor, extendSelection = false) {
-        console.log('addToSelection', file.fullname)
+        console.log('addToSelection', file.fullname, extendSelection)
         if (!extendSelection) {
             this.selected.replace([file])
             console.log('addToSelection added:', this.selected[0].fullname)
         } else {
             // find highest selected index
-            const maxIndex = this.selected.reduce((currentIndex, file) => {
-                const index = this.getFileIndex(file)
-                return index > currentIndex ? index : currentIndex
-            }, -1)
-
-            // get fileIndex
+            let maxIndex = -1
+            let minIndex = this.files.length
             const fileIndex = this.getFileIndex(file)
+            const previousIndex = this.getFileIndex(this.cursor)
+            const isInSelection = !!this.selected.find((selected) => file === selected)
 
-            // 0...fileIndex
-            if (maxIndex === -1) {
-                this.selected.replace(this.files.slice(0, fileIndex + 1))
-            } else if (fileIndex > maxIndex) {
-                console.log('range', fileIndex, maxIndex + 1)
-                this.selected.replace(this.files.slice(maxIndex, fileIndex + 1).concat(this.selected))
+            this.selected.forEach((selected) => {
+                const index = this.getFileIndex(selected)
+                maxIndex = Math.max(maxIndex, index)
+                minIndex = Math.min(minIndex, index)
+            })
+
+            console.log({ maxIndex, minIndex, previousIndex, fileIndex })
+
+            let start = 0,
+                end = 0
+
+            if (!isInSelection) {
+                start = Math.min(fileIndex, minIndex)
+                end = Math.max(fileIndex, maxIndex) + 1
             } else {
-                const minIndex = this.selected.reduce((currentIndex, file) => {
-                    const index = this.getFileIndex(file)
-                    return index < currentIndex ? index : currentIndex
-                }, this.files.length)
-
-                if (fileIndex > minIndex) {
-                    this.selected.replace(this.files.slice(minIndex, fileIndex + 1))
+                if (fileIndex > previousIndex) {
+                    start = fileIndex
+                    end = maxIndex + 1
                 } else {
-                    this.selected.replace(this.files.slice(fileIndex, minIndex + 1))
+                    start = minIndex
+                    end = fileIndex + 1
                 }
             }
+
+            this.selected.replace(this.files.slice(start, end))
         }
+
         this.setCursor(file)
     }
 
