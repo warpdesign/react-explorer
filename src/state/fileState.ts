@@ -186,6 +186,7 @@ export class FileState {
             refreshSelection: action,
             addToSelection: action,
             toggleSelection: action,
+            selectAll: action,
             setCursor: action,
             setEditingFile: action,
             emptyCache: action,
@@ -428,6 +429,14 @@ export class FileState {
         } else {
             this.selected.push(file)
             this.setCursor(file)
+        }
+    }
+
+    selectAll() {
+        const length = this.files.length
+        if (length) {
+            this.selected.replace(this.files)
+            this.setCursor(this.selected[length - 1])
         }
     }
 

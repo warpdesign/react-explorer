@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react'
+import React, { useCallback, useEffect, useState, useRef } from 'react'
 import { ContextMenu2, ContextMenu2ChildrenProps, ContextMenu2ContentProps } from '@blueprintjs/popover2'
 import { IconName, Icon, HotkeysTarget2, Classes } from '@blueprintjs/core'
 import { useTranslation } from 'react-i18next'
@@ -24,6 +24,7 @@ import { throttle } from '$src/utils/throttle'
 import { FileState } from '$src/state/fileState'
 import { FileContextMenu } from '$src/components/menus/FileContextMenu'
 import Keys from '$src/constants/keys'
+import { useMenuAccelerator } from '$src/hooks/useAccelerator'
 import { TypeIcons } from '$src/constants/icons'
 
 import 'react-virtualized/styles.css'
@@ -76,6 +77,17 @@ export function buildNodeFromFile(file: FileDescriptor, isSelected: boolean): Fi
     return res
 }
 
+const onSelectAll = (cache: FileState): void => {
+    const isOverlayOpen = document.body.classList.contains(Classes.OVERLAY_OPEN)
+    console.log('onSelectAll')
+    if (!isOverlayOpen && !isEditable(document.activeElement)) {
+        cache.selectAll()
+    } else {
+        // need to select all text: send message
+        ipcRenderer.invoke('selectAll')
+    }
+}
+
 const FileView = observer(({ hide }: Props) => {
     const { viewState, appState } = useStores('settingsState', 'viewState', 'appState')
     const { t } = useTranslation()
@@ -111,6 +123,13 @@ const FileView = observer(({ hide }: Props) => {
         ),
         ['ArrowDown', 'ArrowUp'],
     )
+
+    useMenuAccelerator([
+        {
+            combo: 'CmdOrCtrl+A',
+            callback: useCallback(() => onSelectAll(cache), [cache]),
+        },
+    ])
 
     // public componentDidUpdate(): void {
     //     const scrollTop = this.state.position === -1 ? this.cache.scrollTop : null
@@ -344,49 +363,12 @@ const FileView = observer(({ hide }: Props) => {
         // }
     }
 
-    const selectAll = (invert = false): void => {
-        // let newSelected = selected
-        // let newPosition = position
-        // if (nodes.length && isViewActive()) {
-        //     newSelected = 0
-        //     newPosition = -1
-        //     let i = 0
-        //     for (const node of nodes) {
-        //         node.isSelected = invert ? !node.isSelected : true
-        //         if (node.isSelected) {
-        //             newPosition = i
-        //             newSelected++
-        //         }
-        //         i++
-        //     }
-        //     setNodes(nodes)
-        //     setSelected(newSelected)
-        //     setPosition(newPosition)
-        //     console.warn('disabled: updateSelection after state update (3)')
-        //     // this.setState({ nodes, selected, position }, () => {
-        //     //     this.updateSelection()
-        //     // })
-        // }
-    }
-
     const onOpenFile = (e: KeyboardEvent): void => {
         // if (isViewActive() && position > -1) {
         //     const file = nodes[position].nodeData as FileDescriptor
         //     openFileOrDirectory(file, e.shiftKey)
         // }
     }
-
-    const onSelectAll = (): void => {
-        const isOverlayOpen = document.body.classList.contains(Classes.OVERLAY_OPEN)
-        if (!isOverlayOpen && !isEditable(document.activeElement)) {
-            selectAll()
-        } else {
-            // need to select all text: send message
-            ipcRenderer.invoke('selectAll')
-        }
-    }
-
-    const onInvertSelection = (): void => selectAll(true)
 
     // onInputKeyDown = (e: React.KeyboardEvent<HTMLElement>): void => {
     //     if (this.editingElement) {
@@ -543,20 +525,20 @@ const FileView = observer(({ hide }: Props) => {
             onKeyDown: onOpenFile,
             group: t('SHORTCUT.GROUP.ACTIVE_VIEW'),
         },
-        {
-            global: true,
-            combo: 'mod + i',
-            label: t('SHORTCUT.ACTIVE_VIEW.SELECT_INVERT'),
-            onKeyDown: onInvertSelection,
-            group: t('SHORTCUT.GROUP.ACTIVE_VIEW'),
-        },
+        // {
+        //     global: true,
+        //     combo: 'mod + i',
+        //     label: t('SHORTCUT.ACTIVE_VIEW.SELECT_INVERT'),
+        //     onKeyDown: onInvertSelection,
+        //     group: t('SHORTCUT.GROUP.ACTIVE_VIEW'),
+        // },
         ...(!isMac || window.ENV.CY
             ? [
                   {
                       global: true,
                       combo: 'mod + a',
                       label: t('SHORTCUT.ACTIVE_VIEW.SELECT_ALL'),
-                      onKeyDown: onSelectAll,
+                      onKeyDown: () => onSelectAll(cache),
                       group: t('SHORTCUT.GROUP.ACTIVE_VIEW'),
                   },
               ]

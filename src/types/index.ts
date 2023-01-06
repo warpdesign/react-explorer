@@ -3,7 +3,7 @@ import { FileState } from '$src/state/fileState'
 import { IconName } from '@blueprintjs/icons'
 import { IpcRendererEvent } from 'electron/renderer'
 
-export type IpcRendererEventHandler = (event: IpcRendererEvent, command: string, param?: string) => void
+export type IpcRendererEventHandler<C, P = string> = (event: IpcRendererEvent, command: C, param?: P) => void
 
 /**
  * Describes a view, the path is the path to its first tab: right now each view is created with only
