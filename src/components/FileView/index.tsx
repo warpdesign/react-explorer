@@ -1,29 +1,20 @@
-import React, { useCallback, useEffect, useState, useRef } from 'react'
+import React, { useCallback, useRef, MutableRefObject } from 'react'
+import { observer } from 'mobx-react'
 import { ContextMenu2, ContextMenu2ChildrenProps, ContextMenu2ContentProps } from '@blueprintjs/popover2'
-import { IconName, Icon, HotkeysTarget2, Classes } from '@blueprintjs/core'
+import { HotkeysTarget2, Classes } from '@blueprintjs/core'
 import { useTranslation } from 'react-i18next'
-import { IReactionDisposer, reaction, toJS, IObservableArray } from 'mobx'
-import i18next from 'i18next'
-import { AutoSizer, Index, RowMouseEventHandlerParams, ScrollParams } from 'react-virtualized'
 import classNames from 'classnames'
 import { ipcRenderer } from 'electron'
 
-import { AppState } from '$src/state/appState'
-import { FileDescriptor, FileID, sameID } from '$src/services/Fs'
+import { FileDescriptor, sameID } from '$src/services/Fs'
 import { TSORT_METHOD_NAME, TSORT_ORDER, getSortMethod } from '$src/services/FsSort'
 import { formatBytes } from '$src/utils/formatBytes'
 import { shouldCatchEvent, isEditable, isInRow } from '$src/utils/dom'
 import { AppAlert } from '$src/components/AppAlert'
-import { WithMenuAccelerators, Accelerators, Accelerator } from '$src/components/hoc/WithMenuAccelerators'
 import { isMac } from '$src/utils/platform'
-import { SettingsState } from '$src/state/settingsState'
-import { ViewState } from '$src/state/viewState'
-import { debounce } from '$src/utils/debounce'
 import { filterDirs, filterFiles, getSelectionRange } from '$src/utils/fileUtils'
-import { throttle } from '$src/utils/throttle'
 import { FileState } from '$src/state/fileState'
 import { FileContextMenu } from '$src/components/menus/FileContextMenu'
-import Keys from '$src/constants/keys'
 import { useMenuAccelerator } from '$src/hooks/useAccelerator'
 import { TypeIcons } from '$src/constants/icons'
 
@@ -33,25 +24,8 @@ import { ArrowKey, DraggedObject, FileViewItem } from '$src/types'
 import { HeaderMouseEvent, ItemMouseEvent, useLayout } from '$src/hooks/useLayout'
 import { useStores } from '$src/hooks/useStores'
 import { useKeyDown } from '$src/hooks/useKeyDown'
-import { observer } from 'mobx-react'
-
-const SCROLL_DEBOUNCE = 50
-const ARROW_KEYS_REPEAT_DELAY = 5
 
 const LABEL_CLASSNAME = 'file-label'
-
-interface State {
-    nodes: FileViewItem[]
-    // number of items selected
-    selected: number
-    type: string
-    // position of last selected element
-    position: number
-    // last path that was used
-    path: string
-    //
-    rightClickFile: FileDescriptor | null
-}
 
 interface Props {
     hide: boolean
@@ -100,7 +74,7 @@ const FileView = observer(({ hide }: Props) => {
     )
     const rowCount = nodes.length
 
-    const [rightClickFile, setRightClickFile] = useState<FileDescriptor | null>(null)
+    const rightClickFileIndexRef: MutableRefObject<number> = useRef<number>()
 
     const {
         Layout,
@@ -196,45 +170,7 @@ const FileView = observer(({ hide }: Props) => {
         )
         // TODO: use OS specific instead of mac only metaKey
         selectFile(file, event.metaKey, event.shiftKey)
-        // 1. update view cursor
-        // console.log('setting cursor')
-        // setCursor(index)
     }
-
-    // const onItemClick = ({ data, index, event }: ItemMouseEvent): void => {
-    //     // event.stopPropagation()
-    //     const originallySelected = data.isSelected
-
-    //     // let newSelected = selected
-    //     let position = index
-
-    //     if (!event.shiftKey) {
-    //         // newSelected = 0
-    //         nodes.forEach((n) => (n.isSelected = false))
-    //         data.isSelected = true
-    //     } else {
-    //         console.warn('toggle rename else case not implemented !')
-    //         debugger
-    //         data.isSelected = !data.isSelected
-    //         // if (!data.isSelected) {
-    //         //     // need to update position with last one
-    //         //     // will be -1 if no left selected node is
-    //         //     position = nodes.findIndex((node) => node.isSelected)
-    //         // }
-    //         console.warn('onRowClick: this.setEditElement skipped')
-    //     }
-
-    //     // if (data.isSelected) {
-    //     //     newSelected++
-    //     // } else if (originallySelected && newSelected > 0) {
-    //     //     newSelected--
-    //     // }
-
-    //     setNodes(nodes)
-    //     // setSelected(newSelected)
-    //     // setPosition(position)
-    //     console.warn('DISABLED: should update selection on state update')
-    // }
 
     // private onInlineEdit(cancel: boolean): void {
     //     const editingElement = this.editingElement
@@ -546,8 +482,9 @@ const FileView = observer(({ hide }: Props) => {
     ]
 
     const renderFileContextMenu = (props: ContextMenu2ContentProps): JSX.Element => {
-        return undefined
-        // return props.isOpen ? <FileContextMenu fileUnderMouse={this.state.rightClickFile} /> : null
+        const index = rightClickFileIndexRef.current
+        const rightClickFile = index > -1 && index < rowCount ? files[index] : undefined
+        return props.isOpen ? <FileContextMenu fileUnderMouse={rightClickFile} /> : null
     }
 
     // (element: HTMLElement) => {
@@ -563,13 +500,8 @@ const FileView = observer(({ hide }: Props) => {
                     <div
                         ref={ctxMenuProps.ref}
                         onContextMenu={(e) => {
-                            // reset rightClickFile if we right-click on an empty area
-                            if (!isInRow(e)) {
-                                // this.setState({
-                                //     rightClickFile: null,
-                                // })
-                                setRightClickFile(null)
-                            }
+                            // use files.length to tell menu handler we clicked on the blank area
+                            rightClickFileIndexRef.current = files.length
                             ctxMenuProps.onContextMenu(e)
                         }}
                         className={classNames('fileListSizerWrapper', ctxMenuProps.className)}
@@ -589,8 +521,9 @@ const FileView = observer(({ hide }: Props) => {
                             onInlineEdit={() => {
                                 console.log('TODO: inLineEdit')
                             }}
-                            onItemRightClick={() => {
-                                console.log('TODO: onItemRightClick')
+                            onItemRightClick={({ index, event }) => {
+                                rightClickFileIndexRef.current = index
+                                ctxMenuProps.onContextMenu(event)
                             }}
                             columns={[
                                 {
@@ -611,9 +544,5 @@ const FileView = observer(({ hide }: Props) => {
         </HotkeysTarget2>
     )
 })
-
-// const FileView = withTranslation()(
-//     inject('appState', 'viewState', 'settingsState')(WithMenuAccelerators(FileViewClass)),
-// )
 
 export { FileView }

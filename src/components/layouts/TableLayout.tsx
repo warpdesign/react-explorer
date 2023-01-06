@@ -125,6 +125,7 @@ interface RowProps {
     rowData: FileViewItem
     onRowClick?: (event: ItemMouseEvent) => void
     onRowDoubleClick?: (event: ItemMouseEvent) => void
+    onRowRightClick?: (event: ItemMouseEvent) => void
     index: number
 }
 
@@ -134,6 +135,7 @@ const Row = ({
     onRowDoubleClick = () => {
         console.log('double! ')
     },
+    onRowRightClick,
     index,
 }: RowProps): JSX.Element => {
     const [{ isDragging }, drag] = useDrag<DraggedObject, unknown, CollectedProps>({
@@ -151,6 +153,7 @@ const Row = ({
     const clickRef: React.MutableRefObject<number> = useRef(-CLICK_DELAY)
     const clickHandler = makeEvent(index, rowData, onRowClick)
     const doubleClickHandler = makeEvent(index, rowData, onRowDoubleClick)
+    const contextMenuHandler = makeEvent(index, rowData, onRowRightClick)
 
     return (
         <div
@@ -163,6 +166,10 @@ const Row = ({
                 }
                 clickRef.current = e.timeStamp
             }}
+            onContextMenu={(e: React.MouseEvent<HTMLElement>) => {
+                e.stopPropagation()
+                contextMenuHandler(e)
+            }}
             style={{ width: '100%', height: '100%', alignItems: 'center', display: 'flex' }}
         >
             <Name data={rowData} />
@@ -171,16 +178,13 @@ const Row = ({
     )
 }
 
-interface Toto {
-    blah: string
-}
-
 export const TableLayout = forwardRef<LayoutActions, LayoutProps>(
     (
         {
             onItemClick,
             onBlankAreaClick,
             onItemDoubleClick,
+            onItemRightClick,
             onHeaderClick,
             onInlineEdit,
             getItem,
@@ -272,7 +276,12 @@ export const TableLayout = forwardRef<LayoutActions, LayoutProps>(
                                 data-cy-file
                                 className={rowClassName(rowData)}
                             >
-                                <Row rowData={rowData} index={virtualRow.index} onRowClick={onItemClick} />
+                                <Row
+                                    rowData={rowData}
+                                    index={virtualRow.index}
+                                    onRowClick={onItemClick}
+                                    onRowRightClick={onItemRightClick}
+                                />
                                 {/* onRowClick={onItemClick} onRowDoubleClick={onItemDoubleClick} */}
                             </div>
                         )
