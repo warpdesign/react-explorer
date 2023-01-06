@@ -23,7 +23,7 @@ import { ArrowKey, DraggedObject, FileViewItem } from '$src/types'
 import { useVirtual } from 'react-virtual'
 // import { RowRendererProps } from '../RowRenderer'
 
-const CLICK_DELAY = 400
+const CLICK_DELAY = 500
 const ROW_HEIGHT = 28
 const SIZE_COLUMN_WITDH = 70
 // this is just some small enough value: column will grow

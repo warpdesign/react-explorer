@@ -68,6 +68,7 @@ const FileView = observer(({ hide }: Props) => {
     const cache = viewState.getVisibleCache()
     const { files, selected, cursor, path, status, error } = cache
     const cursorIndex = cache.getFileIndex(cursor)
+    const isViewActive = viewState.isActive && !hide
     const keepSelection = !!cache.selected.length
     const nodes = files.map((file) =>
         buildNodeFromFile(file, keepSelection && !!selected.find((selectedFile) => sameID(file.id, selectedFile.id))),
@@ -87,6 +88,7 @@ const FileView = observer(({ hide }: Props) => {
                 // Prevent arrow keys to trigger generic browser scrolling: we want to handle it
                 // ourselves so that the cursor is always visible.
                 event.preventDefault()
+
                 const nextIndex = getNextIndex(cursorIndex, event.key as ArrowKey)
                 if (nextIndex > -1 && nextIndex <= rowCount - 1) {
                     const file = cache.files[nextIndex]
@@ -300,7 +302,7 @@ const FileView = observer(({ hide }: Props) => {
     }
 
     const onOpenFile = (e: KeyboardEvent): void => {
-        if (isViewActive() && cursor) {
+        if (isViewActive && cursor) {
             openFileOrDirectory(cursor, e.shiftKey)
         }
     }
@@ -330,8 +332,6 @@ const FileView = observer(({ hide }: Props) => {
     //         element.removeAttribute('contenteditable')
     //     }
     // }
-
-    const isViewActive = (): boolean => viewState.isActive && !hide
 
     // getElementAndToggleRename = (e?: KeyboardEvent | string, selectText = true): void => {
     //     if (this.state.selected > 0) {

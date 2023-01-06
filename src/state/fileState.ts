@@ -474,8 +474,8 @@ export class FileState {
         // otherwise we keep previous
         this.setStatus('ok', true)
         const niceError = getLocalizedError(error)
-        console.log('orignalCode', error.code, 'newCode', niceError.code)
-        AppAlert.show(i18n.i18next.t('ERRORS.GENERIC', { error }), {
+        // console.log('orignalCode', error.code, 'newCode', niceError.code)
+        AppAlert.show(i18n.i18next.t('ERRORS.GENERIC', { error: niceError }), {
             intent: 'danger',
         })
         return Promise.reject(niceError)
@@ -603,26 +603,20 @@ export class FileState {
     async openFile(appState: AppState, cache: FileState, file: FileDescriptor): Promise<void> {
         try {
             const path = await appState.prepareLocalTransfer(cache, [file])
-            const error = await this.shellOpenFile(path)
-            if (error !== false) {
-                throw {
-                    message: i18n.i18next.t('ERRORS.SHELL_OPEN_FAILED', { path }),
-                    code: 'NO_CODE',
-                }
+            const error = await shell.openPath(path)
+            if (error) {
+                this.handleError({
+                    code: 'SHELL_OPEN_FAILED',
+                })
             }
         } catch (err) {
-            return Promise.reject(err)
+            this.handleError(err)
         }
-    }
-
-    async shellOpenFile(path: string): Promise<boolean> {
-        const error = await shell.openPath(path)
-        return !!error
     }
 
     openDirectory(file: { dir: string; fullname: string }): Promise<string | void> {
         console.log(file.dir, file.fullname)
-        return this.cd(file.dir, file.fullname).catch(this.handleError)
+        return this.cd(file.dir, file.fullname)
     }
 
     openTerminal(path: string): Promise<void> {
