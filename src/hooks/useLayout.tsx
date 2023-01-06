@@ -4,7 +4,7 @@ import type { ReactElement } from 'react'
 import { ArrowKey, DraggedObject, FileViewItem } from '$src/types'
 import { TSORT_METHOD_NAME } from '$src/services/FsSort'
 import { TStatus } from '$src/state/fileState'
-import { TableLayout } from '$src/components/layouts/TableLayout'
+import { TableLayout } from '$src/components/layouts/Table/'
 
 const layouts: { [key in LayoutName]: any } = {
     details: TableLayout,
@@ -59,6 +59,14 @@ const defaultActions: LayoutActions = {
         return -1
     },
 }
+
+export const makeEvent =
+    (index: number, data: any, handler: (event: ItemMouseEvent) => void) => (event: React.MouseEvent<HTMLElement>) =>
+        handler({
+            data,
+            index,
+            event,
+        })
 
 export const useLayout = (name: LayoutName): LayoutReturnProps => {
     const Layout = layouts[name]

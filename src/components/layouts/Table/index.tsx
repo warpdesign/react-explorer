@@ -1,5 +1,6 @@
 import React, { forwardRef, useImperativeHandle, useRef, useEffect, useState, createRef, MutableRefObject } from 'react'
 import { Classes, Icon } from '@blueprintjs/core'
+import { Row } from './components/Row'
 import classNames from 'classnames'
 import {
     Column,
@@ -18,12 +19,10 @@ import { ItemMouseEvent, LayoutActions, LayoutProps } from '$src/hooks/useLayout
 import CONFIG from '$src/config/appConfig'
 import { TStatus } from '$src/state/fileState'
 import { TSORT_METHOD_NAME } from '$src/services/FsSort'
-import { useDrag, useDragDropManager } from 'react-dnd'
 import { ArrowKey, DraggedObject, FileViewItem } from '$src/types'
 import { useVirtual } from 'react-virtual'
 // import { RowRendererProps } from '../RowRenderer'
 
-const CLICK_DELAY = 500
 const ROW_HEIGHT = 28
 const SIZE_COLUMN_WITDH = 70
 // this is just some small enough value: column will grow
@@ -31,31 +30,6 @@ const SIZE_COLUMN_WITDH = 70
 const NAME_COLUMN_WIDTH = 10
 const GRID_CLASSNAME = 'filetable-grid'
 const GRID_CLASSES = `data-cy-filetable ${GRID_CLASSNAME} ${CONFIG.CUSTOM_SCROLLBAR_CLASSNAME}`
-
-const makeEvent =
-    (index: number, data: any, handler: (event: ItemMouseEvent) => void) => (event: React.MouseEvent<HTMLElement>) =>
-        handler({
-            data,
-            index,
-            event,
-        })
-
-const Size = ({ data: { size } }: { data: FileViewItem }) => {
-    return <div className="size">{size}</div>
-}
-
-const Name = ({ data }: { data: FileViewItem }) => {
-    const { icon, title } = data
-
-    return (
-        <div className="name">
-            <Icon icon={icon}></Icon>
-            <span title={title} className="file-label" spellCheck="false">
-                {data.name}
-            </span>
-        </div>
-    )
-}
 
 /*
 {
@@ -115,59 +89,6 @@ const _noRowsRenderer = ({ error, status }: { error: boolean; status: TStatus })
     } else {
         return <div />
     }
-}
-
-interface CollectedProps {
-    isDragging: boolean
-}
-
-interface RowProps {
-    rowData: FileViewItem
-    onRowClick?: (event: ItemMouseEvent) => void
-    onRowDoubleClick?: (event: ItemMouseEvent) => void
-    onRowRightClick?: (event: ItemMouseEvent) => void
-    index: number
-}
-
-const Row = ({ rowData, onRowClick, onRowDoubleClick, onRowRightClick, index }: RowProps): JSX.Element => {
-    const [{ isDragging }, drag] = useDrag<DraggedObject, unknown, CollectedProps>({
-        type: 'file',
-        item: {
-            fileState: null,
-            dragFiles: [],
-            selectedCount: 0,
-        },
-        collect: (monitor) => ({
-            isDragging: !!monitor.isDragging(),
-        }),
-        //getDragProps(index),
-    })
-    const clickRef: React.MutableRefObject<number> = useRef(-CLICK_DELAY)
-    const clickHandler = makeEvent(index, rowData, onRowClick)
-    const doubleClickHandler = makeEvent(index, rowData, onRowDoubleClick)
-    const contextMenuHandler = makeEvent(index, rowData, onRowRightClick)
-
-    return (
-        <div
-            ref={drag}
-            onClick={(e: React.MouseEvent<HTMLElement>) => {
-                if (e.timeStamp - clickRef.current > CLICK_DELAY) {
-                    clickHandler(e)
-                } else {
-                    doubleClickHandler(e)
-                }
-                clickRef.current = e.timeStamp
-            }}
-            onContextMenu={(e: React.MouseEvent<HTMLElement>) => {
-                e.stopPropagation()
-                contextMenuHandler(e)
-            }}
-            style={{ width: '100%', height: '100%', alignItems: 'center', display: 'flex' }}
-        >
-            <Name data={rowData} />
-            <Size data={rowData} />
-        </div>
-    )
 }
 
 export const TableLayout = forwardRef<LayoutActions, LayoutProps>(
