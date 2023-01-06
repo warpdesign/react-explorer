@@ -129,15 +129,7 @@ interface RowProps {
     index: number
 }
 
-const Row = ({
-    rowData,
-    onRowClick,
-    onRowDoubleClick = () => {
-        console.log('double! ')
-    },
-    onRowRightClick,
-    index,
-}: RowProps): JSX.Element => {
+const Row = ({ rowData, onRowClick, onRowDoubleClick, onRowRightClick, index }: RowProps): JSX.Element => {
     const [{ isDragging }, drag] = useDrag<DraggedObject, unknown, CollectedProps>({
         type: 'file',
         item: {
@@ -281,6 +273,7 @@ export const TableLayout = forwardRef<LayoutActions, LayoutProps>(
                                     index={virtualRow.index}
                                     onRowClick={onItemClick}
                                     onRowRightClick={onItemRightClick}
+                                    onRowDoubleClick={onItemDoubleClick}
                                 />
                                 {/* onRowClick={onItemClick} onRowDoubleClick={onItemDoubleClick} */}
                             </div>

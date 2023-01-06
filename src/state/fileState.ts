@@ -382,7 +382,6 @@ export class FileState {
         console.log('addToSelection', file.fullname, extendSelection)
         if (!extendSelection) {
             this.selected.replace([file])
-            console.log('addToSelection added:', this.selected[0].fullname)
         } else {
             // find highest selected index
             let maxIndex = -1

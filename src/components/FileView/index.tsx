@@ -159,7 +159,7 @@ const FileView = observer(({ hide }: Props) => {
 
     const onBlankAreaClick = () => cache.reset()
 
-    const onItemClick = ({ data, index, event }: ItemMouseEvent): void => {
+    const onItemClick = ({ index, event }: ItemMouseEvent): void => {
         // stop click propagation so that it does not reach the blank area
         event.stopPropagation()
         const file = nodes[index].nodeData
@@ -167,9 +167,19 @@ const FileView = observer(({ hide }: Props) => {
             'onItemClick',
             index,
             cache.selected.findIndex((selectedFile) => sameID(selectedFile.id, file.id)),
+            cache.selected.length,
         )
         // TODO: use OS specific instead of mac only metaKey
         selectFile(file, event.metaKey, event.shiftKey)
+    }
+
+    const onItemDoubleClick = ({ event }: ItemMouseEvent): void => {
+        event.stopPropagation()
+        openFileOrDirectory(cursor, event.shiftKey)
+        console.log('onItemDoubleClick', cursor)
+        //     if ((event.target as HTMLElement) !== this.editingElement) {
+        //         this.openFileOrDirectory(file, event.shiftKey)
+        //     }
     }
 
     // private onInlineEdit(cancel: boolean): void {
@@ -261,25 +271,15 @@ const FileView = observer(({ hide }: Props) => {
     //     }
     // }
 
-    // onRowRightClick = (data: RowMouseEventHandlerParams): void => {
-    //     this.setState({ rightClickFile: data.rowData.nodeData as FileDescriptor })
-    // }
-
-    const openFileOrDirectory = async (file: FileDescriptor, useInactiveCache: boolean): Promise<void> => {
-        try {
-            if (!file.isDir) {
-                await cache.openFile(appState, cache, file)
-            } else {
-                const dir = {
-                    dir: cache.join(file.dir, file.fullname),
-                    fullname: '',
-                }
-                await appState.openDirectory(dir, !useInactiveCache)
+    const openFileOrDirectory = (file: FileDescriptor, useInactiveCache: boolean): void => {
+        if (!file.isDir) {
+            cache.openFile(appState, cache, file)
+        } else {
+            const dir = {
+                dir: cache.join(file.dir, file.fullname),
+                fullname: '',
             }
-        } catch (error) {
-            AppAlert.show(t('ERRORS.GENERIC', { error }), {
-                intent: 'danger',
-            })
+            appState.openDirectory(dir, !useInactiveCache)
         }
     }
 
@@ -300,10 +300,9 @@ const FileView = observer(({ hide }: Props) => {
     }
 
     const onOpenFile = (e: KeyboardEvent): void => {
-        // if (isViewActive() && position > -1) {
-        //     const file = nodes[position].nodeData as FileDescriptor
-        //     openFileOrDirectory(file, e.shiftKey)
-        // }
+        if (isViewActive() && cursor) {
+            openFileOrDirectory(cursor, e.shiftKey)
+        }
     }
 
     // onInputKeyDown = (e: React.KeyboardEvent<HTMLElement>): void => {
@@ -513,9 +512,7 @@ const FileView = observer(({ hide }: Props) => {
                             getItem={getRow}
                             getDragProps={getDraggedProps}
                             onItemClick={onItemClick}
-                            onItemDoubleClick={() => {
-                                console.log('TODO: onItemDoubleClick')
-                            }}
+                            onItemDoubleClick={onItemDoubleClick}
                             onHeaderClick={onHeaderClick}
                             onBlankAreaClick={onBlankAreaClick}
                             onInlineEdit={() => {
