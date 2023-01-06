@@ -21,6 +21,7 @@ import { TStatus } from '$src/state/fileState'
 import { TSORT_METHOD_NAME } from '$src/services/FsSort'
 import { ArrowKey, DraggedObject, FileViewItem } from '$src/types'
 import { useVirtual } from 'react-virtual'
+import { Placeholder } from './components/Placeholder'
 // import { RowRendererProps } from '../RowRenderer'
 
 const ROW_HEIGHT = 28
@@ -68,27 +69,6 @@ const rowClassName = (item: FileViewItem): string => {
         selected: item && item.isSelected,
         error: error,
     })
-}
-
-const _noRowsRenderer = ({ error, status }: { error: boolean; status: TStatus }): JSX.Element => {
-    // const { t } = this.injected
-    // const status = this.cache.status
-    // const error = this.cache.error
-
-    // we don't want to show empty + loader at the same time
-    if (status !== 'busy') {
-        // const placeholder = (error && t('COMMON.NO_SUCH_FOLDER')) || t('COMMON.EMPTY_FOLDER')
-        const placeholder = 'placeholder to do'
-        const icon = error ? 'warning-sign' : 'tick-circle'
-        return (
-            <div className="empty">
-                <Icon icon={icon} iconSize={40} />
-                {placeholder}
-            </div>
-        )
-    } else {
-        return <div />
-    }
 }
 
 export const TableLayout = forwardRef<LayoutActions, LayoutProps>(
@@ -166,41 +146,43 @@ export const TableLayout = forwardRef<LayoutActions, LayoutProps>(
 
         return (
             <div ref={tableRef} style={{ height: '100%', width: '100%', overflow: 'auto' }} onClick={onBlankAreaClick}>
-                <div
-                    style={{
-                        height: `${totalSize}px`,
-                        width: '100%',
-                        position: 'relative',
-                    }}
-                >
-                    {virtualItems.map((virtualRow) => {
-                        const rowData = getItem(virtualRow.index)
-                        return (
-                            <div
-                                style={{
-                                    position: 'absolute',
-                                    top: 0,
-                                    left: 0,
-                                    width: '100%',
-                                    height: `${virtualRow.size}px`,
-                                    transform: `translateY(${virtualRow.start}px)`,
-                                }}
-                                key={virtualRow.index}
-                                data-cy-file
-                                className={rowClassName(rowData)}
-                            >
-                                <Row
-                                    rowData={rowData}
-                                    index={virtualRow.index}
-                                    onRowClick={onItemClick}
-                                    onRowRightClick={onItemRightClick}
-                                    onRowDoubleClick={onItemDoubleClick}
-                                />
-                                {/* onRowClick={onItemClick} onRowDoubleClick={onItemDoubleClick} */}
-                            </div>
-                        )
-                    })}
-                    {/* <Table
+                {!virtualItems.length ? (
+                    <Placeholder error={error} status={status} />
+                ) : (
+                    <div
+                        style={{
+                            height: `${totalSize}px`,
+                            width: '100%',
+                            position: 'relative',
+                        }}
+                    >
+                        {virtualItems.map((virtualRow) => {
+                            const rowData = getItem(virtualRow.index)
+                            return (
+                                <div
+                                    style={{
+                                        position: 'absolute',
+                                        top: 0,
+                                        left: 0,
+                                        width: '100%',
+                                        height: `${virtualRow.size}px`,
+                                        transform: `translateY(${virtualRow.start}px)`,
+                                    }}
+                                    key={virtualRow.index}
+                                    data-cy-file
+                                    className={rowClassName(rowData)}
+                                >
+                                    <Row
+                                        rowData={rowData}
+                                        index={virtualRow.index}
+                                        onRowClick={onItemClick}
+                                        onRowRightClick={onItemRightClick}
+                                        onRowDoubleClick={onItemDoubleClick}
+                                    />
+                                </div>
+                            )
+                        })}
+                        {/* <Table
                     headerClassName="tableHeader"
                     headerHeight={ROW_HEIGHT}
                     height={height}
@@ -237,7 +219,8 @@ export const TableLayout = forwardRef<LayoutActions, LayoutProps>(
                         columnData={{ index: 1, sortMethod: columns[1].key }}
                     />
                 </Table> */}
-                </div>
+                    </div>
+                )}
             </div>
         )
     },
