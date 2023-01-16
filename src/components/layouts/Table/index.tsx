@@ -88,6 +88,7 @@ export const TableLayout = forwardRef<LayoutActions, LayoutProps>(
             error,
             status,
             cursorIndex = -1,
+            isDarkModeActive,
         }: LayoutProps,
         ref,
     ) => {
@@ -174,6 +175,7 @@ export const TableLayout = forwardRef<LayoutActions, LayoutProps>(
                                             onRowRightClick={onItemRightClick}
                                             onRowDoubleClick={onItemDoubleClick}
                                             getDragProps={getDragProps}
+                                            isDarkModeActive={isDarkModeActive}
                                         />
                                     </div>
                                 )

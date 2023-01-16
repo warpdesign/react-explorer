@@ -1,10 +1,12 @@
 import React, { useRef } from 'react'
-import { useDrag, useDragDropManager } from 'react-dnd'
+import { DragPreviewImage, useDrag } from 'react-dnd'
 
 import type { DraggedObject, FileViewItem } from '$src/types'
 import { ItemMouseEvent, makeEvent } from '$src/hooks/useLayout'
 import { Name } from '../Column/Name'
 import { Size } from '../Column/Size'
+import { createDragPreview } from '$src/components/layouts/Table/utils'
+import { useTranslation } from 'react-i18next'
 
 interface CollectedProps {
     isDragging: boolean
@@ -16,6 +18,7 @@ export interface RowProps {
     onRowDoubleClick?: (event: ItemMouseEvent) => void
     onRowRightClick?: (event: ItemMouseEvent) => void
     getDragProps: (index: number) => DraggedObject
+    isDarkModeActive: boolean
     index: number
 }
 
@@ -28,38 +31,48 @@ export const Row = ({
     onRowRightClick,
     index,
     getDragProps,
+    isDarkModeActive,
 }: RowProps): JSX.Element => {
-    const [{ isDragging }, drag] = useDrag<DraggedObject, unknown, CollectedProps>({
+    const dragProps = getDragProps(index)
+    const [{ isDragging }, drag, preview] = useDrag<DraggedObject, unknown, CollectedProps>({
         type: 'file',
-        item: getDragProps(index),
+        item: dragProps,
         collect: (monitor) => ({
             isDragging: !!monitor.isDragging(),
         }),
     })
+    const { t } = useTranslation()
     const clickRef: React.MutableRefObject<number> = useRef(-CLICK_DELAY)
     const clickHandler = makeEvent(index, rowData, onRowClick)
     const doubleClickHandler = makeEvent(index, rowData, onRowDoubleClick)
     const contextMenuHandler = makeEvent(index, rowData, onRowRightClick)
+    const dragPreview =
+        dragProps.dragFiles.length > 1
+            ? createDragPreview(t('DRAG.MULTIPLE', { count: dragProps.dragFiles.length }), isDarkModeActive)
+            : undefined
 
     return (
-        <div
-            ref={drag}
-            onClick={(e: React.MouseEvent<HTMLElement>) => {
-                if (e.timeStamp - clickRef.current > CLICK_DELAY) {
-                    clickHandler(e)
-                } else {
-                    doubleClickHandler(e)
-                }
-                clickRef.current = e.timeStamp
-            }}
-            onContextMenu={(e: React.MouseEvent<HTMLElement>) => {
-                e.stopPropagation()
-                contextMenuHandler(e)
-            }}
-            style={{ width: '100%', height: '100%', alignItems: 'center', display: 'flex' }}
-        >
-            <Name data={rowData} />
-            <Size data={rowData} />
-        </div>
+        <>
+            {dragPreview && <DragPreviewImage connect={preview} src={dragPreview} />}
+            <div
+                ref={drag}
+                onClick={(e: React.MouseEvent<HTMLElement>) => {
+                    if (e.timeStamp - clickRef.current > CLICK_DELAY) {
+                        clickHandler(e)
+                    } else {
+                        doubleClickHandler(e)
+                    }
+                    clickRef.current = e.timeStamp
+                }}
+                onContextMenu={(e: React.MouseEvent<HTMLElement>) => {
+                    e.stopPropagation()
+                    contextMenuHandler(e)
+                }}
+                style={{ width: '100%', height: '100%', alignItems: 'center', display: 'flex' }}
+            >
+                <Name data={rowData} />
+                <Size data={rowData} />
+            </div>
+        </>
     )
 }

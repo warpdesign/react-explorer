@@ -7,7 +7,6 @@ import classNames from 'classnames'
 import { ipcRenderer } from 'electron'
 
 import { FileDescriptor, sameID } from '$src/services/Fs'
-import { TSORT_METHOD_NAME, TSORT_ORDER, getSortMethod } from '$src/services/FsSort'
 import { formatBytes } from '$src/utils/formatBytes'
 import { shouldCatchEvent, isEditable, isInRow } from '$src/utils/dom'
 import { AppAlert } from '$src/components/AppAlert'
@@ -63,7 +62,8 @@ const onSelectAll = (cache: FileState): void => {
 }
 
 const FileView = observer(({ hide }: Props) => {
-    const { viewState, appState } = useStores('settingsState', 'viewState', 'appState')
+    const { viewState, appState, settingsState } = useStores('settingsState', 'viewState', 'appState')
+    const { isDarkModeActive } = settingsState
     const { t } = useTranslation()
     const cache = viewState.getVisibleCache()
     const { files, selected, cursor, path, status, error } = cache
@@ -106,19 +106,6 @@ const FileView = observer(({ hide }: Props) => {
             callback: useCallback(() => onSelectAll(cache), [cache]),
         },
     ])
-
-    // public componentDidUpdate(): void {
-    //     const scrollTop = this.state.position === -1 ? this.cache.scrollTop : null
-    //     const viewState = this.injected.viewState
-    //     // if (!viewState.viewId) {
-    //     //     console.log('componentDidUpdate', this.state.position, this.cache.scrollTop, scrollTop);
-    //     // }
-
-    //     // edge case: previous saved scrollTop isn't valid anymore
-    //     // eg. files have been deleted, or selected item has been renamed,
-    //     // so that using previous scrollTop would hide the selected item
-    //     // DISABLED FOR NOW this.tableRef.current.scrollToPosition(this.cache.scrollTop)
-    // }
 
     // renderMenuAccelerators(): React.ReactElement<Record<string, unknown>> {
     //     return (
@@ -209,19 +196,6 @@ const FileView = observer(({ hide }: Props) => {
     //     editingElement.removeAttribute('contenteditable')
     // }
 
-    // const updateSelection = (): void => {
-    //     const selection = nodes
-    //         .filter((node, i) => i !== position && node.isSelected)
-    //         .map((node) => node.nodeData) as FileDescriptor[]
-
-    //     if (position > -1) {
-    //         const cursorFile = nodes[position].nodeData as FileDescriptor
-    //         selection.push(cursorFile)
-    //     }
-
-    //     appState.updateSelection(cache, selection)
-    // }
-
     // clearContentEditable(): void {
     //     if (this.editingElement) {
     //         this.editingElement.blur()
@@ -251,16 +225,6 @@ const FileView = observer(({ hide }: Props) => {
     //             this.clearContentEditable()
     //             this.setEditElement(null, null)
     //         }
-    //     }
-    // }
-
-    // const onRowDoubleClick = (data: RowMouseEventHandlerParams): void => {
-    //     this.clearClickTimeout()
-    //     const { rowData, event } = data
-    //     const file = rowData.nodeData as FileDescriptor
-
-    //     if ((event.target as HTMLElement) !== this.editingElement) {
-    //         this.openFileOrDirectory(file, event.shiftKey)
     //     }
     // }
 
@@ -339,29 +303,6 @@ const FileView = observer(({ hide }: Props) => {
     //     }
     // }
 
-    // scrollPage = throttle((up: boolean): void => {
-    //     const table = this.tableRef.current
-    //     const props = this.tableRef.current.props
-    //     const headerHeight = props.disableHeader ? 0 : props.headerHeight
-    //     const scrollTop = this.cache.scrollTop
-    //     // TODO: props.rowHeight may be a function
-    //     const rowHeight = props.rowHeight as number
-    //     const maxHeight = this.state.nodes.length * rowHeight - (props.height - headerHeight)
-
-    //     let newScrollTop = 0
-
-    //     if (!up) {
-    //         newScrollTop = scrollTop + (props.height - headerHeight)
-    //         if (newScrollTop > maxHeight) {
-    //             newScrollTop = maxHeight
-    //         }
-    //     } else {
-    //         newScrollTop = scrollTop - (props.height - headerHeight)
-    //         if (newScrollTop < 0) {
-    //             newScrollTop = 0
-    //         }
-    //     }
-
     //     table.scrollToPosition(newScrollTop)
     // }, ARROW_KEYS_REPEAT_DELAY)
 
@@ -392,30 +333,6 @@ const FileView = observer(({ hide }: Props) => {
     //     }
     // }
 
-    // const moveSelection = throttle((step: number, isShiftDown: boolean) => {
-    //     position += step
-
-    //     if (position > -1 && position <= state.nodes.length - 1) {
-    //         if (isShiftDown) {
-    //             selected++
-    //         } else {
-    //             // unselect previous one
-    //             nodes.forEach((n) => (n.isSelected = false))
-    //             selected = 1
-    //         }
-
-    //         nodes[position].isSelected = true
-
-    //         // move in method to reuse
-    //         this.setState({ nodes, selected, position }, () => {
-    //             this.updateSelection()
-    //             // test
-    //             console.log('DISABLE FOR NOW: this.tableRef.current.scrollToRow')
-    //             // DISABLE FOR NOW this.tableRef.current.scrollToRow(position)
-    //         })
-    //     }
-    // }, ARROW_KEYS_REPEAT_DELAY)
-
     // setGridRef = (element: HTMLElement): void => {
     //     this.gridElement = (element && element.querySelector(`.${GRID_CLASSNAME}`)) || null
     // }
@@ -426,16 +343,12 @@ const FileView = observer(({ hide }: Props) => {
 
     const getDraggedProps = (index: number): DraggedObject => {
         const { isSelected, nodeData } = nodes[index]
-        const dragFiles = cache.selected.slice(0)
-
-        // only add dragged file if it's not already part of the selected files
-        if (!isSelected) {
-            dragFiles.push(nodeData)
-        }
 
         return {
             fileState: cache,
-            dragFiles,
+            // If dragged file is selected: the whole selection is dragged
+            // otherwise, only the dragged file gets dragged.
+            dragFiles: isSelected ? cache.selected.slice(0) : [nodeData],
         }
     }
 
@@ -530,6 +443,7 @@ const FileView = observer(({ hide }: Props) => {
                             ]}
                             status={cache.status}
                             error={cache.error}
+                            isDarkModeActive={isDarkModeActive}
                         />
                     </div>
                 )}

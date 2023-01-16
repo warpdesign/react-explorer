@@ -37,6 +37,7 @@ export interface LayoutProps {
     itemCount: number
     columns: Column[]
     cursorIndex?: number
+    isDarkModeActive: boolean
 }
 
 export interface LayoutActions {
