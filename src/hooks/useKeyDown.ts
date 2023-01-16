@@ -1,10 +1,11 @@
+import { shouldCatchEvent } from '$src/utils/dom'
 import React from 'react'
 
 export const useKeyDown = (callback: (ev: KeyboardEvent) => void, keys: string[]) => {
     const onKeyDown = React.useCallback(
         (event: KeyboardEvent) => {
             const wasAnyKeyPressed = keys.some((key) => event.key === key)
-            if (wasAnyKeyPressed) {
+            if (wasAnyKeyPressed && shouldCatchEvent(event)) {
                 callback(event)
             }
         },

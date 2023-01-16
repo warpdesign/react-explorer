@@ -140,16 +140,7 @@ const FileView = observer(({ hide }: Props) => {
     //     cache.setEditingFile(file)
     // }
 
-    /*
-    { columnData: any, dataKey: string, event: Event }
-    */
-    const onHeaderClick = ({ data: newMethod }: HeaderMouseEvent): void => {
-        console.log('TODO: onHeaderClick', { newMethod })
-        // const { sortMethod, sortOrder } = cache
-        // const newOrder = sortMethod !== newMethod ? 'asc' : (((sortOrder === 'asc' && 'desc') || 'asc') as TSORT_ORDER)
-        // cache.setSort(newMethod, newOrder)
-        // updateNodes(cache.files)
-    }
+    const onHeaderClick = ({ data: newMethod }: HeaderMouseEvent): void => cache.setSort(newMethod)
 
     const selectFile = (file: FileDescriptor, toggleSelection: boolean, extendSelection: boolean) => {
         if (toggleSelection) {

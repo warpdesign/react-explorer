@@ -1,13 +1,13 @@
 import React from 'react'
 
-import { Column } from '$src/hooks/useLayout'
+import { Column, HeaderMouseEvent } from '$src/hooks/useLayout'
 import { TSORT_ORDER } from '$src/services/FsSort'
 import { Icon } from '@blueprintjs/core'
 
 interface HeaderProps {
     columns: Column[]
     height: number
-    onClick: (e: React.MouseEvent<HTMLElement>, key: TSORT_ORDER | 'none') => void
+    onClick: (event: HeaderMouseEvent) => void
 }
 
 export const SortIndicator = ({ sort }: { sort: TSORT_ORDER | 'none' }) => {
@@ -29,7 +29,13 @@ export const Header = ({ onClick, columns, height }: HeaderProps) => {
         <div className="tableHeader headerRow" style={{ height: `${height}px` }}>
             {columns.map(({ label, key, sort }, i) => {
                 return (
-                    <div key={key} onClick={(e) => onClick(e, sort)}>
+                    <div
+                        key={key}
+                        onClick={(event) => {
+                            event.stopPropagation()
+                            onClick({ event, data: key })
+                        }}
+                    >
                         <span>{label}</span>
                         <SortIndicator sort={sort} />
                         {i === 0 ? <Icon icon="drag-handle-vertical"></Icon> : undefined}

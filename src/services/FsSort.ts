@@ -1,6 +1,6 @@
 import { FileDescriptor } from '$src/services/Fs'
 
-export type TSORT_ORDER = 'asc' | 'desc'
+export type TSORT_ORDER = 'asc' | 'desc' | 'none'
 export type TSORT_METHOD_NAME = 'ctime' | 'btime' | 'name' | 'size'
 export type TSORT_METHOD = (file1: FileDescriptor, file2: FileDescriptor) => number
 

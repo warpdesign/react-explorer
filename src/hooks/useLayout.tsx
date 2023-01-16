@@ -49,9 +49,9 @@ export interface LayoutReturnProps {
 }
 
 export interface Column {
-    key: string
     label: string
-    sort: TSORT_ORDER | 'none'
+    key: TSORT_METHOD_NAME
+    sort: TSORT_ORDER
 }
 
 const defaultActions: LayoutActions = {

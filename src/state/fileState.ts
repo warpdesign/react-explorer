@@ -322,9 +322,17 @@ export class FileState {
         this.editingId = null
     }
 
-    setSort(sortMethod: TSORT_METHOD_NAME, sortOrder: TSORT_ORDER): void {
+    setSort(sortMethod: TSORT_METHOD_NAME): void {
+        // if same sort method, invert order
+        if (this.sortMethod === sortMethod) {
+            this.sortOrder = this.sortOrder === 'asc' ? 'desc' : 'asc'
+        } else {
+            this.sortOrder = 'asc'
+        }
+
         this.sortMethod = sortMethod
-        this.sortOrder = sortOrder
+
+        this.updateFiles()
     }
 
     // Called when fileCache is updated:
@@ -653,7 +661,7 @@ export class FileState {
         }
     }
 
-    updateFiles(newFiles: FileDescriptor[]): void {
+    updateFiles(newFiles: FileDescriptor[] = this.allFiles): void {
         const dirs = filterDirs(newFiles)
         const files = filterFiles(newFiles)
         const SortFn = getSortMethod(this.sortMethod, this.sortOrder)
@@ -664,6 +672,6 @@ export class FileState {
 
         this.allFiles.replace(sortedFiles)
 
-        this.files.replace(this.showHiddenFiles ? sortedFiles : filterHiddenFiles(sortedFiles))
+        this.files.replace(this.showHiddenFiles ? this.allFiles : filterHiddenFiles(sortedFiles))
     }
 }

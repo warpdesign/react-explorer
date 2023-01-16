@@ -131,16 +131,10 @@ export const TableLayout = forwardRef<LayoutActions, LayoutProps>(
             cursorIndex > -1 && scrollToIndex(cursorIndex)
         }, [cursorIndex])
 
-        const _onHeaderClick = ({ columnData, event /*, dataKey */ }: HeaderMouseEventHandlerParams): void => {
-            const newMethod = columnData.sortMethod as TSORT_METHOD_NAME
-            event.stopPropagation()
-            onHeaderClick({ event, data: newMethod })
-        }
-
         return (
             <>
                 {virtualItems.length ? (
-                    <Header height={ROW_HEIGHT} columns={columns} onClick={() => console.log('col click')} />
+                    <Header height={ROW_HEIGHT} columns={columns} onClick={onHeaderClick} />
                 ) : undefined}
                 <div
                     ref={tableRef}
