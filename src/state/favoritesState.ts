@@ -119,7 +119,6 @@ export class FavoritesState {
             this.previousPlaces = usableDrives
             this.buildPlaces(usableDrives)
         }
-
         // restart timeout in any case
         this.launchTimeout(false, this.checkForNewDrives, CHECK_FOR_DRIVES_DELAY)
     }

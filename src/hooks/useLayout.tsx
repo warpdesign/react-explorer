@@ -48,9 +48,10 @@ export interface LayoutReturnProps {
     actions: LayoutActions
 }
 
-interface Column {
+export interface Column {
     key: string
     label: string
+    sort: 'up' | 'down' | 'none'
 }
 
 const defaultActions: LayoutActions = {

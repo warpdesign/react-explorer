@@ -526,10 +526,12 @@ const FileView = observer(({ hide }: Props) => {
                                 {
                                     label: t('FILETABLE.COL_NAME'),
                                     key: 'name',
+                                    sort: 'none',
                                 },
                                 {
                                     label: t('FILETABLE.COL_SIZE'),
                                     key: 'size',
+                                    sort: 'none',
                                 },
                             ]}
                             status={cache.status}

@@ -28,7 +28,7 @@ export const LocalWatch = {
     },
     getCallbacks(path: string): WatcherCB[] {
         const watcher = this.getWatcher(path, false)
-        return watcher.callbacks
+        return watcher?.callbacks || []
     },
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     createCallback(path: string): () => any {

@@ -1,6 +1,7 @@
 import React, { forwardRef, useImperativeHandle, useRef, useEffect, useState, createRef, MutableRefObject } from 'react'
 import { Classes, Icon } from '@blueprintjs/core'
 import { Row } from './components/Row'
+import { Header } from './components/Header'
 import classNames from 'classnames'
 import {
     Column,
@@ -42,24 +43,24 @@ const GRID_CLASSES = `data-cy-filetable ${GRID_CLASSNAME} ${CONFIG.CUSTOM_SCROLL
     sortDirection
     }
 */
-const Header = (data: TableHeaderProps): React.ReactNode => {
-    // TOOD: hardcoded for now, should store the column size/list
-    // and use it here instead
-    const hasResize = data.columnData.index < 1
-    // const { sortMethod, sortOrder } = this.cache
-    // const isSort = data.columnData.sortMethod === sortMethod
-    const isSort = false
-    // const classes = classNames('sort', sortOrder)
-    const classes = classNames('sort')
+// const Header = (data: TableHeaderProps): React.ReactNode => {
+//     // TOOD: hardcoded for now, should store the column size/list
+//     // and use it here instead
+//     const hasResize = data.columnData.index < 1
+//     // const { sortMethod, sortOrder } = this.cache
+//     // const isSort = data.columnData.sortMethod === sortMethod
+//     const isSort = false
+//     // const classes = classNames('sort', sortOrder)
+//     const classes = classNames('sort')
 
-    return (
-        <React.Fragment key={data.dataKey}>
-            <div className="ReactVirtualized__Table__headerTruncatedText">{data.label}</div>
-            {isSort && <div className={classes}>^</div>}
-            {hasResize && <Icon className="resizeHandle" icon="drag-handle-vertical"></Icon>}
-        </React.Fragment>
-    )
-}
+//     return (
+//         <React.Fragment key={data.dataKey}>
+//             <div className="ReactVirtualized__Table__headerTruncatedText">{data.label}</div>
+//             {isSort && <div className={classes}>^</div>}
+//             {hasResize && <Icon className="resizeHandle" icon="drag-handle-vertical"></Icon>}
+//         </React.Fragment>
+//     )
+// }
 
 const rowClassName = (item: FileViewItem): string => {
     const error = item && item.nodeData.mode === -1
@@ -96,10 +97,12 @@ export const TableLayout = forwardRef<LayoutActions, LayoutProps>(
             parentRef: tableRef,
             estimateSize: React.useCallback(() => ROW_HEIGHT, []),
             overscan: 5,
+            // paddingStart: ROW_HEIGHT,
             // rangeExtractor: (range) => {
             //     const { start, end, size } = range
             //     const length = size > 0 ? (end - start + 1) : 0
-            //     return length ? Array.from({ length }, (_, i) => i + start) : []
+            //     console.log('range', start, end)
+            //     return length ? [100].concat(Array.from({ length }, (_, i) => i + start)) : []
             // }
         })
 
@@ -120,16 +123,6 @@ export const TableLayout = forwardRef<LayoutActions, LayoutProps>(
                             return -1
                     }
                 },
-                // selectAll: () => {
-                //     console.log('should selectAll')
-                // },
-                // invertSelection: () => {
-                //     console.log('should invertSelection')
-                // },
-                // setEditElement: (index: number) => {
-                //     setEditElementIndex(index)
-                // },
-                // setCursor: (index: number) => setCursor(index),
             }),
             [],
         )
@@ -145,85 +138,108 @@ export const TableLayout = forwardRef<LayoutActions, LayoutProps>(
         }
 
         return (
-            <div ref={tableRef} style={{ height: '100%', width: '100%', overflow: 'auto' }} onClick={onBlankAreaClick}>
-                {!virtualItems.length ? (
-                    <Placeholder error={error} status={status} />
-                ) : (
-                    <div
-                        style={{
-                            height: `${totalSize}px`,
-                            width: '100%',
-                            position: 'relative',
-                        }}
-                    >
-                        {virtualItems.map((virtualRow) => {
-                            const rowData = getItem(virtualRow.index)
-                            return (
-                                <div
-                                    style={{
-                                        position: 'absolute',
-                                        top: 0,
-                                        left: 0,
-                                        width: '100%',
-                                        height: `${virtualRow.size}px`,
-                                        transform: `translateY(${virtualRow.start}px)`,
-                                    }}
-                                    key={virtualRow.index}
-                                    data-cy-file
-                                    className={rowClassName(rowData)}
-                                >
-                                    <Row
-                                        rowData={rowData}
-                                        index={virtualRow.index}
-                                        onRowClick={onItemClick}
-                                        onRowRightClick={onItemRightClick}
-                                        onRowDoubleClick={onItemDoubleClick}
-                                    />
-                                </div>
-                            )
-                        })}
-                        {/* <Table
-                    headerClassName="tableHeader"
-                    headerHeight={ROW_HEIGHT}
-                    height={height}
-                    gridClassName={GRID_CLASSES}
-                    onHeaderClick={_onHeaderClick}
-                    // onRowRightClick={onRowRightClick}
-                    // onRowDoubleClick={onRowDoubleClick}
-                    // onScroll={this.onScroll}
-                    noRowsRenderer={() => _noRowsRenderer({ error, status })}
-                    rowClassName={({ index }) => rowClassName(index, index > -1 ? getItem(index) : undefined)}
-                    rowHeight={ROW_HEIGHT}
-                    rowGetter={({ index }) => getItem(index)}
-                    rowCount={itemCount}
-                    rowRenderer={(props) => <RowRenderer {...props} rowKey={props.key} />}
-                    // ref={this.tableRef}
-                    width={width}
+            <>
+                {virtualItems.length ? (
+                    <Header height={ROW_HEIGHT} columns={columns} onClick={() => console.log('col click')} />
+                ) : undefined}
+                <div
+                    ref={tableRef}
+                    style={{ height: '100%', width: '100%', overflow: 'auto', fontSize: '90%' }}
+                    onClick={onBlankAreaClick}
                 >
-                    <Column
-                        dataKey={columns[0].key}
-                        label={columns[0].label}
-                        cellRenderer={Name}
-                        headerRenderer={Header}
-                        width={NAME_COLUMN_WIDTH}
-                        flexGrow={1}
-                        columnData={{ index: 0, sortMethod: columns[0].key }}
-                    />
-                    <Column
-                        className={`size ${Classes.TEXT_SMALL}`}
-                        width={SIZE_COLUMN_WITDH}
-                        label={columns[1].label}
-                        headerRenderer={Header}
-                        dataKey={columns[1].key}
-                        flexShrink={1}
-                        columnData={{ index: 1, sortMethod: columns[1].key }}
-                    />
-                </Table> */}
-                    </div>
-                )}
-            </div>
+                    {!virtualItems.length ? (
+                        <Placeholder error={error} status={status} />
+                    ) : (
+                        <div
+                            style={{
+                                height: `${totalSize}px`,
+                                width: '100%',
+                                position: 'relative',
+                            }}
+                        >
+                            {virtualItems.map((virtualRow) => {
+                                const rowData = getItem(virtualRow.index)
+                                return (
+                                    <div
+                                        style={{
+                                            position: 'absolute',
+                                            top: 0,
+                                            left: 0,
+                                            width: '100%',
+                                            height: `${virtualRow.size}px`,
+                                            transform: `translateY(${virtualRow.start}px)`,
+                                        }}
+                                        key={virtualRow.index}
+                                        data-cy-file
+                                        className={rowClassName(rowData)}
+                                    >
+                                        <Row
+                                            rowData={rowData}
+                                            index={virtualRow.index}
+                                            onRowClick={onItemClick}
+                                            onRowRightClick={onItemRightClick}
+                                            onRowDoubleClick={onItemDoubleClick}
+                                        />
+                                    </div>
+                                )
+                            })}
+                        </div>
+                    )}
+                </div>
+            </>
         )
     },
 )
+
+{
+    /* <Table
+headerClassName="tableHeader"
+headerHeight={ROW_HEIGHT}
+height={height}
+gridClassName={GRID_CLASSES}
+onHeaderClick={_onHeaderClick}
+// onRowRightClick={onRowRightClick}
+// onRowDoubleClick={onRowDoubleClick}
+// onScroll={this.onScroll}
+noRowsRenderer={() => _noRowsRenderer({ error, status })}
+rowClassName={({ index }) => rowClassName(index, index > -1 ? getItem(index) : undefined)}
+rowHeight={ROW_HEIGHT}
+rowGetter={({ index }) => getItem(index)}
+rowCount={itemCount}
+rowRenderer={(props) => <RowRenderer {...props} rowKey={props.key} />}
+// ref={this.tableRef}
+width={width}
+>
+<Column
+    dataKey={columns[0].key}
+    label={columns[0].label}
+    cellRenderer={Name}
+    headerRenderer={Header}
+    width={NAME_COLUMN_WIDTH}
+    flexGrow={1}
+    columnData={{ index: 0, sortMethod: columns[0].key }}
+/>
+<Column
+    className={`size ${Classes.TEXT_SMALL}`}
+    width={SIZE_COLUMN_WITDH}
+    label={columns[1].label}
+    headerRenderer={Header}
+    dataKey={columns[1].key}
+    flexShrink={1}
+    columnData={{ index: 1, sortMethod: columns[1].key }}
+/>
+</Table> */
+}
+
+// selectAll: () => {
+//     console.log('should selectAll')
+// },
+// invertSelection: () => {
+//     console.log('should invertSelection')
+// },
+// setEditElement: (index: number) => {
+//     setEditElementIndex(index)
+// },
+// setCursor: (index: number) => setCursor(index),
 
 TableLayout.displayName = 'TableLayout'
