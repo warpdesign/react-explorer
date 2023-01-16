@@ -4,6 +4,7 @@
     flex-grow:1;
     position:relative;
     overflow: auto;
+    font-size: 90%;
 }
 
 .fileListSizerWrapper .empty {
@@ -154,6 +155,22 @@ body.bp4-dark .tableRow .bp4-icon {
 
 .tableHeader {
     display:flex;
+    z-index: 1;
+    width: 100%;
+    align-items: center;
+}
+
+.tableHeader > div {
+    margin: auto 10px;
+}
+
+.tableHeader > div:first-child {
+    flex-grow: 1;
+    display: flex;
+}
+
+.tableHeader > div:first-child > span:first-child {
+    flex-grow: 1;
 }
 
 .tableHeader:last-child {

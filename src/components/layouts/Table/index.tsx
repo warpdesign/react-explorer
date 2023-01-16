@@ -144,7 +144,7 @@ export const TableLayout = forwardRef<LayoutActions, LayoutProps>(
                 ) : undefined}
                 <div
                     ref={tableRef}
-                    style={{ height: '100%', width: '100%', overflow: 'auto', fontSize: '90%' }}
+                    style={{ height: '100%', width: '100%', overflow: 'auto' }}
                     onClick={onBlankAreaClick}
                 >
                     {!virtualItems.length ? (

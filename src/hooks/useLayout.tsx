@@ -2,7 +2,7 @@ import React, { useCallback, useRef } from 'react'
 import type { ReactElement } from 'react'
 
 import { ArrowKey, DraggedObject, FileViewItem } from '$src/types'
-import { TSORT_METHOD_NAME } from '$src/services/FsSort'
+import { TSORT_METHOD_NAME, TSORT_ORDER } from '$src/services/FsSort'
 import { TStatus } from '$src/state/fileState'
 import { TableLayout } from '$src/components/layouts/Table/'
 
@@ -51,7 +51,7 @@ export interface LayoutReturnProps {
 export interface Column {
     key: string
     label: string
-    sort: 'up' | 'down' | 'none'
+    sort: TSORT_ORDER | 'none'
 }
 
 const defaultActions: LayoutActions = {
