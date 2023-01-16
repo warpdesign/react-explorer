@@ -15,23 +15,26 @@ export interface RowProps {
     onRowClick?: (event: ItemMouseEvent) => void
     onRowDoubleClick?: (event: ItemMouseEvent) => void
     onRowRightClick?: (event: ItemMouseEvent) => void
+    getDragProps: (index: number) => DraggedObject
     index: number
 }
 
 const CLICK_DELAY = 500
 
-export const Row = ({ rowData, onRowClick, onRowDoubleClick, onRowRightClick, index }: RowProps): JSX.Element => {
+export const Row = ({
+    rowData,
+    onRowClick,
+    onRowDoubleClick,
+    onRowRightClick,
+    index,
+    getDragProps,
+}: RowProps): JSX.Element => {
     const [{ isDragging }, drag] = useDrag<DraggedObject, unknown, CollectedProps>({
         type: 'file',
-        item: {
-            fileState: null,
-            dragFiles: [],
-            selectedCount: 0,
-        },
+        item: getDragProps(index),
         collect: (monitor) => ({
             isDragging: !!monitor.isDragging(),
         }),
-        //getDragProps(index),
     })
     const clickRef: React.MutableRefObject<number> = useRef(-CLICK_DELAY)
     const clickHandler = makeEvent(index, rowData, onRowClick)

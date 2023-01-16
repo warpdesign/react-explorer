@@ -25,7 +25,6 @@ export interface FileViewItem {
 }
 
 export interface DraggedObject {
-    selectedCount: number
     fileState?: FileState
     dragFiles?: FileDescriptor[]
 }

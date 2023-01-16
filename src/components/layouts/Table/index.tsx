@@ -173,6 +173,7 @@ export const TableLayout = forwardRef<LayoutActions, LayoutProps>(
                                             onRowClick={onItemClick}
                                             onRowRightClick={onItemRightClick}
                                             onRowDoubleClick={onItemDoubleClick}
+                                            getDragProps={getDragProps}
                                         />
                                     </div>
                                 )

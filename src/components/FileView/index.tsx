@@ -426,13 +426,16 @@ const FileView = observer(({ hide }: Props) => {
 
     const getDraggedProps = (index: number): DraggedObject => {
         const { isSelected, nodeData } = nodes[index]
-        // const selectedCount = isSelected ? selected : 0
-        // const dragFiles = selectedCount > 0 ? cache.selected.slice(0) : [nodeData]
+        const dragFiles = cache.selected.slice(0)
+
+        // only add dragged file if it's not already part of the selected files
+        if (!isSelected) {
+            dragFiles.push(nodeData)
+        }
 
         return {
             fileState: cache,
-            dragFiles: [],
-            selectedCount: 0,
+            dragFiles,
         }
     }
 
