@@ -1,18 +1,7 @@
-import React, { forwardRef, useImperativeHandle, useRef, useEffect, useState, createRef, MutableRefObject } from 'react'
-import { Classes, Icon } from '@blueprintjs/core'
+import React, { forwardRef, useImperativeHandle, useRef, useEffect } from 'react'
 import { Row } from './components/Row'
 import { Header } from './components/Header'
 import classNames from 'classnames'
-import {
-    Column,
-    Table,
-    TableHeaderProps,
-    Index,
-    TableCellProps,
-    HeaderMouseEventHandlerParams,
-    RowMouseEventHandlerParams,
-    TableRowProps,
-} from 'react-virtualized'
 
 import '$src/css/fileview-table.css'
 
@@ -32,35 +21,6 @@ const SIZE_COLUMN_WITDH = 70
 const NAME_COLUMN_WIDTH = 10
 const GRID_CLASSNAME = 'filetable-grid'
 const GRID_CLASSES = `data-cy-filetable ${GRID_CLASSNAME} ${CONFIG.CUSTOM_SCROLLBAR_CLASSNAME}`
-
-/*
-{
-    columnData,
-    dataKey,
-    disableSort,
-    label,
-    sortBy,
-    sortDirection
-    }
-*/
-// const Header = (data: TableHeaderProps): React.ReactNode => {
-//     // TOOD: hardcoded for now, should store the column size/list
-//     // and use it here instead
-//     const hasResize = data.columnData.index < 1
-//     // const { sortMethod, sortOrder } = this.cache
-//     // const isSort = data.columnData.sortMethod === sortMethod
-//     const isSort = false
-//     // const classes = classNames('sort', sortOrder)
-//     const classes = classNames('sort')
-
-//     return (
-//         <React.Fragment key={data.dataKey}>
-//             <div className="ReactVirtualized__Table__headerTruncatedText">{data.label}</div>
-//             {isSort && <div className={classes}>^</div>}
-//             {hasResize && <Icon className="resizeHandle" icon="drag-handle-vertical"></Icon>}
-//         </React.Fragment>
-//     )
-// }
 
 const rowClassName = (item: FileViewItem): string => {
     const error = item && item.nodeData.mode === -1
@@ -141,6 +101,7 @@ export const TableLayout = forwardRef<LayoutActions, LayoutProps>(
                     ref={tableRef}
                     style={{ height: '100%', width: '100%', overflow: 'auto' }}
                     onClick={onBlankAreaClick}
+                    tabIndex={0}
                 >
                     {!virtualItems.length ? (
                         <Placeholder error={error} status={status} />
@@ -167,6 +128,7 @@ export const TableLayout = forwardRef<LayoutActions, LayoutProps>(
                                         key={virtualRow.index}
                                         data-cy-file
                                         className={rowClassName(rowData)}
+                                        tabIndex={0}
                                     >
                                         <Row
                                             rowData={rowData}

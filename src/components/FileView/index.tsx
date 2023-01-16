@@ -17,8 +17,6 @@ import { FileContextMenu } from '$src/components/menus/FileContextMenu'
 import { useMenuAccelerator } from '$src/hooks/useAccelerator'
 import { TypeIcons } from '$src/constants/icons'
 
-import 'react-virtualized/styles.css'
-
 import { ArrowKey, DraggedObject, FileViewItem } from '$src/types'
 import { HeaderMouseEvent, ItemMouseEvent, useLayout } from '$src/hooks/useLayout'
 import { useStores } from '$src/hooks/useStores'
@@ -85,6 +83,10 @@ const FileView = observer(({ hide }: Props) => {
     useKeyDown(
         React.useCallback(
             (event: KeyboardEvent) => {
+                if (!viewState.isActive) {
+                    return
+                }
+
                 // Prevent arrow keys to trigger generic browser scrolling: we want to handle it
                 // ourselves so that the cursor is always visible.
                 event.preventDefault()
