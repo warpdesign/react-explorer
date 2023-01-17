@@ -55,7 +55,7 @@
 }
 
 /* inline rename */
-.tableRow .file-label[contenteditable] {
+.tableRow .file-label[contenteditable="true"] {
     background-color:white;
     color:black;
     cursor:text;

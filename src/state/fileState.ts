@@ -195,6 +195,8 @@ export class FileState {
             getSelectedState: observable,
             updateFiles: action,
             cursor: observable,
+            editingId: observable,
+            isSelected: observable,
         })
 
         this.viewId = viewId
@@ -673,5 +675,9 @@ export class FileState {
         this.allFiles.replace(sortedFiles)
 
         this.files.replace(this.showHiddenFiles ? this.allFiles : filterHiddenFiles(sortedFiles))
+    }
+
+    isSelected(file: FileDescriptor): boolean {
+        return !!this.selected.find((selectedFile) => sameID(file.id, selectedFile.id))
     }
 }

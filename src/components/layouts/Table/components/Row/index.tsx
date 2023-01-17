@@ -2,7 +2,7 @@ import React, { useRef } from 'react'
 import { DragPreviewImage, useDrag } from 'react-dnd'
 
 import type { DraggedObject, FileViewItem } from '$src/types'
-import { ItemMouseEvent, makeEvent } from '$src/hooks/useLayout'
+import { InlineEditEvent, ItemMouseEvent, makeEvent } from '$src/hooks/useLayout'
 import { Name } from '../Column/Name'
 import { Size } from '../Column/Size'
 import { createDragPreview } from '$src/components/layouts/Table/utils'
@@ -17,6 +17,7 @@ export interface RowProps {
     onRowClick?: (event: ItemMouseEvent) => void
     onRowDoubleClick?: (event: ItemMouseEvent) => void
     onRowRightClick?: (event: ItemMouseEvent) => void
+    onInlineEdit?: (event: InlineEditEvent) => void
     getDragProps: (index: number) => DraggedObject
     isDarkModeActive: boolean
     index: number
@@ -29,6 +30,7 @@ export const Row = ({
     onRowClick,
     onRowDoubleClick,
     onRowRightClick,
+    onInlineEdit,
     index,
     getDragProps,
     isDarkModeActive,
@@ -57,6 +59,7 @@ export const Row = ({
             <div
                 ref={drag}
                 onClick={(e: React.MouseEvent<HTMLElement>) => {
+                    e.stopPropagation()
                     if (e.timeStamp - clickRef.current > CLICK_DELAY) {
                         clickHandler(e)
                     } else {
@@ -70,7 +73,7 @@ export const Row = ({
                 }}
                 style={{ width: '100%', height: '100%', alignItems: 'center', display: 'flex' }}
             >
-                <Name data={rowData} />
+                <Name data={rowData} onInlineEdit={onInlineEdit} />
                 <Size data={rowData} />
             </div>
         </>

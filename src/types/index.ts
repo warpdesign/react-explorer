@@ -19,6 +19,7 @@ export interface FileViewItem {
     icon: IconName
     size: string
     isSelected: boolean
+    isEditing: boolean
     nodeData: FileDescriptor
     className: string
     title: string

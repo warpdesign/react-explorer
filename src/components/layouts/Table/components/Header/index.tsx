@@ -11,7 +11,6 @@ interface HeaderProps {
 }
 
 export const SortIndicator = ({ sort }: { sort: TSORT_ORDER | 'none' }) => {
-    console.log({ sort })
     switch (sort) {
         case 'none':
             return <span />

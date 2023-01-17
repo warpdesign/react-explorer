@@ -136,6 +136,7 @@ export const TableLayout = forwardRef<LayoutActions, LayoutProps>(
                                             onRowClick={onItemClick}
                                             onRowRightClick={onItemRightClick}
                                             onRowDoubleClick={onItemDoubleClick}
+                                            onInlineEdit={onInlineEdit}
                                             getDragProps={getDragProps}
                                             isDarkModeActive={isDarkModeActive}
                                         />

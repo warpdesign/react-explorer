@@ -28,7 +28,10 @@ interface Props {
     hide: boolean
 }
 
-export function buildNodeFromFile(file: FileDescriptor, isSelected: boolean): FileViewItem {
+export function buildNodeFromFile(
+    file: FileDescriptor,
+    { isSelected, isEditing }: { isSelected: boolean; isEditing: boolean },
+): FileViewItem {
     const filetype = file.type
     const classes = classNames({
         isHidden: file.fullname.startsWith('.'),
@@ -42,6 +45,7 @@ export function buildNodeFromFile(file: FileDescriptor, isSelected: boolean): Fi
         nodeData: file,
         className: classes,
         isSelected: !!isSelected,
+        isEditing,
         size: (!file.isDir && formatBytes(file.length)) || '--',
     }
 
@@ -64,12 +68,15 @@ const FileView = observer(({ hide }: Props) => {
     const { isDarkModeActive } = settingsState
     const { t } = useTranslation()
     const cache = viewState.getVisibleCache()
-    const { files, selected, cursor, path, status, error } = cache
+    const { files, cursor, editingId } = cache
     const cursorIndex = cache.getFileIndex(cursor)
     const isViewActive = viewState.isActive && !hide
     const keepSelection = !!cache.selected.length
     const nodes = files.map((file) =>
-        buildNodeFromFile(file, keepSelection && !!selected.find((selectedFile) => sameID(file.id, selectedFile.id))),
+        buildNodeFromFile(file, {
+            isSelected: keepSelection && cache.isSelected(file),
+            isEditing: editingId ? sameID(file.id, editingId) : false,
+        }),
     )
     const rowCount = nodes.length
 
@@ -142,26 +149,22 @@ const FileView = observer(({ hide }: Props) => {
     const onBlankAreaClick = () => cache.reset()
 
     const onItemClick = ({ index, event }: ItemMouseEvent): void => {
-        // stop click propagation so that it does not reach the blank area
-        event.stopPropagation()
-        const file = nodes[index].nodeData
-        console.log(
-            'onItemClick',
-            index,
-            cache.selected.findIndex((selectedFile) => sameID(selectedFile.id, file.id)),
-            cache.selected.length,
-        )
-        // TODO: use OS specific instead of mac only metaKey
-        selectFile(file, event.metaKey, event.shiftKey)
+        const item = nodes[index]
+        const file = item.nodeData
+        console.log({ selected: item.isSelected })
+        // TODO: enable inline edit if file is already selected
+        if (item.isSelected && (!editingId || !sameID(file.id, editingId))) {
+            console.log('need to enable inline edit!', file.fullname)
+            cache.setEditingFile(file)
+        } else {
+            // TODO: use OS specific instead of mac only metaKey
+            selectFile(file, event.metaKey, event.shiftKey)
+        }
     }
 
     const onItemDoubleClick = ({ event }: ItemMouseEvent): void => {
-        event.stopPropagation()
         openFileOrDirectory(cursor, event.shiftKey)
         console.log('onItemDoubleClick', cursor)
-        //     if ((event.target as HTMLElement) !== this.editingElement) {
-        //         this.openFileOrDirectory(file, event.shiftKey)
-        //     }
     }
 
     // private onInlineEdit(cancel: boolean): void {
@@ -424,8 +427,11 @@ const FileView = observer(({ hide }: Props) => {
                             onItemDoubleClick={onItemDoubleClick}
                             onHeaderClick={onHeaderClick}
                             onBlankAreaClick={onBlankAreaClick}
-                            onInlineEdit={() => {
-                                console.log('TODO: inLineEdit')
+                            onInlineEdit={({ action, data }) => {
+                                if (action === 'validate') {
+                                    console.log('TODO: rename file', data)
+                                }
+                                cache.setEditingFile(null)
                             }}
                             onItemRightClick={({ index, event }) => {
                                 rightClickFileIndexRef.current = index

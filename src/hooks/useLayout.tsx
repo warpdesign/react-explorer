@@ -23,13 +23,19 @@ export interface HeaderMouseEvent {
     event: React.MouseEvent<any>
 }
 
+export interface InlineEditEvent {
+    data?: string
+    action: 'cancel' | 'validate'
+    event: React.SyntheticEvent
+}
+
 export interface LayoutProps {
     onBlankAreaClick: () => void
     onItemClick: (event: ItemMouseEvent) => void
     onItemDoubleClick: (event: ItemMouseEvent) => void
     onItemRightClick: (event: ItemMouseEvent) => void
     onHeaderClick: (event: HeaderMouseEvent) => void
-    onInlineEdit: (event: ItemMouseEvent) => void
+    onInlineEdit: (event: InlineEditEvent) => void
     getItem: (index: number) => FileViewItem
     getDragProps: (index: number) => DraggedObject
     status: TStatus
