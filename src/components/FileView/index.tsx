@@ -430,6 +430,8 @@ const FileView = observer(({ hide }: Props) => {
                             onInlineEdit={({ action, data }) => {
                                 if (action === 'validate') {
                                     console.log('TODO: rename file', data)
+                                    // CHECK ME: do we need to reset the span's innerText incase
+                                    // rename failed or reloading the cache is enough?
                                 }
                                 cache.setEditingFile(null)
                             }}
