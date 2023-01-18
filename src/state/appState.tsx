@@ -392,14 +392,14 @@ export class AppState {
     async renameEditingFile(cache: FileState, newName: string) {
         try {
             const file = cache.allFiles.find((file) => sameID(file.id, cache.editingId))
-            if (file) {
+            if (file && file.fullname !== newName) {
                 await cache.rename(file.dir, file, newName)
             }
         } catch (e) {
             console.log('error renaming file', e)
         } finally {
-            cache.setEditingFile(null)
             cache.reload()
+            cache.setEditingFile(null)
         }
     }
 
