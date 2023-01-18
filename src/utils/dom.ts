@@ -32,14 +32,13 @@ export function isInRow(e: React.MouseEvent<HTMLElement, MouseEvent>): boolean {
 }
 
 export function selectLeftPart(name: string, element: HTMLElement): void {
-    // const filename = this.editingFile.fullname
     const selectionRange = getSelectionRange(name)
     const selection = window.getSelection()
     const range = document.createRange()
-    // const textNode = this.editingElement.childNodes[0]
+    const textNode = element.firstChild
 
-    range.setStart(element, selectionRange.start)
-    range.setEnd(element, selectionRange.end)
+    range.setStart(textNode, selectionRange.start)
+    range.setEnd(textNode, selectionRange.end)
     selection.empty()
     selection.addRange(range)
 }

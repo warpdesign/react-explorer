@@ -3,6 +3,7 @@ import { Icon } from '@blueprintjs/core'
 
 import type { FileViewItem } from '$src/types'
 import { InlineEditEvent } from '$src/hooks/useLayout'
+import { selectLeftPart } from '$src/utils/dom'
 
 interface Props {
     data: FileViewItem
@@ -10,13 +11,14 @@ interface Props {
 }
 
 export const Name = ({ data, onInlineEdit }: Props) => {
-    const { icon, title, isEditing } = data
+    const { icon, title, isEditing, name } = data
     const spanRef = useRef<HTMLSpanElement>()
 
     useEffect(() => {
         // auto focus the span element when it's being edited
         if (isEditing && spanRef.current) {
             spanRef.current.focus()
+            selectLeftPart(name, spanRef.current)
         }
     }, [isEditing])
 

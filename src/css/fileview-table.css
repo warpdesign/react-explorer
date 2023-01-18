@@ -62,6 +62,8 @@
     /* disable ellipsis so that the full text is visible & editable */
     text-overflow:initial;
     overflow:visible;
+    padding: 0 5px;
+    margin: 0 10px;
 }
 
 .tableRow.isHidden {
