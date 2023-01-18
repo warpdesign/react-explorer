@@ -13,13 +13,13 @@ interface HeaderProps {
 export const SortIndicator = ({ sort }: { sort: TSORT_ORDER | 'none' }) => {
     switch (sort) {
         case 'none':
-            return <span />
+            return <Icon icon={<span />} />
 
         case 'asc':
-            return <span>^</span>
+            return <Icon icon="caret-up" />
 
         case 'desc':
-            return <span style={{ transform: 'rotateX(180deg)' }}>^</span>
+            return <Icon icon="caret-down" />
     }
 }
 
@@ -34,6 +34,7 @@ export const Header = ({ onClick, columns, height }: HeaderProps) => {
                             event.stopPropagation()
                             onClick({ event, data: key })
                         }}
+                        style={{ fontWeight: `${sort === 'none' ? 'normal' : 'bold'}` }}
                     >
                         <span>{label}</span>
                         <SortIndicator sort={sort} />
