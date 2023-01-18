@@ -18,6 +18,6 @@ export const Placeholder = ({ error, status }: { error: boolean; status: TStatus
             </div>
         )
     } else {
-        return <div />
+        return null
     }
 }
