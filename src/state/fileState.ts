@@ -181,6 +181,7 @@ export class FileState {
             onLoginSuccess: action,
             doLogin: action,
             clearSelection: action,
+            invertSelection: action,
             reset: action,
             setSort: action,
             refreshSelection: action,
@@ -446,6 +447,17 @@ export class FileState {
         if (length) {
             this.selected.replace(this.files)
             this.setCursor(this.selected[length - 1])
+        }
+    }
+
+    invertSelection() {
+        if (this.selected.length === this.files.length) {
+            this.selected.clear()
+        } else {
+            const newSelection = this.files.filter(
+                (file) => !this.selected.find((selected) => sameID(file.id, selected.id)),
+            )
+            this.selected.replace(newSelection)
         }
     }
 

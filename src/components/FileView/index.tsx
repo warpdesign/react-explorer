@@ -48,9 +48,15 @@ export function buildNodeFromFile(
     return res
 }
 
+const onInvertSelection = (cache: FileState): void => {
+    const isOverlayOpen = document.body.classList.contains(Classes.OVERLAY_OPEN)
+    if (!isOverlayOpen && !isEditable(document.activeElement)) {
+        cache.invertSelection()
+    }
+}
+
 const onSelectAll = (cache: FileState): void => {
     const isOverlayOpen = document.body.classList.contains(Classes.OVERLAY_OPEN)
-    console.log('onSelectAll')
     if (!isOverlayOpen && !isEditable(document.activeElement)) {
         cache.selectAll()
     } else {
@@ -224,13 +230,13 @@ const FileView = observer(({ hide }: Props) => {
             onKeyDown: onOpenFile,
             group: t('SHORTCUT.GROUP.ACTIVE_VIEW'),
         },
-        // {
-        //     global: true,
-        //     combo: 'mod + i',
-        //     label: t('SHORTCUT.ACTIVE_VIEW.SELECT_INVERT'),
-        //     onKeyDown: onInvertSelection,
-        //     group: t('SHORTCUT.GROUP.ACTIVE_VIEW'),
-        // },
+        {
+            global: true,
+            combo: 'mod + i',
+            label: t('SHORTCUT.ACTIVE_VIEW.SELECT_INVERT'),
+            onKeyDown: () => onInvertSelection(cache),
+            group: t('SHORTCUT.GROUP.ACTIVE_VIEW'),
+        },
         ...(!isMac || window.ENV.CY
             ? [
                   {
