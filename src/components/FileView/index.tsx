@@ -127,15 +127,6 @@ const FileView = observer(({ hide }: Props) => {
 
     const getRow = (index: number): FileViewItem => nodes[index]
 
-    // setEditElement(element: HTMLElement, file: FileDescriptor): void {
-    //     const cache = this.cache
-
-    //     this.editingElement = element
-    //     this.editingFile = file
-
-    //     cache.setEditingFile(file)
-    // }
-
     const onHeaderClick = ({ data: newMethod }: HeaderMouseEvent): void => cache.setSort(newMethod)
 
     const selectFile = (file: FileDescriptor, toggleSelection: boolean, extendSelection: boolean) => {
@@ -152,9 +143,7 @@ const FileView = observer(({ hide }: Props) => {
         const item = nodes[index]
         const file = item.nodeData
         console.log({ selected: item.isSelected })
-        // TODO: enable inline edit if file is already selected
         if (item.isSelected && (!editingId || !sameID(file.id, editingId))) {
-            console.log('need to enable inline edit!', file.fullname)
             cache.setEditingFile(file)
         } else {
             // TODO: use OS specific instead of mac only metaKey
@@ -429,11 +418,10 @@ const FileView = observer(({ hide }: Props) => {
                             onBlankAreaClick={onBlankAreaClick}
                             onInlineEdit={({ action, data }) => {
                                 if (action === 'validate') {
-                                    console.log('TODO: rename file', data)
-                                    // CHECK ME: do we need to reset the span's innerText incase
-                                    // rename failed or reloading the cache is enough?
+                                    appState.renameEditingFile(cache, data)
+                                } else {
+                                    cache.setEditingFile(null)
                                 }
-                                cache.setEditingFile(null)
                             }}
                             onItemRightClick={({ index, event }) => {
                                 rightClickFileIndexRef.current = index

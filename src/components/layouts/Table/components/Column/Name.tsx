@@ -1,9 +1,9 @@
 import React, { useRef, useEffect } from 'react'
-import { Icon } from '@blueprintjs/core'
+import { Icon, InputGroup } from '@blueprintjs/core'
 
 import type { FileViewItem } from '$src/types'
 import { InlineEditEvent } from '$src/hooks/useLayout'
-import { selectLeftPart } from '$src/utils/dom'
+import { getSelectionRange } from '$src/utils/fileUtils'
 
 interface Props {
     data: FileViewItem
@@ -12,60 +12,65 @@ interface Props {
 
 export const Name = ({ data, onInlineEdit }: Props) => {
     const { icon, title, isEditing, name } = data
-    const spanRef = useRef<HTMLSpanElement>()
+    const inputRef = useRef<HTMLInputElement>()
 
     useEffect(() => {
-        // auto focus the span element when it's being edited
-        if (isEditing && spanRef.current) {
-            spanRef.current.focus()
-            selectLeftPart(name, spanRef.current)
+        if (isEditing) {
+            const { start, end } = getSelectionRange(name)
+            inputRef.current.setSelectionRange(start, end)
         }
     }, [isEditing])
 
-    const onCancelEdit = (event: React.SyntheticEvent) => {
-        spanRef.current.innerText = data.nodeData.fullname
+    const onCancelEdit = (event: React.SyntheticEvent) =>
         onInlineEdit({
             event,
             action: 'cancel',
         })
-    }
 
     return (
         <div className="name">
             <Icon icon={icon}></Icon>
-            <span
-                ref={spanRef}
-                title={title}
-                className="file-label"
-                spellCheck="false"
-                suppressContentEditableWarning={true}
-                contentEditable={isEditing}
-                onBlur={(event) => {
-                    if (isEditing && onInlineEdit) {
-                        onCancelEdit(event)
-                    }
-                }}
-                onKeyDown={(event) => {
-                    if (isEditing) {
-                        switch (event.key) {
-                            case 'Enter':
-                                event.preventDefault()
-                                onInlineEdit({
-                                    event,
-                                    action: 'validate',
-                                    data: spanRef.current.innerText,
-                                })
-                                break
-
-                            case 'Escape':
-                                onCancelEdit(event)
-                                break
+            {!isEditing ? (
+                <span title={title} className="file-label">
+                    {data.name}
+                </span>
+            ) : (
+                <InputGroup
+                    type="text"
+                    inputRef={inputRef}
+                    spellCheck={false}
+                    onBlur={(event) => {
+                        if (isEditing && onInlineEdit) {
+                            onInlineEdit({
+                                event,
+                                action: 'validate',
+                                data: event.currentTarget.value,
+                            })
                         }
-                    }
-                }}
-            >
-                {data.name}
-            </span>
+                    }}
+                    onKeyDown={(event) => {
+                        if (isEditing) {
+                            switch (event.key) {
+                                case 'Enter':
+                                    event.preventDefault()
+                                    onInlineEdit({
+                                        event,
+                                        action: 'validate',
+                                        data: event.currentTarget.value,
+                                    })
+                                    break
+
+                                case 'Escape':
+                                    onCancelEdit(event)
+                                    break
+                            }
+                        }
+                    }}
+                    defaultValue={data.name}
+                    autoFocus
+                    small
+                />
+            )}
         </div>
     )
 }

@@ -4,7 +4,7 @@ import { action, observable, makeObservable } from 'mobx'
 import type { TFunction } from 'i18next'
 import { shell } from 'electron'
 
-import { FileDescriptor } from '$src/services/Fs'
+import { FileDescriptor, sameID } from '$src/services/Fs'
 import { FileState } from '$src/state/fileState'
 import { TransferOptions } from '$src/state/transferState'
 import { ViewDescriptor } from '$src/types'
@@ -386,6 +386,20 @@ export class AppState {
                 // TODOCOPY
                 debugger
             }
+        }
+    }
+
+    async renameEditingFile(cache: FileState, newName: string) {
+        try {
+            const file = cache.allFiles.find((file) => sameID(file.id, cache.editingId))
+            if (file) {
+                await cache.rename(file.dir, file, newName)
+            }
+        } catch (e) {
+            console.log('error renaming file', e)
+        } finally {
+            cache.setEditingFile(null)
+            cache.reload()
         }
     }
 

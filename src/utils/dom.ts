@@ -1,6 +1,5 @@
 import React from 'react'
 import { Classes } from '@blueprintjs/core'
-import { string } from 'prop-types'
 import { getSelectionRange } from './fileUtils'
 
 export function shouldCatchEvent(e: Event): boolean {
