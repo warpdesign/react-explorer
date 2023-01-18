@@ -71,7 +71,6 @@
         "@types/jest": "^24.0.18",
         "@types/mock-fs": "^4.10.0",
         "@types/node": "^12.0.0",
-        "@types/react-virtualized": "^9.21.4",
         "@types/webpack": "^4.41.23",
         "@types/webpack-env": "^1.15.3",
         "@typescript-eslint/eslint-plugin": "^5.42.1",
@@ -135,10 +134,8 @@
         "react": "^16.9.0",
         "react-dnd": "^14.0.5",
         "react-dnd-html5-backend": "^14.1.0",
-        "react-dnd-text-dragpreview": "^0.2.3",
         "react-dom": "^16.9.0",
         "react-i18next": "^12.0.0",
-        "react-virtual": "^2.10.4",
-        "react-virtualized": "^9.21.1"
+        "react-virtual": "^2.10.4"
     }
 }

@@ -8,10 +8,8 @@ import { ipcRenderer } from 'electron'
 
 import { FileDescriptor, sameID } from '$src/services/Fs'
 import { formatBytes } from '$src/utils/formatBytes'
-import { shouldCatchEvent, isEditable, isInRow } from '$src/utils/dom'
-import { AppAlert } from '$src/components/AppAlert'
+import { isEditable } from '$src/utils/dom'
 import { isMac } from '$src/utils/platform'
-import { filterDirs, filterFiles, getSelectionRange } from '$src/utils/fileUtils'
 import { FileState } from '$src/state/fileState'
 import { FileContextMenu } from '$src/components/menus/FileContextMenu'
 import { useMenuAccelerator } from '$src/hooks/useAccelerator'
@@ -21,8 +19,6 @@ import { ArrowKey, DraggedObject, FileViewItem } from '$src/types'
 import { HeaderMouseEvent, ItemMouseEvent, useLayout } from '$src/hooks/useLayout'
 import { useStores } from '$src/hooks/useStores'
 import { useKeyDown } from '$src/hooks/useKeyDown'
-
-const LABEL_CLASSNAME = 'file-label'
 
 interface Props {
     hide: boolean
@@ -94,19 +90,31 @@ const FileView = observer(({ hide }: Props) => {
                     return
                 }
 
-                // Prevent arrow keys to trigger generic browser scrolling: we want to handle it
-                // ourselves so that the cursor is always visible.
-                event.preventDefault()
+                switch (event.key) {
+                    case 'ArrowUp':
+                    case 'ArrowDown':
+                        // Prevent arrow keys to trigger generic browser scrolling: we want to handle it
+                        // ourselves so that the cursor is always visible.
+                        event.preventDefault()
 
-                const nextIndex = getNextIndex(cursorIndex, event.key as ArrowKey)
-                if (nextIndex > -1 && nextIndex <= rowCount - 1) {
-                    const file = cache.files[nextIndex]
-                    selectFile(file, event.metaKey, event.shiftKey)
+                        const nextIndex = getNextIndex(cursorIndex, event.key as ArrowKey)
+                        if (nextIndex > -1 && nextIndex <= rowCount - 1) {
+                            const file = cache.files[nextIndex]
+                            selectFile(file, event.metaKey, event.shiftKey)
+                        }
+                        break
+
+                    case 'Enter':
+                        const item = nodes[cursorIndex]
+                        if (item.isSelected && (!editingId || !sameID(cursor.id, editingId))) {
+                            cache.setEditingFile(cursor)
+                        }
+                        break
                 }
             },
             [cursor, cache, getNextIndex],
         ),
-        ['ArrowDown', 'ArrowUp'],
+        ['ArrowDown', 'ArrowUp', 'Enter'],
     )
 
     useMenuAccelerator([
@@ -156,72 +164,6 @@ const FileView = observer(({ hide }: Props) => {
         console.log('onItemDoubleClick', cursor)
     }
 
-    // private onInlineEdit(cancel: boolean): void {
-    //     const editingElement = this.editingElement
-
-    //     if (cancel) {
-    //         // restore previous value
-    //         editingElement.innerText = this.editingFile.fullname
-    //     } else {
-    //         // since the File element is modified by the rename FileState.rename method there is
-    //         // no need to refresh the file cache:
-    //         // 1. innerText has been updated and is valid
-    //         // 2. File.fullname is also updated, so any subsequent render will get the latest version as well
-    //         this.cache
-    //             .rename(this.editingFile.dir, this.editingFile, editingElement.innerText)
-    //             .then(() => {
-    //                 // this will not re-sort the files
-    //                 this.updateSelection()
-    //                 // we could also reload but not very optimal when working on remote files
-    //                 // const { fileCache } = this.injected;
-    //                 // fileCache.reload();
-    //                 // Finder automatically repositions the file but won't automatically scroll the list
-    //                 // so the file may be invisible after the reposition: not sure this is perfect either
-    //             })
-    //             .catch((error) => {
-    //                 AppAlert.show(error.message).then(() => {
-    //                     editingElement.innerText = error.oldName
-    //                 })
-    //             })
-    //     }
-    //     this.setEditElement(null, null)
-
-    //     editingElement.blur()
-    //     editingElement.removeAttribute('contenteditable')
-    // }
-
-    // clearContentEditable(): void {
-    //     if (this.editingElement) {
-    //         this.editingElement.blur()
-    //         this.editingElement.removeAttribute('contenteditable')
-    //     }
-    // }
-
-    // toggleInlineRename(
-    //     element: HTMLElement,
-    //     originallySelected: boolean,
-    //     file: FileDescriptor,
-    //     selectText = true,
-    // ): void {
-    //     if (!file.readonly) {
-    //         if (originallySelected) {
-    //             element.contentEditable = 'true'
-    //             element.focus()
-    //             this.setEditElement(element, file)
-    //             selectText && this.selectLeftPart()
-    //             element.onblur = (): void => {
-    //                 if (this.editingElement) {
-    //                     this.onInlineEdit(true)
-    //                 }
-    //             }
-    //         } else {
-    //             // clear rename
-    //             this.clearContentEditable()
-    //             this.setEditElement(null, null)
-    //         }
-    //     }
-    // }
-
     const openFileOrDirectory = (file: FileDescriptor, useInactiveCache: boolean): void => {
         if (!file.isDir) {
             cache.openFile(appState, cache, file)
@@ -255,85 +197,6 @@ const FileView = observer(({ hide }: Props) => {
             openFileOrDirectory(cursor, e.shiftKey)
         }
     }
-
-    // onInputKeyDown = (e: React.KeyboardEvent<HTMLElement>): void => {
-    //     if (this.editingElement) {
-    //         e.nativeEvent.stopImmediatePropagation()
-    //         if (e.key === Keys.ESCAPE || e.key === Keys.ENTER) {
-    //             if (e.key === Keys.ENTER) {
-    //                 e.preventDefault()
-    //             }
-    //             this.onInlineEdit(e.key === Keys.ESCAPE)
-    //         }
-    //     }
-    // }
-
-    // getNodeContentElement(position: number): HTMLElement {
-    //     const selector = `[aria-rowindex="${position}"]`
-    //     return this.gridElement.querySelector(selector)
-    // }
-
-    // clearEditElement(): void {
-    //     const selector = `[aria-rowindex] [contenteditable]`
-    //     const element = this.gridElement.querySelector(selector) as HTMLElement
-    //     if (element) {
-    //         element.onblur = null
-    //         element.removeAttribute('contenteditable')
-    //     }
-    // }
-
-    // getElementAndToggleRename = (e?: KeyboardEvent | string, selectText = true): void => {
-    //     if (this.state.selected > 0) {
-    //         const { position, nodes } = this.state
-    //         const node = nodes[position]
-    //         const file = nodes[position].nodeData as FileDescriptor
-    //         const element = this.getNodeContentElement(position + 1)
-    //         const span: HTMLElement = element.querySelector(`.${LABEL_CLASSNAME}`)
-
-    //         if (e && typeof e !== 'string') {
-    //             e.preventDefault()
-    //         }
-    //         this.toggleInlineRename(span, node.isSelected, file, selectText)
-    //     }
-    // }
-
-    //     table.scrollToPosition(newScrollTop)
-    // }, ARROW_KEYS_REPEAT_DELAY)
-
-    // onDocKeyDown = (e: KeyboardEvent): void => {
-    //     if (!this.isViewActive() || !shouldCatchEvent(e)) {
-    //         return
-    //     }
-
-    //     switch (e.key) {
-    //         case Keys.DOWN:
-    //         case Keys.UP:
-    //             if (!this.editingElement) {
-    //                 this.moveSelection(e.key === Keys.DOWN ? 1 : -1, e.shiftKey)
-    //                 e.preventDefault()
-    //             }
-    //             break
-
-    //         case Keys.ENTER:
-    //             console.log('DISABLE: this.getElementAndToggleRename(e)')
-    //             // this.getElementAndToggleRename(e)
-    //             break
-
-    //         case Keys.PAGE_DOWN:
-    //         case Keys.PAGE_UP:
-    //             console.log('page up/down disabled')
-    //             // DISABLE FOR NOW this.scrollPage(e.key === Keys.PAGE_UP)
-    //             break
-    //     }
-    // }
-
-    // setGridRef = (element: HTMLElement): void => {
-    //     this.gridElement = (element && element.querySelector(`.${GRID_CLASSNAME}`)) || null
-    // }
-
-    // onScroll = debounce(({ scrollTop }: ScrollParams): void => {
-    //     this.cache.scrollTop = scrollTop
-    // }, SCROLL_DEBOUNCE)
 
     const getDraggedProps = (index: number): DraggedObject => {
         const { isSelected, nodeData } = nodes[index]
@@ -386,12 +249,6 @@ const FileView = observer(({ hide }: Props) => {
         const rightClickFile = index > -1 && index < rowCount ? files[index] : undefined
         return props.isOpen ? <FileContextMenu fileUnderMouse={rightClickFile} /> : null
     }
-
-    // (element: HTMLElement) => {
-    //     // since we also need to have access to this element
-    //     const ref = ctxMenuProps.ref as React.MutableRefObject<HTMLElement>
-    //     ref.current = element
-    // }
 
     return (
         <HotkeysTarget2 hotkeys={hotkeys}>
