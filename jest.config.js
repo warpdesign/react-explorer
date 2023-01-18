@@ -5,7 +5,8 @@ module.exports = {
     moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
     preset: 'ts-jest',
     setupFilesAfterEnv: [
-      "<rootDir>/setupTests.ts"
+      "<rootDir>/setupTests.ts",
+      'jest-canvas-mock'
     ],
     moduleDirectories: [
       'node_modules',

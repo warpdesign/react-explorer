@@ -23,7 +23,7 @@ export interface RowProps {
     index: number
 }
 
-const CLICK_DELAY = 500
+export const CLICK_DELAY = 500
 
 export const Row = ({
     rowData,
@@ -60,6 +60,7 @@ export const Row = ({
                 ref={drag}
                 onClick={(e: React.MouseEvent<HTMLElement>) => {
                     e.stopPropagation()
+
                     if (e.timeStamp - clickRef.current > CLICK_DELAY) {
                         clickHandler(e)
                     } else {

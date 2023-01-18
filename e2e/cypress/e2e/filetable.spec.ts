@@ -124,11 +124,11 @@ describe('filetable', () => {
 
         // The following functions haven't been added back to the new filetable implementation yet.
         // FIXME: enable this test again once the feature has been implemented.
-        // it('should remove element from selection if already selected when pressing click + shift', () => {
+        // it.only('should remove element from selection if already selected when pressing click + shift', () => {
         //     cy.get('#view_0 [data-cy-file]:first').click().should('have.class', 'selected')
 
         //     cy.get('body')
-        //         .type('{shift}', { release: false })
+        //         .type('{meta}', { release: false })
         //         .get('#view_0 [data-cy-file]:first')
         //         .click()
         //         .should('not.have.class', 'selected')

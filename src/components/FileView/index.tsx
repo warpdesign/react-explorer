@@ -156,8 +156,8 @@ const FileView = observer(({ hide }: Props) => {
     const onItemClick = ({ index, event }: ItemMouseEvent): void => {
         const item = nodes[index]
         const file = item.nodeData
-        console.log({ selected: item.isSelected })
-        if (item.isSelected && (!editingId || !sameID(file.id, editingId))) {
+
+        if (!event.shiftKey && !event.metaKey && item.isSelected && (!editingId || !sameID(file.id, editingId))) {
             cache.setEditingFile(file)
         } else {
             // TODO: use OS specific instead of mac only metaKey
