@@ -56,6 +56,8 @@ export class ViewState {
         // do nothing if previous === next
         if (next && previous !== next) {
             if (previous) {
+                // disable inline edit
+                previous.setEditingFile(null)
                 previous.isVisible = false
             }
             next.isVisible = true
