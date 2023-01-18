@@ -14,10 +14,7 @@ describe('Size', () => {
 
     const PROPS = {
         data: item,
-        onInlineEdit: jest.fn(),
     }
-
-    beforeEach(() => jest.clearAllMocks())
 
     it('should display component', () => {
         render(<Size {...PROPS} />)
