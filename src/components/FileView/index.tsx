@@ -99,6 +99,7 @@ const FileView = observer(({ hide }: Props) => {
                 switch (event.key) {
                     case 'ArrowUp':
                     case 'ArrowDown':
+                        console.log('keyboard')
                         // Prevent arrow keys to trigger generic browser scrolling: we want to handle it
                         // ourselves so that the cursor is always visible.
                         event.preventDefault()
@@ -130,15 +131,6 @@ const FileView = observer(({ hide }: Props) => {
         },
     ])
 
-    // renderMenuAccelerators(): React.ReactElement<Record<string, unknown>> {
-    //     return (
-    //         <Accelerators>
-    //             <Accelerator combo="CmdOrCtrl+A" onClick={this.onSelectAll}></Accelerator>
-    //             {/* <Accelerator combo="rename" onClick={this.getElementAndToggleRename}></Accelerator> */}
-    //         </Accelerators>
-    //     )
-    // }
-
     const getRow = (index: number): FileViewItem => nodes[index]
 
     const onHeaderClick = ({ data: newMethod }: HeaderMouseEvent): void => cache.setSort(newMethod)
@@ -167,12 +159,11 @@ const FileView = observer(({ hide }: Props) => {
 
     const onItemDoubleClick = ({ event }: ItemMouseEvent): void => {
         openFileOrDirectory(cursor, event.shiftKey)
-        console.log('onItemDoubleClick', cursor)
     }
 
     const openFileOrDirectory = (file: FileDescriptor, useInactiveCache: boolean): void => {
         if (!file.isDir) {
-            cache.openFile(appState, cache, file)
+            cache.openFile(appState, file)
         } else {
             const dir = {
                 dir: cache.join(file.dir, file.fullname),
@@ -180,22 +171,6 @@ const FileView = observer(({ hide }: Props) => {
             }
             appState.openDirectory(dir, !useInactiveCache)
         }
-    }
-
-    const unSelectAll = (): void => {
-        // const selectedNodes = nodes.filter((node) => node.isSelected)
-        // if (selectedNodes.length && isViewActive()) {
-        //     selectedNodes.forEach((node) => {
-        //         node.isSelected = false
-        //     })
-        //     setNodes(nodes)
-        //     // setSelected(0)
-        //     // setPosition(-1)
-        //     console.warn('disabled: updateSelection after state update (2)')
-        //     // this.setState({ nodes, selected: 0, position: -1 }, () => {
-        //     //     this.updateSelection()
-        //     // })
-        // }
     }
 
     const onOpenFile = (e: KeyboardEvent): void => {

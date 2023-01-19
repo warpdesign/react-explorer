@@ -1,4 +1,4 @@
-import React, { useCallback, useRef } from 'react'
+import React, { useCallback, useRef, useState, useEffect } from 'react'
 import type { ReactElement } from 'react'
 
 import { ArrowKey, DraggedObject, FileViewItem } from '$src/types'
@@ -81,9 +81,14 @@ export const useLayout = (name: LayoutName): LayoutReturnProps => {
     if (!Layout) {
         throw `could not find layout "${name}"`
     }
-    const layoutRef = useRef(null)
+    const layoutRef = useRef()
+    const [ready, setReady] = useState(false)
 
-    // TODO: maybe have a ready event since layoutRef.current could be null ?
+    // Little hack to force a rereneder of the parent component
+    // without it, the ref isn't defined in test environment
+    useEffect(() => {
+        setReady(true)
+    }, [name])
 
     return {
         Layout: useCallback((props: LayoutProps) => <Layout {...props} ref={layoutRef} />, [layoutRef, name]),

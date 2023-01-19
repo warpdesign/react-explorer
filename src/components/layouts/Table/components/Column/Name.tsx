@@ -31,7 +31,7 @@ export const Name = ({ data, onInlineEdit }: Props) => {
         <div className="name">
             <Icon icon={icon}></Icon>
             {!isEditing ? (
-                <span title={title} className="file-label">
+                <span title={title} className="file-label" data-cy-filename>
                     {data.name}
                 </span>
             ) : (

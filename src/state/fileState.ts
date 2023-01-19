@@ -622,9 +622,9 @@ export class FileState {
         return this.api.join(path, path2)
     }
 
-    async openFile(appState: AppState, cache: FileState, file: FileDescriptor): Promise<void> {
+    async openFile(appState: AppState, file: FileDescriptor): Promise<void> {
         try {
-            const path = await appState.prepareLocalTransfer(cache, [file])
+            const path = await appState.prepareLocalTransfer(this, [file])
             const error = await shell.openPath(path)
             if (error) {
                 this.handleError({
