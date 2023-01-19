@@ -2,9 +2,8 @@
  * @jest-environment jsdom
  */
 import React from 'react'
-import { within } from '@testing-library/dom'
 
-import { screen, setup, render, t, isSelected, waitFor, wait } from 'rtl'
+import { screen, setup, render, t, waitFor } from 'rtl'
 import { ViewState } from '$src/state/viewState'
 
 import { FileView } from '..'
@@ -153,13 +152,29 @@ describe('FileView', () => {
             expect(cache.openFile).toHaveBeenCalledWith(appState, file)
         })
 
+        it('should show context menu when right clicking on a file', async () => {
+            const { viewState } = options.providerProps
+            const cache = viewState.getVisibleCache()
+            const file = cache.files[0]
+
+            const { user } = setup(<FileView hide={false} />, options)
+
+            await user.pointer([
+                {
+                    target: screen.getByText(file.name),
+                    keys: '[MouseRight]',
+                },
+            ])
+
+            expect(screen.getByText(t('APP_MENUS.COPY'))).toBeInTheDocument()
+        })
+
+        // TODO: we need a way to generate comobos for these ones
         it.todo('should select all files when pressing meta + a')
 
         it.todo('should invert selection when pression meta + i')
 
         it.todo('should open file when pression meta + o')
-
-        it.todo('should show context menu when right clicking on a file')
 
         it.todo('should restore previous name when canceling edit')
 
