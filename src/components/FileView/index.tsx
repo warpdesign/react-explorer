@@ -99,7 +99,6 @@ const FileView = observer(({ hide }: Props) => {
                 switch (event.key) {
                     case 'ArrowUp':
                     case 'ArrowDown':
-                        console.log('keyboard')
                         // Prevent arrow keys to trigger generic browser scrolling: we want to handle it
                         // ourselves so that the cursor is always visible.
                         event.preventDefault()
@@ -119,7 +118,7 @@ const FileView = observer(({ hide }: Props) => {
                         break
                 }
             },
-            [cursor, cache, getNextIndex],
+            [cursor, cache, getNextIndex, rowCount],
         ),
         ['ArrowDown', 'ArrowUp', 'Enter'],
     )
