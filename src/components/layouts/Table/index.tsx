@@ -1,30 +1,19 @@
 import React, { forwardRef, useImperativeHandle, useRef, useEffect } from 'react'
+import { useVirtual } from 'react-virtual'
+import classNames from 'classnames'
+
 import { Row } from './components/Row'
 import { Header } from './components/Header'
-import classNames from 'classnames'
+import { LayoutActions, LayoutProps } from '$src/hooks/useLayout'
+import { ArrowKey, FileViewItem } from '$src/types'
+import { Placeholder } from './components/Placeholder'
 
 import '$src/css/fileview-table.css'
 
-import { ItemMouseEvent, LayoutActions, LayoutProps } from '$src/hooks/useLayout'
-import CONFIG from '$src/config/appConfig'
-import { TStatus } from '$src/state/fileState'
-import { TSORT_METHOD_NAME } from '$src/services/FsSort'
-import { ArrowKey, DraggedObject, FileViewItem } from '$src/types'
-import { useVirtual } from 'react-virtual'
-import { Placeholder } from './components/Placeholder'
-// import { RowRendererProps } from '../RowRenderer'
-
 const ROW_HEIGHT = 28
-const SIZE_COLUMN_WITDH = 70
-// this is just some small enough value: column will grow
-// automatically to make the name visible
-const NAME_COLUMN_WIDTH = 10
-const GRID_CLASSNAME = 'filetable-grid'
-const GRID_CLASSES = `data-cy-filetable ${GRID_CLASSNAME} ${CONFIG.CUSTOM_SCROLLBAR_CLASSNAME}`
 
 const rowClassName = (item: FileViewItem): string => {
     const error = item && item.nodeData.mode === -1
-    // const mainClass = index === -1 ? 'headerRow' : 'tableRow'
 
     return classNames('tableRow', item && item.className, {
         selected: item && item.isSelected,
@@ -58,13 +47,6 @@ export const TableLayout = forwardRef<LayoutActions, LayoutProps>(
             parentRef: tableRef,
             estimateSize: React.useCallback(() => ROW_HEIGHT, []),
             overscan: 5,
-            // paddingStart: ROW_HEIGHT,
-            // rangeExtractor: (range) => {
-            //     const { start, end, size } = range
-            //     const length = size > 0 ? (end - start + 1) : 0
-            //     console.log('range', start, end)
-            //     return length ? [100].concat(Array.from({ length }, (_, i) => i + start)) : []
-            // }
         })
 
         useImperativeHandle(

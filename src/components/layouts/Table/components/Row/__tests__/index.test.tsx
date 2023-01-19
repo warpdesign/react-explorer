@@ -8,8 +8,6 @@ import { render, screen, setup, userEvent, wait } from 'rtl'
 import { Row, CLICK_DELAY } from '..'
 
 describe('Row', () => {
-    // filestate, dragfiles
-
     const item = {
         name: 'filename',
         size: '3 bytes',
