@@ -147,12 +147,12 @@ const FileView = observer(({ hide }: Props) => {
     const onItemClick = ({ index, event }: ItemMouseEvent): void => {
         const item = nodes[index]
         const file = item.nodeData
+        const toggleMode = isMac ? event.metaKey : event.ctrlKey
 
-        if (!event.shiftKey && !event.metaKey && item.isSelected && (!editingId || !sameID(file.id, editingId))) {
+        if (!event.shiftKey && !toggleMode && item.isSelected && (!editingId || !sameID(file.id, editingId))) {
             cache.setEditingFile(file)
         } else {
-            // TODO: use OS specific instead of mac only metaKey
-            selectFile(file, event.metaKey, event.shiftKey)
+            selectFile(file, toggleMode, event.shiftKey)
         }
     }
 

@@ -13,6 +13,7 @@ describe('Row', () => {
         size: '3 bytes',
         icon: 'folder-close',
         isEditing: false,
+        isSelected: false,
         title: 'filename',
     }
 
@@ -60,7 +61,7 @@ describe('Row', () => {
             expect(PROPS.onRowClick).toHaveBeenCalled()
         })
 
-        it('should call double-click handler when the user double-clicks on the row', async () => {
+        it('should call double click handler when the user double-clicks on the row', async () => {
             const { user } = setup(<Row {...PROPS} />)
 
             await user.dblClick(screen.getByText(item.name))
@@ -77,6 +78,15 @@ describe('Row', () => {
 
             expect(PROPS.onRowClick).toHaveBeenCalledTimes(2)
             expect(PROPS.onRowDoubleClick).not.toHaveBeenCalled()
+        })
+
+        it('should not call click handler if file is already selected and the user clicks on the size column', async () => {
+            item.isSelected = true
+
+            const { user } = setup(<Row {...PROPS} />)
+            await user.click(screen.getByText(item.size))
+
+            expect(PROPS.onRowClick).not.toHaveBeenCalled()
         })
 
         // it.only('should show drag overlay when user drags the row', async () => {
