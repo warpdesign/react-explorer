@@ -6,7 +6,7 @@ import React from 'react'
 import { screen, setup, render, t, waitFor } from 'rtl'
 import { ViewState } from '$src/state/viewState'
 
-import { FileView } from '..'
+import { FileView } from '../FileView'
 import { SettingsState } from '$src/state/settingsState'
 import { AppState } from '$src/state/appState'
 
