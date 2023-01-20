@@ -71,8 +71,11 @@ export const TableLayout = forwardRef<LayoutActions, LayoutProps>(
         )
 
         useEffect(() => {
-            cursorIndex > -1 && scrollToIndex(cursorIndex)
-        }, [cursorIndex])
+            // Position scrolling in these cases:
+            // 1. new file has been selected: scroll to selected index to make sure it's visible
+            // 2. new directory has been loaded (or same reloaded): scroll to top or selected index
+            status === 'ok' && scrollToIndex(cursorIndex === -1 ? 0 : cursorIndex)
+        }, [cursorIndex, status])
 
         return (
             <>
