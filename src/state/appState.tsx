@@ -289,12 +289,12 @@ export class AppState {
             return Promise.resolve('')
         }
 
-        // simply open the file if src is local FS
-        if (srcCache.getFS().name === 'local') {
+        // Simply open the file if src is a local FS
+        if (srcCache.getFS().name.startsWith('local')) {
             const api = srcCache.getAPI()
             return Promise.resolve(api.join(files[0].dir, files[0].fullname))
         } else {
-            debugger
+            console.error('TODO: prepareLocalTransfer for non-local FS')
             // TODO once we support non local FS
 
             // first we need to get a FS for local
