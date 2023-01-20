@@ -1,7 +1,7 @@
 import { IconName } from '@blueprintjs/core'
 import { IconNames } from '@blueprintjs/icons'
 import { observable, runInAction } from 'mobx'
-import { isMac } from '$src/utils/platform'
+import { isMac, isWin } from '$src/utils/platform'
 import * as nodeDiskInfo from 'node-disk-info'
 
 import { ALL_DIRS } from '$src/utils/platform'
@@ -97,7 +97,8 @@ export class FavoritesState {
     buildDrivesList(): void {
         this.buildShortcuts()
         this.launchTimeout(true, this.checkForNewDrives, CHECK_FOR_DRIVES_DELAY)
-        this.launchTimeout(true, this.checkForNewDistributions, CHECK_FOR_WSL_DELAY)
+        // Only check for WSL distributions on Windows
+        isWin && this.launchTimeout(true, this.checkForNewDistributions, CHECK_FOR_WSL_DELAY)
     }
 
     checkForNewDistributions = async (): Promise<void> => {
