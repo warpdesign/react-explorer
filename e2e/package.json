@@ -30,6 +30,7 @@
         "assert": "^2.0.0",
         "cypress": "^10.11.0",
         "fs": "^0.0.1-security",
+        "path-browserify": "^1.0.1",
         "pm2": "^4.1.2",
         "stream-browserify": "^3.0.0",
         "swc-loader": "^0.2.3",

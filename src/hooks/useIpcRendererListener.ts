@@ -3,8 +3,8 @@ import { ipcRenderer } from 'electron'
 
 import type { IpcRendererEventHandler } from '$src/types'
 
-const useIpcRendererListener = (event: string, handler: IpcRendererEventHandler) => {
-    const savedHandler = React.useRef<IpcRendererEventHandler>()
+const useIpcRendererListener = <C>(event: string, handler: IpcRendererEventHandler<C>) => {
+    const savedHandler = React.useRef<IpcRendererEventHandler<C>>(handler)
 
     React.useEffect(() => {
         savedHandler.current = handler

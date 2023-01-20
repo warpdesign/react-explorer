@@ -8,10 +8,10 @@ import { Statusbar } from '$src/components/Statusbar'
 import { Toolbar } from '$src/components/Toolbar'
 import { LoginDialog } from '$src/components/dialogs/LoginDialog'
 import { Overlay } from '$src/components/Overlay'
-import { FileTable } from '$src/components/filetable'
+import { FileView } from '$src/components/FileView'
 import { TabList } from '$src/components/TabList'
 import { ViewState } from '$src/state/viewState'
-import { DraggedObject } from '$src/components/filetable/RowRenderer'
+import { DraggedObject } from '$src/types'
 import { useStores } from '$src/hooks/useStores'
 
 interface SideViewProps {
@@ -71,12 +71,12 @@ export const SideView = observer(({ hide, viewState, onPaste }: SideViewProps) =
                 {needLogin && <LoginDialog isOpen={needLogin} onValidation={onValidation} onClose={onClose} />}
                 <TabList></TabList>
                 <Toolbar active={active && !busy} onPaste={onPaste} />
-                <FileTable hide={hide} />
+                <FileView hide={hide} />
                 <Statusbar />
-                <Overlay id={`files-loader-${viewState.viewId}`} active={busy}>
+                <Overlay id={`files-loader-${viewState.viewId}`} shouldShow={busy} delay={true}>
                     <Spinner />
                 </Overlay>
-                <Overlay active={dropOverlayActive}>
+                <Overlay shouldShow={dropOverlayActive} id={`drop-overlay-${viewState.viewId}`}>
                     <Icon icon={dropOverlayIcon} size={80} color="#d9dde0" />
                 </Overlay>
             </div>

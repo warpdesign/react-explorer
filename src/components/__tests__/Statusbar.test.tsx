@@ -2,7 +2,7 @@
  * @jest-environment jsdom
  */
 import React from 'react'
-import { screen, setup, render, t } from 'rtl'
+import { screen, setup, render, t, userEvent } from 'rtl'
 import { Statusbar } from '../Statusbar'
 import { filterFiles, filterDirs } from '$src/utils/fileUtils'
 import { ViewState } from '$src/state/viewState'
@@ -16,8 +16,8 @@ describe('Statusbar', () => {
 
     const buildStatusBarText = () => {
         const cache = options.providerProps.viewState.getVisibleCache()
-        const files = filterFiles(cache.files, cache.showHiddenFiles).length
-        const folders = filterDirs(cache.files, cache.showHiddenFiles).length
+        const files = filterFiles(cache.files).length
+        const folders = filterDirs(cache.files).length
 
         return `${t('STATUS.FILES', { count: files })}, ${t('STATUS.FOLDERS', {
             count: folders,
@@ -47,10 +47,17 @@ describe('Statusbar', () => {
         expect(screen.getByRole('textbox')).toHaveValue(buildStatusBarText())
     })
 
-    it('toggle hidden files button should be hidden if file cache is not valid', () => {
-        options.providerProps.viewState.getVisibleCache().setStatus('busy')
+    it('toggle hidden files button should be inactive if cache is not ready', async () => {
+        const user = userEvent.setup()
+        const cache = options.providerProps.viewState.getVisibleCache()
+        expect(cache.showHiddenFiles).toBe(false)
+
         render(<Statusbar />, options)
 
-        expect(screen.queryByRole('button')).not.toBeInTheDocument()
+        // set cache status to busy & attempt to toggle show hidden files
+        cache.setStatus('busy')
+        await user.click(screen.queryByRole('button'))
+
+        expect(cache.showHiddenFiles).toBe(false)
     })
 })

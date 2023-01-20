@@ -56,6 +56,8 @@ export class ViewState {
         // do nothing if previous === next
         if (next && previous !== next) {
             if (previous) {
+                // disable inline edit
+                previous.setEditingFile(null)
                 previous.isVisible = false
             }
             next.isVisible = true
@@ -74,7 +76,9 @@ export class ViewState {
     activateNextTab(index: number): void {
         const length = this.caches.length
         const newActive = length > index ? this.caches[index] : this.caches[length - 1]
+
         newActive.isVisible = true
+
         if (!newActive.history.length) {
             newActive.cd(newActive.path)
         }

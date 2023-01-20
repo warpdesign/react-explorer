@@ -3,10 +3,10 @@ import { Menu, MenuItem, MenuDivider, Intent } from '@blueprintjs/core'
 import { useTranslation } from 'react-i18next'
 
 import { useStores } from '$src/hooks/useStores'
-import { File, sameID } from '$src/services/Fs'
+import { FileDescriptor, sameID } from '$src/services/Fs'
 
 interface Props {
-    fileUnderMouse: File | null
+    fileUnderMouse: FileDescriptor | null
 }
 
 const FileContextMenu = ({ fileUnderMouse }: Props) => {
@@ -16,7 +16,7 @@ const FileContextMenu = ({ fileUnderMouse }: Props) => {
     const cache = appState.getActiveCache()
 
     const numFilesInClipboard = clipboard.files.length
-    const isInSelection = fileUnderMouse && !!cache.selected.find((file) => sameID(file, fileUnderMouse))
+    const isInSelection = fileUnderMouse && !!cache.selected.find((file) => sameID(file.id, fileUnderMouse.id))
     const isPasteEnabled = numFilesInClipboard && ((!fileUnderMouse && !cache.error) || fileUnderMouse?.isDir)
 
     const onCopy = () => {

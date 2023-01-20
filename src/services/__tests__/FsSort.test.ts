@@ -1,7 +1,7 @@
 import { getSortMethod } from '../FsSort'
-import { File } from '../Fs'
+import { FileDescriptor } from '../Fs'
 
-const files: Array<File> = [
+const files: Array<FileDescriptor> = [
     {
         dir: '/',
         fullname: 'foo',
@@ -19,7 +19,7 @@ const files: Array<File> = [
             dev: 1,
         },
         isSym: false,
-        target: null,
+        target: '',
         type: '',
     },
     {
@@ -39,7 +39,7 @@ const files: Array<File> = [
             dev: 1,
         },
         isSym: false,
-        target: null,
+        target: '',
         type: '',
     },
     {
@@ -59,7 +59,7 @@ const files: Array<File> = [
             dev: 1,
         },
         isSym: false,
-        target: null,
+        target: '',
         type: '',
     },
     {
@@ -79,7 +79,7 @@ const files: Array<File> = [
             dev: 1,
         },
         isSym: false,
-        target: null,
+        target: '',
         type: '',
     },
 ]

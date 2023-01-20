@@ -92,7 +92,7 @@ class KeyboardHotkeysClass extends React.Component<WithTranslation> {
         const cache = this.getActiveFileCache()
         console.log('====')
         console.log('cache selected length', cache.selected.length)
-        console.log('cache.selectedId', cache.selectedId)
+        console.log('cache.cursor', cache.cursor)
         console.log('cache.editingId', cache.editingId)
         console.log('===')
         console.log(cache.selected)

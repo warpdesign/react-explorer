@@ -4,7 +4,7 @@ import { action, observable, makeObservable } from 'mobx'
 import type { TFunction } from 'i18next'
 import { shell } from 'electron'
 
-import { File } from '$src/services/Fs'
+import { FileDescriptor, sameID } from '$src/services/Fs'
 import { FileState } from '$src/state/fileState'
 import { TransferOptions } from '$src/state/transferState'
 import { ViewDescriptor } from '$src/types'
@@ -18,7 +18,7 @@ import { LocalizedError } from '$src/locale/error'
 import { DeleteConfirmDialog } from '$src/components/dialogs/deleteConfirm'
 import { AppAlert } from '$src/components/AppAlert'
 import { TransferListState } from '$src/state/transferListState'
-import { DraggedObject } from '$src/components/filetable/RowRenderer'
+import { DraggedObject } from '$src/types'
 import { SettingsState } from './settingsState'
 import { CustomSettings } from '$src/electron/windowSettings'
 
@@ -73,7 +73,6 @@ export class AppState {
             initViewState: action,
             refreshActiveView: action,
             addView: action,
-            updateSelection: action,
             openDirectory: action,
             options: observable,
         })
@@ -97,7 +96,7 @@ export class AppState {
 
         for (const desc of views) {
             console.log('adding view', desc.viewId, desc.path, window.ENV.CY)
-            this.addView(window.ENV.CY ? '' : desc.path, desc.viewId)
+            this.addView(desc.path, desc.viewId)
         }
 
         this.initViewState()
@@ -219,7 +218,7 @@ export class AppState {
         }
     }
 
-    async delete(files?: File[]): Promise<void> {
+    async delete(files?: FileDescriptor[]): Promise<void> {
         const cache = this.getActiveCache()
         const toDelete = files || cache.selected
 
@@ -268,7 +267,7 @@ export class AppState {
      * @param transferId
      * @param file the file to open
      */
-    openTransferredFile(transferId: number, file: File): void {
+    openTransferredFile(transferId: number, file: FileDescriptor): void {
         // TODO: this is duplicate code from appState/prepareLocalTransfer and fileState.openFile()
         // because we don't have a reference to the destination cache
         const { dstFs: api } = this.transferListState.getTransfer(transferId)
@@ -285,7 +284,7 @@ export class AppState {
      *
      * @returns {Promise<FileTransfer[]>}
      */
-    prepareLocalTransfer(srcCache: FileState, files: File[]): Promise<string> {
+    prepareLocalTransfer(srcCache: FileState, files: FileDescriptor[]): Promise<string> {
         if (!files.length) {
             return Promise.resolve('')
         }
@@ -390,6 +389,20 @@ export class AppState {
         }
     }
 
+    async renameEditingFile(cache: FileState, newName: string) {
+        try {
+            const file = cache.allFiles.find((file) => sameID(file.id, cache.editingId))
+            if (file && file.fullname !== newName) {
+                await cache.rename(file.dir, file, newName)
+            }
+        } catch (e) {
+            console.log('error renaming file', e)
+        } finally {
+            cache.reload()
+            cache.setEditingFile(null)
+        }
+    }
+
     getActiveCache(): FileState {
         const winState = this.winStates[0]
         const view = winState.getActiveView()
@@ -421,18 +434,18 @@ export class AppState {
     }
 
     // TODO: this should be moved into FileState (!)
-    updateSelection(cache: FileState, newSelection: File[]): void {
-        console.log('updateSelection', newSelection.length)
-        cache.selected.replace(newSelection)
-        for (const selected of cache.selected) {
-            console.log(selected.fullname, selected.id.dev, selected.id.ino)
-        }
+    // updateSelection(cache: FileState, newSelection: FileDescriptor[]): void {
+    //     console.log('updateSelection', newSelection.length)
+    //     cache.selected.replace(newSelection)
+    //     for (const selected of cache.selected) {
+    //         console.log(selected.fullname, selected.id.dev, selected.id.ino)
+    //     }
 
-        if (newSelection.length) {
-            const file = newSelection.slice(-1)[0]
-            cache.setSelectedFile(file)
-        } else {
-            cache.setSelectedFile(null)
-        }
-    }
+    //     if (newSelection.length) {
+    //         const file = newSelection.slice(-1)[0]
+    //         cache.setCursor(file)
+    //     } else {
+    //         cache.setCursorFileId(null)
+    //     }
+    // }
 }

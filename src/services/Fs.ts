@@ -1,10 +1,9 @@
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
 import { Readable } from 'stream'
-import { FsVirtual } from '$src/services/plugins/FsVirtual'
 
 import { isWin } from '$src/utils/platform'
 
-const interfaces: Array<Fs> = [FsVirtual]
+const interfaces: Array<Fs> = []
 
 export interface Credentials {
     user?: string
@@ -21,7 +20,7 @@ export interface FileID {
     dev: number
 }
 
-export interface File {
+export interface FileDescriptor {
     dir: string
     name: string
     fullname: string
@@ -113,12 +112,12 @@ export function filetype(mode: number, gid: number, uid: number, extension: stri
 export interface FsApi {
     // public API
     // async methods that may require server access
-    list(dir: string, watchDir?: boolean, transferId?: number): Promise<File[]>
+    list(dir: string, watchDir?: boolean, transferId?: number): Promise<FileDescriptor[]>
     cd(path: string, transferId?: number): Promise<string>
-    delete(parent: string, files: File[], transferId?: number): Promise<number>
+    delete(parent: string, files: FileDescriptor[], transferId?: number): Promise<number>
     makedir(parent: string, name: string, transferId?: number): Promise<string>
-    rename(parent: string, file: File, name: string, transferId?: number): Promise<string>
-    stat(path: string, transferId?: number): Promise<File>
+    rename(parent: string, file: FileDescriptor, name: string, transferId?: number): Promise<string>
+    stat(path: string, transferId?: number): Promise<FileDescriptor>
     isDir(path: string, transferId?: number): Promise<boolean>
     exists(path: string, transferId?: number): Promise<boolean>
     size(source: string, files: string[], transferId?: number): Promise<number>
@@ -148,7 +147,7 @@ export function getFS(path: string): Fs {
     const newfs = interfaces.find((filesystem) => filesystem.canread(path))
     // if (!newfs) {
     //     newfs = FsGeneric;
-    // }
+    // `
 
     return newfs
 }
@@ -195,7 +194,7 @@ export function needsConnection(target: any, key: any, descriptor: any) {
     return descriptor
 }
 
-export function sameID({ id: { ino, dev } }: File, { id: { ino: ino2, dev: dev2 } }: File): boolean {
+export function sameID({ ino, dev }: FileID, { ino: ino2, dev: dev2 }: FileID): boolean {
     return ino === ino2 && dev === dev2
 }
 

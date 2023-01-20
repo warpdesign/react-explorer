@@ -3,7 +3,7 @@ import { Intent } from '@blueprintjs/core'
 import { clipboard } from 'electron'
 import type { TFunction } from 'i18next'
 
-import { File, FsApi } from '$src/services/Fs'
+import { FileDescriptor, FsApi } from '$src/services/Fs'
 import { lineEnding } from '$src/utils/platform'
 import { FileState } from '$src/state/fileState'
 import { i18n } from '$src/locale/i18n'
@@ -17,13 +17,13 @@ import { AppToaster } from '$src/components/AppToaster'
 export interface Clipboard {
     srcFs: FsApi
     srcPath: string
-    files: File[]
+    files: FileDescriptor[]
 }
 
 export class ClipboardState {
     srcPath = ''
     srcFs: FsApi = null
-    files = observable<File>([])
+    files = observable<FileDescriptor>([])
 
     t: TFunction
 
@@ -37,7 +37,7 @@ export class ClipboardState {
         this.t = i18n.i18next.t
     }
 
-    setClipboard(fileState: FileState, files?: File[]): void {
+    setClipboard(fileState: FileState, files?: FileDescriptor[]): void {
         const filesToCopy = files || fileState.selected.slice(0)
         const length = filesToCopy.length
 

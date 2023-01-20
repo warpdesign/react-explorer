@@ -1,6 +1,6 @@
 import { describeUnix } from '../../utils/test/helpers'
 
-import { MakeId, ExeMaskAll, ExeMaskGroup, ExeMaskUser, filetype, sameID, File } from '../Fs'
+import { MakeId, ExeMaskAll, ExeMaskGroup, ExeMaskUser, filetype, sameID, FileID } from '../Fs'
 
 describe('makeId', () => {
     it('should return FileID from stats', () => {
@@ -18,26 +18,22 @@ describe('makeId', () => {
 })
 
 describe('sameID', () => {
-    const file1 = {
-        id: {
-            dev: 10,
-            ino: 5,
-        },
-    } as unknown as File
+    const id1: FileID = {
+        dev: 10,
+        ino: 5,
+    }
 
-    const file2 = {
-        id: {
-            dev: 28,
-            ino: 32,
-        },
-    } as unknown as File
+    const id2: FileID = {
+        dev: 28,
+        ino: 32,
+    }
 
     it('should return true if ino & dev are identical', () => {
-        expect(sameID(file1, file1)).toBe(true)
+        expect(sameID(id1, id1)).toBe(true)
     })
 
     it('should return true if ino & dev are identical', () => {
-        expect(sameID(file1, file2)).toBe(false)
+        expect(sameID(id1, id2)).toBe(false)
     })
 })
 

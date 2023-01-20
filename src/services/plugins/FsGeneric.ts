@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import * as fs from 'fs'
 
-import { FsApi, File, Credentials, Fs } from '$src/services/Fs'
+import { FsApi, FileDescriptor, Credentials, Fs } from '$src/services/Fs'
 
 class GenericApi implements FsApi {
     type = 0
@@ -42,12 +42,12 @@ class GenericApi implements FsApi {
         return Promise.resolve('')
     }
 
-    delete(src: string, files: File[], transferId = -1): Promise<number> {
+    delete(src: string, files: FileDescriptor[], transferId = -1): Promise<number> {
         console.log('FsGeneric.delete')
         return Promise.resolve(files.length)
     }
 
-    rename(source: string, file: File, newName: string, transferId = -1): Promise<string> {
+    rename(source: string, file: FileDescriptor, newName: string, transferId = -1): Promise<string> {
         console.log('FsGeneric.rename')
         return Promise.resolve(newName)
     }
@@ -67,7 +67,7 @@ class GenericApi implements FsApi {
         return true
     }
 
-    stat(fullPath: string, transferId = -1): Promise<File> {
+    stat(fullPath: string, transferId = -1): Promise<FileDescriptor> {
         return Promise.resolve({
             dir: '',
             fullname: '',
@@ -80,10 +80,10 @@ class GenericApi implements FsApi {
             isDir: false,
             readonly: false,
             type: '',
-        } as File)
+        } as FileDescriptor)
     }
 
-    async list(dir: string, watchDir = false, transferId = -1): Promise<File[]> {
+    async list(dir: string, watchDir = false, transferId = -1): Promise<FileDescriptor[]> {
         console.log('FsGeneric.readDirectory')
         const pathExists = await this.isDir(dir)
 

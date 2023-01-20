@@ -209,7 +209,7 @@
             "NODEST": "copy target could not be accessed",
             "COPY_ERROR": "Couldn't copy files: {{message}}",
             "COPY_UNKNOWN_ERROR": "Error while copying files.",
-            "SHELL_OPEN_FAILED": "Could not open file: {{path}}",
+            "SHELL_OPEN_FAILED": "Could not open file: no application to open it.",
             "OPEN_TERMINAL_FAILED": "Could not open terminal. Check that the path is correct in the settings."
         },
         "MAIN_PROCESS": {

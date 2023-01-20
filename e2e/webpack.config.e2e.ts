@@ -51,10 +51,9 @@ const baseConfig = {
         path: _resolve(__dirname, 'build-e2e'),
     },
     externals: {
-        path: '{}',
+        // path: '{}',
         net: '{}',
         tls: '{}',
-        fs: '{}',
     },
     node: {
         __dirname: false,
@@ -66,6 +65,7 @@ const baseConfig = {
         // Add '.ts' and '.tsx' as resolvable extensions.
         extensions: ['.ts', '.tsx', '.js', '.json', '.css'],
         alias: {
+            fs: 'memfs',
             $src: _resolve(__dirname, '../src'),
             // TODO: use proper polyfills instead of incomplete custom ones
             ...aliases,
@@ -76,6 +76,7 @@ const baseConfig = {
             stream: require.resolve('stream-browserify'),
             assert: require.resolve('assert/'),
             util: require.resolve('util/'),
+            path: require.resolve('path-browserify'),
         },
     },
     module: {

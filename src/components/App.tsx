@@ -62,7 +62,7 @@ const App = inject('appState')(
                 // do not show outlines when using the mouse
                 FocusStyleManager.onlyShowFocusOnTabs()
 
-                if (window.ENV.CY) {
+                if (window.ENV.CY || window.ENV.NODE_ENV === 'development') {
                     window.appState = this.appState
                     window.settingsState = settingsState
                     window.renderer = ipcRenderer
