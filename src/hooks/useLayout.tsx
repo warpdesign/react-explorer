@@ -24,7 +24,7 @@ export interface HeaderMouseEvent {
 }
 
 export interface InlineEditEvent {
-    data?: string
+    data?: string | FileViewItem
     action: 'cancel' | 'validate' | 'start'
     event: React.SyntheticEvent
 }

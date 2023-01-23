@@ -5,6 +5,7 @@ import type { FileViewItem } from '$src/types'
 import { InlineEditEvent } from '$src/hooks/useLayout'
 import { getSelectionRange } from '$src/utils/fileUtils'
 import { CLICK_DELAY } from '../Row'
+import { isMac } from '$src/utils/platform'
 
 interface Props {
     data: FileViewItem
@@ -14,12 +15,18 @@ interface Props {
 export const Name = ({ data, onInlineEdit }: Props) => {
     const { icon, title, isEditing, isSelected, name } = data
     const inputRef = useRef<HTMLInputElement>()
-    const clickRef: React.MutableRefObject<number> = useRef(-CLICK_DELAY)
+    const timeoutRef = useRef<ReturnType<typeof setTimeout>>()
 
     useEffect(() => {
         if (isEditing) {
             const { start, end } = getSelectionRange(name)
             inputRef.current.setSelectionRange(start, end)
+        }
+
+        return () => {
+            if (timeoutRef.current) {
+                clearTimeout(timeoutRef.current)
+            }
         }
     }, [isEditing])
 
@@ -36,17 +43,24 @@ export const Name = ({ data, onInlineEdit }: Props) => {
                 <span
                     title={title}
                     onClick={(e: React.MouseEvent<HTMLElement>) => {
-                        if (isSelected && e.timeStamp - clickRef.current > CLICK_DELAY) {
-                            console.log('first click & selected: enable online')
-                            e.stopPropagation()
-                            onInlineEdit({
-                                event,
-                                action: 'start',
-                            })
-                        } else if (isSelected) {
-                            console.log('isSelected but delay too small: double click ?')
+                        if (!timeoutRef.current && !e.shiftKey && !(isMac ? e.metaKey : e.ctrlKey)) {
+                            e.persist()
+                            timeoutRef.current = setTimeout(() => {
+                                timeoutRef.current = undefined
+                                // Only enable inline edit if row was selected when the click happened:
+                                // this prevents enabling inline edit when the user clicked on a non-selected row
+                                isSelected &&
+                                    onInlineEdit({
+                                        event: e,
+                                        action: 'start',
+                                        data,
+                                    })
+                            }, CLICK_DELAY)
+                        } else {
+                            // double-click: do nothing
+                            clearTimeout(timeoutRef.current)
+                            timeoutRef.current = undefined
                         }
-                        clickRef.current = e.timeStamp
                     }}
                     className="file-label"
                     data-cy-filename

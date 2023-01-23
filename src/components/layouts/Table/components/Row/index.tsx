@@ -62,12 +62,7 @@ export const Row = ({
                     e.stopPropagation()
 
                     if (e.timeStamp - clickRef.current > CLICK_DELAY) {
-                        // If the row is already selected, calling the event handler
-                        // will enable inline edit: we only want that to happen if the user
-                        // clicks on the filename only, not on the icon or size.
-                        if (!rowData.isSelected) {
-                            clickHandler(e)
-                        }
+                        clickHandler(e)
                     } else {
                         doubleClickHandler(e)
                     }

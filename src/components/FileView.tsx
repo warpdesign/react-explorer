@@ -16,7 +16,7 @@ import { useMenuAccelerator } from '$src/hooks/useAccelerator'
 import { TypeIcons } from '$src/constants/icons'
 
 import { ArrowKey, DraggedObject, FileViewItem } from '$src/types'
-import { HeaderMouseEvent, ItemMouseEvent, useLayout } from '$src/hooks/useLayout'
+import { HeaderMouseEvent, InlineEditEvent, ItemMouseEvent, useLayout } from '$src/hooks/useLayout'
 import { useStores } from '$src/hooks/useStores'
 import { useKeyDown } from '$src/hooks/useKeyDown'
 
@@ -149,26 +149,23 @@ const FileView = observer(({ hide }: Props) => {
         const file = item.nodeData
         const toggleMode = isMac ? event.metaKey : event.ctrlKey
 
-        // if (!event.shiftKey && !toggleMode && item.isSelected && (!editingId || !sameID(file.id, editingId))) {
-        //     cache.setEditingFile(file)
-        // } else {
         selectFile(file, toggleMode, event.shiftKey)
-        // }
     }
 
-    const onInlineEdit = ({ action, data }) => {
+    const onInlineEdit = ({ action, data }: InlineEditEvent) => {
         switch (action) {
             case 'validate':
-                appState.renameEditingFile(cache, data)
+                appState.renameEditingFile(cache, data as string)
                 break
 
             case 'start':
                 console.log('starting edit file')
-                const file = data.nodeData
+                const file = (data as FileViewItem).nodeData
                 cache.setEditingFile(file)
                 break
 
-                cancel: cache.setEditingFile(null)
+            case 'cancel':
+                cache.setEditingFile(null)
         }
     }
 

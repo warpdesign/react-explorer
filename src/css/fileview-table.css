@@ -41,6 +41,7 @@
 
 .tableRow .name {
     display:flex;
+    height: 100%;
     align-items: center;
     margin-left: 10px;
     flex-grow: 1;
@@ -48,7 +49,10 @@
 }
 
 .tableRow .file-label {
+    display: flex;
     flex-grow:1;
+    height: 100%;
+    align-items: center;
     overflow:hidden;
     white-space: pre;
     text-overflow:ellipsis;
