@@ -80,15 +80,6 @@ describe('Row', () => {
             expect(PROPS.onRowDoubleClick).not.toHaveBeenCalled()
         })
 
-        it('should not call click handler if file is already selected and the user clicks on the size column', async () => {
-            item.isSelected = true
-
-            const { user } = setup(<Row {...PROPS} />)
-            await user.click(screen.getByText(item.size))
-
-            expect(PROPS.onRowClick).not.toHaveBeenCalled()
-        })
-
         // it.only('should show drag overlay when user drags the row', async () => {
         //     const { user } = setup(<Row {...PROPS} />)
 

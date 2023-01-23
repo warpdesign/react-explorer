@@ -4,6 +4,8 @@ import { Icon, InputGroup } from '@blueprintjs/core'
 import type { FileViewItem } from '$src/types'
 import { InlineEditEvent } from '$src/hooks/useLayout'
 import { getSelectionRange } from '$src/utils/fileUtils'
+import { CLICK_DELAY } from '../Row'
+import { isMac } from '$src/utils/platform'
 
 interface Props {
     data: FileViewItem
@@ -11,13 +13,20 @@ interface Props {
 }
 
 export const Name = ({ data, onInlineEdit }: Props) => {
-    const { icon, title, isEditing, name } = data
+    const { icon, title, isEditing, isSelected, name } = data
     const inputRef = useRef<HTMLInputElement>()
+    const timeoutRef = useRef<ReturnType<typeof setTimeout>>()
 
     useEffect(() => {
         if (isEditing) {
             const { start, end } = getSelectionRange(name)
             inputRef.current.setSelectionRange(start, end)
+        }
+
+        return () => {
+            if (timeoutRef.current) {
+                clearTimeout(timeoutRef.current)
+            }
         }
     }, [isEditing])
 
@@ -31,7 +40,31 @@ export const Name = ({ data, onInlineEdit }: Props) => {
         <div className="name">
             <Icon icon={icon}></Icon>
             {!isEditing ? (
-                <span title={title} className="file-label" data-cy-filename>
+                <span
+                    title={title}
+                    onClick={(e: React.MouseEvent<HTMLElement>) => {
+                        if (!timeoutRef.current && !e.shiftKey && !(isMac ? e.metaKey : e.ctrlKey)) {
+                            e.persist()
+                            timeoutRef.current = setTimeout(() => {
+                                timeoutRef.current = undefined
+                                // Only enable inline edit if row was selected when the click happened:
+                                // this prevents enabling inline edit when the user clicked on a non-selected row
+                                isSelected &&
+                                    onInlineEdit({
+                                        event: e,
+                                        action: 'start',
+                                        data,
+                                    })
+                            }, CLICK_DELAY)
+                        } else {
+                            // double-click: do nothing
+                            clearTimeout(timeoutRef.current)
+                            timeoutRef.current = undefined
+                        }
+                    }}
+                    className="file-label"
+                    data-cy-filename
+                >
                     {data.name}
                 </span>
             ) : (
