@@ -25,7 +25,7 @@ export interface HeaderMouseEvent {
 
 export interface InlineEditEvent {
     data?: string
-    action: 'cancel' | 'validate'
+    action: 'cancel' | 'validate' | 'start'
     event: React.SyntheticEvent
 }
 

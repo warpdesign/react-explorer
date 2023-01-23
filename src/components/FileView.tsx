@@ -149,10 +149,26 @@ const FileView = observer(({ hide }: Props) => {
         const file = item.nodeData
         const toggleMode = isMac ? event.metaKey : event.ctrlKey
 
-        if (!event.shiftKey && !toggleMode && item.isSelected && (!editingId || !sameID(file.id, editingId))) {
-            cache.setEditingFile(file)
-        } else {
-            selectFile(file, toggleMode, event.shiftKey)
+        // if (!event.shiftKey && !toggleMode && item.isSelected && (!editingId || !sameID(file.id, editingId))) {
+        //     cache.setEditingFile(file)
+        // } else {
+        selectFile(file, toggleMode, event.shiftKey)
+        // }
+    }
+
+    const onInlineEdit = ({ action, data }) => {
+        switch (action) {
+            case 'validate':
+                appState.renameEditingFile(cache, data)
+                break
+
+            case 'start':
+                console.log('starting edit file')
+                const file = data.nodeData
+                cache.setEditingFile(file)
+                break
+
+                cancel: cache.setEditingFile(null)
         }
     }
 
@@ -253,13 +269,7 @@ const FileView = observer(({ hide }: Props) => {
                             onItemDoubleClick={onItemDoubleClick}
                             onHeaderClick={onHeaderClick}
                             onBlankAreaClick={onBlankAreaClick}
-                            onInlineEdit={({ action, data }) => {
-                                if (action === 'validate') {
-                                    appState.renameEditingFile(cache, data)
-                                } else {
-                                    cache.setEditingFile(null)
-                                }
-                            }}
+                            onInlineEdit={onInlineEdit}
                             onItemRightClick={({ index, event }) => {
                                 rightClickFileIndexRef.current = index
                                 ctxMenuProps.onContextMenu(event)
