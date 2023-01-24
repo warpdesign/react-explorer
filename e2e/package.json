@@ -31,7 +31,7 @@
         "cypress": "^10.11.0",
         "fs": "^0.0.1-security",
         "path-browserify": "^1.0.1",
-        "pm2": "^4.1.2",
+        "pm2": "^5.2.2",
         "stream-browserify": "^3.0.0",
         "swc-loader": "^0.2.3",
         "ts-node": "^10.9.1",
