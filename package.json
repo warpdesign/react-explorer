@@ -35,7 +35,7 @@
         "build": "webpack --watch",
         "server": "pm2 start \"npx ws -d ./build-e2e -p 8080\" --name cy-server",
         "server:stop": "pm2 --silent stop cy-server || true",
-        "dist": "webpack --config webpack.config.production.ts && electron-builder -mwl",
+        "dist-all": "webpack --config webpack.config.production.ts && electron-builder -w --x64 --arm64 && electron-builder -m --universal && electron-builder -l --x64 --arm64",
         "dist-win": "webpack --config webpack.config.production.ts && electron-builder -w --x64 --arm64",
         "dist-mac": "webpack --config webpack.config.production.ts && electron-builder -m --universal",
         "dist-linux": "webpack --config webpack.config.production.ts && electron-builder -l --x64 --arm64",
