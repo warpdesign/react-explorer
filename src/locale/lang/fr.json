@@ -107,6 +107,7 @@
                 "BACKWARD_HISTORY": "Reculer d'un dossier (historique)",
                 "FORWARD_HISTORY": "Avancer d'un dossier (historique)",
                 "OPEN_FILE": "Ouvre le fichier/dossier sélectionné",
+                "OPEN_FILE_INACTIVE_VIEW": "Ouvre le fichier/dossier sélectionné dans l'autre vue",
                 "COPY_PATH": "Copier le chemin des éléments sélectionnés",
                 "COPY_FILENAME": "Copier le nom des éléments sélectionnés",
                 "DELETE": "Supprimer les éléments sélectionnés",
