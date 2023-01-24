@@ -74,7 +74,7 @@ export const Row = ({
                 }}
                 style={{ width: '100%', height: '100%', alignItems: 'center', display: 'flex' }}
             >
-                <Name data={rowData} onInlineEdit={onInlineEdit} />
+                <Name data={rowData} onInlineEdit={onInlineEdit} selectedCount={dragProps.fileState.selected.length} />
                 <Size data={rowData} />
             </div>
         </>

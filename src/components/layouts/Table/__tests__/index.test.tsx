@@ -6,7 +6,7 @@ import * as ReactVirtual from 'react-virtual'
 import { render, screen, setup, t } from 'rtl'
 
 import { Column } from '$src/hooks/useLayout'
-import { TStatus } from '$src/state/fileState'
+import { FileState, TStatus } from '$src/state/fileState'
 import { FileViewItem } from '$src/types'
 
 import { TableLayout } from '..'
@@ -58,7 +58,11 @@ describe('TableLayout', () => {
         onInlineEdit: jest.fn(),
         onHeaderClick: jest.fn(),
         getDragProps: jest.fn(() => ({
-            fileState: null,
+            fileState: {
+                selected: {
+                    length: 0,
+                },
+            } as FileState,
             dragFiles: new Array(2),
         })),
         getItem: jest.fn((index) => items[index]),

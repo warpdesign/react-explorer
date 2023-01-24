@@ -3,6 +3,7 @@
  */
 import { FileViewItem } from '$src/types'
 import React from 'react'
+import userEvent from '@testing-library/user-event'
 import { render, screen, setup } from 'rtl'
 
 import { Name } from '../Name'
@@ -11,6 +12,7 @@ describe('Name', () => {
     const item = {
         icon: 'add',
         isEditing: false,
+        isSelected: false,
         name: 'filename',
         title: 'title',
     } as FileViewItem
@@ -18,6 +20,7 @@ describe('Name', () => {
     const PROPS = {
         data: item,
         onInlineEdit: jest.fn(),
+        selectedCount: 0,
     }
 
     beforeEach(() => jest.clearAllMocks())
@@ -32,6 +35,52 @@ describe('Name', () => {
         expect(container.querySelector(`[icon="${item.icon}"]`)).toBeInTheDocument()
     })
 
+    describe('start edit mode', () => {
+        const editItem = {
+            ...item,
+            isSelected: true,
+        }
+
+        beforeEach(() => jest.useFakeTimers())
+        afterEach(() => jest.useRealTimers())
+
+        it('should start edit mode when clicking on name', async () => {
+            const PROPS = {
+                data: editItem,
+                onInlineEdit: jest.fn(),
+                selectedCount: 0,
+            }
+
+            const user = userEvent.setup({ advanceTimers: jest.runOnlyPendingTimers })
+
+            render(<Name {...PROPS} />)
+
+            await user.click(screen.getByText(item.name))
+
+            expect(PROPS.onInlineEdit).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    action: 'start',
+                }),
+            )
+        })
+
+        it('should not start edit mode when clicking on name and several files are selected', async () => {
+            const PROPS = {
+                data: editItem,
+                onInlineEdit: jest.fn(),
+                selectedCount: 2,
+            }
+
+            const user = userEvent.setup({ advanceTimers: jest.runOnlyPendingTimers })
+
+            render(<Name {...PROPS} />)
+
+            await user.click(screen.getByText(item.name))
+
+            expect(PROPS.onInlineEdit).not.toHaveBeenCalled()
+        })
+    })
+
     describe('edit mode', () => {
         const editItem = {
             ...item,
@@ -41,6 +90,7 @@ describe('Name', () => {
         const PROPS = {
             data: editItem,
             onInlineEdit: jest.fn(),
+            selectedCount: 0,
         }
 
         it('should show edit input', () => {
