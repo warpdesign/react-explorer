@@ -1,6 +1,7 @@
 /**
  * @jest-environment jsdom
  */
+import { FileState } from '$src/state/fileState'
 import { FileViewItem } from '$src/types'
 import React from 'react'
 import { render, screen, setup, userEvent, wait } from 'rtl'
@@ -24,7 +25,11 @@ describe('Row', () => {
         onRowRightClick: jest.fn(),
         onInlineEdit: jest.fn(),
         getDragProps: jest.fn(() => ({
-            fileState: null,
+            fileState: {
+                selected: {
+                    length: 0,
+                },
+            } as FileState,
             dragFiles: new Array(2),
         })),
         isDarkModeActive: false,

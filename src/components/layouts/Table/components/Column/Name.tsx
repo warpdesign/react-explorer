@@ -10,9 +10,10 @@ import { isMac } from '$src/utils/platform'
 interface Props {
     data: FileViewItem
     onInlineEdit?: (event: InlineEditEvent) => void
+    selectedCount: number
 }
 
-export const Name = ({ data, onInlineEdit }: Props) => {
+export const Name = ({ data, onInlineEdit, selectedCount }: Props) => {
     const { icon, title, isEditing, isSelected, name } = data
     const inputRef = useRef<HTMLInputElement>()
     const timeoutRef = useRef<ReturnType<typeof setTimeout>>()
@@ -43,7 +44,12 @@ export const Name = ({ data, onInlineEdit }: Props) => {
                 <span
                     title={title}
                     onClick={(e: React.MouseEvent<HTMLElement>) => {
-                        if (!timeoutRef.current && !e.shiftKey && !(isMac ? e.metaKey : e.ctrlKey)) {
+                        if (
+                            !timeoutRef.current &&
+                            selectedCount < 2 &&
+                            !e.shiftKey &&
+                            !(isMac ? e.metaKey : e.ctrlKey)
+                        ) {
                             e.persist()
                             timeoutRef.current = setTimeout(() => {
                                 timeoutRef.current = undefined

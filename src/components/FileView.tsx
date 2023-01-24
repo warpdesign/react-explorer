@@ -159,7 +159,6 @@ const FileView = observer(({ hide }: Props) => {
                 break
 
             case 'start':
-                console.log('starting edit file')
                 const file = (data as FileViewItem).nodeData
                 cache.setEditingFile(file)
                 break
