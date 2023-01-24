@@ -169,7 +169,7 @@ const FileView = observer(({ hide }: Props) => {
     }
 
     const onItemDoubleClick = ({ event }: ItemMouseEvent): void => {
-        openFileOrDirectory(cursor, event.shiftKey)
+        openFileOrDirectory(cursor, isMac ? event.altKey : event.ctrlKey)
     }
 
     const openFileOrDirectory = (file: FileDescriptor, useInactiveCache: boolean): void => {
@@ -186,7 +186,7 @@ const FileView = observer(({ hide }: Props) => {
 
     const onOpenFile = (e: KeyboardEvent): void => {
         if (isViewActive && cursor) {
-            openFileOrDirectory(cursor, e.shiftKey)
+            openFileOrDirectory(cursor, isMac ? e.altKey : e.ctrlKey)
         }
     }
 
@@ -211,8 +211,8 @@ const FileView = observer(({ hide }: Props) => {
         },
         {
             global: true,
-            combo: 'mod + shift + o',
-            label: t('SHORTCUT.ACTIVE_VIEW.OPEN_FILE'),
+            combo: isMac ? 'mod + alt + o' : 'mod + shift + o',
+            label: t('SHORTCUT.ACTIVE_VIEW.OPEN_FILE_INACTIVE_VIEW'),
             onKeyDown: onOpenFile,
             group: t('SHORTCUT.GROUP.ACTIVE_VIEW'),
         },

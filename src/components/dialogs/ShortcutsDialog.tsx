@@ -38,6 +38,10 @@ export const buildShortcuts = (t: TFunction<'translation', undefined>) => ({
         { combo: 'mod + shift + c', label: t('SHORTCUT.ACTIVE_VIEW.COPY_PATH') },
         { combo: 'mod + shift + n', label: t('SHORTCUT.ACTIVE_VIEW.COPY_FILENAME') },
         { combo: 'mod + o', label: t('SHORTCUT.ACTIVE_VIEW.OPEN_FILE') },
+        {
+            combo: isMac ? 'mod + alt + o' : 'mod + shift + o',
+            label: t('SHORTCUT.ACTIVE_VIEW.OPEN_FILE_INACTIVE_VIEW'),
+        },
         { combo: 'mod + a', label: t('SHORTCUT.ACTIVE_VIEW.SELECT_ALL') },
         { combo: 'mod + i', label: t('SHORTCUT.ACTIVE_VIEW.SELECT_INVERT') },
         { combo: 'mod + l', label: t('SHORTCUT.ACTIVE_VIEW.FOCUS_PATH') },

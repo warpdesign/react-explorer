@@ -107,6 +107,7 @@
                 "BACKWARD_HISTORY": "Go Back",
                 "FORWARD_HISTORY": "Go Forward",
                 "OPEN_FILE": "Open the selected file/folder",
+                "OPEN_FILE_INACTIVE_VIEW": "Open the selected file/folder in the other view",
                 "COPY_PATH": "Copy selected items'path into the clipboard",
                 "COPY_FILENAME": "Copy selected items' filenames into the clipboard",
                 "DELETE": "Delete selected items",
