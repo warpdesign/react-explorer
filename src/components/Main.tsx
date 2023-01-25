@@ -330,6 +330,6 @@ const App = inject('appState')(
     ),
 )
 
-const ExplorerApp = withTranslation()(App)
+const Main = withTranslation()(App)
 
-export { ExplorerApp }
+export { Main }
