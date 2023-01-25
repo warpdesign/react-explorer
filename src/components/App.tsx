@@ -35,7 +35,7 @@ interface InjectedProps extends WithTranslation {
     appState: AppState
 }
 
-const App = inject('appState')(
+const AppClass = inject('appState')(
     observer(
         class App extends React.Component<WithTranslation> {
             private appState: AppState
@@ -189,6 +189,7 @@ const App = inject('appState')(
 
             componentDidMount(): void {
                 // listen for events from main electron process as well as webview
+                document.body.classList.add('loaded')
                 this.addListeners()
                 this.setDarkThemeClass()
                 this.setPlatformClass()
@@ -328,6 +329,6 @@ const App = inject('appState')(
     ),
 )
 
-const Main = withTranslation()(App)
+const App = withTranslation()(AppClass)
 
-export { Main }
+export { App }
