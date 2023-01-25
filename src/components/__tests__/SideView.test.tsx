@@ -30,7 +30,6 @@ describe('SideView', () => {
 
     const PROPS = {
         hide: false,
-        onPaste: jest.fn(),
         viewState: undefined as ViewState,
     }
 

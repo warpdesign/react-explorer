@@ -315,10 +315,8 @@ const App = inject('appState')(
                                 className={mainClass}
                             >
                                 <LeftPanel hide={!isExplorer}></LeftPanel>
-                                <SideView viewState={viewStateLeft} hide={!isExplorer} onPaste={this.onPaste} />
-                                {isSplitView && (
-                                    <SideView viewState={winState.views[1]} hide={!isExplorer} onPaste={this.onPaste} />
-                                )}
+                                <SideView viewState={viewStateLeft} hide={!isExplorer} />
+                                {isSplitView && <SideView viewState={winState.views[1]} hide={!isExplorer} />}
                                 <Downloads hide={isExplorer} />
                             </div>
                             <LogUI isDarkModeActive={this.settingsState.isDarkModeActive}></LogUI>
@@ -330,6 +328,6 @@ const App = inject('appState')(
     ),
 )
 
-const ExplorerApp = withTranslation()(App)
+const Main = withTranslation()(App)
 
-export { ExplorerApp }
+export { Main }

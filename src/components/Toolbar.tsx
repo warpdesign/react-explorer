@@ -1,430 +1,254 @@
-import * as React from 'react'
-import { reaction, IReactionDisposer } from 'mobx'
-import { inject, observer } from 'mobx-react'
-import { InputGroup, ControlGroup, Button, ButtonGroup, Intent, Position, HotkeysTarget2 } from '@blueprintjs/core'
-import { Tooltip2, Popover2 } from '@blueprintjs/popover2'
-import { withTranslation, WithTranslation } from 'react-i18next'
+import React, { useState, useEffect, useRef, useCallback } from 'react'
+import { observer } from 'mobx-react'
+import { InputGroup, ControlGroup, Button, ButtonGroup, Intent, HotkeysTarget2, Classes } from '@blueprintjs/core'
+import { Popover2 } from '@blueprintjs/popover2'
+import { useTranslation } from 'react-i18next'
 
-import { AppState } from '$src/state/appState'
 import { FileMenu } from '$src/components/FileMenu'
 import { MakedirDialog } from '$src/components/dialogs/MakedirDialog'
 import { AppAlert } from '$src/components/AppAlert'
 import { Logger } from '$src/components/Log'
 import { AppToaster } from '$src/components/AppToaster'
-import { WithMenuAccelerators, Accelerators, Accelerator } from '$src/components/hoc/WithMenuAccelerators'
-import { throttle } from '$src/utils/throttle'
-import { isWin, isMac } from '$src/utils/platform'
-import { ViewState } from '$src/state/viewState'
-import { FileState } from '$src/state/fileState'
 import { LocalizedError } from '$src/locale/error'
 import Keys from '$src/constants/keys'
+import { useStores } from '$src/hooks/useStores'
+import { useMenuAccelerator } from '$src/hooks/useAccelerator'
 
-const TOOLTIP_DELAY = 1200
-const MOVE_EVENT_THROTTLE = 300
 const ERROR_MESSAGE_TIMEOUT = 3500
 
-interface Props extends WithTranslation {
-    onPaste: () => void
+interface Props {
     active: boolean
 }
 
-interface InjectedProps extends Props {
-    appState: AppState
-    viewState: ViewState
-}
+export const Toolbar = observer(({ active }: Props) => {
+    const { appState, viewState } = useStores('appState', 'viewState')
+    const [isMakedirDialogOpen, setIsMakedirDialogOpen] = useState(false)
+    const cache = viewState.getVisibleCache()
+    const { selected, history, current } = cache
+    const [path, setPath] = useState('')
+    const { t } = useTranslation()
+    const inputRef = useRef<HTMLInputElement>()
+    const submitButtonRef = useRef<HTMLButtonElement>()
 
-interface PathInputState {
-    status: -1 | 0 | 1
-    path: string
-    isOpen: boolean
-    isTooltipOpen: boolean
-}
+    useMenuAccelerator([
+        {
+            combo: 'CmdOrCtrl+N',
+            callback: useCallback(() => onMakedir(), [cache]),
+        },
+        {
+            combo: 'CmdOrCtrl+D',
+            callback: useCallback(() => onDelete(), [cache]),
+        },
+    ])
 
-export const ToolbarClass = inject(
-    'appState',
-    'viewState',
-)(
-    observer(
-        WithMenuAccelerators(
-            class ToolbarClass extends React.Component<Props, PathInputState> {
-                private input: HTMLInputElement | null = null
-                private disposer: IReactionDisposer
-                private tooltipReady = false
-                private tooltipTimeout = 0
-                private canShowTooltip = false
+    useEffect(() => {
+        setPath(cache.path)
+    }, [cache.path])
 
-                constructor(props: Props) {
-                    super(props)
+    const onBackward = () => cache.navHistory(-1)
 
-                    const { viewState } = this.injected
-                    const fileCache = viewState.getVisibleCache()
+    const onForward = () => cache.navHistory(1)
 
-                    this.state = {
-                        status: 0,
-                        path: fileCache.path,
-                        isOpen: false,
-                        isTooltipOpen: false,
-                    }
+    const onPathChange = (event: React.FormEvent<HTMLElement>): void => {
+        setPath((event.target as HTMLInputElement).value)
+    }
 
-                    this.installReactions()
+    const onSubmit = async (shouldSelectTextOnError = false): Promise<void> => {
+        if (cache.path !== path) {
+            try {
+                await cache.cd(path)
+                inputRef.current.blur()
+            } catch (e) {
+                const err = e as LocalizedError
+                await AppAlert.show(`${err.message} (${err.code})`, {
+                    intent: 'danger',
+                })
+
+                // If path was submitted by pressing enter
+                // it means the input still has focus: in this
+                // case we re-select the (wrong) path to let the user
+                // fix it.
+                if (shouldSelectTextOnError) {
+                    inputRef.current.select()
+                } else {
+                    // if the user clicked on the submit button it means
+                    // the input lost focus: in this case we reset the value
+                    // to the current cache path.
+                    setPath(cache.path)
                 }
+            }
+        }
+    }
 
-                private get injected(): InjectedProps {
-                    return this.props as InjectedProps
-                }
+    const onKeyUp = (event: React.KeyboardEvent<HTMLElement>): void => {
+        if (event.key === Keys.ESCAPE) {
+            // since React events are attached to the root document
+            // event already has bubbled up so we must stop
+            // its immediate propagation
+            event.nativeEvent.stopImmediatePropagation()
+            // lose focus
+            inputRef.current.blur()
+        } else if (event.key === Keys.ENTER) {
+            onSubmit(true)
+        }
+    }
 
-                private get cache(): FileState {
-                    const { viewState } = this.injected
-                    return viewState.getVisibleCache()
-                }
+    const onBlur = (e: React.FocusEvent<HTMLInputElement>): void => {
+        const didClickOnSubmit = e.relatedTarget === submitButtonRef.current
+        // restore previous valid cache unless an error alert has been displayed:
+        // this will cause the input to loose focus but we don't want to update the path
+        // in that particular case
+        if (!didClickOnSubmit && cache.path !== path && !document.body.classList.contains(Classes.OVERLAY_OPEN)) {
+            setPath(cache.path)
+        }
+    }
 
-                // reset status once path has been modified from outside this component
-                private installReactions(): void {
-                    this.disposer = reaction(
-                        (): string => {
-                            return this.cache?.path || ''
-                        },
-                        (path): void => {
-                            this.setState({ path, status: 0 })
-                        },
-                    )
-                }
+    const onReload = (): void => cache.reload()
 
-                private onBackward = (): void => {
-                    this.cache.navHistory(-1)
-                }
+    const makedir = async (dirName: string, navigate: boolean): Promise<void> => {
+        setIsMakedirDialogOpen(false)
 
-                private onForward = (): void => {
-                    this.cache.navHistory(1)
-                }
+        if (!dirName.length) {
+            return
+        }
 
-                private onPathChange = (event: React.FormEvent<HTMLElement>): void => {
-                    const path = (event.target as HTMLInputElement).value
-                    this.setState({ path })
-                    // this.checkPath(event);
-                }
+        try {
+            Logger.log("Let's create a directory :)", dirName, navigate)
+            const dir = await cache.makedir(path, dirName)
 
-                private onSubmit = (): void => {
-                    if (this.cache.path !== this.state.path) {
-                        this.input.blur()
-                        const path = this.state.path
-                        this.cache.cd(this.state.path).catch((err: LocalizedError) => {
-                            AppAlert.show(`${err.message} (${err.code})`, {
-                                intent: 'danger',
-                            }).then((): void => {
-                                // we restore the wrong path entered and focus the input:
-                                // in case the user made a simple typo he doesn't want
-                                // to type it again
-                                this.setState({ path })
-                                this.input.focus()
-                            })
-                        })
-                    }
-                }
+            if (!navigate) {
+                cache.reload()
+            } else {
+                cache.cd(dir as string)
+            }
+        } catch (err) {
+            AppToaster.show({
+                message: t('ERRORS.CREATE_FOLDER', { message: err.message }),
+                icon: 'error',
+                intent: Intent.DANGER,
+                timeout: ERROR_MESSAGE_TIMEOUT,
+            })
+        }
+    }
 
-                private onKeyUp = (event: React.KeyboardEvent<HTMLElement>): void => {
-                    this.hideTooltip()
+    const onMakedir = (): void => {
+        const fileCache = appState.getActiveCache()
 
-                    if (event.key === Keys.ESCAPE) {
-                        // since React events are attached to the root document
-                        // event already has bubbled up so we must stop
-                        // its immediate propagation
-                        event.nativeEvent.stopImmediatePropagation()
-                        // lose focus
-                        this.input.blur()
-                        // workaround for Cypress bug https://github.com/cypress-io/cypress/issues/1176
-                        // this.onBlur();
-                    } else if (event.key === Keys.ENTER) {
-                        this.onSubmit()
-                    }
-                }
+        if (fileCache === cache && !fileCache.error) {
+            setIsMakedirDialogOpen(true)
+        }
+    }
 
-                private onBlur = (): void => {
-                    this.setState({ path: this.cache.path, status: 0, isTooltipOpen: false })
-                }
+    const onDelete = (): void => {
+        if (appState.getActiveCache() === cache) {
+            appState.delete()
+        }
+    }
 
-                private onReload = (): void => {
-                    this.cache.reload()
-                }
+    const onFileAction = (action: string): void => {
+        switch (action) {
+            case 'makedir':
+                Logger.log('Opening new folder dialog')
+                onMakedir()
+                break
 
-                private refHandler = (input: HTMLInputElement): void => {
-                    this.input = input
-                }
+            case 'delete':
+                onDelete()
+                break
 
-                private makedir = async (dirName: string, navigate: boolean): Promise<void> => {
-                    this.setState({ isOpen: false })
-                    if (!dirName.length) {
-                        return
-                    }
+            case 'paste':
+                appState.paste(cache)
+                break
 
-                    try {
-                        Logger.log("Let's create a directory :)", dirName, navigate)
-                        const dir = await this.cache.makedir(this.state.path, dirName)
+            default:
+                Logger.warn('action unknown', action)
+        }
+    }
 
-                        if (!navigate) {
-                            this.cache.reload()
-                        } else {
-                            this.cache.cd(dir as string)
+    const onFocus = (): void => inputRef.current.select()
+
+    const onParent = (): void => cache.openParentDirectory()
+
+    const hotkeys = [
+        {
+            global: true,
+            combo: 'mod+l',
+            label: t('SHORTCUT.ACTIVE_VIEW.FOCUS_PATH'),
+            onKeyDown: () => inputRef.current.focus(),
+            group: t('SHORTCUT.GROUP.ACTIVE_VIEW'),
+        },
+    ]
+    const canGoBackward = current > 0
+    const canGoForward = history.length > 1 && current < history.length - 1
+    const reloadButton = (
+        <Button className="small data-cy-reload" onClick={onReload} minimal rightIcon="repeat"></Button>
+    )
+
+    return (
+        <HotkeysTarget2 hotkeys={hotkeys}>
+            <ControlGroup className="toolbar">
+                <ButtonGroup>
+                    <Button
+                        title={t('TOOLBAR.BACK')}
+                        data-cy-backward
+                        disabled={!canGoBackward}
+                        onClick={onBackward}
+                        rightIcon="chevron-left"
+                    ></Button>
+                    <Button
+                        title={t('TOOLBAR.FORWARD')}
+                        data-cy-forward
+                        disabled={!canGoForward}
+                        onClick={onForward}
+                        rightIcon="chevron-right"
+                    ></Button>
+                    <Button
+                        title={t('TOOLBAR.PARENT')}
+                        disabled={cache.isRoot()}
+                        onClick={onParent}
+                        rightIcon="arrow-up"
+                    ></Button>
+
+                    <Popover2
+                        content={
+                            <FileMenu
+                                isDisabled={!cache || cache.error}
+                                selectedItemsLength={selected.length}
+                                onFileAction={onFileAction}
+                            />
                         }
-                    } catch (err) {
-                        const { t } = this.props
+                    >
+                        <Button rightIcon="caret-down" icon="cog" />
+                    </Popover2>
+                </ButtonGroup>
+                <InputGroup
+                    data-cy-path
+                    onChange={onPathChange}
+                    onKeyUp={onKeyUp}
+                    placeholder={t('COMMON.PATH_PLACEHOLDER')}
+                    rightElement={reloadButton}
+                    value={path}
+                    inputRef={inputRef}
+                    onBlur={onBlur}
+                    onFocus={onFocus}
+                    disabled={!active}
+                />
+                {isMakedirDialogOpen && (
+                    <MakedirDialog
+                        isOpen={true}
+                        onClose={makedir}
+                        onValidation={cache.isDirectoryNameValid}
+                        parentPath={path}
+                    ></MakedirDialog>
+                )}
 
-                        AppToaster.show({
-                            message: t('ERRORS.CREATE_FOLDER', { message: err.message }),
-                            icon: 'error',
-                            intent: Intent.DANGER,
-                            timeout: ERROR_MESSAGE_TIMEOUT,
-                        })
-                    }
-                }
-
-                private onMakedir = (): void => {
-                    const { appState, viewState } = this.injected
-                    const fileCache = appState.getActiveCache()
-
-                    if (fileCache === viewState.getVisibleCache() && !fileCache.error) {
-                        this.setState({ isOpen: true })
-                    }
-                }
-
-                private onDelete = (): void => {
-                    const { appState, viewState } = this.injected
-                    const fileCache = viewState.getVisibleCache()
-
-                    if (appState.getActiveCache() === fileCache) {
-                        appState.delete()
-                    }
-                }
-
-                private onFileAction = (action: string): void => {
-                    switch (action) {
-                        case 'makedir':
-                            Logger.log('Opening new folder dialog')
-                            this.onMakedir()
-                            break
-
-                        case 'delete':
-                            this.onDelete()
-                            break
-
-                        case 'paste':
-                            this.props.onPaste()
-                            break
-
-                        default:
-                            Logger.warn('action unknown', action)
-                    }
-                }
-
-                public onActivatePath = (): void => {
-                    if (this.props.active) {
-                        this.input.focus()
-                    }
-                }
-
-                public hideTooltip(): void {
-                    this.canShowTooltip = false
-                    this.setState({ isTooltipOpen: false })
-                }
-
-                public onFocus = (): void => {
-                    if (this.state.isTooltipOpen) {
-                        this.hideTooltip()
-                    } else {
-                        this.canShowTooltip = false
-                    }
-                    this.input.select()
-                }
-
-                public componentWillUnmount(): void {
-                    this.disposer()
-                }
-
-                renderMenuAccelerators(): React.ReactElement {
-                    return (
-                        <Accelerators>
-                            <Accelerator combo="CmdOrCtrl+N" onClick={this.onMakedir}></Accelerator>
-                            <Accelerator combo="CmdOrCtrl+D" onClick={this.onDelete}></Accelerator>
-                        </Accelerators>
-                    )
-                }
-
-                onPathEnter = (): void => {
-                    this.tooltipReady = true
-                    this.canShowTooltip = true
-                    this.setTooltipTimeout()
-                }
-
-                onPathLeave = (): void => {
-                    this.tooltipReady = false
-                }
-
-                onPathMouseMove = throttle((): void => {
-                    if (this.state.isTooltipOpen) {
-                        // if tooltip was visible and mouse moves
-                        // then it cannot be opened again unless the
-                        // user leaves the text input
-                        this.canShowTooltip = false
-                        this.setState({ isTooltipOpen: false })
-                    } else if (this.canShowTooltip && this.tooltipReady) {
-                        clearTimeout(this.tooltipTimeout)
-                        this.setTooltipTimeout()
-                    }
-                }, MOVE_EVENT_THROTTLE)
-
-                setTooltipTimeout(): void {
-                    this.tooltipTimeout = window.setTimeout(() => {
-                        if (this.tooltipReady && this.canShowTooltip) {
-                            this.setState({ isTooltipOpen: true })
-                        }
-                    }, TOOLTIP_DELAY)
-                }
-
-                onParent = (): void => {
-                    const { viewState } = this.injected
-                    const fileCache = viewState.getVisibleCache()
-                    fileCache.openParentDirectory()
-                }
-
-                private renderTooltip(): JSX.Element {
-                    const { t } = this.props
-                    const localExample = isWin
-                        ? t('TOOLTIP.PATH.EXAMPLE_WIN')
-                        : (isMac && t('TOOLTIP.PATH.EXAMPLE_MAC')) || t('TOOLTIP.PATH.EXAMPLE_LINUX')
-
-                    return (
-                        <React.Fragment>
-                            <p>{t('TOOLTIP.PATH.TITLE1')}</p>
-                            <p>{t('TOOLTIP.PATH.TITLE2')}</p>
-                            <ul>
-                                <li>{localExample}</li>
-                                {/* <li>{t('TOOLTIP.PATH.FTP1')}</li>
-                        <li>{t('TOOLTIP.PATH.FTP2')}</li> */}
-                            </ul>
-                        </React.Fragment>
-                    )
-                }
-
-                private hotkeys = [
-                    {
-                        global: true,
-                        combo: 'mod+l',
-                        label: this.injected.t('SHORTCUT.ACTIVE_VIEW.FOCUS_PATH'),
-                        onKeyDown: this.onActivatePath,
-                        group: this.injected.t('SHORTCUT.GROUP.ACTIVE_VIEW'),
-                    },
-                ]
-
-                public render(): JSX.Element {
-                    const { status, path, isOpen, isTooltipOpen } = this.state
-                    const { viewState } = this.injected
-
-                    const fileCache = viewState.getVisibleCache()
-                    const { selected, history, current } = fileCache
-                    const { t } = this.props
-
-                    if (!fileCache) {
-                        console.log('oops', fileCache)
-                        debugger
-                    }
-
-                    const canGoBackward = current > 0
-                    const canGoForward = history.length > 1 && current < history.length - 1
-                    const reloadButton = (
-                        <Button
-                            className="small data-cy-reload"
-                            onClick={this.onReload}
-                            minimal
-                            rightIcon="repeat"
-                        ></Button>
-                    )
-                    const intent = status === -1 ? 'danger' : 'none'
-                    const isRoot = fileCache.isRoot()
-
-                    return (
-                        <HotkeysTarget2 hotkeys={this.hotkeys}>
-                            <ControlGroup className="toolbar">
-                                <ButtonGroup style={{ minWidth: 120, overflow: 'hidden' }}>
-                                    <Button
-                                        title={t('TOOLBAR.BACK')}
-                                        data-cy-backward
-                                        disabled={!canGoBackward}
-                                        onClick={this.onBackward}
-                                        rightIcon="chevron-left"
-                                    ></Button>
-                                    <Button
-                                        title={t('TOOLBAR.FORWARD')}
-                                        data-cy-forward
-                                        disabled={!canGoForward}
-                                        onClick={this.onForward}
-                                        rightIcon="chevron-right"
-                                    ></Button>
-                                    <Button
-                                        title={t('TOOLBAR.PARENT')}
-                                        disabled={isRoot}
-                                        onClick={this.onParent}
-                                        rightIcon="arrow-up"
-                                    ></Button>
-
-                                    <Popover2
-                                        content={
-                                            <FileMenu
-                                                isDisabled={!fileCache || fileCache.error}
-                                                selectedItemsLength={selected.length}
-                                                onFileAction={this.onFileAction}
-                                            />
-                                        }
-                                    >
-                                        <Button rightIcon="caret-down" icon="cog" />
-                                    </Popover2>
-                                </ButtonGroup>
-                                <Tooltip2
-                                    content={this.renderTooltip()}
-                                    position={Position.BOTTOM}
-                                    hoverOpenDelay={1500}
-                                    openOnTargetFocus={false}
-                                    isOpen={isTooltipOpen}
-                                >
-                                    <InputGroup
-                                        data-cy-path
-                                        onChange={this.onPathChange}
-                                        onKeyUp={this.onKeyUp}
-                                        placeholder={t('COMMON.PATH_PLACEHOLDER')}
-                                        rightElement={reloadButton}
-                                        value={path}
-                                        intent={intent}
-                                        inputRef={this.refHandler}
-                                        onBlur={this.onBlur}
-                                        onFocus={this.onFocus}
-                                        onMouseEnter={this.onPathEnter}
-                                        onMouseLeave={this.onPathLeave}
-                                        onMouseMove={this.onPathMouseMove}
-                                    />
-                                </Tooltip2>
-                                {isOpen && (
-                                    <MakedirDialog
-                                        isOpen={isOpen}
-                                        onClose={this.makedir}
-                                        onValidation={fileCache.isDirectoryNameValid}
-                                        parentPath={path}
-                                    ></MakedirDialog>
-                                )}
-
-                                <Button
-                                    rightIcon="arrow-right"
-                                    className="data-cy-submit-path"
-                                    disabled={status === -1}
-                                    onClick={this.onSubmit}
-                                />
-                            </ControlGroup>
-                        </HotkeysTarget2>
-                    )
-                }
-            },
-        ),
-    ),
-)
-
-const Toolbar = withTranslation()(ToolbarClass)
-
-export { Toolbar }
+                <Button
+                    rightIcon="arrow-right"
+                    className="data-cy-submit-path"
+                    onClick={() => onSubmit()}
+                    elementRef={submitButtonRef}
+                />
+            </ControlGroup>
+        </HotkeysTarget2>
+    )
+})

@@ -131,8 +131,8 @@
             "FOLDERS_other": "{{count}} dossiers"
         },
         "TOOLBAR": {
-            "BACK": "Voir le dossier précédemment consulté",
-            "FORWARD": "Voir le dossier précédemment consulté",
+            "BACK": "Cliquer pour revenir en arrière",
+            "FORWARD": "Cliquer pour avancer",
             "PARENT": "Voir le dossier parent"
         },
         "COMMON": {
@@ -213,17 +213,6 @@
         },
         "MAIN_PROCESS": {
             "PRESS_TO_EXIT": "Maintenez la touche ⌘Q enfoncée pour quitter"
-        },
-        "TOOLTIP": {
-            "PATH": {
-                "TITLE1": "Entrer le chemin vers un dossier local pour en afficher le contenu.",
-                "TITLE2": "Exemples:",
-                "EXAMPLE_WIN": "C:\\Users\\Nico",
-                "EXAMPLE_MAC": "/Users/robert/Documents",
-                "EXAMPLE_LINUX": "home/robert",
-                "FTP1": "ftp://ftp.free.fr",
-                "FTP2": "ftp://kylian:mbappe@ftp.psg.fr"
-            }
         },
         "FAVORITES_PANEL": {
             "SHORTCUTS": "Raccourcis",

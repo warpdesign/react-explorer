@@ -131,8 +131,8 @@
             "FOLDERS_other": "{{count}} folders"
         },
         "TOOLBAR": {
-            "BACK": "Goto previously visited folder",
-            "FORWARD": "Goto previously visited folder",
+            "BACK": "Click here to go backwards",
+            "FORWARD": "Click here to go forward",
             "PARENT": "Open parent folder"
         },
         "COMMON": {
@@ -215,17 +215,6 @@
         },
         "MAIN_PROCESS": {
             "PRESS_TO_EXIT": "Keep pressing ⌘Q to exit"
-        },
-        "TOOLTIP": {
-            "PATH": {
-                "TITLE1": "Enter a local path to show its contents.",
-                "TITLE2": "Examples:",
-                "EXAMPLE_WIN": "C:\\Users\\Jack",
-                "EXAMPLE_MAC": "/Users/jack/Documents",
-                "EXAMPLE_LINUX": "home/jack",
-                "FTP1": "ftp://ftp.online.net",
-                "FTP2": "ftp://jack:bauer@ftp.24hours.net"
-            }
         },
         "FAVORITES_PANEL": {
             "SHORTCUTS": "Shortcuts",

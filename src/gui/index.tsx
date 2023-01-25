@@ -9,7 +9,7 @@ import { HTML5Backend } from 'react-dnd-html5-backend'
 import process from 'process'
 import child_process from 'child_process'
 
-import { ExplorerApp } from '$src/components/App'
+import { Main } from '$src/components/Main'
 import { i18n } from '$src/locale/i18n'
 import { AppState } from '$src/state/appState'
 import initFS from '$src/utils/initFS'
@@ -67,7 +67,7 @@ class App {
                 <I18nextProvider i18n={i18n.i18next}>
                     <Provider appState={this.appState}>
                         <HotkeysProvider>
-                            <ExplorerApp />
+                            <Main />
                         </HotkeysProvider>
                     </Provider>
                 </I18nextProvider>
