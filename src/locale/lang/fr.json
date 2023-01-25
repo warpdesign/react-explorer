@@ -131,8 +131,8 @@
             "FOLDERS_other": "{{count}} dossiers"
         },
         "TOOLBAR": {
-            "BACK": "Voir le dossier précédemment consulté",
-            "FORWARD": "Voir le dossier précédemment consulté",
+            "BACK": "Cliquer pour revenir en arrière",
+            "FORWARD": "Cliquer pour avancer",
             "PARENT": "Voir le dossier parent"
         },
         "COMMON": {

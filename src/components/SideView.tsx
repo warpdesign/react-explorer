@@ -17,10 +17,9 @@ import { useStores } from '$src/hooks/useStores'
 interface SideViewProps {
     hide: boolean
     viewState: ViewState
-    onPaste: () => void
 }
 
-export const SideView = observer(({ hide, viewState, onPaste }: SideViewProps) => {
+export const SideView = observer(({ hide, viewState }: SideViewProps) => {
     const { appState } = useStores('appState')
     const [{ isOver, canDrop }, drop] = useDrop(
         () => ({
@@ -70,7 +69,7 @@ export const SideView = observer(({ hide, viewState, onPaste }: SideViewProps) =
             <div ref={drop} id={divId} className={activeClass}>
                 {needLogin && <LoginDialog isOpen={needLogin} onValidation={onValidation} onClose={onClose} />}
                 <TabList></TabList>
-                <Toolbar active={active && !busy} onPaste={onPaste} />
+                <Toolbar active={active && !busy} />
                 <FileView hide={hide} />
                 <Statusbar />
                 <Overlay id={`files-loader-${viewState.viewId}`} shouldShow={busy} delay={true}>

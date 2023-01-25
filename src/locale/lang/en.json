@@ -131,8 +131,8 @@
             "FOLDERS_other": "{{count}} folders"
         },
         "TOOLBAR": {
-            "BACK": "Goto previously visited folder",
-            "FORWARD": "Goto previously visited folder",
+            "BACK": "Click here to go backwards",
+            "FORWARD": "Click here to go forward",
             "PARENT": "Open parent folder"
         },
         "COMMON": {

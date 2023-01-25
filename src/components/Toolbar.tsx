@@ -1,15 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react'
 import { observer } from 'mobx-react'
-import {
-    InputGroup,
-    ControlGroup,
-    Button,
-    ButtonGroup,
-    Intent,
-    Position,
-    HotkeysTarget2,
-    Classes,
-} from '@blueprintjs/core'
+import { InputGroup, ControlGroup, Button, ButtonGroup, Intent, HotkeysTarget2, Classes } from '@blueprintjs/core'
 import { Popover2 } from '@blueprintjs/popover2'
 import { useTranslation } from 'react-i18next'
 
@@ -26,18 +17,18 @@ import { useMenuAccelerator } from '$src/hooks/useAccelerator'
 const ERROR_MESSAGE_TIMEOUT = 3500
 
 interface Props {
-    onPaste: () => void
     active: boolean
 }
 
-export const Toolbar = observer(({ onPaste, active }: Props) => {
+export const Toolbar = observer(({ active }: Props) => {
     const { appState, viewState } = useStores('appState', 'viewState')
     const [isMakedirDialogOpen, setIsMakedirDialogOpen] = useState(false)
     const cache = viewState.getVisibleCache()
     const { selected, history, current } = cache
     const [path, setPath] = useState('')
     const { t } = useTranslation()
-    const inputRef = useRef<HTMLInputElement>(null)
+    const inputRef = useRef<HTMLInputElement>()
+    const submitButtonRef = useRef<HTMLButtonElement>()
 
     useMenuAccelerator([
         {
@@ -62,7 +53,7 @@ export const Toolbar = observer(({ onPaste, active }: Props) => {
         setPath((event.target as HTMLInputElement).value)
     }
 
-    const onSubmit = async (): Promise<void> => {
+    const onSubmit = async (shouldSelectTextOnError = false): Promise<void> => {
         if (cache.path !== path) {
             try {
                 await cache.cd(path)
@@ -72,7 +63,19 @@ export const Toolbar = observer(({ onPaste, active }: Props) => {
                 await AppAlert.show(`${err.message} (${err.code})`, {
                     intent: 'danger',
                 })
-                inputRef.current.select()
+
+                // If path was submitted by pressing enter
+                // it means the input still has focus: in this
+                // case we re-select the (wrong) path to let the user
+                // fix it.
+                if (shouldSelectTextOnError) {
+                    inputRef.current.select()
+                } else {
+                    // if the user clicked on the submit button it means
+                    // the input lost focus: in this case we reset the value
+                    // to the current cache path.
+                    setPath(cache.path)
+                }
             }
         }
     }
@@ -86,15 +89,16 @@ export const Toolbar = observer(({ onPaste, active }: Props) => {
             // lose focus
             inputRef.current.blur()
         } else if (event.key === Keys.ENTER) {
-            onSubmit()
+            onSubmit(true)
         }
     }
 
-    const onBlur = (): void => {
+    const onBlur = (e: React.FocusEvent<HTMLInputElement>): void => {
+        const didClickOnSubmit = e.relatedTarget === submitButtonRef.current
         // restore previous valid cache unless an error alert has been displayed:
         // this will cause the input to loose focus but we don't want to update the path
         // in that particular case
-        if (cache.path !== path && !document.body.classList.contains(Classes.OVERLAY_OPEN)) {
+        if (!didClickOnSubmit && cache.path !== path && !document.body.classList.contains(Classes.OVERLAY_OPEN)) {
             setPath(cache.path)
         }
     }
@@ -153,7 +157,7 @@ export const Toolbar = observer(({ onPaste, active }: Props) => {
                 break
 
             case 'paste':
-                onPaste()
+                appState.paste(cache)
                 break
 
             default:
@@ -238,7 +242,12 @@ export const Toolbar = observer(({ onPaste, active }: Props) => {
                     ></MakedirDialog>
                 )}
 
-                <Button rightIcon="arrow-right" className="data-cy-submit-path" onClick={onSubmit} />
+                <Button
+                    rightIcon="arrow-right"
+                    className="data-cy-submit-path"
+                    onClick={() => onSubmit()}
+                    elementRef={submitButtonRef}
+                />
             </ControlGroup>
         </HotkeysTarget2>
     )
