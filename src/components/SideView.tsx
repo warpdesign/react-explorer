@@ -69,7 +69,7 @@ export const SideView = observer(({ hide, viewState }: SideViewProps) => {
             <div ref={drop} id={divId} className={activeClass}>
                 {needLogin && <LoginDialog isOpen={needLogin} onValidation={onValidation} onClose={onClose} />}
                 <TabList></TabList>
-                <Toolbar active={active && !busy} />
+                <Toolbar active={!busy} />
                 <FileView hide={hide} />
                 <Statusbar />
                 <Overlay id={`files-loader-${viewState.viewId}`} shouldShow={busy} delay={true}>

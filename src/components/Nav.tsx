@@ -22,35 +22,15 @@ const Nav = observer(() => {
     const downloadClass = classNames(Classes.MINIMAL, 'download')
     const isSplitViewActive = appState.winStates[0].splitView
 
-    const showDownloadsTab = (): void => {
-        appState.showDownloadsTab()
-    }
-
-    const showExplorerTab = (): void => {
-        appState.showExplorerTab()
-    }
-
     const navClick = (): void => {
         if (appState.isExplorer) {
-            showDownloadsTab()
+            appState.toggleExplorerTab(false)
         } else {
-            showExplorerTab()
+            appState.toggleExplorerTab(true)
         }
     }
 
-    const onToggleSplitView = (): void => {
-        if (appState.isExplorer) {
-            appState.toggleSplitViewMode()
-        }
-    }
-
-    const onOpenPrefs = (): void => {
-        runInAction(() => (appState.isPrefsOpen = true))
-    }
-
-    const onOpenShortcuts = (): void => {
-        runInAction(() => (appState.isShortcutsOpen = true))
-    }
+    const onToggleSplitView = (): void => appState.isExplorer && appState.toggleSplitViewMode()
 
     return (
         <Navbar>
@@ -85,7 +65,14 @@ const Nav = observer(() => {
                     title={t('NAV.SPLITVIEW')}
                 />
                 <Navbar.Divider />
-                <Popover2 content={<HamburgerMenu onOpenShortcuts={onOpenShortcuts} onOpenPrefs={onOpenPrefs} />}>
+                <Popover2
+                    content={
+                        <HamburgerMenu
+                            onOpenShortcuts={(): void => appState.toggleShortcutsDialog(true)}
+                            onOpenPrefs={(): void => appState.togglePrefsDialog(true)}
+                        />
+                    }
+                >
                     <Button className={`data-cy-toggle-app-menu ${Classes.MINIMAL}`} icon="menu" />
                 </Popover2>
             </Navbar.Group>

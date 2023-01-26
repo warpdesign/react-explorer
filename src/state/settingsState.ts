@@ -2,7 +2,6 @@ import { observable, action, makeObservable, runInAction } from 'mobx'
 import { ipcRenderer } from 'electron'
 
 import { CustomSettings } from '$src/electron/windowSettings'
-import { JSObject } from '$src/components/Log'
 import { i18n, languageList } from '$src/locale/i18n'
 import { isMojave, isWin, isMac, defaultFolder } from '$src/utils/platform'
 
@@ -68,7 +67,7 @@ export class SettingsState {
         return ipcRenderer.invoke('window:getCustomSettings')
     }
 
-    getParam(name: string): JSObject {
+    getParam(name: string) {
         return JSON.parse(localStorage.getItem(name))
     }
 
@@ -124,7 +123,7 @@ export class SettingsState {
         )
     }
 
-    loadAndUpgradeSettings(): JSObject {
+    loadAndUpgradeSettings() {
         let settings = this.getParam(APP_STORAGE_KEY)
         // no settings set: first time the app is run
         if (settings === null) {
@@ -140,7 +139,7 @@ export class SettingsState {
     }
 
     loadSettings(): void {
-        const settings: JSObject = this.loadAndUpgradeSettings()
+        const settings = this.loadAndUpgradeSettings()
 
         this.darkMode = settings.darkMode
 
@@ -177,7 +176,7 @@ export class SettingsState {
         }
     }
 
-    getDefaultSettings(): JSObject {
+    getDefaultSettings() {
         return {
             // we don't want to wait for async call to retrieve language
             // from jest, so we set default lang to en instead.

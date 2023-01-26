@@ -7,7 +7,6 @@ import { inject } from 'mobx-react'
 import { AppState } from '$src/state/appState'
 import { FileState } from '$src/state/fileState'
 import { SettingsState } from '$src/state/settingsState'
-import { Logger } from '$src/components/Log'
 import { isMac } from '$src/utils/platform'
 
 interface InjectedProps extends WithTranslation {
@@ -45,13 +44,9 @@ class KeyboardHotkeysClass extends React.Component<WithTranslation> {
     /**
      * Event Handlers
      */
-    onShowDownloadsTab = (): void => {
-        this.appState.showDownloadsTab()
-    }
+    onShowDownloadsTab = (): void => this.appState.toggleExplorerTab(false)
 
-    onShowExplorerTab = (): void => {
-        this.appState.showExplorerTab()
-    }
+    onShowExplorerTab = (): void => this.appState.toggleExplorerTab(true)
 
     onNextView = (): void => {
         const winState = this.appState.winStates[0]

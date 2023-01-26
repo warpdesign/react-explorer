@@ -7,7 +7,6 @@ import * as nodePath from 'path'
 
 import { FsApi, FileDescriptor, Credentials, Fs, filetype } from '$src/services/Fs'
 import { throttle } from '$src/utils/throttle'
-import { Logger, JSObject } from '$src/components/Log'
 import { isWin, DOWNLOADS_DIR } from '$src/utils/platform'
 import { LocalizedError } from '$src/locale/error'
 
@@ -85,30 +84,9 @@ class Client {
         this.bindEvents()
     }
 
-    getLoggerArgs(params: (string | number | boolean | JSObject)[]): (string | number | boolean | JSObject)[] {
-        // append host and client instance
-        return [`[${this.host}:${this.instanceId}]`, ...params]
-    }
-
-    success(...params: (string | number | boolean | JSObject)[]): void {
-        Logger.success(...this.getLoggerArgs(params))
-    }
-
-    log(...params: (string | number | boolean | JSObject)[]): void {
-        Logger.log(...this.getLoggerArgs(params))
-    }
-
-    warn(...params: (string | number | boolean | JSObject)[]): void {
-        Logger.warn(...this.getLoggerArgs(params))
-    }
-
-    error(...params: (string | number | boolean | JSObject)[]): void {
-        Logger.error(...this.getLoggerArgs(params))
-    }
-
     public login(options: Credentials): Promise<void> {
         if (!this.connected) {
-            this.log(
+            console.log(
                 'connecting to',
                 this.host,
                 'with options',
@@ -133,10 +111,10 @@ class Client {
     }
 
     private onReady(): void {
-        this.success('ready, setting transfer mode to binary')
+        console.log('ready, setting transfer mode to binary')
         this.client.binary((err: Error) => {
             if (err) {
-                this.warn('could not set transfer mode to binary')
+                console.warn('could not set transfer mode to binary')
             }
             this.readyResolve()
             this.status = 'ready'
@@ -145,7 +123,7 @@ class Client {
     }
 
     private onClose(): void {
-        this.warn('close')
+        console.warn('close')
         this.connected = false
         this.status = 'offline'
 
@@ -162,8 +140,8 @@ class Client {
     }
 
     private onError(error: LocalizedError): void {
-        this.log(typeof error.code)
-        this.error('onError', `${error.code}: ${error.message}`)
+        console.log(typeof error.code)
+        console.error('onError', `${error.code}: ${error.message}`)
         switch (error.code) {
             // 500 series: command not accepted
             // user not logged in (user limit may be reached too)
@@ -191,9 +169,9 @@ class Client {
 
             default:
                 // sometimes error.code is undefined or is a string (!!)
-                this.warn('unhandled error code:', error.code)
+                console.warn('unhandled error code:', error.code)
                 if (error && (error as string).match(/Timeout/)) {
-                    this.warn('Connection timeout ?')
+                    console.warn('Connection timeout ?')
                 }
                 break
         }
@@ -203,14 +181,14 @@ class Client {
 
     private onGreeting(greeting: string): void {
         for (const line of greeting.split('\n')) {
-            this.log(line)
+            console.log(line)
         }
     }
 
     public list(path: string): Promise<FileDescriptor[]> {
         this.status = 'busy'
 
-        this.log('list', path)
+        console.log('list', path)
         return new Promise((resolve, reject) => {
             const newpath = this.pathpart(path)
             // Note: since node-ftp only supports the LIST cmd and
@@ -227,7 +205,7 @@ class Client {
                 this.status = 'ready'
 
                 if (err) {
-                    this.error('error calling list for', newpath)
+                    console.error('error calling list for', newpath)
                     reject(err)
                 } else {
                     const files: FileDescriptor[] = list
@@ -267,7 +245,7 @@ class Client {
     }
 
     public cd(path: string): Promise<string> {
-        this.log('cd', path)
+        console.log('cd', path)
         return new Promise((resolve, reject) => {
             const oldPath = path
             const newpath = this.pathpart(path)
@@ -308,7 +286,7 @@ class Client {
     public get(path: string, dest: string): Promise<string> {
         return new Promise((resolve, reject) => {
             const newpath = this.pathpart(path)
-            this.log('downloading file', newpath, dest)
+            console.log('downloading file', newpath, dest)
             this.client.get(newpath, (err: Error, readStream: fs.ReadStream) => {
                 if (err) {
                     reject(err)
@@ -387,7 +365,7 @@ class Client {
         const oldPath = join(path, oldName)
         const newPath = join(path, newName)
 
-        this.log('rename', oldPath, newPath)
+        console.log('rename', oldPath, newPath)
         return new Promise((resolve, reject) => {
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             return this.client.rename(oldPath, newPath, (err: any) => {
@@ -409,7 +387,7 @@ class Client {
         const path = this.pathpart(parent)
         const newPath = join(path, name)
 
-        this.log('mkdir', path, newPath)
+        console.log('mkdir', path, newPath)
         return new Promise((resolve, reject) => {
             this.client.mkdir(newPath, true, (err: Error): void => {
                 if (err) {
