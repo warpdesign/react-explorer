@@ -20,8 +20,7 @@ describe('Nav', () => {
         options.providerProps.appState = appState
         await options.providerProps.appState.loadSettingsAndPrepareViews()
 
-        jest.spyOn(appState, 'showDownloadsTab')
-        jest.spyOn(appState, 'showExplorerTab')
+        jest.spyOn(appState, 'toggleExplorerTab')
         jest.spyOn(appState, 'toggleSplitViewMode')
 
         jest.clearAllMocks()
@@ -61,7 +60,7 @@ describe('Nav', () => {
 
             await user.click(screen.getByRole('button', { name: t('NAV.TRANSFERS') }))
 
-            expect(options.providerProps.appState.showDownloadsTab).toHaveBeenCalled()
+            expect(options.providerProps.appState.toggleExplorerTab).toHaveBeenCalledWith(false)
         })
 
         it('should show downloads when clicking on downloads button and show explorer when clicking on explorer button', async () => {
@@ -72,12 +71,12 @@ describe('Nav', () => {
 
             await user.click(transfersButton)
 
-            expect(options.providerProps.appState.showDownloadsTab).toHaveBeenCalled()
+            expect(options.providerProps.appState.toggleExplorerTab).toHaveBeenCalledWith(false)
             expect(isSelected(explorerButton)).toBe(false)
             expect(isSelected(transfersButton)).toBe(true)
 
             await user.click(explorerButton)
-            expect(options.providerProps.appState.showExplorerTab).toHaveBeenCalled()
+            expect(options.providerProps.appState.toggleExplorerTab).toHaveBeenCalledWith(true)
             expect(isSelected(explorerButton)).toBe(true)
             expect(isSelected(transfersButton)).toBe(false)
         })

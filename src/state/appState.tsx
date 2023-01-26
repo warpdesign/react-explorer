@@ -43,12 +43,8 @@ export class AppState {
     settingsState = new SettingsState(window.ENV.VERSION as string)
 
     isExplorer = true
-
     isPrefsOpen = false
-
     isShortcutsOpen = false
-
-    isExitDialogOpen = false
 
     options: CustomSettings = {
         splitView: false,
@@ -66,15 +62,15 @@ export class AppState {
             isExplorer: observable,
             isPrefsOpen: observable,
             isShortcutsOpen: observable,
-            isExitDialogOpen: observable,
             toggleSplitViewMode: action,
-            showDownloadsTab: action,
-            showExplorerTab: action,
+            toggleExplorerTab: action,
             initViewState: action,
             refreshActiveView: action,
             addView: action,
             openDirectory: action,
             options: observable,
+            togglePrefsDialog: action,
+            toggleShortcutsDialog: action,
         })
 
         this.t = i18n.i18next.t
@@ -111,12 +107,16 @@ export class AppState {
         winState.initState()
     }
 
-    showDownloadsTab = (): void => {
-        this.isExplorer = false
+    toggleExplorerTab = (showExplorer = true): void => {
+        this.isExplorer = showExplorer
     }
 
-    showExplorerTab = (): void => {
-        this.isExplorer = true
+    toggleShortcutsDialog = (open = true) => {
+        this.isShortcutsOpen = open
+    }
+
+    togglePrefsDialog = (open = true) => {
+        this.isPrefsOpen = open
     }
 
     drop({ dragFiles, fileState }: DraggedObject, destCache: FileState): void {

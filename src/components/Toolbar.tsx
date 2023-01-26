@@ -7,7 +7,6 @@ import { useTranslation } from 'react-i18next'
 import { FileMenu } from '$src/components/FileMenu'
 import { MakedirDialog } from '$src/components/dialogs/MakedirDialog'
 import { AppAlert } from '$src/components/AppAlert'
-import { Logger } from '$src/components/Log'
 import { AppToaster } from '$src/components/AppToaster'
 import { LocalizedError } from '$src/locale/error'
 import Keys from '$src/constants/keys'
@@ -113,7 +112,7 @@ export const Toolbar = observer(({ active }: Props) => {
         }
 
         try {
-            Logger.log("Let's create a directory :)", dirName, navigate)
+            console.log("Let's create a directory :)", dirName, navigate)
             const dir = await cache.makedir(path, dirName)
 
             if (!navigate) {
@@ -148,7 +147,7 @@ export const Toolbar = observer(({ active }: Props) => {
     const onFileAction = (action: string): void => {
         switch (action) {
             case 'makedir':
-                Logger.log('Opening new folder dialog')
+                console.log('Opening new folder dialog')
                 onMakedir()
                 break
 
@@ -161,7 +160,7 @@ export const Toolbar = observer(({ active }: Props) => {
                 break
 
             default:
-                Logger.warn('action unknown', action)
+                console.warn('action unknown', action)
         }
     }
 

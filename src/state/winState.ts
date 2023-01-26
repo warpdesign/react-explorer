@@ -2,7 +2,6 @@ import { observable, action, computed, makeObservable } from 'mobx'
 import { ipcRenderer } from 'electron'
 
 import { ViewState } from '$src/state/viewState'
-import { JSObject } from '$src/components/Log'
 import { FileState } from '$src/state/fileState'
 
 export interface WindowSettings {
@@ -54,7 +53,7 @@ export class WinState {
         ipcRenderer.invoke('setWindowSettings', this.toJSON)
     }
 
-    get toJSON(): JSObject {
+    get toJSON() {
         return {
             settings: {
                 splitView: this.splitView,
