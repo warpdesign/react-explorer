@@ -231,8 +231,8 @@ class Client {
                                 isSym: false,
                                 target: null,
                                 id: {
-                                    ino: mDate.getTime(),
-                                    dev: new Date().getTime(),
+                                    ino: BigInt(mDate.getTime()),
+                                    dev: BigInt(new Date().getTime()),
                                 },
                             }
                             return file

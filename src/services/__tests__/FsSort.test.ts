@@ -15,8 +15,8 @@ const files: Array<FileDescriptor> = [
         isDir: true,
         readonly: false,
         id: {
-            ino: 0,
-            dev: 1,
+            ino: 0n,
+            dev: 1n,
         },
         isSym: false,
         target: '',
@@ -35,8 +35,8 @@ const files: Array<FileDescriptor> = [
         isDir: false,
         readonly: false,
         id: {
-            ino: 1,
-            dev: 1,
+            ino: 1n,
+            dev: 1n,
         },
         isSym: false,
         target: '',
@@ -55,8 +55,8 @@ const files: Array<FileDescriptor> = [
         isDir: false,
         readonly: false,
         id: {
-            ino: 2,
-            dev: 1,
+            ino: 2n,
+            dev: 1n,
         },
         isSym: false,
         target: '',
@@ -75,8 +75,8 @@ const files: Array<FileDescriptor> = [
         isDir: false,
         readonly: false,
         id: {
-            ino: 3,
-            dev: 1,
+            ino: 3n,
+            dev: 1n,
         },
         isSym: false,
         target: '',
@@ -88,24 +88,24 @@ describe('sorting methods', () => {
     it('sort by Name/Asc', () => {
         const sortMethod = getSortMethod('name', 'asc')
         const sorted_ids = files.sort(sortMethod).map((file) => file.id.ino)
-        expect(sorted_ids).toEqual([2, 0, 1, 3])
+        expect(sorted_ids).toEqual([2n, 0n, 1n, 3n])
     })
 
     it('sort by Name/Desc', () => {
         const sortMethod = getSortMethod('name', 'desc')
         const sorted_ids = files.sort(sortMethod).map((file) => file.id.ino)
-        expect(sorted_ids).toEqual([3, 1, 0, 2])
+        expect(sorted_ids).toEqual([3n, 1n, 0n, 2n])
     })
 
     it('sort by Size/Asc', () => {
         const sortMethod = getSortMethod('size', 'asc')
         const sorted_ids = files.sort(sortMethod).map((file) => file.id.ino)
-        expect(sorted_ids).toEqual([1, 0, 3, 2])
+        expect(sorted_ids).toEqual([1n, 0n, 3n, 2n])
     })
 
     it('sort by Size/Asc', () => {
         const sortMethod = getSortMethod('size', 'desc')
         const sorted_ids = files.sort(sortMethod).map((file) => file.id.ino)
-        expect(sorted_ids).toEqual([2, 3, 0, 1])
+        expect(sorted_ids).toEqual([2n, 3n, 0n, 1n])
     })
 })

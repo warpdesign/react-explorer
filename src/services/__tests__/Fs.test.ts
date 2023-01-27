@@ -5,8 +5,8 @@ import { MakeId, ExeMaskAll, ExeMaskGroup, ExeMaskUser, filetype, sameID, FileID
 describe('makeId', () => {
     it('should return FileID from stats', () => {
         const stats = {
-            ino: 123,
-            dev: 456,
+            ino: 123n,
+            dev: 456n,
             fullname: 'foo',
         }
 
@@ -19,13 +19,13 @@ describe('makeId', () => {
 
 describe('sameID', () => {
     const id1: FileID = {
-        dev: 10,
-        ino: 5,
+        dev: 10n,
+        ino: 5n,
     }
 
     const id2: FileID = {
-        dev: 28,
-        ino: 32,
+        dev: 28n,
+        ino: 32n,
     }
 
     it('should return true if ino & dev are identical', () => {
