@@ -16,8 +16,8 @@ export function registerFs(fs: Fs): void {
 }
 
 export interface FileID {
-    ino: number
-    dev: number
+    ino: bigint
+    dev: bigint
 }
 
 export interface FileDescriptor {
@@ -71,7 +71,7 @@ export const ExeMaskUser = 0o0100
 
 export type FileType = 'exe' | 'img' | 'arc' | 'snd' | 'vid' | 'doc' | 'cod' | ''
 
-export function MakeId(stats: { ino: number; dev: number }): FileID {
+export function MakeId(stats: { ino: bigint; dev: bigint }): FileID {
     return {
         ino: stats.ino,
         dev: stats.dev,

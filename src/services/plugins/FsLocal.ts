@@ -187,8 +187,8 @@ export class LocalApi implements FsApi {
     }
 
     async isDir(path: string, transferId = -1): Promise<boolean> {
-        const lstat = fs.lstatSync(path)
-        const stat = fs.statSync(path)
+        const lstat = fs.lstatSync(path, { bigint: true })
+        const stat = fs.statSync(path, { bigint: true })
         return stat.isDirectory() || lstat.isDirectory()
     }
 
@@ -208,7 +208,7 @@ export class LocalApi implements FsApi {
     async stat(fullPath: string, transferId = -1): Promise<FileDescriptor> {
         try {
             const format = path.parse(fullPath)
-            const stats = fs.lstatSync(fullPath)
+            const stats = fs.lstatSync(fullPath, { bigint: true })
             const file: FileDescriptor = {
                 dir: format.dir,
                 fullname: format.base,
@@ -217,12 +217,13 @@ export class LocalApi implements FsApi {
                 cDate: stats.ctime,
                 mDate: stats.mtime,
                 bDate: stats.birthtime,
-                length: stats.size,
-                mode: stats.mode,
+                length: Number(stats.size),
+                mode: Number(stats.mode),
                 isDir: stats.isDirectory(),
                 readonly: false,
                 type:
-                    (!stats.isDirectory() && filetype(stats.mode, stats.gid, stats.uid, format.ext.toLowerCase())) ||
+                    (!stats.isDirectory() &&
+                        filetype(Number(stats.mode), Number(stats.gid), Number(stats.uid), format.ext.toLowerCase())) ||
                     '',
                 isSym: stats.isSymbolicLink(),
                 target: (stats.isSymbolicLink() && fs.readlinkSync(fullPath)) || null,
@@ -289,16 +290,16 @@ export class LocalApi implements FsApi {
     static fileFromPath(fullPath: string): FileDescriptor {
         const format = path.parse(fullPath)
         let name = fullPath
-        let stats: Partial<fs.Stats> = null
+        let stats: Partial<fs.BigIntStats> = null
         let targetStats = null
 
         try {
             // do not follow symlinks first
-            stats = fs.lstatSync(fullPath)
+            stats = fs.lstatSync(fullPath, { bigint: true })
             if (stats.isSymbolicLink()) {
                 // get link target path first
                 name = fs.readlinkSync(fullPath)
-                targetStats = fs.statSync(fullPath)
+                targetStats = fs.statSync(fullPath, { bigint: true })
             }
         } catch (err) {
             console.warn('error getting stats for', fullPath, err)
@@ -310,12 +311,12 @@ export class LocalApi implements FsApi {
                 ctime: new Date(),
                 mtime: new Date(),
                 birthtime: new Date(),
-                size: stats ? stats.size : 0,
+                size: stats ? stats.size : 0n,
                 isDirectory: (): boolean => isDir,
-                mode: -1,
+                mode: -1n,
                 isSymbolicLink: (): boolean => isSymLink,
-                ino: 0,
-                dev: 0,
+                ino: 0n,
+                dev: 0n,
             }
         }
 
@@ -330,12 +331,13 @@ export class LocalApi implements FsApi {
             cDate: stats.ctime,
             mDate: stats.mtime,
             bDate: stats.birthtime,
-            length: stats.size,
-            mode: mode,
+            length: Number(stats.size),
+            mode: Number(mode),
             isDir: targetStats ? targetStats.isDirectory() : stats.isDirectory(),
             readonly: false,
             type:
-                (!(targetStats ? targetStats.isDirectory() : stats.isDirectory()) && filetype(mode, 0, 0, extension)) ||
+                (!(targetStats ? targetStats.isDirectory() : stats.isDirectory()) &&
+                    filetype(Number(mode), 0, 0, extension)) ||
                 '',
             isSym: stats.isSymbolicLink(),
             target: (stats.isSymbolicLink() && name) || null,

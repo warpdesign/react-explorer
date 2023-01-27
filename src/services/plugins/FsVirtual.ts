@@ -1,13 +1,10 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { fs, vol } from 'memfs'
-import type { Stats, ReadStream } from 'fs'
+import type { ReadStream, BigIntStats } from 'fs'
 import { Transform, TransformCallback } from 'stream'
 import * as path from 'path'
-// import mkdir = require('mkdirp')
-// import del = require('del')
 
 import { FsApi, FileDescriptor, Credentials, Fs, filetype, MakeId } from '$src/services/Fs'
-// import { size } from '$src/utils/size'
 import { throttle } from '$src/utils/throttle'
 import { isWin, HOME_DIR } from '$src/utils/platform'
 import { VirtualWatch } from '$src/services/plugins/VirtualWatch'
@@ -191,8 +188,8 @@ export class VirtualApi implements FsApi {
     }
 
     async isDir(path: string, transferId = -1): Promise<boolean> {
-        const lstat = vol.lstatSync(path)
-        const stat = vol.statSync(path)
+        const lstat = vol.lstatSync(path, { bigint: true })
+        const stat = vol.statSync(path, { bigint: true })
         return stat.isDirectory() || lstat.isDirectory()
     }
 
@@ -212,7 +209,7 @@ export class VirtualApi implements FsApi {
     async stat(fullPath: string, transferId = -1): Promise<FileDescriptor> {
         try {
             const format = path.parse(fullPath)
-            const stats = vol.lstatSync(fullPath)
+            const stats = vol.lstatSync(fullPath, { bigint: true })
             const file: FileDescriptor = {
                 dir: format.dir,
                 fullname: format.base,
@@ -221,12 +218,13 @@ export class VirtualApi implements FsApi {
                 cDate: stats.ctime,
                 mDate: stats.mtime,
                 bDate: stats.birthtime,
-                length: stats.size,
-                mode: stats.mode,
+                length: Number(stats.size),
+                mode: Number(stats.mode),
                 isDir: stats.isDirectory(),
                 readonly: false,
                 type:
-                    (!stats.isDirectory() && filetype(stats.mode, stats.gid, stats.uid, format.ext.toLowerCase())) ||
+                    (!stats.isDirectory() &&
+                        filetype(Number(stats.mode), Number(stats.gid), Number(stats.uid), format.ext.toLowerCase())) ||
                     '',
                 isSym: stats.isSymbolicLink(),
                 target: (stats.isSymbolicLink() && vol.readlinkSync(fullPath)) || null,
@@ -291,16 +289,16 @@ export class VirtualApi implements FsApi {
     static fileFromPath(fullPath: string): FileDescriptor {
         const format = path.parse(fullPath)
         let name = fullPath
-        let stats: Partial<Stats> = null
+        let stats: Partial<BigIntStats> = null
         let targetStats = null
 
         try {
             // do not follow symlinks first
-            stats = vol.lstatSync(fullPath)
+            stats = vol.lstatSync(fullPath, { bigint: true })
             if (stats.isSymbolicLink()) {
                 // get link target path first
                 name = vol.readlinkSync(fullPath) as string
-                targetStats = vol.statSync(fullPath)
+                targetStats = vol.statSync(fullPath, { bigint: true })
             }
         } catch (err) {
             console.warn('error getting stats for', fullPath, err)
@@ -312,12 +310,12 @@ export class VirtualApi implements FsApi {
                 ctime: new Date(),
                 mtime: new Date(),
                 birthtime: new Date(),
-                size: stats ? stats.size : 0,
+                size: stats ? stats.size : 0n,
                 isDirectory: (): boolean => isDir,
-                mode: -1,
+                mode: -1n,
                 isSymbolicLink: (): boolean => isSymLink,
-                ino: 0,
-                dev: 0,
+                ino: 0n,
+                dev: 0n,
             }
         }
 
@@ -332,12 +330,13 @@ export class VirtualApi implements FsApi {
             cDate: stats.ctime,
             mDate: stats.mtime,
             bDate: stats.birthtime,
-            length: stats.size,
-            mode: mode,
+            length: Number(stats.size),
+            mode: Number(mode),
             isDir: targetStats ? targetStats.isDirectory() : stats.isDirectory(),
             readonly: false,
             type:
-                (!(targetStats ? targetStats.isDirectory() : stats.isDirectory()) && filetype(mode, 0, 0, extension)) ||
+                (!(targetStats ? targetStats.isDirectory() : stats.isDirectory()) &&
+                    filetype(Number(mode), 0, 0, extension)) ||
                 '',
             isSym: stats.isSymbolicLink(),
             target: (stats.isSymbolicLink() && name) || null,
@@ -481,7 +480,7 @@ export class VirtualApi implements FsApi {
 
 export function FolderExists(path: string): boolean {
     try {
-        return vol.existsSync(path) && vol.lstatSync(path).isDirectory()
+        return vol.existsSync(path) && vol.lstatSync(path, { bigint: true }).isDirectory()
     } catch (err) {
         return false
     }
