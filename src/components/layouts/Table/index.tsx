@@ -6,7 +6,7 @@ import { Row } from './components/Row'
 import { Header } from './components/Header'
 import { LayoutActions, LayoutProps } from '$src/hooks/useLayout'
 import { ArrowKey, FileViewItem } from '$src/types'
-import { Placeholder } from './components/Placeholder'
+import { Placeholder } from '../components/Placeholder'
 
 import '$src/css/fileview-table.css'
 

@@ -5,10 +5,11 @@ import { ArrowKey, DraggedObject, FileViewItem } from '$src/types'
 import { TSORT_METHOD_NAME, TSORT_ORDER } from '$src/services/FsSort'
 import { TStatus } from '$src/state/fileState'
 import { TableLayout } from '$src/components/layouts/Table/'
+import { IconsLayout } from '$src/components/layouts/Icon/'
 
 const layouts: { [key in LayoutName]: any } = {
     details: TableLayout,
-    icons: TableLayout,
+    icons: IconsLayout,
 }
 
 export type LayoutName = 'details' | 'icons'
@@ -30,7 +31,7 @@ export interface InlineEditEvent {
     event: React.SyntheticEvent
 }
 
-export interface LayoutProps {
+export interface LayoutProps<T = Record<string, unknown>> {
     onBlankAreaClick: () => void
     onItemClick: (event: ItemMouseEvent) => void
     onItemDoubleClick: (event: ItemMouseEvent) => void
@@ -45,6 +46,8 @@ export interface LayoutProps {
     columns: Column[]
     cursorIndex?: number
     isDarkModeActive: boolean
+    // layout-specific options
+    options?: T
 }
 
 export interface LayoutActions {
