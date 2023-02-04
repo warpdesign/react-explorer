@@ -1,6 +1,3 @@
-/**
- * @jest-environment jsdom
- */
 import { FileViewItem } from '$src/types'
 import React from 'react'
 import userEvent from '@testing-library/user-event'

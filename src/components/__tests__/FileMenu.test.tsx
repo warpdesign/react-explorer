@@ -1,6 +1,3 @@
-/**
- * @jest-environment jsdom
- */
 import { AppState } from '$src/state/appState'
 import React from 'react'
 import { screen, render, setup, t } from 'rtl'

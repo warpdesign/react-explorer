@@ -1,3 +1,6 @@
+/**
+ * @jest-environment node
+ */
 import { getSelectionRange, getExtensionIndex } from '../fileUtils'
 
 describe('fileUtils', () => {

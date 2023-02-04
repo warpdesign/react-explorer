@@ -1,6 +1,3 @@
-/**
- * @jest-environment jsdom
- */
 import React from 'react'
 import { within } from '@testing-library/dom'
 

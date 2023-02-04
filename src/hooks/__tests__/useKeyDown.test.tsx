@@ -1,6 +1,3 @@
-/**
- * @jest-environment jsdom
- */
 import React, { ReactElement } from 'react'
 import { setup } from 'rtl'
 

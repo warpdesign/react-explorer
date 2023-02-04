@@ -1,3 +1,6 @@
+/**
+ * @jest-environment node
+ */
 import { getSortMethod } from '../FsSort'
 import { FileDescriptor } from '../Fs'
 

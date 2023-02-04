@@ -1,6 +1,3 @@
-/**
- * @jest-environment jsdom
- */
 import { Column } from '$src/hooks/useLayout'
 import React from 'react'
 import { render, screen, setup } from 'rtl'

@@ -70,7 +70,7 @@ const FileView = observer(({ hide }: Props) => {
     const { isDarkModeActive } = settingsState
     const { t } = useTranslation()
     const cache = viewState.getVisibleCache()
-    const { files, cursor, editingId } = cache
+    const { files, cursor, editingId, layout } = cache
     const cursorIndex = cache.getFileIndex(cursor)
     const isViewActive = viewState.isActive && !hide
     const keepSelection = !!cache.selected.length
@@ -87,7 +87,7 @@ const FileView = observer(({ hide }: Props) => {
     const {
         Layout,
         actions: { getNextIndex },
-    } = useLayout('details')
+    } = useLayout(layout)
 
     useKeyDown(
         React.useCallback(

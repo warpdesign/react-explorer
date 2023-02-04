@@ -12,6 +12,7 @@ import { LocalizedError } from '$src/locale/error'
 import Keys from '$src/constants/keys'
 import { useStores } from '$src/hooks/useStores'
 import { useMenuAccelerator } from '$src/hooks/useAccelerator'
+import { ViewToggle } from './components'
 
 const ERROR_MESSAGE_TIMEOUT = 3500
 
@@ -23,7 +24,7 @@ export const Toolbar = observer(({ active }: Props) => {
     const { appState, viewState } = useStores('appState', 'viewState')
     const [isMakedirDialogOpen, setIsMakedirDialogOpen] = useState(false)
     const cache = viewState.getVisibleCache()
-    const { selected, history, current } = cache
+    const { selected, history, current, layout } = cache
     const [path, setPath] = useState('')
     const { t } = useTranslation()
     const inputRef = useRef<HTMLInputElement>()
@@ -216,9 +217,11 @@ export const Toolbar = observer(({ active }: Props) => {
                                 onFileAction={onFileAction}
                             />
                         }
+                        placement="bottom-start"
                     >
                         <Button rightIcon="caret-down" icon="cog" />
                     </Popover2>
+                    <ViewToggle layout={layout} onClick={(newLayout) => cache.setLayout(newLayout)} />
                 </ButtonGroup>
                 <InputGroup
                     data-cy-path
