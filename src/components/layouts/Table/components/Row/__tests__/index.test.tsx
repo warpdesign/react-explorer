@@ -1,6 +1,3 @@
-/**
- * @jest-environment jsdom
- */
 import { FileState } from '$src/state/fileState'
 import { FileViewItem } from '$src/types'
 import React from 'react'

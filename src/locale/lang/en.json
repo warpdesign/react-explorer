@@ -133,7 +133,10 @@
         "TOOLBAR": {
             "BACK": "Click here to go backwards",
             "FORWARD": "Click here to go forward",
-            "PARENT": "Open parent folder"
+            "PARENT": "Open parent folder",
+            "ICON_VIEW": "Icons",
+            "DETAILS_VIEW": "Details",
+            "CHANGE_VIEW": "Change display mode"
         },
         "COMMON": {
             "SIZE": {

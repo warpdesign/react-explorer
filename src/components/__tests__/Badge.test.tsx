@@ -1,6 +1,3 @@
-/**
- * @jest-environment jsdom
- */
 import { Classes, Intent } from '@blueprintjs/core'
 import React from 'react'
 import { screen, render } from 'rtl'

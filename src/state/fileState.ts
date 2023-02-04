@@ -9,15 +9,29 @@ import { AppState } from '$src/state/appState'
 import { getSortMethod, TSORT_METHOD_NAME, TSORT_ORDER } from '$src/services/FsSort'
 import { AppAlert } from '$src/components/AppAlert'
 import { filterDirs, filterFiles, filterHiddenFiles } from '$src/utils/fileUtils'
+import { LayoutName } from '$src/hooks/useLayout'
 
 export type TStatus = 'busy' | 'ok' | 'login' | 'offline'
 
+export interface HistoryEntry {
+    layout: LayoutName
+    path: string
+    showHiddenFiles: boolean
+    sortMethod: TSORT_METHOD_NAME
+    sortOrder: TSORT_ORDER
+}
+
 export class FileState {
     /* observable properties start here */
+    // history
     path = ''
+    sortMethod: TSORT_METHOD_NAME = 'name'
+    sortOrder: TSORT_ORDER = 'asc'
+    showHiddenFiles = false
+    layout: LayoutName = 'details'
+    // /history
 
     previousPath: string
-
     readonly files = observable<FileDescriptor>([])
     readonly allFiles = observable<FileDescriptor>([])
 
@@ -27,10 +41,6 @@ export class FileState {
     cursor: FileDescriptor | null = null
     // element that's being edited
     editingId: FileID = null
-
-    sortMethod: TSORT_METHOD_NAME = 'name'
-
-    sortOrder: TSORT_ORDER = 'asc'
 
     server = ''
 
@@ -43,17 +53,12 @@ export class FileState {
 
     cmd = ''
 
-    showHiddenFiles = false
-
-    // @observable
-    // active = false;
-
     isVisible = false
 
     viewId = -1
 
     // history stuff
-    history = observable<string>([])
+    history = observable<HistoryEntry>([])
     current = -1
 
     waitForConnection = async () => {
@@ -88,17 +93,25 @@ export class FileState {
                 this.error = true
             }
         }
-        // this.error = error
-        // this.history.length === 0 || this.error
     }
 
-    addPathToHistory(path: string): void {
+    addCurrentStateToHistory(): void {
         const keep = this.history.slice(0, this.current + 1)
-        this.history.replace(keep.concat([path]))
+        this.history.replace(
+            keep.concat([
+                {
+                    path: this.path,
+                    layout: this.layout,
+                    showHiddenFiles: this.showHiddenFiles,
+                    sortMethod: this.sortMethod,
+                    sortOrder: this.sortOrder,
+                },
+            ]),
+        )
         this.current++
     }
 
-    navHistory(dir = -1, force = false): Promise<string | void> {
+    async navHistory(dir = -1, force = false): Promise<string | void> {
         if (!this.history.length) {
             debugger
             console.warn('attempting to nav in empty history')
@@ -126,19 +139,20 @@ export class FileState {
 
         this.current = newCurrent
 
-        const path = history[newCurrent]
+        const { path, showHiddenFiles, sortOrder, sortMethod, layout } = history[newCurrent]
 
-        return this.cd(path, '', true, true).catch(() => {
-            // whatever happens, we want switch to that folder
+        try {
+            // set history properties that influence listing before cd
+            // otherwise we would sort the files twice
+            this.showHiddenFiles = showHiddenFiles
+            this.sortOrder = sortOrder
+            this.sortMethod = sortMethod
+            this.layout = layout
+            await this.cd(path, '', true, true)
+        } catch (e) {
             this.updatePath(path, true)
             this.emptyCache()
-        })
-        // if (path !== this.path || force) {
-        //     // console.log('opening path from history', path);
-        //     this.cd(path, '', true, true);
-        // } else {
-        //     console.warn('preventing endless loop');
-        // }
+        }
     }
     // /history
 
@@ -166,6 +180,7 @@ export class FileState {
             sortMethod: observable,
             sortOrder: observable,
             server: observable,
+            layout: observable,
             status: observable,
             error: observable,
             isVisible: observable,
@@ -173,7 +188,7 @@ export class FileState {
             current: observable,
             showHiddenFiles: observable,
             setStatus: action,
-            addPathToHistory: action,
+            addCurrentStateToHistory: action,
             navHistory: action,
             updatePath: action,
             revertPath: action,
@@ -198,6 +213,7 @@ export class FileState {
             cursor: observable,
             editingId: observable,
             isSelected: observable,
+            setLayout: action,
         })
 
         this.viewId = viewId
@@ -267,7 +283,7 @@ export class FileState {
         this.path = path
 
         if (!skipHistory && this.status !== 'login') {
-            this.addPathToHistory(path)
+            this.addCurrentStateToHistory()
             this.setCursor(null)
             this.editingId = null
 
@@ -325,12 +341,16 @@ export class FileState {
         this.editingId = null
     }
 
-    setSort(sortMethod: TSORT_METHOD_NAME): void {
+    setSort(sortMethod: TSORT_METHOD_NAME, sortOrder?: TSORT_ORDER): void {
         // if same sort method, invert order
-        if (this.sortMethod === sortMethod) {
-            this.sortOrder = this.sortOrder === 'asc' ? 'desc' : 'asc'
+        if (!sortOrder) {
+            if (this.sortMethod === sortMethod) {
+                this.sortOrder = this.sortOrder === 'asc' ? 'desc' : 'asc'
+            } else {
+                this.sortOrder = 'asc'
+            }
         } else {
-            this.sortOrder = 'asc'
+            this.sortOrder = sortOrder
         }
 
         this.sortMethod = sortMethod
@@ -691,5 +711,9 @@ export class FileState {
 
     isSelected(file: FileDescriptor): boolean {
         return !!this.selected.find((selectedFile) => sameID(file.id, selectedFile.id))
+    }
+
+    setLayout(newLayout: LayoutName) {
+        this.layout = newLayout
     }
 }

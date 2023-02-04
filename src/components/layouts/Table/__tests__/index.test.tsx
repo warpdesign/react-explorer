@@ -1,6 +1,3 @@
-/**
- * @jest-environment jsdom
- */
 import React from 'react'
 import * as ReactVirtual from 'react-virtual'
 import { render, screen, setup, t } from 'rtl'

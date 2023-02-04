@@ -1,6 +1,3 @@
-/**
- * @jest-environment jsdom
- */
 import React from 'react'
 import { ShortcutsDialog } from '../ShortcutsDialog'
 import { render, screen, LOCALE_EN, userEvent } from 'rtl'

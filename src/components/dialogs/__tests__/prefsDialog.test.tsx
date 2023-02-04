@@ -1,6 +1,3 @@
-/**
- * @jest-environment jsdom
- */
 import React from 'react'
 import { setup, screen, LOCALE_EN, waitFor } from 'rtl'
 import { SettingsState } from '$src/state/settingsState'

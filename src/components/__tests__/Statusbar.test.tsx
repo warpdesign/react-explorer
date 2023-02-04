@@ -1,6 +1,3 @@
-/**
- * @jest-environment jsdom
- */
 import React from 'react'
 import { screen, setup, render, t, userEvent } from 'rtl'
 import { Statusbar } from '../Statusbar'

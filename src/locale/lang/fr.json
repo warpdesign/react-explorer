@@ -133,7 +133,10 @@
         "TOOLBAR": {
             "BACK": "Cliquer pour revenir en arrière",
             "FORWARD": "Cliquer pour avancer",
-            "PARENT": "Voir le dossier parent"
+            "PARENT": "Voir le dossier parent",
+            "ICON_VIEW": "Icônes",
+            "DETAILS_VIEW": "Détails",
+            "CHANGE_VIEW": "Changer le mode d'affichage"
         },
         "COMMON": {
             "SIZE": {

@@ -8,9 +8,10 @@ import { TableLayout } from '$src/components/layouts/Table/'
 
 const layouts: { [key in LayoutName]: any } = {
     details: TableLayout,
+    icons: TableLayout,
 }
 
-export type LayoutName = 'details'
+export type LayoutName = 'details' | 'icons'
 
 export interface ItemMouseEvent {
     data: FileViewItem

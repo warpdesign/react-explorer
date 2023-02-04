@@ -1,6 +1,3 @@
-/**
- * @jest-environment jsdom
- */
 import React from 'react'
 
 import { render, t, setup, screen } from 'rtl'

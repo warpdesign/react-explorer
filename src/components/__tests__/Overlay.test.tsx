@@ -1,6 +1,3 @@
-/**
- * @jest-environment jsdom
- */
 import React from 'react'
 import { screen, render } from 'rtl'
 import { Overlay } from '../Overlay'

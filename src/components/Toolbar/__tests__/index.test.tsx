@@ -1,18 +1,47 @@
-/**
- * @jest-environment jsdom
- */
 import React from 'react'
 import { render, setup, screen, waitFor, t, fireEvent, waitForElementToBeRemoved } from 'rtl'
 
 import { AppState } from '$src/state/appState'
 import { ViewState } from '$src/state/viewState'
 
-import { Toolbar } from '../Toolbar'
+import { Toolbar } from '..'
 import { optionKey } from '$src/utils/platform'
+import { HistoryEntry } from '$src/state/fileState'
 
 const CODES = {
     L: 76,
 }
+
+const fakeHistory: HistoryEntry[] = [
+    {
+        path: 'a',
+        sortMethod: 'name',
+        sortOrder: 'asc',
+        showHiddenFiles: false,
+        layout: 'details',
+    },
+    {
+        path: 'b',
+        sortMethod: 'name',
+        sortOrder: 'asc',
+        showHiddenFiles: false,
+        layout: 'details',
+    },
+    {
+        path: 'c',
+        sortMethod: 'name',
+        sortOrder: 'asc',
+        showHiddenFiles: false,
+        layout: 'details',
+    },
+    {
+        path: 'd',
+        sortMethod: 'name',
+        sortOrder: 'asc',
+        showHiddenFiles: false,
+        layout: 'details',
+    },
+]
 
 describe('Toolbar', () => {
     const options = {
@@ -69,7 +98,7 @@ describe('Toolbar', () => {
         // enable back button
         cache.current = 2
         // enable foward button
-        cache.history.push(...'azerty'.split(''))
+        cache.history.push(...fakeHistory)
 
         render(<Toolbar {...PROPS} />, options)
 
@@ -98,7 +127,7 @@ describe('Toolbar', () => {
             jest.spyOn(cache, 'navHistory').mockImplementation()
 
             // enable foward button
-            cache.history.push(...'azerty'.split(''))
+            cache.history.push(...fakeHistory)
 
             const { user } = setup(<Toolbar {...PROPS} />, options)
 
@@ -112,7 +141,7 @@ describe('Toolbar', () => {
             jest.spyOn(cache, 'openParentDirectory').mockImplementation()
 
             // enable foward button
-            cache.history.push(...'azerty'.split(''))
+            cache.history.push(...fakeHistory)
 
             const { user } = setup(<Toolbar {...PROPS} />, options)
 

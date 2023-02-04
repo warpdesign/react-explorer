@@ -1,3 +1,6 @@
+/**
+ * @jest-environment node
+ */
 import * as fs from 'fs'
 import { FsLocal } from '../FsLocal'
 
