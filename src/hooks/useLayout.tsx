@@ -31,7 +31,7 @@ export interface InlineEditEvent {
     event: React.SyntheticEvent
 }
 
-export interface LayoutProps<T = Record<string, unknown>> {
+export interface LayoutProps<T> {
     onBlankAreaClick: () => void
     onItemClick: (event: ItemMouseEvent) => void
     onItemDoubleClick: (event: ItemMouseEvent) => void
@@ -46,16 +46,16 @@ export interface LayoutProps<T = Record<string, unknown>> {
     columns: Column[]
     cursorIndex?: number
     isDarkModeActive: boolean
-    // layout-specific options
     options?: T
 }
 
 export interface LayoutActions {
     getNextIndex: (index: number, direction: ArrowKey) => number
+    icons: boolean
 }
 
 export interface LayoutReturnProps {
-    Layout: (props: LayoutProps) => ReactElement
+    Layout: (props: LayoutProps<unknown>) => ReactElement
     actions: LayoutActions
 }
 
@@ -70,6 +70,7 @@ const defaultActions: LayoutActions = {
         console.warn('cannot call getNextIndex: ref not ready!')
         return -1
     },
+    icons: false,
 }
 
 export const makeEvent =
@@ -95,7 +96,7 @@ export const useLayout = (name: LayoutName): LayoutReturnProps => {
     }, [name])
 
     return {
-        Layout: useCallback((props: LayoutProps) => <Layout {...props} ref={layoutRef} />, [layoutRef, name]),
+        Layout: useCallback((props: LayoutProps<unknown>) => <Layout {...props} ref={layoutRef} />, [layoutRef, name]),
         actions: layoutRef.current || defaultActions,
     }
 }

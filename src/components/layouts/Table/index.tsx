@@ -21,7 +21,7 @@ const rowClassName = (item: FileViewItem): string => {
     })
 }
 
-export const TableLayout = forwardRef<LayoutActions, LayoutProps>(
+export const TableLayout = forwardRef<LayoutActions, LayoutProps<undefined>>(
     (
         {
             onItemClick,
@@ -38,7 +38,7 @@ export const TableLayout = forwardRef<LayoutActions, LayoutProps>(
             status,
             cursorIndex = -1,
             isDarkModeActive,
-        }: LayoutProps,
+        }: LayoutProps<undefined>,
         ref,
     ) => {
         const tableRef: React.MutableRefObject<HTMLDivElement> = useRef()
@@ -49,26 +49,23 @@ export const TableLayout = forwardRef<LayoutActions, LayoutProps>(
             overscan: 5,
         })
 
-        useImperativeHandle(
-            ref,
-            () => ({
-                getNextIndex: (index: number, direction: ArrowKey) => {
-                    console.log(`should navigate to ${direction} index=${index} itemCount=${itemCount}`)
-                    switch (direction) {
-                        case 'ArrowDown':
-                            return index + 1
+        useImperativeHandle(ref, () => ({
+            getNextIndex: (index: number, direction: ArrowKey) => {
+                console.log(`should navigate to ${direction} index=${index} itemCount=${itemCount}`)
+                switch (direction) {
+                    case 'ArrowDown':
+                        return index + 1
 
-                        case 'ArrowUp':
-                            return index - 1
+                    case 'ArrowUp':
+                        return index - 1
 
-                        default:
-                            console.warn(`getNextIndex: unknown direction ${direction}`)
-                            return -1
-                    }
-                },
-            }),
-            [],
-        )
+                    default:
+                        console.warn(`getNextIndex: unknown direction ${direction}`)
+                        return -1
+                }
+            },
+            icons: false,
+        }))
 
         useEffect(() => {
             // Position scrolling in these cases:

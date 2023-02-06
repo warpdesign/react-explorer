@@ -3,11 +3,11 @@ import { useVirtual } from 'react-virtual'
 import classNames from 'classnames'
 import { Colors, Icon } from '@blueprintjs/core'
 
-import { LayoutActions, LayoutProps } from '$src/hooks/useLayout'
+import { LayoutActions, LayoutProps, makeEvent } from '$src/hooks/useLayout'
 import { ArrowKey, FileViewItem } from '$src/types'
 import { TruncatedText } from '../components/TruncatedText'
 
-import '$src/css/fileview-table.css'
+import '$src/css/fileview-icons.css'
 import { Placeholder } from '../components/Placeholder'
 
 const ROW_HEIGHT = 28
@@ -43,16 +43,19 @@ export const IconsLayout = forwardRef<LayoutActions, LayoutProps<IconLayoutOptio
             cursorIndex = -1,
             isDarkModeActive,
             options: { iconSize } = {
-                iconSize: 64 + 24,
+                iconSize: 64,
             },
         }: LayoutProps<IconLayoutOptions>,
         ref,
     ) => {
         const tableRef: React.MutableRefObject<HTMLDivElement> = useRef()
         const [rowWidth, setRowWidth] = useState(0)
-        const itemPerRow = Math.floor(rowWidth / iconSize)
+        const itemWidth = Math.floor(iconSize * 1.9)
+        const itemPerRow = Math.floor(rowWidth / itemWidth)
         const extraRow = itemCount % itemPerRow ? 1 : 0
         const numRows = itemPerRow > 0 ? Math.floor(itemCount / itemPerRow) + extraRow : 0
+
+        console.log('render Icons!', cursorIndex)
 
         const getItems = (row: number) => {
             const startIndex = row * itemPerRow
@@ -66,12 +69,10 @@ export const IconsLayout = forwardRef<LayoutActions, LayoutProps<IconLayoutOptio
             return items
         }
 
-        console.log({ rowWidth, numRows, itemPerRow, itemCount })
-
         const { totalSize, virtualItems, scrollToIndex } = useVirtual({
             size: numRows,
             parentRef: tableRef,
-            estimateSize: React.useCallback(() => iconSize + 20, []),
+            estimateSize: React.useCallback(() => Math.floor(itemWidth * 1.1), []),
             overscan: 0,
         })
 
@@ -84,14 +85,21 @@ export const IconsLayout = forwardRef<LayoutActions, LayoutProps<IconLayoutOptio
             ref,
             () => ({
                 getNextIndex: (index: number, direction: ArrowKey) => {
-                    console.log(`should navigate to ${direction} index=${index} itemCount=${itemCount}`)
+                    console.log(
+                        `should navigate to ${direction} index=${index} itemCount=${itemCount} itemPerRow=${itemPerRow}`,
+                    )
+                    debugger
                     switch (direction) {
-                        // TODO: arrowDown/up = move one row up/down
-                        // arrowLeft/Right: move one index up/down
                         case 'ArrowDown':
-                            return index + 1
+                            return index + itemPerRow
 
                         case 'ArrowUp':
+                            return index - itemPerRow
+
+                        case 'ArrowRight':
+                            return index + 1
+
+                        case 'ArrowLeft':
                             return index - 1
 
                         default:
@@ -99,22 +107,31 @@ export const IconsLayout = forwardRef<LayoutActions, LayoutProps<IconLayoutOptio
                             return -1
                     }
                 },
+                icons: true,
             }),
-            [],
+            [itemPerRow],
         )
 
-        useEffect(() => {
-            // Position scrolling in these cases:
-            // 1. new file has been selected: scroll to selected index to make sure it's visible
-            // 2. new directory has been loaded (or same reloaded): scroll to top or selected index
-            status === 'ok' && scrollToIndex(cursorIndex === -1 ? 0 : cursorIndex)
-        }, [cursorIndex, status])
+        // useEffect(() => {
+        //     // Position scrolling in these cases:
+        //     // 1. new file has been selected: scroll to selected index to make sure it's visible
+        //     // 2. new directory has been loaded (or same reloaded): scroll to top or selected index
+        //     if (status === 'ok' && itemPerRow > 0) {
+        //         console.log('*** scrolling to cursorIndex', cursorIndex, itemPerRow)
+        //         const row = Math.ceil(cursorIndex/itemPerRow)
+        //         // const extraRow = cursorIndex % itemPerRow ? 1 : 0
+        //         console.log('*** scrolling to index', cursorIndex === -1 ? 0 : row)
+        //         scrollToIndex(cursorIndex === -1 ? 0 : row)
+        //     }
+
+        // }, [cursorIndex, status, itemPerRow])
 
         return (
             <div
+                className="fileview-icons"
                 ref={tableRef}
                 style={{ height: '100%', width: '100%', overflow: 'auto' }}
-                onClick={onBlankAreaClick}
+                // onClick={onBlankAreaClick}
                 tabIndex={0}
             >
                 {!virtualItems.length ? (
@@ -143,28 +160,41 @@ export const IconsLayout = forwardRef<LayoutActions, LayoutProps<IconLayoutOptio
                                     data-cy-file
                                     tabIndex={0}
                                 >
-                                    {items.map((item, index) => (
-                                        <div
-                                            key={`row_${virtualRow.index}_item_${index}`}
-                                            style={{
-                                                padding: '4px',
-                                                overflow: 'hidden',
-                                                width: '120px',
-                                                wordBreak: 'break-word',
-                                                display: 'flex',
-                                                flexDirection: 'column',
-                                                alignItems: 'center',
-                                                textAlign: 'center',
-                                            }}
-                                        >
-                                            <Icon icon={item.icon} size={64} color={Colors.GRAY2} title={item.name} />
-                                            <TruncatedText
-                                                key={`text_${virtualRow.index}_item_${index}`}
-                                                text={item.name}
-                                                lines={2}
-                                            />
-                                        </div>
-                                    ))}
+                                    {items.map((item, index) => {
+                                        const clickHandler = makeEvent(
+                                            virtualRow.index * itemPerRow + index,
+                                            item,
+                                            onItemClick,
+                                        )
+                                        if (item.isSelected) {
+                                            console.log(item.isSelected, item.name)
+                                        }
+                                        return (
+                                            <div
+                                                className={classNames(item.isSelected && 'selected')}
+                                                key={`row_${virtualRow.index}_item_${index}`}
+                                                style={{
+                                                    padding: '4px',
+                                                    overflow: 'hidden',
+                                                    width: `${itemWidth}px`,
+                                                }}
+                                                onClick={clickHandler}
+                                            >
+                                                <Icon
+                                                    icon={item.icon}
+                                                    size={iconSize}
+                                                    color={Colors.GRAY2}
+                                                    title={item.name}
+                                                    className="icon"
+                                                />
+                                                <TruncatedText
+                                                    key={`text_${virtualRow.index}_item_${index}`}
+                                                    text={item.name}
+                                                    lines={2}
+                                                />
+                                            </div>
+                                        )
+                                    })}
                                     {/* <Row
                                             rowData={rowData}
                                             index={virtualRow.index}

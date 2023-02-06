@@ -209,6 +209,7 @@ export const Toolbar = observer(({ active }: Props) => {
                         rightIcon="arrow-up"
                     ></Button>
 
+                    <ViewToggle layout={layout} onClick={(newLayout) => cache.setLayout(newLayout)} />
                     <Popover2
                         content={
                             <FileMenu
@@ -219,9 +220,8 @@ export const Toolbar = observer(({ active }: Props) => {
                         }
                         placement="bottom-start"
                     >
-                        <Button rightIcon="caret-down" icon="cog" />
+                        <Button rightIcon="caret-down" icon="wrench" />
                     </Popover2>
-                    <ViewToggle layout={layout} onClick={(newLayout) => cache.setLayout(newLayout)} />
                 </ButtonGroup>
                 <InputGroup
                     data-cy-path

@@ -1,4 +1,5 @@
 import * as React from 'react'
+import { IconNames } from '@blueprintjs/icons'
 import { Menu, MenuItem, MenuDivider } from '@blueprintjs/core'
 import { useTranslation } from 'react-i18next'
 
@@ -13,9 +14,9 @@ export const HamburgerMenu = ({ onOpenPrefs, onOpenShortcuts }: HamburgerProps) 
     return (
         <>
             <Menu className="data-cy-app-menu">
-                <MenuItem text={t('NAV.PREFS')} icon="cog" onClick={onOpenPrefs} />
+                <MenuItem text={t('NAV.PREFS')} icon={IconNames.SETTINGS} onClick={onOpenPrefs} />
                 <MenuDivider />
-                <MenuItem text={t('NAV.SHORTCUTS')} icon="lightbulb" onClick={onOpenShortcuts} />
+                <MenuItem text={t('NAV.SHORTCUTS')} icon={IconNames.LIGHTBULB} onClick={onOpenShortcuts} />
             </Menu>
         </>
     )

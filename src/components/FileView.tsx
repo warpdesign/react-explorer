@@ -81,13 +81,16 @@ const FileView = observer(({ hide }: Props) => {
         }),
     )
     const rowCount = nodes.length
+    const counter = useRef(0)
 
     const rightClickFileIndexRef: MutableRefObject<number> = useRef<number>()
 
     const {
         Layout,
-        actions: { getNextIndex },
+        actions: { getNextIndex, icons },
     } = useLayout(layout)
+
+    console.log('render!', { cursorIndex, cursor, icons })
 
     useKeyDown(
         React.useCallback(
@@ -99,10 +102,14 @@ const FileView = observer(({ hide }: Props) => {
                 switch (event.key) {
                     case 'ArrowUp':
                     case 'ArrowDown':
+                    case 'ArrowRight':
+                    case 'ArrowLeft':
                         // Prevent arrow keys to trigger generic browser scrolling: we want to handle it
                         // ourselves so that the cursor is always visible.
                         event.preventDefault()
 
+                        console.log('usekeydown (render)', layout, icons)
+                        debugger
                         const nextIndex = getNextIndex(cursorIndex, event.key as ArrowKey)
                         if (nextIndex > -1 && nextIndex <= rowCount - 1) {
                             const file = cache.files[nextIndex]
@@ -118,9 +125,9 @@ const FileView = observer(({ hide }: Props) => {
                         break
                 }
             },
-            [cursor, cache, getNextIndex, rowCount],
+            [cursor, cache, getNextIndex, rowCount, icons],
         ),
-        ['ArrowDown', 'ArrowUp', 'Enter'],
+        ['ArrowDown', 'ArrowUp', 'ArrowLeft', 'ArrowRight', 'Enter'],
     )
 
     useMenuAccelerator([

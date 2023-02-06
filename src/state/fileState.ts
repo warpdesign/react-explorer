@@ -448,6 +448,8 @@ export class FileState {
             this.selected.replace(this.files.slice(start, end))
         }
 
+        console.log('added', file)
+
         this.setCursor(file)
     }
 
