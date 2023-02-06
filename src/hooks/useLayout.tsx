@@ -56,7 +56,7 @@ export interface LayoutActions {
 
 export interface LayoutReturnProps {
     Layout: (props: LayoutProps<unknown>) => ReactElement
-    actions: LayoutActions
+    getActions: () => LayoutActions
 }
 
 export interface Column {
@@ -81,22 +81,22 @@ export const makeEvent =
             event,
         })
 
-export const useLayout = (name: LayoutName): LayoutReturnProps => {
+export const useLayout = (name: LayoutName): LayoutReturnProps & { layoutRef: React.MutableRefObject<any> } => {
     const Layout = layouts[name]
     if (!Layout) {
         throw `could not find layout "${name}"`
     }
     const layoutRef = useRef()
-    const [ready, setReady] = useState(false)
-
-    // Little hack to force a rereneder of the parent component
-    // without it, the ref isn't defined in test environment
-    useEffect(() => {
-        setReady(true)
-    }, [name])
 
     return {
         Layout: useCallback((props: LayoutProps<unknown>) => <Layout {...props} ref={layoutRef} />, [layoutRef, name]),
-        actions: layoutRef.current || defaultActions,
+        // we cannot simply return the layoutRef.current because the layout will
+        // be modified *after* this component has rendered, so the parent could
+        // have the previous reference.
+        //
+        // Note: getActions should be called inside handlers and not inside
+        // renderers
+        getActions: () => layoutRef.current || defaultActions,
+        layoutRef,
     }
 }

@@ -88,10 +88,14 @@ export const IconsLayout = forwardRef<LayoutActions, LayoutProps<IconLayoutOptio
                     console.log(
                         `should navigate to ${direction} index=${index} itemCount=${itemCount} itemPerRow=${itemPerRow}`,
                     )
-                    debugger
+
                     switch (direction) {
                         case 'ArrowDown':
-                            return index + itemPerRow
+                            // if it's the first time arrow down key is pressed
+                            // we have to select the first element of the first row,
+                            // otherwise, select the element at the same position
+                            // in the next row
+                            return index === -1 ? 0 : index + itemPerRow
 
                         case 'ArrowUp':
                             return index - itemPerRow
