@@ -116,19 +116,17 @@ export const IconsLayout = forwardRef<LayoutActions, LayoutProps<IconLayoutOptio
             [itemPerRow],
         )
 
-        // useEffect(() => {
-        //     // Position scrolling in these cases:
-        //     // 1. new file has been selected: scroll to selected index to make sure it's visible
-        //     // 2. new directory has been loaded (or same reloaded): scroll to top or selected index
-        //     if (status === 'ok' && itemPerRow > 0) {
-        //         console.log('*** scrolling to cursorIndex', cursorIndex, itemPerRow)
-        //         const row = Math.ceil(cursorIndex/itemPerRow)
-        //         // const extraRow = cursorIndex % itemPerRow ? 1 : 0
-        //         console.log('*** scrolling to index', cursorIndex === -1 ? 0 : row)
-        //         scrollToIndex(cursorIndex === -1 ? 0 : row)
-        //     }
-
-        // }, [cursorIndex, status, itemPerRow])
+        useEffect(() => {
+            // Position scrolling in these cases:
+            // 1. new file has been selected: scroll to selected index to make sure it's visible
+            // 2. new directory has been loaded (or same reloaded): scroll to top or selected index
+            if (status === 'ok' && itemPerRow > 0) {
+                console.log('*** scrolling to cursorIndex', cursorIndex, itemPerRow)
+                const row = Math.floor(cursorIndex / itemPerRow)
+                console.log('*** scrolling to index', cursorIndex === -1 ? 0 : row)
+                scrollToIndex(cursorIndex === -1 ? 0 : row)
+            }
+        }, [cursorIndex, status, itemPerRow])
 
         return (
             <div

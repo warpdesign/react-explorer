@@ -14,7 +14,7 @@ export const TruncatedText = ({ text, lines, ellipsis = '....' }: TruncateProps)
         const element = textRef.current
         element.textContent = text
         let clientRects = element.getClientRects()
-        console.log(text, clientRects.length)
+        // console.log(text, clientRects.length)
         let truncatedText = ''
         if (clientRects.length > lines) {
             let truncLength = ellipsis.length
@@ -27,7 +27,7 @@ export const TruncatedText = ({ text, lines, ellipsis = '....' }: TruncateProps)
                 const croppedText = `${leftPart}${rightPart}`
                 truncatedText = croppedText.substring(0, 4).trimRight() + '…' + croppedText.substring(5).trimLeft()
                 element.textContent = truncatedText
-                console.log('testing with', truncatedText, { rightPos, leftPos, truncLength: truncLength / 2 })
+                // console.log('testing with', truncatedText, { rightPos, leftPos, truncLength: truncLength / 2 })
                 clientRects = element.getClientRects()
                 truncLength += 4
             }
