@@ -157,9 +157,7 @@ export const IconsLayout = forwardRef<LayoutActions, LayoutProps<IconLayoutOptio
                                             item,
                                             onItemClick,
                                         )
-                                        if (item.isSelected) {
-                                            console.log(item.isSelected, item.name)
-                                        }
+
                                         return (
                                             <div
                                                 className={classNames(item.isSelected && 'selected')}

@@ -136,7 +136,8 @@
             "PARENT": "Open parent folder",
             "ICON_VIEW": "Icons",
             "DETAILS_VIEW": "Details",
-            "CHANGE_VIEW": "Change display mode"
+            "CHANGE_VIEW": "Change display mode",
+            "CHANGE_SORT_METHOD": "Change files sort order"
         },
         "COMMON": {
             "SIZE": {
@@ -170,7 +171,9 @@
         },
         "FILETABLE": {
             "COL_NAME": "Name",
-            "COL_SIZE": "Size"
+            "COL_SIZE": "Size",
+            "SORT_ASCENDING": "Ascending",
+            "SORT_DESCENDING": "Descending"
         },
         "FILEMENU": {
             "PASTE_one": "Paste {{count}} item",
