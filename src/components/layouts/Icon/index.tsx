@@ -10,17 +10,6 @@ import { TruncatedText } from '../components/TruncatedText'
 import '$src/css/fileview-icons.css'
 import { Placeholder } from '../components/Placeholder'
 
-const ROW_HEIGHT = 28
-
-const rowClassName = (item: FileViewItem): string => {
-    const error = item && item.nodeData.mode === -1
-
-    return classNames('tableRow', item && item.className, {
-        selected: item && item.isSelected,
-        error: error,
-    })
-}
-
 export interface IconLayoutOptions {
     iconSize: number
 }
@@ -72,7 +61,7 @@ export const IconsLayout = forwardRef<LayoutActions, LayoutProps<IconLayoutOptio
         const { totalSize, virtualItems, scrollToIndex } = useVirtual({
             size: numRows,
             parentRef: tableRef,
-            estimateSize: React.useCallback(() => Math.floor(itemWidth * 1.1), []),
+            estimateSize: React.useCallback(() => Math.floor(itemWidth), []),
             overscan: 0,
         })
 
@@ -176,9 +165,10 @@ export const IconsLayout = forwardRef<LayoutActions, LayoutProps<IconLayoutOptio
                                                 className={classNames(item.isSelected && 'selected')}
                                                 key={`row_${virtualRow.index}_item_${index}`}
                                                 style={{
-                                                    padding: '4px',
+                                                    margin: '4px',
                                                     overflow: 'hidden',
                                                     width: `${itemWidth}px`,
+                                                    alignSelf: 'start',
                                                 }}
                                                 onClick={clickHandler}
                                             >

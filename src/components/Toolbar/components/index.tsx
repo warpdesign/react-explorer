@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next'
 import { Popover2 } from '@blueprintjs/popover2'
 
 export const getTickIcon = (currentLayout: LayoutName, wantedLayout: LayoutName): IconName | undefined =>
-    currentLayout === wantedLayout ? 'small-tick' : undefined
+    currentLayout === wantedLayout ? 'small-tick' : 'blank'
 
 export const ViewToggleMenu = ({ layout, onClick }: { layout: LayoutName; onClick: (layout: LayoutName) => void }) => {
     const { t } = useTranslation()
@@ -15,15 +15,15 @@ export const ViewToggleMenu = ({ layout, onClick }: { layout: LayoutName; onClic
         <Menu>
             <MenuItem
                 text={t('TOOLBAR.DETAILS_VIEW')}
-                icon="properties"
+                icon={getTickIcon(layout, 'details')}
                 onClick={() => onClick('details')}
-                labelElement={<Icon icon={getTickIcon(layout, 'details')} />}
+                labelElement={<Icon icon="properties" />}
             />
             <MenuItem
                 text={t('TOOLBAR.ICON_VIEW')}
-                icon="grid-view"
+                icon={getTickIcon(layout, 'icons')}
                 onClick={() => onClick('icons')}
-                labelElement={<Icon icon={getTickIcon(layout, 'icons')} />}
+                labelElement={<Icon icon="grid-view" />}
             />
         </Menu>
     )
