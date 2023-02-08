@@ -117,7 +117,14 @@ export const IconLayout = forwardRef<LayoutActions, LayoutProps<IconLayoutOption
             <div
                 className="fileview-icons"
                 ref={tableRef}
-                style={{ height: '100%', width: '100%', overflow: 'auto' }}
+                style={{
+                    height: '100%',
+                    width: '100%',
+                    overflow: 'auto',
+                    wordBreak: 'break-word',
+                    textAlign: 'center',
+                    borderRadius: '8px',
+                }}
                 onClick={onBlankAreaClick}
                 tabIndex={0}
             >

@@ -42,9 +42,10 @@ export const TruncatedText = ({ text, lines, ellipsis = '....', isSelected }: Tr
 
     return (
         <span
-            className="truncated"
             style={{
                 display: 'block',
+                padding: '4px',
+                borderRadius: '4px',
                 ...(isSelected ? { color: Colors.WHITE, backgroundColor: Colors.BLUE3 } : {}),
             }}
         >
