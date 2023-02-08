@@ -1,12 +1,14 @@
 import React, { useState, useEffect, useRef } from 'react'
+import { Colors } from '@blueprintjs/core'
 
 interface TruncateProps {
     text: string
     lines: number
     ellipsis?: string
+    isSelected: boolean
 }
 
-export const TruncatedText = ({ text, lines, ellipsis = '....' }: TruncateProps) => {
+export const TruncatedText = ({ text, lines, ellipsis = '....', isSelected }: TruncateProps) => {
     const [displayText, setDisplayText] = useState(text)
     const textRef = useRef(null)
 
@@ -39,7 +41,13 @@ export const TruncatedText = ({ text, lines, ellipsis = '....' }: TruncateProps)
     }, [text, lines])
 
     return (
-        <span className="truncated" style={{ display: 'block' }}>
+        <span
+            className="truncated"
+            style={{
+                display: 'block',
+                ...(isSelected ? { color: Colors.WHITE, backgroundColor: Colors.BLUE3 } : {}),
+            }}
+        >
             <span title={text} ref={textRef}>
                 {displayText}
             </span>

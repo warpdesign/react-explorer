@@ -28,14 +28,16 @@ export const IconLayout = forwardRef<LayoutActions, LayoutProps<IconLayoutOption
             cursorIndex = -1,
             isDarkModeActive,
             options: { iconSize } = {
-                iconSize: 64,
+                iconSize: 56,
             },
         }: LayoutProps<IconLayoutOptions>,
         ref,
     ) => {
         const tableRef: React.MutableRefObject<HTMLDivElement> = useRef()
         const [rowWidth, setRowWidth] = useState(0)
-        const itemWidth = Math.floor(iconSize * 1.9)
+        // margin between items: we need to add it to the width
+        const margin = 4
+        const itemWidth = iconSize * 1.9 + margin * 2
         const itemsPerRow = Math.floor(rowWidth / itemWidth)
         const extraRow = itemCount % itemsPerRow ? 1 : 0
         const numRows = itemsPerRow > 0 ? Math.floor(itemCount / itemsPerRow) + extraRow : 0
@@ -151,6 +153,7 @@ export const IconLayout = forwardRef<LayoutActions, LayoutProps<IconLayoutOption
                                             item={item}
                                             itemIndex={virtualRow.index * itemsPerRow + index}
                                             width={itemWidth}
+                                            margin={margin}
                                             onItemClick={onItemClick}
                                             onItemDoubleClick={onItemDoubleClick}
                                             onItemRightClick={onItemRightClick}
@@ -158,16 +161,6 @@ export const IconLayout = forwardRef<LayoutActions, LayoutProps<IconLayoutOption
                                             iconSize={iconSize}
                                         />
                                     ))}
-                                    {/* <Row
-                                            rowData={rowData}
-                                            index={virtualRow.index}
-                                            onRowClick={onItemClick}
-                                            onRowRightClick={onItemRightClick}
-                                            onRowDoubleClick={onItemDoubleClick}
-                                            onInlineEdit={onInlineEdit}
-                                            getDragProps={getDragProps}
-                                            isDarkModeActive={isDarkModeActive}
-                                        /> */}
                                 </div>
                             )
                         })}
