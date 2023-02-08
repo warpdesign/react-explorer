@@ -213,7 +213,7 @@ export const Toolbar = observer(({ active }: Props) => {
                         title={t('TOOLBAR.PARENT')}
                         disabled={cache.isRoot()}
                         onClick={onParent}
-                        rightIcon="arrow-up"
+                        rightIcon="chevron-up"
                     ></Button>
 
                     <ViewToggle layout={layout} onClick={(newLayout) => cache.setLayout(newLayout)} />

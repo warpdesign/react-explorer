@@ -4,12 +4,12 @@ import type { ReactElement } from 'react'
 import { ArrowKey, DraggedObject, FileViewItem } from '$src/types'
 import { TSORT_METHOD_NAME, TSORT_ORDER } from '$src/services/FsSort'
 import { TStatus } from '$src/state/fileState'
-import { TableLayout } from '$src/components/layouts/Table/'
-import { IconsLayout } from '$src/components/layouts/Icon/'
+import { TableLayout } from '$src/components/layouts/TableLayout/'
+import { IconLayout } from '$src/components/layouts/IconLayout/'
 
 const layouts: { [key in LayoutName]: any } = {
     details: TableLayout,
-    icons: IconsLayout,
+    icons: IconLayout,
 }
 
 export type LayoutName = 'details' | 'icons'

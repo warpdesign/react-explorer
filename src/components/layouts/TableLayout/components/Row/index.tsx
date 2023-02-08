@@ -5,7 +5,7 @@ import type { DraggedObject, FileViewItem } from '$src/types'
 import { InlineEditEvent, ItemMouseEvent, makeEvent } from '$src/hooks/useLayout'
 import { Name } from '../Column/Name'
 import { Size } from '../Column/Size'
-import { createDragPreview } from '$src/components/layouts/Table/utils'
+import { createDragPreview } from '$src/components/layouts/TableLayout/utils'
 import { useTranslation } from 'react-i18next'
 
 interface CollectedProps {

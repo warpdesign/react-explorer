@@ -33,11 +33,10 @@ export const ViewToggleMenu = ({ layout, onClick }: { layout: LayoutName; onClic
 
 export const ViewToggle = ({ layout, onClick }: { layout: LayoutName; onClick: (layout: LayoutName) => void }) => {
     const { t } = useTranslation()
-    const icon = layout === 'details' ? 'properties' : 'grid-view'
 
     return (
         <Popover2 content={<ViewToggleMenu onClick={onClick} layout={layout} />} placement="bottom-start">
-            <Button icon={icon} title={t('TOOLBAR.CHANGE_VIEW')} />
+            <Button icon={IconNames.GRID_VIEW} title={t('TOOLBAR.CHANGE_VIEW')} />
         </Popover2>
     )
 }
