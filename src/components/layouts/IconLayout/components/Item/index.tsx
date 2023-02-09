@@ -1,9 +1,9 @@
 import React, { useCallback } from 'react'
 import classNames from 'classnames'
-import { Classes, Colors, Icon, TextArea } from '@blueprintjs/core'
+import { Colors, Icon } from '@blueprintjs/core'
 
 import { TruncatedText } from '$src/components/layouts/components/TruncatedText'
-import { ItemMouseEvent, makeEvent } from '$src/hooks/useLayout'
+import { InlineEditEvent, ItemMouseEvent, makeEvent } from '$src/hooks/useLayout'
 import { DraggedObject, FileViewItem } from '$src/types'
 import { useFileClick } from '$src/hooks/useFileClick'
 import { useDragFile } from '$src/hooks/useDragFile'
@@ -18,6 +18,7 @@ interface Props {
     onItemClick: (event: ItemMouseEvent) => void
     onItemDoubleClick: (event: ItemMouseEvent) => void
     onItemRightClick: (event: ItemMouseEvent) => void
+    onInlineEdit: (event: InlineEditEvent) => void
     getDragProps: (index: number) => DraggedObject
 }
 
@@ -25,6 +26,7 @@ export const Item = ({
     onItemClick,
     onItemDoubleClick,
     onItemRightClick,
+    onInlineEdit,
     getDragProps,
     margin,
     width,
@@ -36,9 +38,10 @@ export const Item = ({
     const clickHandler = makeEvent(itemIndex, item, onItemClick)
     const doubleClickHandler = makeEvent(itemIndex, item, onItemDoubleClick)
     const rightClickHandler = makeEvent(itemIndex, item, onItemRightClick)
+    const dragProps = getDragProps(itemIndex)
     const { dragRef, dragPreview } = useDragFile({
         isDarkModeActive,
-        dragProps: getDragProps(itemIndex),
+        dragProps,
     })
     const mouseProps = useFileClick({
         clickHandler,
@@ -65,19 +68,12 @@ export const Item = ({
                 {...mouseProps}
             >
                 <Icon icon={item.icon} size={iconSize} color={Colors.GRAY2} title={item.name} className="icon" />
-                {!item.isEditing ? (
-                    <TruncatedText text={item.name} lines={2} isSelected={item.isSelected} />
-                ) : (
-                    <TextArea
-                        className={Classes.INPUT}
-                        spellCheck={false}
-                        defaultValue={item.name}
-                        growVertically={false}
-                        fill={false}
-                        autoFocus
-                        small
-                    />
-                )}
+                <TruncatedText
+                    lines={2}
+                    item={item}
+                    selectedCount={dragProps.fileState.selected.length}
+                    onInlineEdit={onInlineEdit}
+                />
             </div>
             {dragPreview}
         </>
