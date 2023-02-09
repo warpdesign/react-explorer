@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react'
 import { observer } from 'mobx-react'
 import { InputGroup, ControlGroup, Button, ButtonGroup, Intent, HotkeysTarget2, Classes } from '@blueprintjs/core'
+import { IconNames } from '@blueprintjs/icons'
 import { Popover2 } from '@blueprintjs/popover2'
 import { useTranslation } from 'react-i18next'
 
@@ -228,7 +229,7 @@ export const Toolbar = observer(({ active }: Props) => {
                         }
                         placement="bottom-start"
                     >
-                        <Button rightIcon="caret-down" icon="wrench" />
+                        <Button rightIcon="caret-down" icon={IconNames.FOLDER_NEW} />
                     </Popover2>
                 </ButtonGroup>
                 <InputGroup

@@ -1,10 +1,11 @@
-import React, { useRef } from 'react'
+import React, { useCallback } from 'react'
 import classNames from 'classnames'
 import { Classes, Colors, Icon, TextArea } from '@blueprintjs/core'
 
 import { TruncatedText } from '$src/components/layouts/components/TruncatedText'
 import { ItemMouseEvent, makeEvent } from '$src/hooks/useLayout'
 import { FileViewItem } from '$src/types'
+import { useFileClick } from '$src/hooks/useFileClick'
 
 interface Props {
     item: FileViewItem
@@ -18,8 +19,6 @@ interface Props {
     onItemRightClick: (event: ItemMouseEvent) => void
 }
 
-export const CLICK_DELAY = 500
-
 export const Item = ({
     onItemClick,
     onItemDoubleClick,
@@ -31,10 +30,19 @@ export const Item = ({
     iconSize,
     isDarkModeActive,
 }: Props) => {
-    const clickRef: React.MutableRefObject<number> = useRef(-CLICK_DELAY)
     const clickHandler = makeEvent(itemIndex, item, onItemClick)
     const doubleClickHandler = makeEvent(itemIndex, item, onItemDoubleClick)
     const rightClickHandler = makeEvent(itemIndex, item, onItemRightClick)
+    const mouseProps = useFileClick({
+        clickHandler,
+        doubleClickHandler,
+        rightClickHandler,
+        // we don't want to react on clicks on empty/blank area
+        shouldSkipEvent: useCallback(
+            (event: React.MouseEvent<HTMLElement>) => (event.target as HTMLElement).tagName === 'DIV',
+            [],
+        ),
+    })
 
     return (
         <div
@@ -45,25 +53,7 @@ export const Item = ({
                 width: `${width}px`,
                 alignSelf: 'start',
             }}
-            onClick={(e: React.MouseEvent<HTMLElement>) => {
-                // we don't want to react on clicks on empty/blank area
-                if ((e.target as HTMLElement).tagName === 'DIV') {
-                    return
-                }
-
-                e.stopPropagation()
-
-                if (e.timeStamp - clickRef.current > CLICK_DELAY) {
-                    clickHandler(e)
-                } else {
-                    doubleClickHandler(e)
-                }
-                clickRef.current = e.timeStamp
-            }}
-            onContextMenu={(e: React.MouseEvent<HTMLElement>) => {
-                e.stopPropagation()
-                rightClickHandler(e)
-            }}
+            {...mouseProps}
         >
             <Icon icon={item.icon} size={iconSize} color={Colors.GRAY2} title={item.name} className="icon" />
             {!item.isEditing ? (

@@ -4,8 +4,8 @@ import { Icon, InputGroup } from '@blueprintjs/core'
 import type { FileViewItem } from '$src/types'
 import { InlineEditEvent } from '$src/hooks/useLayout'
 import { getSelectionRange } from '$src/utils/fileUtils'
-import { CLICK_DELAY } from '../Row'
 import { isMac } from '$src/utils/platform'
+import { CLICK_DELAY } from '$src/hooks/useFileClick'
 
 interface Props {
     data: FileViewItem
