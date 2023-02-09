@@ -164,6 +164,7 @@ export const IconLayout = forwardRef<LayoutActions, LayoutProps<IconLayoutOption
                                             onItemClick={onItemClick}
                                             onItemDoubleClick={onItemDoubleClick}
                                             onItemRightClick={onItemRightClick}
+                                            getDragProps={getDragProps}
                                             isDarkModeActive={isDarkModeActive}
                                             iconSize={iconSize}
                                         />
