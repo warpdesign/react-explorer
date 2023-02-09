@@ -106,9 +106,7 @@ export const IconLayout = forwardRef<LayoutActions, LayoutProps<IconLayoutOption
             // 1. new file has been selected: scroll to selected index to make sure it's visible
             // 2. new directory has been loaded (or same reloaded): scroll to top or selected index
             if (status === 'ok' && itemsPerRow > 0) {
-                console.log('*** scrolling to cursorIndex', cursorIndex, itemsPerRow)
                 const row = Math.floor(cursorIndex / itemsPerRow)
-                console.log('*** scrolling to index', cursorIndex === -1 ? 0 : row)
                 scrollToIndex(cursorIndex === -1 ? 0 : row)
             }
         }, [cursorIndex, status, itemsPerRow])

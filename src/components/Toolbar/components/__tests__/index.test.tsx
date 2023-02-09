@@ -73,7 +73,7 @@ describe('Toolbar components', () => {
         })
 
         it('should return "tick-icon" if currentLayout does not equal to wantedLayout', () => {
-            expect(getTickIcon('details', 'icons')).toBe(undefined)
+            expect(getTickIcon('details', 'icons')).toBe('blank')
         })
     })
 })
