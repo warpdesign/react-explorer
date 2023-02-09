@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react'
 import { observer } from 'mobx-react'
 import { InputGroup, ControlGroup, Button, ButtonGroup, Intent, HotkeysTarget2, Classes } from '@blueprintjs/core'
+import { IconNames } from '@blueprintjs/icons'
 import { Popover2 } from '@blueprintjs/popover2'
 import { useTranslation } from 'react-i18next'
 
@@ -12,7 +13,8 @@ import { LocalizedError } from '$src/locale/error'
 import Keys from '$src/constants/keys'
 import { useStores } from '$src/hooks/useStores'
 import { useMenuAccelerator } from '$src/hooks/useAccelerator'
-import { ViewToggle } from './components'
+import { SortMenuToggle, ViewToggle } from './components'
+import { TSORT_METHOD_NAME, TSORT_ORDER } from '$src/services/FsSort'
 
 const ERROR_MESSAGE_TIMEOUT = 3500
 
@@ -24,7 +26,7 @@ export const Toolbar = observer(({ active }: Props) => {
     const { appState, viewState } = useStores('appState', 'viewState')
     const [isMakedirDialogOpen, setIsMakedirDialogOpen] = useState(false)
     const cache = viewState.getVisibleCache()
-    const { selected, history, current, layout } = cache
+    const { selected, history, current, layout, sortMethod, sortOrder } = cache
     const [path, setPath] = useState('')
     const { t } = useTranslation()
     const inputRef = useRef<HTMLInputElement>()
@@ -169,6 +171,12 @@ export const Toolbar = observer(({ active }: Props) => {
 
     const onParent = (): void => cache.openParentDirectory()
 
+    const onSortChange = (newSortMethod: TSORT_METHOD_NAME, newSortOrder: TSORT_ORDER) => {
+        if (newSortMethod !== sortMethod || sortOrder !== newSortOrder) {
+            cache.setSort(newSortMethod, newSortOrder)
+        }
+    }
+
     const hotkeys = [
         {
             global: true,
@@ -206,9 +214,11 @@ export const Toolbar = observer(({ active }: Props) => {
                         title={t('TOOLBAR.PARENT')}
                         disabled={cache.isRoot()}
                         onClick={onParent}
-                        rightIcon="arrow-up"
+                        rightIcon="chevron-up"
                     ></Button>
 
+                    <ViewToggle layout={layout} onClick={(newLayout) => cache.setLayout(newLayout)} />
+                    <SortMenuToggle sortMethod={sortMethod} sortOrder={sortOrder} onClick={onSortChange} />
                     <Popover2
                         content={
                             <FileMenu
@@ -219,9 +229,8 @@ export const Toolbar = observer(({ active }: Props) => {
                         }
                         placement="bottom-start"
                     >
-                        <Button rightIcon="caret-down" icon="cog" />
+                        <Button rightIcon="caret-down" icon={IconNames.FOLDER_NEW} />
                     </Popover2>
-                    <ViewToggle layout={layout} onClick={(newLayout) => cache.setLayout(newLayout)} />
                 </ButtonGroup>
                 <InputGroup
                     data-cy-path

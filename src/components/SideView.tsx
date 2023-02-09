@@ -1,4 +1,4 @@
-import * as React from 'react'
+import React from 'react'
 import { Icon, Spinner } from '@blueprintjs/core'
 import { Provider, observer } from 'mobx-react'
 import { useDrop } from 'react-dnd'

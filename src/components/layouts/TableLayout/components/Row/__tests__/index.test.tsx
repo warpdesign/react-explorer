@@ -1,9 +1,10 @@
 import { FileState } from '$src/state/fileState'
 import { FileViewItem } from '$src/types'
 import React from 'react'
-import { render, screen, setup, userEvent, wait } from 'rtl'
+import { render, screen, setup, wait } from 'rtl'
 
-import { Row, CLICK_DELAY } from '..'
+import { CLICK_DELAY } from '$src/hooks/useFileClick'
+import { Row } from '..'
 
 describe('Row', () => {
     const item = {

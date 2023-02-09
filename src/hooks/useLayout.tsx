@@ -4,11 +4,12 @@ import type { ReactElement } from 'react'
 import { ArrowKey, DraggedObject, FileViewItem } from '$src/types'
 import { TSORT_METHOD_NAME, TSORT_ORDER } from '$src/services/FsSort'
 import { TStatus } from '$src/state/fileState'
-import { TableLayout } from '$src/components/layouts/Table/'
+import { TableLayout } from '$src/components/layouts/TableLayout/'
+import { IconLayout } from '$src/components/layouts/IconLayout/'
 
 const layouts: { [key in LayoutName]: any } = {
     details: TableLayout,
-    icons: TableLayout,
+    icons: IconLayout,
 }
 
 export type LayoutName = 'details' | 'icons'
@@ -30,7 +31,7 @@ export interface InlineEditEvent {
     event: React.SyntheticEvent
 }
 
-export interface LayoutProps {
+export interface LayoutProps<T> {
     onBlankAreaClick: () => void
     onItemClick: (event: ItemMouseEvent) => void
     onItemDoubleClick: (event: ItemMouseEvent) => void
@@ -45,15 +46,17 @@ export interface LayoutProps {
     columns: Column[]
     cursorIndex?: number
     isDarkModeActive: boolean
+    options?: T
 }
 
 export interface LayoutActions {
     getNextIndex: (index: number, direction: ArrowKey) => number
+    icons: boolean
 }
 
 export interface LayoutReturnProps {
-    Layout: (props: LayoutProps) => ReactElement
-    actions: LayoutActions
+    Layout: (props: LayoutProps<unknown>) => ReactElement
+    getActions: () => LayoutActions
 }
 
 export interface Column {
@@ -67,6 +70,7 @@ const defaultActions: LayoutActions = {
         console.warn('cannot call getNextIndex: ref not ready!')
         return -1
     },
+    icons: false,
 }
 
 export const makeEvent =
@@ -77,22 +81,22 @@ export const makeEvent =
             event,
         })
 
-export const useLayout = (name: LayoutName): LayoutReturnProps => {
+export const useLayout = (name: LayoutName): LayoutReturnProps & { layoutRef: React.MutableRefObject<any> } => {
     const Layout = layouts[name]
     if (!Layout) {
         throw `could not find layout "${name}"`
     }
     const layoutRef = useRef()
-    const [ready, setReady] = useState(false)
-
-    // Little hack to force a rereneder of the parent component
-    // without it, the ref isn't defined in test environment
-    useEffect(() => {
-        setReady(true)
-    }, [name])
 
     return {
-        Layout: useCallback((props: LayoutProps) => <Layout {...props} ref={layoutRef} />, [layoutRef, name]),
-        actions: layoutRef.current || defaultActions,
+        Layout: useCallback((props: LayoutProps<unknown>) => <Layout {...props} ref={layoutRef} />, [layoutRef, name]),
+        // we cannot simply return the layoutRef.current because the layout will
+        // be modified *after* this component has rendered, so the parent could
+        // have the previous reference.
+        //
+        // Note: getActions should be called inside handlers and not inside
+        // renderers
+        getActions: () => layoutRef.current || defaultActions,
+        layoutRef,
     }
 }

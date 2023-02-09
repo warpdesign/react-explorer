@@ -136,7 +136,8 @@
             "PARENT": "Voir le dossier parent",
             "ICON_VIEW": "Icônes",
             "DETAILS_VIEW": "Détails",
-            "CHANGE_VIEW": "Changer le mode d'affichage"
+            "CHANGE_VIEW": "Changer le mode d'affichage",
+            "CHANGE_SORT_METHOD": "Modifier l'ordonnancement des fichiers"
         },
         "COMMON": {
             "SIZE": {
@@ -168,7 +169,9 @@
         },
         "FILETABLE": {
             "COL_NAME": "Nom",
-            "COL_SIZE": "Taille"
+            "COL_SIZE": "Taille",
+            "SORT_ASCENDING": "Croissant",
+            "SORT_DESCENDING": "Décroissant"
         },
         "FILEMENU": {
             "PASTE_one": "Coller {{count}} élément",

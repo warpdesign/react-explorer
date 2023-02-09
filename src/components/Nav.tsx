@@ -2,7 +2,6 @@ import * as React from 'react'
 import { Navbar, Alignment, Button, Classes, Intent } from '@blueprintjs/core'
 import { IconNames } from '@blueprintjs/icons'
 import { Popover2 } from '@blueprintjs/popover2'
-import { runInAction } from 'mobx'
 import { observer } from 'mobx-react'
 import { useTranslation } from 'react-i18next'
 import classNames from 'classnames'
@@ -73,7 +72,7 @@ const Nav = observer(() => {
                         />
                     }
                 >
-                    <Button className={`data-cy-toggle-app-menu ${Classes.MINIMAL}`} icon="menu" />
+                    <Button className={`data-cy-toggle-app-menu ${Classes.MINIMAL}`} icon={IconNames.SETTINGS} />
                 </Popover2>
             </Navbar.Group>
         </Navbar>

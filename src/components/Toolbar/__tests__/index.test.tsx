@@ -74,9 +74,11 @@ describe('Toolbar', () => {
         expect(screen.getByTitle(t('TOOLBAR.BACK'))).toBeInTheDocument()
         expect(screen.getByTitle(t('TOOLBAR.FORWARD'))).toBeInTheDocument()
         expect(screen.getByTitle(t('TOOLBAR.PARENT'))).toBeInTheDocument()
+        expect(screen.getByTitle(t('TOOLBAR.CHANGE_VIEW'))).toBeInTheDocument()
+        expect(screen.getByTitle(t('TOOLBAR.CHANGE_SORT_METHOD'))).toBeInTheDocument()
         expect(container.querySelector('[data-icon="arrow-right"]')).toBeInTheDocument()
 
-        await user.click(container.querySelector('[data-icon="cog"]'))
+        await user.click(container.querySelector('[data-icon="caret-down"]'))
 
         expect(screen.getByText(t('COMMON.MAKEDIR'))).toBeInTheDocument()
         expect(screen.getByText(t('FILEMENU.PASTE', { count: 0 })))
@@ -286,7 +288,7 @@ describe('Toolbar', () => {
         it('should open makedir dialog when clicking on makedir button', async () => {
             const { user, container } = setup(<Toolbar {...PROPS} />, options)
 
-            await user.click(container.querySelector('[data-icon="cog"]'))
+            await user.click(container.querySelector('[data-icon="caret-down"]'))
 
             await user.click(screen.getByText(t('COMMON.MAKEDIR')))
 
@@ -296,7 +298,7 @@ describe('Toolbar', () => {
         it('should close makedir dialog when clicking on cancel', async () => {
             const { user, container } = setup(<Toolbar {...PROPS} />, options)
 
-            await user.click(container.querySelector('[data-icon="cog"]'))
+            await user.click(container.querySelector('[data-icon="caret-down"]'))
 
             await user.click(screen.getByText(t('COMMON.MAKEDIR')))
 
@@ -316,7 +318,7 @@ describe('Toolbar', () => {
 
             const { user, container } = setup(<Toolbar {...PROPS} />, options)
 
-            await user.click(container.querySelector('[data-icon="cog"]'))
+            await user.click(container.querySelector('[data-icon="caret-down"]'))
 
             await user.click(screen.getByText(t('COMMON.MAKEDIR')))
 
@@ -343,7 +345,7 @@ describe('Toolbar', () => {
 
             const { user, container } = setup(<Toolbar {...PROPS} />, options)
 
-            await user.click(container.querySelector('[data-icon="cog"]'))
+            await user.click(container.querySelector('[data-icon="caret-down"]'))
 
             await user.click(screen.getByText(t('COMMON.MAKEDIR')))
 
@@ -370,7 +372,7 @@ describe('Toolbar', () => {
 
             const { user, container } = setup(<Toolbar {...PROPS} />, options)
 
-            await user.click(container.querySelector('[data-icon="cog"]'))
+            await user.click(container.querySelector('[data-icon="caret-down"]'))
 
             await user.click(screen.getByText(t('COMMON.MAKEDIR')))
 
@@ -398,7 +400,7 @@ describe('Toolbar', () => {
             jest.spyOn(appState, 'paste')
             const { user, container } = setup(<Toolbar {...PROPS} />, options)
 
-            await user.click(container.querySelector('[data-icon="cog"]'))
+            await user.click(container.querySelector('[data-icon="caret-down"]'))
 
             await user.click(screen.getByText(t('FILEMENU.PASTE', { count: 1 })))
 
@@ -415,7 +417,7 @@ describe('Toolbar', () => {
 
             const { container, user } = setup(<Toolbar {...PROPS} />, options)
 
-            await user.click(container.querySelector('[data-icon="cog"]'))
+            await user.click(container.querySelector('[data-icon="caret-down"]'))
 
             await user.click(screen.getByText(t('FILEMENU.DELETE', { count: 1 })))
 
