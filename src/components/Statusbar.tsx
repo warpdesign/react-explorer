@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { InputGroup, ControlGroup, Button, Intent } from '@blueprintjs/core'
+import { Button, Intent } from '@blueprintjs/core'
 import { IconNames } from '@blueprintjs/icons'
 import { Tooltip2 } from '@blueprintjs/popover2'
 import { observer } from 'mobx-react'
@@ -43,18 +43,12 @@ const Statusbar = observer(() => {
     )
 
     return (
-        <ControlGroup>
-            <InputGroup
-                disabled
-                rightElement={
-                    <ToggleHiddenFilesButton showHiddenFiles={showHiddenFiles} content={content} onClick={onClick} />
-                }
-                value={`${t('STATUS.FILES', { count: numFiles })}, ${t('STATUS.FOLDERS', {
-                    count: numDirs,
-                })}`}
-                className="status-bar"
-            />
-        </ControlGroup>
+        <div className="status-bar">
+            <ToggleHiddenFilesButton showHiddenFiles={showHiddenFiles} content={content} onClick={onClick} />
+            {`${t('STATUS.FILES', { count: numFiles })}, ${t('STATUS.FOLDERS', {
+                count: numDirs,
+            })}`}
+        </div>
     )
 })
 
