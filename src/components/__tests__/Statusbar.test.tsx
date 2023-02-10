@@ -35,7 +35,7 @@ describe('Statusbar', () => {
     it('should display statusbar text and toggle hidden files button', () => {
         render(<Statusbar />, options)
 
-        expect(screen.getByRole('textbox')).toHaveValue(buildStatusBarText())
+        expect(screen.getByText(buildStatusBarText())).toBeInTheDocument()
         expect(screen.getByRole('button')).toBeInTheDocument()
     })
 
@@ -44,7 +44,7 @@ describe('Statusbar', () => {
 
         await user.click(screen.getByRole('button'))
 
-        expect(screen.getByRole('textbox')).toHaveValue(buildStatusBarText())
+        expect(screen.getByText(buildStatusBarText())).toBeInTheDocument()
     })
 
     it('toggle hidden files button should be inactive if cache is not ready', async () => {

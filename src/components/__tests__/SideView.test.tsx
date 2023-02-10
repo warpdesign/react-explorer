@@ -63,7 +63,7 @@ describe('SideView', () => {
         }
 
         // status bar
-        expect(screen.getByDisplayValue(buildStatusBarText())).toBeInTheDocument()
+        expect(screen.getByText(buildStatusBarText())).toBeInTheDocument()
 
         // overlay d&d
         expect(screen.getByTestId('drop-overlay-0')).toBeInTheDocument()

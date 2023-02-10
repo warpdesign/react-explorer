@@ -359,32 +359,15 @@ body.bp4-dark .app-loader.active{
 }
 
 .status-bar {
+    background: rgba(206, 217, 224, 0.5);
     border-top: 1px solid rgb(189, 195, 199);
-}
-
-/* FIXME: we only used disable state to use the styles associated with disabled state */
-.status-bar .bp4-input:disabled,
-.status-bar .bp4-input.bp4-disabled,
-.status-bar .bp4-button.bp4-disabled,
-.status-bar button.bp4-minimal.bp4-disabled,
-.status-bar button.bp4-minimal.bp4-disabled:hover,
-.status-bar.bp4-input-group.bp4-disabled {
-    cursor:default;
+    padding-top: 4px;
+    padding-bottom: 4px;
 }
 
 .bp4-dark .status-bar {
+    background-color:rgb(41, 56, 66);
     border-top: 1px solid rgb(14,25,34);
-}
-
-.status-bar.offline > .bp4-icon:after{
-    border-bottom: 1px solid rgba(255,0,0,.6);
-    content: "";
-    width: 100%;
-    height: 50%;
-    position: absolute;
-    top: 2px;
-    transform: rotateZ(-45deg);
-    left: -2px;
 }
 
 .tablist{
