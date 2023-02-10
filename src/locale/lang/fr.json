@@ -70,6 +70,7 @@
                 "INVALID_FOLDER": "Nom de dossier invalide ou introuvable",
                 "DEFAULT_TERMINAL": "Terminal externe",
                 "DEFAULT_TERMINAL_HELP": "Spécifie le type de terminal à lancer",
+                "DEFAULT_VIEW_MODE": "Mode d'affichage par défaut",
                 "TEST_TERMINAL": "Cliquez ici pour lancer le terminal specifié",
                 "TEST_TERMINAL_FAILED": "Impossible de lancer le terminal spécifié: {{terminal}} (code de retour: {{code}})"
             },

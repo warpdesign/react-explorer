@@ -222,10 +222,10 @@ const PrefsDialog = observer(({ isOpen, onClose }: PrefsProps) => {
                     </Select2>
                 </FormGroup>
 
-                <FormGroup inline={true} label="Default Viewmode">
+                <FormGroup inline={true} label={t('DIALOG.PREFS.DEFAULT_VIEW_MODE')}>
                     <RadioGroup inline={true} selectedValue={defaultViewMode} onChange={onChangeViewMode}>
-                        <Radio label="details" value="details" />
-                        <Radio label="icons" value="icons" />
+                        <Radio label={t('TOOLBAR.ICON_VIEW')} value="details" />
+                        <Radio label={t('TOOLBAR.DETAILS_VIEW')} value="icons" />
                     </RadioGroup>
                 </FormGroup>
 

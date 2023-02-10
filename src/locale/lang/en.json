@@ -70,6 +70,7 @@
                 "INVALID_FOLDER": "Invalid folder name or non-existing folder",
                 "DEFAULT_TERMINAL": "External terminal",
                 "DEFAULT_TERMINAL_HELP": "Customizes what kind of terminal to launch",
+                "DEFAULT_VIEW_MODE": "Default view mode",
                 "TEST_TERMINAL": "Click here to launch the specified external terminal",
                 "TEST_TERMINAL_FAILED": "Unable to start specified terminal: {{terminal}} (return code: {{code}})"
             },
