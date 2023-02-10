@@ -95,7 +95,7 @@ export class SettingsState {
         // finally set requested language
         i18next.changeLanguage(lang)
 
-        this.lang = i18next.language
+        runInAction(() => (this.lang = i18next.language))
     }
 
     setDefaultTerminal(cmd: string): void {
