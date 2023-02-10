@@ -1,6 +1,6 @@
 import React from 'react'
 
-import { LayoutName } from '$src/hooks/useLayout'
+import { ViewModeName } from '$src/hooks/useViewMode'
 import { Button, Icon, IconName, Menu, MenuDivider, MenuItem } from '@blueprintjs/core'
 import { IconNames } from '@blueprintjs/icons'
 import { useTranslation } from 'react-i18next'
@@ -10,20 +10,26 @@ import { TSORT_METHOD_NAME, TSORT_ORDER } from '$src/services/FsSort'
 export const getTickIcon = (str: string, expectedStr: string): IconName | undefined =>
     str === expectedStr ? 'small-tick' : 'blank'
 
-export const ViewToggleMenu = ({ layout, onClick }: { layout: LayoutName; onClick: (layout: LayoutName) => void }) => {
+export const ViewToggleMenu = ({
+    viewmode,
+    onClick,
+}: {
+    viewmode: ViewModeName
+    onClick: (viewmode: ViewModeName) => void
+}) => {
     const { t } = useTranslation()
 
     return (
         <Menu>
             <MenuItem
                 text={t('TOOLBAR.DETAILS_VIEW')}
-                icon={getTickIcon(layout, 'details')}
+                icon={getTickIcon(viewmode, 'details')}
                 onClick={() => onClick('details')}
                 labelElement={<Icon icon={IconNames.PROPERTIES} />}
             />
             <MenuItem
                 text={t('TOOLBAR.ICON_VIEW')}
-                icon={getTickIcon(layout, 'icons')}
+                icon={getTickIcon(viewmode, 'icons')}
                 onClick={() => onClick('icons')}
                 labelElement={<Icon icon={IconNames.GRID_VIEW} />}
             />
@@ -31,11 +37,17 @@ export const ViewToggleMenu = ({ layout, onClick }: { layout: LayoutName; onClic
     )
 }
 
-export const ViewToggle = ({ layout, onClick }: { layout: LayoutName; onClick: (layout: LayoutName) => void }) => {
+export const ViewToggle = ({
+    viewmode,
+    onClick,
+}: {
+    viewmode: ViewModeName
+    onClick: (viewmode: ViewModeName) => void
+}) => {
     const { t } = useTranslation()
 
     return (
-        <Popover2 content={<ViewToggleMenu onClick={onClick} layout={layout} />} placement="bottom-start">
+        <Popover2 content={<ViewToggleMenu onClick={onClick} viewmode={viewmode} />} placement="bottom-start">
             <Button icon={IconNames.GRID_VIEW} title={t('TOOLBAR.CHANGE_VIEW')} />
         </Popover2>
     )

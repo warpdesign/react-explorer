@@ -4,7 +4,7 @@ import classNames from 'classnames'
 
 import { Row } from './components/Row'
 import { Header } from './components/Header'
-import { LayoutActions, LayoutProps } from '$src/hooks/useLayout'
+import { ViewModeActions, ViewModeProps } from '$src/hooks/useViewMode'
 import { ArrowKey, FileViewItem } from '$src/types'
 import { Placeholder } from '../components/Placeholder'
 
@@ -21,7 +21,7 @@ const rowClassName = (item: FileViewItem): string => {
     })
 }
 
-export const TableLayout = forwardRef<LayoutActions, LayoutProps<undefined>>(
+export const TableViewMode = forwardRef<ViewModeActions, ViewModeProps<undefined>>(
     (
         {
             onItemClick,
@@ -38,7 +38,7 @@ export const TableLayout = forwardRef<LayoutActions, LayoutProps<undefined>>(
             status,
             cursorIndex = -1,
             isDarkModeActive,
-        }: LayoutProps<undefined>,
+        }: ViewModeProps<undefined>,
         ref,
     ) => {
         const tableRef: React.MutableRefObject<HTMLDivElement> = useRef()
@@ -133,4 +133,4 @@ export const TableLayout = forwardRef<LayoutActions, LayoutProps<undefined>>(
     },
 )
 
-TableLayout.displayName = 'TableLayout'
+TableViewMode.displayName = 'TableViewMode'

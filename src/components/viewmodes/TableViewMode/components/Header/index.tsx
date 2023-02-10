@@ -1,6 +1,6 @@
 import React from 'react'
 
-import { Column, HeaderMouseEvent } from '$src/hooks/useLayout'
+import { Column, HeaderMouseEvent } from '$src/hooks/useViewMode'
 import { TSORT_ORDER } from '$src/services/FsSort'
 import { Icon } from '@blueprintjs/core'
 

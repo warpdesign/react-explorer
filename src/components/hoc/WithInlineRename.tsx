@@ -2,7 +2,7 @@ import React, { ReactElement, useEffect, useRef } from 'react'
 import { InputGroup, TextArea } from '@blueprintjs/core'
 
 import { isMac } from '$src/utils/platform'
-import { InlineEditEvent } from '$src/hooks/useLayout'
+import { InlineEditEvent } from '$src/hooks/useViewMode'
 import { FileViewItem } from '$src/types'
 import { CLICK_DELAY } from '$src/hooks/useFileClick'
 import { getSelectionRange } from '$src/utils/fileUtils'

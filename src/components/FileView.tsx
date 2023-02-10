@@ -16,7 +16,7 @@ import { useMenuAccelerator } from '$src/hooks/useAccelerator'
 import { TypeIcons } from '$src/constants/icons'
 
 import { ArrowKey, DraggedObject, FileViewItem } from '$src/types'
-import { HeaderMouseEvent, InlineEditEvent, ItemMouseEvent, useLayout } from '$src/hooks/useLayout'
+import { HeaderMouseEvent, InlineEditEvent, ItemMouseEvent, useViewMode } from '$src/hooks/useViewMode'
 import { useStores } from '$src/hooks/useStores'
 import { useKeyDown } from '$src/hooks/useKeyDown'
 
@@ -68,9 +68,10 @@ const onSelectAll = (cache: FileState): void => {
 const FileView = observer(({ hide }: Props) => {
     const { viewState, appState, settingsState } = useStores('settingsState', 'viewState', 'appState')
     const { isDarkModeActive } = settingsState
+    const winState = appState.getWinStateFromViewId(viewState.viewId)
     const { t } = useTranslation()
     const cache = viewState.getVisibleCache()
-    const { files, cursor, editingId, layout } = cache
+    const { files, cursor, editingId, viewmode } = cache
     const cursorIndex = cache.getFileIndex(cursor)
     const isViewActive = viewState.isActive && !hide
     const keepSelection = !!cache.selected.length
@@ -81,12 +82,14 @@ const FileView = observer(({ hide }: Props) => {
         }),
     )
     const rowCount = nodes.length
-    const counter = useRef(0)
 
     const rightClickFileIndexRef: MutableRefObject<number> = useRef<number>()
 
-    const { Layout, getActions, layoutRef } = useLayout(layout)
-
+    const { ViewMode, getActions, viewmodeRef } = useViewMode(viewmode)
+    const viewmodeOptions = {
+        iconSize: 56,
+        isSplitViewActive: winState.splitView,
+    }
     console.log('render!', { cursorIndex, cursor })
 
     useKeyDown(
@@ -104,8 +107,8 @@ const FileView = observer(({ hide }: Props) => {
                         // Prevent arrow keys to trigger generic browser scrolling: we want to handle it
                         // ourselves so that the cursor is always visible.
                         event.preventDefault()
-                        const { icons, getNextIndex } = getActions()
-                        console.log('usekeydown (render)', layout, icons, layoutRef.current.icons)
+                        const { getNextIndex } = getActions()
+                        console.log('usekeydown (render)', viewmode, viewmodeRef.current.icons)
                         const nextIndex = getNextIndex(cursorIndex, event.key as ArrowKey)
                         if (nextIndex > -1 && nextIndex <= rowCount - 1) {
                             const file = cache.files[nextIndex]
@@ -259,7 +262,7 @@ const FileView = observer(({ hide }: Props) => {
                         className={classNames('fileListSizerWrapper', ctxMenuProps.className)}
                     >
                         {ctxMenuProps.popover}
-                        <Layout
+                        <ViewMode
                             cursorIndex={cursorIndex}
                             itemCount={nodes.length}
                             getItem={getRow}
@@ -288,6 +291,7 @@ const FileView = observer(({ hide }: Props) => {
                             status={cache.status}
                             error={cache.error}
                             isDarkModeActive={isDarkModeActive}
+                            options={viewmodeOptions}
                         />
                     </div>
                 )}

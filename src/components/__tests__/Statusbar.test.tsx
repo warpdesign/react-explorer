@@ -23,7 +23,10 @@ describe('Statusbar', () => {
 
     beforeEach(async () => {
         options.providerProps.viewState = new ViewState(0)
-        const cache = options.providerProps.viewState.addCache('/virtual', -1, true)
+        const cache = options.providerProps.viewState.addCache('/virtual', -1, {
+            activateNewCache: true,
+            viewmode: 'details',
+        })
         await cache.openDirectory({ dir: '/virtual', fullname: '' })
 
         jest.clearAllMocks()

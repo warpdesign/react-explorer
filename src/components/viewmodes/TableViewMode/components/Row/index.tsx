@@ -2,7 +2,7 @@ import React from 'react'
 import { useTranslation } from 'react-i18next'
 
 import type { DraggedObject, FileViewItem } from '$src/types'
-import { InlineEditEvent, ItemMouseEvent, makeEvent } from '$src/hooks/useLayout'
+import { InlineEditEvent, ItemMouseEvent, makeEvent } from '$src/hooks/useViewMode'
 import { Name } from '../Column/Name'
 import { Size } from '../Column/Size'
 import { useFileClick } from '$src/hooks/useFileClick'

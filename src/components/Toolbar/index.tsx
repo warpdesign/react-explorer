@@ -26,7 +26,7 @@ export const Toolbar = observer(({ active }: Props) => {
     const { appState, viewState } = useStores('appState', 'viewState')
     const [isMakedirDialogOpen, setIsMakedirDialogOpen] = useState(false)
     const cache = viewState.getVisibleCache()
-    const { selected, history, current, layout, sortMethod, sortOrder } = cache
+    const { selected, history, current, viewmode, sortMethod, sortOrder } = cache
     const [path, setPath] = useState('')
     const { t } = useTranslation()
     const inputRef = useRef<HTMLInputElement>()
@@ -217,7 +217,7 @@ export const Toolbar = observer(({ active }: Props) => {
                         rightIcon="chevron-up"
                     ></Button>
 
-                    <ViewToggle layout={layout} onClick={(newLayout) => cache.setLayout(newLayout)} />
+                    <ViewToggle viewmode={viewmode} onClick={(newViewMode) => cache.setViewMode(newViewMode)} />
                     <SortMenuToggle sortMethod={sortMethod} sortOrder={sortOrder} onClick={onSortChange} />
                     <Popover2
                         content={

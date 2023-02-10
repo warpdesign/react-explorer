@@ -2,13 +2,13 @@ import React from 'react'
 import * as ReactVirtual from 'react-virtual'
 import { render, screen, setup, t } from 'rtl'
 
-import { Column } from '$src/hooks/useLayout'
+import { Column } from '$src/hooks/useViewMode'
 import { FileState, TStatus } from '$src/state/fileState'
 import { FileViewItem } from '$src/types'
 
-import { TableLayout } from '..'
+import { TableViewMode } from '..'
 
-describe('TableLayout', () => {
+describe('TableViewMode', () => {
     const items = [
         {
             name: 'filename',
@@ -74,7 +74,7 @@ describe('TableLayout', () => {
     beforeEach(() => jest.clearAllMocks())
 
     it('should display table', () => {
-        render(<TableLayout {...PROPS} />)
+        render(<TableViewMode {...PROPS} />)
 
         // show elements
         items.forEach((item) => {
@@ -92,7 +92,7 @@ describe('TableLayout', () => {
             itemCount: 0,
         }
 
-        render(<TableLayout {...newProps} />)
+        render(<TableViewMode {...newProps} />)
 
         expect(screen.getByText(t('COMMON.EMPTY_FOLDER'))).toBeInTheDocument()
 
@@ -119,7 +119,7 @@ describe('TableLayout', () => {
 
         jest.spyOn(ReactVirtual, 'useVirtual').mockImplementationOnce(() => fakeVirtual)
 
-        render(<TableLayout {...PROPS} cursorIndex={0} />)
+        render(<TableViewMode {...PROPS} cursorIndex={0} />)
 
         expect(fakeVirtual.scrollToIndex).toHaveBeenCalledWith(0)
     })
@@ -127,7 +127,7 @@ describe('TableLayout', () => {
     describe('interactions', () => {
         it('should call onItemClick', async () => {
             const firstItem = items[0]
-            const { user } = setup(<TableLayout {...PROPS} />)
+            const { user } = setup(<TableViewMode {...PROPS} />)
 
             await user.click(screen.getByText(firstItem.name))
 
@@ -141,7 +141,7 @@ describe('TableLayout', () => {
 
         it('should call onItemDoubleClick', async () => {
             const firstItem = items[0]
-            const { user } = setup(<TableLayout {...PROPS} />)
+            const { user } = setup(<TableViewMode {...PROPS} />)
 
             await user.dblClick(screen.getByText(firstItem.name))
 
@@ -155,7 +155,7 @@ describe('TableLayout', () => {
 
         it('should call onItemRightClick', async () => {
             const firstItem = items[0]
-            const { user } = setup(<TableLayout {...PROPS} />)
+            const { user } = setup(<TableViewMode {...PROPS} />)
 
             await user.pointer([
                 {
@@ -173,7 +173,7 @@ describe('TableLayout', () => {
         })
 
         it('should call onHeaderClick', async () => {
-            const { user } = setup(<TableLayout {...PROPS} />)
+            const { user } = setup(<TableViewMode {...PROPS} />)
 
             await user.click(screen.getByText(columns[0].label))
 
@@ -190,7 +190,7 @@ describe('TableLayout', () => {
                 itemCount: 0,
             }
 
-            const { user } = setup(<TableLayout {...newProps} />)
+            const { user } = setup(<TableViewMode {...newProps} />)
 
             await user.click(screen.getByText(t('COMMON.EMPTY_FOLDER')))
 

@@ -2,7 +2,7 @@ import React from 'react'
 import { Icon } from '@blueprintjs/core'
 
 import type { FileViewItem } from '$src/types'
-import { InlineEditEvent } from '$src/hooks/useLayout'
+import { InlineEditEvent } from '$src/hooks/useViewMode'
 import { InlineRenameProps, withInlineRename } from '$src/components/hoc/WithInlineRename'
 
 interface TextProps extends InlineRenameProps {
