@@ -1,18 +1,18 @@
 import React, { forwardRef, useImperativeHandle, useRef, useEffect, useLayoutEffect, useState } from 'react'
 import { useVirtual } from 'react-virtual'
 
-import { LayoutActions, LayoutProps } from '$src/hooks/useLayout'
+import { ViewModeActions, ViewModeProps } from '$src/hooks/useViewMode'
 import { ArrowKey } from '$src/types'
 
 import '$src/css/fileview-icons.css'
 import { Placeholder } from '../components/Placeholder'
 import { Item } from './components/Item'
 
-export interface IconLayoutOptions {
+export interface IconViewModeOptions {
     iconSize: number
 }
 
-export const IconLayout = forwardRef<LayoutActions, LayoutProps<IconLayoutOptions>>(
+export const IconViewMode = forwardRef<ViewModeActions, ViewModeProps<IconViewModeOptions>>(
     (
         {
             onItemClick,
@@ -30,7 +30,7 @@ export const IconLayout = forwardRef<LayoutActions, LayoutProps<IconLayoutOption
             options: { iconSize } = {
                 iconSize: 56,
             },
-        }: LayoutProps<IconLayoutOptions>,
+        }: ViewModeProps<IconViewModeOptions>,
         ref,
     ) => {
         const tableRef: React.MutableRefObject<HTMLDivElement> = useRef()
@@ -178,4 +178,4 @@ export const IconLayout = forwardRef<LayoutActions, LayoutProps<IconLayoutOption
     },
 )
 
-IconLayout.displayName = 'IconLayout'
+IconViewMode.displayName = 'IconViewMode'

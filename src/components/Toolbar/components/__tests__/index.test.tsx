@@ -1,5 +1,5 @@
 import React from 'react'
-import { LayoutName } from '$src/hooks/useLayout'
+import { ViewModeName } from '$src/hooks/useViewMode'
 import { render, screen, t, setup } from 'rtl'
 
 import { getTickIcon, ViewToggle, ViewToggleMenu } from '..'
@@ -10,7 +10,7 @@ describe('Toolbar components', () => {
     describe('ViewToggle', () => {
         const PROPS = {
             onClick: jest.fn(),
-            layout: 'details' as LayoutName,
+            viewmode: 'details' as ViewModeName,
         }
 
         it('should display ViewToggle', () => {
@@ -43,7 +43,7 @@ describe('Toolbar components', () => {
     describe('ViewToggleMenu', () => {
         const PROPS = {
             onClick: jest.fn(),
-            layout: 'details' as LayoutName,
+            viewmode: 'details' as ViewModeName,
         }
 
         it('should display ViewToggleMenu', () => {

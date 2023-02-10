@@ -9,12 +9,12 @@ import { AppState } from '$src/state/appState'
 import { getSortMethod, TSORT_METHOD_NAME, TSORT_ORDER } from '$src/services/FsSort'
 import { AppAlert } from '$src/components/AppAlert'
 import { filterDirs, filterFiles, filterHiddenFiles } from '$src/utils/fileUtils'
-import { LayoutName } from '$src/hooks/useLayout'
+import { ViewModeName } from '$src/hooks/useViewMode'
 
 export type TStatus = 'busy' | 'ok' | 'login' | 'offline'
 
 export interface HistoryEntry {
-    layout: LayoutName
+    viewmode: ViewModeName
     path: string
     showHiddenFiles: boolean
     sortMethod: TSORT_METHOD_NAME
@@ -28,7 +28,7 @@ export class FileState {
     sortMethod: TSORT_METHOD_NAME = 'name'
     sortOrder: TSORT_ORDER = 'asc'
     showHiddenFiles = false
-    layout: LayoutName = 'details'
+    viewmode: ViewModeName = 'details'
     // /history
 
     previousPath: string
@@ -101,7 +101,7 @@ export class FileState {
             keep.concat([
                 {
                     path: this.path,
-                    layout: this.layout,
+                    viewmode: this.viewmode,
                     showHiddenFiles: this.showHiddenFiles,
                     sortMethod: this.sortMethod,
                     sortOrder: this.sortOrder,
@@ -139,7 +139,7 @@ export class FileState {
 
         this.current = newCurrent
 
-        const { path, showHiddenFiles, sortOrder, sortMethod, layout } = history[newCurrent]
+        const { path, showHiddenFiles, sortOrder, sortMethod, viewmode } = history[newCurrent]
 
         try {
             // set history properties that influence listing before cd
@@ -147,7 +147,7 @@ export class FileState {
             this.showHiddenFiles = showHiddenFiles
             this.sortOrder = sortOrder
             this.sortMethod = sortMethod
-            this.layout = layout
+            this.viewmode = viewmode
             await this.cd(path, '', true, true)
         } catch (e) {
             this.updatePath(path, true)
@@ -180,7 +180,7 @@ export class FileState {
             sortMethod: observable,
             sortOrder: observable,
             server: observable,
-            layout: observable,
+            viewmode: observable,
             status: observable,
             error: observable,
             isVisible: observable,
@@ -213,7 +213,7 @@ export class FileState {
             cursor: observable,
             editingId: observable,
             isSelected: observable,
-            setLayout: action,
+            setViewMode: action,
         })
 
         this.viewId = viewId
@@ -715,7 +715,7 @@ export class FileState {
         return !!this.selected.find((selectedFile) => sameID(file.id, selectedFile.id))
     }
 
-    setLayout(newLayout: LayoutName) {
-        this.layout = newLayout
+    setViewMode(newViewMode: ViewModeName) {
+        this.viewmode = newViewMode
     }
 }

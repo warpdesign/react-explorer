@@ -170,7 +170,11 @@ export class AppState {
 
         const view = winState.getActiveView()
         if (!view.getVisibleCache()) {
-            view.addCache(this.settingsState.defaultFolder, -1, true)
+            const { defaultFolder, defaultViewMode } = this.settingsState
+            view.addCache(defaultFolder, -1, {
+                activateNewCache: true,
+                viewmode: defaultViewMode,
+            })
         }
     }
 
@@ -195,7 +199,10 @@ export class AppState {
             // a path and not dir + fullname
             if (viewState.getVisibleCache()?.path !== file.dir) {
                 // use openDirectory
-                viewState.addCache(file.dir, -1, true)
+                viewState.addCache(file.dir, -1, {
+                    activateNewCache: true,
+                    viewmode: this.settingsState.defaultViewMode,
+                })
             }
         }
     }
@@ -425,7 +432,9 @@ export class AppState {
     addView(path = '', viewId = -1): void {
         const winState = this.winStates[0]
         const view = winState.getOrCreateView(viewId)
-        view.addCache(path)
+        view.addCache(path, -1, {
+            viewmode: this.settingsState.defaultViewMode,
+        })
     }
 
     removeView(viewId: number): void {

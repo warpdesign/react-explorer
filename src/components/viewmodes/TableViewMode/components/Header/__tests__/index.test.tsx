@@ -1,4 +1,4 @@
-import { Column } from '$src/hooks/useLayout'
+import { Column } from '$src/hooks/useViewMode'
 import React from 'react'
 import { render, screen, setup } from 'rtl'
 

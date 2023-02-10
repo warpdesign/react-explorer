@@ -139,9 +139,13 @@ class MenuAcceleratorsClass extends React.Component<Props> {
     onNewTab = (): void => {
         if (this.appState.isExplorer) {
             const { settingsState } = this.injected
+            const { defaultFolder, defaultViewMode } = settingsState
             const winState = this.appState.winStates[0]
             const viewState = winState.getActiveView()
-            viewState.addCache(settingsState.defaultFolder, viewState.getVisibleCacheIndex() + 1, true)
+            viewState.addCache(defaultFolder, viewState.getVisibleCacheIndex() + 1, {
+                activateNewCache: true,
+                viewmode: defaultViewMode,
+            })
             console.log('need to create a new tab')
         }
     }

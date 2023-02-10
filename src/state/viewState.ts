@@ -1,6 +1,7 @@
 import { observable, action, makeObservable } from 'mobx'
 
 import { FileState } from '$src/state/fileState'
+import { ViewModeName } from '$src/hooks/useViewMode'
 
 export class ViewState {
     viewId: number
@@ -24,9 +25,20 @@ export class ViewState {
         this.viewId = viewId
     }
 
-    addCache(path: string, index = -1, activateNewCache = false): FileState {
+    addCache(
+        path: string,
+        index = -1,
+        {
+            activateNewCache = false,
+            viewmode,
+        }: {
+            activateNewCache?: boolean
+            viewmode: ViewModeName
+        },
+    ): FileState {
         console.log('viewState/addCache', path)
         const cache = new FileState(path, this.viewId)
+        cache.setViewMode(viewmode)
 
         if (index === -1) {
             this.caches.push(cache)

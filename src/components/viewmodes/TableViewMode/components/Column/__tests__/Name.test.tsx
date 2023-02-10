@@ -1,7 +1,8 @@
-import { FileViewItem } from '$src/types'
 import React from 'react'
 import userEvent from '@testing-library/user-event'
 import { render, screen, setup } from 'rtl'
+
+import { FileViewItem } from '$src/types'
 
 import { Name } from '../Name'
 

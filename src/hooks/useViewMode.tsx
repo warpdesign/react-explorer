@@ -1,18 +1,18 @@
-import React, { useCallback, useRef, useState, useEffect } from 'react'
+import React, { useCallback, useRef } from 'react'
 import type { ReactElement } from 'react'
 
 import { ArrowKey, DraggedObject, FileViewItem } from '$src/types'
 import { TSORT_METHOD_NAME, TSORT_ORDER } from '$src/services/FsSort'
 import { TStatus } from '$src/state/fileState'
-import { TableLayout } from '$src/components/layouts/TableLayout/'
-import { IconLayout } from '$src/components/layouts/IconLayout/'
+import { TableViewMode } from '$src/components/viewmodes/TableViewMode/'
+import { IconViewMode } from '$src/components/viewmodes/IconViewMode/'
 
-const layouts: { [key in LayoutName]: any } = {
-    details: TableLayout,
-    icons: IconLayout,
+const viewmodes: { [key in ViewModeName]: any } = {
+    details: TableViewMode,
+    icons: IconViewMode,
 }
 
-export type LayoutName = 'details' | 'icons'
+export type ViewModeName = 'details' | 'icons'
 
 export interface ItemMouseEvent {
     data: FileViewItem
@@ -31,7 +31,7 @@ export interface InlineEditEvent {
     event: React.SyntheticEvent
 }
 
-export interface LayoutProps<T> {
+export interface ViewModeProps<T> {
     onBlankAreaClick: () => void
     onItemClick: (event: ItemMouseEvent) => void
     onItemDoubleClick: (event: ItemMouseEvent) => void
@@ -49,14 +49,14 @@ export interface LayoutProps<T> {
     options?: T
 }
 
-export interface LayoutActions {
+export interface ViewModeActions {
     getNextIndex: (index: number, direction: ArrowKey) => number
     icons: boolean
 }
 
-export interface LayoutReturnProps {
-    Layout: (props: LayoutProps<unknown>) => ReactElement
-    getActions: () => LayoutActions
+export interface ViewModeReturnProps {
+    ViewMode: (props: ViewModeProps<unknown>) => ReactElement
+    getActions: () => ViewModeActions
 }
 
 export interface Column {
@@ -65,7 +65,7 @@ export interface Column {
     sort: TSORT_ORDER
 }
 
-const defaultActions: LayoutActions = {
+const defaultActions: ViewModeActions = {
     getNextIndex: () => {
         console.warn('cannot call getNextIndex: ref not ready!')
         return -1
@@ -81,22 +81,25 @@ export const makeEvent =
             event,
         })
 
-export const useLayout = (name: LayoutName): LayoutReturnProps & { layoutRef: React.MutableRefObject<any> } => {
-    const Layout = layouts[name]
-    if (!Layout) {
-        throw `could not find layout "${name}"`
+export const useViewMode = (name: ViewModeName): ViewModeReturnProps & { viewmodeRef: React.MutableRefObject<any> } => {
+    const ViewMode = viewmodes[name]
+    if (!ViewMode) {
+        throw `could not find viewmode "${name}"`
     }
-    const layoutRef = useRef()
+    const viewmodeRef = useRef()
 
     return {
-        Layout: useCallback((props: LayoutProps<unknown>) => <Layout {...props} ref={layoutRef} />, [layoutRef, name]),
-        // we cannot simply return the layoutRef.current because the layout will
+        ViewMode: useCallback(
+            (props: ViewModeProps<unknown>) => <ViewMode {...props} ref={viewmodeRef} />,
+            [viewmodeRef, name],
+        ),
+        // we cannot simply return the viewModeRef.current because the viewmode will
         // be modified *after* this component has rendered, so the parent could
         // have the previous reference.
         //
         // Note: getActions should be called inside handlers and not inside
         // renderers
-        getActions: () => layoutRef.current || defaultActions,
-        layoutRef,
+        getActions: () => viewmodeRef.current || defaultActions,
+        viewmodeRef,
     }
 }

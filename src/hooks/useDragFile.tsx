@@ -1,7 +1,7 @@
 import React from 'react'
 import { DragPreviewImage, useDrag } from 'react-dnd'
 
-import { createDragPreview } from '$src/components/layouts/TableLayout/utils'
+import { createDragPreview } from '$src/components/viewmodes/TableViewMode/utils'
 import { DraggedObject } from '$src/types'
 import { useTranslation } from 'react-i18next'
 

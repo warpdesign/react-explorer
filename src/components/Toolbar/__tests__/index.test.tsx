@@ -18,28 +18,28 @@ const fakeHistory: HistoryEntry[] = [
         sortMethod: 'name',
         sortOrder: 'asc',
         showHiddenFiles: false,
-        layout: 'details',
+        viewmode: 'details',
     },
     {
         path: 'b',
         sortMethod: 'name',
         sortOrder: 'asc',
         showHiddenFiles: false,
-        layout: 'details',
+        viewmode: 'details',
     },
     {
         path: 'c',
         sortMethod: 'name',
         sortOrder: 'asc',
         showHiddenFiles: false,
-        layout: 'details',
+        viewmode: 'details',
     },
     {
         path: 'd',
         sortMethod: 'name',
         sortOrder: 'asc',
         showHiddenFiles: false,
-        layout: 'details',
+        viewmode: 'details',
     },
 ]
 

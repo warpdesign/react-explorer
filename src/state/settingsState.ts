@@ -4,6 +4,7 @@ import { ipcRenderer } from 'electron'
 import { CustomSettings } from '$src/electron/windowSettings'
 import { i18n, languageList } from '$src/locale/i18n'
 import { isMojave, isWin, isMac, defaultFolder } from '$src/utils/platform'
+import { ViewModeName } from '$src/hooks/useViewMode'
 
 const APP_STORAGE_KEY = 'react-explorer'
 
@@ -24,6 +25,8 @@ export class SettingsState {
     // this is the asked mode
     darkMode: boolean | 'auto'
 
+    defaultViewMode: ViewModeName
+
     // this is the current active mode
     isDarkModeActive: boolean
 
@@ -42,12 +45,14 @@ export class SettingsState {
             isDarkModeActive: observable,
             defaultFolder: observable,
             defaultTerminal: observable,
+            defaultViewMode: observable,
             setLanguage: action,
             setDefaultTerminal: action,
             loadAndUpgradeSettings: action,
             loadSettings: action,
             setDefaultFolder: action,
             setActiveTheme: action,
+            setDefaultViewMode: action,
             resetSettings: action,
         })
 
@@ -118,6 +123,7 @@ export class SettingsState {
                 defaultFolder: this.defaultFolder,
                 darkMode: this.darkMode,
                 defaultTerminal: this.defaultTerminal,
+                defaultViewMode: this.defaultViewMode,
                 version: this.version,
             }),
         )
@@ -147,6 +153,7 @@ export class SettingsState {
         this.setLanguage(settings.lang)
         this.setDefaultFolder(settings.defaultFolder)
         this.setDefaultTerminal(settings.defaultTerminal)
+        this.defaultViewMode = settings.defaultViewMode
 
         // we should only save settings in case it's the first time the app is run
         // or an upgrade was needed
@@ -155,6 +162,10 @@ export class SettingsState {
 
     setDefaultFolder(folder: string): void {
         this.defaultFolder = folder
+    }
+
+    setDefaultViewMode(viewmode: ViewModeName): void {
+        this.defaultViewMode = viewmode
     }
 
     setActiveTheme = async (darkMode = this.darkMode): Promise<void> => {
@@ -189,6 +200,8 @@ export class SettingsState {
                 ? DEFAULT_TERMINAL.darwin
                 : (isWin && DEFAULT_TERMINAL.win) || DEFAULT_TERMINAL.linux,
             version: this.version,
+            // 'details' | 'icons'
+            defaultViewMode: 'details',
         }
     }
 

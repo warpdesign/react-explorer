@@ -1,7 +1,7 @@
-import { FileViewItem } from '$src/types'
 import React from 'react'
 import { render, screen } from 'rtl'
 
+import { FileViewItem } from '$src/types'
 import { Size } from '../Size'
 
 describe('Size', () => {

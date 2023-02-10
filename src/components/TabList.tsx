@@ -77,7 +77,10 @@ const TabList = observer(() => {
     )
 
     const addTab = (index: number): void => {
-        viewState.addCache(settingsState.defaultFolder, index + 1, true)
+        viewState.addCache(settingsState.defaultFolder, index + 1, {
+            activateNewCache: true,
+            viewmode: settingsState.defaultViewMode,
+        })
     }
 
     const selectTab = (tabIndex: number): void => viewState.setVisibleCache(tabIndex)

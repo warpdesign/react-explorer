@@ -1,6 +1,7 @@
 import * as React from 'react'
 import { useState } from 'react'
-import { Dialog, Classes, Intent, Button, InputGroup, FormGroup, MenuItem } from '@blueprintjs/core'
+import { Dialog, Classes, Intent, Button, InputGroup, FormGroup, MenuItem, RadioGroup, Radio } from '@blueprintjs/core'
+import { IconNames } from '@blueprintjs/icons'
 import { Tooltip2 } from '@blueprintjs/popover2'
 import { Select2, ItemRenderer } from '@blueprintjs/select'
 import { useTranslation } from 'react-i18next'
@@ -11,6 +12,8 @@ import { FsLocal, FolderExists } from '$src/services/plugins/FsLocal'
 import { AppAlert } from '$src/components/AppAlert'
 import { HOME_DIR } from '$src/utils/platform'
 import { useStores } from '$src/hooks/useStores'
+import { ViewModeName } from '$src/hooks/useViewMode'
+import { observer } from 'mobx-react'
 
 const DEBOUNCE_DELAY = 300
 
@@ -29,18 +32,18 @@ interface Theme {
     code: boolean | 'auto'
 }
 
-const PrefsDialog = ({ isOpen, onClose }: PrefsProps) => {
+const PrefsDialog = observer(({ isOpen, onClose }: PrefsProps) => {
     const { settingsState } = useStores('settingsState')
-
-    const [lang, setLang] = useState(settingsState.lang)
+    const { lang, darkMode, defaultTerminal, defaultViewMode } = settingsState
+    const { t } = useTranslation()
     const [defaultFolder, setDefaultFolder] = useState(settingsState.defaultFolder)
-    const [darkMode, setDarkMode] = useState(settingsState.darkMode)
-    const [defaultTerminal, setDefaultTerminal] = useState(settingsState.defaultTerminal)
+
+    console.log({ defaultViewMode })
+
     // TODO: we could have a default folder that's not using FsLocal
     const [isFolderValid, setIsFolderValid] = useState(
         () => FsLocal.canread(defaultFolder) && FolderExists(defaultFolder),
     )
-    const { t } = useTranslation()
 
     const checkPath: (path: string) => void = debounce((path: string) => {
         const isValid = FsLocal.canread(path) && FolderExists(path)
@@ -120,28 +123,21 @@ const PrefsDialog = ({ isOpen, onClose }: PrefsProps) => {
     }
 
     const onLanguageSelect = (newLang: Language): void => {
-        setLang(newLang.code)
         settingsState.setLanguage(newLang.code)
         settingsState.saveSettings()
     }
 
     const onThemeSelect = (newTheme: Theme): void => {
-        setDarkMode(newTheme.code)
         settingsState.setActiveTheme(newTheme.code)
         settingsState.saveSettings()
     }
 
     const onResetPrefs = (): void => {
         settingsState.resetSettings()
-        setLang(settingsState.lang)
-        setDarkMode(settingsState.darkMode)
-        setDefaultFolder(settingsState.defaultFolder)
-        setDefaultTerminal(settingsState.defaultTerminal)
     }
 
     const onTerminalChange = (event: React.FormEvent<HTMLElement>): void => {
         const terminal = (event.target as HTMLInputElement).value
-        setDefaultTerminal(terminal)
         settingsState.setDefaultTerminal(terminal)
         settingsState.saveSettings()
     }
@@ -158,6 +154,12 @@ const PrefsDialog = ({ isOpen, onClose }: PrefsProps) => {
             })
     }
 
+    const onChangeViewMode = (event: React.FormEvent<HTMLElement>) => {
+        const viewmode = (event.target as HTMLInputElement).value as ViewModeName
+        settingsState.setDefaultViewMode(viewmode)
+        settingsState.saveSettings()
+    }
+
     const languageItems = getSortedLanguages()
     const selectedLanguage = languageItems.find((language: Language) => language.code === lang)
     const themeItems = getThemeList()
@@ -172,7 +174,7 @@ const PrefsDialog = ({ isOpen, onClose }: PrefsProps) => {
 
     return (
         <Dialog
-            icon="cog"
+            icon={IconNames.SETTINGS}
             className="data-cy-prefs-dialog"
             title={t('DIALOG.PREFS.TITLE')}
             isOpen={isOpen}
@@ -218,6 +220,13 @@ const PrefsDialog = ({ isOpen, onClose }: PrefsProps) => {
                             }
                         />
                     </Select2>
+                </FormGroup>
+
+                <FormGroup inline={true} label="Default Viewmode">
+                    <RadioGroup inline={true} selectedValue={defaultViewMode} onChange={onChangeViewMode}>
+                        <Radio label="details" value="details" />
+                        <Radio label="icons" value="icons" />
+                    </RadioGroup>
                 </FormGroup>
 
                 <FormGroup
@@ -270,6 +279,6 @@ const PrefsDialog = ({ isOpen, onClose }: PrefsProps) => {
             </div>
         </Dialog>
     )
-}
+})
 
 export { PrefsDialog }

@@ -1,6 +1,7 @@
-import { TStatus } from '$src/state/fileState'
 import React from 'react'
 import { render, screen, t } from 'rtl'
+
+import { TStatus } from '$src/state/fileState'
 
 import { Placeholder } from '../'
 
