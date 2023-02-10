@@ -10,6 +10,7 @@ import { Item } from './components/Item'
 
 export interface IconViewModeOptions {
     iconSize: number
+    isSplitViewActive: boolean
 }
 
 export const IconViewMode = forwardRef<ViewModeActions, ViewModeProps<IconViewModeOptions>>(
@@ -27,9 +28,7 @@ export const IconViewMode = forwardRef<ViewModeActions, ViewModeProps<IconViewMo
             status,
             cursorIndex = -1,
             isDarkModeActive,
-            options: { iconSize } = {
-                iconSize: 56,
-            },
+            options: { iconSize, isSplitViewActive },
         }: ViewModeProps<IconViewModeOptions>,
         ref,
     ) => {
@@ -61,10 +60,13 @@ export const IconViewMode = forwardRef<ViewModeActions, ViewModeProps<IconViewMo
             overscan: 0,
         })
 
+        // Cecalculate width on mount and when splitView mode is changed
+        // TODO: would be a good idea to do it on resize as well, but could be
+        // expensive.
         useLayoutEffect(() => {
             const { width } = tableRef.current.getBoundingClientRect()
             setRowWidth(width)
-        }, [])
+        }, [isSplitViewActive])
 
         useImperativeHandle(
             ref,

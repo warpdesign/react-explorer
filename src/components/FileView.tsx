@@ -68,6 +68,7 @@ const onSelectAll = (cache: FileState): void => {
 const FileView = observer(({ hide }: Props) => {
     const { viewState, appState, settingsState } = useStores('settingsState', 'viewState', 'appState')
     const { isDarkModeActive } = settingsState
+    const winState = appState.getWinStateFromViewId(viewState.viewId)
     const { t } = useTranslation()
     const cache = viewState.getVisibleCache()
     const { files, cursor, editingId, viewmode } = cache
@@ -85,7 +86,10 @@ const FileView = observer(({ hide }: Props) => {
     const rightClickFileIndexRef: MutableRefObject<number> = useRef<number>()
 
     const { ViewMode, getActions, viewmodeRef } = useViewMode(viewmode)
-
+    const viewmodeOptions = {
+        iconSize: 56,
+        isSplitViewActive: winState.splitView,
+    }
     console.log('render!', { cursorIndex, cursor })
 
     useKeyDown(
@@ -103,8 +107,8 @@ const FileView = observer(({ hide }: Props) => {
                         // Prevent arrow keys to trigger generic browser scrolling: we want to handle it
                         // ourselves so that the cursor is always visible.
                         event.preventDefault()
-                        const { icons, getNextIndex } = getActions()
-                        console.log('usekeydown (render)', viewmode, icons, viewmodeRef.current.icons)
+                        const { getNextIndex } = getActions()
+                        console.log('usekeydown (render)', viewmode, viewmodeRef.current.icons)
                         const nextIndex = getNextIndex(cursorIndex, event.key as ArrowKey)
                         if (nextIndex > -1 && nextIndex <= rowCount - 1) {
                             const file = cache.files[nextIndex]
@@ -287,6 +291,7 @@ const FileView = observer(({ hide }: Props) => {
                             status={cache.status}
                             error={cache.error}
                             isDarkModeActive={isDarkModeActive}
+                            options={viewmodeOptions}
                         />
                     </div>
                 )}

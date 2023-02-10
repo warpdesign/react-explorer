@@ -442,6 +442,9 @@ export class AppState {
         winState.removeView(viewId)
     }
 
+    getWinStateFromViewId(viewId: number) {
+        return this.winStates.find((win) => !!win.getView(viewId))
+    }
     // TODO: this should be moved into FileState (!)
     // updateSelection(cache: FileState, newSelection: FileDescriptor[]): void {
     //     console.log('updateSelection', newSelection.length)

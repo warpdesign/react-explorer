@@ -51,7 +51,6 @@ export interface ViewModeProps<T> {
 
 export interface ViewModeActions {
     getNextIndex: (index: number, direction: ArrowKey) => number
-    icons: boolean
 }
 
 export interface ViewModeReturnProps {
@@ -70,7 +69,6 @@ const defaultActions: ViewModeActions = {
         console.warn('cannot call getNextIndex: ref not ready!')
         return -1
     },
-    icons: false,
 }
 
 export const makeEvent =
