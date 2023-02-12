@@ -1,15 +1,6 @@
 {
     "translations": {
-        "LANG": [
-            {
-                "code": "fr",
-                "lang": "French"
-            },
-            {
-                "code": "en",
-                "lang": "English"
-            }
-        ],
+        "CURRENT_LANGUAGE": "English",
         "NAV": {
             "EXPLORER": "Explorer",
             "TRANSFERS": "Transfers",

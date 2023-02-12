@@ -5,6 +5,7 @@ import { IconNames } from '@blueprintjs/icons'
 import { Tooltip2 } from '@blueprintjs/popover2'
 import { Select2, ItemRenderer } from '@blueprintjs/select'
 import { useTranslation } from 'react-i18next'
+import { languageList } from '$src/locale/i18n'
 import { ipcRenderer } from 'electron'
 
 import { debounce } from '$src/utils/debounce'
@@ -37,8 +38,6 @@ const PrefsDialog = observer(({ isOpen, onClose }: PrefsProps) => {
     const { lang, darkMode, defaultTerminal, defaultViewMode } = settingsState
     const { t } = useTranslation()
     const [defaultFolder, setDefaultFolder] = useState(settingsState.defaultFolder)
-
-    console.log({ defaultViewMode })
 
     // TODO: we could have a default folder that's not using FsLocal
     const [isFolderValid, setIsFolderValid] = useState(
@@ -93,14 +92,18 @@ const PrefsDialog = observer(({ isOpen, onClose }: PrefsProps) => {
     }
 
     const getSortedLanguages = (): Array<Language> => {
-        const auto = [{ code: 'auto', lang: t('COMMON.AUTO') }]
-        const languages = (t('LANG', { returnObjects: true }) as Array<Language>).sort(
-            (lang1: Language, lang2: Language) => {
+        const languages: Array<Language> = languageList
+            .map((code: string) => ({
+                code,
+                lang: t('CURRENT_LANGUAGE', { lng: code }),
+            }))
+            .sort((lang1: Language, lang2: Language) => {
                 if (lang1.lang < lang2.lang) {
                     return -1
                 } else return lang1.lang > lang2.lang ? 1 : 0
-            },
-        )
+            })
+
+        const auto = [{ code: 'auto', lang: t('COMMON.AUTO') }]
 
         return auto.concat(languages)
     }
