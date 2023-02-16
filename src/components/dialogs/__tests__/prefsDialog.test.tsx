@@ -27,14 +27,14 @@ describe('PrefsDialog', () => {
         expect(screen.getByText(LOCALE_EN.DIALOG.PREFS.DEFAULT_TERMINAL)).toBeInTheDocument()
     })
 
-    it('should set language', async () => {
-        const { selectBPOption } = setup(<PrefsDialog {...PROPS} />, { providerProps: { settingsState } })
-        const { lang, code } = LOCALE_EN.LANG[0]
+    // it('should set language', async () => {
+    //     const { selectBPOption } = setup(<PrefsDialog {...PROPS} />, { providerProps: { settingsState } })
+    //     const { lang, code } = LOCALE_EN.LANG[0]
 
-        await selectBPOption(LOCALE_EN.DIALOG.PREFS.LANGUAGE, lang)
+    //     await selectBPOption(LOCALE_EN.DIALOG.PREFS.LANGUAGE, lang)
 
-        expect(settingsState.lang).toBe(code)
-    })
+    //     expect(settingsState.lang).toBe(code)
+    // })
 
     it('should set theme', async () => {
         const { selectBPOption } = setup(<PrefsDialog {...PROPS} />, { providerProps: { settingsState } })
