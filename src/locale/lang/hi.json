@@ -1,19 +1,6 @@
 {
     "translations": {
-        "LANG": [
-            {
-                "code": "fr",
-                "lang": "फ्रेंच"
-            },
-            {
-                "code": "en",
-                "lang": "अंग्रेज़ी"
-            },
-            {
-                "code": "hi",
-                "lang": "हिंदी"
-            }
-        ],
+        "CURRENT_LANGUAGE": "हिंदी",
         "NAV": {
             "EXPLORER": "समन्वेषक",
             "TRANSFERS": "स्थानांतरण",
