@@ -1,19 +1,6 @@
 {
     "translations": {
-        "LANG": [
-            {
-                "code": "fr",
-                "lang": "Français"
-            },
-            {
-                "code": "en",
-                "lang": "Anglais"
-            },
-            {
-                "code": "hi",
-                "lang": "हिंदी"
-            }
-        ],
+        "CURRENT_LANGUAGE": "Français",
         "NAV": {
             "EXPLORER": "Explorateur",
             "TRANSFERS": "Téléchargements",
@@ -74,6 +61,7 @@
                 "INVALID_FOLDER": "Nom de dossier invalide ou introuvable",
                 "DEFAULT_TERMINAL": "Terminal externe",
                 "DEFAULT_TERMINAL_HELP": "Spécifie le type de terminal à lancer",
+                "DEFAULT_VIEW_MODE": "Mode d'affichage par défaut",
                 "TEST_TERMINAL": "Cliquez ici pour lancer le terminal specifié",
                 "TEST_TERMINAL_FAILED": "Impossible de lancer le terminal spécifié: {{terminal}} (code de retour: {{code}})"
             },
@@ -140,7 +128,8 @@
             "PARENT": "Voir le dossier parent",
             "ICON_VIEW": "Icônes",
             "DETAILS_VIEW": "Détails",
-            "CHANGE_VIEW": "Changer le mode d'affichage"
+            "CHANGE_VIEW": "Changer le mode d'affichage",
+            "CHANGE_SORT_METHOD": "Modifier l'ordonnancement des fichiers"
         },
         "COMMON": {
             "SIZE": {
@@ -172,7 +161,9 @@
         },
         "FILETABLE": {
             "COL_NAME": "Nom",
-            "COL_SIZE": "Taille"
+            "COL_SIZE": "Taille",
+            "SORT_ASCENDING": "Croissant",
+            "SORT_DESCENDING": "Décroissant"
         },
         "FILEMENU": {
             "PASTE_one": "Coller {{count}} élément",

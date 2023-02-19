@@ -1,19 +1,6 @@
 {
     "translations": {
-        "LANG": [
-            {
-                "code": "fr",
-                "lang": "French"
-            },
-            {
-                "code": "en",
-                "lang": "English"
-            },
-            {
-                "code": "hi",
-                "lang": "हिंदी"
-            }
-        ],
+        "CURRENT_LANGUAGE": "English",
         "NAV": {
             "EXPLORER": "Explorer",
             "TRANSFERS": "Transfers",
@@ -74,6 +61,7 @@
                 "INVALID_FOLDER": "Invalid folder name or non-existing folder",
                 "DEFAULT_TERMINAL": "External terminal",
                 "DEFAULT_TERMINAL_HELP": "Customizes what kind of terminal to launch",
+                "DEFAULT_VIEW_MODE": "Default view mode",
                 "TEST_TERMINAL": "Click here to launch the specified external terminal",
                 "TEST_TERMINAL_FAILED": "Unable to start specified terminal: {{terminal}} (return code: {{code}})"
             },
@@ -140,7 +128,8 @@
             "PARENT": "Open parent folder",
             "ICON_VIEW": "Icons",
             "DETAILS_VIEW": "Details",
-            "CHANGE_VIEW": "Change display mode"
+            "CHANGE_VIEW": "Change display mode",
+            "CHANGE_SORT_METHOD": "Change files sort order"
         },
         "COMMON": {
             "SIZE": {
@@ -174,7 +163,9 @@
         },
         "FILETABLE": {
             "COL_NAME": "Name",
-            "COL_SIZE": "Size"
+            "COL_SIZE": "Size",
+            "SORT_ASCENDING": "Ascending",
+            "SORT_DESCENDING": "Descending"
         },
         "FILEMENU": {
             "PASTE_one": "Paste {{count}} item",
