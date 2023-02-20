@@ -146,6 +146,8 @@
             "CP_NAMES_COPIED_other": "Les noms des {{count}} éléments sélectionnés ont été copiés dans le presse-papier",
             "CP_PATHS_COPIED_one": "Le chemin vers l'élément sélectionné a été copié dans le presse-papier",
             "CP_PATHS_COPIED_other": "Les chemins des {{count}} éléments sélectionnés ont été copiés dans le presse-papier",
+            "DELETE_SUCCESS_one": "Le fichier/dossier a été supprimé.",
+            "DELETE_SUCCESS_other": "Les fichiers/dossiers ont été supprimés.",            
             "MAKEDIR": "Nouveau dossier",
             "CANCEL": "Annuler",
             "OK": "OK",
