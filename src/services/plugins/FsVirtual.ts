@@ -494,8 +494,8 @@ export const FsVirtual: Fs = {
         needsRefresh: false,
         readonly: false,
     },
-    canread(str: string): boolean {
-        return !!str.match(virtualStart)
+    canread(basePath: string): boolean {
+        return !!basePath.match(virtualStart)
     },
     serverpart(str: string): string {
         return 'virtual'

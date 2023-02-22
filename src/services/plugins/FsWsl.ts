@@ -124,8 +124,8 @@ export const FsWsl: Fs = {
         needsRefresh: false,
         readonly: false,
     },
-    canread(str: string): boolean {
-        return isWin && !!str.match(wslStart)
+    canread(basePath: string): boolean {
+        return isWin && !!basePath.match(wslStart)
     },
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     serverpart(str: string): string {

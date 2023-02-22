@@ -218,7 +218,7 @@ export class FileState {
 
         this.viewId = viewId
         this.path = path
-        this.getNewFS(path)
+        this.getNewFS(path, '')
     }
 
     private saveContext(): void {
@@ -250,10 +250,12 @@ export class FileState {
         this.reload()
     }
 
-    private getNewFS(path: string, skipContext = false): Fs {
-        const newfs = getFS(path)
+    private getNewFS(path: string, newDir: string, skipContext = false): Fs {
+        const newfs = getFS(path, newDir)
 
-        if (newfs) {
+        // only create a new FS if supported FS is different
+        // than current one
+        if (!this.fs || newfs.name !== this.fs.name) {
             !skipContext && this.api && this.saveContext()
 
             // we need to free events in any case
@@ -526,13 +528,15 @@ export class FileState {
     }
 
     cd(path: string, path2 = '', skipHistory = false, skipContext = false): Promise<string> {
-        // first updates fs (eg. was local fs, is now ftp)
-        if (this.path !== path) {
-            if (this.getNewFS(path, skipContext)) {
+        // Since we may change Fs in the middle of a path (for example:
+        // path == '/foo/archive/zip', path2 == '..', fs == FsZip)
+        // In this particular case, going up a directory should
+        // switch to FsLocal.
+        if (this.path !== path || path2 === '..') {
+            if (this.getNewFS(path, path2, skipContext)) {
                 this.server = this.fs.serverpart(path)
                 this.credentials = this.fs.credentials(path)
             } else {
-                // this.navHistory(0);
                 return Promise.reject({
                     message: i18n.i18next.t('ERRORS.CANNOT_READ_FOLDER', { folder: path }),
                     code: 'NO_FS',
@@ -659,7 +663,6 @@ export class FileState {
     }
 
     openDirectory(file: { dir: string; fullname: string }): Promise<string | void> {
-        console.log(file.dir, file.fullname)
         return this.cd(file.dir, file.fullname)
     }
 

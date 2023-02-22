@@ -129,7 +129,6 @@ export class ZipApi implements FsApi {
         this.path = ''
         this.onFsChange = onFsChange
         this.zip = new Zip(path)
-        debugger
     }
 
     // local fs doesn't require login
@@ -601,8 +600,11 @@ export const FsZip: Fs = {
         needsRefresh: false,
         readonly: true,
     },
-    canread(str: string): boolean {
-        return str.replace(/\/$/, '').split(/\.zip/gi).length === 2
+    canread(basePath: string, subPath: string): boolean {
+        return (
+            basePath.replace(/\/$/, '').split(/\.zip/gi).length === 2 &&
+            (subPath !== '..' || !basePath.match(/\.zip$/i))
+        )
     },
     serverpart(str: string): string {
         return 'zip'

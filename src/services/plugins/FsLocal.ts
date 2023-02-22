@@ -500,8 +500,8 @@ export const FsLocal: Fs = {
         needsRefresh: false,
         readonly: false,
     },
-    canread(str: string): boolean {
-        return !!str.match(localStart)
+    canread(basePath: string): boolean {
+        return !!basePath.match(localStart)
     },
     serverpart(str: string): string {
         return 'local'

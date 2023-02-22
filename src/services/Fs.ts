@@ -47,7 +47,7 @@ export interface Fs {
     // runtime api
     API: new (path: string, onFsChange: (filename: string) => void) => FsApi
     // static members
-    canread(str: string): boolean
+    canread(basePath: string, subPath: string): boolean
     serverpart(str: string): string
     credentials(str: string): Credentials
     displaypath(str: string): { fullPath: string; shortPath: string }
@@ -144,8 +144,8 @@ export interface FsApi {
     loginOptions: Credentials
 }
 
-export function getFS(path: string): Fs {
-    const newfs = interfaces.find((filesystem) => filesystem.canread(path))
+export function getFS(basePath: string, subPath: string): Fs {
+    const newfs = interfaces.find((filesystem) => filesystem.canread(basePath, subPath))
     // if (!newfs) {
     //     newfs = FsGeneric;
     // `

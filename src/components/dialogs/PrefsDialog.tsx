@@ -41,11 +41,11 @@ const PrefsDialog = observer(({ isOpen, onClose }: PrefsProps) => {
 
     // TODO: we could have a default folder that's not using FsLocal
     const [isFolderValid, setIsFolderValid] = useState(
-        () => FsLocal.canread(defaultFolder) && FolderExists(defaultFolder),
+        () => FsLocal.canread(defaultFolder, '') && FolderExists(defaultFolder),
     )
 
     const checkPath: (path: string) => void = debounce((path: string) => {
-        const isValid = FsLocal.canread(path) && FolderExists(path)
+        const isValid = FsLocal.canread(path, '') && FolderExists(path)
 
         if (path !== settingsState.defaultFolder) {
             setIsFolderValid(isValid)
