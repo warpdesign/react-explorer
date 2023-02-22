@@ -33,7 +33,7 @@
                 "NOT_VALID": "फ़ोल्डर नाम ठीक नहीं है.",
                 "TITLE": "नए फ़ोल्डर के लिए एक नाम दर्ज करें",
                 "NAME": "फ़ोल्डर नाम",
-                "CREATE": "Create",
+                "CREATE": "बनाएँ",
                 "CREATE_READ": "फ़ोल्डर बनाएँ और पढ़ें"
             },
             "LOGIN": {
@@ -61,6 +61,7 @@
                 "INVALID_FOLDER": "अमान्य फ़ोल्डर नाम या गैर-मौजूदा फ़ोल्डर",
                 "DEFAULT_TERMINAL": "बाहरी टर्मिनल",
                 "DEFAULT_TERMINAL_HELP": "अनुकूलित करता है कि किस प्रकार का टर्मिनल लॉन्च किया जाए",
+                "DEFAULT_VIEW_MODE": "डिफ़ॉल्ट दृश्य मोड",
                 "TEST_TERMINAL": "निर्दिष्ट बाहरी टर्मिनल लॉन्च करने के लिए यहां क्लिक करें",
                 "TEST_TERMINAL_FAILED": "निर्दिष्ट टर्मिनल प्रारंभ करने में असमर्थ: {{terminal}} (वापसी कोड: {{code}})"
             },
@@ -127,7 +128,8 @@
             "PARENT": "मूल फ़ोल्डर खोलें",
             "ICON_VIEW": "माउस",
             "DETAILS_VIEW": "विवरण",
-            "CHANGE_VIEW": "प्रदर्शन मोड बदलें"
+            "CHANGE_VIEW": "प्रदर्शन मोड बदलें",
+            "CHANGE_SORT_METHOD": "फ़ाइलें सॉर्ट क्रम बदलें"
         },
         "COMMON": {
             "SIZE": {
@@ -161,7 +163,9 @@
         },
         "FILETABLE": {
             "COL_NAME": "नाम",
-            "COL_SIZE": "परिमाण"
+            "COL_SIZE": "परिमाण",
+            "SORT_ASCENDING": "आरोही",
+            "SORT_DESCENDING": "अवरोही"
         },
         "FILEMENU": {
             "PASTE_one": "{{count}} आइटम पेस्ट करें",
