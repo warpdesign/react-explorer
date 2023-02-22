@@ -498,6 +498,7 @@ export const FsLocal: Fs = {
     description: 'Local Filesystem',
     options: {
         needsRefresh: false,
+        readonly: false,
     },
     canread(str: string): boolean {
         return !!str.match(localStart)

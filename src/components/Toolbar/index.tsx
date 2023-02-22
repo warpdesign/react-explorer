@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react'
 import { observer } from 'mobx-react'
-import { InputGroup, ControlGroup, Button, ButtonGroup, Intent, HotkeysTarget2, Classes } from '@blueprintjs/core'
+import { InputGroup, ControlGroup, Button, ButtonGroup, Intent, HotkeysTarget2, Classes, Icon } from '@blueprintjs/core'
 import { IconName, IconNames } from '@blueprintjs/icons'
 import { Popover2 } from '@blueprintjs/popover2'
 import { useTranslation } from 'react-i18next'
@@ -237,7 +237,7 @@ export const Toolbar = observer(({ active }: Props) => {
                     onChange={onPathChange}
                     onKeyUp={onKeyUp}
                     placeholder={t('COMMON.PATH_PLACEHOLDER')}
-                    leftIcon={cache.getFS().icon as IconName}
+                    leftElement={<Icon icon={cache.getFS().icon as IconName} style={{ opacity: 0.3 }} />}
                     rightElement={reloadButton}
                     value={path}
                     inputRef={inputRef}

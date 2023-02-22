@@ -599,6 +599,7 @@ export const FsZip: Fs = {
     description: 'Zip Filesystem (Readonly)',
     options: {
         needsRefresh: false,
+        readonly: true,
     },
     canread(str: string): boolean {
         return str.replace(/\/$/, '').split(/\.zip/gi).length === 2

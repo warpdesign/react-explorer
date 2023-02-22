@@ -492,6 +492,7 @@ export const FsVirtual: Fs = {
     description: 'Virtual Filesystem',
     options: {
         needsRefresh: false,
+        readonly: false,
     },
     canread(str: string): boolean {
         return !!str.match(virtualStart)

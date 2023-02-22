@@ -1,9 +1,10 @@
 import * as React from 'react'
-import { Button, Intent } from '@blueprintjs/core'
+import { Button, Colors, Icon, Intent } from '@blueprintjs/core'
 import { IconNames } from '@blueprintjs/icons'
 import { Tooltip2 } from '@blueprintjs/popover2'
 import { observer } from 'mobx-react'
 import { useTranslation } from 'react-i18next'
+
 import { useStores } from '$src/hooks/useStores'
 import { filterDirs, filterFiles } from '$src/utils/fileUtils'
 
@@ -33,6 +34,7 @@ const Statusbar = observer(() => {
     const { t } = useTranslation()
     const fileCache = viewState.getVisibleCache()
     const { files, showHiddenFiles } = fileCache
+    const showReadOnlyIcon = fileCache.getFS().options.readonly
 
     const numDirs = filterDirs(files).length
     const numFiles = filterFiles(files).length
@@ -48,6 +50,18 @@ const Statusbar = observer(() => {
             {`${t('STATUS.FILES', { count: numFiles })}, ${t('STATUS.FOLDERS', {
                 count: numDirs,
             })}`}
+            {showReadOnlyIcon && (
+                <div
+                    style={{
+                        flexGrow: 1,
+                        display: 'flex',
+                        justifyContent: 'end',
+                        marginRight: '0.5rem',
+                    }}
+                >
+                    <Icon icon={IconNames.LOCK} color={Colors.GRAY3} title={t('FS.READONLY')} />
+                </div>
+            )}
         </div>
     )
 })

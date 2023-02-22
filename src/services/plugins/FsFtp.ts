@@ -763,6 +763,7 @@ export const FsFtp: Fs = {
     description: 'Fs that just implements fs over ftp',
     options: {
         needsRefresh: true,
+        readonly: false,
     },
     canread(str: string): boolean {
         const info = new URL(str)

@@ -40,6 +40,7 @@ export interface FileDescriptor {
 
 export interface FsOptions {
     needsRefresh: boolean
+    readonly: boolean
 }
 
 export interface Fs {

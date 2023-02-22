@@ -262,6 +262,9 @@
             "GO_BACK": "Back",
             "GO_FORWARD": "Forward",
             "TOGGLE_HIDDEN_FILES": "Show/Hide Hidden Files"
+        },
+        "FS": {
+            "READONLY": "You are not allowed to alter this folder"
         }
     }
 }

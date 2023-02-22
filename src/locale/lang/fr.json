@@ -262,6 +262,9 @@
             "GO_BACK": "Précédent",
             "GO_FORWARD": "Suivant",
             "TOGGLE_HIDDEN_FILES": "Voir/Cacher Fichiers Cachés"
+        },
+        "FS": {
+            "READONLY": "Vous ne pouvez pas modifier ce dossier"
         }
     }
 }
