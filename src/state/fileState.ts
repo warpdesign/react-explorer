@@ -255,7 +255,7 @@ export class FileState {
 
         // only create a new FS if supported FS is different
         // than current one
-        if (!this.fs || newfs.name !== this.fs.name) {
+        if (!this.fs || (newfs && newfs.name !== this.fs.name)) {
             !skipContext && this.api && this.saveContext()
 
             // we need to free events in any case

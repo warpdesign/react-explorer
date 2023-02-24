@@ -24,10 +24,14 @@ export const checkDirectoryName = (dirName: string) => !!!dirName.match(invalidD
 
 export interface ZipMethods {
     isZipRoot: (path: string) => boolean
-    getEntries: () => Promise<ZipEntry[]>
+    getEntries: (path: string) => Promise<ZipEntry[]>
+    getRelativePath: (path: string) => string
+    prepareEntries: () => Promise<void>
+    getFileDescriptor: (entry: ZipEntry) => FileDescriptor
+    isDir: (path: string) => boolean
 }
 
-export class Zip {
+export class Zip implements ZipMethods {
     ready = false
     zip: StreamZipAsync
     zipEntries: ZipEntry[]
@@ -35,9 +39,9 @@ export class Zip {
     zipFilename: string
 
     constructor(path: string) {
-        this.zip = new StreamZip.async({ file: path })
+        this.zipPath = path.replace(/(?<=\.zip).*/i, '')
+        this.zip = new StreamZip.async({ file: this.zipPath })
         this.zipEntries = []
-        this.zipPath = path.replace(/(\/$)*/, '')
         this.zipFilename = ''
     }
 
@@ -45,24 +49,39 @@ export class Zip {
         return true
     }
 
-    async getEntries(path: string) {
+    /**
+     * Get path relative to zip path
+     */
+    getRelativePath(path: string) {
+        return path.replace(this.zipPath, '').replace(/^\//, '')
+    }
+
+    async prepareEntries() {
         if (!this.ready) {
             const entries = await this.zip.entries()
             this.zipEntries = Object.values(entries)
             this.ready = true
         }
+    }
 
-        const pathInZip = path.replace(this.zipPath, '')
-        const isZipRoot = !!!pathInZip
+    async getEntries(path: string) {
+        const pathInZip = this.getRelativePath(path)
+        // const isZipRoot = !pathInZip.length
 
-        // TODO: get path inside zip
-        return this.zipEntries.filter((entry) => {
-            if (isZipRoot) {
-                const name = entry.name.replace(/(\/$)*/g, '')
-                // root: include files in root zip
-                return !name.match(/\//)
-            }
-        })
+        // const longestPath = pathInZip.replace(/([^\/]*)$/, '')
+        const regExp = pathInZip.length ? new RegExp(`^${pathInZip}\/([^\/]+)[\/]?$`, 'g') : /^([^\/])*[\/]?$/g
+        return this.zipEntries.filter((entry) => !!entry.name.match(regExp))
+    }
+
+    isDir(path: string) {
+        const pathInZip = this.getRelativePath(path)
+        const longestPath = pathInZip.replace(/([^\/]*)$/, '')
+
+        if (!longestPath.length) {
+            return true
+        } else {
+            return this.zipEntries.some((entry) => entry.isDirectory && !!entry.name.match(pathInZip))
+        }
     }
 
     getFileDescriptor(entry: ZipEntry) {
@@ -72,10 +91,9 @@ export class Zip {
         const mDate = new Date(entry.time)
         const mode = entry.attr ? ((entry.attr >>> 0) | 0) >> 16 : 0
 
-        // TODO: build file
         const file = {
             dir: path.parse(`${this.zipPath}/${name}`).dir,
-            fullname: name,
+            fullname: parsed.base,
             name: parsed.name,
             extension,
             cDate: mDate,
@@ -145,20 +163,27 @@ export class ZipApi implements FsApi {
     }
 
     resolve(newPath: string): string {
-        // TODO:
         // gh#44: replace ~ with userpath
-        debugger
         const dir = newPath.replace(/^~/, HOME_DIR)
         return path.resolve(dir)
     }
 
     async cd(path: string, transferId = -1): Promise<string> {
         const resolvedPath = this.resolve(path)
+
+        try {
+            await this.zip.prepareEntries()
+        } catch (e) {
+            console.error('error getting zip file entries', e)
+            throw { code: 'ENOTDIR' }
+        }
+
         try {
             const isDir = await this.isDir(resolvedPath)
             if (isDir) {
                 return resolvedPath
             } else {
+                debugger
                 throw { code: 'ENOTDIR' }
             }
         } catch {}
@@ -286,7 +311,7 @@ export class ZipApi implements FsApi {
 
     async isDir(path: string, transferId = -1): Promise<boolean> {
         console.warn('TODO: FsZip.isDir => check that file inside dir is a directory')
-        return true
+        return this.zip.isDir(path)
     }
 
     async exists(path: string, transferId = -1): Promise<boolean> {
@@ -356,102 +381,9 @@ export class ZipApi implements FsApi {
 
     async list(dir: string, watchDir = false, transferId = -1): Promise<FileDescriptor[]> {
         const entries = await this.zip.getEntries(dir)
-        // return []
+
         return entries.map((entry) => this.zip.getFileDescriptor(entry))
-        debugger
-        throw 'TODO: FsZip.list not implemented'
-        // try {
-        //     await this.isDir(dir)
-        //     return new Promise<FileDescriptor[]>((resolve, reject) => {
-        //         vol.readdir(dir, (err, items) => {
-        //             if (err) {
-        //                 reject(err)
-        //             } else {
-        //                 const dirPath = path.resolve(dir)
-
-        //                 const files: FileDescriptor[] = []
-
-        //                 for (let i = 0; i < items.length; i++) {
-        //                     const file = ZipApi.fileFromPath(path.join(dirPath, items[i] as string))
-        //                     files.push(file)
-        //                 }
-
-        //                 watchDir && this.onList(dirPath)
-
-        //                 resolve(files)
-        //             }
-        //         })
-        //     })
-        // } catch (err) {
-        //     throw {
-        //         code: err.code,
-        //         message: `Could not access path: ${dir}`,
-        //     }
-        // }
-    }
-
-    static fileFromPath(fullPath: string): FileDescriptor {
-        const format = path.parse(fullPath)
-        const name = fullPath
-        const stats: Partial<BigIntStats> = null
-
-        debugger
-
-        return {
-            name: `${fullPath}`,
-        } as FileDescriptor
-        // try {
-        //     // do not follow symlinks first
-        //     stats = vol.lstatSync(fullPath, { bigint: true })
-        //     if (stats.isSymbolicLink()) {
-        //         // get link target path first
-        //         name = vol.readlinkSync(fullPath) as string
-        //         targetStats = vol.statSync(fullPath, { bigint: true })
-        //     }
-        // } catch (err) {
-        //     console.warn('error getting stats for', fullPath, err)
-
-        //     const isDir = stats ? stats.isDirectory() : false
-        //     const isSymLink = stats ? stats.isSymbolicLink() : false
-
-        //     stats = {
-        //         ctime: new Date(),
-        //         mtime: new Date(),
-        //         birthtime: new Date(),
-        //         size: stats ? stats.size : 0n,
-        //         isDirectory: (): boolean => isDir,
-        //         mode: -1n,
-        //         isSymbolicLink: (): boolean => isSymLink,
-        //         ino: 0n,
-        //         dev: 0n,
-        //     }
-        // }
-
-        // const extension = path.parse(name).ext.toLowerCase()
-        // const mode = targetStats ? targetStats.mode : stats.mode
-
-        // const file: FileDescriptor = {
-        //     dir: format.dir,
-        //     fullname: format.base,
-        //     name: format.name,
-        //     extension: extension,
-        //     cDate: stats.ctime,
-        //     mDate: stats.mtime,
-        //     bDate: stats.birthtime,
-        //     length: Number(stats.size),
-        //     mode: Number(mode),
-        //     isDir: targetStats ? targetStats.isDirectory() : stats.isDirectory(),
-        //     readonly: false,
-        //     type:
-        //         (!(targetStats ? targetStats.isDirectory() : stats.isDirectory()) &&
-        //             filetype(Number(mode), 0, 0, extension)) ||
-        //         '',
-        //     isSym: stats.isSymbolicLink(),
-        //     target: (stats.isSymbolicLink() && name) || null,
-        //     id: MakeId({ ino: stats.ino, dev: stats.dev }),
-        // }
-
-        // return file
+        // FIXME: what should we do about watch dir?
     }
 
     isRoot(path: string): boolean {
