@@ -75,13 +75,11 @@ export class Zip implements ZipMethods {
 
     isDir(path: string) {
         const pathInZip = this.getRelativePath(path)
-        const longestPath = pathInZip.replace(/([^\/]*)$/, '')
 
-        if (!longestPath.length) {
-            return true
-        } else {
-            return this.zipEntries.some((entry) => entry.isDirectory && !!entry.name.match(pathInZip))
-        }
+        return (
+            pathInZip.length === 0 ||
+            this.zipEntries.some((entry) => entry.isDirectory && !!entry.name.match(pathInZip))
+        )
     }
 
     getFileDescriptor(entry: ZipEntry) {
@@ -178,15 +176,13 @@ export class ZipApi implements FsApi {
             throw { code: 'ENOTDIR' }
         }
 
-        try {
-            const isDir = await this.isDir(resolvedPath)
-            if (isDir) {
-                return resolvedPath
-            } else {
-                debugger
-                throw { code: 'ENOTDIR' }
-            }
-        } catch {}
+        const isDir = await this.isDir(resolvedPath)
+        if (isDir) {
+            return resolvedPath
+        } else {
+            debugger
+            throw { code: 'ENOTDIR' }
+        }
     }
 
     size(source: string, files: string[], transferId = -1): Promise<number> {
@@ -310,7 +306,6 @@ export class ZipApi implements FsApi {
     }
 
     async isDir(path: string, transferId = -1): Promise<boolean> {
-        console.warn('TODO: FsZip.isDir => check that file inside dir is a directory')
         return this.zip.isDir(path)
     }
 
