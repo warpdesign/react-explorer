@@ -493,6 +493,7 @@ export const FsVirtual: Fs = {
     options: {
         needsRefresh: false,
         readonly: false,
+        indirect: false,
     },
     canread(basePath: string): boolean {
         return !!basePath.match(virtualStart)

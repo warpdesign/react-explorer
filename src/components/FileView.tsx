@@ -183,15 +183,16 @@ const FileView = observer(({ hide }: Props) => {
     }
 
     const openFileOrDirectory = (file: FileDescriptor, useInactiveCache: boolean): void => {
-        if (!file.isDir) {
-            cache.openFile(appState, file)
-        } else {
-            const dir = {
-                dir: cache.join(file.dir, file.fullname),
-                fullname: '',
-            }
-            appState.openDirectory(dir, !useInactiveCache)
-        }
+        // if (!file.isDir) {
+        //     cache.openFile(appState, file)
+        // } else {
+        //     // const dir = {
+        //     //     dir: cache.join(file.dir, file.fullname),
+        //     //     fullname: '',
+        //     // }
+        //     appState.openDirectory(file, !useInactiveCache)
+        // }
+        appState.openFileOrDirectory(file, useInactiveCache)
     }
 
     const onOpenFile = (e: KeyboardEvent): void => {

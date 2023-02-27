@@ -66,20 +66,56 @@ export class Zip implements ZipMethods {
 
     async getEntries(path: string) {
         const pathInZip = this.getRelativePath(path)
-        // const isZipRoot = !pathInZip.length
-
         // const longestPath = pathInZip.replace(/([^\/]*)$/, '')
-        const regExp = pathInZip.length ? new RegExp(`^${pathInZip}\/([^\/]+)[\/]?$`, 'g') : /^([^\/])*[\/]?$/g
-        return this.zipEntries.filter((entry) => !!entry.name.match(regExp))
+        // const regExp = pathInZip.length ? new RegExp(`^${pathInZip}\/([^\/]+)[\/]?$`, 'g') : /^([^\/])*[\/]?$/g
+        const dirsInRoot: string[] = []
+        const entries: ZipEntry[] = []
+        const dirPos = !pathInZip.length ? 0 : pathInZip.split('/').length
+        this.zipEntries.forEach((entry) => {
+            const { name } = entry
+            if (name.startsWith(pathInZip)) {
+                // const paths =  pathInZip.length ? name.replace(new RegExp(`${pathInZip}[^\/]?`, 'g'), '').split('/') : name.split('/')
+                const paths = name.split('/')
+                const dir = paths[dirPos]
+                // do not add current path or already added path to the list
+                if (dirsInRoot.indexOf(dir) !== -1 || !dir.length) return
+
+                if (paths.length === dirPos + 1) {
+                    entries.push(entry)
+                } else {
+                    dirsInRoot.push(dir)
+                    entries.push(this.getFakeDirDescriptor(dir))
+                }
+                console.log(dir, paths)
+            }
+        })
+        console.log(entries)
+        debugger
+        return entries
     }
 
     isDir(path: string) {
         const pathInZip = this.getRelativePath(path)
 
-        return (
-            pathInZip.length === 0 ||
-            this.zipEntries.some((entry) => entry.isDirectory && !!entry.name.match(pathInZip))
-        )
+        debugger
+
+        // will match 'pathInZip/' & 'pathInZip/foo': even though the second one is not necessarily
+        // a directory, it means that pathInZip is itself a directory.
+        return pathInZip.length === 0 || this.zipEntries.some((entry) => !!entry.name.match(`${pathInZip}/`))
+    }
+
+    getFakeDirDescriptor(name: string): ZipEntry {
+        const time = new Date().getTime()
+        return {
+            name,
+            size: 0,
+            attr: 0,
+            isDirectory: true,
+            time,
+            crc: time,
+            offset: time,
+            headerOffset: time,
+        } as any
     }
 
     getFileDescriptor(entry: ZipEntry) {
@@ -172,15 +208,16 @@ export class ZipApi implements FsApi {
         try {
             await this.zip.prepareEntries()
         } catch (e) {
+            debugger
             console.error('error getting zip file entries', e)
             throw { code: 'ENOTDIR' }
         }
+        debugger
 
         const isDir = await this.isDir(resolvedPath)
         if (isDir) {
             return resolvedPath
         } else {
-            debugger
             throw { code: 'ENOTDIR' }
         }
     }
@@ -526,12 +563,19 @@ export const FsZip: Fs = {
     options: {
         needsRefresh: false,
         readonly: true,
+        indirect: true,
     },
     canread(basePath: string, subPath: string): boolean {
-        return (
-            basePath.replace(/\/$/, '').split(/\.zip/gi).length === 2 &&
-            (subPath !== '..' || !basePath.match(/\.zip$/i))
-        )
+        // console.log(basePath.replace(/\/$/, '').split(/\.zip/gi).length, (subPath !== '..' || !basePath.match(/\.zip$/i)))
+        // debugger
+        // return (
+        //     basePath.replace(/\/$/, '').split(/\.zip/gi).length === 2 &&
+        //     (subPath !== '..' || !basePath.match(/\.zip$/i))
+        // )
+        const fullPath = path.join(basePath, subPath)
+        const matches = fullPath.match(/\.zip/gi)
+
+        return matches && matches.length === 1
     },
     serverpart(str: string): string {
         return 'zip'

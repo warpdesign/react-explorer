@@ -123,6 +123,7 @@ export const FsWsl: Fs = {
     options: {
         needsRefresh: false,
         readonly: false,
+        indirect: false,
     },
     canread(basePath: string): boolean {
         return isWin && !!basePath.match(wslStart)

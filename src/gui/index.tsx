@@ -22,9 +22,9 @@ configure({
 })
 
 const bootstrap = async () => {
-    const appState = new AppState()
-
     initFS()
+
+    const appState = new AppState()
 
     await appState.loadSettingsAndPrepareViews()
 

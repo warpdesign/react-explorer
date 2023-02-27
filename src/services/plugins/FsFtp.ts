@@ -764,6 +764,7 @@ export const FsFtp: Fs = {
     options: {
         needsRefresh: true,
         readonly: false,
+        indirect: true,
     },
     canread(str: string): boolean {
         const info = new URL(str)

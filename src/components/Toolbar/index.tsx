@@ -58,7 +58,11 @@ export const Toolbar = observer(({ active }: Props) => {
     const onSubmit = async (shouldSelectTextOnError = false): Promise<void> => {
         if (cache.path !== path) {
             try {
-                await cache.cd(path)
+                // await cache.cd(path)
+                await appState.openDirectory({
+                    dir: path,
+                    fullname: '',
+                })
                 inputRef.current.blur()
             } catch (e) {
                 const err = e as LocalizedError

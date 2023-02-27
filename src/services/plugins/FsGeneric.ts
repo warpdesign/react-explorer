@@ -145,6 +145,7 @@ export const FsGeneric: Fs = {
     options: {
         needsRefresh: false,
         readonly: false,
+        indirect: false,
     },
     canread(str: string): boolean {
         return true

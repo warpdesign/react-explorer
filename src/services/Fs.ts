@@ -41,11 +41,15 @@ export interface FileDescriptor {
 export interface FsOptions {
     needsRefresh: boolean
     readonly: boolean
+    // do we have direct access to files
+    // or do we need to first copy them to local fs
+    // to open them (like in zip, remote,...)
+    indirect: boolean
 }
 
 export interface Fs {
     // runtime api
-    API: new (path: string, onFsChange: (filename: string) => void) => FsApi
+    API: new (path: string, onFsChange?: (filename: string) => void) => FsApi
     // static members
     canread(basePath: string, subPath: string): boolean
     serverpart(str: string): string

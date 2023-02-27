@@ -4,7 +4,7 @@ import { action, observable, computed, makeObservable } from 'mobx'
 import type { TFunction } from 'i18next'
 import { shell } from 'electron'
 
-import { FileDescriptor, sameID } from '$src/services/Fs'
+import { FileDescriptor, FsApi, getFS, sameID } from '$src/services/Fs'
 import { FileState } from '$src/state/fileState'
 import { TransferOptions } from '$src/state/transferState'
 import { ViewDescriptor } from '$src/types'
@@ -21,6 +21,7 @@ import { TransferListState } from '$src/state/transferListState'
 import { DraggedObject } from '$src/types'
 import { SettingsState } from './settingsState'
 import { CustomSettings } from '$src/electron/windowSettings'
+import { DOWNLOADS_DIR } from '$src/electron/osSupport'
 
 // wait 1 sec before showing badge: this avoids
 // flashing (1) badge when the transfer is very fast
@@ -57,6 +58,9 @@ export class AppState {
     // reference to current i18n's instance translate function
     t: TFunction
 
+    localFsApi: FsApi
+    localFsName: string
+
     constructor() {
         makeObservable(this, {
             isExplorer: observable,
@@ -68,6 +72,7 @@ export class AppState {
             refreshActiveView: action,
             addView: action,
             openDirectory: action,
+            openFileOrDirectory: action,
             options: observable,
             togglePrefsDialog: action,
             toggleShortcutsDialog: action,
@@ -75,6 +80,9 @@ export class AppState {
         })
 
         this.t = i18n.i18next.t
+        const { API, name } = getFS(DOWNLOADS_DIR, '')
+        this.localFsApi = new API(DOWNLOADS_DIR)
+        this.localFsName = name
     }
 
     async loadSettingsAndPrepareViews() {
@@ -179,11 +187,23 @@ export class AppState {
         }
     }
 
-    openDirectory(file: { dir: string; fullname: string }, sameView = true) {
+    /**
+     * Attempts to browse directory, falls back to opening the file otherwise
+     */
+    async openFileOrDirectory(file: FileDescriptor, useInactiveCache: boolean) {
+        try {
+            await this.openDirectory(file, !useInactiveCache)
+        } catch (e) {
+            const cache = this.getActiveCache()
+            cache.openFile(this, file)
+        }
+    }
+
+    openDirectory(file: Pick<FileDescriptor, 'dir' | 'fullname'>, sameView = true) {
         if (sameView) {
             const activeCache = this.getActiveCache()
             if (activeCache && activeCache.status === 'ok') {
-                activeCache.openDirectory(file)
+                return activeCache.openDirectory(file)
             }
         } else {
             const winState = this.winStates[0]
@@ -292,32 +312,31 @@ export class AppState {
      *
      * @returns {Promise<FileTransfer[]>}
      */
-    prepareLocalTransfer(srcCache: FileState, files: FileDescriptor[]): Promise<string> {
+    async prepareLocalTransfer(srcCache: FileState, files: FileDescriptor[]): Promise<string> {
         if (!files.length) {
-            return Promise.resolve('')
+            return ''
         }
 
         // Simply open the file if src is a local FS
-        if (srcCache.getFS().name.startsWith('local')) {
+        if (!srcCache.getFS().options.indirect) {
             const api = srcCache.getAPI()
-            return Promise.resolve(api.join(files[0].dir, files[0].fullname))
+            return api.join(files[0].dir, files[0].fullname)
         } else {
             console.error('TODO: prepareLocalTransfer for non-local FS')
-            // TODO once we support non local FS
-
+            const options = {
+                files,
+                srcFs: srcCache.getAPI(),
+                srcPath: srcCache.path,
+                dstFs: this.localFsApi,
+                dstPath: DOWNLOADS_DIR,
+                dstFsName: this.localFsName,
+            }
+            debugger
             // first we need to get a FS for local
             // const fs = getFS(DOWNLOADS_DIR)
             // const api = new fs.API(DOWNLOADS_DIR, () => {
             //     //
             // })
-            // const options = {
-            //     files,
-            //     srcFs: srcCache.getAPI(),
-            //     srcPath: srcCache.path,
-            //     dstFs: api,
-            //     dstPath: DOWNLOADS_DIR,
-            //     dstFsName: fs.name,
-            // }
 
             // // TODO: use a temporary filename for destination file?
             // return this.addTransfer(options)
@@ -364,17 +383,18 @@ export class AppState {
         return view.caches
     }
 
-    async copy(options: TransferOptions) {
+    async copy(options: TransferOptions, silent = false) {
         try {
             const transfer = await this.transferListState.addTransfer(options)
             await transfer.start()
 
-            AppToaster.show({
-                message: this.t('COMMON.COPY_FINISHED'),
-                icon: 'tick',
-                intent: Intent.SUCCESS,
-                timeout: SUCCESS_COPY_TIMEOUT,
-            })
+            !silent &&
+                AppToaster.show({
+                    message: this.t('COMMON.COPY_FINISHED'),
+                    icon: 'tick',
+                    intent: Intent.SUCCESS,
+                    timeout: SUCCESS_COPY_TIMEOUT,
+                })
 
             // get visible caches: the ones that are not visible will be automatically refreshed
             // when set visible
@@ -387,14 +407,15 @@ export class AppState {
                 debugger
                 console.log(err, err.files)
                 const successCount = err.files - err.errors
-                AppToaster.show({
-                    message: this.t('COMMON.COPY_WARNING', {
-                        count: successCount,
-                    }),
-                    icon: 'warning-sign',
-                    intent: !successCount ? Intent.DANGER : Intent.WARNING,
-                    timeout: ERROR_MESSAGE_TIMEOUT,
-                })
+                !silent &&
+                    AppToaster.show({
+                        message: this.t('COMMON.COPY_WARNING', {
+                            count: successCount,
+                        }),
+                        icon: 'warning-sign',
+                        intent: !successCount ? Intent.DANGER : Intent.WARNING,
+                        timeout: ERROR_MESSAGE_TIMEOUT,
+                    })
             } else {
                 // TODOCOPY
                 debugger
