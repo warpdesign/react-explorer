@@ -85,9 +85,8 @@ export class Zip implements ZipMethods {
                     entries.push(entry)
                 } else {
                     dirsInRoot.push(dir)
-                    entries.push(this.getFakeDirDescriptor(dir))
+                    entries.push(this.getFakeDirDescriptor(pathInZip.length ? `${pathInZip}/${dir}` : dir))
                 }
-                console.log(dir, paths)
             }
         })
         console.log(entries)
@@ -398,9 +397,9 @@ export class ZipApi implements FsApi {
 
     async list(dir: string, watchDir = false, transferId = -1): Promise<FileDescriptor[]> {
         const entries = await this.zip.getEntries(dir)
-
-        return entries.map((entry) => this.zip.getFileDescriptor(entry))
-        // FIXME: what should we do about watch dir?
+        const list = entries.map((entry) => this.zip.getFileDescriptor(entry))
+        console.log(list)
+        return list
     }
 
     isRoot(path: string): boolean {
