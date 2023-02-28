@@ -129,8 +129,8 @@ describe('FileView', () => {
 
             expect(appState.openDirectory).toHaveBeenCalledWith(
                 expect.objectContaining({
-                    dir: cache.join(file.dir, file.fullname),
-                    fullname: '',
+                    dir: file.dir,
+                    fullname: file.fullname,
                 }),
                 true,
             )
