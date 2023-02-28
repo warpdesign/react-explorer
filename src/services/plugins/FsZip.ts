@@ -23,12 +23,12 @@ const progressFunc = throttle((progress: (bytes: number) => void, bytesRead: num
 export const checkDirectoryName = (dirName: string) => !!!dirName.match(invalidDirChars) && dirName !== '/'
 
 export interface ZipMethods {
-    isZipRoot: (path: string) => boolean
     getEntries: (path: string) => Promise<ZipEntry[]>
     getRelativePath: (path: string) => string
     prepareEntries: () => Promise<void>
     getFileDescriptor: (entry: ZipEntry) => FileDescriptor
     isDir: (path: string) => boolean
+    close(): void
 }
 
 export class Zip implements ZipMethods {
@@ -45,8 +45,8 @@ export class Zip implements ZipMethods {
         this.zipFilename = ''
     }
 
-    isZipRoot(path: string) {
-        return true
+    close() {
+        this.zip.close()
     }
 
     /**
@@ -148,24 +148,6 @@ export class Zip implements ZipMethods {
         } as FileDescriptor
 
         return file
-        //         dir: format.dir,
-        //         fullname: format.base,
-        //         name: format.name,
-        //         extension: format.ext.toLowerCase(),
-        //         cDate: stats.ctime,
-        //         mDate: stats.mtime,
-        //         bDate: stats.birthtime,
-        //         length: Number(stats.size),
-        //         mode: Number(stats.mode),
-        //         isDir: stats.isDirectory(),
-        //         readonly: false,
-        //         type:
-        //             (!stats.isDirectory() &&
-        //                 filetype(Number(stats.mode), Number(stats.gid), Number(stats.uid), format.ext.toLowerCase())) ||
-        //             '',
-        //         isSym: stats.isSymbolicLink(),
-        //         target: (stats.isSymbolicLink() && vol.readlinkSync(fullPath)) || null,
-        //         id: MakeId({ ino: stats.ino, dev: stats.dev }),
     }
 }
 
@@ -262,10 +244,10 @@ export class ZipApi implements FsApi {
         throw 'TODO: FsZip.makedir'
     }
 
-    delete(source: string, files: FileDescriptor[], transferId = -1): Promise<number> {
+    async delete(source: string, files: FileDescriptor[], transferId = -1): Promise<number> {
         const toDelete = files.map((file) => path.join(source, file.fullname))
 
-        return Promise.reject('TODO: FsZip.delete not implemented!')
+        throw 'TODO: FsZip.delete not implemented!'
         // return new Promise(async (resolve, reject) => {
         //     try {
         //         const deleted = await del(toDelete, {
@@ -423,7 +405,7 @@ export class ZipApi implements FsApi {
     }
 
     off(): void {
-        //
+        this.zip.close()
     }
 
     // TODO add error handling
