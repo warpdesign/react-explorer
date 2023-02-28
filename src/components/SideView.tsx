@@ -27,7 +27,12 @@ export const SideView = observer(({ hide, viewState }: SideViewProps) => {
             canDrop: ({ fileState }: DraggedObject) => {
                 const sourceViewId = fileState.viewId
                 const fileCache = viewState.getVisibleCache()
-                return viewState.viewId !== sourceViewId && fileCache.status !== 'busy' && !fileCache.error
+                return (
+                    viewState.viewId !== sourceViewId &&
+                    fileCache.status !== 'busy' &&
+                    !fileCache.error &&
+                    !fileCache.getFS().options.readonly
+                )
             },
             drop: (item) => appState.drop(item, viewState.getVisibleCache()),
             collect: (monitor) => ({

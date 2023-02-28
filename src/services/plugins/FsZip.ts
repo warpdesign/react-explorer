@@ -435,7 +435,7 @@ export class ZipApi implements FsApi {
         //     console.log('FsVirtual.getStream error', err)
         //     return Promise.reject(err)
         // }
-        return Promise.reject('TODO: getStream')
+        return Promise.reject('TODO: FsZip.getStream')
     }
 
     putStream(

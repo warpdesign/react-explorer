@@ -163,6 +163,10 @@ const FileView = observer(({ hide }: Props) => {
     }
 
     const onInlineEdit = ({ action, data }: InlineEditEvent) => {
+        if (cache.getFS().options.readonly) {
+            return
+        }
+
         switch (action) {
             case 'validate':
                 appState.renameEditingFile(cache, data as string)

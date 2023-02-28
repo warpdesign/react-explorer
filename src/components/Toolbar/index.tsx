@@ -226,7 +226,7 @@ export const Toolbar = observer(({ active }: Props) => {
                     <Popover2
                         content={
                             <FileMenu
-                                isDisabled={!cache || cache.error}
+                                isDisabled={!cache || cache.error || cache.getFS().options.readonly}
                                 selectedItemsLength={selected.length}
                                 onFileAction={onFileAction}
                             />

@@ -160,7 +160,7 @@ export class AppState {
     }
 
     paste(destCache: FileState): void {
-        if (destCache && !destCache.error && this.clipboard.files.length) {
+        if (destCache && !destCache.error && !destCache.getFS().options.readonly && this.clipboard.files.length) {
             const options = {
                 files: this.clipboard.files,
                 srcFs: this.clipboard.srcFs,
@@ -170,6 +170,8 @@ export class AppState {
                 dstFsName: destCache.getFS().name,
             }
             this.copy(options)
+        } else {
+            shell.beep()
         }
     }
 
@@ -250,7 +252,8 @@ export class AppState {
         const cache = this.getActiveCache()
         const toDelete = files || cache.selected
 
-        if (!toDelete.length) {
+        if (!toDelete.length || cache.getFS().options.readonly) {
+            shell.beep()
             return
         }
 
