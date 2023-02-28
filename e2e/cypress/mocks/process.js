@@ -2,7 +2,7 @@ module.exports = {
     process: 'React-Explorer',
     platform: __PLATFORM__,
     version: __NODE__,
-    verisons: {
+    versions: {
         chrome: 'cypress chrome',
         electron: 'cypress electron',
     },
