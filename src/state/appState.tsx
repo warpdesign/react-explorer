@@ -320,12 +320,13 @@ export class AppState {
             return ''
         }
 
+        const { dir, fullname } = files[0]
+
         // Simply open the file if src is a local FS
         if (!srcCache.getFS().options.indirect) {
             const api = srcCache.getAPI()
-            return api.join(files[0].dir, files[0].fullname)
+            return api.join(dir, fullname)
         } else {
-            console.error('TODO: prepareLocalTransfer for non-local FS')
             const options = {
                 files,
                 srcFs: srcCache.getAPI(),
@@ -334,7 +335,28 @@ export class AppState {
                 dstPath: DOWNLOADS_DIR,
                 dstFsName: this.localFsName,
             }
-            debugger
+
+            try {
+                debugger
+                const transfer = await this.transferListState.addTransfer(options)
+                await transfer.start()
+                debugger
+                return this.localFsApi.join(DOWNLOADS_DIR, fullname)
+            } catch (e) {
+                debugger
+                console.log('oops error copying file')
+                // TODO: add a new error for failed transfers
+                throw {
+                    code: 'SHELL_OPEN_FAILED',
+                }
+            }
+            // return this.addTransfer(options)
+            //     .then(() => {
+            //         return api.join(DOWNLOADS_DIR, files[0].fullname)
+            //     })
+            //     .catch((err) => {
+            //         return Promise.reject(err)
+            //     })
             // first we need to get a FS for local
             // const fs = getFS(DOWNLOADS_DIR)
             // const api = new fs.API(DOWNLOADS_DIR, () => {

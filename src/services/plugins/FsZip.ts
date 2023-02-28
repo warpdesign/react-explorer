@@ -27,6 +27,7 @@ export interface ZipMethods {
     getRelativePath: (path: string) => string
     prepareEntries: () => Promise<void>
     getFileDescriptor: (entry: ZipEntry) => FileDescriptor
+    getFileStream: (path: string) => any
     isDir: (path: string) => boolean
     close(): void
 }
@@ -90,14 +91,12 @@ export class Zip implements ZipMethods {
             }
         })
         console.log(entries)
-        debugger
+
         return entries
     }
 
     isDir(path: string) {
         const pathInZip = this.getRelativePath(path)
-
-        debugger
 
         // will match 'pathInZip/' & 'pathInZip/foo': even though the second one is not necessarily
         // a directory, it means that pathInZip is itself a directory.
@@ -149,6 +148,11 @@ export class Zip implements ZipMethods {
 
         return file
     }
+
+    getFileStream(path: string): Promise<NodeJS.ReadableStream> {
+        const relativePath = this.getRelativePath(path)
+        return this.zip.stream(relativePath)
+    }
 }
 
 export class ZipApi implements FsApi {
@@ -194,7 +198,6 @@ export class ZipApi implements FsApi {
             console.error('error getting zip file entries', e)
             throw { code: 'ENOTDIR' }
         }
-        debugger
 
         const isDir = await this.isDir(resolvedPath)
         if (isDir) {
@@ -408,20 +411,12 @@ export class ZipApi implements FsApi {
         this.zip.close()
     }
 
-    // TODO add error handling
-    async getStream(path: string, file: string, transferId = -1): Promise<ReadStream> {
-        // try {
-        //     const stream = fs.createReadStream(this.join(path, file))
-        //     return Promise.resolve(stream)
-        // } catch (err) {
-        //     console.log('FsVirtual.getStream error', err)
-        //     return Promise.reject(err)
-        // }
-        return Promise.reject('TODO: FsZip.getStream')
+    getStream(path: string, file: string, transferId = -1): Promise<NodeJS.ReadableStream> {
+        return this.zip.getFileStream(this.join(path, file))
     }
 
     putStream(
-        readStream: ReadStream,
+        readStream: NodeJS.ReadableStream,
         dstPath: string,
         progress: (bytes: number) => void,
         transferId = -1,
@@ -548,12 +543,6 @@ export const FsZip: Fs = {
         indirect: true,
     },
     canread(basePath: string, subPath: string): boolean {
-        // console.log(basePath.replace(/\/$/, '').split(/\.zip/gi).length, (subPath !== '..' || !basePath.match(/\.zip$/i)))
-        // debugger
-        // return (
-        //     basePath.replace(/\/$/, '').split(/\.zip/gi).length === 2 &&
-        //     (subPath !== '..' || !basePath.match(/\.zip$/i))
-        // )
         const fullPath = path.join(basePath, subPath)
         const matches = fullPath.match(/\.zip/gi)
 

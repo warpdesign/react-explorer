@@ -1,5 +1,4 @@
 import { observable, action, computed, makeObservable, runInAction } from 'mobx'
-import type { Readable } from 'stream'
 
 import { FsApi, FileDescriptor } from '$src/services/Fs'
 import { Deferred } from '$src/utils/deferred'
@@ -53,7 +52,7 @@ export class TransferState {
 
     public elements = observable<FileTransfer>([])
 
-    public streams = new Array<Readable>()
+    public streams = new Array<NodeJS.ReadableStream>()
 
     public status: Status = 'queued'
 
@@ -199,7 +198,7 @@ export class TransferState {
         this.errors++
     }
 
-    removeStream(stream: Readable): void {
+    removeStream(stream: NodeJS.ReadableStream): void {
         const index = this.streams.findIndex((item) => item === stream)
         if (index > -1) {
             this.streams.splice(index, 1)
@@ -414,7 +413,9 @@ export class TransferState {
 
     destroyRunningStreams(): void {
         for (const stream of this.streams) {
-            stream.destroy()
+            // stream.destroy()
+            // stream.close()
+            console.warn('need to detroy stream')
         }
     }
 

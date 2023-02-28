@@ -1,6 +1,4 @@
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
-import { Readable } from 'stream'
-
 import { isWin } from '$src/utils/platform'
 
 const interfaces: Array<Fs> = []
@@ -127,9 +125,9 @@ export interface FsApi {
     exists(path: string, transferId?: number): Promise<boolean>
     size(source: string, files: string[], transferId?: number): Promise<number>
     makeSymlink(targetPath: string, path: string, transferId?: number): Promise<boolean>
-    getStream(path: string, file: string, transferId?: number): Promise<Readable>
+    getStream(path: string, file: string, transferId?: number): Promise<NodeJS.ReadableStream>
     putStream(
-        readStream: Readable,
+        readStream: NodeJS.ReadableStream,
         dstPath: string,
         progress: (bytesRead: number) => void,
         transferId?: number,
