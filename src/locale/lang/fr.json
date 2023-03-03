@@ -209,7 +209,8 @@
             "COPY_ERROR": "La copie n'a pu s'effectuer: {{message}}",
             "COPY_UNKNOWN_ERROR": "Impossible de copier les fichiers demandés.",
             "SHELL_OPEN_FAILED": "Impossible d'ouvrir le fichier: aucune application connue pour l'ouvrir.",
-            "OPEN_TERMINAL_FAILED": "Impossible d'ouvrir le terminal. Vérifiez le chemin du terminal dans les paramètres."
+            "OPEN_TERMINAL_FAILED": "Impossible d'ouvrir le terminal. Vérifiez le chemin du terminal dans les paramètres.",
+            "EBADFILE": "Fichier Endommagé"
         },
         "MAIN_PROCESS": {
             "PRESS_TO_EXIT": "Maintenez la touche ⌘Q enfoncée pour quitter"

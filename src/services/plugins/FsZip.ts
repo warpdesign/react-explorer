@@ -11,7 +11,7 @@ import { isWin, HOME_DIR } from '$src/utils/platform'
 const invalidDirChars = (isWin && /[\*:<>\?|"]+/gi) || /^[\.]+[\/]+(.)*$/gi
 const invalidFileChars = (isWin && /[\*:<>\?|"]+/gi) || /\//
 const SEP = path.sep
-
+const getZipPathRegEx = /(?<=\.zip).*/i
 // Since nodeJS will translate unix like paths to windows path, when running under Windows
 // we accept Windows style paths (eg. C:\foo...) and unix paths (eg. /foo or ./foo)
 const isRoot = (isWin && /((([a-zA-Z]\:)(\\)*)|(\\\\))$/) || /^\/$/
@@ -25,25 +25,22 @@ export const checkDirectoryName = (dirName: string) => !!!dirName.match(invalidD
 export interface ZipMethods {
     getEntries: (path: string) => Promise<ZipEntry[]>
     getRelativePath: (path: string) => string
-    prepareEntries: () => Promise<void>
+    prepareEntries: (path: string) => Promise<void>
     getFileDescriptor: (entry: ZipEntry) => FileDescriptor
     getFileStream: (path: string) => any
     isDir: (path: string) => boolean
+    setup: (path: string) => void
     close(): void
 }
 
 export class Zip implements ZipMethods {
     ready = false
-    zip: StreamZipAsync
-    zipEntries: ZipEntry[]
-    zipPath: string
-    zipFilename: string
+    zip: StreamZipAsync = null
+    zipEntries: ZipEntry[] = []
+    zipPath = ''
 
     constructor(path: string) {
-        this.zipPath = path.replace(/(?<=\.zip).*/i, '')
-        this.zip = new StreamZip.async({ file: this.zipPath })
-        this.zipEntries = []
-        this.zipFilename = ''
+        this.setup(path)
     }
 
     close() {
@@ -57,7 +54,22 @@ export class Zip implements ZipMethods {
         return path.replace(this.zipPath, '').replace(/^\//, '')
     }
 
-    async prepareEntries() {
+    async setup(path: string) {
+        const zipPath = path.replace(getZipPathRegEx, '')
+        if (zipPath !== this.zipPath) {
+            this.zipPath = zipPath
+            this.zip && this.close()
+            this.zip = new StreamZip.async({ file: zipPath })
+            this.ready = false
+        }
+    }
+
+    async prepareEntries(path: string) {
+        // If the user first attempted to open an invalid zip archive
+        // then clicks on another zip file, we will keep the same fs
+        // so here we re-run setup which will open a new zip stream
+        // with the new path is needed.
+        this.setup(path)
         if (!this.ready) {
             const entries = await this.zip.entries()
             this.zipEntries = Object.values(entries)
@@ -67,15 +79,13 @@ export class Zip implements ZipMethods {
 
     async getEntries(path: string) {
         const pathInZip = this.getRelativePath(path)
-        // const longestPath = pathInZip.replace(/([^\/]*)$/, '')
-        // const regExp = pathInZip.length ? new RegExp(`^${pathInZip}\/([^\/]+)[\/]?$`, 'g') : /^([^\/])*[\/]?$/g
+
         const dirsInRoot: string[] = []
         const entries: ZipEntry[] = []
         const dirPos = !pathInZip.length ? 0 : pathInZip.split('/').length
         this.zipEntries.forEach((entry) => {
             const { name } = entry
             if (name.startsWith(pathInZip)) {
-                // const paths =  pathInZip.length ? name.replace(new RegExp(`${pathInZip}[^\/]?`, 'g'), '').split('/') : name.split('/')
                 const paths = name.split('/')
                 const dir = paths[dirPos]
                 // do not add current path or already added path to the list
@@ -97,7 +107,7 @@ export class Zip implements ZipMethods {
     isDir(path: string) {
         const pathInZip = this.getRelativePath(path)
 
-        // will match 'pathInZip/' & 'pathInZip/foo': even though the second one is not necessarily
+        // Will match 'pathInZip/' & 'pathInZip/foo': even though the second one is not necessarily
         // a directory, it means that pathInZip is itself a directory.
         return pathInZip.length === 0 || this.zipEntries.some((entry) => !!entry.name.match(`${pathInZip}/`))
     }
@@ -191,11 +201,11 @@ export class ZipApi implements FsApi {
         const resolvedPath = this.resolve(path)
 
         try {
-            await this.zip.prepareEntries()
+            await this.zip.prepareEntries(path)
         } catch (e) {
             debugger
             console.error('error getting zip file entries', e)
-            throw { code: 'ENOTDIR' }
+            throw { code: 'EBADFILE' }
         }
 
         const isDir = await this.isDir(resolvedPath)
@@ -206,124 +216,24 @@ export class ZipApi implements FsApi {
         }
     }
 
-    size(source: string, files: string[], transferId = -1): Promise<number> {
-        return Promise.reject('FsZip:size not implemented!')
-        // return new Promise(async (resolve, reject) => {
-        //     try {
-        //         let bytes = 0
-        //         for (const file of files) {
-        //             bytes += await size(path.join(source, file))
-        //         }
-        //         resolve(bytes)
-        //     } catch (err) {
-        //         reject(err)
-        //     }
-        // })
+    async size(source: string, files: string[], transferId = -1): Promise<number> {
+        throw 'FsZip:size not implemented!'
     }
 
     async makedir(source: string, dirName: string, transferId = -1): Promise<string> {
-        // return new Promise((resolve, reject) => {
-        //     console.log('makedir, source:', source, 'dirName:', dirName)
-        //     const unixPath = path.join(source, dirName).replace(/\\/g, '/')
-        //     console.log('unixPath', unixPath)
-        //     try {
-        //         console.log('calling mkdir')
-        //         reject('FsVirtual:makedir not implemented!')
-        //         // mkdir(unixPath, (err: NodeJS.ErrnoException) => {
-        //         //     if (err) {
-        //         //         console.log('error creating dir', err)
-        //         //         reject(err)
-        //         //     } else {
-        //         //         console.log('successfully created dir', err)
-        //         //         resolve(path.join(source, dirName))
-        //         //     }
-        //         // })
-        //     } catch (err) {
-        //         console.log('error execing mkdir()', err)
-        //         reject(err)
-        //     }
-        // })
-        throw 'TODO: FsZip.makedir'
+        throw 'FsZip.makedir not supported'
     }
 
     async delete(source: string, files: FileDescriptor[], transferId = -1): Promise<number> {
-        const toDelete = files.map((file) => path.join(source, file.fullname))
-
-        throw 'TODO: FsZip.delete not implemented!'
-        // return new Promise(async (resolve, reject) => {
-        //     try {
-        //         const deleted = await del(toDelete, {
-        //             force: true,
-        //             noGlob: true,
-        //         })
-        //         resolve(deleted.length)
-        //     } catch (err) {
-        //         reject(err)
-        //     }
-        // })
+        throw 'FsZip.delete not supported'
     }
 
     rename(source: string, file: FileDescriptor, newName: string, transferId = -1): Promise<string> {
-        throw 'TODO: FsZip.rename'
-        // const oldPath = path.join(source, file.fullname)
-        // const newPath = path.join(source, newName)
-
-        // if (!newName.match(invalidFileChars)) {
-        //     return new Promise((resolve, reject) => {
-        //         // since node's fs.rename will overwrite the destination
-        //         // path if it exists, first check that file doesn't exist
-        //         this.exists(newPath)
-        //             .then((exists) => {
-        //                 if (exists) {
-        //                     reject({
-        //                         code: 'EEXIST',
-        //                         oldName: file.fullname,
-        //                     })
-        //                 } else {
-        //                     vol.rename(oldPath, newPath, (err) => {
-        //                         if (err) {
-        //                             reject({
-        //                                 code: err.code,
-        //                                 message: err.message,
-        //                                 newName: newName,
-        //                                 oldName: file.fullname,
-        //                             })
-        //                         } else {
-        //                             resolve(newName)
-        //                         }
-        //                     })
-        //                 }
-        //             })
-        //             .catch((err) => {
-        //                 reject({
-        //                     code: err.code,
-        //                     message: err.message,
-        //                     newName: newName,
-        //                     oldName: file.fullname,
-        //                 })
-        //             })
-        //     })
-        // } else {
-        //     // reject promise with previous name in case of invalid chars
-        //     return Promise.reject({
-        //         oldName: file.fullname,
-        //         newName: newName,
-        //         code: 'BAD_FILENAME',
-        //     })
-        // }
+        throw 'FsZip.rename not supported'
     }
 
     async makeSymlink(targetPath: string, path: string, transferId = -1): Promise<boolean> {
-        throw 'TODO: FsZip.makeSymLink'
-        // return new Promise<boolean>((resolve, reject) =>
-        //     vol.symlink(targetPath, path, (err) => {
-        //         if (err) {
-        //             reject(err)
-        //         } else {
-        //             resolve(true)
-        //         }
-        //     }),
-        // )
+        throw 'FsZip.makeSymLink not supported'
     }
 
     async isDir(path: string, transferId = -1): Promise<boolean> {
@@ -332,48 +242,10 @@ export class ZipApi implements FsApi {
 
     async exists(path: string, transferId = -1): Promise<boolean> {
         throw 'TODO: FsZip.Exists not implemented'
-        // try {
-        //     await vol.promises.access(path)
-        //     return true
-        // } catch (err) {
-        //     if (err.code === 'ENOENT') {
-        //         return false
-        //     } else {
-        //         throw err
-        //     }
-        // }
     }
 
     async stat(fullPath: string, transferId = -1): Promise<FileDescriptor> {
         throw 'TODO: FsZip.stat not implemented'
-        // try {
-        //     const format = path.parse(fullPath)
-        //     const stats = vol.lstatSync(fullPath, { bigint: true })
-        //     const file: FileDescriptor = {
-        //         dir: format.dir,
-        //         fullname: format.base,
-        //         name: format.name,
-        //         extension: format.ext.toLowerCase(),
-        //         cDate: stats.ctime,
-        //         mDate: stats.mtime,
-        //         bDate: stats.birthtime,
-        //         length: Number(stats.size),
-        //         mode: Number(stats.mode),
-        //         isDir: stats.isDirectory(),
-        //         readonly: false,
-        //         type:
-        //             (!stats.isDirectory() &&
-        //                 filetype(Number(stats.mode), Number(stats.gid), Number(stats.uid), format.ext.toLowerCase())) ||
-        //             '',
-        //         isSym: stats.isSymbolicLink(),
-        //         target: (stats.isSymbolicLink() && vol.readlinkSync(fullPath)) || null,
-        //         id: MakeId({ ino: stats.ino, dev: stats.dev }),
-        //     }
-
-        //     return file
-        // } catch (err) {
-        //     throw err
-        // }
     }
 
     login(server?: string, credentials?: Credentials): Promise<void> {
@@ -382,17 +254,6 @@ export class ZipApi implements FsApi {
 
     onList(dir: string): void {
         console.warn('FsZop.onList not implemented')
-        // if (dir !== this.path) {
-        //     // console.log('stopWatching', this.path)
-        //     try {
-        //         VirtualWatch.stopWatchingPath(this.path, this.onFsChange)
-        //         VirtualWatch.watchPath(dir, this.onFsChange)
-        //     } catch (e) {
-        //         console.warn('Could not watch path', dir, e)
-        //     }
-        //     // console.log('watchPath', dir)
-        //     this.path = dir
-        // }
     }
 
     async list(dir: string, watchDir = false, transferId = -1): Promise<FileDescriptor[]> {
@@ -420,68 +281,7 @@ export class ZipApi implements FsApi {
         progress: (bytes: number) => void,
         transferId = -1,
     ): Promise<void> {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        // return new Promise((resolve: (val?: any) => void, reject: (val?: any) => void) => {
-        //     let finished = false
-        //     let readError = false
-        //     let bytesRead = 0
-
-        //     const reportProgress = new Transform({
-        //         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        //         transform(chunk: any, encoding: any, callback: TransformCallback) {
-        //             bytesRead += chunk.length
-        //             progressFunc(progress, bytesRead)
-        //             callback(null, chunk)
-        //         },
-        //         highWaterMark: 16384 * 31,
-        //     })
-
-        //     const writeStream = fs.createWriteStream(dstPath)
-
-        //     readStream.once('error', (err) => {
-        //         console.log('error on read stream')
-        //         readError = true
-        //         readStream.destroy()
-        //         writeStream.destroy(err)
-        //     })
-
-        //     readStream.pipe(reportProgress).pipe(writeStream)
-
-        //     writeStream.once('finish', (...args) => {
-        //         progress(writeStream.bytesWritten)
-        //         finished = true
-        //     })
-
-        //     writeStream.once('error', (err) => {
-        //         // remove created file if it's empty and there was a problem
-        //         // accessing the source file: we will report an error to the
-        //         // user so there's no need to leave an empty file
-        //         if (readError && !bytesRead && !writeStream.bytesWritten) {
-        //             console.log('cleaning up fs')
-        //             fs.unlink(dstPath, (err) => {
-        //                 if (!err) {
-        //                     console.log('cleaned-up fs')
-        //                 } else {
-        //                     console.log('error cleaning-up fs', err)
-        //                 }
-        //             })
-        //         }
-        //         reject(err)
-        //     })
-
-        //     writeStream.once('close', () => {
-        //         if (finished) {
-        //             resolve()
-        //         } else {
-        //             reject()
-        //         }
-        //     })
-
-        //     writeStream.once('error', (err) => {
-        //         reject(err)
-        //     })
-        // })
-        throw 'TODO: FsZip.putStream not implemented'
+        throw 'FsZip.putStream not supported'
     }
 
     getParentTree(dir: string): Array<{ dir: string; fullname: string; name: string }> {

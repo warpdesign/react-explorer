@@ -196,8 +196,14 @@ export class AppState {
         try {
             await this.openDirectory(file, !useInactiveCache)
         } catch (e) {
-            const cache = this.getActiveCache()
-            cache.openFile(this, file)
+            if (e.code === 'ENOTDIR') {
+                const cache = this.getActiveCache()
+                cache.openFile(this, file)
+            } else {
+                AppAlert.show(`${e.message} (${e.code})`, {
+                    intent: 'danger',
+                })
+            }
         }
     }
 

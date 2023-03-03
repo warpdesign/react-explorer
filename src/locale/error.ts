@@ -13,7 +13,7 @@ export interface IOError {
 
 export function getLocalizedError(error: string | IOError): LocalizedError {
     const supportedErrors =
-        /(ENOTFOUND|ECONNREFUSED|ENOENT|EPERM|EACCES|EIO|ENOSPC|EEXIST|EHOSTDOWN|ENOTDIR|NODEST|530|550|EROS|SHELL_OPEN_FAILED)$/
+        /(ENOTFOUND|ECONNREFUSED|ENOENT|EPERM|EACCES|EIO|ENOSPC|EEXIST|EHOSTDOWN|ENOTDIR|NODEST|530|550|EROS|SHELL_OPEN_FAILED|EBADFILE)$/
     const niceError: LocalizedError = {}
     const {
         i18next: { t },
@@ -32,9 +32,10 @@ export function getLocalizedError(error: string | IOError): LocalizedError {
                 break
         }
     } else {
-        niceError.code = (error as IOError).code
+        niceError.code = (error as IOError).code || error.toString()
     }
 
+    debugger
     switch (supportedErrors.test(niceError.code.toString())) {
         case true:
             niceError.message = t(`ERRORS.${niceError.code.toString()}`)
