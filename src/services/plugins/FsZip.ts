@@ -68,7 +68,7 @@ export class Zip implements ZipMethods {
         // If the user first attempted to open an invalid zip archive
         // then clicks on another zip file, we will keep the same fs
         // so here we re-run setup which will open a new zip stream
-        // with the new path is needed.
+        // with the new path if needed.
         this.setup(path)
         if (!this.ready) {
             const entries = await this.zip.entries()
@@ -203,9 +203,8 @@ export class ZipApi implements FsApi {
         try {
             await this.zip.prepareEntries(path)
         } catch (e) {
-            debugger
             console.error('error getting zip file entries', e)
-            throw { code: 'EBADFILE' }
+            throw e?.code === 'EACCES' ? e : { code: 'EBADFILE' }
         }
 
         const isDir = await this.isDir(resolvedPath)
@@ -218,22 +217,6 @@ export class ZipApi implements FsApi {
 
     async size(source: string, files: string[], transferId = -1): Promise<number> {
         throw 'FsZip:size not implemented!'
-    }
-
-    async makedir(source: string, dirName: string, transferId = -1): Promise<string> {
-        throw 'FsZip.makedir not supported'
-    }
-
-    async delete(source: string, files: FileDescriptor[], transferId = -1): Promise<number> {
-        throw 'FsZip.delete not supported'
-    }
-
-    rename(source: string, file: FileDescriptor, newName: string, transferId = -1): Promise<string> {
-        throw 'FsZip.rename not supported'
-    }
-
-    async makeSymlink(targetPath: string, path: string, transferId = -1): Promise<boolean> {
-        throw 'FsZip.makeSymLink not supported'
     }
 
     async isDir(path: string, transferId = -1): Promise<boolean> {
@@ -273,15 +256,6 @@ export class ZipApi implements FsApi {
 
     getStream(path: string, file: string, transferId = -1): Promise<NodeJS.ReadableStream> {
         return this.zip.getFileStream(this.join(path, file))
-    }
-
-    putStream(
-        readStream: NodeJS.ReadableStream,
-        dstPath: string,
-        progress: (bytes: number) => void,
-        transferId = -1,
-    ): Promise<void> {
-        throw 'FsZip.putStream not supported'
     }
 
     getParentTree(dir: string): Array<{ dir: string; fullname: string; name: string }> {

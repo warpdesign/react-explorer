@@ -117,16 +117,16 @@ export interface FsApi {
     // async methods that may require server access
     list(dir: string, watchDir?: boolean, transferId?: number): Promise<FileDescriptor[]>
     cd(path: string, transferId?: number): Promise<string>
-    delete(parent: string, files: FileDescriptor[], transferId?: number): Promise<number>
-    makedir(parent: string, name: string, transferId?: number): Promise<string>
-    rename(parent: string, file: FileDescriptor, name: string, transferId?: number): Promise<string>
+    delete?(parent: string, files: FileDescriptor[], transferId?: number): Promise<number>
+    makedir?(parent: string, name: string, transferId?: number): Promise<string>
+    rename?(parent: string, file: FileDescriptor, name: string, transferId?: number): Promise<string>
     stat(path: string, transferId?: number): Promise<FileDescriptor>
     isDir(path: string, transferId?: number): Promise<boolean>
     exists(path: string, transferId?: number): Promise<boolean>
     size(source: string, files: string[], transferId?: number): Promise<number>
-    makeSymlink(targetPath: string, path: string, transferId?: number): Promise<boolean>
+    makeSymlink?(targetPath: string, path: string, transferId?: number): Promise<boolean>
     getStream(path: string, file: string, transferId?: number): Promise<NodeJS.ReadableStream>
-    putStream(
+    putStream?(
         readStream: NodeJS.ReadableStream,
         dstPath: string,
         progress: (bytesRead: number) => void,
