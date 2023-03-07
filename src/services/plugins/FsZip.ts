@@ -44,6 +44,10 @@ export class Zip implements ZipMethods {
     }
 
     close() {
+        // Reset zipPath so that zip is reopened if needed: this can happen
+        // if files from this zip are added into clipboard, then tab is closed
+        // and user pastes files.
+        this.zipPath = ''
         this.zip.close()
     }
 
@@ -57,9 +61,9 @@ export class Zip implements ZipMethods {
     async setup(path: string) {
         const zipPath = path.replace(getZipPathRegEx, '')
         if (zipPath !== this.zipPath) {
-            this.zipPath = zipPath
             this.zip && this.close()
             this.zip = new StreamZip.async({ file: zipPath })
+            this.zipPath = zipPath
             this.ready = false
         }
     }
@@ -79,13 +83,15 @@ export class Zip implements ZipMethods {
 
     async getEntries(path: string) {
         const pathInZip = this.getRelativePath(path)
-
         const dirsInRoot: string[] = []
         const entries: ZipEntry[] = []
         const dirPos = !pathInZip.length ? 0 : pathInZip.split('/').length
         this.zipEntries.forEach((entry) => {
             const { name } = entry
-            if (name.startsWith(pathInZip)) {
+            // skip name partially matching pathInZip, for eg.
+            // pathInZip === '/foo'
+            // name === '/foo.bar'
+            if (name.startsWith(pathInZip.length ? `${pathInZip}/` : '')) {
                 const paths = name.split('/')
                 const dir = paths[dirPos]
                 // do not add current path or already added path to the list

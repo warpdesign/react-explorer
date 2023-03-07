@@ -221,9 +221,6 @@ export class TransferState {
         let stream = null
 
         try {
-            // if (transfer.file.isSym) {
-            //     debugger;
-            // }
             newFilename = await this.renameOrCreateDir(transfer, fullDstPath)
         } catch (err) {
             console.log('error creating directory', err)
@@ -485,6 +482,7 @@ export class TransferState {
             // /note
             try {
                 await this.srcFs.cd(currentPath)
+
                 subFiles = await this.srcFs.list(currentPath)
                 const subDir = this.srcFs.join(subDirectory, dir.fullname)
                 transfers = transfers.concat(await this.getFileList(subFiles, subDir))
@@ -493,7 +491,7 @@ export class TransferState {
                 // then, simply skip it when doing the transfer
                 this.onTransferError(transfer, { code: 'ENOENT' })
                 this.transfersDone++
-                console.log('could not get directory content for', currentPath)
+                console.log('could not get directory content for', currentPath, err)
                 console.log('directory was still added to transfer list for consistency')
             }
         }
