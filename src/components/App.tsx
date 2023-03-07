@@ -28,6 +28,8 @@ import '@blueprintjs/popover2/lib/css/blueprint-popover2.css'
 import '$src/css/main.css'
 import '$src/css/windows.css'
 import '$src/css/scrollbars.css'
+import { reaction } from 'mobx'
+import { ReactiveProperties } from '$src/types'
 
 const App = observer(() => {
     const { appState } = useStores('appState')
@@ -110,6 +112,47 @@ const App = observer(() => {
             e.stopImmediatePropagation()
             e.preventDefault()
         }
+    }, [])
+
+    // Install menu reactions to update native menu when needed
+    useEffect(() => {
+        return reaction(
+            (): ReactiveProperties => {
+                const view = appState.getActiveView()
+                const activeCache = view.getVisibleCache()
+
+                return {
+                    // if any of these elements have changed
+                    // we'll have to update native menus
+                    status: activeCache.status,
+                    path: activeCache.path,
+                    selectedLength: activeCache.selected.length,
+                    // enable when FsZip is merged
+                    isReadonly: false,
+                    isIndirect: false,
+                    // isReadonly: activeCache.getFS().options.readonly,
+                    // isIndirect: activeCache.getFS().options.indirect,
+                    isOverlayOpen: document.body.classList.contains('bp4-overlay-open'),
+                    activeViewTabNums: view.caches.length,
+                    isExplorer: appState.isExplorer,
+                    language: i18n.language,
+                    // missing: about opened, tab: is it needed?
+                }
+            },
+            (value) => {
+                console.log('something changed!')
+                ipcRenderer.invoke('updateMenus', t('APP_MENUS', { returnObjects: true }), value)
+            },
+            {
+                equals: (value: ReactiveProperties, previousValue: ReactiveProperties) => {
+                    console.log(JSON.stringify(value) === JSON.stringify(previousValue))
+                    console.log(JSON.stringify(value))
+                    console.log(JSON.stringify(previousValue))
+
+                    return JSON.stringify(value) === JSON.stringify(previousValue)
+                },
+            },
+        )
     }, [])
 
     useEventListener('keydown', onShortcutsCombo, { capture: true })

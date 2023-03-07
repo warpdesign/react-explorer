@@ -7,6 +7,7 @@ import { AppMenu, LocaleString } from '$src/electron/appMenus'
 import { isLinux } from '$src/electron/osSupport'
 import { WindowSettings } from '$src/electron//windowSettings'
 import { Remote } from '$src/electron/remote'
+import { ReactiveProperties } from '$src/types'
 
 const ENV_E2E = !!process.env.E2E
 const HTML_PATH = `${__dirname}/index.html`
@@ -155,7 +156,7 @@ const ElectronApp = {
      * - reloadIgnoringCache: need to reload the main window (dev only)
      * - exit: wants to exit the app
      * - openTerminal(cmd): should open a new terminal process using specified cmd line
-     * - languageChanged(strings): language has been changed so menus need to be updated
+     * - updateMenus(strings): language has been changed so menus need to be updated
      * - selectAll: wants to generate a selectAll event
      */
     installIpcMainListeners() {
@@ -186,9 +187,10 @@ const ElectronApp = {
             })
         })
 
-        ipcMain.handle('languageChanged', (e: Event, strings: LocaleString, lang: string) => {
+        ipcMain.handle('updateMenus', (e: Event, strings: LocaleString, props: ReactiveProperties) => {
+            console.log('** need to update menus :)')
             if (this.appMenu) {
-                this.appMenu.createMenu(strings, lang)
+                this.appMenu.createMenu(strings, props)
             } else {
                 console.log('languageChanged but app not ready :(')
             }
