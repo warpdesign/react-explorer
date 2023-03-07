@@ -58,7 +58,7 @@ export const Item = ({
         <>
             <div
                 ref={dragRef}
-                className={classNames(item.isSelected && 'selected')}
+                className={classNames(item.isSelected && 'selected', item.className)}
                 style={{
                     margin: `${margin}px`,
                     overflow: 'hidden',
@@ -67,7 +67,14 @@ export const Item = ({
                 }}
                 {...mouseProps}
             >
-                <Icon icon={item.icon} size={iconSize} color={Colors.GRAY2} title={item.name} className="icon" />
+                <Icon
+                    icon={item.icon}
+                    size={iconSize}
+                    color={Colors.GRAY2}
+                    title={item.name}
+                    className="icon"
+                    style={{ position: 'relative' }}
+                />
                 <TruncatedText
                     lines={2}
                     item={item}
