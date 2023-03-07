@@ -668,7 +668,7 @@ export class FileState {
     }
 
     openTerminal(path: string): Promise<void> {
-        if (this.getFS().name === 'local') {
+        if (!this.getFS().options.indirect) {
             return ipcRenderer.invoke('openTerminal', path)
         }
     }
