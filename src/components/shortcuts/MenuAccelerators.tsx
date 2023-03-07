@@ -180,6 +180,10 @@ class MenuAcceleratorsClass extends React.Component<Props> {
         !isEditable(document.activeElement) && cache && cache.openParentDirectory()
     }
 
+    onRename = (): void => {
+        this.appState.startEditingFile(this.getActiveFileCache())
+    }
+
     renderMenuAccelerators(): React.ReactElement {
         return (
             <Accelerators>
@@ -199,6 +203,7 @@ class MenuAcceleratorsClass extends React.Component<Props> {
                 <Accelerator combo={isMac ? 'Cmd+Left' : 'Alt+Left'} onClick={this.onBack}></Accelerator>
                 <Accelerator combo={isMac ? 'Cmd+Right' : 'Alt+Right'} onClick={this.onForward}></Accelerator>
                 <Accelerator combo="Backspace" onClick={this.onParent}></Accelerator>
+                <Accelerator combo="rename" onClick={this.onRename}></Accelerator>
             </Accelerators>
         )
     }

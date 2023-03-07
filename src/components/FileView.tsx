@@ -166,7 +166,7 @@ const FileView = observer(({ hide }: Props) => {
 
             case 'start':
                 const file = (data as FileViewItem).nodeData
-                cache.setEditingFile(file)
+                appState.startEditingFile(cache, file)
                 break
 
             case 'cancel':
