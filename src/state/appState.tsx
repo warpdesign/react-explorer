@@ -417,9 +417,13 @@ export class AppState {
         }
     }
 
-    getActiveCache(): FileState {
+    getActiveView(): ViewState {
         const winState = this.winStates[0]
-        const view = winState.getActiveView()
+        return winState.getActiveView()
+    }
+
+    getActiveCache(): FileState {
+        const view = this.getActiveView()
         return this.isExplorer ? view.caches.find((cache) => cache.isVisible === true) : null
     }
 

@@ -1,6 +1,5 @@
 import i18next from 'i18next'
 import type { Resource } from 'i18next'
-import { ipcRenderer } from 'electron'
 
 const locales: Resource = {}
 
@@ -36,10 +35,6 @@ const i18n = {
     }),
     i18next,
 }
-
-i18next.on('languageChanged', (lang: string): void => {
-    ipcRenderer.invoke('languageChanged', i18next.t('APP_MENUS', { returnObjects: true }), lang)
-})
 
 const languageList = Object.keys(locales)
 

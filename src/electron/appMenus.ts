@@ -1,6 +1,7 @@
 import { clipboard, Menu, BrowserWindow, MenuItemConstructorOptions, MenuItem, app, ipcMain, dialog } from 'electron'
 
 import { isMac, isLinux, VERSIONS } from '$src/electron/osSupport'
+import { ReactiveProperties } from '$src/types'
 
 const ACCELERATOR_EVENT = 'menu_accelerator'
 
@@ -84,8 +85,19 @@ export class AppMenu {
         }
     }
 
-    getMenuTemplate(): MenuItemConstructorOptions[] {
+    getMenuTemplate({
+        activeViewTabNums,
+        isReadonly,
+        isIndirect,
+        isOverlayOpen,
+        isExplorer,
+        path,
+        selectedLength,
+        status,
+    }: ReactiveProperties): MenuItemConstructorOptions[] {
         const menuStrings = this.menuStrings
+        const explorerWithoutOverlay = !isOverlayOpen && isExplorer
+        const explorerWithoutOverlayCanWrite = explorerWithoutOverlay && !isReadonly && status === 'ok'
         let windowMenuIndex = 4
 
         const template = [
@@ -97,17 +109,20 @@ export class AppMenu {
                         label: menuStrings['NEW_TAB'],
                         click: this.sendComboEvent,
                         accelerator: 'CmdOrCtrl+T',
+                        enabled: explorerWithoutOverlay,
                     },
                     {
                         label: menuStrings['CLOSE_TAB'],
                         click: this.sendComboEvent,
                         accelerator: 'CmdOrCtrl+W',
+                        enabled: explorerWithoutOverlay && activeViewTabNums > 1,
                     },
                     { type: 'separator' },
                     {
                         label: menuStrings['MAKEDIR'],
                         accelerator: 'CmdOrCtrl+N',
                         click: this.sendComboEvent,
+                        enabled: explorerWithoutOverlayCanWrite,
                     },
                     {
                         label: menuStrings['RENAME'],
@@ -118,17 +133,20 @@ export class AppMenu {
                                 Object.assign({ combo: 'rename', data: undefined }),
                             )
                         },
+                        enabled: explorerWithoutOverlayCanWrite && selectedLength === 1,
                     },
                     {
                         label: menuStrings['DELETE'],
                         accelerator: 'CmdOrCtrl+D',
                         click: this.sendComboEvent,
+                        enabled: explorerWithoutOverlayCanWrite && selectedLength > 0,
                     },
                     { type: 'separator' },
                     {
                         label: menuStrings['OPEN_TERMINAL'],
                         accelerator: 'CmdOrCtrl+K',
                         click: this.sendComboEvent,
+                        enabled: explorerWithoutOverlay && !isIndirect,
                     },
                 ],
             },
@@ -313,13 +331,13 @@ export class AppMenu {
         return template as MenuItemConstructorOptions[]
     }
 
-    createMenu(menuStrings: LocaleString, lang: string): void {
+    createMenu(menuStrings: LocaleString, props: ReactiveProperties): void {
         this.menuStrings = menuStrings
-        this.lang = lang
+        this.lang = props.language
 
-        const menuTemplate = this.getMenuTemplate()
+        const template = this.getMenuTemplate(props)
 
-        const menu = Menu.buildFromTemplate(menuTemplate)
+        const menu = Menu.buildFromTemplate(template)
 
         Menu.setApplicationMenu(menu)
     }

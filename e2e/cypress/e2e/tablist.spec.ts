@@ -77,20 +77,24 @@ describe('tablist', () => {
 
         cy.get('#view_0 .tablist').contains('/').find('[icon]').rightclick()
 
-        cy.get('@stub_invoke').should('be.calledOnce').and('be.calledWith', 'Menu:buildFromTemplate')
-
-        // cy.get('@stub_popup').should('be.calledOnce')
+        cy.get('@stub_invoke')
+            .should('be.called')
+            .then((stub: any) => {
+                // check we have the correct number of elements in the menu template
+                // NOTE: I guess we can do a lot better than that!
+                expect(stub.getCalls()[1].args[0]).to.equal('Menu:buildFromTemplate')
+            })
     })
 
     it('right-click on the tab should show the tab menu', () => {
         cy.get('#view_0 .tablist').contains('/').find('.bp4-button-text').rightclick('right')
 
         cy.get('@stub_invoke')
-            .should('be.calledOnce')
+            .should('be.called')
             .then((stub: any) => {
                 // check we have the correct number of elements in the menu template
                 // NOTE: I guess we can do a lot better than that!
-                expect(stub.getCalls()[0].args[1].length).to.equal(8)
+                expect(stub.getCalls()[1].args[1].length).to.equal(8)
             })
     })
 

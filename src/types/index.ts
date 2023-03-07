@@ -1,5 +1,5 @@
 import { FileDescriptor } from '$src/services/Fs'
-import { FileState } from '$src/state/fileState'
+import { FileState, TStatus } from '$src/state/fileState'
 import { IconName } from '@blueprintjs/icons'
 import { IpcRendererEvent } from 'electron/renderer'
 
@@ -31,3 +31,16 @@ export interface DraggedObject {
 }
 
 export type ArrowKey = 'ArrowUp' | 'ArrowDown' | 'ArrowLeft' | 'ArrowRight'
+
+// Properties that trigger an update of native menus
+export interface ReactiveProperties {
+    activeViewTabNums: number
+    isReadonly: boolean
+    isIndirect: boolean
+    isOverlayOpen: boolean
+    isExplorer: boolean
+    path: string
+    selectedLength: number
+    status: TStatus
+    language: string
+}

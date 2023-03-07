@@ -15,6 +15,7 @@ const FileContextMenu = ({ fileUnderMouse }: Props) => {
     const clipboard = appState.clipboard
     const cache = appState.getActiveCache()
 
+    // TODO: disable delete/paste when cahce.fs.readonly is true
     const numFilesInClipboard = clipboard.files.length
     const isInSelection = fileUnderMouse && !!cache.selected.find((file) => sameID(file.id, fileUnderMouse.id))
     const isPasteEnabled = numFilesInClipboard && ((!fileUnderMouse && !cache.error) || fileUnderMouse?.isDir)
