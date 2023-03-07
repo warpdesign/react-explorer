@@ -80,9 +80,16 @@ export const IconViewMode = forwardRef<ViewModeActions, ViewModeProps<IconViewMo
                         case 'ArrowDown':
                             // if it's the first time arrow down key is pressed
                             // we have to select the first element of the first row,
-                            // otherwise, select the element at the same position
-                            // in the next row
-                            return index === -1 ? 0 : index + itemsPerRow
+                            if (index === -1) return 0
+
+                            // if we reached last row, do nothing
+                            if (index / itemsPerRow >= numRows - 1) return index
+
+                            const newIndex = index + itemsPerRow
+
+                            // goto element at the same position on the row or
+                            // last element of the row
+                            return newIndex >= itemCount ? itemCount - 1 : newIndex
 
                         case 'ArrowUp':
                             return index - itemsPerRow
