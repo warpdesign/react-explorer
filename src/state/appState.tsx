@@ -410,6 +410,13 @@ export class AppState {
         }
     }
 
+    startEditingFile(cache: FileState, file?: FileDescriptor) {
+        if (cache) {
+            const fileToEdit = file || (cache.selected.length === 1 && cache.selected[0])
+            fileToEdit && cache.setEditingFile(fileToEdit)
+        }
+    }
+
     getActiveCache(): FileState {
         const winState = this.winStates[0]
         const view = winState.getActiveView()
