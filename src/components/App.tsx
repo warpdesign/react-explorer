@@ -47,7 +47,6 @@ const App = observer(() => {
     } = appState
 
     const cache = appState.getActiveCache()
-    const view = appState.activeView
 
     const progress = (pendingTransfers && totalTransferProgress) || -1
 

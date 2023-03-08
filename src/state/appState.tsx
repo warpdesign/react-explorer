@@ -339,7 +339,6 @@ export class AppState {
     get activeView(): ViewState {
         const winState = this.winStates[0]
         return winState.activeView
-        // return winState.views.find(view => view.isActive)
     }
 
     /**
