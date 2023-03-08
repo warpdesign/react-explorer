@@ -27,6 +27,8 @@ export class WinState {
             toJSON: computed,
             initState: action,
             setActiveView: action,
+            activeView: computed,
+            inactiveView: computed,
         })
 
         this.id = WinState.id++
@@ -95,7 +97,7 @@ export class WinState {
      */
     setActiveView(viewId: number): void {
         console.log('setting active view', viewId)
-        const previous = this.getActiveView()
+        const previous = this.activeView
         const next = this.getView(viewId)
 
         // if the active view has been removed, previous is undefined
@@ -105,11 +107,11 @@ export class WinState {
         next.isActive = true
     }
 
-    getActiveView(): ViewState {
+    get activeView(): ViewState {
         return this.getViewByActive(true)
     }
 
-    getInactiveView(): ViewState {
+    get inactiveView(): ViewState {
         return this.getViewByActive(false)
     }
 

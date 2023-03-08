@@ -123,7 +123,7 @@ class MenuAcceleratorsClass extends React.Component<Props> {
     cycleTab = (direction: 1 | -1): void => {
         if (this.appState.isExplorer) {
             const winState = this.appState.winStates[0]
-            const viewState = winState.getActiveView()
+            const viewState = winState.activeView
             viewState.cycleTab(direction)
         }
     }
@@ -141,7 +141,7 @@ class MenuAcceleratorsClass extends React.Component<Props> {
             const { settingsState } = this.injected
             const { defaultFolder, defaultViewMode } = settingsState
             const winState = this.appState.winStates[0]
-            const viewState = winState.getActiveView()
+            const viewState = winState.activeView
             viewState.addCache(defaultFolder, viewState.getVisibleCacheIndex() + 1, {
                 activateNewCache: true,
                 viewmode: defaultViewMode,
@@ -153,7 +153,7 @@ class MenuAcceleratorsClass extends React.Component<Props> {
     onCloseTab = (): void => {
         if (this.appState.isExplorer) {
             const winState = this.appState.winStates[0]
-            const viewState = winState.getActiveView()
+            const viewState = winState.activeView
             const activeTabIndex = viewState.getVisibleCacheIndex()
             viewState.closeTab(activeTabIndex)
         }

@@ -5,14 +5,10 @@ import { ReactiveProperties } from '$src/types'
 
 const ACCELERATOR_EVENT = 'menu_accelerator'
 
-export interface LocaleString {
-    [key: string]: string
-}
-
 export class AppMenu {
     win: BrowserWindow
     lang: string
-    menuStrings: LocaleString
+    menuStrings: Record<string, string>
 
     constructor(win: BrowserWindow) {
         this.win = win
@@ -331,7 +327,7 @@ export class AppMenu {
         return template as MenuItemConstructorOptions[]
     }
 
-    createMenu(menuStrings: LocaleString, props: ReactiveProperties): void {
+    createMenu(menuStrings: Record<string, string>, props: ReactiveProperties): void {
         this.menuStrings = menuStrings
         this.lang = props.language
 

@@ -36,7 +36,7 @@ describe('SideView', () => {
         providerProps.appState = appState
         providerProps.settingsState = appState.settingsState
         await options.providerProps.appState.loadSettingsAndPrepareViews()
-        PROPS.viewState = appState.winStates[0].getActiveView()
+        PROPS.viewState = appState.winStates[0].activeView
         await waitFor(() => expect(PROPS.viewState.getVisibleCache().status).toBe('ok'))
         jest.clearAllMocks()
     })

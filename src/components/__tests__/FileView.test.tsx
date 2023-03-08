@@ -22,7 +22,7 @@ describe('FileView', () => {
         providerProps.appState = appState
         providerProps.settingsState = appState.settingsState
         await options.providerProps.appState.loadSettingsAndPrepareViews()
-        providerProps.viewState = appState.winStates[0].getActiveView()
+        providerProps.viewState = appState.winStates[0].activeView
         await waitFor(() => expect(providerProps.viewState.getVisibleCache().status).toBe('ok'))
         jest.clearAllMocks()
     })
