@@ -39,6 +39,9 @@ export interface ReactiveProperties {
     isIndirect: boolean
     isOverlayOpen: boolean
     isExplorer: boolean
+    isRoot: boolean
+    historyLength: number
+    historyCurrent: number
     activeViewId: number
     path: string
     selectedLength: number
