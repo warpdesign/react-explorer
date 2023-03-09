@@ -14,7 +14,7 @@ export default function initFS() {
     } else {
         // TODO: there should be an easy way to automatically register new FS
         registerFs(FsWsl)
-        registerFs(FsZip)
         registerFs(FsLocal)
+        registerFs(FsZip)
     }
 }

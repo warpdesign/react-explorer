@@ -486,7 +486,7 @@ export class LocalApi implements FsApi {
 
 export function FolderExists(path: string): boolean {
     try {
-        return fs.existsSync(path) && fs.lstatSync(path).isDirectory()
+        return fs.existsSync(path) && fs.statSync(path).isDirectory()
     } catch (err) {
         return false
     }
@@ -501,8 +501,9 @@ export const FsLocal: Fs = {
         readonly: false,
         indirect: false,
     },
-    canread(basePath: string): boolean {
-        return !!basePath.match(localStart)
+    canread(basePath: string, subDir: string): boolean {
+        const fullPath = path.join(basePath, subDir)
+        return !!basePath.match(localStart) && FolderExists(fullPath)
     },
     serverpart(str: string): string {
         return 'local'
