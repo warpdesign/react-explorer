@@ -112,13 +112,17 @@ const FileView = observer(({ hide }: Props) => {
                         const nextIndex = getNextIndex(cursorIndex, event.key as ArrowKey)
                         if (nextIndex > -1 && nextIndex <= rowCount - 1) {
                             const file = cache.files[nextIndex]
-                            selectFile(file, event.metaKey, event.shiftKey)
+                            selectFile(file, false, event.shiftKey)
                         }
                         break
 
                     case 'Enter':
                         const item = nodes[cursorIndex]
-                        if (item.isSelected && (!editingId || !sameID(cursor.id, editingId))) {
+                        if (
+                            item.isSelected &&
+                            cache.selected.length === 1 &&
+                            (!editingId || !sameID(cursor.id, editingId))
+                        ) {
                             cache.setEditingFile(cursor)
                         }
                         break
