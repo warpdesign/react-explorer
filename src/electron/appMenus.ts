@@ -197,17 +197,20 @@ export class AppMenu {
                         label: menuStrings['TOGGLE_SPLITVIEW'],
                         accelerator: 'CmdOrCtrl+Shift+Alt+V',
                         click: this.sendComboEvent,
+                        enabled: explorerWithoutOverlay,
                     },
                     { type: 'separator' },
                     {
                         label: menuStrings['RELOAD_VIEW'],
                         accelerator: 'CmdOrCtrl+R',
                         click: this.sendComboEvent,
+                        enabled: explorerWithoutOverlay,
                     },
                     {
                         label: menuStrings['TOGGLE_HIDDEN_FILES'],
                         accelerator: 'CmdOrCtrl+H',
                         click: this.sendComboEvent,
+                        enabled: explorerWithoutOverlay && status === 'ok',
                     },
                     { type: 'separator' },
                     {
