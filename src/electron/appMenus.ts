@@ -87,6 +87,9 @@ export class AppMenu {
         isIndirect,
         isOverlayOpen,
         isExplorer,
+        historyCurrent,
+        historyLength,
+        isRoot,
         path,
         selectedLength,
         clipboardLength,
@@ -227,16 +230,19 @@ export class AppMenu {
                         label: menuStrings['GO_BACK'],
                         accelerator: isMac ? 'Cmd+Left' : 'Alt+Left',
                         click: this.sendComboEvent,
+                        enabled: explorerWithoutOverlay && historyCurrent > 0,
                     },
                     {
                         label: menuStrings['GO_FORWARD'],
                         accelerator: isMac ? 'Cmd+Right' : 'Alt+Right',
                         click: this.sendComboEvent,
+                        enabled: explorerWithoutOverlay && historyCurrent < historyLength - 1,
                     },
                     {
                         label: menuStrings['GO_PARENT'],
                         accelerator: 'Backspace',
                         click: this.sendComboEvent,
+                        enabled: explorerWithoutOverlay && !isRoot && status === 'ok',
                     },
                 ],
             },
@@ -275,6 +281,7 @@ export class AppMenu {
                         label: menuStrings['PREFS'],
                         accelerator: 'CmdOrCtrl+,',
                         click: this.sendComboEvent,
+                        enabled: !isOverlayOpen,
                     },
                     { type: 'separator' },
                     {
@@ -304,6 +311,7 @@ export class AppMenu {
                 label: menuStrings['PREFS'],
                 accelerator: 'CmdOrCtrl+,',
                 click: this.sendComboEvent,
+                enabled: !isOverlayOpen,
             })
 
             // add exit to file menu
@@ -332,11 +340,13 @@ export class AppMenu {
                 label: menuStrings['SELECT_NEXT_TAB'],
                 accelerator: 'Ctrl+Tab',
                 click: this.sendComboEvent,
+                enabled: explorerWithoutOverlay && activeViewTabNums > 1,
             },
             {
                 label: menuStrings['SELECT_PREVIOUS_TAB'],
                 accelerator: 'Ctrl+Shift+Tab',
                 click: this.sendComboEvent,
+                enabled: explorerWithoutOverlay && activeViewTabNums > 1,
             },
         )
 

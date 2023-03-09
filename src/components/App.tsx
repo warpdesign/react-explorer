@@ -53,6 +53,8 @@ const App = observer(() => {
     const getReactiveProps = useCallback(() => {
         const activeView = appState.activeView
         const activeCache = activeView.getVisibleCache()
+        const fs = activeCache.getFS()
+        const API = activeCache.getAPI()
 
         return {
             // if any of these elements have changed
@@ -63,6 +65,9 @@ const App = observer(() => {
             // enable when FsZip is merged
             isReadonly: false,
             isIndirect: false,
+            historyLength: activeCache.history.length,
+            historyCurrent: activeCache.current,
+            isRoot: API.isRoot(activeCache.path),
             // isReadonly: activeCache.getFS().options.readonly,
             // isIndirect: activeCache.getFS().options.indirect,
             isOverlayOpen: refIsOverlayOpen.current,
