@@ -1,4 +1,4 @@
-import React, { useEffect, useCallback, useState } from 'react'
+import React, { useEffect, useCallback, useState, useRef } from 'react'
 import { ipcRenderer } from 'electron'
 import { platform } from 'process'
 import { FocusStyleManager, Alert, Classes, Intent } from '@blueprintjs/core'
@@ -30,12 +30,13 @@ import '$src/css/windows.css'
 import '$src/css/scrollbars.css'
 import { reaction } from 'mobx'
 import { ReactiveProperties } from '$src/types'
+import { triggerUpdateMenus } from '$src/events'
 
 const App = observer(() => {
     const { appState } = useStores('appState')
     const { t, i18n } = useTranslation()
     const [isExitDialogOpen, setIsExitDialogOpen] = useState(false)
-    const cache = appState.getActiveCache()
+    const refIsOverlayOpen = useRef(document.body.classList.contains('bp4-overlay-open'))
 
     const {
         settingsState,
@@ -45,7 +46,50 @@ const App = observer(() => {
         isExplorer,
     } = appState
 
+    const cache = appState.getActiveCache()
+
     const progress = (pendingTransfers && totalTransferProgress) || -1
+
+    const getReactiveProps = useCallback(() => {
+        const activeView = appState.activeView
+        const activeCache = activeView.getVisibleCache()
+
+        return {
+            // if any of these elements have changed
+            // we'll have to update native menus
+            status: activeCache.status,
+            path: activeCache.path,
+            selectedLength: activeCache.selected.length,
+            // enable when FsZip is merged
+            isReadonly: false,
+            isIndirect: false,
+            // isReadonly: activeCache.getFS().options.readonly,
+            // isIndirect: activeCache.getFS().options.indirect,
+            isOverlayOpen: refIsOverlayOpen.current,
+            activeViewTabNums: activeView.caches.length,
+            isExplorer: appState.isExplorer,
+            language: settingsState.lang,
+            filesLength: activeCache.files.length,
+            clipboardLength: appState.clipboard.files.length,
+            activeViewId: activeView.viewId,
+            // missing: about opened, tab: is it needed?
+        }
+    }, [appState])
+
+    useEffect(() => {
+        const observer = new MutationObserver((mutationList) => {
+            for (const mutation of mutationList) {
+                if (mutation.attributeName === 'class') {
+                    refIsOverlayOpen.current = document.body.classList.contains(Classes.OVERLAY_OPEN)
+                    triggerUpdateMenus(t('APP_MENUS', { returnObjects: true }), getReactiveProps())
+                }
+            }
+        })
+
+        observer.observe(document.body, { attributes: true })
+
+        return () => observer.disconnect()
+    }, [])
 
     useEffect(() => {
         setDarkThemeClass()
@@ -117,31 +161,10 @@ const App = observer(() => {
     // Install menu reactions to update native menu when needed
     useEffect(() => {
         return reaction(
-            (): ReactiveProperties => {
-                const view = appState.getActiveView()
-                const activeCache = view.getVisibleCache()
-
-                return {
-                    // if any of these elements have changed
-                    // we'll have to update native menus
-                    status: activeCache.status,
-                    path: activeCache.path,
-                    selectedLength: activeCache.selected.length,
-                    // enable when FsZip is merged
-                    isReadonly: false,
-                    isIndirect: false,
-                    // isReadonly: activeCache.getFS().options.readonly,
-                    // isIndirect: activeCache.getFS().options.indirect,
-                    isOverlayOpen: document.body.classList.contains('bp4-overlay-open'),
-                    activeViewTabNums: view.caches.length,
-                    isExplorer: appState.isExplorer,
-                    language: i18n.language,
-                    // missing: about opened, tab: is it needed?
-                }
-            },
+            (): ReactiveProperties => getReactiveProps(),
             (value) => {
                 console.log('something changed!')
-                ipcRenderer.invoke('updateMenus', t('APP_MENUS', { returnObjects: true }), value)
+                triggerUpdateMenus(t('APP_MENUS', { returnObjects: true }), value)
             },
             {
                 equals: (value: ReactiveProperties, previousValue: ReactiveProperties) => {

@@ -5,14 +5,10 @@ import { ReactiveProperties } from '$src/types'
 
 const ACCELERATOR_EVENT = 'menu_accelerator'
 
-export interface LocaleString {
-    [key: string]: string
-}
-
 export class AppMenu {
     win: BrowserWindow
     lang: string
-    menuStrings: LocaleString
+    menuStrings: Record<string, string>
 
     constructor(win: BrowserWindow) {
         this.win = win
@@ -93,6 +89,8 @@ export class AppMenu {
         isExplorer,
         path,
         selectedLength,
+        clipboardLength,
+        filesLength,
         status,
     }: ReactiveProperties): MenuItemConstructorOptions[] {
         const menuStrings = this.menuStrings
@@ -156,29 +154,39 @@ export class AppMenu {
                     {
                         label: menuStrings['CUT'],
                         role: 'cut',
+                        // NOTE: this is ignored in macOS because a role is set
+                        // see: https://github.com/electron/electron/issues/5794#issuecomment-222687713
+                        enabled: explorerWithoutOverlayCanWrite && selectedLength > 0,
                     },
                     {
                         label: menuStrings['COPY'],
                         role: 'copy',
+                        // NOTE: this is ignored in macOS because a role is set
+                        enabled: explorerWithoutOverlay && selectedLength > 0,
                     },
                     {
                         label: menuStrings['COPY_PATH'],
                         accelerator: 'CmdOrCtrl+Shift+C',
                         click: this.sendComboEvent,
+                        enabled: explorerWithoutOverlay && selectedLength > 0,
                     },
                     {
                         label: menuStrings['COPY_FILENAMES'],
                         accelerator: 'CmdOrCtrl+Shift+N',
                         click: this.sendComboEvent,
+                        enabled: explorerWithoutOverlay && selectedLength > 0,
                     },
                     {
                         label: menuStrings['PASTE'],
                         role: 'paste',
+                        // NOTE: this is ignored in macOS because a role is set
+                        enabled: explorerWithoutOverlayCanWrite && clipboardLength > 0,
                     },
                     {
                         label: menuStrings['SELECT_ALL'],
                         accelerator: 'CmdOrCtrl+A',
                         click: this.sendSelectAll,
+                        enabled: explorerWithoutOverlay && filesLength > 0 && status === 'ok',
                     },
                 ],
             },
@@ -245,6 +253,7 @@ export class AppMenu {
                         label: menuStrings['KEYBOARD_SHORTCUTS'],
                         click: this.sendComboEvent,
                         accelerator: 'CmdOrCtrl+S',
+                        enabled: !isOverlayOpen,
                     },
                 ],
             },
@@ -331,7 +340,7 @@ export class AppMenu {
         return template as MenuItemConstructorOptions[]
     }
 
-    createMenu(menuStrings: LocaleString, props: ReactiveProperties): void {
+    createMenu(menuStrings: Record<string, string>, props: ReactiveProperties): void {
         this.menuStrings = menuStrings
         this.lang = props.language
 

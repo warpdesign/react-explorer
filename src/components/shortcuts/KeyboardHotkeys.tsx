@@ -53,7 +53,7 @@ class KeyboardHotkeysClass extends React.Component<WithTranslation> {
         // do nothing if single view
         if (winState.splitView) {
             // get the view that's not active
-            const nextView = winState.getInactiveView()
+            const nextView = winState.inactiveView
 
             winState.setActiveView(nextView.viewId)
         }

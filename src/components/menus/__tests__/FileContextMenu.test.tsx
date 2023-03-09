@@ -38,7 +38,7 @@ describe('FileContextMenu', () => {
     describe('interactions', () => {
         it('should copy to clipboard when clicking on copy menu item', async () => {
             const { clipboard, winStates } = options.providerProps.appState
-            const cache = winStates[0].getActiveView().getVisibleCache()
+            const cache = winStates[0].activeView.getVisibleCache()
             const { user } = setup(<FileContextMenu {...PROPS} />, options)
 
             jest.spyOn(clipboard, 'setClipboard')
@@ -50,7 +50,7 @@ describe('FileContextMenu', () => {
 
         it('should paste from clipboard when clicking on paste menu item', async () => {
             const appState = options.providerProps.appState
-            const cache = appState.winStates[0].getActiveView().getVisibleCache()
+            const cache = appState.winStates[0].activeView.getVisibleCache()
             appState.clipboard.files.push(cache.files[0])
 
             const { user } = setup(<FileContextMenu {...PROPS} />, options)

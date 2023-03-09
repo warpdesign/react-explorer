@@ -39,8 +39,11 @@ export interface ReactiveProperties {
     isIndirect: boolean
     isOverlayOpen: boolean
     isExplorer: boolean
+    activeViewId: number
     path: string
     selectedLength: number
+    clipboardLength: number
+    filesLength: number
     status: TStatus
     language: string
 }

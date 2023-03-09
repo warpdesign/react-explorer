@@ -3,7 +3,7 @@ import process = require('process')
 import path = require('path')
 import child_process = require('child_process')
 
-import { AppMenu, LocaleString } from '$src/electron/appMenus'
+import { AppMenu } from '$src/electron/appMenus'
 import { isLinux } from '$src/electron/osSupport'
 import { WindowSettings } from '$src/electron//windowSettings'
 import { Remote } from '$src/electron/remote'
@@ -187,8 +187,7 @@ const ElectronApp = {
             })
         })
 
-        ipcMain.handle('updateMenus', (e: Event, strings: LocaleString, props: ReactiveProperties) => {
-            console.log('** need to update menus :)')
+        ipcMain.handle('updateMenus', (e: Event, strings: Record<string, string>, props: ReactiveProperties) => {
             if (this.appMenu) {
                 this.appMenu.createMenu(strings, props)
             } else {

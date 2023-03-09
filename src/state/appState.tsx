@@ -1,6 +1,6 @@
 import React from 'react'
 import { Intent } from '@blueprintjs/core'
-import { action, observable, makeObservable } from 'mobx'
+import { action, observable, computed, makeObservable } from 'mobx'
 import type { TFunction } from 'i18next'
 import { shell } from 'electron'
 
@@ -71,6 +71,7 @@ export class AppState {
             options: observable,
             togglePrefsDialog: action,
             toggleShortcutsDialog: action,
+            activeView: computed,
         })
 
         this.t = i18n.i18next.t
@@ -168,7 +169,7 @@ export class AppState {
         const winState = this.winStates[0]
         winState.toggleSplitViewMode()
 
-        const view = winState.getActiveView()
+        const view = winState.activeView
         if (!view.getVisibleCache()) {
             const { defaultFolder, defaultViewMode } = this.settingsState
             view.addCache(defaultFolder, -1, {
@@ -190,10 +191,10 @@ export class AppState {
             if (!winState.splitView) {
                 winState.toggleSplitViewMode()
             } else {
-                winState.setActiveView(winState.getInactiveView().viewId)
+                winState.setActiveView(winState.inactiveView.viewId)
             }
 
-            const viewState = winState.getActiveView()
+            const viewState = winState.activeView
 
             // FIXME this is the only place where we need
             // a path and not dir + fullname
@@ -335,6 +336,11 @@ export class AppState {
         return winState.getView(viewId)
     }
 
+    get activeView(): ViewState {
+        const winState = this.winStates[0]
+        return winState.activeView
+    }
+
     /**
      * Returns the cache that's not active (ie: destination cache)
      *
@@ -342,7 +348,7 @@ export class AppState {
      */
     getInactiveViewVisibleCache(): FileState {
         const winState = this.winStates[0]
-        const view = winState.getInactiveView()
+        const view = winState.inactiveView
         return view.caches.find((cache) => cache.isVisible === true)
     }
 
@@ -417,13 +423,8 @@ export class AppState {
         }
     }
 
-    getActiveView(): ViewState {
-        const winState = this.winStates[0]
-        return winState.getActiveView()
-    }
-
     getActiveCache(): FileState {
-        const view = this.getActiveView()
+        const view = this.activeView
         return this.isExplorer ? view.caches.find((cache) => cache.isVisible === true) : null
     }
 
@@ -456,19 +457,4 @@ export class AppState {
     getWinStateFromViewId(viewId: number) {
         return this.winStates.find((win) => !!win.getView(viewId))
     }
-    // TODO: this should be moved into FileState (!)
-    // updateSelection(cache: FileState, newSelection: FileDescriptor[]): void {
-    //     console.log('updateSelection', newSelection.length)
-    //     cache.selected.replace(newSelection)
-    //     for (const selected of cache.selected) {
-    //         console.log(selected.fullname, selected.id.dev, selected.id.ino)
-    //     }
-
-    //     if (newSelection.length) {
-    //         const file = newSelection.slice(-1)[0]
-    //         cache.setCursor(file)
-    //     } else {
-    //         cache.setCursorFileId(null)
-    //     }
-    // }
 }
