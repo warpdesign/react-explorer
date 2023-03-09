@@ -1,7 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import StreamZip, { StreamZipAsync, ZipEntry } from 'node-stream-zip'
-import type { ReadStream, BigIntStats } from 'fs'
-import { Transform, TransformCallback } from 'stream'
 import * as path from 'path'
 
 import { FsApi, FileDescriptor, Credentials, Fs, filetype, MakeId } from '$src/services/Fs'
@@ -15,10 +13,6 @@ const getZipPathRegEx = /(?<=\.zip).*/i
 // Since nodeJS will translate unix like paths to windows path, when running under Windows
 // we accept Windows style paths (eg. C:\foo...) and unix paths (eg. /foo or ./foo)
 const isRoot = (isWin && /((([a-zA-Z]\:)(\\)*)|(\\\\))$/) || /^\/$/
-
-const progressFunc = throttle((progress: (bytes: number) => void, bytesRead: number) => {
-    progress(bytesRead)
-}, 400)
 
 export const checkDirectoryName = (dirName: string) => !!!dirName.match(invalidDirChars) && dirName !== '/'
 

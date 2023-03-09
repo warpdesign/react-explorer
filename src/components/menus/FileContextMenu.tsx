@@ -14,11 +14,14 @@ const FileContextMenu = ({ fileUnderMouse }: Props) => {
     const { appState } = useStores('appState')
     const clipboard = appState.clipboard
     const cache = appState.getActiveCache()
+    const isReadonly = cache.options.readonly
 
-    // TODO: disable delete/paste when cahce.fs.readonly is true
     const numFilesInClipboard = clipboard.files.length
     const isInSelection = fileUnderMouse && !!cache.selected.find((file) => sameID(file.id, fileUnderMouse.id))
-    const isPasteEnabled = numFilesInClipboard && ((!fileUnderMouse && !cache.error) || fileUnderMouse?.isDir)
+    // FIXME: if fileUnderMouse is a folder, we could paste inside that folder. Right now paste doesn't care about
+    // where click happens: it just uses current cache as target.
+    // ((!fileUnderMouse && !cache.error) || fileUnderMouse?.isDir)
+    const isPasteEnabled = numFilesInClipboard && !isReadonly
 
     const onCopy = () => {
         clipboard.setClipboard(cache, !isInSelection ? [fileUnderMouse] : undefined)
@@ -59,7 +62,7 @@ const FileContextMenu = ({ fileUnderMouse }: Props) => {
                 icon="delete"
                 intent={Intent.DANGER}
                 text={t('APP_MENUS.DELETE')}
-                disabled={!fileUnderMouse}
+                disabled={!fileUnderMouse || isReadonly}
                 onClick={onDelete}
             />
         </Menu>

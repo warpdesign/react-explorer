@@ -722,4 +722,8 @@ export class FileState {
     setViewMode(newViewMode: ViewModeName) {
         this.viewmode = newViewMode
     }
+
+    get options() {
+        return this.fs.options
+    }
 }
