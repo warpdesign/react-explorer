@@ -25,7 +25,11 @@ export const SortIndicator = ({ sort }: { sort: TSORT_ORDER | 'none' }) => {
 
 export const Header = ({ onClick, columns, height }: HeaderProps) => {
     return (
-        <div className="tableHeader headerRow" style={{ height: `${height}px` }}>
+        <div
+            className="tableHeader headerRow"
+            style={{ height: `${height}px` }}
+            onContextMenu={(e) => e.stopPropagation()}
+        >
             {columns.map(({ label, key, sort }, i) => {
                 return (
                     <div
