@@ -243,6 +243,9 @@ export const Toolbar = observer(({ active }: Props) => {
                     onBlur={onBlur}
                     onFocus={onFocus}
                     disabled={!active}
+                    // allows input shrinking to a very low width:
+                    // without it, it would refuse shrinking below 100px
+                    size={1}
                 />
                 {isMakedirDialogOpen && (
                     <MakedirDialog

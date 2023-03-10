@@ -68,7 +68,7 @@ export const SideView = observer(({ hide, viewState }: SideViewProps) => {
         <Provider viewState={viewState}>
             <div ref={drop} id={divId} className={activeClass}>
                 {needLogin && <LoginDialog isOpen={needLogin} onValidation={onValidation} onClose={onClose} />}
-                <TabList></TabList>
+                <TabList />
                 <Toolbar active={!busy} />
                 <FileView hide={hide} />
                 <Statusbar />
