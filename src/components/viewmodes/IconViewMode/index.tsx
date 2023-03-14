@@ -107,7 +107,7 @@ export const IconViewMode = forwardRef<ViewModeActions, ViewModeProps<IconViewMo
                 },
                 icons: true,
             }),
-            [itemsPerRow],
+            [itemsPerRow, numRows],
         )
 
         useEffect(() => {
