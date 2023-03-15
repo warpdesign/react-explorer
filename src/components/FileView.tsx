@@ -136,7 +136,9 @@ const FileView = observer(({ hide }: Props) => {
     useMenuAccelerator([
         {
             combo: 'CmdOrCtrl+A',
-            callback: useCallback(() => onSelectAll(cache), [cache]),
+            callback: useCallback(() => {
+                viewState.isActive && onSelectAll(cache)
+            }, [cache]),
         },
     ])
 
@@ -239,7 +241,9 @@ const FileView = observer(({ hide }: Props) => {
                       global: true,
                       combo: 'mod + a',
                       label: t('SHORTCUT.ACTIVE_VIEW.SELECT_ALL'),
-                      onKeyDown: () => onSelectAll(cache),
+                      onKeyDown: () => {
+                          viewState.isActive && onSelectAll(cache)
+                      },
                       group: t('SHORTCUT.GROUP.ACTIVE_VIEW'),
                   },
               ]
