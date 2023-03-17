@@ -38,13 +38,14 @@ export const TableViewMode = forwardRef<ViewModeActions, ViewModeProps<undefined
             status,
             cursorIndex = -1,
             isDarkModeActive,
+            viewRef,
         }: ViewModeProps<undefined>,
         ref,
     ) => {
-        const tableRef: React.MutableRefObject<HTMLDivElement> = useRef()
+        console.log('render TableView')
         const { totalSize, virtualItems, scrollToIndex } = useVirtual({
             size: itemCount,
-            parentRef: tableRef,
+            parentRef: viewRef,
             estimateSize: React.useCallback(() => ROW_HEIGHT, []),
             overscan: 5,
         })
@@ -64,6 +65,7 @@ export const TableViewMode = forwardRef<ViewModeActions, ViewModeProps<undefined
                         return -1
                 }
             },
+            getSelectionRange: () => [],
             icons: false,
         }))
 
@@ -80,7 +82,7 @@ export const TableViewMode = forwardRef<ViewModeActions, ViewModeProps<undefined
                     <Header height={ROW_HEIGHT} columns={columns} onClick={onHeaderClick} />
                 ) : undefined}
                 <div
-                    ref={tableRef}
+                    ref={viewRef as React.MutableRefObject<HTMLDivElement>}
                     style={{ height: '100%', width: '100%', overflow: 'auto' }}
                     onClick={onBlankAreaClick}
                     tabIndex={0}

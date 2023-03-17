@@ -1,4 +1,4 @@
-import React, { useCallback, useRef } from 'react'
+import React, { MutableRefObject, useCallback, useRef } from 'react'
 import type { ReactElement } from 'react'
 
 import { ArrowKey, DraggedObject, FileViewItem } from '$src/types'
@@ -6,6 +6,7 @@ import { TSORT_METHOD_NAME, TSORT_ORDER } from '$src/services/FsSort'
 import { TStatus } from '$src/state/fileState'
 import { TableViewMode } from '$src/components/viewmodes/TableViewMode/'
 import { IconViewMode } from '$src/components/viewmodes/IconViewMode/'
+import { Selection } from '$src/components/viewmodes/components/Selection'
 
 const viewmodes: { [key in ViewModeName]: any } = {
     details: TableViewMode,
@@ -47,10 +48,12 @@ export interface ViewModeProps<T> {
     cursorIndex?: number
     isDarkModeActive: boolean
     options?: T
+    viewRef: React.MutableRefObject<HTMLElement>
 }
 
 export interface ViewModeActions {
     getNextIndex: (index: number, direction: ArrowKey) => number
+    getSelectionRange: (coords: Selection) => number[]
 }
 
 export interface ViewModeReturnProps {
@@ -69,6 +72,7 @@ const defaultActions: ViewModeActions = {
         console.warn('cannot call getNextIndex: ref not ready!')
         return -1
     },
+    getSelectionRange: () => [],
 }
 
 export const makeEvent =
@@ -79,17 +83,20 @@ export const makeEvent =
             event,
         })
 
-export const useViewMode = (name: ViewModeName): ViewModeReturnProps & { viewmodeRef: React.MutableRefObject<any> } => {
+export const useViewMode = (
+    name: ViewModeName,
+): ViewModeReturnProps & { actionsRef: React.MutableRefObject<any>; viewRef: React.MutableRefObject<HTMLElement> } => {
     const ViewMode = viewmodes[name]
     if (!ViewMode) {
         throw `could not find viewmode "${name}"`
     }
-    const viewmodeRef = useRef()
+    const actionsRef = useRef()
+    const viewRef = useRef()
 
     return {
         ViewMode: useCallback(
-            (props: ViewModeProps<unknown>) => <ViewMode {...props} ref={viewmodeRef} />,
-            [viewmodeRef, name],
+            (props: ViewModeProps<unknown>) => <ViewMode {...props} ref={actionsRef} viewRef={viewRef} />,
+            [name],
         ),
         // we cannot simply return the viewModeRef.current because the viewmode will
         // be modified *after* this component has rendered, so the parent could
@@ -97,7 +104,8 @@ export const useViewMode = (name: ViewModeName): ViewModeReturnProps & { viewmod
         //
         // Note: getActions should be called inside handlers and not inside
         // renderers
-        getActions: () => viewmodeRef.current || defaultActions,
-        viewmodeRef,
+        getActions: () => actionsRef.current || defaultActions,
+        actionsRef,
+        viewRef,
     }
 }

@@ -7,6 +7,8 @@ import { ArrowKey } from '$src/types'
 import '$src/css/fileview-icons.css'
 import { Placeholder } from '../components/Placeholder'
 import { Item } from './components/Item'
+import { RectangleSelection, Selection } from '../components/Selection'
+import { Colors } from '@blueprintjs/core'
 
 export interface IconViewModeOptions {
     iconSize: number
@@ -29,13 +31,15 @@ export const IconViewMode = forwardRef<ViewModeActions, ViewModeProps<IconViewMo
             cursorIndex = -1,
             isDarkModeActive,
             options: { iconSize, isSplitViewActive },
+            viewRef,
         }: ViewModeProps<IconViewModeOptions>,
         ref,
     ) => {
-        const tableRef: React.MutableRefObject<HTMLDivElement> = useRef()
+        console.log('render IconView')
         const [rowWidth, setRowWidth] = useState(0)
         // margin between items: we need to add it to the width
         const margin = 4
+        // width is also the height?
         const itemWidth = iconSize * 1.9 + margin * 2
         const itemsPerRow = Math.floor(rowWidth / itemWidth)
         const extraRow = itemCount % itemsPerRow ? 1 : 0
@@ -53,9 +57,9 @@ export const IconViewMode = forwardRef<ViewModeActions, ViewModeProps<IconViewMo
             return items
         }
 
-        const { totalSize, virtualItems, scrollToIndex } = useVirtual({
+        const { totalSize, virtualItems, scrollToIndex, scrollToOffset } = useVirtual({
             size: numRows,
-            parentRef: tableRef,
+            parentRef: viewRef,
             estimateSize: React.useCallback(() => Math.floor(itemWidth), []),
             overscan: 0,
         })
@@ -64,7 +68,7 @@ export const IconViewMode = forwardRef<ViewModeActions, ViewModeProps<IconViewMo
         // TODO: would be a good idea to do it on resize as well, but could be
         // expensive.
         useLayoutEffect(() => {
-            const { width } = tableRef.current.getBoundingClientRect()
+            const { width } = viewRef.current.getBoundingClientRect()
             setRowWidth(width)
         }, [isSplitViewActive])
 
@@ -105,6 +109,25 @@ export const IconViewMode = forwardRef<ViewModeActions, ViewModeProps<IconViewMo
                             return -1
                     }
                 },
+                getSelectionRange: ({ left, top, width, height, nearBottomEdge }: Selection) => {
+                    // rect is giving absolute coords, we need to convert them
+                    // to coords relative to the viewRef
+                    // Given rect (x, y, x2, y2), return row + col of x,y
+                    // calc first
+                    // first get topLeft most point between origin & target
+
+                    // line height
+                    const lineHeight = Math.floor(itemWidth)
+                    const { scrollTop } = viewRef.current
+                    const lineWidth = itemWidth + margin * 2
+                    const topLeftIndex = Math.floor((scrollTop + top) / lineHeight) * itemsPerRow
+                    const bottomLeftIndex = Math.floor((scrollTop + top + height) / lineHeight) * itemsPerRow
+                    const size =
+                        Math.min(Math.ceil((left + width) / lineWidth), itemsPerRow) - Math.floor(left / lineWidth)
+                    console.log({ topLeftIndex, bottomLeftIndex, size, nearBottomEdge })
+
+                    return [topLeftIndex, bottomLeftIndex, size]
+                },
                 icons: true,
             }),
             [itemsPerRow, numRows],
@@ -121,9 +144,17 @@ export const IconViewMode = forwardRef<ViewModeActions, ViewModeProps<IconViewMo
         }, [cursorIndex, status, itemsPerRow])
 
         return (
+            // <RectangleSelection
+            //     onSelect={onSelect}
+            //     style={{
+            //         border: '1px dotted red',
+            //         borderColor: Colors.BLUE3,
+            //         backgroundColor: Colors.BLUE5,
+            //         opacity: .4
+            //     }}>
             <div
                 className="fileview-icons"
-                ref={tableRef}
+                ref={viewRef as React.MutableRefObject<HTMLDivElement>}
                 style={{
                     height: '100%',
                     width: '100%',
@@ -183,6 +214,7 @@ export const IconViewMode = forwardRef<ViewModeActions, ViewModeProps<IconViewMo
                     </div>
                 )}
             </div>
+            // </RectangleSelection>
         )
     },
 )

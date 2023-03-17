@@ -1,7 +1,7 @@
-import React, { useCallback, useRef, MutableRefObject } from 'react'
+import React, { useCallback, useRef, useEffect, MutableRefObject } from 'react'
 import { observer } from 'mobx-react'
 import { ContextMenu2, ContextMenu2ChildrenProps, ContextMenu2ContentProps } from '@blueprintjs/popover2'
-import { HotkeysTarget2, Classes } from '@blueprintjs/core'
+import { HotkeysTarget2, Classes, Colors } from '@blueprintjs/core'
 import { useTranslation } from 'react-i18next'
 import classNames from 'classnames'
 import { ipcRenderer } from 'electron'
@@ -19,6 +19,7 @@ import { ArrowKey, DraggedObject, FileViewItem } from '$src/types'
 import { HeaderMouseEvent, InlineEditEvent, ItemMouseEvent, useViewMode } from '$src/hooks/useViewMode'
 import { useStores } from '$src/hooks/useStores'
 import { useKeyDown } from '$src/hooks/useKeyDown'
+import { RectangleSelection } from './viewmodes/components/Selection'
 
 interface Props {
     hide: boolean
@@ -85,12 +86,19 @@ const FileView = observer(({ hide }: Props) => {
 
     const rightClickFileIndexRef: MutableRefObject<number> = useRef<number>()
 
-    const { ViewMode, getActions, viewmodeRef } = useViewMode(viewmode)
+    const { ViewMode, getActions, viewRef, actionsRef } = useViewMode(viewmode)
     const viewmodeOptions = {
         iconSize: 56,
         isSplitViewActive: winState.splitView,
     }
-    console.log('render!', { cursorIndex, cursor })
+    isViewActive && console.log('render!', viewmode, viewRef.current)
+
+    useEffect(() => {
+        setTimeout(() => {
+            isViewActive && console.log('timeout!', viewRef.current)
+            isViewActive && console.log('timeout!', getActions())
+        }, 3000)
+    }, [viewmode])
 
     useKeyDown(
         React.useCallback(
@@ -108,7 +116,7 @@ const FileView = observer(({ hide }: Props) => {
                         // ourselves so that the cursor is always visible.
                         event.preventDefault()
                         const { getNextIndex } = getActions()
-                        console.log('usekeydown (render)', viewmode, viewmodeRef.current.icons)
+                        console.log('usekeydown (render)', viewmode)
                         const nextIndex = getNextIndex(cursorIndex, event.key as ArrowKey)
                         if (nextIndex > -1 && nextIndex <= rowCount - 1) {
                             const file = cache.files[nextIndex]
@@ -260,48 +268,64 @@ const FileView = observer(({ hide }: Props) => {
         <HotkeysTarget2 hotkeys={hotkeys}>
             <ContextMenu2 content={renderFileContextMenu}>
                 {(ctxMenuProps: ContextMenu2ChildrenProps) => (
-                    <div
-                        ref={ctxMenuProps.ref}
-                        onContextMenu={(e) => {
-                            // use files.length to tell menu handler we clicked on the blank area
-                            rightClickFileIndexRef.current = files.length
-                            ctxMenuProps.onContextMenu(e)
+                    <RectangleSelection
+                        onSelect={(_, coords) => {
+                            const range = actionsRef.current.getSelectionRange(coords)
+                            // console.log('range', range)
                         }}
-                        className={classNames('fileListSizerWrapper', ctxMenuProps.className)}
+                        isDisabled={!isViewActive}
+                        selectionAreaRef={viewRef as MutableRefObject<HTMLDivElement>}
+                        style={{
+                            border: '1px dotted red',
+                            borderColor: Colors.BLUE3,
+                            backgroundColor: Colors.BLUE5,
+                            opacity: 0.4,
+                        }}
                     >
-                        {ctxMenuProps.popover}
-                        <ViewMode
-                            cursorIndex={cursorIndex}
-                            itemCount={nodes.length}
-                            getItem={getRow}
-                            getDragProps={getDraggedProps}
-                            onItemClick={onItemClick}
-                            onItemDoubleClick={onItemDoubleClick}
-                            onHeaderClick={onHeaderClick}
-                            onBlankAreaClick={onBlankAreaClick}
-                            onInlineEdit={onInlineEdit}
-                            onItemRightClick={({ index, event }) => {
-                                rightClickFileIndexRef.current = index
-                                ctxMenuProps.onContextMenu(event)
+                        <div
+                            ref={ctxMenuProps.ref}
+                            onContextMenu={(e) => {
+                                // use files.length to tell menu handler we clicked on the blank area
+                                rightClickFileIndexRef.current = files.length
+                                ctxMenuProps.onContextMenu(e)
                             }}
-                            columns={[
-                                {
-                                    label: t('FILETABLE.COL_NAME'),
-                                    key: 'name',
-                                    sort: cache.sortMethod === 'name' ? cache.sortOrder : 'none',
-                                },
-                                {
-                                    label: t('FILETABLE.COL_SIZE'),
-                                    key: 'size',
-                                    sort: cache.sortMethod === 'size' ? cache.sortOrder : 'none',
-                                },
-                            ]}
-                            status={cache.status}
-                            error={cache.error}
-                            isDarkModeActive={isDarkModeActive}
-                            options={viewmodeOptions}
-                        />
-                    </div>
+                            className={classNames('fileListSizerWrapper', ctxMenuProps.className)}
+                        >
+                            {ctxMenuProps.popover}
+                            <ViewMode
+                                cursorIndex={cursorIndex}
+                                itemCount={nodes.length}
+                                getItem={getRow}
+                                getDragProps={getDraggedProps}
+                                onItemClick={onItemClick}
+                                onItemDoubleClick={onItemDoubleClick}
+                                onHeaderClick={onHeaderClick}
+                                onBlankAreaClick={onBlankAreaClick}
+                                onInlineEdit={onInlineEdit}
+                                onItemRightClick={({ index, event }) => {
+                                    rightClickFileIndexRef.current = index
+                                    ctxMenuProps.onContextMenu(event)
+                                }}
+                                columns={[
+                                    {
+                                        label: t('FILETABLE.COL_NAME'),
+                                        key: 'name',
+                                        sort: cache.sortMethod === 'name' ? cache.sortOrder : 'none',
+                                    },
+                                    {
+                                        label: t('FILETABLE.COL_SIZE'),
+                                        key: 'size',
+                                        sort: cache.sortMethod === 'size' ? cache.sortOrder : 'none',
+                                    },
+                                ]}
+                                status={cache.status}
+                                error={cache.error}
+                                isDarkModeActive={isDarkModeActive}
+                                options={viewmodeOptions}
+                                viewRef={viewRef}
+                            />
+                        </div>
+                    </RectangleSelection>
                 )}
             </ContextMenu2>
         </HotkeysTarget2>
