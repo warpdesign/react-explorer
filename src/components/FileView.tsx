@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next'
 import classNames from 'classnames'
 import { ipcRenderer } from 'electron'
 
-import { FileDescriptor, sameID } from '$src/services/Fs'
+import { FileDescriptor, FileID, sameID } from '$src/services/Fs'
 import { formatBytes } from '$src/utils/formatBytes'
 import { isEditable } from '$src/utils/dom'
 import { isMac } from '$src/utils/platform'
@@ -91,14 +91,6 @@ const FileView = observer(({ hide }: Props) => {
         iconSize: 56,
         isSplitViewActive: winState.splitView,
     }
-    isViewActive && console.log('render!', viewmode, viewRef.current)
-
-    useEffect(() => {
-        setTimeout(() => {
-            isViewActive && console.log('timeout!', viewRef.current)
-            isViewActive && console.log('timeout!', getActions())
-        }, 3000)
-    }, [viewmode])
 
     useKeyDown(
         React.useCallback(
@@ -159,6 +151,27 @@ const FileView = observer(({ hide }: Props) => {
             cache.toggleSelection(file)
         } else {
             cache.addToSelection(file, extendSelection)
+        }
+    }
+
+    const selectIndexes = ([topLeft, bottomLeft, size, itemsPerRow]: number[]) => {
+        const maxRow = (bottomLeft - topLeft) / itemsPerRow
+
+        const indexes: number[] = []
+        for (let row = 0; row <= maxRow; ++row) {
+            for (let col = 0; col < size; ++col) {
+                const index = topLeft + row * itemsPerRow + col
+                index < cache.files.length && indexes.push(index)
+            }
+        }
+
+        indexes.forEach((index) => console.log(index))
+        // only update selection if different
+        //  && cache.selected.length !== indexes.length && indexes.some((index) => !cache.selected.find(file => sameID(file.id, cache.files[index].id)))
+        if (indexes.length && cache.selected.length !== indexes.length) {
+            cache.replaceSelectionWithIndexes(indexes)
+        } else if (cache.selected.length && !indexes.length) {
+            cache.clearSelection()
         }
     }
 
@@ -271,6 +284,7 @@ const FileView = observer(({ hide }: Props) => {
                     <RectangleSelection
                         onSelect={(_, coords) => {
                             const range = actionsRef.current.getSelectionRange(coords)
+                            selectIndexes(range)
                             // console.log('range', range)
                         }}
                         isDisabled={!isViewActive}

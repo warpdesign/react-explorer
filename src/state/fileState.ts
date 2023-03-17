@@ -202,6 +202,7 @@ export class FileState {
             refreshSelection: action,
             addToSelection: action,
             toggleSelection: action,
+            replaceSelectionWithIndexes: action,
             selectAll: action,
             setCursor: action,
             setEditingFile: action,
@@ -462,6 +463,10 @@ export class FileState {
             this.selected.push(file)
             this.setCursor(file)
         }
+    }
+
+    replaceSelectionWithIndexes(indexes: number[]) {
+        this.selected.replace(indexes.map((index) => this.files[index]))
     }
 
     selectAll() {

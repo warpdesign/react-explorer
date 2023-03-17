@@ -37,6 +37,7 @@ export const IconViewMode = forwardRef<ViewModeActions, ViewModeProps<IconViewMo
     ) => {
         console.log('render IconView')
         const [rowWidth, setRowWidth] = useState(0)
+        // we only need a ref to this value
         // margin between items: we need to add it to the width
         const margin = 4
         // width is also the height?
@@ -109,24 +110,30 @@ export const IconViewMode = forwardRef<ViewModeActions, ViewModeProps<IconViewMo
                             return -1
                     }
                 },
-                getSelectionRange: ({ left, top, width, height, nearBottomEdge }: Selection) => {
+                getSelectionRange: ({ left, top, width, height, nearBottomEdge, isTop, isLeft }: Selection) => {
                     // rect is giving absolute coords, we need to convert them
                     // to coords relative to the viewRef
                     // Given rect (x, y, x2, y2), return row + col of x,y
                     // calc first
                     // first get topLeft most point between origin & target
 
+                    // console.log({ left, top, width, height })
+
                     // line height
                     const lineHeight = Math.floor(itemWidth)
                     const { scrollTop } = viewRef.current
                     const lineWidth = itemWidth + margin * 2
-                    const topLeftIndex = Math.floor((scrollTop + top) / lineHeight) * itemsPerRow
-                    const bottomLeftIndex = Math.floor((scrollTop + top + height) / lineHeight) * itemsPerRow
+                    const topLeftIndex =
+                        Math.floor((scrollTop + top) / lineHeight) * itemsPerRow +
+                        Math.min(itemsPerRow - 1, Math.floor(left / itemWidth))
+                    const bottomLeftIndex =
+                        Math.floor((scrollTop + top + height) / lineHeight) * itemsPerRow +
+                        Math.min(itemsPerRow - 1, Math.floor(left / itemWidth))
                     const size =
                         Math.min(Math.ceil((left + width) / lineWidth), itemsPerRow) - Math.floor(left / lineWidth)
-                    console.log({ topLeftIndex, bottomLeftIndex, size, nearBottomEdge })
+                    console.log({ topLeftIndex, bottomLeftIndex, size, isTop, isLeft })
 
-                    return [topLeftIndex, bottomLeftIndex, size]
+                    return [topLeftIndex, bottomLeftIndex, size, itemsPerRow]
                 },
                 icons: true,
             }),

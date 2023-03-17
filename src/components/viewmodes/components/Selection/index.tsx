@@ -1,4 +1,5 @@
 import { useEventListener } from '$src/hooks/useEventListener'
+import { useThrottledCallback } from 'use-debounce'
 import React, { CSSProperties, Reducer, useReducer, useRef, useLayoutEffect } from 'react'
 
 export interface Props {
@@ -23,16 +24,11 @@ export interface Selection {
     top: number
     width: number
     height: number
+    // needed to scroll container when pointer is near the bottom edge
     nearBottomEdge: boolean
-}
-
-const getTransformBox = (selectionBoxOrigin: number[], selectionBoxTarget: number[]): string | null => {
-    if (selectionBoxOrigin[1] > selectionBoxTarget[1] && selectionBoxOrigin[0] > selectionBoxTarget[0])
-        return 'scaleY(-1) scaleX(-1)'
-
-    if (selectionBoxOrigin[1] > selectionBoxTarget[1]) return 'scaleY(-1)'
-    if (selectionBoxOrigin[0] > selectionBoxTarget[0]) return 'scaleX(-1)'
-    return null
+    // needed to select the current file cursor using the selection direction
+    isLeft: boolean
+    isTop: boolean
 }
 
 const getConstrainCoords = (rect: DOMRect, origin: number[], target: number[], relative = false): Selection => {
@@ -57,6 +53,8 @@ const getConstrainCoords = (rect: DOMRect, origin: number[], target: number[], r
         width,
         height,
         nearBottomEdge: rect.y + rect.height - cy2 <= 2,
+        isTop: origin[1] > target[1],
+        isLeft: origin[0] > target[0],
     }
 }
 
@@ -88,6 +86,8 @@ export const RectangleSelection = ({
 
     useLayoutEffect(() => {
         parentRect.current = selectionAreaRef.current?.getBoundingClientRect()
+        // FIXME: this should be updated when the element is updated otherwise selection
+        // be big enough
         !isDisabled && console.log('selectionAreaRef changed', parentRect.current)
     }, [selectionAreaRef.current])
 
@@ -104,7 +104,7 @@ export const RectangleSelection = ({
         return false
     }
 
-    useEventListener('mousemove', (evt: MouseEvent) => {
+    const debouncedMouseMove = useThrottledCallback((evt: MouseEvent) => {
         if (isDisabled || (!state.hold && !isEventInsideSelectionArea(evt))) {
             return
         }
@@ -114,17 +114,18 @@ export const RectangleSelection = ({
             setState({ selectionBox: true })
         }
         if (state.selectionBox) {
-            const rect = parentRect.current
             setState({
                 selectionBoxTarget: [evt.pageX, evt.pageY],
             })
 
             onSelect(
                 evt,
-                getConstrainCoords(parentRect.current, [evt.pageX, evt.pageY], state.selectionBoxOrigin, true),
+                getConstrainCoords(parentRect.current, state.selectionBoxOrigin, [evt.pageX, evt.pageY], true),
             )
         }
-    })
+    }, 25)
+
+    useEventListener('mousemove', debouncedMouseMove)
 
     const closeSelectionBox = (e: MouseEvent) => {
         !isDisabled && console.log('closeSelectionBox')
@@ -157,8 +158,6 @@ export const RectangleSelection = ({
             selectionBoxOrigin: [e.pageX, e.pageY],
             selectionBoxTarget: [e.pageX, e.pageY],
         })
-
-        // console.log('hold', e.pageX - rect.left, e.pageY - rect.top, selectionAreaRef.current)
     })
 
     const { left, top, width, height } = getConstrainCoords(
@@ -170,9 +169,7 @@ export const RectangleSelection = ({
     const baseStyle = {
         position: 'fixed',
         zIndex: 10,
-        // TODO: also Math.min(left, parentRect.current.width + parentRect.current.x),
         left,
-        // TODO: Math.min(top, parentRect.current.height + parentRect.current.y),
         top,
         height,
         width,
