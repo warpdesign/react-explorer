@@ -122,9 +122,11 @@ export const FsWsl: Fs = {
     description: 'Local WSL Filesystem',
     options: {
         needsRefresh: false,
+        readonly: false,
+        indirect: false,
     },
-    canread(str: string): boolean {
-        return isWin && !!str.match(wslStart)
+    canread(basePath: string): boolean {
+        return isWin && !!basePath.match(wslStart)
     },
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     serverpart(str: string): string {

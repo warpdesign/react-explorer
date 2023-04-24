@@ -62,14 +62,11 @@ const App = observer(() => {
             status: activeCache.status,
             path: activeCache.path,
             selectedLength: activeCache.selected.length,
-            // enable when FsZip is merged
-            isReadonly: false,
-            isIndirect: false,
             historyLength: activeCache.history.length,
             historyCurrent: activeCache.current,
             isRoot: API.isRoot(activeCache.path),
-            // isReadonly: activeCache.getFS().options.readonly,
-            // isIndirect: activeCache.getFS().options.indirect,
+            isReadonly: fs.options.readonly,
+            isIndirect: fs.options.indirect,
             isOverlayOpen: refIsOverlayOpen.current,
             activeViewTabNums: activeView.caches.length,
             isExplorer: appState.isExplorer,
@@ -77,7 +74,6 @@ const App = observer(() => {
             filesLength: activeCache.files.length,
             clipboardLength: appState.clipboard.files.length,
             activeViewId: activeView.viewId,
-            // missing: about opened, tab: is it needed?
         }
     }, [appState])
 

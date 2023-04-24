@@ -1,5 +1,4 @@
 import { observable, action, computed, makeObservable, runInAction } from 'mobx'
-import type { Readable } from 'stream'
 
 import { FsApi, FileDescriptor } from '$src/services/Fs'
 import { Deferred } from '$src/utils/deferred'
@@ -53,7 +52,7 @@ export class TransferState {
 
     public elements = observable<FileTransfer>([])
 
-    public streams = new Array<Readable>()
+    public streams = new Array<NodeJS.ReadableStream>()
 
     public status: Status = 'queued'
 
@@ -199,7 +198,7 @@ export class TransferState {
         this.errors++
     }
 
-    removeStream(stream: Readable): void {
+    removeStream(stream: NodeJS.ReadableStream): void {
         const index = this.streams.findIndex((item) => item === stream)
         if (index > -1) {
             this.streams.splice(index, 1)
@@ -222,9 +221,6 @@ export class TransferState {
         let stream = null
 
         try {
-            // if (transfer.file.isSym) {
-            //     debugger;
-            // }
             newFilename = await this.renameOrCreateDir(transfer, fullDstPath)
         } catch (err) {
             console.log('error creating directory', err)
@@ -414,7 +410,9 @@ export class TransferState {
 
     destroyRunningStreams(): void {
         for (const stream of this.streams) {
-            stream.destroy()
+            // stream.destroy()
+            // stream.close()
+            console.warn('need to detroy stream')
         }
     }
 
@@ -484,6 +482,7 @@ export class TransferState {
             // /note
             try {
                 await this.srcFs.cd(currentPath)
+
                 subFiles = await this.srcFs.list(currentPath)
                 const subDir = this.srcFs.join(subDirectory, dir.fullname)
                 transfers = transfers.concat(await this.getFileList(subFiles, subDir))
@@ -492,7 +491,7 @@ export class TransferState {
                 // then, simply skip it when doing the transfer
                 this.onTransferError(transfer, { code: 'ENOENT' })
                 this.transfersDone++
-                console.log('could not get directory content for', currentPath)
+                console.log('could not get directory content for', currentPath, err)
                 console.log('directory was still added to transfer list for consistency')
             }
         }

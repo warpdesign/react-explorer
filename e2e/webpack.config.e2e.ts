@@ -77,6 +77,7 @@ const baseConfig = {
             assert: require.resolve('assert/'),
             util: require.resolve('util/'),
             path: require.resolve('path-browserify'),
+            zlib: require.resolve('browserify-zlib'),
         },
     },
     module: {

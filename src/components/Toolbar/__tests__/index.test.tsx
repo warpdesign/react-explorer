@@ -232,7 +232,7 @@ describe('Toolbar', () => {
                 await user.paste('/foo')
                 await user.keyboard('{Enter}')
 
-                expect(cache.cd).toHaveBeenCalledWith('/foo')
+                expect(cache.cd).toHaveBeenCalledWith('/foo', '')
 
                 expect(input).not.toHaveFocus()
             })
@@ -249,7 +249,7 @@ describe('Toolbar', () => {
                 await user.paste('/foo')
                 await user.click(container.querySelector('[data-icon="arrow-right"]'))
 
-                expect(cache.cd).toHaveBeenCalledWith('/foo')
+                expect(cache.cd).toHaveBeenCalledWith('/foo', '')
             })
 
             it('should show an alert then restore previous value when the user clicked on the submit button and the cache failed to change directory', async () => {
@@ -269,7 +269,7 @@ describe('Toolbar', () => {
                 await user.paste('/foo')
                 await user.click(container.querySelector('[data-icon="arrow-right"]'))
 
-                expect(cache.cd).toHaveBeenCalledWith('/foo')
+                expect(cache.cd).toHaveBeenCalledWith('/foo', '')
 
                 await screen.findByText(`${error.message} (${error.code})`)
 

@@ -209,7 +209,8 @@
             "COPY_ERROR": "Couldn't copy files: {{message}}",
             "COPY_UNKNOWN_ERROR": "Error while copying files.",
             "SHELL_OPEN_FAILED": "Could not open file: no application to open it.",
-            "OPEN_TERMINAL_FAILED": "Could not open terminal. Check that the path is correct in the settings."
+            "OPEN_TERMINAL_FAILED": "Could not open terminal. Check that the path is correct in the settings.",
+            "EBADFILE": "Corrupted File"
         },
         "MAIN_PROCESS": {
             "PRESS_TO_EXIT": "Keep pressing ⌘Q to exit"
@@ -262,6 +263,9 @@
             "GO_BACK": "Back",
             "GO_FORWARD": "Forward",
             "TOGGLE_HIDDEN_FILES": "Show/Hide Hidden Files"
+        },
+        "FS": {
+            "READONLY": "You are not allowed to alter this folder"
         }
     }
 }

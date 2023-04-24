@@ -1,6 +1,4 @@
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
-import { Readable } from 'stream'
-
 import { isWin } from '$src/utils/platform'
 
 const interfaces: Array<Fs> = []
@@ -40,13 +38,18 @@ export interface FileDescriptor {
 
 export interface FsOptions {
     needsRefresh: boolean
+    readonly: boolean
+    // do we have direct access to files
+    // or do we need to first copy them to local fs
+    // to open them (like in zip, remote,...)
+    indirect: boolean
 }
 
 export interface Fs {
     // runtime api
-    API: new (path: string, onFsChange: (filename: string) => void) => FsApi
+    API: new (path: string, onFsChange?: (filename: string) => void) => FsApi
     // static members
-    canread(str: string): boolean
+    canread(basePath: string, subPath: string): boolean
     serverpart(str: string): string
     credentials(str: string): Credentials
     displaypath(str: string): { fullPath: string; shortPath: string }
@@ -114,17 +117,17 @@ export interface FsApi {
     // async methods that may require server access
     list(dir: string, watchDir?: boolean, transferId?: number): Promise<FileDescriptor[]>
     cd(path: string, transferId?: number): Promise<string>
-    delete(parent: string, files: FileDescriptor[], transferId?: number): Promise<number>
-    makedir(parent: string, name: string, transferId?: number): Promise<string>
-    rename(parent: string, file: FileDescriptor, name: string, transferId?: number): Promise<string>
+    delete?(parent: string, files: FileDescriptor[], transferId?: number): Promise<number>
+    makedir?(parent: string, name: string, transferId?: number): Promise<string>
+    rename?(parent: string, file: FileDescriptor, name: string, transferId?: number): Promise<string>
     stat(path: string, transferId?: number): Promise<FileDescriptor>
     isDir(path: string, transferId?: number): Promise<boolean>
     exists(path: string, transferId?: number): Promise<boolean>
     size(source: string, files: string[], transferId?: number): Promise<number>
-    makeSymlink(targetPath: string, path: string, transferId?: number): Promise<boolean>
-    getStream(path: string, file: string, transferId?: number): Promise<Readable>
-    putStream(
-        readStream: Readable,
+    makeSymlink?(targetPath: string, path: string, transferId?: number): Promise<boolean>
+    getStream(path: string, file: string, transferId?: number): Promise<NodeJS.ReadableStream>
+    putStream?(
+        readStream: NodeJS.ReadableStream,
         dstPath: string,
         progress: (bytesRead: number) => void,
         transferId?: number,
@@ -143,8 +146,8 @@ export interface FsApi {
     loginOptions: Credentials
 }
 
-export function getFS(path: string): Fs {
-    const newfs = interfaces.find((filesystem) => filesystem.canread(path))
+export function getFS(basePath: string, subPath: string): Fs {
+    const newfs = interfaces.find((filesystem) => filesystem.canread(basePath, subPath))
     // if (!newfs) {
     //     newfs = FsGeneric;
     // `

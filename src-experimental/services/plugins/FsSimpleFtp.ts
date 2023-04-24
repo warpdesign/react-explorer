@@ -5,7 +5,7 @@ import * as fs from 'fs'
 import { Transform, Readable, Writable } from 'stream'
 import { EventEmitter } from 'events'
 import * as nodePath from 'path'
-import { isWin } from '../../utils/platform'
+import { isWin } from '$src/utils/platform'
 
 function serverPart(str: string, lowerCase = true): string {
     const info = new URL(str)
@@ -192,7 +192,7 @@ class Client {
     }
 
     @canTimeout
-    getStream(path: string, writeStream: Writable): Promise<Readable> {
+    getStream(path: string, writeStream: Writable): Promise<NodeJS.ReadableStream> {
         this.ftpClient.download(writeStream, path)
         return Promise.resolve(this.ftpClient.ftp.dataSocket)
     }
@@ -418,7 +418,7 @@ class SimpleFtpApi implements FsApi {
         }
     }
 
-    async getStream(path: string, file: string, transferId = -1): Promise<Readable> {
+    async getStream(path: string, file: string, transferId = -1): Promise<NodeJS.ReadableStream> {
         try {
             // create a duplex stream
             const transform = new Transform({

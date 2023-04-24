@@ -31,9 +31,9 @@ export class LocalApi implements FsApi {
     // current path
     path: string
     loginOptions: Credentials = null
-    onFsChange: (filename: string) => void
+    onFsChange?: (filename: string) => void
 
-    constructor(_: string, onFsChange: (filename: string) => void) {
+    constructor(_: string, onFsChange?: (filename: string) => void) {
         this.path = ''
         this.onFsChange = onFsChange
     }
@@ -242,14 +242,14 @@ export class LocalApi implements FsApi {
 
     onList(dir: string): void {
         if (dir !== this.path) {
-            // console.log('stopWatching', this.path)
-            try {
-                LocalWatch.stopWatchingPath(this.path, this.onFsChange)
-                LocalWatch.watchPath(dir, this.onFsChange)
-            } catch (e) {
-                console.warn('Could not watch path', dir, e)
+            if (this.onFsChange) {
+                try {
+                    LocalWatch.stopWatchingPath(this.path, this.onFsChange)
+                    LocalWatch.watchPath(dir, this.onFsChange)
+                } catch (e) {
+                    console.warn('Could not watch path', dir, e)
+                }
             }
-            // console.log('watchPath', dir)
             this.path = dir
         }
     }
@@ -354,7 +354,7 @@ export class LocalApi implements FsApi {
     off(): void {
         // console.log("off", this.path)
         // console.log("stopWatchingPath", this.path)
-        LocalWatch.stopWatchingPath(this.path, this.onFsChange)
+        this.onFsChange && LocalWatch.stopWatchingPath(this.path, this.onFsChange)
     }
 
     // TODO add error handling
@@ -486,7 +486,7 @@ export class LocalApi implements FsApi {
 
 export function FolderExists(path: string): boolean {
     try {
-        return fs.existsSync(path) && fs.lstatSync(path).isDirectory()
+        return fs.existsSync(path) && fs.statSync(path).isDirectory()
     } catch (err) {
         return false
     }
@@ -498,9 +498,12 @@ export const FsLocal: Fs = {
     description: 'Local Filesystem',
     options: {
         needsRefresh: false,
+        readonly: false,
+        indirect: false,
     },
-    canread(str: string): boolean {
-        return !!str.match(localStart)
+    canread(basePath: string, subDir: string): boolean {
+        const fullPath = path.join(basePath, subDir)
+        return !!basePath.match(localStart) && FolderExists(fullPath)
     },
     serverpart(str: string): string {
         return 'local'
