@@ -106,6 +106,7 @@
         "style-loader": "^3.3.1",
         "swc-loader": "^0.2.3",
         "terser-webpack-plugin": "^5.3.6",
+        "thread-loader": "^4.0.2",
         "ts-jest": "^29.0.3",
         "ts-loader": "^9.4.1",
         "ts-node": "^10.9.1",
@@ -119,10 +120,11 @@
         "@babel/runtime": "^7.20.1",
         "@blueprintjs/core": "^4.12.0",
         "@blueprintjs/popover2": "^1.10.1",
-        "@blueprintjs/select": "^4.8.11",
+        "@blueprintjs/select": "^4.9.24",
         "@types/mkdirp": "^0.5.2",
         "@types/react": "^16.9.2",
         "@types/react-dom": "^16.9.0",
+        "@types/sqlite3": "^3.1.8",
         "classnames": "^2.2.6",
         "del": "git+https://git@github.com/warpdesign/del.git",
         "electron-window-state": "git+https://git@github.com/warpdesign/electron-window-state.git",
@@ -137,6 +139,8 @@
         "react-dnd-html5-backend": "^14.1.0",
         "react-dom": "^16.9.0",
         "react-i18next": "^12.0.0",
-        "react-virtual": "^2.10.4"
+        "react-select": "^5.7.4",
+        "react-virtual": "^2.10.4",
+        "sqlite3": "^5.1.6"
     }
 }

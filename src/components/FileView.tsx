@@ -87,7 +87,7 @@ const FileView = observer(({ hide }: Props) => {
 
     const { ViewMode, getActions, viewmodeRef } = useViewMode(viewmode)
     const viewmodeOptions = {
-        iconSize: 56,
+        iconSize: 256,
         isSplitViewActive: winState.splitView,
     }
     console.log('render!', { cursorIndex, cursor })

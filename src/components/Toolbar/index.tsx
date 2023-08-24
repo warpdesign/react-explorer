@@ -7,6 +7,7 @@ import { useTranslation } from 'react-i18next'
 
 import { FileMenu } from '$src/components/FileMenu'
 import { MakedirDialog } from '$src/components/dialogs/MakedirDialog'
+import { ApplyTagsDialog } from '$src/components/dialogs/ApplyTagsDialog'
 import { AppAlert } from '$src/components/AppAlert'
 import { AppToaster } from '$src/components/AppToaster'
 import { LocalizedError } from '$src/locale/error'
@@ -15,6 +16,7 @@ import { useStores } from '$src/hooks/useStores'
 import { useMenuAccelerator } from '$src/hooks/useAccelerator'
 import { SortMenuToggle, ViewToggle } from './components'
 import { TSORT_METHOD_NAME, TSORT_ORDER } from '$src/services/FsSort'
+import { ipcRenderer } from 'electron'
 
 const ERROR_MESSAGE_TIMEOUT = 3500
 
@@ -25,6 +27,7 @@ interface Props {
 export const Toolbar = observer(({ active }: Props) => {
     const { appState, viewState } = useStores('appState', 'viewState')
     const [isMakedirDialogOpen, setIsMakedirDialogOpen] = useState(false)
+    const [isApplyTagsDialogOpen, setIsApplyTagsDialogOpen] = useState(false)
     const cache = viewState.getVisibleCache()
     const { selected, history, current, viewmode, sortMethod, sortOrder } = cache
     const [path, setPath] = useState('')
@@ -146,9 +149,22 @@ export const Toolbar = observer(({ active }: Props) => {
             appState.delete()
         }
     }
+    const onApplyTags = (tags: any[]) => {
+        setIsApplyTagsDialogOpen(false)
+        const selectedFiles = selected.map((file) => [file.dir, file.name, file.extension].join('/'))
+        const tagNames = tags.map((it: any) => it.value)
+        const fileNames = selectedFiles
+        //.map((it:any)=>it.value)
+        ipcRenderer.invoke('apply-tags', { fileNames, tagNames })
+    }
 
     const onFileAction = (action: string): void => {
         switch (action) {
+            case 'applytags':
+                if (appState.getActiveCache() === cache) {
+                    setIsApplyTagsDialogOpen(true)
+                }
+                break
             case 'makedir':
                 console.log('Opening new folder dialog')
                 onMakedir()
@@ -254,6 +270,14 @@ export const Toolbar = observer(({ active }: Props) => {
                         onValidation={cache.isDirectoryNameValid}
                         parentPath={path}
                     ></MakedirDialog>
+                )}
+                {isApplyTagsDialogOpen && (
+                    <ApplyTagsDialog
+                        isOpen={true}
+                        onApplyTags={onApplyTags}
+                        onClose={() => setIsApplyTagsDialogOpen(false)}
+                        // onValidation={(tags) => true} // Provide a validation function if needed
+                    />
                 )}
 
                 <Button

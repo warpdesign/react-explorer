@@ -45,8 +45,9 @@ export const TruncatedText = withInlineRename(
             <span
                 style={{
                     display: 'block',
-                    padding: '4px',
+                    //padding: '4px',
                     borderRadius: '4px',
+                    marginTop: '-5px',
                     ...(isSelected ? { color: Colors.WHITE, backgroundColor: Colors.BLUE3 } : {}),
                 }}
                 onClick={onClick}

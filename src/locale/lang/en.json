@@ -129,7 +129,8 @@
             "ICON_VIEW": "Icons",
             "DETAILS_VIEW": "Details",
             "CHANGE_VIEW": "Change display mode",
-            "CHANGE_SORT_METHOD": "Change files sort order"
+            "CHANGE_SORT_METHOD": "Change files sort order",
+            "TILE_VIEW": "Tiles"
         },
         "COMMON": {
             "SIZE": {

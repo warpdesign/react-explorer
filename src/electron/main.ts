@@ -8,10 +8,11 @@ import { isLinux } from '$src/electron/osSupport'
 import { WindowSettings } from '$src/electron//windowSettings'
 import { Remote } from '$src/electron/remote'
 import { ReactiveProperties } from '$src/types'
+import { TagManager } from '$src/tagManager'
 
 const ENV_E2E = !!process.env.E2E
 const HTML_PATH = `${__dirname}/index.html`
-
+const tagManager = new TagManager('./tags.db')
 const ElectronApp = {
     mainWindow: null as Electron.BrowserWindow,
     devWindow: null as Electron.BrowserWindow,
@@ -293,6 +294,15 @@ const ElectronApp = {
 
         this.installIpcMainListeners()
         this.installNativeThemeListener()
+        ipcMain.handle('apply-tags', (event, { fileNames, tagNames }) => {
+            console.log('apply-tags received', { fileNames, tagNames })
+            return tagManager.applyTagsToFiles(fileNames, tagNames)
+        })
+
+        ipcMain.handle('list-tags', (event, query) => {
+            console.log('list-tags received')
+            return tagManager.getAllTags()
+        })
         await this.createMainWindow()
     },
 }
