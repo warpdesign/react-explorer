@@ -13,6 +13,7 @@
     "esModuleInterop": true,
     "useDefineForClassFields": true,
     "baseUrl": "./src",
+    "skipLibCheck": true,
     "paths": {
       "rtl": ["utils/test/rtl"],
       "$src/*": ["./*"]

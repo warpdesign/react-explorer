@@ -33,6 +33,12 @@ export const ViewToggleMenu = ({
                 onClick={() => onClick('icons')}
                 labelElement={<Icon icon={IconNames.GRID_VIEW} />}
             />
+            <MenuItem
+                text={t('TOOLBAR.TILE_VIEW')}
+                icon={getTickIcon(viewmode, 'tiles')}
+                onClick={() => onClick('tiles')}
+                labelElement={<Icon icon={IconNames.GRID_VIEW} />}
+            />
         </Menu>
     )
 }

@@ -6,13 +6,15 @@ import { TSORT_METHOD_NAME, TSORT_ORDER } from '$src/services/FsSort'
 import { TStatus } from '$src/state/fileState'
 import { TableViewMode } from '$src/components/viewmodes/TableViewMode/'
 import { IconViewMode } from '$src/components/viewmodes/IconViewMode/'
+import { TileViewMode } from '$src/components/viewmodes/TileViewMode/'
 
 const viewmodes: { [key in ViewModeName]: any } = {
     details: TableViewMode,
     icons: IconViewMode,
+    tiles: TileViewMode,
 }
 
-export type ViewModeName = 'details' | 'icons'
+export type ViewModeName = 'details' | 'icons' | 'tiles'
 
 export interface ItemMouseEvent {
     data: FileViewItem

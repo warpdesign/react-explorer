@@ -94,6 +94,9 @@ export const LeftPanel = observer(({ hide }: { hide: boolean }) => {
         e: React.MouseEvent<HTMLElement>,
     ): Promise<void> => {
         try {
+            /* if (node.id === 's_bookmarks'{
+
+            })*/
             await appState.openDirectory({ dir: node.nodeData, fullname: '' }, !(isMac ? e.altKey : e.ctrlKey))
         } catch (err) {
             AppAlert.show(`${err.message} (${err.code})`, {
