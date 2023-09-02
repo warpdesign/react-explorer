@@ -201,7 +201,7 @@ export class SettingsState {
                 : (isWin && DEFAULT_TERMINAL.win) || DEFAULT_TERMINAL.linux,
             version: this.version,
             // 'details' | 'icons'
-            defaultViewMode: 'details',
+            defaultViewMode: 'tiles',
         }
     }
 

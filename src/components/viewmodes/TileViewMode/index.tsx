@@ -7,6 +7,8 @@ import { ArrowKey } from '$src/types'
 import '$src/css/fileview-icons.css'
 import { Placeholder } from '../components/Placeholder'
 import { Item } from './components/Item'
+import { GoblinCache, GoblinCacheOptions } from 'goblin-cache'
+import Worker from '$src/image.worker'
 
 export interface TileViewModeOptions {
     iconSize: number
@@ -40,6 +42,19 @@ export const TileViewMode = forwardRef<ViewModeActions, ViewModeProps<TileViewMo
         const itemsPerRow = Math.floor(rowWidth / itemWidth)
         const extraRow = itemCount % itemsPerRow ? 1 : 0
         const numRows = itemsPerRow > 0 ? Math.floor(itemCount / itemsPerRow) + extraRow : 0
+        const options: GoblinCacheOptions = {
+            dbOptions: {
+                dbName: 'blobDb',
+                objectStore: 'IndexDbblobObjectStore',
+            },
+            spawn: () => new Worker(),
+            memoryLimit: 500,
+            memLOptions: { batchSize: 1, maxBatches: 50, timeoutMs: 0 },
+            dbLOptions: { batchSize: 50, maxBatches: 5, timeoutMs: 200 },
+            hvLOptions: { batchSize: 10, maxBatches: 6, timeoutMs: 50 },
+        }
+
+        const cacheManager = GoblinCache.getInstance(options)
 
         const getItems = (row: number) => {
             const startIndex = row * itemsPerRow
@@ -166,7 +181,6 @@ export const TileViewMode = forwardRef<ViewModeActions, ViewModeProps<TileViewMo
                                             key={`row_${virtualRow.index}_item_${index}`}
                                             item={item}
                                             itemIndex={virtualRow.index * itemsPerRow + index}
-                                            //width={itemWidth}
                                             margin={margin}
                                             onItemClick={onItemClick}
                                             onItemDoubleClick={onItemDoubleClick}
@@ -175,6 +189,7 @@ export const TileViewMode = forwardRef<ViewModeActions, ViewModeProps<TileViewMo
                                             getDragProps={getDragProps}
                                             isDarkModeActive={isDarkModeActive}
                                             iconSize={iconSize - 10}
+                                            cacheManager={cacheManager}
                                         />
                                     ))}
                                 </div>

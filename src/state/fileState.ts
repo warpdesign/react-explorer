@@ -247,7 +247,9 @@ export class FileState {
     }
 
     onFSChange = (filename: string): void => {
-        this.reload()
+        if (this.viewmode !== 'tiles') {
+            this.reload()
+        }
     }
 
     private getNewFS(path: string, skipContext = false): Fs {
@@ -542,7 +544,6 @@ export class FileState {
 
         return this.cwd(path, path2, skipHistory)
     }
-
     // changes current path and retrieves file list
     cwd = withConnection(async (path: string, path2 = '', skipHistory = false): Promise<string> => {
         const joint = path2 ? this.join(path, path2) : this.api.sanityze(path)
@@ -550,7 +551,7 @@ export class FileState {
 
         try {
             const path = await this.api.cd(joint)
-            const files = await this.list(path)
+            const files: FileDescriptor[] = await this.list(path)
             runInAction(() => {
                 const isSameDir = this.path === path
 
@@ -660,7 +661,7 @@ export class FileState {
 
     openDirectory(file: { dir: string; fullname: string }): Promise<string | void> {
         console.log(file.dir, file.fullname)
-        return this.cd(file.dir, file.fullname)
+        return file.fullname === '' ? this.cd(file.dir, file.fullname) : Promise.resolve(file.fullname)
     }
 
     openTerminal(path: string): Promise<void> {

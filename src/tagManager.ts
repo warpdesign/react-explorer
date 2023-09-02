@@ -16,14 +16,26 @@ export class TagManager {
     }
 
     private initializeTables(): void {
-        //this.db.run(`DROP TABLE tags`);
         // Create tables if they don't exist
-
-        this.db.run(`DROP TABLE file_tags`)
+        this.db.run(`CREATE TABLE IF NOT EXISTS file (
+            fileurl TEXT,
+            viewcount INTEGER
+          )`)
+        // this.db.run(`DROP TABLE file_tags`)
         this.db.run(`CREATE TABLE IF NOT EXISTS file_tags (
       fileurl TEXT,
       tag TEXT
     )`)
+    }
+
+    public incrementViewCount(fileurl: string): Promise<void> {
+        return new Promise((resolve, reject) => {
+            this.db.run(`UPDATE file SET viewcount = viewcount + 1 WHERE fileurl = ?`, [fileurl], (err) => {
+                // this.db.close();
+                if (err) return reject(err)
+                resolve()
+            })
+        })
     }
 
     public getAllTags(): Promise<string[]> {

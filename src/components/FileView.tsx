@@ -154,7 +154,9 @@ const FileView = observer(({ hide }: Props) => {
         }
     }
 
-    const onBlankAreaClick = () => cache.reset()
+    const onBlankAreaClick = () => {
+        console.log('blnk click')
+    }
 
     const onItemClick = ({ index, event }: ItemMouseEvent): void => {
         const item = nodes[index]
@@ -181,16 +183,19 @@ const FileView = observer(({ hide }: Props) => {
     }
 
     const onItemDoubleClick = ({ event }: ItemMouseEvent): void => {
-        openFileOrDirectory(cursor, isMac ? event.altKey : event.ctrlKey)
+        openFileOrDirectory(cursor, !event.ctrlKey /*isMac ? event.altKey : event.ctrlKey*/)
     }
 
     const openFileOrDirectory = (file: FileDescriptor, useInactiveCache: boolean): void => {
-        if (!file.isDir) {
+        if (!file.isDir && file.type !== 'img') {
             cache.openFile(appState, file)
         } else {
             const dir = {
                 dir: cache.join(file.dir, file.fullname),
-                fullname: '',
+                fullname: file.type === 'img' ? file.fullname : '',
+            }
+            if (file.type === 'img') {
+                ipcRenderer.invoke('increment-viewcount', cache.path)
             }
             appState.openDirectory(dir, !useInactiveCache)
         }
@@ -256,53 +261,69 @@ const FileView = observer(({ hide }: Props) => {
         return props.isOpen ? <FileContextMenu fileUnderMouse={rightClickFile} /> : null
     }
 
+    const isImg = (filePath: string) => {
+        //const filePath = "example.jpg";
+        const extension = filePath.split('.').pop()
+        const Extensions = {
+            img: /\.(png|jpeg|jpg|gif|pcx|tiff|raw|webp|svg|heif|bmp|ilbm|iff|lbm|ppm|pgw|pbm|pnm|psd)$/,
+        }
+
+        return Extensions.img.test(`.${extension}`)
+    }
+
     return (
         <HotkeysTarget2 hotkeys={hotkeys}>
             <ContextMenu2 content={renderFileContextMenu}>
-                {(ctxMenuProps: ContextMenu2ChildrenProps) => (
-                    <div
-                        ref={ctxMenuProps.ref}
-                        onContextMenu={(e) => {
-                            // use files.length to tell menu handler we clicked on the blank area
-                            rightClickFileIndexRef.current = files.length
-                            ctxMenuProps.onContextMenu(e)
-                        }}
-                        className={classNames('fileListSizerWrapper', ctxMenuProps.className)}
-                    >
-                        {ctxMenuProps.popover}
-                        <ViewMode
-                            cursorIndex={cursorIndex}
-                            itemCount={nodes.length}
-                            getItem={getRow}
-                            getDragProps={getDraggedProps}
-                            onItemClick={onItemClick}
-                            onItemDoubleClick={onItemDoubleClick}
-                            onHeaderClick={onHeaderClick}
-                            onBlankAreaClick={onBlankAreaClick}
-                            onInlineEdit={onInlineEdit}
-                            onItemRightClick={({ index, event }) => {
-                                rightClickFileIndexRef.current = index
-                                ctxMenuProps.onContextMenu(event)
+                {(ctxMenuProps: ContextMenu2ChildrenProps) =>
+                    isImg(cache?.path) ? (
+                        <div className="imgcontainer">
+                            <img src={cache.path}></img>
+                        </div>
+                    ) : (
+                        <div
+                            ref={ctxMenuProps.ref}
+                            onContextMenu={(e) => {
+                                // use files.length to tell menu handler we clicked on the blank area
+                                rightClickFileIndexRef.current = files.length
+                                ctxMenuProps.onContextMenu(e)
                             }}
-                            columns={[
-                                {
-                                    label: t('FILETABLE.COL_NAME'),
-                                    key: 'name',
-                                    sort: cache.sortMethod === 'name' ? cache.sortOrder : 'none',
-                                },
-                                {
-                                    label: t('FILETABLE.COL_SIZE'),
-                                    key: 'size',
-                                    sort: cache.sortMethod === 'size' ? cache.sortOrder : 'none',
-                                },
-                            ]}
-                            status={cache.status}
-                            error={cache.error}
-                            isDarkModeActive={isDarkModeActive}
-                            options={viewmodeOptions}
-                        />
-                    </div>
-                )}
+                            className={classNames('fileListSizerWrapper', ctxMenuProps.className)}
+                        >
+                            {ctxMenuProps.popover}
+                            <ViewMode
+                                cursorIndex={cursorIndex}
+                                itemCount={nodes.length}
+                                getItem={getRow}
+                                getDragProps={getDraggedProps}
+                                onItemClick={onItemClick}
+                                onItemDoubleClick={onItemDoubleClick}
+                                onHeaderClick={onHeaderClick}
+                                onBlankAreaClick={onBlankAreaClick}
+                                onInlineEdit={onInlineEdit}
+                                onItemRightClick={({ index, event }) => {
+                                    rightClickFileIndexRef.current = index
+                                    ctxMenuProps.onContextMenu(event)
+                                }}
+                                columns={[
+                                    {
+                                        label: t('FILETABLE.COL_NAME'),
+                                        key: 'name',
+                                        sort: cache.sortMethod === 'name' ? cache.sortOrder : 'none',
+                                    },
+                                    {
+                                        label: t('FILETABLE.COL_SIZE'),
+                                        key: 'size',
+                                        sort: cache.sortMethod === 'size' ? cache.sortOrder : 'none',
+                                    },
+                                ]}
+                                status={cache.status}
+                                error={cache.error}
+                                isDarkModeActive={isDarkModeActive}
+                                options={viewmodeOptions}
+                            />
+                        </div>
+                    )
+                }
             </ContextMenu2>
         </HotkeysTarget2>
     )

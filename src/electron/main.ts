@@ -70,6 +70,7 @@ const ElectronApp = {
             // height: settings.height,
             // x: settings.x,
             // y: settings.y,
+            fullscreen: true,
             webPreferences: {
                 nodeIntegration: true,
                 contextIsolation: false,
@@ -302,6 +303,11 @@ const ElectronApp = {
         ipcMain.handle('list-tags', (event, query) => {
             console.log('list-tags received')
             return tagManager.getAllTags()
+        })
+
+        ipcMain.handle('increment-viewcount', (event, fileName) => {
+            console.log('increment-viewcount received', { fileName })
+            return tagManager.incrementViewCount(fileName)
         })
         await this.createMainWindow()
     },
