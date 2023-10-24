@@ -9,8 +9,7 @@ function importAllLocales(r: __WebpackModuleApi.RequireContext) {
         locales[code] = r(key)
     })
 }
-
-importAllLocales(require['context']('./lang/', true, /\.json$/))
+importAllLocales(require.context('./lang/', true, /\.json$/))
 
 const i18n = {
     promise: i18next.init({
