@@ -269,7 +269,7 @@ const FileView = observer(({ hide }: Props) => {
             global: true,
             combo: 'mod + i',
             label: t('SHORTCUT.ACTIVE_VIEW.SELECT_INVERT'),
-            onKeyDown: () => onInvertSelection(cache),
+            onKeyDown: () => isViewActive && onInvertSelection(cache),
             group: t('SHORTCUT.GROUP.ACTIVE_VIEW'),
         },
         ...(!isMac || window.ENV.CY
