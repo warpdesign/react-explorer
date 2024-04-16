@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react'
 import { observer } from 'mobx-react'
-import { InputGroup, ControlGroup, Button, ButtonGroup, Intent, HotkeysTarget2, Classes } from '@blueprintjs/core'
-import { IconNames } from '@blueprintjs/icons'
+import { InputGroup, ControlGroup, Button, ButtonGroup, Intent, HotkeysTarget2, Classes, Icon } from '@blueprintjs/core'
+import { IconName, IconNames } from '@blueprintjs/icons'
 import { Popover2 } from '@blueprintjs/popover2'
 import { useTranslation } from 'react-i18next'
 
@@ -58,7 +58,11 @@ export const Toolbar = observer(({ active }: Props) => {
     const onSubmit = async (shouldSelectTextOnError = false): Promise<void> => {
         if (cache.path !== path) {
             try {
-                await cache.cd(path)
+                // await cache.cd(path)
+                await appState.openDirectory({
+                    dir: path,
+                    fullname: '',
+                })
                 inputRef.current.blur()
             } catch (e) {
                 const err = e as LocalizedError
@@ -222,7 +226,7 @@ export const Toolbar = observer(({ active }: Props) => {
                     <Popover2
                         content={
                             <FileMenu
-                                isDisabled={!cache || cache.error}
+                                isDisabled={!cache || cache.error || cache.getFS().options.readonly}
                                 selectedItemsLength={selected.length}
                                 onFileAction={onFileAction}
                             />
@@ -237,6 +241,7 @@ export const Toolbar = observer(({ active }: Props) => {
                     onChange={onPathChange}
                     onKeyUp={onKeyUp}
                     placeholder={t('COMMON.PATH_PLACEHOLDER')}
+                    leftElement={<Icon icon={cache.getFS().icon as IconName} style={{ opacity: 0.3 }} />}
                     rightElement={reloadButton}
                     value={path}
                     inputRef={inputRef}
@@ -246,6 +251,7 @@ export const Toolbar = observer(({ active }: Props) => {
                     // allows input shrinking to a very low width:
                     // without it, it would refuse shrinking below 100px
                     size={1}
+                    spellCheck={false}
                 />
                 {isMakedirDialogOpen && (
                     <MakedirDialog
