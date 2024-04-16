@@ -20,8 +20,8 @@ export const buildShortcuts = (t: TFunction<'translation', undefined>) => ({
     [t('SHORTCUT.GROUP.GLOBAL')]: [
         { combo: 'alt + mod + l', label: t('SHORTCUT.MAIN.DOWNLOADS_TAB') },
         { combo: 'alt + mod + e', label: t('SHORTCUT.MAIN.EXPLORER_TAB') },
-        { combo: 'ctrl + alt + right', label: t('SHORTCUT.MAIN.NEXT_VIEW') },
-        { combo: 'ctrl + alt + left', label: t('SHORTCUT.MAIN.PREVIOUS_VIEW') },
+        { combo: 'ctrl + shift + right', label: t('SHORTCUT.MAIN.NEXT_VIEW') },
+        { combo: 'ctrl + shift + left', label: t('SHORTCUT.MAIN.PREVIOUS_VIEW') },
         { combo: 'mod + r', label: t('SHORTCUT.MAIN.RELOAD_VIEW') },
         { combo: 'escape', label: t('SHORTCUT.LOG.TOGGLE') },
         { combo: 'mod + s', label: t('SHORTCUT.MAIN.KEYBOARD_SHORTCUTS') },
