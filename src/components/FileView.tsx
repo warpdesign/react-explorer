@@ -92,10 +92,47 @@ const FileView = observer(({ hide }: Props) => {
     }
     console.log('render!', { cursorIndex, cursor })
 
+    const searchStringRef = React.useRef<string>('')
+    const timeStampRef = React.useRef<number>(0)
+
+    // quick select
     useKeyDown(
         React.useCallback(
             (event: KeyboardEvent) => {
-                if (!viewState.isActive) {
+                let searchString = searchStringRef.current
+                // we only want to catch printable keys
+                if (
+                    !viewState.isActive ||
+                    !appState.isExplorer ||
+                    event.key.length !== 1 ||
+                    event.ctrlKey ||
+                    event.altKey ||
+                    event.metaKey
+                ) {
+                    return
+                }
+
+                // previous keyevent > 1sec ?
+                if (event.timeStamp - timeStampRef.current > 1000) searchString = ''
+
+                // search_string += key
+                searchString += event.key
+
+                // call select file marching search_string
+                if (searchString.length) cache.selectMatchingFile(searchString)
+
+                searchStringRef.current = searchString
+                timeStampRef.current = event.timeStamp
+            },
+            [cursor, cache, rowCount],
+        ),
+        ['*'],
+    )
+
+    useKeyDown(
+        React.useCallback(
+            (event: KeyboardEvent) => {
+                if (!viewState.isActive || !appState.isExplorer) {
                     return
                 }
 

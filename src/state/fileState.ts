@@ -197,6 +197,7 @@ export class FileState {
             doLogin: action,
             clearSelection: action,
             invertSelection: action,
+            selectMatchingFile: action,
             reset: action,
             setSort: action,
             refreshSelection: action,
@@ -469,6 +470,15 @@ export class FileState {
         if (length) {
             this.selected.replace(this.files)
             this.setCursor(this.selected[length - 1])
+        }
+    }
+
+    selectMatchingFile(str: string) {
+        // find first matching file (could be the same, we don't care)
+        const file = this.files.find((file) => file.name.toLowerCase().startsWith(str.toLowerCase()))
+        if (file) {
+            this.selected.replace([file])
+            this.setCursor(this.selected[0])
         }
     }
 
