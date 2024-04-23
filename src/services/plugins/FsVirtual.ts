@@ -228,7 +228,7 @@ export class VirtualApi implements FsApi {
                     '',
                 isSym: stats.isSymbolicLink(),
                 target: (stats.isSymbolicLink() && vol.readlinkSync(fullPath)) || null,
-                id: MakeId({ ino: stats.ino, dev: stats.dev }),
+                id: MakeId({ ino: stats.ino, dev: stats.dev }, fullPath),
             }
 
             return file
@@ -340,7 +340,7 @@ export class VirtualApi implements FsApi {
                 '',
             isSym: stats.isSymbolicLink(),
             target: (stats.isSymbolicLink() && name) || null,
-            id: MakeId({ ino: stats.ino, dev: stats.dev }),
+            id: MakeId({ ino: stats.ino, dev: stats.dev }, fullPath),
         }
 
         return file
