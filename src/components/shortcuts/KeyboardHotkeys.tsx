@@ -61,18 +61,14 @@ class KeyboardHotkeysClass extends React.Component<WithTranslation> {
 
     onBackwardHistory = (): void => {
         const cache = this.getActiveFileCache()
-        console.log('onBackwardHistory')
         if (cache) {
-            console.log('if cache')
             cache.navHistory(-1)
         }
     }
 
     onForwardHistory = (): void => {
         const cache = this.getActiveFileCache()
-        console.log('onForwardHistory')
         if (cache) {
-            console.log('if cache')
             cache.navHistory(1)
         }
     }

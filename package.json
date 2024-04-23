@@ -1,6 +1,6 @@
 {
     "name": "react-explorer",
-    "version": "3.1.0",
+    "version": "4.0.0",
     "description": "Plugin-based file explorer written with React",
     "main": "build/main.js",
     "build": {
@@ -27,6 +27,9 @@
         "files": [
             "build/**/*"
         ]
+    },
+    "overrides": {
+        "nan": "github:jkleinsc/nan#remove_accessor_signature"
     },
     "scripts": {
         "test": "jest",
@@ -79,8 +82,8 @@
         "clean-webpack-plugin": "^4.0.0",
         "copy-webpack-plugin": "^11.0.0",
         "css-loader": "^6.7.1",
-        "electron": "^21.0.1",
-        "electron-builder": "^23.2.0",
+        "electron": "^22.3.27",
+        "electron-builder": "^24.13.3",
         "electron-devtools-installer": "^3.1.1",
         "eslint": "^8.27.0",
         "eslint-config-prettier": "^8.5.0",
@@ -135,6 +138,7 @@
         "react": "^16.9.0",
         "react-dnd": "^14.0.5",
         "react-dnd-html5-backend": "^14.1.0",
+        "react-doc-viewer": "git+https://git@github.com/warpdesign/react-doc-viewer.git#release",
         "react-dom": "^16.9.0",
         "react-i18next": "^12.0.0",
         "react-virtual": "^2.10.4"

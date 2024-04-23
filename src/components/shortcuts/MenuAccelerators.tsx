@@ -74,7 +74,6 @@ class MenuAcceleratorsClass extends React.Component<Props> {
 
     onReloadFileView = (): void => {
         if (this.appState.isExplorer) {
-            console.log('reloading view' /*, this.state.activeView*/)
             this.appState.refreshActiveView(/*this.state.activeView*/)
         } else {
             console.log('downloads active, no refresh')

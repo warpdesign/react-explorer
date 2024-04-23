@@ -31,8 +31,6 @@ interface LoginState {
     busy?: boolean
 }
 
-const ENTER_KEY = 13
-
 class LoginDialogClass extends React.Component<LoginProps, LoginState> {
     private input: HTMLInputElement | null = null
 

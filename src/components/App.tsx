@@ -1,5 +1,5 @@
 import React, { useEffect, useCallback, useState, useRef } from 'react'
-import { ipcRenderer } from 'electron'
+import { ipcRenderer, webFrame } from 'electron'
 import { platform } from 'process'
 import { FocusStyleManager, Alert, Classes, Intent } from '@blueprintjs/core'
 import classNames from 'classnames'
@@ -31,6 +31,7 @@ import '$src/css/scrollbars.css'
 import { reaction } from 'mobx'
 import { ReactiveProperties } from '$src/types'
 import { triggerUpdateMenus } from '$src/events'
+import { PreviewDialog } from './dialogs/PreviewDialog'
 
 const App = observer(() => {
     const { appState } = useStores('appState')
@@ -44,6 +45,7 @@ const App = observer(() => {
         isPrefsOpen,
         isShortcutsOpen,
         isExplorer,
+        activeView,
     } = appState
 
     const cache = appState.getActiveCache()
@@ -126,6 +128,8 @@ const App = observer(() => {
 
         ipcRenderer.on('exitRequest', onExitRequest)
 
+        webFrame.setVisualZoomLevelLimits(1, 4)
+
         return () => {
             ipcRenderer.removeAllListeners('exitRequest')
         }
@@ -168,17 +172,11 @@ const App = observer(() => {
         return reaction(
             (): ReactiveProperties => getReactiveProps(),
             (value) => {
-                console.log('something changed!')
                 triggerUpdateMenus(t('APP_MENUS', { returnObjects: true }), value)
             },
             {
-                equals: (value: ReactiveProperties, previousValue: ReactiveProperties) => {
-                    console.log(JSON.stringify(value) === JSON.stringify(previousValue))
-                    console.log(JSON.stringify(value))
-                    console.log(JSON.stringify(previousValue))
-
-                    return JSON.stringify(value) === JSON.stringify(previousValue)
-                },
+                equals: (value: ReactiveProperties, previousValue: ReactiveProperties) =>
+                    JSON.stringify(value) === JSON.stringify(previousValue),
             },
         )
     }, [])
@@ -304,6 +302,7 @@ const App = observer(() => {
                     {splitView && <SideView viewState={views[1]} hide={!isExplorer} />}
                     <Downloads hide={isExplorer} />
                 </div>
+                <PreviewDialog />
             </React.Fragment>
         </Provider>
     )

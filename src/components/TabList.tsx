@@ -120,7 +120,6 @@ const TabList = observer(() => {
     }
 
     const onFolderContextMenu = (index: number, e: React.MouseEvent): void => {
-        console.log('right click')
         e.preventDefault()
         e.stopPropagation()
 

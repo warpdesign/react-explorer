@@ -45,6 +45,7 @@ export class AppState {
     isExplorer = true
     isPrefsOpen = false
     isShortcutsOpen = false
+    isPreviewOpen = false
 
     options: CustomSettings = {
         splitView: false,
@@ -62,6 +63,7 @@ export class AppState {
             isExplorer: observable,
             isPrefsOpen: observable,
             isShortcutsOpen: observable,
+            isPreviewOpen: observable,
             toggleSplitViewMode: action,
             toggleExplorerTab: action,
             initViewState: action,
@@ -71,6 +73,7 @@ export class AppState {
             options: observable,
             togglePrefsDialog: action,
             toggleShortcutsDialog: action,
+            togglePreviewDialog: action,
             activeView: computed,
         })
 
@@ -118,6 +121,10 @@ export class AppState {
 
     togglePrefsDialog = (open = true) => {
         this.isPrefsOpen = open
+    }
+
+    togglePreviewDialog = (open = true) => {
+        this.isPreviewOpen = open
     }
 
     drop({ dragFiles, fileState }: DraggedObject, destCache: FileState): void {

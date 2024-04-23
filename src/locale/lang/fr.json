@@ -71,7 +71,11 @@
             "SHORTCUTS": {
                 "FILTER_PLACEHOLDER": "Rechercher un raccourci",
                 "NO_RESULTS": "Aucun raccourci pour ce filtre"
-            }            
+            },
+            "PREVIEW": {
+                "LAST_MODIFIED_ON": "Dernière modification le {{date}}",
+                "OPEN": "Ouvrir"
+            }
         },
         "SHORTCUT": {
             "OPEN_DEVTOOLS": "Outils de développement",
@@ -106,7 +110,8 @@
                 "SELECT_ALL": "Selectionner tous les éléments",
                 "SELECT_INVERT": "Inverser la selection",
                 "OPEN_TERMINAL": "Ouvre un Terminal dans le dossier courant",
-                "PARENT_DIRECTORY": "Ouvre le dossier parent"
+                "PARENT_DIRECTORY": "Ouvre le dossier parent",
+                "OPEN_PREVIEW": "Affiche un aperçu du fichier selectionné"
             },
             "GROUP": {
                 "ACTIVE_VIEW": "Vue de dossier active",

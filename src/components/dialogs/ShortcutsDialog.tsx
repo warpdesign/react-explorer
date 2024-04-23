@@ -31,6 +31,7 @@ export const buildShortcuts = (t: TFunction<'translation', undefined>) => ({
         { combo: 'mod + alt + shift + v', label: t('NAV.SPLITVIEW') },
     ],
     [t('SHORTCUT.GROUP.ACTIVE_VIEW')]: [
+        { combo: 'space', label: t('SHORTCUT.ACTIVE_VIEW.OPEN_PREVIEW') },
         { combo: (isMac && 'mod + left') || 'alt + left', label: t('SHORTCUT.ACTIVE_VIEW.BACKWARD_HISTORY') },
         { combo: (isMac && 'mod + right') || 'alt + right', label: t('SHORTCUT.ACTIVE_VIEW.FORWARD_HISTORY') },
         { combo: 'meta + c', label: t('SHORTCUT.ACTIVE_VIEW.COPY') },
