@@ -2,6 +2,7 @@
 import { Readable } from 'stream'
 
 import { isWin } from '$src/utils/platform'
+import { BigIntStats } from 'fs'
 
 const interfaces: Array<Fs> = []
 
@@ -15,10 +16,7 @@ export function registerFs(fs: Fs): void {
     interfaces.push(fs)
 }
 
-export interface FileID {
-    ino: bigint
-    dev: bigint
-}
+export type FileID = string
 
 export interface FileDescriptor {
     dir: string
@@ -71,11 +69,8 @@ export const ExeMaskUser = 0o0100
 
 export type FileType = 'exe' | 'img' | 'arc' | 'snd' | 'vid' | 'doc' | 'cod' | ''
 
-export function MakeId(stats: { ino: bigint; dev: bigint }): FileID {
-    return {
-        ino: stats.ino,
-        dev: stats.dev,
-    }
+export function MakeId(stats: Partial<BigIntStats>, fullpath: string): FileID {
+    return stats.ino > 1n ? `${stats.ino}-${stats.dev}` : `${stats.ino}-${stats.dev}-${fullpath}`
 }
 
 function isModeExe(mode: number, gid: number, uid: number): boolean {
@@ -194,8 +189,8 @@ export function needsConnection(target: any, key: any, descriptor: any) {
     return descriptor
 }
 
-export function sameID({ ino, dev }: FileID, { ino: ino2, dev: dev2 }: FileID): boolean {
-    return ino === ino2 && dev === dev2
+export function sameID(id1: FileID, id2: FileID): boolean {
+    return id1 === id2
 }
 
 // in test environment, load the generic fs as first one

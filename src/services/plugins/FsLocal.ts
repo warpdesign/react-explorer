@@ -227,7 +227,7 @@ export class LocalApi implements FsApi {
                     '',
                 isSym: stats.isSymbolicLink(),
                 target: (stats.isSymbolicLink() && fs.readlinkSync(fullPath)) || null,
-                id: MakeId({ ino: stats.ino, dev: stats.dev }),
+                id: MakeId(stats, fullPath),
             }
 
             return file
@@ -315,7 +315,7 @@ export class LocalApi implements FsApi {
                 isDirectory: (): boolean => isDir,
                 mode: -1n,
                 isSymbolicLink: (): boolean => isSymLink,
-                ino: 0n,
+                ino: 1n,
                 dev: 0n,
             }
         }
@@ -341,7 +341,7 @@ export class LocalApi implements FsApi {
                 '',
             isSym: stats.isSymbolicLink(),
             target: (stats.isSymbolicLink() && name) || null,
-            id: MakeId({ ino: stats.ino, dev: stats.dev }),
+            id: MakeId(stats, fullPath),
         }
 
         return file

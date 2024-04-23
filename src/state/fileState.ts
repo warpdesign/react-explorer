@@ -375,9 +375,7 @@ export class FileState {
             for (const selection of this.selected) {
                 // use inode/dev to retrieve files that were selected before reload:
                 // we cannot use fullname anymore since files may have been renamed
-                const newFile = this.files.find(
-                    (file) => file.id.dev === selection.id.dev && file.id.ino === selection.id.ino,
-                )
+                const newFile = this.files.find((file) => file.id === selection.id)
                 // don't add file to selection list if it is supposed to be hidden and we don't
                 // want to show hidden files
                 if (newFile && (this.showHiddenFiles || !newFile.fullname.startsWith('.'))) {
@@ -499,9 +497,7 @@ export class FileState {
 
     setEditingFile(file: FileDescriptor): void {
         if (file) {
-            this.editingId = {
-                ...file.id,
-            }
+            this.editingId = file.id
         } else {
             this.editingId = null
         }

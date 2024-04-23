@@ -230,10 +230,7 @@ class Client {
                                 type: (ftpFile.type !== 'd' && filetype(0, 0, 0, ext)) || '',
                                 isSym: false,
                                 target: null,
-                                id: {
-                                    ino: BigInt(mDate.getTime()),
-                                    dev: BigInt(new Date().getTime()),
-                                },
+                                id: ftpFile.name,
                             }
                             return file
                         })

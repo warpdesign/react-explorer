@@ -6,30 +6,31 @@ import { describeUnix } from '../../utils/test/helpers'
 import { MakeId, ExeMaskAll, ExeMaskGroup, ExeMaskUser, filetype, sameID, FileID } from '../Fs'
 
 describe('makeId', () => {
-    it('should return FileID from stats', () => {
+    it('should return FileID from stats using ino > 1', () => {
+        const fullPath = '/dev/foo'
         const stats = {
             ino: 123n,
             dev: 456n,
-            fullname: 'foo',
         }
 
-        expect(MakeId(stats)).toEqual({
-            ino: stats.ino,
-            dev: stats.dev,
-        })
+        expect(MakeId(stats, fullPath)).toEqual(`${stats.ino}-${stats.dev}`)
+    })
+
+    it('should return FileID from stats using ino <= 1', () => {
+        const fullPath = '/dev/foo'
+        const stats = {
+            ino: 1n,
+            dev: 456n,
+        }
+
+        expect(MakeId(stats, fullPath)).toEqual(`${stats.ino}-${stats.dev}-${fullPath}`)
     })
 })
 
 describe('sameID', () => {
-    const id1: FileID = {
-        dev: 10n,
-        ino: 5n,
-    }
+    const id1 = '123-456-foo'
 
-    const id2: FileID = {
-        dev: 28n,
-        ino: 32n,
-    }
+    const id2 = '123-789-bar'
 
     it('should return true if ino & dev are identical', () => {
         expect(sameID(id1, id1)).toBe(true)
