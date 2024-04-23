@@ -5,7 +5,6 @@ import { app } from 'electron'
 type App = { getPath: (name: string) => string } | Electron.App
 
 function getAppInstance(): App {
-    console.log('getAppInstance', app)
     let appInstance: App = app
 
     if (!appInstance) {

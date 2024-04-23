@@ -1,9 +1,19 @@
 import { shouldCatchEvent } from '$src/utils/dom'
 import React from 'react'
 
-export function useKeyDown(callback: (ev: KeyboardEvent) => void, keys: string[]) {
+export interface Options {
+    alwaysCatchEvent?: boolean
+}
+
+export function useKeyDown(
+    callback: (ev: KeyboardEvent) => void,
+    keys: string[],
+    { alwaysCatchEvent }: Options = {
+        alwaysCatchEvent: false,
+    },
+) {
     function handleKeyDown(event: KeyboardEvent) {
-        if ((keys.includes(event.key) || keys.includes('*')) && shouldCatchEvent(event)) {
+        if (((keys.includes(event.key) || keys.includes('*')) && alwaysCatchEvent) || shouldCatchEvent(event)) {
             callback(event)
         }
     }

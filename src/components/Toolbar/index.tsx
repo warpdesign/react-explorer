@@ -115,7 +115,6 @@ export const Toolbar = observer(({ active }: Props) => {
         }
 
         try {
-            console.log("Let's create a directory :)", dirName, navigate)
             const dir = await cache.makedir(path, dirName)
 
             if (!navigate) {
@@ -150,7 +149,6 @@ export const Toolbar = observer(({ active }: Props) => {
     const onFileAction = (action: string): void => {
         switch (action) {
             case 'makedir':
-                console.log('Opening new folder dialog')
                 onMakedir()
                 break
 

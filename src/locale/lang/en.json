@@ -71,6 +71,10 @@
             "SHORTCUTS": {
                 "FILTER_PLACEHOLDER": "Filter shortcuts",
                 "NO_RESULTS": "No shortcut matches this filter"
+            },
+            "PREVIEW": {
+                "LAST_MODIFIED_ON": "Last modified on {{date}}",
+                "OPEN": "Open"
             }
         },
         "SHORTCUT": {
@@ -106,7 +110,8 @@
                 "SELECT_ALL": "Select all items",
                 "SELECT_INVERT": "Invert selection",
                 "OPEN_TERMINAL": "Open Terminal in active folder",
-                "PARENT_DIRECTORY": "Go to parent folder"
+                "PARENT_DIRECTORY": "Go to parent folder",
+                "OPEN_PREVIEW": "Display a preview of selected file"
             },
             "GROUP": {
                 "ACTIVE_VIEW": "Active file view",

@@ -71,6 +71,10 @@
             "SHORTCUTS": {
                 "FILTER_PLACEHOLDER": "फ़िल्टर शॉर्टकट",
                 "NO_RESULTS": "कोई शॉर्टकट इस फ़िल्टर से मैच नहीं करता है"
+            },
+            "PREVIEW": {
+                "LAST_MODIFIED_ON": "Last modified on {{date}}",
+                "OPEN": "Open"
             }
         },
         "SHORTCUT": {
@@ -106,7 +110,8 @@
                 "SELECT_ALL": "सभी आइटम चुनें",
                 "SELECT_INVERT": "उलट चयन",
                 "OPEN_TERMINAL": "सक्रिय फ़ोल्डर में टर्मिनल खोलें",
-                "PARENT_DIRECTORY": "पैरेंट फोल्डर में जाएं"
+                "PARENT_DIRECTORY": "पैरेंट फोल्डर में जाएं",
+                "OPEN_PREVIEW": "Display a preview of selected file"
             },
             "GROUP": {
                 "ACTIVE_VIEW": "सक्रिय फ़ाइल दृश्य",

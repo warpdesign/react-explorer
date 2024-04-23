@@ -8,7 +8,7 @@ import { ipcRenderer } from 'electron'
 
 import { FileDescriptor, sameID } from '$src/services/Fs'
 import { formatBytes } from '$src/utils/formatBytes'
-import { isEditable } from '$src/utils/dom'
+import { isEditable, shouldCatchEvent } from '$src/utils/dom'
 import { isMac } from '$src/utils/platform'
 import { FileState } from '$src/state/fileState'
 import { FileContextMenu } from '$src/components/menus/FileContextMenu'
@@ -90,10 +90,9 @@ const FileView = observer(({ hide }: Props) => {
         iconSize: 56,
         isSplitViewActive: winState.splitView,
     }
-    console.log('render!', { cursorIndex, cursor })
 
-    const searchStringRef = React.useRef<string>('')
-    const timeStampRef = React.useRef<number>(0)
+    const searchStringRef = useRef<string>('')
+    const timeStampRef = useRef<number>(0)
 
     // quick select
     useKeyDown(
@@ -132,7 +131,11 @@ const FileView = observer(({ hide }: Props) => {
     useKeyDown(
         React.useCallback(
             (event: KeyboardEvent) => {
-                if (!viewState.isActive || !appState.isExplorer) {
+                if (
+                    !viewState.isActive ||
+                    !appState.isExplorer ||
+                    (!appState.isPreviewOpen && !shouldCatchEvent(event))
+                ) {
                     return
                 }
 
@@ -140,20 +143,20 @@ const FileView = observer(({ hide }: Props) => {
                     case 'ArrowUp':
                     case 'ArrowDown':
                     case 'ArrowRight':
-                    case 'ArrowLeft':
+                    case 'ArrowLeft': {
                         // Prevent arrow keys to trigger generic browser scrolling: we want to handle it
                         // ourselves so that the cursor is always visible.
                         event.preventDefault()
                         const { getNextIndex } = getActions()
-                        console.log('usekeydown (render)', viewmode, viewmodeRef.current.icons)
                         const nextIndex = getNextIndex(cursorIndex, event.key as ArrowKey)
                         if (nextIndex > -1 && nextIndex <= rowCount - 1) {
                             const file = cache.files[nextIndex]
                             selectFile(file, false, event.shiftKey)
                         }
                         break
+                    }
 
-                    case 'Enter':
+                    case 'Enter': {
                         const item = nodes[cursorIndex]
                         if (
                             item.isSelected &&
@@ -163,11 +166,24 @@ const FileView = observer(({ hide }: Props) => {
                             cache.setEditingFile(cursor)
                         }
                         break
+                    }
+
+                    case ' ': {
+                        event.preventDefault()
+                        const item = nodes[cursorIndex]
+                        if (item && !appState.isPreviewOpen) {
+                            appState.togglePreviewDialog(true)
+                        } else {
+                            appState.togglePreviewDialog(false)
+                        }
+                        break
+                    }
                 }
             },
             [cursor, cache, rowCount],
         ),
-        ['ArrowDown', 'ArrowUp', 'ArrowLeft', 'ArrowRight', 'Enter'],
+        ['ArrowDown', 'ArrowUp', 'ArrowLeft', 'ArrowRight', 'Enter', ' '],
+        { alwaysCatchEvent: true },
     )
 
     useMenuAccelerator([

@@ -154,6 +154,10 @@ export default [
                             from: 'img/icon-512x512.ico',
                             to: 'icon.ico',
                         },
+                        {
+                            from: 'node_modules/react-doc-viewer/dist/pdf.worker.min.js',
+                            to: 'pdf.worker.min.js',
+                        },
                     ],
                 }),
             ],
