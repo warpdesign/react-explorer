@@ -18,7 +18,7 @@ const darkTheme = {
     tertiary: Colors.DARK_GRAY3,
     textPrimary: Colors.WHITE,
     textSecondary: Colors.LIGHT_GRAY1,
-    textTertiary: Colors.LIGHT_GRAY5,
+    textTertiary: Colors.GRAY2,
     disableThemeScrollbar: true,
 }
 
@@ -114,6 +114,7 @@ export const PreviewDialog = observer(() => {
                             noRenderer: {
                                 overrideComponent: NoPreviewRenderer,
                             },
+                            txtCodeTheme: settingsState.isDarkModeActive ? 'nord' : 'xcode',
                         }}
                         documents={docs}
                         initialActiveDocument={activeDocument}
