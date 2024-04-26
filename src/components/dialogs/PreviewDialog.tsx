@@ -2,7 +2,7 @@ import React, { KeyboardEvent as KE, ReactNode, useCallback, useEffect, useMemo,
 import { useStores } from '$src/hooks/useStores'
 import { Button, Classes, Colors, Dialog, Icon } from '@blueprintjs/core'
 import { observer } from 'mobx-react'
-import DocViewer, { DocViewerRenderers } from 'react-doc-viewer'
+import DocViewer, { DocViewerRenderers, IConfig } from 'react-doc-viewer'
 import { TypeIcons } from '$src/constants/icons'
 import { formatBytes } from '$src/utils/formatBytes'
 import { FileDescriptor } from '$src/services/Fs'
@@ -93,6 +93,20 @@ export const PreviewDialog = observer(() => {
         )
     }
 
+    // pre-calculate config to prevent unncessary re-rendering of the preview
+    const viewerConfig: IConfig = useMemo(
+        () => ({
+            header: {
+                disableHeader: true,
+            },
+            noRenderer: {
+                overrideComponent: NoPreviewRenderer,
+            },
+            txtCodeTheme: settingsState.isDarkModeActive ? 'nord' : 'xcode',
+        }),
+        [],
+    )
+
     return (
         cache.cursor && (
             <Dialog
@@ -107,15 +121,7 @@ export const PreviewDialog = observer(() => {
                         style={{
                             maxHeight: '80vh',
                         }}
-                        config={{
-                            header: {
-                                disableHeader: true,
-                            },
-                            noRenderer: {
-                                overrideComponent: NoPreviewRenderer,
-                            },
-                            txtCodeTheme: settingsState.isDarkModeActive ? 'nord' : 'xcode',
-                        }}
+                        config={viewerConfig}
                         documents={docs}
                         initialActiveDocument={activeDocument}
                         activeDocument={activeDocument}
