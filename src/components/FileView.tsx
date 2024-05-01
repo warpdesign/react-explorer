@@ -251,7 +251,7 @@ const FileView = observer(({ hide }: Props) => {
 
     const onOpenFile = (e: KeyboardEvent): void => {
         if (isViewActive && cursor) {
-            openFileOrDirectory(cursor, isMac ? e.altKey : e.ctrlKey)
+            openFileOrDirectory(cursor, isMac ? e.altKey : e.shiftKey)
         }
     }
 
