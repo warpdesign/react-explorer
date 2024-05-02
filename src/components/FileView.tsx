@@ -1,7 +1,7 @@
 import React, { useCallback, useRef, MutableRefObject } from 'react'
 import { observer } from 'mobx-react'
 import { ContextMenu2, ContextMenu2ChildrenProps, ContextMenu2ContentProps } from '@blueprintjs/popover2'
-import { HotkeysTarget2, Classes } from '@blueprintjs/core'
+import { HotkeysTarget2, Classes, HotkeyConfig } from '@blueprintjs/core'
 import { useTranslation } from 'react-i18next'
 import classNames from 'classnames'
 import { ipcRenderer } from 'electron'
@@ -250,7 +250,7 @@ const FileView = observer(({ hide }: Props) => {
     }
 
     const onOpenFile = (e: KeyboardEvent): void => {
-        if (isViewActive && cursor) {
+        if (isViewActive && cursor && shouldCatchEvent(e)) {
             openFileOrDirectory(cursor, isMac ? e.altKey : e.shiftKey)
         }
     }
@@ -266,7 +266,7 @@ const FileView = observer(({ hide }: Props) => {
         }
     }
 
-    const hotkeys = [
+    const hotkeys: HotkeyConfig[] = [
         {
             global: true,
             combo: 'mod + o',
@@ -285,7 +285,7 @@ const FileView = observer(({ hide }: Props) => {
             global: true,
             combo: 'mod + i',
             label: t('SHORTCUT.ACTIVE_VIEW.SELECT_INVERT'),
-            onKeyDown: () => isViewActive && onInvertSelection(cache),
+            onKeyDown: (e) => shouldCatchEvent(e) && isViewActive && onInvertSelection(cache),
             group: t('SHORTCUT.GROUP.ACTIVE_VIEW'),
         },
         ...(!isMac || window.ENV.CY
@@ -294,11 +294,11 @@ const FileView = observer(({ hide }: Props) => {
                       global: true,
                       combo: 'mod + a',
                       label: t('SHORTCUT.ACTIVE_VIEW.SELECT_ALL'),
-                      onKeyDown: () => {
-                          viewState.isActive && onSelectAll(cache)
+                      onKeyDown: (e) => {
+                          shouldCatchEvent(e) && viewState.isActive && onSelectAll(cache)
                       },
                       group: t('SHORTCUT.GROUP.ACTIVE_VIEW'),
-                  },
+                  } as HotkeyConfig,
               ]
             : []),
     ]
