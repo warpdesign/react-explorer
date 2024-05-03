@@ -20,23 +20,23 @@ const DEFAULT_TERMINAL = {
 }
 
 export class SettingsState {
-    lang: string
+    lang = ''
 
     // this is the asked mode
-    darkMode: boolean | 'auto'
+    darkMode: boolean | 'auto' = 'auto'
 
-    defaultViewMode: ViewModeName
+    defaultViewMode: ViewModeName = null
 
     // this is the current active mode
-    isDarkModeActive: boolean
+    isDarkModeActive = false
 
-    defaultFolder: string
+    defaultFolder = ''
 
-    defaultTerminal: string
+    defaultTerminal = ''
 
-    terminalTemplate: string
+    terminalTemplate = ''
 
-    version: string
+    version = ''
 
     constructor(version: string) {
         makeObservable(this, {
