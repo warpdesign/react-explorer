@@ -76,6 +76,8 @@ export const IconViewMode = forwardRef<ViewModeActions, ViewModeProps<IconViewMo
                         `should navigate to ${direction} index=${index} itemCount=${itemCount} itemsPerRow=${itemsPerRow}`,
                     )
 
+                    const lastIndex = itemCount - 1
+
                     switch (direction) {
                         case 'ArrowDown':
                             // if it's the first time arrow down key is pressed
@@ -91,14 +93,23 @@ export const IconViewMode = forwardRef<ViewModeActions, ViewModeProps<IconViewMo
                             // last element of the row
                             return newIndex >= itemCount ? itemCount - 1 : newIndex
 
-                        case 'ArrowUp':
-                            return index - itemsPerRow
+                        case 'ArrowUp': {
+                            const pos = index - itemsPerRow
+                            if (index > -1) return pos >= 0 ? pos : index
+                            else return lastIndex
+                        }
 
-                        case 'ArrowRight':
-                            return index + 1
+                        case 'ArrowRight': {
+                            const pos = index + 1
+                            if (index > -1) return pos <= lastIndex ? pos : index
+                            else return 0
+                        }
 
-                        case 'ArrowLeft':
-                            return index - 1
+                        case 'ArrowLeft': {
+                            const pos = index - 1
+                            if (index > -1) return pos > -1 ? pos : index
+                            else return lastIndex
+                        }
 
                         default:
                             console.warn(`getNextIndex: unknown direction ${direction}`)
@@ -107,14 +118,14 @@ export const IconViewMode = forwardRef<ViewModeActions, ViewModeProps<IconViewMo
                 },
                 icons: true,
             }),
-            [itemsPerRow, numRows],
+            [itemsPerRow, numRows, itemCount],
         )
 
         useEffect(() => {
             // Position scrolling in these cases:
             // 1. new file has been selected: scroll to selected index to make sure it's visible
             // 2. new directory has been loaded (or same reloaded): scroll to top or selected index
-            if (status === 'ok' && itemsPerRow > 0) {
+            if (status === 'ok' && cursorIndex > -1 && itemsPerRow > 0) {
                 const row = Math.floor(cursorIndex / itemsPerRow)
                 scrollToIndex(cursorIndex === -1 ? 0 : row)
             }

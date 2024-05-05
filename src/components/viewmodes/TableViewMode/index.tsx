@@ -54,10 +54,12 @@ export const TableViewMode = forwardRef<ViewModeActions, ViewModeProps<undefined
                 console.log(`should navigate to ${direction} index=${index} itemCount=${itemCount}`)
                 switch (direction) {
                     case 'ArrowDown':
-                        return index + 1
+                        if (index > -1) return index < itemCount - 1 ? index + 1 : index
+                        else return 0
 
                     case 'ArrowUp':
-                        return index - 1
+                        if (index > -1) return index > 0 ? index - 1 : index
+                        else return itemCount - 1
 
                     default:
                         console.warn(`getNextIndex: unknown direction ${direction}`)
@@ -71,7 +73,7 @@ export const TableViewMode = forwardRef<ViewModeActions, ViewModeProps<undefined
             // Position scrolling in these cases:
             // 1. new file has been selected: scroll to selected index to make sure it's visible
             // 2. new directory has been loaded (or same reloaded): scroll to top or selected index
-            status === 'ok' && scrollToIndex(cursorIndex === -1 ? 0 : cursorIndex)
+            status === 'ok' && cursorIndex > -1 && scrollToIndex(cursorIndex === -1 ? 0 : cursorIndex)
         }, [cursorIndex, status])
 
         return (
