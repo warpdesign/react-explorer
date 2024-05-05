@@ -149,6 +149,7 @@ const FileView = observer(({ hide }: Props) => {
                         event.preventDefault()
                         const { getNextIndex } = getActions()
                         const nextIndex = getNextIndex(cursorIndex, event.key as ArrowKey)
+                        if (nextIndex === cursorIndex) return
                         if (nextIndex > -1 && nextIndex <= rowCount - 1) {
                             const file = cache.files[nextIndex]
                             selectFile(file, false, event.shiftKey)
@@ -180,7 +181,7 @@ const FileView = observer(({ hide }: Props) => {
                     }
                 }
             },
-            [cursor, cache, rowCount],
+            [cursor, cache, rowCount, cursorIndex],
         ),
         ['ArrowDown', 'ArrowUp', 'ArrowLeft', 'ArrowRight', 'Enter', ' '],
         { alwaysCatchEvent: true },
