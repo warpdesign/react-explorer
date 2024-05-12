@@ -138,7 +138,7 @@
         "react": "^16.9.0",
         "react-dnd": "^14.0.5",
         "react-dnd-html5-backend": "^14.1.0",
-        "react-doc-viewer": "github:warpdesign/react-doc-viewer#release",
+        "react-doc-viewer": "github:warpdesign/react-doc-viewer#bc2e5713018269634c6b3456b29326ebb01d7003",
         "react-dom": "^16.9.0",
         "react-i18next": "^12.0.0",
         "react-virtual": "^2.10.4"
