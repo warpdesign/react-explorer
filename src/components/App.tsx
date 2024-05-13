@@ -304,7 +304,7 @@ const App = observer(() => {
                     {splitView && <SideView viewState={views[1]} hide={!isExplorer} />}
                     <Downloads hide={isExplorer} />
                 </div>
-                <PreviewDialog />
+                {cache.cursor && <PreviewDialog />}
             </React.Fragment>
         </Provider>
     )
