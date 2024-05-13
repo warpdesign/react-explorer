@@ -2,7 +2,7 @@ import React, { KeyboardEvent as KE, ReactNode, useCallback, useEffect, useMemo,
 import { useStores } from '$src/hooks/useStores'
 import { Button, Classes, Colors, Dialog, Icon } from '@blueprintjs/core'
 import { observer } from 'mobx-react'
-import DocViewer, { DocViewerRenderers, IConfig } from 'react-doc-viewer'
+import DocViewer, { DocViewerRenderers, IConfig, IDocument } from 'react-doc-viewer'
 import { TypeIcons } from '$src/constants/icons'
 import { formatBytes } from '$src/utils/formatBytes'
 import { FileDescriptor } from '$src/services/Fs'
@@ -28,13 +28,16 @@ export const PreviewDialog = observer(() => {
     const view = appState.activeView
     const cache = view.getVisibleCache()
     const cursorIndex = cache.getFileIndex(cache.cursor)
+    const currentFile = cache.join(cache.cursor.dir, cache.cursor.fullname).replace(/#/g, '%23')
     const docs = useMemo(() => {
         return cache.files.map((file) => ({ uri: cache.join(file.dir, file.fullname).replace(/#/g, '%23') }))
-    }, [cache.cursor])
-    const activeDocument = docs[cursorIndex]
-    const { isDir, type, length, mDate } = cache.cursor || ({} as FileDescriptor)
+    }, [currentFile])
+    const activeDocumentRef = useRef<IDocument>({
+        ...docs[cursorIndex],
+    })
+    activeDocumentRef.current.uri = docs[cursorIndex].uri
+    const { isDir, type } = cache.cursor || ({} as FileDescriptor)
     const icon = (isDir && TypeIcons['dir']) || (type && TypeIcons[type]) || TypeIcons['any']
-    const size = (length && formatBytes(length)) || 0
     const theme = settingsState.isDarkModeActive ? darkTheme : lightTheme
 
     const Header = ({ cache }: { cache: FileState }) => {
@@ -70,6 +73,9 @@ export const PreviewDialog = observer(() => {
     const NoPreviewRenderer = ({ document, fileName }: any) => {
         const { t } = useTranslation()
         const fileText = fileName || document?.fileType || ''
+        const { mDate, length, type, isDir } = cache.cursor
+        const icon = (isDir && TypeIcons['dir']) || (type && TypeIcons[type]) || TypeIcons['any']
+        const size = (length && formatBytes(length)) || 0
         const modifiedString = (mDate && t('DIALOG.PREVIEW.LAST_MODIFIED_ON', { date: mDate.toLocaleString() })) || ''
 
         return (
@@ -123,8 +129,8 @@ export const PreviewDialog = observer(() => {
                         }}
                         config={viewerConfig}
                         documents={docs}
-                        initialActiveDocument={activeDocument}
-                        activeDocument={activeDocument}
+                        initialActiveDocument={activeDocumentRef.current}
+                        activeDocument={activeDocumentRef.current}
                         pluginRenderers={DocViewerRenderers}
                         theme={theme}
                     />
