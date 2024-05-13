@@ -45,7 +45,6 @@ const App = observer(() => {
         isPrefsOpen,
         isShortcutsOpen,
         isExplorer,
-        activeView,
     } = appState
 
     const cache = appState.getActiveCache()
@@ -79,6 +78,7 @@ const App = observer(() => {
             filesLength: activeCache.files.length,
             clipboardLength: appState.clipboard.files.length,
             activeViewId: activeView.viewId,
+            viewMode: activeView.getVisibleCache().viewmode,
             // missing: about opened, tab: is it needed?
         }
     }, [appState])

@@ -96,6 +96,8 @@
                 "CLOSE_ACTIVE_TAB": "Close active tab"
             },
             "ACTIVE_VIEW": {
+                "TABLE_MODE": "Table view",
+                "ICON_MODE": "Icons view",
                 "COPY": "Copy selected items to clipboard",
                 "PASTE": "Paste selected items into current folder",
                 "VIEW_HISTORY": "Show nav history (debug)",
@@ -266,7 +268,9 @@
             "GO_PARENT": "Parent folder",
             "GO_BACK": "Back",
             "GO_FORWARD": "Forward",
-            "TOGGLE_HIDDEN_FILES": "Show/Hide Hidden Files"
+            "TOGGLE_HIDDEN_FILES": "Show/Hide Hidden Files",
+            "TOGGLE_ICONVIEW_MODE": "as Icons",
+            "TOGGLE_TABLEVIEW_MODE": "as List"
         }
     }
 }

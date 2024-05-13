@@ -96,6 +96,8 @@
                 "CLOSE_ACTIVE_TAB": "Fermer l'onglet actif"
             },
             "ACTIVE_VIEW": {
+                "TABLE_MODE": "Vue liste",
+                "ICON_MODE": "Vue icônes",
                 "COPY": "Copier les éléments sélectionnés dans le presse-papier",
                 "PASTE": "Coller les éléments sélectionnés dans le presse-papier",
                 "VIEW_HISTORY": "Afficher l'historique de navigation (debug)",
@@ -252,7 +254,7 @@
             "PASTE": "Coller",
             "RELOAD_VIEW": "Recharger Vue Active",
             "FORCE_RELOAD_APP": "Recharger l'App",
-            "KEYBOARD_SHORTCUTS": "List des Raccourcis",
+            "KEYBOARD_SHORTCUTS": "Liste des Raccourcis",
             "ABOUT_TITLE": "React-Explorer",
             "ABOUT_CONTENT": "Version: ${version}\nCommit: ${hash}\nDate: ${date}\nElectron: ${electron}\nChrome: ${chrome}\nNode: ${node}\nSE: ${platform} ${arch} ${release}",
             "ZOOM": "Zoom",
@@ -266,7 +268,9 @@
             "GO_PARENT": "Dossier parent",
             "GO_BACK": "Précédent",
             "GO_FORWARD": "Suivant",
-            "TOGGLE_HIDDEN_FILES": "Voir/Cacher Fichiers Cachés"
+            "TOGGLE_HIDDEN_FILES": "Voir/Cacher Fichiers Cachés",
+            "TOGGLE_ICONVIEW_MODE": "Par icônes",
+            "TOGGLE_TABLEVIEW_MODE": "Par liste"
         }
     }
 }

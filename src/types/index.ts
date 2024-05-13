@@ -1,3 +1,4 @@
+import { ViewModeName } from '$src/hooks/useViewMode'
 import { FileDescriptor } from '$src/services/Fs'
 import { FileState, TStatus } from '$src/state/fileState'
 import { IconName } from '@blueprintjs/icons'
@@ -49,4 +50,7 @@ export interface ReactiveProperties {
     filesLength: number
     status: TStatus
     language: string
+    viewMode: ViewModeName
 }
+
+export type KeyboardLayoutMap = Record<string, string>
