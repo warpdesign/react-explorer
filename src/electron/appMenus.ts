@@ -1,7 +1,7 @@
 import { clipboard, Menu, BrowserWindow, MenuItemConstructorOptions, MenuItem, app, ipcMain, dialog } from 'electron'
 
 import { isMac, isLinux, VERSIONS } from '$src/electron/osSupport'
-import { ReactiveProperties } from '$src/types'
+import { KeyboardLayoutMap, ReactiveProperties } from '$src/types'
 
 const ACCELERATOR_EVENT = 'menu_accelerator'
 
@@ -17,7 +17,6 @@ export class AppMenu {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     sendComboEvent = (menuItem: MenuItem & { accelerator: string }) => {
         const accel = menuItem.accelerator || ''
-        console.log('sending', menuItem.label, accel)
         this.win.webContents.send(ACCELERATOR_EVENT, Object.assign({ combo: accel, data: undefined }))
     }
 
@@ -95,10 +94,13 @@ export class AppMenu {
         clipboardLength,
         filesLength,
         status,
+        viewMode,
     }: ReactiveProperties): MenuItemConstructorOptions[] {
         const menuStrings = this.menuStrings
         const explorerWithoutOverlay = !isOverlayOpen && isExplorer
         const explorerWithoutOverlayCanWrite = explorerWithoutOverlay && !isReadonly && status === 'ok'
+        const isIconViewMode = viewMode === 'icons'
+
         let windowMenuIndex = 4
 
         const template = [
@@ -196,6 +198,23 @@ export class AppMenu {
             {
                 label: menuStrings['TITLE_VIEW'],
                 submenu: [
+                    {
+                        type: 'checkbox',
+                        label: menuStrings['TOGGLE_ICONVIEW_MODE'],
+                        accelerator: 'CmdOrCtrl+1',
+                        click: this.sendComboEvent,
+                        enabled: explorerWithoutOverlay,
+                        checked: isIconViewMode,
+                    },
+                    {
+                        type: 'checkbox',
+                        label: menuStrings['TOGGLE_TABLEVIEW_MODE'],
+                        accelerator: 'CmdOrCtrl+2',
+                        click: this.sendComboEvent,
+                        enabled: explorerWithoutOverlay,
+                        checked: !isIconViewMode,
+                    },
+                    { type: 'separator' },
                     {
                         label: menuStrings['TOGGLE_SPLITVIEW'],
                         accelerator: 'CmdOrCtrl+Shift+Alt+V',

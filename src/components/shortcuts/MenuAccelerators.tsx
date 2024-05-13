@@ -183,6 +183,16 @@ class MenuAcceleratorsClass extends React.Component<Props> {
         this.appState.startEditingFile(this.getActiveFileCache())
     }
 
+    onToggleIconViewMode = (): void => {
+        const cache = this.getActiveFileCache()
+        cache.viewmode !== 'icons' && cache.setViewMode('icons')
+    }
+
+    onToggleTableViewMode = (): void => {
+        const cache = this.getActiveFileCache()
+        cache.viewmode !== 'details' && cache.setViewMode('details')
+    }
+
     renderMenuAccelerators(): React.ReactElement {
         return (
             <Accelerators>
@@ -203,6 +213,8 @@ class MenuAcceleratorsClass extends React.Component<Props> {
                 <Accelerator combo={isMac ? 'Cmd+Right' : 'Alt+Right'} onClick={this.onForward}></Accelerator>
                 <Accelerator combo="Backspace" onClick={this.onParent}></Accelerator>
                 <Accelerator combo="rename" onClick={this.onRename}></Accelerator>
+                <Accelerator combo="CmdOrCtrl+1" onClick={this.onToggleIconViewMode}></Accelerator>
+                <Accelerator combo="CmdOrCtrl+2" onClick={this.onToggleTableViewMode}></Accelerator>
             </Accelerators>
         )
     }

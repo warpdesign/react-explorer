@@ -7,7 +7,7 @@ import { AppMenu } from '$src/electron/appMenus'
 import { isLinux } from '$src/electron/osSupport'
 import { WindowSettings } from '$src/electron//windowSettings'
 import { Remote } from '$src/electron/remote'
-import { ReactiveProperties } from '$src/types'
+import { KeyboardLayoutMap, ReactiveProperties } from '$src/types'
 
 const ENV_E2E = !!process.env.E2E
 const HTML_PATH = `${__dirname}/index.html`
@@ -187,13 +187,21 @@ const ElectronApp = {
             })
         })
 
-        ipcMain.handle('updateMenus', (e: Event, strings: Record<string, string>, props: ReactiveProperties) => {
-            if (this.appMenu) {
-                this.appMenu.createMenu(strings, props)
-            } else {
-                console.log('languageChanged but app not ready :(')
-            }
-        })
+        ipcMain.handle(
+            'updateMenus',
+            (
+                e: Event,
+                strings: Record<string, string>,
+                props: ReactiveProperties,
+                keyboardLayoutMap: KeyboardLayoutMap,
+            ) => {
+                if (this.appMenu) {
+                    this.appMenu.createMenu(strings, props, keyboardLayoutMap)
+                } else {
+                    console.log('languageChanged but app not ready :(')
+                }
+            },
+        )
 
         ipcMain.handle('selectAll', () => {
             if (this.mainWindow) {
