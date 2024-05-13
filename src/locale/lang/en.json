@@ -98,6 +98,10 @@
             "ACTIVE_VIEW": {
                 "TABLE_MODE": "Table view",
                 "ICON_MODE": "Icons view",
+                "SORT_BY_NAME": "Sort by Name",
+                "SORT_BY_SIZE": "Sort by Size",
+                "SORT_ORDER_ASCENDING": "Ascending Order",
+                "SORT_ORDER_DESCENDING": "Descending Order",
                 "COPY": "Copy selected items to clipboard",
                 "PASTE": "Paste selected items into current folder",
                 "VIEW_HISTORY": "Show nav history (debug)",
@@ -136,7 +140,7 @@
             "ICON_VIEW": "Icons",
             "DETAILS_VIEW": "Details",
             "CHANGE_VIEW": "Change display mode",
-            "CHANGE_SORT_METHOD": "Change files sort order"
+            "CHANGE_SORT_METHOD": "Change files sort method"
         },
         "COMMON": {
             "SIZE": {
@@ -270,7 +274,12 @@
             "GO_FORWARD": "Forward",
             "TOGGLE_HIDDEN_FILES": "Show/Hide Hidden Files",
             "TOGGLE_ICONVIEW_MODE": "as Icons",
-            "TOGGLE_TABLEVIEW_MODE": "as List"
+            "TOGGLE_TABLEVIEW_MODE": "as List",
+            "SORT_BY": "Sort By",
+            "SORT_BY_NAME": "Name",
+            "SORT_BY_SIZE": "Size",
+            "SORT_ASCENDING": "Ascending",
+            "SORT_DESCENDING": "Descending"
         }
     }
 }

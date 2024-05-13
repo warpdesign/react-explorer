@@ -193,6 +193,26 @@ class MenuAcceleratorsClass extends React.Component<Props> {
         cache.viewmode !== 'details' && cache.setViewMode('details')
     }
 
+    onSortByName = (): void => {
+        const cache = this.getActiveFileCache()
+        cache.sortMethod !== 'name' && cache.setSort('name')
+    }
+
+    onSortBySize = (): void => {
+        const cache = this.getActiveFileCache()
+        cache.sortMethod !== 'size' && cache.setSort('size')
+    }
+
+    onSortOrderAsc = (): void => {
+        const cache = this.getActiveFileCache()
+        cache.sortOrder !== 'asc' && cache.setSort(cache.sortMethod, 'asc')
+    }
+
+    onSortOrderDesc = (): void => {
+        const cache = this.getActiveFileCache()
+        cache.sortOrder !== 'desc' && cache.setSort(cache.sortMethod, 'desc')
+    }
+
     renderMenuAccelerators(): React.ReactElement {
         return (
             <Accelerators>
@@ -215,6 +235,10 @@ class MenuAcceleratorsClass extends React.Component<Props> {
                 <Accelerator combo="rename" onClick={this.onRename}></Accelerator>
                 <Accelerator combo="CmdOrCtrl+1" onClick={this.onToggleIconViewMode}></Accelerator>
                 <Accelerator combo="CmdOrCtrl+2" onClick={this.onToggleTableViewMode}></Accelerator>
+                <Accelerator combo="CmdOrCtrl+Alt+1" onClick={this.onSortByName}></Accelerator>
+                <Accelerator combo="CmdOrCtrl+Alt+2" onClick={this.onSortBySize}></Accelerator>
+                <Accelerator combo="CmdOrCtrl+Shift+Alt+1" onClick={this.onSortOrderAsc}></Accelerator>
+                <Accelerator combo="CmdOrCtrl+Shift+Alt+2" onClick={this.onSortOrderDesc}></Accelerator>
             </Accelerators>
         )
     }

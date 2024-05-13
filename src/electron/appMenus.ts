@@ -95,11 +95,15 @@ export class AppMenu {
         filesLength,
         status,
         viewMode,
+        sortMethod,
+        sortOrder,
     }: ReactiveProperties): MenuItemConstructorOptions[] {
         const menuStrings = this.menuStrings
         const explorerWithoutOverlay = !isOverlayOpen && isExplorer
         const explorerWithoutOverlayCanWrite = explorerWithoutOverlay && !isReadonly && status === 'ok'
         const isIconViewMode = viewMode === 'icons'
+        const isSortByName = sortMethod === 'name'
+        const isSortAscending = sortOrder === 'asc'
 
         let windowMenuIndex = 4
 
@@ -215,6 +219,45 @@ export class AppMenu {
                         checked: !isIconViewMode,
                     },
                     { type: 'separator' },
+                    {
+                        label: menuStrings['SORT_BY'],
+                        enabled: explorerWithoutOverlay,
+                        submenu: [
+                            {
+                                label: menuStrings['SORT_BY_NAME'],
+                                type: 'radio',
+                                accelerator: 'CmdOrCtrl+Alt+1',
+                                click: this.sendComboEvent,
+                                enabled: explorerWithoutOverlay,
+                                checked: isSortByName,
+                            },
+                            {
+                                label: menuStrings['SORT_BY_SIZE'],
+                                type: 'radio',
+                                accelerator: 'CmdOrCtrl+Alt+2',
+                                click: this.sendComboEvent,
+                                enabled: explorerWithoutOverlay,
+                                checked: !isSortByName,
+                            },
+                            { type: 'separator' },
+                            {
+                                label: menuStrings['SORT_ASCENDING'],
+                                type: 'checkbox',
+                                click: this.sendComboEvent,
+                                accelerator: 'CmdOrCtrl+Shift+Alt+1',
+                                enabled: explorerWithoutOverlay,
+                                checked: isSortAscending,
+                            },
+                            {
+                                label: menuStrings['SORT_DESCENDING'],
+                                type: 'checkbox',
+                                click: this.sendComboEvent,
+                                accelerator: 'CmdOrCtrl+Shift+Alt+2',
+                                enabled: explorerWithoutOverlay,
+                                checked: !isSortAscending,
+                            },
+                        ],
+                    },
                     {
                         label: menuStrings['TOGGLE_SPLITVIEW'],
                         accelerator: 'CmdOrCtrl+Shift+Alt+V',

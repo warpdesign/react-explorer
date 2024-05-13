@@ -1,5 +1,6 @@
 import { ViewModeName } from '$src/hooks/useViewMode'
 import { FileDescriptor } from '$src/services/Fs'
+import { TSORT_METHOD_NAME, TSORT_ORDER } from '$src/services/FsSort'
 import { FileState, TStatus } from '$src/state/fileState'
 import { IconName } from '@blueprintjs/icons'
 import { IpcRendererEvent } from 'electron/renderer'
@@ -51,6 +52,8 @@ export interface ReactiveProperties {
     status: TStatus
     language: string
     viewMode: ViewModeName
+    sortMethod: TSORT_METHOD_NAME
+    sortOrder: TSORT_ORDER
 }
 
 export type KeyboardLayoutMap = Record<string, string>

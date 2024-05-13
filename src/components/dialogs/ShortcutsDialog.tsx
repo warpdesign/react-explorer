@@ -41,6 +41,16 @@ export const buildShortcuts = async (t: TFunction<'translation', undefined>): Pr
         [t('SHORTCUT.GROUP.ACTIVE_VIEW')]: [
             { combo: `mod + ${keyboardLayoutMap['Digit1']}`, label: t('SHORTCUT.ACTIVE_VIEW.ICON_MODE') },
             { combo: `mod + ${keyboardLayoutMap['Digit2']}`, label: t('SHORTCUT.ACTIVE_VIEW.TABLE_MODE') },
+            { combo: `mod + alt + ${keyboardLayoutMap['Digit1']}`, label: t('SHORTCUT.ACTIVE_VIEW.SORT_BY_NAME') },
+            { combo: `mod + alt + ${keyboardLayoutMap['Digit2']}`, label: t('SHORTCUT.ACTIVE_VIEW.SORT_BY_SIZE') },
+            {
+                combo: `mod + shift + alt + ${keyboardLayoutMap['Digit1']}`,
+                label: t('SHORTCUT.ACTIVE_VIEW.SORT_ORDER_DESCENDING'),
+            },
+            {
+                combo: `mod + shift + alt + ${keyboardLayoutMap['Digit2']}`,
+                label: t('SHORTCUT.ACTIVE_VIEW.SORT_ORDER_ASCENDING'),
+            },
             { combo: 'space', label: t('SHORTCUT.ACTIVE_VIEW.OPEN_PREVIEW') },
             { combo: (isMac && 'mod + left') || 'alt + left', label: t('SHORTCUT.ACTIVE_VIEW.BACKWARD_HISTORY') },
             { combo: (isMac && 'mod + right') || 'alt + right', label: t('SHORTCUT.ACTIVE_VIEW.FORWARD_HISTORY') },

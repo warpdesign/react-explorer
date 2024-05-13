@@ -79,6 +79,8 @@ const App = observer(() => {
             clipboardLength: appState.clipboard.files.length,
             activeViewId: activeView.viewId,
             viewMode: activeView.getVisibleCache().viewmode,
+            sortMethod: activeView.getVisibleCache().sortMethod,
+            sortOrder: activeView.getVisibleCache().sortOrder,
             // missing: about opened, tab: is it needed?
         }
     }, [appState])

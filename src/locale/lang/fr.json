@@ -98,6 +98,10 @@
             "ACTIVE_VIEW": {
                 "TABLE_MODE": "Vue liste",
                 "ICON_MODE": "Vue icônes",
+                "SORT_BY_NAME": "Trier par Nom",
+                "SORT_BY_SIZE": "Trier par Taille",
+                "SORT_ORDER_ASCENDING": "Croissant",
+                "SORT_ORDER_DESCENDING": "Décroissant",
                 "COPY": "Copier les éléments sélectionnés dans le presse-papier",
                 "PASTE": "Coller les éléments sélectionnés dans le presse-papier",
                 "VIEW_HISTORY": "Afficher l'historique de navigation (debug)",
@@ -270,7 +274,12 @@
             "GO_FORWARD": "Suivant",
             "TOGGLE_HIDDEN_FILES": "Voir/Cacher Fichiers Cachés",
             "TOGGLE_ICONVIEW_MODE": "Par icônes",
-            "TOGGLE_TABLEVIEW_MODE": "Par liste"
+            "TOGGLE_TABLEVIEW_MODE": "Par liste",
+            "SORT_BY": "Trier par",
+            "SORT_BY_NAME": "Nom",
+            "SORT_BY_SIZE": "Taille",
+            "SORT_ASCENDING": "Croissant",
+            "SORT_DESCENDING": "Décroissant"
         }
     }
 }
