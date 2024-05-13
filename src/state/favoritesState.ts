@@ -23,7 +23,7 @@ export interface Favorite {
 
 export const filterSystemDrive = ({ filesystem, mounted }: Drive) => {
     // exclude system volumes from the list of devices we want to show
-    if (filesystem.match(/(tmpfs|devfs|map)/) || mounted.match(/^\/(System|boot)/)) {
+    if (filesystem.match(/(tmpfs|devfs|map|efivarfs)/) || mounted.match(/^\/(System|boot)/)) {
         return false
     } else {
         return true
