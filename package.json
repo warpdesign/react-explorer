@@ -1,6 +1,6 @@
 {
     "name": "react-explorer",
-    "version": "4.0.0",
+    "version": "4.0.0-rc.1",
     "description": "Plugin-based file explorer written with React",
     "main": "build/main.js",
     "build": {

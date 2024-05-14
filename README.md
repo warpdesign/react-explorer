@@ -1,4 +1,4 @@
-# File manager written in TypeScript & React
+# Cross-platform File manager for Windows, Mac, Linux
 
 ![master Tests](https://github.com/warpdesign/react-explorer/actions/workflows/github-actions-tests.yml/badge.svg?branch=master)
 
@@ -8,14 +8,32 @@
 
 - Split-view window
 - Tabs support
+- Media File Preview
 - Fully keyboard controlled
-- Fully localized (French & English available)
-- Dark Mode with automatic detection (macOS Mojave)
+- Fully localized
+- Dark Mode with automatic detection
 - Open a terminal from any folder
 - Plugin-based filesystem support
-- WSL detection on Windows
+- WSL integration (Windows)
 
 ## Feature tour
+
+### Trully Cross-platform
+
+React-Explorer is available on every major operating systems & architectures:
+
+ - Windows x66, AARCH64
+ - Linux x64, AARCH64
+ - macOS x64, AARCH64
+
+### Builtin media file preview
+
+Pressing the `space` bar when a file is selected will open the media preview.
+If the file format is supported, it will be displayed without needing any additional
+library:
+
+![media-preview](./img/media-preview.gif)
+
 
 ### Dark theme automatic detection (macOS Mojave)
 
@@ -45,11 +63,11 @@ By right-clicking on a tab's icon you can quickly get access to the parents of t
 
 React-Explorer will automatically detect and show the list of Linux distributions installed using WSL on Windows:
 
-![parent-folders](./img/feature-wsl.jpg)
+![wsl-support](./img/feature-wsl.jpg)
 
 ## Requirements
 
-React-Explorer works on any modern Windows, Mac or Linux computer.
+React-Explorer works on any modern **Windows**, **Mac** or **Linux** **64bit** computer.
 
 ## Building for local development
 
@@ -147,7 +165,7 @@ As a starting point you may use the `FsGeneric` skeleton.
 
 ## Acknowledgments
 
-React-Explorer makes use of the following tools/components:
+React-Explorer makes use of the following libraries/components:
 
 - [React](https://reactjs.org)
 - [Electron](https://electron.s.org)
