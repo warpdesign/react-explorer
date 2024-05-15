@@ -15,9 +15,9 @@ describe('ShortcutsDialog', () => {
     beforeEach(() => jest.resetAllMocks())
 
     describe('shortcuts list', () => {
-        it('should render shortcuts', () => {
+        it('should render shortcuts', async () => {
             render(<ShortcutsDialog {...DEFAULT_PROPS} />)
-            expect(screen.getByText(exitLabel)).toBeInTheDocument()
+            expect(await screen.findByText(exitLabel)).toBeInTheDocument()
             expect(screen.getByText(reloadViewLabel)).toBeInTheDocument()
         })
 

@@ -17,10 +17,7 @@ const files: Array<FileDescriptor> = [
         mode: 16877,
         isDir: true,
         readonly: false,
-        id: {
-            ino: 0n,
-            dev: 1n,
-        },
+        id: '0-1',
         isSym: false,
         target: '',
         type: '',
@@ -37,10 +34,7 @@ const files: Array<FileDescriptor> = [
         mode: 33188,
         isDir: false,
         readonly: false,
-        id: {
-            ino: 1n,
-            dev: 1n,
-        },
+        id: '1-1',
         isSym: false,
         target: '',
         type: '',
@@ -57,10 +51,7 @@ const files: Array<FileDescriptor> = [
         mode: 33188,
         isDir: false,
         readonly: false,
-        id: {
-            ino: 2n,
-            dev: 1n,
-        },
+        id: '2-1',
         isSym: false,
         target: '',
         type: '',
@@ -77,10 +68,7 @@ const files: Array<FileDescriptor> = [
         mode: 33188,
         isDir: false,
         readonly: false,
-        id: {
-            ino: 3n,
-            dev: 1n,
-        },
+        id: '3-1',
         isSym: false,
         target: '',
         type: '',
@@ -90,25 +78,25 @@ const files: Array<FileDescriptor> = [
 describe('sorting methods', () => {
     it('sort by Name/Asc', () => {
         const sortMethod = getSortMethod('name', 'asc')
-        const sorted_ids = files.sort(sortMethod).map((file) => file.id.ino)
-        expect(sorted_ids).toEqual([2n, 0n, 1n, 3n])
+        const sorted_ids = files.sort(sortMethod).map((file) => file.id)
+        expect(sorted_ids).toEqual(['2-1', '0-1', '1-1', '3-1'])
     })
 
     it('sort by Name/Desc', () => {
         const sortMethod = getSortMethod('name', 'desc')
-        const sorted_ids = files.sort(sortMethod).map((file) => file.id.ino)
-        expect(sorted_ids).toEqual([3n, 1n, 0n, 2n])
+        const sorted_ids = files.sort(sortMethod).map((file) => file.id)
+        expect(sorted_ids).toEqual(['3-1', '1-1', '0-1', '2-1'])
     })
 
     it('sort by Size/Asc', () => {
         const sortMethod = getSortMethod('size', 'asc')
-        const sorted_ids = files.sort(sortMethod).map((file) => file.id.ino)
-        expect(sorted_ids).toEqual([1n, 0n, 3n, 2n])
+        const sorted_ids = files.sort(sortMethod).map((file) => file.id)
+        expect(sorted_ids).toEqual(['1-1', '0-1', '3-1', '2-1'])
     })
 
     it('sort by Size/Asc', () => {
         const sortMethod = getSortMethod('size', 'desc')
-        const sorted_ids = files.sort(sortMethod).map((file) => file.id.ino)
-        expect(sorted_ids).toEqual([2n, 3n, 0n, 1n])
+        const sorted_ids = files.sort(sortMethod).map((file) => file.id)
+        expect(sorted_ids).toEqual(['2-1', '3-1', '0-1', '1-1'])
     })
 })

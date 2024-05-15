@@ -409,10 +409,7 @@ describe('FsLocal', () => {
                 length: fsStat.size,
                 isDir: false,
                 isSym: false,
-                id: {
-                    dev: fsStat.dev,
-                    ino: fsStat.ino,
-                },
+                id: `${fsStat.ino}-${fsStat.dev}`,
                 mode: fsStat.mode,
                 readonly: false,
                 target: null,

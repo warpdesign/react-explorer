@@ -5,7 +5,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        node-version: [14.x]
+        node-version: [16.x]
         os: [ubuntu-latest]
         experimental: [false]
         # include:
@@ -26,9 +26,15 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
           cache: 'npm'
+      - name:  Install
+        run:   |
+                if [ "$RUNNER_OS" == "Linux" ]; then
+                      sudo apt-get install -y libsdl-pango-dev libgif-dev
+                fi
+        shell: bash
       - name: Install node_modules
         working-directory: ./
-        run: npm ci
+        run: npm ci && npm rebuild canvas --update-binary
       - name: Install e2e node_modules
         run: npm ci
       - name: Build E2E version
