@@ -42,5 +42,10 @@ module.exports = {
         writeText: function(text) {
             //
         }
+    },
+    webFrame: {
+        setVisualZoomLevelLimits: function (minimumLevel, maximumLevel) {
+            //
+        }
     }
 };

@@ -6,7 +6,6 @@ module.exports = {
     preset: 'ts-jest',
     setupFilesAfterEnv: [
       "<rootDir>/setupTests.ts",
-      'jest-canvas-mock'
     ],
     moduleDirectories: [
       'node_modules',
