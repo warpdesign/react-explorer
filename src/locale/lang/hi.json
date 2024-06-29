@@ -73,8 +73,8 @@
                 "NO_RESULTS": "कोई शॉर्टकट इस फ़िल्टर से मैच नहीं करता है"
             },
             "PREVIEW": {
-                "LAST_MODIFIED_ON": "Last modified on {{date}}",
-                "OPEN": "Open"
+                "LAST_MODIFIED_ON": "अंतिम बार {{date}} को परिवर्तित किया गया",
+                "OPEN": "खुला है"
             }
         },
         "SHORTCUT": {
@@ -111,7 +111,7 @@
                 "SELECT_INVERT": "उलट चयन",
                 "OPEN_TERMINAL": "सक्रिय फ़ोल्डर में टर्मिनल खोलें",
                 "PARENT_DIRECTORY": "पैरेंट फोल्डर में जाएं",
-                "OPEN_PREVIEW": "Display a preview of selected file"
+                "OPEN_PREVIEW": "चयनित फ़ाइल का पूर्वावलोकन प्रदर्शित करें"
             },
             "GROUP": {
                 "ACTIVE_VIEW": "सक्रिय फ़ाइल दृश्य",
@@ -183,9 +183,9 @@
             "FINISHED": "समाप्त",
             "FINISHED_ERRORS": "समाप्त, त्रुटियों के साथ",
             "PROGRESS": "{{current}} / {{size}}",
-            "ERROR": "Error",
-            "CANCELLED": "Cancelled",
-            "QUEUED": "Queued"
+            "ERROR": "त्रुटि",
+            "CANCELLED": "रद्द",
+            "QUEUED": "कतारबद्ध"
         },
         "ERRORS": {
             "CANNOT_READ_FOLDER": "'{{folder}}' नहीं खुल सकता: ऐसी कोई फ़ाइल या डायरेक्टरी नहीं है",
