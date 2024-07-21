@@ -22,7 +22,7 @@
 
 React-Explorer is available on every major operating systems & architectures:
 
- - Windows x66, AARCH64
+ - Windows x64, AARCH64
  - Linux x64, AARCH64
  - macOS x64, AARCH64
 
