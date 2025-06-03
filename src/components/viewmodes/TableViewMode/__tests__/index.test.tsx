@@ -1,5 +1,5 @@
 import React from 'react'
-import * as ReactVirtual from 'react-virtual'
+import * as ReactVirtual from '@tanstack/react-virtual'
 import { render, screen, setup, t } from 'rtl'
 
 import { Column } from '$src/hooks/useViewMode'
@@ -102,7 +102,7 @@ describe('TableViewMode', () => {
     it('should scroll to cursor index', () => {
         const fakeVirtual = {
             totalSize: 200,
-            virtualItems: [
+            getVirtualItems: () => [
                 {
                     index: 0,
                     start: 0,
@@ -117,7 +117,7 @@ describe('TableViewMode', () => {
             measure: jest.fn(),
         } as any
 
-        jest.spyOn(ReactVirtual, 'useVirtual').mockImplementationOnce(() => fakeVirtual)
+        jest.spyOn(ReactVirtual, 'useVirtualizer').mockImplementationOnce(() => fakeVirtual)
 
         render(<TableViewMode {...PROPS} cursorIndex={0} />)
 

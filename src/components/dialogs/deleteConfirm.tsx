@@ -9,8 +9,13 @@ interface Props {
 export const DeleteConfirmDialog = ({ count }: Props) => {
     return (
         <p>
-            <Trans i18nKey="DIALOG.DELETE.CONFIRM" i18n={i18n.i18next} count={count}>
-                Are you sure you want to delete <b>{{ count }}</b> file(s)/folder(s)?
+            <Trans
+                i18nKey="DIALOG.DELETE.CONFIRM"
+                i18n={i18n.i18next}
+                count={count}
+                tOptions={{ interpolation: { prefix: '[[', suffix: ']]' } }}
+            >
+                Are you sure you want to delete <b>[[ count ]]</b> file(s)/folder(s)?
                 <br />
                 <br />
                 This action will <b>permanentaly</b> delete the selected elements.

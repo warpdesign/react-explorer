@@ -16,15 +16,15 @@
     color: rgba(92, 112, 128, 0.5);
 }
 
-.fileListSizerWrapper .empty .bp4-icon {
+.fileListSizerWrapper .empty .bp5-icon {
     margin: 10px auto;
 }
 
-.bp4-dark .fileListSizerWrapper .empty {
+.bp5-dark .fileListSizerWrapper .empty {
     color:rgba(255, 255, 255, 0.47);
 }
 
-.bp4-dark .fileListSizerWrapper .empty .bp4-icon {
+.bp5-dark .fileListSizerWrapper .empty .bp5-icon {
     color:rgba(92, 112, 128, 0.5);
 }
 
@@ -76,7 +76,7 @@
     background-color:#137cbd;
 }
 
-.tableRow .bp4-icon {
+.tableRow .bp5-icon {
     margin-right:7px;
     color:#5c7080;
 }
@@ -94,30 +94,30 @@
     border:1px solid rgba(0,0,0,.4);
 }
 
-.tableRow.selected, .tableRow.selected .bp4-icon {
+.tableRow.selected, .tableRow.selected .bp5-icon {
     color:#fff;
 }
 
 .tableRow.error,
-.tableRow.error .bp4-icon,
-body.bp4-dark .tableRow.error .bp4-icon {
+.tableRow.error .bp5-icon,
+body.bp5-dark .tableRow.error .bp5-icon {
     color: rgb(160, 43, 43);
 }
 
 /* dark theme */
-body.bp4-dark .tableRow:hover {
+body.bp5-dark .tableRow:hover {
     background-color:rgba(92, 112, 128, 0.3);
 }
 
-body.bp4-dark .tableRow.selected {
+body.bp5-dark .tableRow.selected {
     background-color: rgb(88, 100, 109);
 }
 
-body.bp4-dark .sideview.active .tableRow.selected {
+body.bp5-dark .sideview.active .tableRow.selected {
     background-color: #137cbd;
 }
 
-body.bp4-dark .tableRow .bp4-icon {
+body.bp5-dark .tableRow .bp5-icon {
     color:#f5f8fa;
 }
 
@@ -160,7 +160,7 @@ body.bp4-dark .tableRow .bp4-icon {
     border:none;
 }
 
-.bp4-dark .headerRow {
+.bp5-dark .headerRow {
     background-color:rgb(66, 84, 97);
     color:#BFCCD6;
 }
@@ -175,6 +175,6 @@ body.bp4-dark .tableRow .bp4-icon {
     transform:rotateX(180deg);
 }
 
-.bp4-dark .tableHeader .resizeHandle, .bp4-dark .tableHeader .sort {
+.bp5-dark .tableHeader .resizeHandle, .bp5-dark .tableHeader .sort {
     color: rgba(163, 188, 207, 0.589);
 }

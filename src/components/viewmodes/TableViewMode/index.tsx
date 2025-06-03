@@ -1,5 +1,5 @@
 import React, { forwardRef, useImperativeHandle, useRef, useEffect } from 'react'
-import { useVirtual } from 'react-virtual'
+import { useVirtualizer } from '@tanstack/react-virtual'
 import classNames from 'classnames'
 
 import { Row } from './components/Row'
@@ -42,12 +42,23 @@ export const TableViewMode = forwardRef<ViewModeActions, ViewModeProps<undefined
         ref,
     ) => {
         const tableRef: React.MutableRefObject<HTMLDivElement> = useRef()
-        const { totalSize, virtualItems, scrollToIndex } = useVirtual({
-            size: itemCount,
-            parentRef: tableRef,
+        // const { totalSize, virtualItems, scrollToIndex } = useVirtual({
+        //     size: itemCount,
+        //     parentRef: tableRef,
+        //     estimateSize: React.useCallback(() => ROW_HEIGHT, []),
+        //     overscan: 5,
+        // })
+
+        const virtualizer = useVirtualizer({
+            count: itemCount,
+            getScrollElement: () => tableRef.current,
             estimateSize: React.useCallback(() => ROW_HEIGHT, []),
-            overscan: 5,
+            overscan: 0,
         })
+
+        const virtualItems = virtualizer.getVirtualItems()
+        const scrollToIndex = virtualizer.scrollToIndex
+        const totalSize = virtualizer.getTotalSize()
 
         useImperativeHandle(ref, () => ({
             getNextIndex: (index: number, direction: ArrowKey) => {

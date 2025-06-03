@@ -1,6 +1,15 @@
 import i18next from 'i18next'
 import type { Resource } from 'i18next'
 
+interface webpackRequire extends NodeRequire {
+    context: (
+        path: string,
+        deep?: boolean,
+        filter?: RegExp,
+        mode?: 'sync' | 'eager' | 'weak' | 'lazy' | 'lazy-once',
+    ) => __WebpackModuleApi.RequireContext
+}
+
 const locales: Resource = {}
 
 function importAllLocales(r: __WebpackModuleApi.RequireContext) {
@@ -10,7 +19,7 @@ function importAllLocales(r: __WebpackModuleApi.RequireContext) {
     })
 }
 
-importAllLocales(require['context']('./lang/', true, /\.json$/))
+importAllLocales((require as webpackRequire).context('./lang/', true, /\.json$/))
 
 const i18n = {
     promise: i18next.init({

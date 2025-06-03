@@ -10,7 +10,7 @@ interface Props {
 export const Badge = ({ intent = Intent.NONE, text = '', progress = 0 }: Props) => {
     if (text) {
         return (
-            <div className={`app-badge bp4-intent-${intent}`}>
+            <div className={`app-badge bp5-intent-${intent}`}>
                 <span className="app-badge-content">{text}</span>
                 <Spinner size={20} value={progress}></Spinner>
             </div>

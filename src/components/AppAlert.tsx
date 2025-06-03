@@ -1,5 +1,5 @@
 import * as React from 'react'
-import * as ReactDOM from 'react-dom'
+import { createRoot } from 'react-dom/client'
 import { Alert, AlertProps } from '@blueprintjs/core'
 
 import { Deferred } from '$src/utils/deferred'
@@ -24,12 +24,12 @@ class Alerter extends React.Component<Record<string, unknown>, AlerterState> {
         }
     }
 
-    public static create(container = document.body): Promise<React.ReactNode> {
+    public static create(container = document.body): Promise<Alerter> {
         const containerElement = document.createElement('div')
         container.appendChild(containerElement)
-        // use a ref and return a promise since in the future ReactDOM.render may return void
+        const root = createRoot(containerElement)
         return new Promise((resolve) => {
-            ReactDOM.render(<Alerter ref={(c): void => resolve(c)} />, containerElement)
+            root.render(<Alerter ref={(c) => resolve(c)} />)
         })
     }
 
@@ -100,7 +100,7 @@ class Alerter extends React.Component<Record<string, unknown>, AlerterState> {
 
 let MyAlerter: Alerter = null
 
-Alerter.create().then((component: Alerter) => {
+Alerter.create().then((component) => {
     MyAlerter = component
 })
 

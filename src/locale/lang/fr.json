@@ -21,8 +21,8 @@
             "QUIT": {
                 "BT_STOP_TRANSFERS": "Arrêter & quitter",
                 "BT_KEEP_TRANSFERS": "Ne pas quitter",
-                "CONTENT_one": "<1>{{count}}</1> téléchargement est <3>en cours</3>.<5 /><6 />Quiiter l'application maintenant le <8>stoppera</8>.",
-                "CONTENT_other": "<1>{{count}}</1> téléchargements sont <3>en cours</3>.<5 /><6 />Quiiter l'application maintenant les <8>arrêtera</8>."
+                "CONTENT_one": "<1>[[count]]</1> téléchargement est <3>en cours</3>.<5 /><6 />Quiiter l'application maintenant le <8>stoppera</8>.",
+                "CONTENT_other": "<1>[[count]]</1> téléchargements sont <3>en cours</3>.<5 /><6 />Quiiter l'application maintenant les <8>arrêtera</8>."
             },
             "STOP_TRANSFER": {
                 "BT_OK": "Supprimer le transfert",
@@ -66,7 +66,7 @@
                 "TEST_TERMINAL_FAILED": "Impossible de lancer le terminal spécifié: {{terminal}} (code de retour: {{code}})"
             },
             "DELETE": {
-                "CONFIRM": "Etes-vous sûr de vouloir supprimer <1>{{count}}</1> fichier(s)/dossier(s) ?<3 /><4 />Cette action supprimera de manière <6>permanente</6> les éléments sélectionnés."
+                "CONFIRM": "Etes-vous sûr de vouloir supprimer <1>[[count]]</1> fichier(s)/dossier(s) ?<3 /><4 />Cette action supprimera de manière <6>permanente</6> les éléments sélectionnés."
             },
             "SHORTCUTS": {
                 "FILTER_PLACEHOLDER": "Rechercher un raccourci",

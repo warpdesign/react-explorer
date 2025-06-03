@@ -1,4 +1,4 @@
 /* put ok button first on Windows */
-.win32 .bp4-alert-footer .bp4-button:first-child, .win32 .bp4-dialog-footer .bp4-button:first-child {
+.win32 .bp5-alert-footer .bp5-button:first-child, .win32 .bp5-dialog-footer .bp5-button:first-child {
     order: 1;
 }

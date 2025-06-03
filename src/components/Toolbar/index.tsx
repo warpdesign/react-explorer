@@ -258,7 +258,7 @@ export const Toolbar = observer(({ active }: Props) => {
                     rightIcon="arrow-right"
                     className="data-cy-submit-path"
                     onClick={() => onSubmit()}
-                    elementRef={submitButtonRef}
+                    ref={submitButtonRef}
                 />
             </ControlGroup>
         </HotkeysTarget2>

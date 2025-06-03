@@ -87,7 +87,7 @@ describe('tablist', () => {
     })
 
     it('right-click on the tab should show the tab menu', () => {
-        cy.get('#view_0 .tablist').contains('/').find('.bp4-button-text').rightclick('right')
+        cy.get('#view_0 .tablist').contains('/').find('.bp5-button-text').rightclick('right')
 
         cy.get('@stub_invoke')
             .should('be.called')
