@@ -21,8 +21,8 @@
             "QUIT": {
                 "BT_STOP_TRANSFERS": "Cancel & quit",
                 "BT_KEEP_TRANSFERS": "Keep transfers",
-                "CONTENT_one": "There is <1>{{count}}</1> transfer <3>in progress</3>.<5 /><6 />Exiting the app now will <8>cancel</8> the download.",
-                "CONTENT_other": "There are <1>{{count}}</1> transfers <3>in progress</3>.<5 /><6 />Exiting the app now will <8>cancel</8> all downloads."
+                "CONTENT_one": "There is <1>[[count]]</1> transfer <3>in progress</3>.<5 /><6 />Exiting the app now will <8>cancel</8> the download.",
+                "CONTENT_other": "There are <1>[[count]]</1> transfers <3>in progress</3>.<5 /><6 />Exiting the app now will <8>cancel</8> all downloads."
             },
             "STOP_TRANSFER": {
                 "BT_OK": "Discard transfer",
@@ -66,7 +66,7 @@
                 "TEST_TERMINAL_FAILED": "Unable to start specified terminal: {{terminal}} (return code: {{code}})"
             },
             "DELETE": {
-                "CONFIRM": "Are you sure you want to delete <1>{{count}}</1> file(s)/folder(s)?<3 /><4 />This action will <6>permanentaly</6> delete the selected elements."
+                "CONFIRM": "Are you sure you want to delete <1>[[count]]</1> file(s)/folder(s)?<3 /><4 />This action will <6>permanentaly</6> delete the selected elements."
             },
             "SHORTCUTS": {
                 "FILTER_PLACEHOLDER": "Filter shortcuts",

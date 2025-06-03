@@ -9,7 +9,7 @@
     "removeComments": true,
     "lib": ["es6", "dom"],
     "resolveJsonModule": true,
-    "types": ["node", "electron", "jest", "webpack", "webpack-env", "@testing-library/jest-dom"],
+    "types": ["webpack-env", "node", "electron", "jest", "webpack", "@testing-library/jest-dom"],
     "esModuleInterop": true,
     "useDefineForClassFields": true,
     "baseUrl": "./src",

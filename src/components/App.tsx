@@ -28,6 +28,7 @@ import '@blueprintjs/popover2/lib/css/blueprint-popover2.css'
 import '$src/css/main.css'
 import '$src/css/windows.css'
 import '$src/css/scrollbars.css'
+
 import { reaction } from 'mobx'
 import { ReactiveProperties } from '$src/types'
 import { triggerUpdateMenus } from '$src/events'
@@ -37,7 +38,7 @@ const App = observer(() => {
     const { appState } = useStores('appState')
     const { t, i18n } = useTranslation()
     const [isExitDialogOpen, setIsExitDialogOpen] = useState(false)
-    const refIsOverlayOpen = useRef(document.body.classList.contains('bp4-overlay-open'))
+    const refIsOverlayOpen = useRef(document.body.classList.contains('bp5-overlay-open'))
 
     const {
         settingsState,
@@ -90,7 +91,10 @@ const App = observer(() => {
             for (const mutation of mutationList) {
                 if (mutation.attributeName === 'class') {
                     refIsOverlayOpen.current = document.body.classList.contains(Classes.OVERLAY_OPEN)
-                    triggerUpdateMenus(t('APP_MENUS', { returnObjects: true }), getReactiveProps())
+                    triggerUpdateMenus(
+                        t('APP_MENUS', { returnObjects: true }) as Record<string, string>,
+                        getReactiveProps(),
+                    )
                 }
             }
         })
@@ -174,7 +178,7 @@ const App = observer(() => {
         return reaction(
             (): ReactiveProperties => getReactiveProps(),
             (value) => {
-                triggerUpdateMenus(t('APP_MENUS', { returnObjects: true }), value)
+                triggerUpdateMenus(t('APP_MENUS', { returnObjects: true }) as Record<string, string>, value)
             },
             {
                 equals: (value: ReactiveProperties, previousValue: ReactiveProperties) =>
@@ -286,8 +290,12 @@ const App = observer(() => {
                     isOpen={isExitDialogOpen}
                 >
                     <p>
-                        <Trans i18nKey="DIALOG.QUIT.CONTENT" count={count}>
-                            There are <b>{{ count }}</b> transfers <b>in progress</b>.<br />
+                        <Trans
+                            i18nKey="DIALOG.QUIT.CONTENT"
+                            count={count}
+                            tOptions={{ interpolation: { prefix: '[[', suffix: ']]' } }}
+                        >
+                            There are <b>[[ count ]]</b> transfers <b>in progress</b>.<br />
                             <br />
                             Exiting the app now will <b>cancel</b> the downloads.
                         </Trans>

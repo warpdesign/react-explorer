@@ -1,5 +1,5 @@
 import React, { forwardRef, useImperativeHandle, useRef, useEffect, useLayoutEffect, useState } from 'react'
-import { useVirtual } from 'react-virtual'
+import { useVirtualizer } from '@tanstack/react-virtual'
 
 import { ViewModeActions, ViewModeProps } from '$src/hooks/useViewMode'
 import { ArrowKey } from '$src/types'
@@ -53,12 +53,16 @@ export const IconViewMode = forwardRef<ViewModeActions, ViewModeProps<IconViewMo
             return items
         }
 
-        const { totalSize, virtualItems, scrollToIndex } = useVirtual({
-            size: numRows,
-            parentRef: tableRef,
+        const virtualizer = useVirtualizer({
+            count: numRows,
+            getScrollElement: () => tableRef.current,
             estimateSize: React.useCallback(() => Math.floor(itemWidth), []),
             overscan: 0,
         })
+
+        const virtualItems = virtualizer.getVirtualItems()
+        const scrollToIndex = virtualizer.scrollToIndex
+        const totalSize = virtualizer.getTotalSize()
 
         // Cecalculate width on mount and when splitView mode is changed
         // TODO: would be a good idea to do it on resize as well, but could be

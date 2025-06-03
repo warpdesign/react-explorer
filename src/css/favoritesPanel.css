@@ -10,18 +10,18 @@
     font-size:13px;
 }
 
-.bp4-dark .favoritesPanel {
+.bp5-dark .favoritesPanel {
     background-color:rgb(41, 56, 66);
 }
 
-.favoritesPanel .bp4-tree-node-content-0 {
+.favoritesPanel .bp5-tree-node-content-0 {
     pointer-events: none;
 }
 
-.favoritesPanel .bp4-tree-node-content-0:hover {
+.favoritesPanel .bp5-tree-node-content-0:hover {
     background-color:transparent;
 }
 
-.favoritesPanel .bp4-tree-node-content-0 .bp4-icon {
+.favoritesPanel .bp5-tree-node-content-0 .bp5-icon {
     pointer-events: all;
 }

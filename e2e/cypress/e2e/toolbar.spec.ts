@@ -63,7 +63,7 @@ describe('toolbar', () => {
     it('should show an alert then focus input when typing a non valid path', () => {
         cy.get('#view_0 [data-cy-path]').type(':{enter}')
 
-        cy.get('.data-cy-alert').should('be.visible').find('.bp4-button').click()
+        cy.get('.data-cy-alert').should('be.visible').find('.bp5-button').click()
 
         cy.get('#view_0 [data-cy-path]').should('have.value', ':')
 

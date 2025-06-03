@@ -5,7 +5,7 @@ let translations: { [key: string]: string }
 let byteFormats: Array<string>
 
 export function updateTranslations(): void {
-    translations = i18next.t('COMMON.SIZE', { returnObjects: true })
+    translations = i18next.t('COMMON.SIZE', { returnObjects: true }) as { [key: string]: string }
     byteFormats = Object.keys(translations).map((key) => translations[key])
 }
 

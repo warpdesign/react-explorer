@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { Dialog, Classes, Button, KeyCombo, InputGroup, Callout } from '@blueprintjs/core'
+import { Dialog, Classes, Button, KeyComboTag, InputGroup, Callout } from '@blueprintjs/core'
 import type { TFunction } from 'i18next'
 import { useTranslation } from 'react-i18next'
 
@@ -85,7 +85,7 @@ const renderShortcuts = (shortcuts: Combo[]) =>
     shortcuts.map((shortcut) => (
         <div key={shortcut.combo} className={Classes.HOTKEY}>
             <div className={Classes.HOTKEY_LABEL}>{shortcut.label}</div>
-            <KeyCombo combo={shortcut.combo}></KeyCombo>
+            <KeyComboTag combo={shortcut.combo}></KeyComboTag>
         </div>
     ))
 

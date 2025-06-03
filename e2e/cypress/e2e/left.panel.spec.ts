@@ -78,7 +78,7 @@ describe('left panel', () => {
         const length: number = favoritesState.shortcuts.length
         cy.get('.favoritesPanel').contains('Shortcuts').should('be.visible')
 
-        cy.get('@shortcuts').find('.bp4-tree-node-content-1').its('length').should('equal', length)
+        cy.get('@shortcuts').find('.bp5-tree-node-content-1').its('length').should('equal', length)
 
         SHORTCUTS.forEach((shortcut) => {
             cy.get('@shortcuts').contains(shortcut).should('be.visible')
@@ -89,7 +89,7 @@ describe('left panel', () => {
     //     const length: number = favoritesState.places.length
     //     cy.get('.favoritesPanel').contains('Places').should('be.visible')
 
-    //     cy.get('@places').find('.bp4-tree-node-content-1').its('length').should('equal', length)
+    //     cy.get('@places').find('.bp5-tree-node-content-1').its('length').should('equal', length)
 
     //     favoritesState.places.forEach((place: any) => {
     //         cy.get('@places').contains(place.label).should('be.visible')
@@ -112,7 +112,7 @@ describe('left panel', () => {
     //     // wait 5 secs: this is the delay we wait before updating drive list
     //     cy.wait(5000)
 
-    //     cy.get('@places').find('.bp4-tree-node-content-1').its('length').should('equal', favoritesState.places.length)
+    //     cy.get('@places').find('.bp5-tree-node-content-1').its('length').should('equal', favoritesState.places.length)
 
     //     favoritesState.places.forEach((place: any) => {
     //         cy.get('@places').contains(place.label).should('be.visible')
@@ -123,7 +123,7 @@ describe('left panel', () => {
         const path = favoritesState.shortcuts[1].path
         const label = SHORTCUTS[1]
 
-        cy.get('.favoritesPanel > ul > li:eq(0) .bp4-tree-node-content-1').contains(label).click()
+        cy.get('.favoritesPanel > ul > li:eq(0) .bp5-tree-node-content-1').contains(label).click()
 
         cy.get('@stub_cd0').should('be.calledWith', path)
     })

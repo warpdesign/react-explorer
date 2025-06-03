@@ -1,5 +1,5 @@
 import * as React from 'react'
-import * as ReactDOM from 'react-dom'
+import ReactDOM from 'react-dom/client'
 import { HotkeysProvider } from '@blueprintjs/core'
 import { configure } from 'mobx'
 import { I18nextProvider } from 'react-i18next'
@@ -30,7 +30,9 @@ const bootstrap = async () => {
 
     await i18n.promise
 
-    ReactDOM.render(
+    const root = ReactDOM.createRoot(document.getElementById('root'))
+
+    root.render(
         <DndProvider backend={HTML5Backend}>
             <I18nextProvider i18n={i18n.i18next}>
                 <Provider appState={appState}>
@@ -40,7 +42,6 @@ const bootstrap = async () => {
                 </Provider>
             </I18nextProvider>
         </DndProvider>,
-        document.getElementById('root'),
     )
 }
 
