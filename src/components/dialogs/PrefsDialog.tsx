@@ -1,16 +1,16 @@
 import * as React from 'react'
 import { useState } from 'react'
-import { Dialog, Classes, Intent, Button, InputGroup, FormGroup, MenuItem, RadioGroup, Radio } from '@blueprintjs/core'
-import { IconNames } from '@blueprintjs/icons'
-import { Tooltip2 } from '@blueprintjs/popover2'
-import { Select2, ItemRenderer } from '@blueprintjs/select'
+import { Intent } from '@blueprintjs/core'
 import { useTranslation } from 'react-i18next'
 import { languageList } from '$src/locale/i18n'
 import { ipcRenderer } from 'electron'
 
+import { Modal, Radio, Group, Select, TextInput, ActionIcon, Tooltip, Button, Text } from '@mantine/core'
+import { IconFlag, IconSun, IconFolder, IconTerminal, IconPlayerPlayFilled, IconTrash } from '@tabler/icons-react'
+
 import { debounce } from '$src/utils/debounce'
 import { FsLocal, FolderExists } from '$src/services/plugins/FsLocal'
-import { AppAlert } from '$src/components/AppAlert'
+import { showAlertModal } from '$src/components/AppAlert'
 import { HOME_DIR } from '$src/utils/platform'
 import { useStores } from '$src/hooks/useStores'
 import { ViewModeName } from '$src/hooks/useViewMode'
@@ -24,18 +24,19 @@ interface PrefsProps {
 }
 
 interface Language {
-    lang: string
-    code: string
+    label: string
+    value: string
 }
 
 interface Theme {
-    name: string
-    code: boolean | 'auto'
+    label: string
+    value: 'true' | 'auto' | 'false'
 }
 
 const PrefsDialog = observer(({ isOpen, onClose }: PrefsProps) => {
     const { settingsState } = useStores('settingsState')
     const { lang, darkMode, defaultTerminal, defaultViewMode } = settingsState
+    const darkModeValue = darkMode === 'auto' ? 'auto' : darkMode ? 'true' : 'false'
     const { t } = useTranslation()
     const [defaultFolder, setDefaultFolder] = useState(settingsState.defaultFolder)
 
@@ -73,37 +74,19 @@ const PrefsDialog = observer(({ isOpen, onClose }: PrefsProps) => {
         }
     }
 
-    const renderLanguageItem: ItemRenderer<Language> = (lang, { handleClick, modifiers }) => {
-        return (
-            <MenuItem
-                active={modifiers.active}
-                key={lang.code}
-                label={lang.code}
-                onClick={handleClick}
-                text={lang.lang}
-            />
-        )
-    }
-
-    const renderThemeItem: ItemRenderer<Theme> = (theme, { handleClick, modifiers }) => {
-        return (
-            <MenuItem active={modifiers.active} key={theme.code.toString()} onClick={handleClick} text={theme.name} />
-        )
-    }
-
     const getSortedLanguages = (): Array<Language> => {
         const languages: Array<Language> = languageList
             .map((code: string) => ({
-                code,
-                lang: t('CURRENT_LANGUAGE', { lng: code }),
+                value: code,
+                label: t('CURRENT_LANGUAGE', { lng: code }),
             }))
             .sort((lang1: Language, lang2: Language) => {
-                if (lang1.lang < lang2.lang) {
+                if (lang1.label < lang2.label) {
                     return -1
-                } else return lang1.lang > lang2.lang ? 1 : 0
+                } else return lang1.label > lang2.label ? 1 : 0
             })
 
-        const auto = [{ code: 'auto', lang: t('COMMON.AUTO') }]
+        const auto = [{ value: 'auto', label: t('COMMON.AUTO') }]
 
         return auto.concat(languages)
     }
@@ -111,27 +94,27 @@ const PrefsDialog = observer(({ isOpen, onClose }: PrefsProps) => {
     const getThemeList = (): Array<Theme> => {
         return [
             {
-                code: 'auto',
-                name: t('COMMON.AUTO'),
+                value: 'auto',
+                label: t('COMMON.AUTO'),
             },
             {
-                code: true,
-                name: t('DIALOG.PREFS.DARK'),
+                value: 'true',
+                label: t('DIALOG.PREFS.DARK'),
             },
             {
-                code: false,
-                name: t('DIALOG.PREFS.BRIGHT'),
+                value: 'false',
+                label: t('DIALOG.PREFS.BRIGHT'),
             },
         ]
     }
 
-    const onLanguageSelect = (newLang: Language): void => {
-        settingsState.setLanguage(newLang.code)
+    const onLanguageSelect = (value: string): void => {
+        settingsState.setLanguage(value)
         settingsState.saveSettings()
     }
 
-    const onThemeSelect = (newTheme: Theme): void => {
-        settingsState.setActiveTheme(newTheme.code)
+    const onThemeSelect = (value: Theme['value']): void => {
+        settingsState.setActiveTheme(value === 'auto' ? 'auto' : value === 'true')
         settingsState.saveSettings()
     }
 
@@ -151,136 +134,113 @@ const PrefsDialog = observer(({ isOpen, onClose }: PrefsProps) => {
         const { code, terminal } = await ipcRenderer.invoke('openTerminal', path)
 
         code &&
-            AppAlert.show(t('DIALOG.PREFS.TEST_TERMINAL_FAILED', { terminal, code }), {
+            showAlertModal({
+                message: t('DIALOG.PREFS.TEST_TERMINAL_FAILED', { terminal, code }),
                 intent: Intent.DANGER,
                 icon: 'error',
-            })
+                modalId: 'prefsTestTerminalError',
+            }).then((res) => console.log('closed', res))
     }
 
-    const onChangeViewMode = (event: React.FormEvent<HTMLElement>) => {
-        const viewmode = (event.target as HTMLInputElement).value as ViewModeName
+    const onChangeViewMode = (value: string) => {
+        console.log('onChangeViewMode', value)
+        const viewmode = value as ViewModeName
         settingsState.setDefaultViewMode(viewmode)
         settingsState.saveSettings()
     }
 
     const languageItems = getSortedLanguages()
-    const selectedLanguage = languageItems.find((language: Language) => language.code === lang)
+    const selectedLanguage = languageItems.find((language: Language) => language.value === lang)
     const themeItems = getThemeList()
-    const selectedTheme = themeItems.find((theme: Theme) => theme.code === darkMode)
-    const activeTheme = settingsState.isDarkModeActive ? t('DIALOG.PREFS.DARK') : t('DIALOG.PREFS.BRIGHT')
-    const intent: Intent = isFolderValid ? Intent.NONE : Intent.DANGER
+    const selectedTheme = themeItems.find((theme: Theme) => theme.value === darkModeValue)
     const testTerminalButton = (
-        <Tooltip2 content={t('DIALOG.PREFS.TEST_TERMINAL')}>
-            <Button icon="play" intent={Intent.PRIMARY} minimal={true} onClick={testTerminal} />
-        </Tooltip2>
+        <Tooltip label={t('DIALOG.PREFS.DEFAULT_TERMINAL_HELP')}>
+            <ActionIcon variant="subtle" aria-label="Settings">
+                <IconPlayerPlayFilled style={{ width: '70%', height: '70%' }} stroke={1.5} onClick={testTerminal} />
+            </ActionIcon>
+        </Tooltip>
     )
 
     return (
-        <Dialog
-            icon={IconNames.SETTINGS}
-            className="data-cy-prefs-dialog"
-            title={t('DIALOG.PREFS.TITLE')}
-            isOpen={isOpen}
-            autoFocus={true}
-            enforceFocus={true}
-            canEscapeKeyClose={true}
-            usePortal={true}
+        <Modal
+            centered
+            closeOnEscape={false}
             onClose={onClose}
+            opened={isOpen}
+            title={t('DIALOG.PREFS.TITLE')}
+            withCloseButton
+            pr="xl"
         >
-            <div className={Classes.DIALOG_BODY}>
-                <FormGroup inline={true} label={t('DIALOG.PREFS.LANGUAGE')}>
-                    <Select2<Language>
-                        filterable={false}
-                        activeItem={selectedLanguage}
-                        items={languageItems}
-                        itemRenderer={renderLanguageItem}
-                        onItemSelect={onLanguageSelect}
-                    >
-                        <Button
-                            className="data-cy-language-select"
-                            icon="flag"
-                            rightIcon="caret-down"
-                            text={selectedLanguage.lang}
-                        />
-                    </Select2>
-                </FormGroup>
+            <Select
+                label={t('DIALOG.PREFS.LANGUAGE')}
+                rightSection={<IconFlag size={16} />}
+                data={languageItems}
+                allowDeselect={false}
+                defaultValue={selectedLanguage.value}
+                size="sm"
+                onChange={onLanguageSelect}
+            ></Select>
 
-                <FormGroup inline={true} label={t('DIALOG.PREFS.THEME')}>
-                    <Select2<Theme>
-                        filterable={false}
-                        activeItem={selectedTheme}
-                        items={themeItems}
-                        itemRenderer={renderThemeItem}
-                        onItemSelect={onThemeSelect}
-                    >
-                        <Button
-                            icon="contrast"
-                            rightIcon="caret-down"
-                            text={
-                                selectedTheme.code === 'auto'
-                                    ? `${selectedTheme.name} (${activeTheme})`
-                                    : `${selectedTheme.name}`
-                            }
-                        />
-                    </Select2>
-                </FormGroup>
+            <Select
+                label={t('DIALOG.PREFS.THEME')}
+                rightSection={<IconSun size={16} />}
+                data={themeItems}
+                allowDeselect={false}
+                defaultValue={selectedTheme.value}
+                size="sm"
+                onChange={onThemeSelect}
+                my="lg"
+            ></Select>
 
-                <FormGroup inline={true} label={t('DIALOG.PREFS.DEFAULT_VIEW_MODE')}>
-                    <RadioGroup inline={true} selectedValue={defaultViewMode} onChange={onChangeViewMode}>
-                        <Radio label={t('TOOLBAR.ICON_VIEW')} value="details" />
-                        <Radio label={t('TOOLBAR.DETAILS_VIEW')} value="icons" />
-                    </RadioGroup>
-                </FormGroup>
+            <Radio.Group
+                label={t('DIALOG.PREFS.DEFAULT_VIEW_MODE')}
+                value={defaultViewMode}
+                onChange={onChangeViewMode}
+                name="default-view-mode"
+                className="data-cy-default-view-mode"
+            >
+                <Group>
+                    <Radio label={t('TOOLBAR.ICON_VIEW')} value="icons" />
+                    <Radio label={t('TOOLBAR.DETAILS_VIEW')} value="details" />
+                </Group>
+            </Radio.Group>
 
-                <FormGroup
-                    inline={true}
-                    labelFor="default-folder"
-                    label={t('DIALOG.PREFS.DEFAULT_FOLDER')}
-                    helperText={isFolderValid ? <span>&nbsp;</span> : <span>{t('DIALOG.PREFS.INVALID_FOLDER')}</span>}
-                    intent={intent}
-                >
-                    <InputGroup
-                        onChange={onFolderChange}
-                        onBlur={onFolderBlur}
-                        value={defaultFolder}
-                        leftIcon="folder-close"
-                        placeholder={t('DIALOG.PREFS.DEFAULT_FOLDER')}
-                        id="default-folder"
-                        name="default-folder"
-                        title={defaultFolder}
-                    />
-                </FormGroup>
+            <TextInput
+                label={t('DIALOG.PREFS.DEFAULT_FOLDER')}
+                value={defaultFolder}
+                onBlur={onFolderBlur}
+                onChange={onFolderChange}
+                leftSection={<IconFolder size={16} />}
+                withErrorStyles={false}
+                error={(!isFolderValid && t('DIALOG.PREFS.INVALID_FOLDER')) || ''}
+                spellCheck={false}
+                my="lg"
+            />
 
-                <FormGroup
-                    inline={true}
-                    labelFor="default-terminal"
-                    label={t('DIALOG.PREFS.DEFAULT_TERMINAL')}
-                    helperText={t('DIALOG.PREFS.DEFAULT_TERMINAL_HELP')}
-                >
-                    <InputGroup
-                        onChange={onTerminalChange}
-                        value={defaultTerminal}
-                        rightElement={testTerminalButton}
-                        leftIcon="console"
-                        placeholder={t('DIALOG.PREFS.DEFAULT_TERMINAL')}
-                        id="default-terminal"
-                        name="default-terminal"
-                        title={defaultTerminal}
-                    />
-                </FormGroup>
+            <TextInput
+                label={t('DIALOG.PREFS.DEFAULT_TERMINAL')}
+                value={defaultTerminal}
+                onChange={onTerminalChange}
+                leftSection={<IconTerminal size={16} />}
+                rightSection={testTerminalButton}
+                spellCheck={false}
+                my="lg"
+            />
 
-                <FormGroup inline={true} intent="danger" helperText={t('DIALOG.PREFS.RESET_HELP')} label=" ">
-                    <Button icon="trash" intent="primary" text={t('DIALOG.PREFS.RESET')} onClick={onResetPrefs} />
-                </FormGroup>
-            </div>
-            <div className={Classes.DIALOG_FOOTER}>
-                <div className={Classes.DIALOG_FOOTER_ACTIONS}>
-                    <Button onClick={onClose} className="data-cy-close">
-                        {t('COMMON.CLOSE')}
-                    </Button>
-                </div>
-            </div>
-        </Dialog>
+            <Button variant="filled" leftSection={<IconTrash size={16} />} onClick={onResetPrefs}>
+                {t('DIALOG.PREFS.RESET')}
+            </Button>
+
+            <Text size="xs" c="red.9">
+                {t('DIALOG.PREFS.RESET_HELP')}
+            </Text>
+
+            <Group justify="end">
+                <Button onClick={onClose} variant="light" color="gray">
+                    {t('COMMON.CLOSE')}
+                </Button>
+            </Group>
+        </Modal>
     )
 })
 

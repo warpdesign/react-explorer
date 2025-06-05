@@ -1,6 +1,9 @@
 import React, { useEffect, useCallback, useState, useRef } from 'react'
 import { ipcRenderer, webFrame } from 'electron'
 import { platform } from 'process'
+import { Select, TextInput, Radio } from '@mantine/core'
+import { createTheme, MantineProvider } from '@mantine/core'
+import { ModalsProvider } from '@mantine/modals'
 import { FocusStyleManager, Alert, Classes, Intent } from '@blueprintjs/core'
 import classNames from 'classnames'
 import { Provider, observer } from 'mobx-react'
@@ -22,6 +25,7 @@ import { useEventListener } from '$src/hooks/useEventListener'
 
 import Keys from '$src/constants/keys'
 
+import '@mantine/core/styles.css'
 import '@blueprintjs/core/lib/css/blueprint.css'
 import '@blueprintjs/icons/lib/css/blueprint-icons.css'
 import '@blueprintjs/popover2/lib/css/blueprint-popover2.css'
@@ -33,6 +37,26 @@ import { reaction } from 'mobx'
 import { ReactiveProperties } from '$src/types'
 import { triggerUpdateMenus } from '$src/events'
 import { PreviewDialog } from './dialogs/PreviewDialog'
+
+const theme = createTheme({
+    components: {
+        Select: Select.extend({
+            styles: {
+                label: { paddingBottom: '.2rem' },
+            },
+        }),
+        TextInput: TextInput.extend({
+            styles: {
+                label: { paddingBottom: '.2rem' },
+            },
+        }),
+        RadioGroup: Radio.Group.extend({
+            styles: {
+                label: { paddingBottom: '.2rem' },
+            },
+        }),
+    },
+})
 
 const App = observer(() => {
     const { appState } = useStores('appState')
@@ -280,40 +304,42 @@ const App = observer(() => {
 
     return (
         <Provider settingsState={settingsState}>
-            <React.Fragment>
-                <Alert
-                    cancelButtonText={t('DIALOG.QUIT.BT_KEEP_TRANSFERS')}
-                    confirmButtonText={t('DIALOG.QUIT.BT_STOP_TRANSFERS')}
-                    icon="warning-sign"
-                    intent={Intent.WARNING}
-                    onClose={onExitDialogClose}
-                    isOpen={isExitDialogOpen}
-                >
-                    <p>
-                        <Trans
-                            i18nKey="DIALOG.QUIT.CONTENT"
-                            count={count}
-                            tOptions={{ interpolation: { prefix: '[[', suffix: ']]' } }}
-                        >
-                            There are <b>[[ count ]]</b> transfers <b>in progress</b>.<br />
-                            <br />
-                            Exiting the app now will <b>cancel</b> the downloads.
-                        </Trans>
-                    </p>
-                </Alert>
-                <PrefsDialog isOpen={isPrefsOpen} onClose={() => appState.togglePrefsDialog(false)} />
-                <ShortcutsDialog isOpen={isShortcutsOpen} onClose={() => appState.toggleShortcutsDialog(false)} />
-                <MenuAccelerators onExitComboDown={onExitComboDown} />
-                <KeyboardHotkeys />
-                <Nav></Nav>
-                <div onClickCapture={handleClick} onContextMenuCapture={handleClick} className={mainClass}>
-                    <LeftPanel hide={!isExplorer}></LeftPanel>
-                    <SideView viewState={views[0]} hide={!isExplorer} />
-                    {splitView && <SideView viewState={views[1]} hide={!isExplorer} />}
-                    <Downloads hide={isExplorer} />
-                </div>
-                {cache?.cursor && <PreviewDialog />}
-            </React.Fragment>
+            <MantineProvider theme={theme} forceColorScheme={(settingsState.isDarkModeActive && 'dark') || 'light'}>
+                <ModalsProvider>
+                    <Alert
+                        cancelButtonText={t('DIALOG.QUIT.BT_KEEP_TRANSFERS')}
+                        confirmButtonText={t('DIALOG.QUIT.BT_STOP_TRANSFERS')}
+                        icon="warning-sign"
+                        intent={Intent.WARNING}
+                        onClose={onExitDialogClose}
+                        isOpen={isExitDialogOpen}
+                    >
+                        <p>
+                            <Trans
+                                i18nKey="DIALOG.QUIT.CONTENT"
+                                count={count}
+                                tOptions={{ interpolation: { prefix: '[[', suffix: ']]' } }}
+                            >
+                                There are <b>[[ count ]]</b> transfers <b>in progress</b>.<br />
+                                <br />
+                                Exiting the app now will <b>cancel</b> the downloads.
+                            </Trans>
+                        </p>
+                    </Alert>
+                    <PrefsDialog isOpen={isPrefsOpen} onClose={() => appState.togglePrefsDialog(false)} />
+                    <ShortcutsDialog isOpen={isShortcutsOpen} onClose={() => appState.toggleShortcutsDialog(false)} />
+                    <MenuAccelerators onExitComboDown={onExitComboDown} />
+                    <KeyboardHotkeys />
+                    <Nav></Nav>
+                    <div onClickCapture={handleClick} onContextMenuCapture={handleClick} className={mainClass}>
+                        <LeftPanel hide={!isExplorer}></LeftPanel>
+                        <SideView viewState={views[0]} hide={!isExplorer} />
+                        {splitView && <SideView viewState={views[1]} hide={!isExplorer} />}
+                        <Downloads hide={isExplorer} />
+                    </div>
+                    {cache?.cursor && <PreviewDialog />}
+                </ModalsProvider>
+            </MantineProvider>
         </Provider>
     )
 })

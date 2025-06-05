@@ -7,7 +7,7 @@ import { useTranslation } from 'react-i18next'
 
 import useIpcRendererListener from '$src/hooks/useIpcRendererListener'
 import { sendFakeCombo } from '$src/utils/keyboard'
-import { AppAlert } from '$src/components/AppAlert'
+import { showAlertModal } from '$src/components/AppAlert'
 import { LocalizedError } from '$src/locale/error'
 import { useStores } from '$src/hooks/useStores'
 import { UserHomeIcons } from '$src/constants/icons'
@@ -112,8 +112,10 @@ const TabList = observer(() => {
                     fullname: path,
                 })
                 .catch((err: LocalizedError) => {
-                    AppAlert.show(`${err.message} (${err.code})`, {
+                    showAlertModal({
+                        message: `${err.message} (${err.code})`,
                         intent: 'danger',
+                        modalId: 'tabListError',
                     })
                 })
         }

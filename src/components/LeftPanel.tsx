@@ -9,7 +9,7 @@ import { useStores } from '$src/hooks/useStores'
 import { USERNAME, isMac } from '$src/utils/platform'
 import { UserHomeIcons } from '$src/constants/icons'
 import { FavoritesState } from '$src/state/favoritesState'
-import { AppAlert } from '$src/components/AppAlert'
+import { showAlertModal } from '$src/components/AppAlert'
 import CONFIG from '$src/config/appConfig'
 
 import '$src/css/favoritesPanel.css'
@@ -96,8 +96,10 @@ export const LeftPanel = observer(({ hide }: { hide: boolean }) => {
         try {
             await appState.openDirectory({ dir: node.nodeData, fullname: '' }, !(isMac ? e.altKey : e.ctrlKey))
         } catch (err) {
-            AppAlert.show(`${err.message} (${err.code})`, {
+            showAlertModal({
+                message: `${err.message} (${err.code})`,
                 intent: 'danger',
+                modalId: 'favoritesPanelError',
             })
         }
     }

@@ -7,7 +7,7 @@ import { i18n } from '$src/locale/i18n'
 import { getLocalizedError } from '$src/locale/error'
 import { AppState } from '$src/state/appState'
 import { getSortMethod, TSORT_METHOD_NAME, TSORT_ORDER } from '$src/services/FsSort'
-import { AppAlert } from '$src/components/AppAlert'
+import { showAlertModal } from '$src/components/AppAlert'
 import { filterDirs, filterFiles, filterHiddenFiles } from '$src/utils/fileUtils'
 import { ViewModeName } from '$src/hooks/useViewMode'
 
@@ -525,8 +525,10 @@ export class FileState {
         this.setStatus('ok', true)
         const niceError = getLocalizedError(error)
         // console.log('orignalCode', error.code, 'newCode', niceError.code)
-        AppAlert.show(i18n.i18next.t('ERRORS.GENERIC', { error: niceError }), {
+        showAlertModal({
+            message: i18n.i18next.t('ERRORS.GENERIC', { error: niceError }),
             intent: 'danger',
+            modalId: 'fileStateError',
         })
         return Promise.reject(niceError)
     }

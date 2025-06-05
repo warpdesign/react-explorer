@@ -7,7 +7,7 @@ import { useTranslation } from 'react-i18next'
 
 import { FileMenu } from '$src/components/FileMenu'
 import { MakedirDialog } from '$src/components/dialogs/MakedirDialog'
-import { AppAlert } from '$src/components/AppAlert'
+import { showAlertModal } from '$src/components/AppAlert'
 import { AppToaster } from '$src/components/AppToaster'
 import { LocalizedError } from '$src/locale/error'
 import Keys from '$src/constants/keys'
@@ -62,8 +62,10 @@ export const Toolbar = observer(({ active }: Props) => {
                 inputRef.current.blur()
             } catch (e) {
                 const err = e as LocalizedError
-                await AppAlert.show(`${err.message} (${err.code})`, {
+                await showAlertModal({
+                    message: `${err.message} (${err.code})`,
                     intent: 'danger',
+                    modalId: 'cd-error',
                 })
 
                 // If path was submitted by pressing enter

@@ -16,7 +16,7 @@ import { i18n } from '$src/locale/i18n'
 import { AppToaster } from '$src/components/AppToaster'
 import { LocalizedError } from '$src/locale/error'
 import { DeleteConfirmDialog } from '$src/components/dialogs/deleteConfirm'
-import { AppAlert } from '$src/components/AppAlert'
+import { showAlertModal } from '$src/components/AppAlert'
 import { TransferListState } from '$src/state/transferListState'
 import { DraggedObject } from '$src/types'
 import { SettingsState } from './settingsState'
@@ -241,11 +241,12 @@ export class AppState {
             return
         }
 
-        const confirmed = await AppAlert.show(<DeleteConfirmDialog count={toDelete.length} />, {
+        const confirmed = await showAlertModal({
+            message: <DeleteConfirmDialog count={toDelete.length} />,
             cancelButtonText: this.t('COMMON.CANCEL'),
             confirmButtonText: this.t('APP_MENUS.DELETE'),
-            icon: 'trash',
-            intent: Intent.DANGER,
+            intent: 'danger',
+            modalId: 'deleteConfirm',
         })
 
         if (confirmed) {

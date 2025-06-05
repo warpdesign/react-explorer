@@ -10,7 +10,7 @@ import classNames from 'classnames'
 import { AppState } from '$src/state/appState'
 import type { TransferState, FileTransfer } from '$src/state/transferState'
 import { formatBytes } from '$src/utils/formatBytes'
-import { AppAlert } from '$src/components/AppAlert'
+import { showAlertModal } from '$src/components/AppAlert'
 import CONFIG from '$src/config/appConfig'
 import { isWin } from '$src/utils/platform'
 import { TypeIcons } from '$src/constants/icons'
@@ -117,11 +117,13 @@ class DownloadsClass extends React.Component<Props, State> {
     showTransferAlert(): Promise<boolean> {
         const { t } = this.injected
 
-        return AppAlert.show(t('DIALOG.STOP_TRANSFER.MESSAGE'), {
+        return showAlertModal({
+            message: t('DIALOG.STOP_TRANSFER.MESSAGE'),
             cancelButtonText: t('DIALOG.STOP_TRANSFER.BT_CANCEL'),
             confirmButtonText: t('DIALOG.STOP_TRANSFER.BT_OK'),
-            intent: Intent.WARNING,
+            intent: 'warning',
             icon: 'warning-sign',
+            modalId: 'transfer-alert',
         })
     }
 
