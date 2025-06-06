@@ -1,28 +1,21 @@
 import * as React from 'react'
-import { Navbar, Alignment, Button, Classes, Intent } from '@blueprintjs/core'
-import { IconNames } from '@blueprintjs/icons'
-import { Popover2 } from '@blueprintjs/popover2'
 import { observer } from 'mobx-react'
 import { useTranslation } from 'react-i18next'
-import classNames from 'classnames'
 
 import { HamburgerMenu } from '$src/components/HamburgerMenu'
-import { Badge } from '$src/components/Badge'
 import { useStores } from '$src/hooks/useStores'
-import { ActionIcon, Divider, Group, Menu } from '@mantine/core'
-import { IconAdjustmentsHorizontal, IconBorderVertical } from '@tabler/icons-react'
+import { ActionIcon, Divider, Group, Menu, Button, Indicator } from '@mantine/core'
+import { IconAdjustmentsHorizontal, IconBorderVertical, IconHomeFilled, IconDownload } from '@tabler/icons-react'
 
 const Nav = observer(() => {
     const { appState } = useStores('appState')
-    const { transferListState } = appState
+    // const { transferListState } = appState
     const { t } = useTranslation()
     const isExplorer = appState.isExplorer
     const count = appState.transferListState.pendingTransfers
-    const badgeText = (count && count + '') || ''
-    const badgeProgress = transferListState.totalTransferProgress
-    const downloadClass = classNames(Classes.MINIMAL, 'download')
+    // const badgeText = (count && count + '') || ''
+    // const badgeProgress = transferListState.totalTransferProgress
     const isSplitViewActive = appState.winStates[0].splitView
-    const [isPopoverOpen, setPopoverOpen] = React.useState(false)
 
     const navClick = (): void => {
         if (appState.isExplorer) {
@@ -37,9 +30,31 @@ const Nav = observer(() => {
     return (
         <div style={{ height: '100%' }}>
             <Group h="100%" px="md" bg="background">
-                {/* <Burger opened={opened} onClick={toggle} hiddenFrom="sm" size="sm" /> */}
                 <Group justify="space-between" style={{ flex: 1 }}>
-                    {t('APP_MENUS.ABOUT_TITLE')}
+                    <Group gap="sm" visibleFrom="sm">
+                        {t('APP_MENUS.ABOUT_TITLE')}
+                        <Divider size="sm" orientation="vertical" />
+                        <Button
+                            leftSection={<IconHomeFilled size={16} />}
+                            className="data-cy-explorer-tab"
+                            onClick={navClick}
+                            size="xs"
+                            variant={isExplorer ? 'filled' : 'subtle'}
+                        >
+                            {t('NAV.EXPLORER')}
+                        </Button>
+                        <Indicator color="teal" disabled={count === 0} processing={count > 0}>
+                            <Button
+                                leftSection={<IconDownload size={16} />}
+                                className="data-cy-downloads-tab"
+                                onClick={navClick}
+                                size="xs"
+                                variant={!isExplorer ? 'filled' : 'subtle'}
+                            >
+                                {t('NAV.TRANSFERS')}
+                            </Button>
+                        </Indicator>
+                    </Group>
                     <Group ml="xl" gap="sm" visibleFrom="sm">
                         <ActionIcon
                             variant={(isSplitViewActive && 'filled') || 'subtle'}
@@ -52,20 +67,14 @@ const Nav = observer(() => {
                         <Divider size="sm" orientation="vertical" />
                         <Menu width={200} position="bottom" withArrow shadow="md">
                             <Menu.Target>
-                                <ActionIcon variant="subtle" size="lg" onClick={() => setPopoverOpen(!isPopoverOpen)}>
+                                <ActionIcon variant="subtle" size="lg">
                                     <IconAdjustmentsHorizontal size={24} stroke={1.5} />
                                 </ActionIcon>
                             </Menu.Target>
                             <Menu.Dropdown className="data-cy-app-menu">
                                 <HamburgerMenu
-                                    onOpenShortcuts={(): void => {
-                                        setPopoverOpen(false)
-                                        appState.toggleShortcutsDialog(true)
-                                    }}
-                                    onOpenPrefs={(): void => {
-                                        setPopoverOpen(false)
-                                        appState.togglePrefsDialog(true)
-                                    }}
+                                    onOpenShortcuts={(): void => appState.toggleShortcutsDialog(true)}
+                                    onOpenPrefs={(): void => appState.togglePrefsDialog(true)}
                                 />
                             </Menu.Dropdown>
                         </Menu>
@@ -73,50 +82,6 @@ const Nav = observer(() => {
                 </Group>
             </Group>
         </div>
-        // <Navbar>
-        //     <Navbar.Group align={Alignment.LEFT} className="title-group">
-        //         <Navbar.Heading>{t('APP_MENUS.ABOUT_TITLE')}</Navbar.Heading>
-        //         <Navbar.Divider />
-        //         <Button
-        //             className={`${Classes.MINIMAL} data-cy-explorer-tab`}
-        //             icon="home"
-        //             text={t('NAV.EXPLORER')}
-        //             onClick={navClick}
-        //             intent={isExplorer ? Intent.PRIMARY : 'none'}
-        //         />
-        //         <Button
-        //             style={{ position: 'relative' }}
-        //             className={`${downloadClass} data-cy-downloads-tab`}
-        //             icon="download"
-        //             onClick={navClick}
-        //             intent={!isExplorer ? Intent.PRIMARY : 'none'}
-        //         >
-        //             {t('NAV.TRANSFERS')}
-        //             <Badge intent="none" text={badgeText} progress={badgeProgress} />
-        //         </Button>
-        //     </Navbar.Group>
-        //     <Navbar.Group align={Alignment.RIGHT}>
-        //         <Button
-        //             className={`data-cy-toggle-splitview ${Classes.MINIMAL}`}
-        //             active={isSplitViewActive}
-        //             intent={(isSplitViewActive && 'primary') || 'none'}
-        //             onClick={onToggleSplitView}
-        //             icon={IconNames.PANEL_STATS}
-        //             title={t('NAV.SPLITVIEW')}
-        //         />
-        //         <Navbar.Divider />
-        //         <Popover2
-        //             content={
-        //                 <HamburgerMenu
-        //                     onOpenShortcuts={(): void => appState.toggleShortcutsDialog(true)}
-        //                     onOpenPrefs={(): void => appState.togglePrefsDialog(true)}
-        //                 />
-        //             }
-        //         >
-        //             <Button className={`data-cy-toggle-app-menu ${Classes.MINIMAL}`} icon={IconNames.SETTINGS} />
-        //         </Popover2>
-        //     </Navbar.Group>
-        // </Navbar>
     )
 })
 

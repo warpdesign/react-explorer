@@ -53,7 +53,7 @@ button.small:hover{
     border-radius:0;
 }
 
-.main > .hidden{
+.main .hidden{
     display:none;
     pointer-events: none;
 }

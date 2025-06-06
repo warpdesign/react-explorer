@@ -317,7 +317,11 @@ const App = observer(() => {
                 <ModalsProvider>
                     <AppShell
                         header={{ height: 50 }}
-                        navbar={{ width: 200, breakpoint: 'xs', collapsed: {} }}
+                        navbar={{
+                            width: 200,
+                            breakpoint: 'xs',
+                            collapsed: { mobile: !isExplorer, desktop: !isExplorer },
+                        }}
                         className={mainClass}
                     >
                         <Alert
@@ -358,7 +362,7 @@ const App = observer(() => {
                         <AppShell.Main h="100%" flex={1}>
                             {<SideView viewState={views[0]} hide={!isExplorer} />}
                             {splitView && <SideView viewState={views[1]} hide={!isExplorer} />}
-                            {/*<Downloads hide={isExplorer} /> */}
+                            <Downloads hide={isExplorer} />
                         </AppShell.Main>
                         {/* </div> */}
                         {cache?.cursor && <PreviewDialog />}
