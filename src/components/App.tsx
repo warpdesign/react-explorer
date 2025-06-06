@@ -1,7 +1,7 @@
 import React, { useEffect, useCallback, useState, useRef } from 'react'
 import { ipcRenderer, webFrame } from 'electron'
 import { platform } from 'process'
-import { Select, TextInput, Radio } from '@mantine/core'
+import { Select, TextInput, Radio, AppShell, virtualColor, colorsTuple } from '@mantine/core'
 import { createTheme, MantineProvider } from '@mantine/core'
 import { ModalsProvider } from '@mantine/modals'
 import { FocusStyleManager, Alert, Classes, Intent } from '@blueprintjs/core'
@@ -27,11 +27,11 @@ import Keys from '$src/constants/keys'
 
 import '@mantine/core/styles.css'
 import '@blueprintjs/core/lib/css/blueprint.css'
-import '@blueprintjs/icons/lib/css/blueprint-icons.css'
-import '@blueprintjs/popover2/lib/css/blueprint-popover2.css'
+// import '@blueprintjs/icons/lib/css/blueprint-icons.css'
+// import '@blueprintjs/popover2/lib/css/blueprint-popover2.css'
 import '$src/css/main.css'
-import '$src/css/windows.css'
-import '$src/css/scrollbars.css'
+// import '$src/css/windows.css'
+// import '$src/css/scrollbars.css'
 
 import { reaction } from 'mobx'
 import { ReactiveProperties } from '$src/types'
@@ -39,6 +39,15 @@ import { triggerUpdateMenus } from '$src/events'
 import { PreviewDialog } from './dialogs/PreviewDialog'
 
 const theme = createTheme({
+    colors: {
+        ['blue-dark']: colorsTuple('#293742'),
+        ['blue-light']: colorsTuple('#ced9e080'),
+        background: virtualColor({
+            light: 'blue-light',
+            dark: 'blue-dark',
+            name: 'background',
+        }),
+    },
     components: {
         Select: Select.extend({
             styles: {
@@ -242,7 +251,7 @@ const App = observer(() => {
 
     /**
      * stop click propagation in case click happens on an inactive sideview:
-     * this prevents doing unwanted actions like selected elements when the
+     * this prevents doing unwanted actions like selecting elements when the
      * user simply wants to activate an inactive sideview
      */
     const handleClick = (e: React.MouseEvent): void => {
@@ -306,38 +315,54 @@ const App = observer(() => {
         <Provider settingsState={settingsState}>
             <MantineProvider theme={theme} forceColorScheme={(settingsState.isDarkModeActive && 'dark') || 'light'}>
                 <ModalsProvider>
-                    <Alert
-                        cancelButtonText={t('DIALOG.QUIT.BT_KEEP_TRANSFERS')}
-                        confirmButtonText={t('DIALOG.QUIT.BT_STOP_TRANSFERS')}
-                        icon="warning-sign"
-                        intent={Intent.WARNING}
-                        onClose={onExitDialogClose}
-                        isOpen={isExitDialogOpen}
+                    <AppShell
+                        header={{ height: 50 }}
+                        navbar={{ width: 200, breakpoint: 'xs', collapsed: {} }}
+                        className={mainClass}
                     >
-                        <p>
-                            <Trans
-                                i18nKey="DIALOG.QUIT.CONTENT"
-                                count={count}
-                                tOptions={{ interpolation: { prefix: '[[', suffix: ']]' } }}
-                            >
-                                There are <b>[[ count ]]</b> transfers <b>in progress</b>.<br />
-                                <br />
-                                Exiting the app now will <b>cancel</b> the downloads.
-                            </Trans>
-                        </p>
-                    </Alert>
-                    <PrefsDialog isOpen={isPrefsOpen} onClose={() => appState.togglePrefsDialog(false)} />
-                    <ShortcutsDialog isOpen={isShortcutsOpen} onClose={() => appState.toggleShortcutsDialog(false)} />
-                    <MenuAccelerators onExitComboDown={onExitComboDown} />
-                    <KeyboardHotkeys />
-                    <Nav></Nav>
-                    <div onClickCapture={handleClick} onContextMenuCapture={handleClick} className={mainClass}>
-                        <LeftPanel hide={!isExplorer}></LeftPanel>
-                        <SideView viewState={views[0]} hide={!isExplorer} />
-                        {splitView && <SideView viewState={views[1]} hide={!isExplorer} />}
-                        <Downloads hide={isExplorer} />
-                    </div>
-                    {cache?.cursor && <PreviewDialog />}
+                        <Alert
+                            cancelButtonText={t('DIALOG.QUIT.BT_KEEP_TRANSFERS')}
+                            confirmButtonText={t('DIALOG.QUIT.BT_STOP_TRANSFERS')}
+                            icon="warning-sign"
+                            intent={Intent.WARNING}
+                            onClose={onExitDialogClose}
+                            isOpen={isExitDialogOpen}
+                        >
+                            <p>
+                                <Trans
+                                    i18nKey="DIALOG.QUIT.CONTENT"
+                                    count={count}
+                                    tOptions={{ interpolation: { prefix: '[[', suffix: ']]' } }}
+                                >
+                                    There are <b>[[ count ]]</b> transfers <b>in progress</b>.<br />
+                                    <br />
+                                    Exiting the app now will <b>cancel</b> the downloads.
+                                </Trans>
+                            </p>
+                        </Alert>
+                        <PrefsDialog isOpen={isPrefsOpen} onClose={() => appState.togglePrefsDialog(false)} />
+                        <ShortcutsDialog
+                            isOpen={isShortcutsOpen}
+                            onClose={() => appState.toggleShortcutsDialog(false)}
+                        />
+                        <MenuAccelerators onExitComboDown={onExitComboDown} />
+                        <KeyboardHotkeys />
+                        <AppShell.Header>
+                            <Nav />
+                        </AppShell.Header>
+                        {/* <div onClickCapture={handleClick} onContextMenuCapture={handleClick} className={mainClass}> */}
+                        <AppShell.Navbar>
+                            {/* <LeftPanel hide={!isExplorer} /> */}
+                            Navbar :)
+                        </AppShell.Navbar>
+                        <AppShell.Main h="100%" flex={1}>
+                            {<SideView viewState={views[0]} hide={!isExplorer} />}
+                            {splitView && <SideView viewState={views[1]} hide={!isExplorer} />}
+                            {/*<Downloads hide={isExplorer} /> */}
+                        </AppShell.Main>
+                        {/* </div> */}
+                        {cache?.cursor && <PreviewDialog />}
+                    </AppShell>
                 </ModalsProvider>
             </MantineProvider>
         </Provider>

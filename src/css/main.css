@@ -40,6 +40,7 @@ button.small:hover{
     display:flex;
     flex-direction:column;
     flex-grow:1;
+    height:100%;
 }
 
 .sideview > .bp5-control-group{
@@ -70,12 +71,15 @@ button.small:hover{
     height:100%;
 }
 
-#root .main{
+/* #root .main{
     display:flex;
     justify-content: center;
     flex-grow:1;
     overflow:hidden;
-    /* padding:10px; */
+} */
+
+#root .main{
+    height: 100%;
 }
 
 #root .sideview {
@@ -85,7 +89,8 @@ button.small:hover{
 }
 
 #root .singleView .sideview {
-    width:calc(100% - 200px);
+    /* width:calc(100% - 200px); */
+    width: 100%;
 }
 
 #root .sideview {
@@ -327,7 +332,6 @@ body.bp5-dark .app-loader.active{
 }
 
 .app-loader > * {
-    /* flex-grow: 1; */
     opacity: 0;
     transition-property: opacity;
     transition-duration: 800ms;

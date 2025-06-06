@@ -1,7 +1,7 @@
 import * as React from 'react'
-import { IconNames } from '@blueprintjs/icons'
-import { Menu, MenuItem, MenuDivider } from '@blueprintjs/core'
 import { useTranslation } from 'react-i18next'
+import { Menu } from '@mantine/core'
+import { IconAdjustmentsHorizontal, IconBulb } from '@tabler/icons-react'
 
 interface HamburgerProps {
     onOpenPrefs: () => void
@@ -13,11 +13,12 @@ export const HamburgerMenu = ({ onOpenPrefs, onOpenShortcuts }: HamburgerProps) 
 
     return (
         <>
-            <Menu className="data-cy-app-menu">
-                <MenuItem text={t('NAV.PREFS')} icon={IconNames.SETTINGS} onClick={onOpenPrefs} />
-                <MenuDivider />
-                <MenuItem text={t('NAV.SHORTCUTS')} icon={IconNames.LIGHTBULB} onClick={onOpenShortcuts} />
-            </Menu>
+            <Menu.Item leftSection={<IconAdjustmentsHorizontal size={14} />} onClick={onOpenPrefs}>
+                {t('NAV.PREFS')}
+            </Menu.Item>
+            <Menu.Item leftSection={<IconBulb size={14} />} onClick={onOpenShortcuts}>
+                {t('NAV.SHORTCUTS')}
+            </Menu.Item>
         </>
     )
 }

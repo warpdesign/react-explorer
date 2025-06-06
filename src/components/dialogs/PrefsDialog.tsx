@@ -236,7 +236,7 @@ const PrefsDialog = observer(({ isOpen, onClose }: PrefsProps) => {
             </Text>
 
             <Group justify="end">
-                <Button onClick={onClose} variant="light" color="gray">
+                <Button onClick={onClose} variant="filled" color="gray">
                     {t('COMMON.CLOSE')}
                 </Button>
             </Group>
