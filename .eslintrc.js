@@ -15,7 +15,8 @@ module.exports = {
     rules: {
         // Place to specify ESLint rules. Can be used to overwrite rules specified from the extended configs
         // e.g. "@typescript-eslint/explicit-function-return-type": "off",
-        "no-only-tests/no-only-tests": "error"
+        "no-only-tests/no-only-tests": "error",
+        "@typescript-eslint/no-empty-function": "off"
     },
     settings: {
         react: {

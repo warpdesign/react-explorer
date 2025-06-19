@@ -40,6 +40,7 @@ const Nav = observer(() => {
                             onClick={navClick}
                             size="xs"
                             variant={isExplorer ? 'filled' : 'subtle'}
+                            color={!isExplorer ? '#4a5056' : ''}
                         >
                             {t('NAV.EXPLORER')}
                         </Button>
@@ -50,6 +51,7 @@ const Nav = observer(() => {
                                 onClick={navClick}
                                 size="xs"
                                 variant={!isExplorer ? 'filled' : 'subtle'}
+                                color={isExplorer ? '#4a5056' : ''}
                             >
                                 {t('NAV.TRANSFERS')}
                             </Button>

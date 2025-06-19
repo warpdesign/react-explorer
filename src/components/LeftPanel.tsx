@@ -1,75 +1,74 @@
 import React, { useState } from 'react'
-import { Tree, TreeNodeInfo } from '@blueprintjs/core'
 import { observer } from 'mobx-react'
 import type { TFunction } from 'i18next'
 import { useTranslation } from 'react-i18next'
-import classNames from 'classnames'
 
 import { useStores } from '$src/hooks/useStores'
 import { USERNAME, isMac } from '$src/utils/platform'
-import { UserHomeIcons } from '$src/constants/icons'
+import { UserHomeIconsTabler } from '$src/constants/icons'
 import { FavoritesState } from '$src/state/favoritesState'
 import { showAlertModal } from '$src/components/AppAlert'
-import CONFIG from '$src/config/appConfig'
 
 import '$src/css/favoritesPanel.css'
+import { Group, ScrollArea, TreeNodeData, Tree, UseTreeReturnType } from '@mantine/core'
+import { IconCaretRightFilled, IconFolder } from '@tabler/icons-react'
+import { IconButton } from './common/IconButton'
 
 export const buildNodes = (
     favorites: FavoritesState,
-    { t, path, expanded }: { t: TFunction<'translation', undefined>; path: string; expanded: boolean[] },
-): TreeNodeInfo<string>[] => {
+    { t, path }: { t: TFunction<'translation', undefined>; path: string },
+): TreeNodeData[] => {
     const shouldShowWsl = favorites.distributions.length
-    const nodes: TreeNodeInfo<string>[] = [
+    const nodes: TreeNodeData[] = [
         {
-            id: 0,
-            hasCaret: true,
-            isExpanded: expanded[0],
             label: t('FAVORITES_PANEL.SHORTCUTS'),
-            childNodes: favorites.shortcuts.map((shortcut) => ({
-                id: `s_${shortcut.path}`,
-                key: `s_${shortcut.path}`,
-                label: (
-                    <span title={shortcut.path}>
-                        {shortcut.label === 'HOME_DIR' ? USERNAME : t(`FAVORITES_PANEL.${shortcut.label}`)}
-                    </span>
-                ),
-                icon: UserHomeIcons[shortcut.label],
-                nodeData: shortcut.path,
-                isSelected: shortcut.path === path,
-            })) as Array<TreeNodeInfo<string>>,
-        },
+            value: 'FAVORITES_PANEL.SHORTCUTS',
+            children: favorites.shortcuts.map(
+                (shortcut) =>
+                    ({
+                        value: `s_${shortcut.path}`,
+                        label: shortcut.label === 'HOME_DIR' ? USERNAME : t(`FAVORITES_PANEL.${shortcut.label}`),
+                        nodeProps: {
+                            icon: UserHomeIconsTabler[shortcut.label],
+                            isSelected: shortcut.path === path,
+                            path: `${shortcut.path}`,
+                        },
+                    } as TreeNodeData),
+            ),
+        } as TreeNodeData,
         {
-            id: 1,
-            hasCaret: true,
-            isExpanded: expanded[1],
             label: t('FAVORITES_PANEL.PLACES'),
-            childNodes: favorites.places.map((place) => ({
-                id: `p_${place.path}`,
-                key: `p_${place.path}`,
-                label: <span title={place.path}>{place.label}</span>,
-                icon: place.icon,
-                nodeData: place.path,
-                isSelected: place.path === path,
-            })) as Array<TreeNodeInfo<string>>,
-        },
+            value: 'FAVORITES_PANEL.PLACES',
+            children: favorites.places.map(
+                (place) =>
+                    ({
+                        value: `s_${place.path}`,
+                        label: `${place.label}`,
+                        nodeProps: {
+                            icon: IconFolder,
+                            isSelected: place.path === path,
+                            path: `${place.path}`,
+                        },
+                    } as TreeNodeData),
+            ),
+        } as TreeNodeData,
     ]
 
     if (shouldShowWsl) {
         const distributionNodes = favorites.distributions.map((distrib) => ({
-            id: `p_${distrib.path}`,
-            key: `p_${distrib.path}`,
-            label: <span title={distrib.path}>{distrib.label}</span>,
-            icon: distrib.icon,
-            nodeData: distrib.path,
-            isSelected: distrib.path === path,
-        }))
+            value: `p_${distrib.path}`,
+            label: distrib.label,
+            nodeProps: {
+                icon: distrib.icon,
+                path: distrib.path,
+                isSelected: distrib.path === path,
+            },
+        })) as TreeNodeData[]
 
         nodes.push({
-            id: 2,
-            hasCaret: true,
-            isExpanded: expanded[2],
+            value: 'FAVORITES_PANEL.LINUX',
             label: t('FAVORITES_PANEL.LINUX'),
-            childNodes: distributionNodes as Array<TreeNodeInfo<string>>,
+            children: distributionNodes,
         })
     }
 
@@ -80,21 +79,21 @@ export const LeftPanel = observer(({ hide }: { hide: boolean }) => {
     const { t } = useTranslation()
     const { appState } = useStores('appState')
     const { favoritesState } = appState
-    const [expanded, setExpanded] = useState([true, true, true])
     const activePath = appState.getActiveCache()?.path || ''
     const nodes = buildNodes(favoritesState, {
         t,
         path: activePath,
-        expanded,
     })
 
-    const onNodeClick = async (
-        node: TreeNodeInfo<string>,
-        _: number[],
-        e: React.MouseEvent<HTMLElement>,
-    ): Promise<void> => {
+    const [expandedState, setExpandedState] = useState({
+        'FAVORITES_PANEL.SHORTCUTS': true,
+        'FAVORITES_PANEL.PLACES': true,
+        'FAVORITES_PANEL.LINUX': true,
+    })
+
+    const onNodeClick = async (node: TreeNodeData, e: React.MouseEvent<HTMLElement>): Promise<void> => {
         try {
-            await appState.openDirectory({ dir: node.nodeData, fullname: '' }, !(isMac ? e.altKey : e.ctrlKey))
+            await appState.openDirectory({ dir: node.nodeProps.path, fullname: '' }, !(isMac ? e.altKey : e.ctrlKey))
         } catch (err) {
             showAlertModal({
                 message: `${err.message} (${err.code})`,
@@ -104,24 +103,68 @@ export const LeftPanel = observer(({ hide }: { hide: boolean }) => {
         }
     }
 
-    const onNodeToggle = (node: TreeNodeInfo<string>): void => {
-        const isExpanded = expanded[node.id as number]
-        expanded[node.id as number] = !isExpanded
-
-        setExpanded([...expanded])
-    }
-
-    const classnames = classNames(`favoritesPanel ${CONFIG.CUSTOM_SCROLLBAR_CLASSNAME}`, {
-        hidden: hide,
-    })
+    // Note: we use a fake tree object because of a bug in Mantine Tree component
+    // which causes the component to endlessly re-render when the tree Data is
+    // defined inside the component.
+    // See: https://github.com/mantinedev/mantine/issues/6916
+    const tree = {
+        expandedState: expandedState,
+        selectedState: [],
+        initialize: () => {},
+        setHoveredNode: () => {},
+        toggleExpanded: (value: string) => {
+            setExpandedState({
+                ...expandedState,
+                [value]: !expandedState[value as keyof typeof expandedState],
+            })
+        },
+    } as unknown as UseTreeReturnType
 
     return (
-        <Tree
-            contents={nodes}
-            onNodeClick={onNodeClick}
-            onNodeCollapse={onNodeToggle}
-            onNodeExpand={onNodeToggle}
-            className={classnames}
-        />
+        <>
+            <ScrollArea overscrollBehavior="contain" scrollbarSize={8} scrollHideDelay={500} bg="background" h="100%">
+                <Tree
+                    tree={tree}
+                    data={nodes}
+                    levelOffset={0}
+                    renderNode={({ node, expanded, elementProps }) => {
+                        const { nodeProps } = node
+
+                        return (
+                            <Group gap={5} {...elementProps}>
+                                {!nodeProps && (
+                                    <IconButton
+                                        pl="xs"
+                                        w="100%"
+                                        size="xs"
+                                        icon={IconCaretRightFilled}
+                                        variant="transparent"
+                                        radius="0"
+                                        iconProps={{
+                                            style: { transform: expanded ? 'rotate(90deg)' : 'rotate(0deg)' },
+                                        }}
+                                    >
+                                        {node.label}
+                                    </IconButton>
+                                )}
+                                {nodeProps && (
+                                    <IconButton
+                                        w="100%"
+                                        size="xs"
+                                        icon={nodeProps.icon}
+                                        radius="0"
+                                        onClick={(e) => onNodeClick(node, e)}
+                                        active={nodeProps.isSelected}
+                                        pl="lg"
+                                    >
+                                        {node.label}
+                                    </IconButton>
+                                )}
+                            </Group>
+                        )
+                    }}
+                />
+            </ScrollArea>
+        </>
     )
 })

@@ -163,13 +163,13 @@ button.small:hover{
     box-shadow: 0 0 4px 2px inset #b6000982;
 }
 
-#root .sideview:first-child{
+/* #root .sideview:first-child{
     margin-right:10px;
 }
 
 #root .singleView .sideview:first-child{
     margin-right:0;
-}
+} */
 
 .bp5-input-group{
     flex-grow:1;

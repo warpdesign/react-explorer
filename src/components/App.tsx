@@ -1,10 +1,10 @@
 import React, { useEffect, useCallback, useState, useRef } from 'react'
 import { ipcRenderer, webFrame } from 'electron'
 import { platform } from 'process'
-import { Select, TextInput, Radio, AppShell, virtualColor, colorsTuple } from '@mantine/core'
+import { Select, TextInput, Radio, AppShell, virtualColor, colorsTuple, Button as ButtonMantine } from '@mantine/core'
 import { createTheme, MantineProvider } from '@mantine/core'
 import { ModalsProvider } from '@mantine/modals'
-import { FocusStyleManager, Alert, Classes, Intent } from '@blueprintjs/core'
+import { FocusStyleManager, Alert, Classes, Intent, Button } from '@blueprintjs/core'
 import classNames from 'classnames'
 import { Provider, observer } from 'mobx-react'
 import { Trans, useTranslation } from 'react-i18next'
@@ -30,6 +30,7 @@ import '@blueprintjs/core/lib/css/blueprint.css'
 // import '@blueprintjs/icons/lib/css/blueprint-icons.css'
 // import '@blueprintjs/popover2/lib/css/blueprint-popover2.css'
 import '$src/css/main.css'
+import '$src/css/mantine-extensions.css'
 // import '$src/css/windows.css'
 // import '$src/css/scrollbars.css'
 
@@ -40,12 +41,19 @@ import { PreviewDialog } from './dialogs/PreviewDialog'
 
 const theme = createTheme({
     colors: {
-        ['blue-dark']: colorsTuple('#293742'),
-        ['blue-light']: colorsTuple('#ced9e080'),
+        ['blue-background-dark']: colorsTuple('#293742'),
+        ['blue-background-light']: colorsTuple('#ced9e080'),
+        ['gray-light']: colorsTuple('#4a5056'),
+        ['gray-dark']: colorsTuple('#eeeeee'),
         background: virtualColor({
-            light: 'blue-light',
-            dark: 'blue-dark',
+            light: 'blue-background-light',
+            dark: 'blue-background-dark',
             name: 'background',
+        }),
+        button: virtualColor({
+            light: 'gray-light',
+            dark: 'gray-dark',
+            name: 'button',
         }),
     },
     components: {
@@ -62,6 +70,11 @@ const theme = createTheme({
         RadioGroup: Radio.Group.extend({
             styles: {
                 label: { paddingBottom: '.2rem' },
+            },
+        }),
+        Button: ButtonMantine.extend({
+            styles: {
+                inner: { justifyContent: 'left' },
             },
         }),
     },
@@ -316,6 +329,7 @@ const App = observer(() => {
             <MantineProvider theme={theme} forceColorScheme={(settingsState.isDarkModeActive && 'dark') || 'light'}>
                 <ModalsProvider>
                     <AppShell
+                        transitionDuration={0}
                         header={{ height: 50 }}
                         navbar={{
                             width: 200,
@@ -356,10 +370,9 @@ const App = observer(() => {
                         </AppShell.Header>
                         {/* <div onClickCapture={handleClick} onContextMenuCapture={handleClick} className={mainClass}> */}
                         <AppShell.Navbar>
-                            {/* <LeftPanel hide={!isExplorer} /> */}
-                            Navbar :)
+                            <LeftPanel hide={!isExplorer} />
                         </AppShell.Navbar>
-                        <AppShell.Main h="100%" flex={1}>
+                        <AppShell.Main h="100%" display={'flex'}>
                             {<SideView viewState={views[0]} hide={!isExplorer} />}
                             {splitView && <SideView viewState={views[1]} hide={!isExplorer} />}
                             <Downloads hide={isExplorer} />
