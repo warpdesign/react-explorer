@@ -1,6 +1,5 @@
 import * as React from 'react'
 import { useState, useCallback } from 'react'
-import { ButtonGroup, Button, Icon, IconName } from '@blueprintjs/core'
 import { observer } from 'mobx-react'
 import { MenuItemConstructorOptions, ipcRenderer } from 'electron'
 import { useTranslation } from 'react-i18next'
@@ -10,8 +9,17 @@ import { sendFakeCombo } from '$src/utils/keyboard'
 import { showAlertModal } from '$src/components/AppAlert'
 import { LocalizedError } from '$src/locale/error'
 import { useStores } from '$src/hooks/useStores'
-import { UserHomeIcons } from '$src/constants/icons'
+import { UserHomeIcons, UserHomeIconsTabler } from '$src/constants/icons'
+import { ActionIcon, Button as Button2, Flex } from '@mantine/core'
 import { ALL_DIRS } from '$src/utils/platform'
+import {
+    Icon,
+    IconProps,
+    IconFolder,
+    IconFolderExclamation,
+    IconSquareRoundedX,
+    IconCirclePlusFilled,
+} from '@tabler/icons-react'
 
 /**
  * build a list of { regex, IconName } to match folders with an icon
@@ -23,17 +31,19 @@ import { ALL_DIRS } from '$src/utils/platform'
  */
 export const TabIcons = Object.keys(UserHomeIcons).map((dirname: string) => ({
     regex: new RegExp(`^${ALL_DIRS[dirname]}$`),
-    icon: UserHomeIcons[dirname],
+    icon: UserHomeIconsTabler[dirname],
 }))
 
-export const getTabIcon = (path: string): IconName => {
+export const getTabIconTabler = (
+    path: string,
+): React.ForwardRefExoticComponent<IconProps & React.RefAttributes<Icon>> => {
     for (const obj of TabIcons) {
         if (obj.regex.test(path)) {
-            return obj.icon as IconName
+            return obj.icon
         }
     }
 
-    return 'folder-close'
+    return IconFolder
 }
 
 const TabList = observer(() => {
@@ -44,7 +54,7 @@ const TabList = observer(() => {
     useIpcRendererListener(
         'context-menu-tab-list:click',
         useCallback(
-            (event, command, param) => {
+            (_, command, param) => {
                 if (!viewState?.isActive) {
                     return
                 }
@@ -180,55 +190,47 @@ const TabList = observer(() => {
     // whenever the language has changed
 
     return (
-        <ButtonGroup fill className="tablist" alignText="center">
+        <Button2.Group flex={0}>
             {caches.map((cache, index) => {
-                const closeIcon = caches.length > 1 && (
-                    <Icon
-                        iconSize={12}
-                        htmlTitle={t('TABS.CLOSE')}
-                        className="closetab"
-                        intent="warning"
+                const closeIcon = cache.isVisible && caches.length > 1 && (
+                    <IconSquareRoundedX
+                        size={16}
                         onClick={(e) => {
                             e.stopPropagation()
                             closeTab(index, e)
                         }}
-                        icon="cross"
-                    ></Icon>
+                    />
                 )
                 const path = cache.path
-                const tabIcon = cache.error ? 'issue' : getTabIcon(path)
+                const TabIcon = cache.error ? IconFolderExclamation : getTabIconTabler(path)
                 const tabInfo = (cache.getFS() && cache.getFS().displaypath(path)) || {
                     fullPath: '',
                     shortPath: '',
                 }
 
                 return (
-                    <Button
+                    <Button2
                         key={'' + viewId + index}
                         onContextMenu={() => onContextMenu(index)}
                         onClick={() => selectTab(index)}
                         title={tabInfo.fullPath}
-                        intent={cache.isVisible ? 'primary' : 'none'}
-                        rightIcon={closeIcon}
+                        leftSection={<TabIcon size={16} onContextMenu={(e) => onFolderContextMenu(index, e)} />}
+                        rightSection={closeIcon}
+                        radius="0"
+                        variant={cache.isVisible ? 'filled' : 'default'}
                         className="tab"
+                        bd="xl"
                     >
-                        <Icon
-                            onContextMenu={(e) => onFolderContextMenu(index, e)}
-                            className="folder"
-                            icon={tabIcon}
-                        ></Icon>
                         {tabInfo.shortPath}
-                    </Button>
+                    </Button2>
                 )
             })}
-            <Button
-                icon="add"
-                className="addtab"
-                minimal
-                title={t('TABS.NEW')}
-                onClick={() => addTab(viewState.getVisibleCacheIndex())}
-            ></Button>
-        </ButtonGroup>
+            <Flex align="center" mx="sm">
+                <ActionIcon variant="white" radius="xl" title={t('TABS.NEW')} size="sm">
+                    <IconCirclePlusFilled stroke={1.5} onClick={() => addTab(viewState.getVisibleCacheIndex())} />
+                </ActionIcon>
+            </Flex>
+        </Button2.Group>
     )
 })
 
