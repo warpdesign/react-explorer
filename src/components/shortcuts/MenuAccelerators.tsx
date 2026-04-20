@@ -1,16 +1,15 @@
 import * as React from 'react'
-import { withTranslation, WithTranslation } from 'react-i18next'
-import { Classes } from '@blueprintjs/core'
-import { inject } from 'mobx-react'
 import { IconAlertTriangle } from '@tabler/icons-react'
+import { inject } from 'mobx-react'
+import { WithTranslation, withTranslation } from 'react-i18next'
 
-import { WithMenuAccelerators, Accelerators, Accelerator } from '$src/components/hoc/WithMenuAccelerators'
-import { isMac } from '$src/utils/platform'
-import { isEditable } from '$src/utils/dom'
+import { AppToaster } from '$src/components/AppToaster'
+import { Accelerator, Accelerators, WithMenuAccelerators } from '$src/components/hoc/WithMenuAccelerators'
 import { AppState } from '$src/state/appState'
 import { FileState } from '$src/state/fileState'
-import { AppToaster } from '$src/components/AppToaster'
 import { SettingsState } from '$src/state/settingsState'
+import { isEditable } from '$src/utils/dom'
+import { isMac } from '$src/utils/platform'
 
 interface Props extends WithTranslation {
     onExitComboDown: () => void
@@ -101,7 +100,7 @@ class MenuAcceleratorsClass extends React.Component<Props> {
             return
         }
 
-        const isOverlayOpen = document.body.classList.contains(Classes.OVERLAY_OPEN)
+        const isOverlayOpen = document.querySelector('[data-mantine-portal]') !== null
 
         if (cache && !isOverlayOpen && !isEditable(document.activeElement)) {
             const resolvedPath = cache.getAPI().resolve(cache.path)
