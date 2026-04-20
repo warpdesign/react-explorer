@@ -14,7 +14,8 @@ import {
 import { useTranslation } from 'react-i18next'
 import { TSORT_METHOD_NAME, TSORT_ORDER } from '$src/services/FsSort'
 
-export const getTickIcon = (str: string, expectedStr: string) => (str === expectedStr ? <IconCheck size={16} /> : null)
+export const getTickIcon = (str: string, expectedStr: string) =>
+    str === expectedStr ? <IconCheck size={16} /> : <div style={{ width: 16, height: 16 }} />
 
 export const ViewToggleMenu = ({
     viewmode,

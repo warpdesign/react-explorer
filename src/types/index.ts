@@ -1,9 +1,11 @@
+import { Icon, IconProps } from '@tabler/icons-react'
+import { IpcRendererEvent } from 'electron/renderer'
+import React from 'react'
+
 import { ViewModeName } from '$src/hooks/useViewMode'
 import { FileDescriptor } from '$src/services/Fs'
 import { TSORT_METHOD_NAME, TSORT_ORDER } from '$src/services/FsSort'
 import { FileState, TStatus } from '$src/state/fileState'
-import { IconName } from '@blueprintjs/icons'
-import { IpcRendererEvent } from 'electron/renderer'
 
 export type IpcRendererEventHandler<C, P = string> = (event: IpcRendererEvent, command: C, param?: P) => void
 
@@ -18,7 +20,7 @@ export interface ViewDescriptor {
 
 export interface FileViewItem {
     name: string
-    icon: IconName
+    icon: React.ForwardRefExoticComponent<IconProps & React.RefAttributes<Icon>>
     size: string
     isSelected: boolean
     isEditing: boolean

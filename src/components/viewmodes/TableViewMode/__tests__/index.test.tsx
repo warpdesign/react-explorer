@@ -1,6 +1,7 @@
 import React from 'react'
 import * as ReactVirtual from '@tanstack/react-virtual'
 import { render, screen, setup, t } from 'rtl'
+import { IconFolder } from '@tabler/icons-react'
 
 import { Column } from '$src/hooks/useViewMode'
 import { FileState, TStatus } from '$src/state/fileState'
@@ -13,24 +14,26 @@ describe('TableViewMode', () => {
         {
             name: 'filename',
             size: '3 bytes',
-            icon: 'folder-close',
+            icon: IconFolder,
             isEditing: false,
             isSelected: false,
             title: 'filename',
             nodeData: {
                 mode: 0,
             },
+            className: '',
         },
         {
             name: 'filename2',
             size: '28 bytes',
-            icon: 'folder-close',
+            icon: IconFolder,
             isEditing: false,
             isSelected: false,
             title: 'filename2',
             nodeData: {
                 mode: 0,
             },
+            className: '',
         },
     ] as FileViewItem[]
 

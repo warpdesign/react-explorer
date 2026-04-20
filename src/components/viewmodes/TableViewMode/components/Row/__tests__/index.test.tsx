@@ -1,19 +1,23 @@
-import { FileState } from '$src/state/fileState'
-import { FileViewItem } from '$src/types'
 import React from 'react'
 import { render, screen, setup, wait } from 'rtl'
+import { IconFolder } from '@tabler/icons-react'
 
 import { CLICK_DELAY } from '$src/hooks/useFileClick'
+import { FileState } from '$src/state/fileState'
+import { FileViewItem } from '$src/types'
+
 import { Row } from '..'
 
 describe('Row', () => {
     const item = {
         name: 'filename',
         size: '3 bytes',
-        icon: 'folder-close',
+        icon: IconFolder,
         isEditing: false,
         isSelected: false,
         title: 'filename',
+        nodeData: {} as any,
+        className: '',
     }
 
     const PROPS = {

@@ -1,9 +1,8 @@
 import React from 'react'
-import { Icon } from '@blueprintjs/core'
 
-import type { FileViewItem } from '$src/types'
-import { InlineEditEvent } from '$src/hooks/useViewMode'
 import { InlineRenameProps, withInlineRename } from '$src/components/hoc/WithInlineRename'
+import { InlineEditEvent } from '$src/hooks/useViewMode'
+import type { FileViewItem } from '$src/types'
 
 interface TextProps extends InlineRenameProps {
     item: FileViewItem
@@ -26,11 +25,11 @@ interface Props {
 }
 
 export const Name = ({ data, onInlineEdit, disabledInlineEdit }: Props) => {
-    const { icon } = data
+    const IconComponent = data.icon
 
     return (
         <div className="name">
-            <Icon icon={icon}></Icon>
+            <IconComponent size={16} style={{ marginRight: '8px' }} />
             <Text onInlineEdit={onInlineEdit} item={data} disabledInlineEdit={disabledInlineEdit}></Text>
         </div>
     )

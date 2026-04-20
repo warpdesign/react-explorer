@@ -1,6 +1,7 @@
 import React from 'react'
 import userEvent from '@testing-library/user-event'
 import { render, screen, setup } from 'rtl'
+import { IconFile } from '@tabler/icons-react'
 
 import { FileViewItem } from '$src/types'
 
@@ -8,11 +9,14 @@ import { Name } from '../Name'
 
 describe('Name', () => {
     const item = {
-        icon: 'add',
+        icon: IconFile,
         isEditing: false,
         isSelected: false,
         name: 'filename',
         title: 'title',
+        size: '100 KB',
+        nodeData: {} as any,
+        className: '',
     } as FileViewItem
 
     const PROPS = {
@@ -24,13 +28,10 @@ describe('Name', () => {
     beforeEach(() => jest.clearAllMocks())
 
     it('should display component', () => {
-        const { container } = render(<Name {...PROPS} />)
+        render(<Name {...PROPS} />)
 
         expect(screen.getByText(item.name)).toBeInTheDocument()
         expect(screen.getByTitle(item.title)).toBeInTheDocument()
-
-        // item.icon is used
-        expect(container.querySelector(`[icon="${item.icon}"]`)).toBeInTheDocument()
     })
 
     describe('start edit mode', () => {

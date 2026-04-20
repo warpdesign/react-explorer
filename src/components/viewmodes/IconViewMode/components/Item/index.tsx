@@ -1,12 +1,11 @@
 import React, { useCallback } from 'react'
 import classNames from 'classnames'
-import { Colors, Icon } from '@blueprintjs/core'
 
 import { TruncatedText } from '$src/components/viewmodes/components/TruncatedText'
+import { useDragFile } from '$src/hooks/useDragFile'
+import { useFileClick } from '$src/hooks/useFileClick'
 import { InlineEditEvent, ItemMouseEvent, makeEvent } from '$src/hooks/useViewMode'
 import { DraggedObject, FileViewItem } from '$src/types'
-import { useFileClick } from '$src/hooks/useFileClick'
-import { useDragFile } from '$src/hooks/useDragFile'
 
 interface Props {
     item: FileViewItem
@@ -64,21 +63,29 @@ export const Item = ({
                     overflow: 'hidden',
                     width: `${width}px`,
                     alignSelf: 'start',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
                 }}
                 {...mouseProps}
             >
-                <Icon
-                    icon={item.icon}
-                    size={iconSize}
-                    color={Colors.GRAY2}
-                    title={item.name}
+                <div
                     className="icon"
-                    style={{ position: 'relative' }}
-                />
+                    title={item.name}
+                    style={{
+                        position: 'relative',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        color: 'var(--mantine-color-gray-6)',
+                    }}
+                >
+                    <item.icon size={iconSize} />
+                </div>
                 <TruncatedText
                     lines={2}
                     item={item}
-                    disabledInlineEdit={!dragProps || dragProps.fileState.selected.length >= 2}
+                    disabledInlineEdit={!dragProps || (dragProps.fileState?.selected.length ?? 0) >= 2}
                     onInlineEdit={onInlineEdit}
                 />
             </div>

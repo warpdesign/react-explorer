@@ -13,7 +13,7 @@ import { isMac } from '$src/utils/platform'
 import { FileState } from '$src/state/fileState'
 import { FileContextMenu } from '$src/components/menus/FileContextMenu'
 import { useMenuAccelerator } from '$src/hooks/useAccelerator'
-import { TypeIcons } from '$src/constants/icons'
+import { TypeIconsTabler } from '$src/constants/icons'
 
 import { ArrowKey, DraggedObject, FileViewItem } from '$src/types'
 import { HeaderMouseEvent, InlineEditEvent, ItemMouseEvent, useViewMode } from '$src/hooks/useViewMode'
@@ -35,7 +35,8 @@ export function buildNodeFromFile(
     })
 
     const res: FileViewItem = {
-        icon: (file.isDir && TypeIcons['dir']) || (filetype && TypeIcons[filetype]) || TypeIcons['any'],
+        icon:
+            (file.isDir && TypeIconsTabler['dir']) || (filetype && TypeIconsTabler[filetype]) || TypeIconsTabler['any'],
         name: file.fullname,
         title: file.isSym ? `${file.fullname} → ${file.target}` : file.fullname,
         nodeData: file,
