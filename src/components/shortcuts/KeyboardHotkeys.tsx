@@ -7,7 +7,7 @@ import { useStores } from '$src/hooks/useStores'
 import { FileState } from '$src/state/fileState'
 import { isMac } from '$src/utils/platform'
 
-const KeyboardHotkeys = observer((): JSX.Element | null => {
+const KeyboardHotkeys = (): JSX.Element | null => {
     const { appState } = useStores('appState')
 
     const getActiveFileCache = (ignoreStatus = false): FileState => {
@@ -83,6 +83,6 @@ const KeyboardHotkeys = observer((): JSX.Element | null => {
     ])
 
     return null
-})
+}
 
 export { KeyboardHotkeys }

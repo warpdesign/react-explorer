@@ -18,7 +18,7 @@ describe('Name', () => {
     const PROPS = {
         data: item,
         onInlineEdit: jest.fn(),
-        selectedCount: 0,
+        disabledInlineEdit: false,
     }
 
     beforeEach(() => jest.clearAllMocks())
@@ -46,7 +46,7 @@ describe('Name', () => {
             const PROPS = {
                 data: editItem,
                 onInlineEdit: jest.fn(),
-                selectedCount: 0,
+                disabledInlineEdit: false,
             }
 
             const user = userEvent.setup({ advanceTimers: jest.runOnlyPendingTimers })
@@ -66,7 +66,7 @@ describe('Name', () => {
             const PROPS = {
                 data: editItem,
                 onInlineEdit: jest.fn(),
-                selectedCount: 2,
+                disabledInlineEdit: true,
             }
 
             const user = userEvent.setup({ advanceTimers: jest.runOnlyPendingTimers })
@@ -88,7 +88,7 @@ describe('Name', () => {
         const PROPS = {
             data: editItem,
             onInlineEdit: jest.fn(),
-            selectedCount: 0,
+            disabledInlineEdit: false,
         }
 
         it('should show edit input', () => {
