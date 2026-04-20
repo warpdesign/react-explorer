@@ -1,7 +1,6 @@
 /// <reference types="cypress"/>
 
 import { TAB_ICONS } from '../support/constants'
-import { Classes } from '@blueprintjs/core'
 
 function matchPath(path: string) {
     const match = TAB_ICONS.find((obj) => obj.regex.test(path))
@@ -47,7 +46,7 @@ describe('tablist', () => {
 
     it('tablist should have path in title', () => {
         // cy.CDAndList(0, '/')
-        cy.get('#view_0 .tablist').contains('/').should('have.class', Classes.INTENT_PRIMARY)
+        cy.get('#view_0 .tablist').contains('/').should('have.attr', 'data-variant', 'light')
     })
 
     // describe('tablist should show tab icons for known user folders', () => {
@@ -87,7 +86,7 @@ describe('tablist', () => {
     })
 
     it('right-click on the tab should show the tab menu', () => {
-        cy.get('#view_0 .tablist').contains('/').find('.bp5-button-text').rightclick('right')
+        cy.get('#view_0 .tablist').contains('/').rightclick('right')
 
         cy.get('@stub_invoke')
             .should('be.called')
@@ -114,17 +113,17 @@ describe('tablist', () => {
 
     it('clicking on an inactive tab should activate it', () => {
         // check that first element is active
-        cy.getTab(0, 0).should('have.class', Classes.INTENT_PRIMARY)
+        cy.getTab(0, 0).should('have.attr', 'data-variant', 'light')
 
         cy.addTab(0)
 
-        cy.getTab(0, 0).should('not.have.class', Classes.INTENT_PRIMARY)
+        cy.getTab(0, 0).should('have.attr', 'data-variant', 'default')
 
-        cy.getTab(0, 1).should('have.class', Classes.INTENT_PRIMARY)
+        cy.getTab(0, 1).should('have.attr', 'data-variant', 'light')
 
-        cy.getTab(0, 0).click().should('have.class', Classes.INTENT_PRIMARY)
+        cy.getTab(0, 0).click().should('have.attr', 'data-variant', 'light')
 
-        cy.getTab(0, 1).should('not.have.class', Classes.INTENT_PRIMARY)
+        cy.getTab(0, 1).should('have.attr', 'data-variant', 'default')
 
         cy.getTab(0, 1).triggerHover()
     })

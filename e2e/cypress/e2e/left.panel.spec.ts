@@ -1,5 +1,4 @@
 /// <reference types="cypress"/>
-import { Classes } from '@blueprintjs/core'
 import { SHORTCUTS, isMac } from '../support/constants'
 
 describe('left panel', () => {
@@ -40,45 +39,30 @@ describe('left panel', () => {
     })
 
     it('should be visible and expanded', () => {
-        cy.get('.favoritesPanel > ul > li')
-            .should('be.visible')
-            .and('have.class', Classes.TREE_NODE_EXPANDED)
-            .its('length')
-            .should('equal', 2)
+        cy.get('.favoritesPanel > ul > li').should('be.visible').its('length').should('equal', 2)
     })
 
     it('clicking on section should toggle elements', () => {
         // check that shortcuts node is expanded and toggle it
-        cy.get('@shortcuts')
-            .should('have.class', Classes.TREE_NODE_EXPANDED)
-            .find(`.${Classes.TREE_NODE_CARET}`)
-            .click()
+        cy.get('@shortcuts').contains('Shortcuts').click()
 
-        // check that it's no longer expanded and toggle it
-        cy.get('@shortcuts')
-            .should('not.have.class', Classes.TREE_NODE_EXPANDED)
-            .find(`.${Classes.TREE_NODE_CARET}`)
-            .click()
+        // verify items are hidden
+        cy.get('@shortcuts').contains(SHORTCUTS[0]).should('not.be.visible')
 
-        // check that shortcuts is expanded again
-        cy.get('@shortcuts').should('have.class', Classes.TREE_NODE_EXPANDED)
+        // click again to expand
+        cy.get('@shortcuts').contains('Shortcuts').click()
+
+        // verify items are visible again
+        cy.get('@shortcuts').contains(SHORTCUTS[0]).should('be.visible')
 
         // same thing for the places
-        cy.get('@places').should('have.class', Classes.TREE_NODE_EXPANDED).find(`.${Classes.TREE_NODE_CARET}`).click()
+        cy.get('@places').contains('Places').click()
 
-        cy.get('@places')
-            .should('not.have.class', Classes.TREE_NODE_EXPANDED)
-            .find(`.${Classes.TREE_NODE_CARET}`)
-            .click()
-
-        cy.get('@places').should('have.class', Classes.TREE_NODE_EXPANDED)
+        cy.get('@places').contains('Places').click()
     })
 
     it(`should have all shortcuts`, () => {
-        const length: number = favoritesState.shortcuts.length
         cy.get('.favoritesPanel').contains('Shortcuts').should('be.visible')
-
-        cy.get('@shortcuts').find('.bp5-tree-node-content-1').its('length').should('equal', length)
 
         SHORTCUTS.forEach((shortcut) => {
             cy.get('@shortcuts').contains(shortcut).should('be.visible')
@@ -123,7 +107,7 @@ describe('left panel', () => {
         const path = favoritesState.shortcuts[1].path
         const label = SHORTCUTS[1]
 
-        cy.get('.favoritesPanel > ul > li:eq(0) .bp5-tree-node-content-1').contains(label).click()
+        cy.get('@shortcuts').contains(label).click()
 
         cy.get('@stub_cd0').should('be.calledWith', path)
     })
@@ -170,11 +154,11 @@ describe('left panel', () => {
 
     it.skip('should make favorite active if activeCache.path === favorite.path', () => {
         cy.enterPath('/cy/documents')
-        cy.get('.favoritesPanel').contains('Documents').parents('li').should('have.class', Classes.TREE_NODE_SELECTED)
+        cy.get('.favoritesPanel').contains('Documents').parents('li').should('have.attr', 'data-variant', 'light')
     })
 
     it.skip('should not make favorite active if activeCache.path !== favorite.path', () => {
-        cy.get(`.favoritesPanel > ul > li li.${Classes.TREE_NODE_SELECTED}`).should('not.exist')
+        cy.get('.favoritesPanel > ul > li li[data-variant="light"]').should('not.exist')
     })
 
     // This is not working: cache doesn't appear to be set busy

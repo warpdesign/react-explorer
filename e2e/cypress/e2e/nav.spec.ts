@@ -1,5 +1,4 @@
 /// <reference types="cypress"/>
-import { Classes } from '@blueprintjs/core'
 
 describe('app shortcuts', () => {
     before(() => {

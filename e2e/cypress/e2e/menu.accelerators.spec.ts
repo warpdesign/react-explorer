@@ -1,7 +1,5 @@
 /// <reference types="cypress"/>
 
-import { Classes } from '@blueprintjs/core'
-
 /**
  * NOTE: Combos are events that are supposed to be sent from the main process
  * after a menu (or its associated shortcut) has been selected.
