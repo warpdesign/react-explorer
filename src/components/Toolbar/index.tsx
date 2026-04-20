@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react'
 import { observer } from 'mobx-react'
-import { HotkeysTarget2, Classes } from '@blueprintjs/core'
 import { Menu, Button, Group, TextInput, ActionIcon } from '@mantine/core'
+import { useHotkeys } from '@mantine/hooks'
 import { useTranslation } from 'react-i18next'
 import {
     IconX,
@@ -111,7 +111,8 @@ export const Toolbar = observer(({ active }: Props) => {
         // restore previous valid cache unless an error alert has been displayed:
         // this will cause the input to loose focus but we don't want to update the path
         // in that particular case
-        if (!didClickOnSubmit && cache.path !== path && !document.body.classList.contains(Classes.OVERLAY_OPEN)) {
+        const hasOverlay = document.querySelector('[data-mantine-portal]') !== null
+        if (!didClickOnSubmit && cache.path !== path && !hasOverlay) {
             setPath(cache.path)
         }
     }
@@ -186,118 +187,109 @@ export const Toolbar = observer(({ active }: Props) => {
         }
     }
 
-    const hotkeys = [
-        {
-            global: true,
-            combo: 'mod+l',
-            label: t('SHORTCUT.ACTIVE_VIEW.FOCUS_PATH'),
-            onKeyDown: () => inputRef.current?.focus(),
-            group: t('SHORTCUT.GROUP.ACTIVE_VIEW'),
-        },
-    ]
+    useHotkeys([['mod+L', () => inputRef.current?.focus()]])
+
     const canGoBackward = current > 0
     const canGoForward = history.length > 1 && current < history.length - 1
 
     return (
-        <HotkeysTarget2 hotkeys={hotkeys}>
-            <Group gap="xs" className="toolbar" wrap="nowrap" style={{ padding: '4px' }}>
-                <Button.Group>
-                    <Button
-                        title={t('TOOLBAR.BACK')}
-                        data-cy-backward
-                        disabled={!canGoBackward}
-                        onClick={onBackward}
-                        variant="default"
-                        size="compact-sm"
-                        style={{ minWidth: 'auto', padding: '4px 8px' }}
-                    >
-                        <IconChevronLeft size={16} />
-                    </Button>
-                    <Button
-                        title={t('TOOLBAR.FORWARD')}
-                        data-cy-forward
-                        disabled={!canGoForward}
-                        onClick={onForward}
-                        variant="default"
-                        size="compact-sm"
-                        style={{ minWidth: 'auto', padding: '4px 8px' }}
-                    >
-                        <IconChevronRight size={16} />
-                    </Button>
-                    <Button
-                        title={t('TOOLBAR.PARENT')}
-                        disabled={cache.isRoot()}
-                        onClick={onParent}
-                        variant="default"
-                        size="compact-sm"
-                        style={{ minWidth: 'auto', padding: '4px 8px' }}
-                    >
-                        <IconChevronUp size={16} />
-                    </Button>
-                </Button.Group>
-
-                <Button.Group>
-                    <ViewToggle viewmode={viewmode} onClick={(newViewMode) => cache.setViewMode(newViewMode)} />
-                    <SortMenuToggle sortMethod={sortMethod} sortOrder={sortOrder} onClick={onSortChange} />
-                    <Menu position="bottom-start">
-                        <Menu.Target>
-                            <Button
-                                variant="default"
-                                size="compact-sm"
-                                leftSection={<IconFolderPlus size={16} />}
-                                rightSection={<IconChevronDown size={14} />}
-                                style={{ minWidth: 'auto', padding: '4px 8px' }}
-                            />
-                        </Menu.Target>
-                        <Menu.Dropdown>
-                            <FileMenu
-                                isDisabled={!cache || cache.error}
-                                selectedItemsLength={selected.length}
-                                onFileAction={onFileAction}
-                            />
-                        </Menu.Dropdown>
-                    </Menu>
-                </Button.Group>
-
-                <TextInput
-                    data-cy-path
-                    onChange={onPathChange}
-                    onKeyUp={onKeyUp}
-                    placeholder={t('COMMON.PATH_PLACEHOLDER')}
-                    rightSection={
-                        <ActionIcon className="data-cy-reload" onClick={onReload} variant="subtle" size="sm">
-                            <IconRefresh size={16} />
-                        </ActionIcon>
-                    }
-                    value={path}
-                    ref={inputRef}
-                    onBlur={onBlur}
-                    onFocus={onFocus}
-                    disabled={!active}
-                    style={{ flex: 1 }}
-                    size="xs"
-                />
-
-                {isMakedirDialogOpen && (
-                    <MakedirDialog
-                        isOpen={true}
-                        onClose={makedir}
-                        onValidation={cache.isDirectoryNameValid}
-                        parentPath={path}
-                    />
-                )}
-
+        <Group gap="xs" className="toolbar" wrap="nowrap" style={{ padding: '4px' }}>
+            <Button.Group>
                 <Button
-                    className="data-cy-submit-path"
-                    onClick={() => onSubmit()}
-                    ref={submitButtonRef}
+                    title={t('TOOLBAR.BACK')}
+                    data-cy-backward
+                    disabled={!canGoBackward}
+                    onClick={onBackward}
                     variant="default"
                     size="compact-sm"
                     style={{ minWidth: 'auto', padding: '4px 8px' }}
                 >
-                    <IconArrowRight size={16} />
+                    <IconChevronLeft size={16} />
                 </Button>
-            </Group>
-        </HotkeysTarget2>
+                <Button
+                    title={t('TOOLBAR.FORWARD')}
+                    data-cy-forward
+                    disabled={!canGoForward}
+                    onClick={onForward}
+                    variant="default"
+                    size="compact-sm"
+                    style={{ minWidth: 'auto', padding: '4px 8px' }}
+                >
+                    <IconChevronRight size={16} />
+                </Button>
+                <Button
+                    title={t('TOOLBAR.PARENT')}
+                    disabled={cache.isRoot()}
+                    onClick={onParent}
+                    variant="default"
+                    size="compact-sm"
+                    style={{ minWidth: 'auto', padding: '4px 8px' }}
+                >
+                    <IconChevronUp size={16} />
+                </Button>
+            </Button.Group>
+
+            <Button.Group>
+                <ViewToggle viewmode={viewmode} onClick={(newViewMode) => cache.setViewMode(newViewMode)} />
+                <SortMenuToggle sortMethod={sortMethod} sortOrder={sortOrder} onClick={onSortChange} />
+                <Menu position="bottom-start">
+                    <Menu.Target>
+                        <Button
+                            variant="default"
+                            size="compact-sm"
+                            leftSection={<IconFolderPlus size={16} />}
+                            rightSection={<IconChevronDown size={14} />}
+                            style={{ minWidth: 'auto', padding: '4px 8px' }}
+                        />
+                    </Menu.Target>
+                    <Menu.Dropdown>
+                        <FileMenu
+                            isDisabled={!cache || cache.error}
+                            selectedItemsLength={selected.length}
+                            onFileAction={onFileAction}
+                        />
+                    </Menu.Dropdown>
+                </Menu>
+            </Button.Group>
+
+            <TextInput
+                data-cy-path
+                onChange={onPathChange}
+                onKeyUp={onKeyUp}
+                placeholder={t('COMMON.PATH_PLACEHOLDER')}
+                rightSection={
+                    <ActionIcon className="data-cy-reload" onClick={onReload} variant="subtle" size="sm">
+                        <IconRefresh size={16} />
+                    </ActionIcon>
+                }
+                value={path}
+                ref={inputRef}
+                onBlur={onBlur}
+                onFocus={onFocus}
+                disabled={!active}
+                style={{ flex: 1 }}
+                size="xs"
+            />
+
+            {isMakedirDialogOpen && (
+                <MakedirDialog
+                    isOpen={true}
+                    onClose={makedir}
+                    onValidation={cache.isDirectoryNameValid}
+                    parentPath={path}
+                />
+            )}
+
+            <Button
+                className="data-cy-submit-path"
+                onClick={() => onSubmit()}
+                ref={submitButtonRef}
+                variant="default"
+                size="compact-sm"
+                style={{ minWidth: 'auto', padding: '4px 8px' }}
+            >
+                <IconArrowRight size={16} />
+            </Button>
+        </Group>
     )
 })

@@ -1,7 +1,7 @@
 import React, { useCallback, useRef, MutableRefObject, useState } from 'react'
 import { observer } from 'mobx-react'
 import { Menu } from '@mantine/core'
-import { HotkeysTarget2, Classes, HotkeyConfig } from '@blueprintjs/core'
+import { useHotkeys } from '@mantine/hooks'
 import { useTranslation } from 'react-i18next'
 import classNames from 'classnames'
 import { ipcRenderer } from 'electron'
@@ -49,14 +49,14 @@ export function buildNodeFromFile(
 }
 
 const onInvertSelection = (cache: FileState): void => {
-    const isOverlayOpen = document.body.classList.contains(Classes.OVERLAY_OPEN)
+    const isOverlayOpen = document.querySelector('[data-mantine-portal]') !== null
     if (!isOverlayOpen && !isEditable(document.activeElement)) {
         cache.invertSelection()
     }
 }
 
 const onSelectAll = (cache: FileState): void => {
-    const isOverlayOpen = document.body.classList.contains(Classes.OVERLAY_OPEN)
+    const isOverlayOpen = document.querySelector('[data-mantine-portal]') !== null
     if (!isOverlayOpen && !isEditable(document.activeElement)) {
         cache.selectAll()
     } else {
@@ -267,42 +267,19 @@ const FileView = observer(({ hide }: Props) => {
         }
     }
 
-    const hotkeys: HotkeyConfig[] = [
-        {
-            global: true,
-            combo: 'mod + o',
-            label: t('SHORTCUT.ACTIVE_VIEW.OPEN_FILE'),
-            onKeyDown: onOpenFile,
-            group: t('SHORTCUT.GROUP.ACTIVE_VIEW'),
-        },
-        {
-            global: true,
-            combo: isMac ? 'mod + alt + o' : 'mod + shift + o',
-            label: t('SHORTCUT.ACTIVE_VIEW.OPEN_FILE_INACTIVE_VIEW'),
-            onKeyDown: onOpenFile,
-            group: t('SHORTCUT.GROUP.ACTIVE_VIEW'),
-        },
-        {
-            global: true,
-            combo: 'mod + i',
-            label: t('SHORTCUT.ACTIVE_VIEW.SELECT_INVERT'),
-            onKeyDown: (e) => shouldCatchEvent(e) && isViewActive && onInvertSelection(cache),
-            group: t('SHORTCUT.GROUP.ACTIVE_VIEW'),
-        },
+    useHotkeys([
+        ['mod+O', onOpenFile],
+        [isMac ? 'mod+alt+O' : 'mod+shift+O', onOpenFile],
+        ['mod+I', (e: KeyboardEvent) => shouldCatchEvent(e) && isViewActive && onInvertSelection(cache)],
         ...(!isMac || window.ENV.CY
             ? [
-                  {
-                      global: true,
-                      combo: 'mod + a',
-                      label: t('SHORTCUT.ACTIVE_VIEW.SELECT_ALL'),
-                      onKeyDown: (e) => {
-                          shouldCatchEvent(e) && viewState.isActive && onSelectAll(cache)
-                      },
-                      group: t('SHORTCUT.GROUP.ACTIVE_VIEW'),
-                  } as HotkeyConfig,
+                  ['mod+A', (e: KeyboardEvent) => shouldCatchEvent(e) && viewState.isActive && onSelectAll(cache)] as [
+                      string,
+                      (e: KeyboardEvent) => void,
+                  ],
               ]
             : []),
-    ]
+    ])
 
     const [contextMenuOpened, setContextMenuOpened] = useState(false)
     const [contextMenuPosition, setContextMenuPosition] = useState({ x: 0, y: 0 })
@@ -319,56 +296,54 @@ const FileView = observer(({ hide }: Props) => {
             : undefined
 
     return (
-        <HotkeysTarget2 hotkeys={hotkeys}>
-            <div
-                onContextMenu={(e) => {
-                    // use files.length to tell menu handler we clicked on the blank area
-                    rightClickFileIndexRef.current = files.length
-                    handleContextMenu(e)
+        <div
+            onContextMenu={(e) => {
+                // use files.length to tell menu handler we clicked on the blank area
+                rightClickFileIndexRef.current = files.length
+                handleContextMenu(e)
+            }}
+            className="fileListSizerWrapper"
+        >
+            <Menu opened={contextMenuOpened} onChange={setContextMenuOpened} withinPortal={false}>
+                <Menu.Target>
+                    <div style={{ position: 'fixed', left: contextMenuPosition.x, top: contextMenuPosition.y }} />
+                </Menu.Target>
+                <Menu.Dropdown>
+                    <FileContextMenu fileUnderMouse={rightClickFile} />
+                </Menu.Dropdown>
+            </Menu>
+            <ViewMode
+                cursorIndex={cursorIndex}
+                itemCount={nodes.length}
+                getItem={getRow}
+                getDragProps={getDraggedProps}
+                onItemClick={onItemClick}
+                onItemDoubleClick={onItemDoubleClick}
+                onHeaderClick={onHeaderClick}
+                onBlankAreaClick={onBlankAreaClick}
+                onInlineEdit={onInlineEdit}
+                onItemRightClick={({ index, event }) => {
+                    rightClickFileIndexRef.current = index
+                    handleContextMenu(event)
                 }}
-                className="fileListSizerWrapper"
-            >
-                <Menu opened={contextMenuOpened} onChange={setContextMenuOpened} withinPortal={false}>
-                    <Menu.Target>
-                        <div style={{ position: 'fixed', left: contextMenuPosition.x, top: contextMenuPosition.y }} />
-                    </Menu.Target>
-                    <Menu.Dropdown>
-                        <FileContextMenu fileUnderMouse={rightClickFile} />
-                    </Menu.Dropdown>
-                </Menu>
-                <ViewMode
-                    cursorIndex={cursorIndex}
-                    itemCount={nodes.length}
-                    getItem={getRow}
-                    getDragProps={getDraggedProps}
-                    onItemClick={onItemClick}
-                    onItemDoubleClick={onItemDoubleClick}
-                    onHeaderClick={onHeaderClick}
-                    onBlankAreaClick={onBlankAreaClick}
-                    onInlineEdit={onInlineEdit}
-                    onItemRightClick={({ index, event }) => {
-                        rightClickFileIndexRef.current = index
-                        handleContextMenu(event)
-                    }}
-                    columns={[
-                        {
-                            label: t('FILETABLE.COL_NAME'),
-                            key: 'name',
-                            sort: cache.sortMethod === 'name' ? cache.sortOrder : 'none',
-                        },
-                        {
-                            label: t('FILETABLE.COL_SIZE'),
-                            key: 'size',
-                            sort: cache.sortMethod === 'size' ? cache.sortOrder : 'none',
-                        },
-                    ]}
-                    status={cache.status}
-                    error={cache.error}
-                    isDarkModeActive={isDarkModeActive}
-                    options={viewmodeOptions}
-                />
-            </div>
-        </HotkeysTarget2>
+                columns={[
+                    {
+                        label: t('FILETABLE.COL_NAME'),
+                        key: 'name',
+                        sort: cache.sortMethod === 'name' ? cache.sortOrder : 'none',
+                    },
+                    {
+                        label: t('FILETABLE.COL_SIZE'),
+                        key: 'size',
+                        sort: cache.sortMethod === 'size' ? cache.sortOrder : 'none',
+                    },
+                ]}
+                status={cache.status}
+                error={cache.error}
+                isDarkModeActive={isDarkModeActive}
+                options={viewmodeOptions}
+            />
+        </div>
     )
 })
 
