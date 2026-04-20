@@ -1,5 +1,6 @@
 import React from 'react'
-import { Icon, Spinner } from '@blueprintjs/core'
+import { Loader } from '@mantine/core'
+import { IconX, IconDownload } from '@tabler/icons-react'
 import { Provider, observer } from 'mobx-react'
 import { useDrop } from 'react-dnd'
 import classNames from 'classnames'
@@ -61,7 +62,7 @@ export const SideView = observer(({ hide, viewState }: SideViewProps) => {
 
     const needLogin = fileCache.status === 'login'
     const busy = fileCache.status === 'busy'
-    const dropOverlayIcon = isOver && !canDrop ? 'cross' : 'import'
+    const DropOverlayIcon = isOver && !canDrop ? IconX : IconDownload
     const dropOverlayActive = isOver
 
     return (
@@ -73,10 +74,10 @@ export const SideView = observer(({ hide, viewState }: SideViewProps) => {
                 <FileView hide={hide} />
                 <Statusbar />
                 <Overlay id={`files-loader-${viewState.viewId}`} shouldShow={busy} delay={true}>
-                    <Spinner />
+                    <Loader size="lg" />
                 </Overlay>
                 <Overlay shouldShow={dropOverlayActive} id={`drop-overlay-${viewState.viewId}`}>
-                    <Icon icon={dropOverlayIcon} size={80} color="#d9dde0" />
+                    <DropOverlayIcon size={80} color="#d9dde0" />
                 </Overlay>
             </div>
         </Provider>
