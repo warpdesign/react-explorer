@@ -1,8 +1,8 @@
 import React from 'react'
-import { Intent } from '@blueprintjs/core'
 import { action, observable, computed, makeObservable } from 'mobx'
 import type { TFunction } from 'i18next'
 import { shell } from 'electron'
+import { IconX, IconAlertTriangle, IconCheck } from '@tabler/icons-react'
 
 import { FileDescriptor, sameID } from '$src/services/Fs'
 import { FileState } from '$src/state/fileState'
@@ -219,15 +219,15 @@ export class AppState {
         if (err) {
             AppToaster.show({
                 message: this.t('ERRORS.DELETE', { message: err.message }),
-                icon: 'error',
-                intent: Intent.DANGER,
+                icon: <IconX size={16} />,
+                color: 'red',
                 timeout: ERROR_MESSAGE_TIMEOUT,
             })
         } else {
             AppToaster.show({
                 message: this.t('ERRORS.DELETE_WARN'),
-                icon: 'warning-sign',
-                intent: Intent.WARNING,
+                icon: <IconAlertTriangle size={16} />,
+                color: 'yellow',
                 timeout: ERROR_MESSAGE_TIMEOUT,
             })
         }
@@ -262,8 +262,8 @@ export class AppState {
                     } else {
                         AppToaster.show({
                             message: this.t('COMMON.DELETE_SUCCESS', { count: deleted }),
-                            icon: 'tick',
-                            intent: Intent.SUCCESS,
+                            icon: <IconCheck size={16} />,
+                            color: 'green',
                         })
                     }
 
@@ -379,8 +379,8 @@ export class AppState {
 
             AppToaster.show({
                 message: this.t('COMMON.COPY_FINISHED'),
-                icon: 'tick',
-                intent: Intent.SUCCESS,
+                icon: <IconCheck size={16} />,
+                color: 'green',
                 timeout: SUCCESS_COPY_TIMEOUT,
             })
 
@@ -399,8 +399,8 @@ export class AppState {
                     message: this.t('COMMON.COPY_WARNING', {
                         count: successCount,
                     }),
-                    icon: 'warning-sign',
-                    intent: !successCount ? Intent.DANGER : Intent.WARNING,
+                    icon: !successCount ? <IconX size={16} /> : <IconAlertTriangle size={16} />,
+                    color: !successCount ? 'red' : 'yellow',
                     timeout: ERROR_MESSAGE_TIMEOUT,
                 })
             } else {

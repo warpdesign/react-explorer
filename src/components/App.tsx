@@ -4,6 +4,7 @@ import { platform } from 'process'
 import { Select, TextInput, Radio, AppShell, virtualColor, colorsTuple, Button as ButtonMantine } from '@mantine/core'
 import { createTheme, MantineProvider } from '@mantine/core'
 import { ModalsProvider } from '@mantine/modals'
+import { Notifications } from '@mantine/notifications'
 import { FocusStyleManager, Alert, Classes, Intent, Button } from '@blueprintjs/core'
 import classNames from 'classnames'
 import { Provider, observer } from 'mobx-react'
@@ -26,6 +27,7 @@ import { useEventListener } from '$src/hooks/useEventListener'
 import Keys from '$src/constants/keys'
 
 import '@mantine/core/styles.css'
+import '@mantine/notifications/styles.css'
 import '@blueprintjs/core/lib/css/blueprint.css'
 // import '@blueprintjs/icons/lib/css/blueprint-icons.css'
 // import '@blueprintjs/popover2/lib/css/blueprint-popover2.css'
@@ -327,6 +329,7 @@ const App = observer(() => {
     return (
         <Provider settingsState={settingsState}>
             <MantineProvider theme={theme} forceColorScheme={(settingsState.isDarkModeActive && 'dark') || 'light'}>
+                <Notifications position="top-center" />
                 <ModalsProvider>
                     <AppShell
                         transitionDuration={0}

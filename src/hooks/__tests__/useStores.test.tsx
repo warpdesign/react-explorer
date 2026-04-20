@@ -1,6 +1,5 @@
 import React from 'react'
-import { render } from 'rtl'
-import { screen } from '@testing-library/react'
+import { render, screen } from 'rtl'
 
 import { useStores } from '$src/hooks/useStores'
 

@@ -139,10 +139,6 @@ const isSelected = (element: HTMLElement) => element.classList.contains(Classes.
 const t = i18n.i18next.t
 const LOCALE_EN = en.translations
 
-configure({
-    testIdAttribute: 'id',
-})
-
 const originalOffsetHeight = Object.getOwnPropertyDescriptor(HTMLElement.prototype, 'offsetHeight')
 const originalOffsetWidth = Object.getOwnPropertyDescriptor(HTMLElement.prototype, 'offsetWidth')
 
@@ -183,4 +179,5 @@ vol.fromJSON(
 export * from '@testing-library/react'
 
 // override render method
-export { customRender as render, setup, withMarkup, isSelected, LOCALE_EN, userEvent, t, i18next, wait, vol }
+export { customRender as render, setup, withMarkup, isSelected, LOCALE_EN, userEvent, t, i18next, wait, vol, within }
+export { screen, waitFor, waitForElementToBeRemoved, fireEvent } from '@testing-library/react'

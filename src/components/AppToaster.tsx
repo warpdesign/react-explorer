@@ -1,16 +1,12 @@
-import { Toaster, Position, Intent } from '@blueprintjs/core'
-import { IconName } from '@blueprintjs/icons'
+import { notifications } from '@mantine/notifications'
+import { ReactNode } from 'react'
 
 const TOAST_TIMEOUT = 2000
 
-const MyToaster = Toaster.create({
-    position: Position.TOP,
-})
-
 export interface IToasterOpts {
     message: string | JSX.Element
-    icon: IconName
-    intent?: Intent
+    icon?: ReactNode
+    color?: 'red' | 'green' | 'blue' | 'yellow'
     timeout?: number
 }
 
@@ -18,11 +14,22 @@ let lastToast = ''
 
 export const AppToaster = {
     show: (opts: IToasterOpts, key?: string, dismissPrev = false): string => {
-        if (dismissPrev) {
-            MyToaster.dismiss(lastToast)
+        if (dismissPrev && lastToast) {
+            notifications.hide(lastToast)
         }
 
-        lastToast = MyToaster.show({ timeout: TOAST_TIMEOUT, ...opts }, key)
+        const id = key || Math.random().toString(36).substring(7)
+
+        notifications.show({
+            id,
+            message: opts.message,
+            icon: opts.icon,
+            color: opts.color,
+            autoClose: opts.timeout || TOAST_TIMEOUT,
+            position: 'top-center',
+        })
+
+        lastToast = id
         return lastToast
     },
 }

@@ -82,7 +82,7 @@ describe('FileView', () => {
 
             // compare filenames in the dom before...
             const filenames = Array.from(container.querySelectorAll('[data-cy-filename]')).map(
-                (element) => element.textContent,
+                (element) => (element as HTMLElement).textContent,
             )
 
             expect(filenames).toEqual(['dir1', 'dir2', 'foo1', 'foo2'])
@@ -91,7 +91,7 @@ describe('FileView', () => {
 
             // ... and after clicking on name column
             const filenames2 = Array.from(container.querySelectorAll('[data-cy-filename]')).map(
-                (element) => element.textContent,
+                (element) => (element as HTMLElement).textContent,
             )
 
             expect(filenames2).toEqual(['dir2', 'dir1', 'foo2', 'foo1'])

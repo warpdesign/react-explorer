@@ -1,7 +1,8 @@
 import * as React from 'react'
 import { withTranslation, WithTranslation } from 'react-i18next'
-import { Classes, Intent } from '@blueprintjs/core'
+import { Classes } from '@blueprintjs/core'
 import { inject } from 'mobx-react'
+import { IconAlertTriangle } from '@tabler/icons-react'
 
 import { WithMenuAccelerators, Accelerators, Accelerator } from '$src/components/hoc/WithMenuAccelerators'
 import { isMac } from '$src/utils/platform'
@@ -111,8 +112,8 @@ class MenuAcceleratorsClass extends React.Component<Props> {
             } catch (e) {
                 AppToaster.show({
                     message: t('ERRORS.OPEN_TERMINAL_FAILED'),
-                    icon: 'warning-sign',
-                    intent: Intent.WARNING,
+                    icon: <IconAlertTriangle size={16} />,
+                    color: 'yellow',
                     timeout: 0,
                 })
             }

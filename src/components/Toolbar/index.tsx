@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react'
 import { observer } from 'mobx-react'
-import { InputGroup, ControlGroup, Button, ButtonGroup, Intent, HotkeysTarget2, Classes } from '@blueprintjs/core'
+import { InputGroup, ControlGroup, Button, ButtonGroup, HotkeysTarget2, Classes } from '@blueprintjs/core'
 import { IconNames } from '@blueprintjs/icons'
-import { Popover2 } from '@blueprintjs/popover2'
+import { Menu } from '@mantine/core'
 import { useTranslation } from 'react-i18next'
+import { IconX } from '@tabler/icons-react'
 
 import { FileMenu } from '$src/components/FileMenu'
 import { MakedirDialog } from '$src/components/dialogs/MakedirDialog'
@@ -127,8 +128,8 @@ export const Toolbar = observer(({ active }: Props) => {
         } catch (err) {
             AppToaster.show({
                 message: t('ERRORS.CREATE_FOLDER', { message: err.message }),
-                icon: 'error',
-                intent: Intent.DANGER,
+                icon: <IconX size={16} />,
+                color: 'red',
                 timeout: ERROR_MESSAGE_TIMEOUT,
             })
         }
@@ -219,18 +220,18 @@ export const Toolbar = observer(({ active }: Props) => {
 
                     <ViewToggle viewmode={viewmode} onClick={(newViewMode) => cache.setViewMode(newViewMode)} />
                     <SortMenuToggle sortMethod={sortMethod} sortOrder={sortOrder} onClick={onSortChange} />
-                    <Popover2
-                        content={
+                    <Menu position="bottom-start">
+                        <Menu.Target>
+                            <Button rightIcon="caret-down" icon={IconNames.FOLDER_NEW} />
+                        </Menu.Target>
+                        <Menu.Dropdown>
                             <FileMenu
                                 isDisabled={!cache || cache.error}
                                 selectedItemsLength={selected.length}
                                 onFileAction={onFileAction}
                             />
-                        }
-                        placement="bottom-start"
-                    >
-                        <Button rightIcon="caret-down" icon={IconNames.FOLDER_NEW} />
-                    </Popover2>
+                        </Menu.Dropdown>
+                    </Menu>
                 </ButtonGroup>
                 <InputGroup
                     data-cy-path

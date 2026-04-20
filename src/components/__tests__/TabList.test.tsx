@@ -1,7 +1,6 @@
 import React from 'react'
-import { within } from '@testing-library/dom'
 
-import { screen, setup, render, t, isSelected } from 'rtl'
+import { screen, setup, render, t, isSelected, within } from 'rtl'
 import { ViewState } from '$src/state/viewState'
 import { ipcRenderer } from 'electron'
 
