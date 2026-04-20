@@ -1,9 +1,18 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react'
 import { observer } from 'mobx-react'
-import { InputGroup, ControlGroup, Button, ButtonGroup, HotkeysTarget2, Classes } from '@blueprintjs/core'
-import { Menu, Button as MantineButton } from '@mantine/core'
+import { HotkeysTarget2, Classes } from '@blueprintjs/core'
+import { Menu, Button, Group, TextInput, ActionIcon } from '@mantine/core'
 import { useTranslation } from 'react-i18next'
-import { IconX, IconFolderPlus, IconChevronDown } from '@tabler/icons-react'
+import {
+    IconX,
+    IconFolderPlus,
+    IconChevronDown,
+    IconChevronLeft,
+    IconChevronRight,
+    IconChevronUp,
+    IconRefresh,
+    IconArrowRight,
+} from '@tabler/icons-react'
 
 import { FileMenu } from '$src/components/FileMenu'
 import { MakedirDialog } from '$src/components/dialogs/MakedirDialog'
@@ -29,8 +38,8 @@ export const Toolbar = observer(({ active }: Props) => {
     const { selected, history, current, viewmode, sortMethod, sortOrder } = cache
     const [path, setPath] = useState('')
     const { t } = useTranslation()
-    const inputRef = useRef<HTMLInputElement>()
-    const submitButtonRef = useRef<HTMLButtonElement>()
+    const inputRef = useRef<HTMLInputElement>(null)
+    const submitButtonRef = useRef<HTMLButtonElement>(null)
 
     useMenuAccelerator([
         {
@@ -59,7 +68,7 @@ export const Toolbar = observer(({ active }: Props) => {
         if (cache.path !== path) {
             try {
                 await cache.cd(path)
-                inputRef.current.blur()
+                inputRef.current?.blur()
             } catch (e) {
                 const err = e as LocalizedError
                 await showAlertModal({
@@ -73,7 +82,7 @@ export const Toolbar = observer(({ active }: Props) => {
                 // case we re-select the (wrong) path to let the user
                 // fix it.
                 if (shouldSelectTextOnError) {
-                    inputRef.current.select()
+                    inputRef.current?.select()
                 } else {
                     // if the user clicked on the submit button it means
                     // the input lost focus: in this case we reset the value
@@ -91,7 +100,7 @@ export const Toolbar = observer(({ active }: Props) => {
             // its immediate propagation
             event.nativeEvent.stopImmediatePropagation()
             // lose focus
-            inputRef.current.blur()
+            inputRef.current?.blur()
         } else if (event.key === Keys.ENTER) {
             onSubmit(true)
         }
@@ -167,7 +176,7 @@ export const Toolbar = observer(({ active }: Props) => {
         }
     }
 
-    const onFocus = (): void => inputRef.current.select()
+    const onFocus = (): void => inputRef.current?.select()
 
     const onParent = (): void => cache.openParentDirectory()
 
@@ -182,46 +191,57 @@ export const Toolbar = observer(({ active }: Props) => {
             global: true,
             combo: 'mod+l',
             label: t('SHORTCUT.ACTIVE_VIEW.FOCUS_PATH'),
-            onKeyDown: () => inputRef.current.focus(),
+            onKeyDown: () => inputRef.current?.focus(),
             group: t('SHORTCUT.GROUP.ACTIVE_VIEW'),
         },
     ]
     const canGoBackward = current > 0
     const canGoForward = history.length > 1 && current < history.length - 1
-    const reloadButton = (
-        <Button className="small data-cy-reload" onClick={onReload} minimal rightIcon="repeat"></Button>
-    )
 
     return (
         <HotkeysTarget2 hotkeys={hotkeys}>
-            <ControlGroup className="toolbar">
-                <ButtonGroup>
+            <Group gap="xs" className="toolbar" wrap="nowrap" style={{ padding: '4px' }}>
+                <Button.Group>
                     <Button
                         title={t('TOOLBAR.BACK')}
                         data-cy-backward
                         disabled={!canGoBackward}
                         onClick={onBackward}
-                        rightIcon="chevron-left"
-                    ></Button>
+                        variant="default"
+                        size="compact-sm"
+                        style={{ minWidth: 'auto', padding: '4px 8px' }}
+                    >
+                        <IconChevronLeft size={16} />
+                    </Button>
                     <Button
                         title={t('TOOLBAR.FORWARD')}
                         data-cy-forward
                         disabled={!canGoForward}
                         onClick={onForward}
-                        rightIcon="chevron-right"
-                    ></Button>
+                        variant="default"
+                        size="compact-sm"
+                        style={{ minWidth: 'auto', padding: '4px 8px' }}
+                    >
+                        <IconChevronRight size={16} />
+                    </Button>
                     <Button
                         title={t('TOOLBAR.PARENT')}
                         disabled={cache.isRoot()}
                         onClick={onParent}
-                        rightIcon="chevron-up"
-                    ></Button>
+                        variant="default"
+                        size="compact-sm"
+                        style={{ minWidth: 'auto', padding: '4px 8px' }}
+                    >
+                        <IconChevronUp size={16} />
+                    </Button>
+                </Button.Group>
 
+                <Button.Group>
                     <ViewToggle viewmode={viewmode} onClick={(newViewMode) => cache.setViewMode(newViewMode)} />
                     <SortMenuToggle sortMethod={sortMethod} sortOrder={sortOrder} onClick={onSortChange} />
                     <Menu position="bottom-start">
                         <Menu.Target>
-                            <MantineButton
+                            <Button
                                 variant="default"
                                 size="compact-sm"
                                 leftSection={<IconFolderPlus size={16} />}
@@ -237,38 +257,47 @@ export const Toolbar = observer(({ active }: Props) => {
                             />
                         </Menu.Dropdown>
                     </Menu>
-                </ButtonGroup>
-                <InputGroup
+                </Button.Group>
+
+                <TextInput
                     data-cy-path
                     onChange={onPathChange}
                     onKeyUp={onKeyUp}
                     placeholder={t('COMMON.PATH_PLACEHOLDER')}
-                    rightElement={reloadButton}
+                    rightSection={
+                        <ActionIcon className="data-cy-reload" onClick={onReload} variant="subtle" size="sm">
+                            <IconRefresh size={16} />
+                        </ActionIcon>
+                    }
                     value={path}
-                    inputRef={inputRef}
+                    ref={inputRef}
                     onBlur={onBlur}
                     onFocus={onFocus}
                     disabled={!active}
-                    // allows input shrinking to a very low width:
-                    // without it, it would refuse shrinking below 100px
-                    size={1}
+                    style={{ flex: 1 }}
+                    size="xs"
                 />
+
                 {isMakedirDialogOpen && (
                     <MakedirDialog
                         isOpen={true}
                         onClose={makedir}
                         onValidation={cache.isDirectoryNameValid}
                         parentPath={path}
-                    ></MakedirDialog>
+                    />
                 )}
 
                 <Button
-                    rightIcon="arrow-right"
                     className="data-cy-submit-path"
                     onClick={() => onSubmit()}
                     ref={submitButtonRef}
-                />
-            </ControlGroup>
+                    variant="default"
+                    size="compact-sm"
+                    style={{ minWidth: 'auto', padding: '4px 8px' }}
+                >
+                    <IconArrowRight size={16} />
+                </Button>
+            </Group>
         </HotkeysTarget2>
     )
 })
