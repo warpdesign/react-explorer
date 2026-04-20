@@ -29,7 +29,7 @@ const Nav = observer(() => {
 
     return (
         <div style={{ height: '100%' }}>
-            <Group h="100%" px="md" bg="background">
+            <Group h="100%" px="md">
                 <Group justify="space-between" style={{ flex: 1 }}>
                     <Group gap="sm" visibleFrom="sm">
                         {t('APP_MENUS.ABOUT_TITLE')}
@@ -38,9 +38,9 @@ const Nav = observer(() => {
                             leftSection={<IconHomeFilled size={16} />}
                             className="data-cy-explorer-tab"
                             onClick={navClick}
-                            size="xs"
-                            variant={isExplorer ? 'filled' : 'subtle'}
-                            color={!isExplorer ? '#4a5056' : ''}
+                            size="sm"
+                            variant={isExplorer ? 'light' : 'subtle'}
+                            color={!isExplorer ? 'gray' : undefined}
                         >
                             {t('NAV.EXPLORER')}
                         </Button>
@@ -49,9 +49,9 @@ const Nav = observer(() => {
                                 leftSection={<IconDownload size={16} />}
                                 className="data-cy-downloads-tab"
                                 onClick={navClick}
-                                size="xs"
-                                variant={!isExplorer ? 'filled' : 'subtle'}
-                                color={isExplorer ? '#4a5056' : ''}
+                                size="sm"
+                                variant={!isExplorer ? 'light' : 'subtle'}
+                                color={isExplorer ? 'gray' : undefined}
                             >
                                 {t('NAV.TRANSFERS')}
                             </Button>
@@ -59,7 +59,8 @@ const Nav = observer(() => {
                     </Group>
                     <Group ml="xl" gap="sm" visibleFrom="sm">
                         <ActionIcon
-                            variant={(isSplitViewActive && 'filled') || 'subtle'}
+                            variant={(isSplitViewActive && 'light') || 'subtle'}
+                            c={isSplitViewActive ? undefined : 'dimmed'}
                             size="md"
                             onClick={onToggleSplitView}
                             title={t('NAV.SPLITVIEW')}
@@ -69,7 +70,7 @@ const Nav = observer(() => {
                         <Divider size="sm" orientation="vertical" />
                         <Menu width={200} position="bottom" withArrow shadow="md">
                             <Menu.Target>
-                                <ActionIcon variant="subtle" size="lg">
+                                <ActionIcon variant="subtle" size="lg" c="dimmed">
                                     <IconAdjustmentsHorizontal size={24} stroke={1.5} />
                                 </ActionIcon>
                             </Menu.Target>

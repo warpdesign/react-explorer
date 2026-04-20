@@ -3,15 +3,15 @@ import {
     IconCameraFilled,
     IconDeviceImac,
     IconDownload,
-    IconFile,
+    IconFileFilled,
     IconFileCode,
     IconFileDigit,
     IconFileText,
     IconFileZip,
-    IconFolder,
+    IconFolderFilled,
     IconHomeFilled,
     IconMusic,
-    IconPhoto,
+    IconPhotoFilled,
     IconProps,
     IconVideoFilled,
 } from '@tabler/icons-react'
@@ -31,13 +31,13 @@ export const UserHomeIconsTabler: {
 export const TypeIconsTabler: {
     [key: string]: React.ForwardRefExoticComponent<IconProps & React.RefAttributes<Icon>>
 } = {
-    img: IconPhoto,
-    any: IconFile,
+    img: IconPhotoFilled,
+    any: IconFileFilled,
     snd: IconMusic,
     vid: IconVideoFilled,
     exe: IconFileDigit,
     arc: IconFileZip,
     doc: IconFileText,
     cod: IconFileCode,
-    dir: IconFolder,
+    dir: IconFolderFilled,
 }

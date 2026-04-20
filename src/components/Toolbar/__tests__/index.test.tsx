@@ -169,16 +169,10 @@ describe('Toolbar', () => {
             it('should focus input when pressing focus shortcut', async () => {
                 const { container } = setup(<Toolbar {...PROPS} />, options)
 
-                // Not an ideal solution but we cannot use user.keyboard since Blueprint
-                // is using the deprecated event.which property of the event that's received
-                // and user.keyboard doesn't set this property on the event object.
-                //
+                // Note: We use fireEvent.keyDown instead of user.keyboard because we need
+                // to set the deprecated event.which property for backward compatibility.
                 // Also note that we check for ctrlKey & not metaKey which will work even
-                // when running on a Mac:
-                // because Blueprint is also using a deprecated property navigator.platform
-                // to detect macOS and in jest navigator.platform === ''
-                //
-                // see: https://github.com/palantir/blueprint/discussions/5891
+                // when running on a Mac since navigator.platform === '' in jest.
                 fireEvent.keyDown(container, {
                     which: CODES.L,
                     ctrlKey: true,

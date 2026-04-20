@@ -27,10 +27,17 @@ function parseBoxShadow(style: Style) {
 }
 
 function createDragPreview(text = '...', isDarkModeActive = false): string {
+    const computedStyle = getComputedStyle(document.documentElement)
+    const backgroundColor = isDarkModeActive
+        ? computedStyle.getPropertyValue('--mantine-color-gray-8')
+        : computedStyle.getPropertyValue('--mantine-color-gray-2')
+    const color = computedStyle.getPropertyValue('--mantine-color-text')
+    const borderColor = computedStyle.getPropertyValue('--mantine-color-default-border')
+
     const style: Style = {
-        backgroundColor: isDarkModeActive ? 'rgba(92, 112, 128, 0.3)' : 'rgba(191, 204, 214, 0.4)',
-        color: isDarkModeActive ? '#f5f8fa' : '#182026',
-        borderColor: '#1a1a1a',
+        backgroundColor: backgroundColor || (isDarkModeActive ? '#25262b' : '#f1f3f5'),
+        color: color || (isDarkModeActive ? '#c1c2c5' : '#000000'),
+        borderColor: borderColor || '#dee2e6',
         fontSize: 14,
         paddingTop: 5,
         paddingRight: 5,

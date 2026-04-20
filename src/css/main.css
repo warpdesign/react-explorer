@@ -3,36 +3,18 @@ body {
     overflow:hidden;
     height:100vh;
     user-select: none;
+    background-color: var(--mantine-color-body);
+    color: var(--mantine-color-text);
+    font-family: var(--mantine-font-family);
 }
 
-body.bp5-dark {
-    background-color: #293742;
-    color: #f5f8fa;
-}
-
-button.small.bp5-minimal{
+button.small{
     transform:scale(.8);
     opacity:.6;
 }
 
 button.small:hover{
     opacity:1;
-}
-
-.bp5-tree-node-caret-none{
-    min-width:10px;
-}
-
-.bp5-control-group.toolbar{
-    z-index:1;
-}
-
-/* needed to make the pathbar full-width
- * FIXME: we shouldn't hack css like this
- */
-.toolbar > .bp5-popover2-target {
-    flex-grow: 1;
-    flex-shrink: 1;
 }
 
 /* auto resize layout */
@@ -43,15 +25,6 @@ button.small:hover{
     height:100%;
 }
 
-.sideview > .bp5-control-group{
-    flex-shrink:0;
-    -webkit-user-select: none;
-}
-
-.sideview > .bp5-control-group > :first-child,
-.sideview > .bp5-control-group > :last-child {
-    border-radius:0;
-}
 
 .main .hidden{
     display:none;
@@ -94,23 +67,7 @@ button.small:hover{
 }
 
 #root .sideview {
-    border-left: 1px solid rgb(189, 195, 199);
-}
-
-#root .dualView #view_0.inactive {
-    border-right-color:transparent;
-}
-
-#root .dualView #view_0.active {
-    border-left-color:transparent;
-}
-
-#root .dualView #view_1.inactive{
-    border-left-color: rgb(131, 135, 138);
-}
-
-#root .darwin.dualView #view_1.active:before {
-    border-bottom-right-radius: 5px;
+    border-left: 1px solid var(--mantine-color-default-border);
 }
 
 #root .dualView .sideview:before{
@@ -121,38 +78,21 @@ button.small:hover{
     bottom: 0;
     left: -1px;
     content: "";
-    opacity: .6;
     z-index: 9;
-    border: 1px solid rgb(189, 195, 199);
+    border: 1px solid var(--mantine-color-default-border);
     border-top:none;
     border-bottom:none;
 }
 
 #root .dualView .sideview.active:before {
-    opacity:1;
-    border: 2px solid rgba(19, 124, 189, .9);
-}
-
-#root .dualView .sideview.inactive:before{
-    border-left:none;
+    border: 2px solid var(--mantine-color-blue-outline);
+    opacity: 0.4;
 }
 
 /* dark theme */
-.bp5-dark #root .singleView .sideview {
-    border-left: 1px solid rgb(14,25,34);
-}
-
-.bp5-dark #root .sideview,
-.bp5-dark #root .dualView #view_1.inactive {
-    border-color: rgb(14,25,34);
-}
-
-.bp5-dark #root .dualView .sideview.inactive:before {
-    border-color: rgb(73, 75, 76);
-}
 
 #root .sideview.dropTarget:before {
-    box-shadow: 0 0 4px 2px inset #00b63ddb;
+    box-shadow: 0 0 4px 2px inset var(--mantine-color-green-6);
 }
 
 #root .sideview.notDropTarget{
@@ -160,7 +100,7 @@ button.small:hover{
 }
 
 #root .sideview.notDropTarget:before {
-    box-shadow: 0 0 4px 2px inset #b6000982;
+    box-shadow: 0 0 4px 2px inset var(--mantine-color-red-6);
 }
 
 /* #root .sideview:first-child{
@@ -171,21 +111,6 @@ button.small:hover{
     margin-right:0;
 } */
 
-.bp5-input-group{
-    flex-grow:1;
-}
-
-.bp5-popover-wrapper{
-    flex-grow:1;
-}
-
-.bp5-popover-wrapper .bp5-popover-target{
-    width:100%;
-}
-
-.bp5-navbar .title-group .bp5-intent-primary{
-    pointer-events:none;
-}
 
 .downloads{
     overflow:auto;
@@ -202,49 +127,18 @@ button.small:hover{
     margin: auto;
 }
 
-.downloads.empty .bp5-icon{
+.downloads.empty svg{
     padding: 20px 12px;
-    border: 3px dashed #d9dde0;
+    border: 3px dashed var(--mantine-color-default-border);
     border-radius:8px;
     margin-bottom:20px;
     text-align:center;
-}
-
-.downloads.empty .bp5-icon svg{
     display:inline;
 }
 
-.downloads .bp5-tree-node-content .action{
-    vertical-align:text-bottom;
-    opacity: .5;
-    cursor:pointer;    
-}
-
-.downloads .bp5-tree-node-content:hover .action{
-    opacity: 1;
-}
-
-/* line height bug ? */
-.bp5-tree-node-caret > span{
-    vertical-align:top;
-}
-
-#root .bp5-navbar {
-    border-bottom: 1px solid rgb(189, 195, 199);
-    background: rgb(246,246,246);
-    background: linear-gradient(180deg, rgba(246,246,246,1) 16%, rgba(230,236,239,1) 100%);
-    box-shadow:none;
-}
-
-.bp5-dark #root .bp5-navbar {
-    border-bottom: 1px solid rgb(14,25,34);
-    background: rgb(46,46,46);
-    background: linear-gradient(180deg, rgba(56,56,56,1) 16%, rgba(40,56,69,1) 100%);
-}
-
-.bp5-navbar .download .bp5-button-text{
-    display: flex;
-    align-items: center;
+#root .mantine-AppShell-header {
+    border-bottom: 1px solid var(--mantine-color-default-border);
+    background: var(--mantine-color-body);
 }
 
 .app-badge{
@@ -253,59 +147,15 @@ button.small:hover{
     position: relative;
 }
 
-.app-badge .bp5-spinner svg {
-    stroke-width: 10;
-}
-
 .app-badge-content{
     position: absolute;
     left: 0;
-    color: #106ba3;
+    color: var(--mantine-color-blue-text);
     font-size: 11px;
     font-weight: bold;
     line-height: 19px;
     right: 0;
     text-align: center;
-}
-
-.bp5-dark .app-badge-content {
-    color: #48aff0;
-}
-
-.app-badge .bp5-spinner{
-    display:inline-block;
-}
-
-.app-badge.bp5-intent-success{
-    background-color:#0d8050;
-}
-
-.app-badge.bp5-intent-danger{
-    background-color:#c23030;
-}
-
-.app-badge.bp5-intent-primary{
-    background-color:#106ba3;
-}
-
-.app-badge.bp5-intent-warning{
-    background-color:#bf7326;
-}
-
-.bp5-dark .app-badge.bp5-intent-success{
-    background-color:#0f9960;
-}
-
-.bp5-dark .app-badge.bp5-intent-danger{
-    background-color:#db3737;
-}
-
-.bp5-dark .app-badge.bp5-intent-primary{
-    background-color:#137cbd;
-}
-
-.bp5-dark .app-badge.bp5-intent-warning{
-    background-color:#d9822b;
 }
 
 /* app loader */
@@ -326,11 +176,7 @@ button.small:hover{
 .app-loader.active{
     opacity:1;
     pointer-events:all;
-    background-color: rgba(255,255,255,.9);
-}
-
-body.bp5-dark .app-loader.active{
-    background-color:rgba(41, 55, 66, 0.9);
+    background-color: var(--mantine-color-body);
 }
 
 .app-loader > * {
@@ -343,37 +189,22 @@ body.bp5-dark .app-loader.active{
     opacity: 1;
 }
 
-/* properly align labels inside every dialog */
-.bp5-dialog-body label.bp5-label {
-    width: 28%;
-    text-align: right;
-}
-
-/* special case for makedir: we want to see the dialog */
-.makedirDialog label.bp5-label{
-    width:auto;
-}
 
 /* login dialog */
 .loginDialog .error{
     text-align:center;
-    color:white;
+    color:var(--mantine-color-white);
     padding:15px;
     margin:10px 30px 40px 30px;
     border-radius:3px;
-    border:1px solid rgba(16,22,26,.2);
+    border:1px solid var(--mantine-color-default-border);
 }
 
 .status-bar {
-    background: rgba(206, 217, 224, 0.5);
-    border-top: 1px solid rgb(189, 195, 199);
+    background: var(--mantine-color-default);
+    border-top: 1px solid var(--mantine-color-default-border);
     padding-top: 4px;
     padding-bottom: 4px;
-}
-
-.bp5-dark .status-bar {
-    background-color:rgb(41, 56, 66);
-    border-top: 1px solid rgb(14,25,34);
 }
 
 .tablist{
@@ -385,15 +216,6 @@ body.bp5-dark .app-loader.active{
     cursor:default;
 }
 
-.tablist .bp5-button.tab > * {
-    margin-right:0;
-}
-
-.tablist .bp5-button .bp5-icon.folder{
-    padding: 0 10px;
-    margin:0;
-    opacity:.9;
-}
 
 .tablist button:last-child{
     opacity:.3;
@@ -407,54 +229,14 @@ body.bp5-dark .app-loader.active{
     opacity:0;
 }
 
-.tablist .bp5-button:hover .closetab{
+.tablist button:hover .closetab{
     opacity:1;
 }
 
-.tablist .addtab:hover, .bp5-dark .bp5-button.addtab:hover{
-    background:transparent;
+.sideview:not(.active) .tablist button[data-active]{
+    background-color: var(--mantine-color-gray-light);
 }
 
-.tablist.bp5-button-group.bp5-fill .bp5-button:not(.bp5-fixed) {
-    width:13rem;
-    flex-grow:0;
-}
-
-.tablist.bp5-button-group.bp5-fill .addtab:not(.bp5-fixed){
-    width:auto;
-    flex-grow:0;
-}
-
-.tablist .bp5-button .bp5-button-text{
-    flex-grow: 1;
-    text-align: center;
-}
-
-.sideview:not(.active) .tablist .bp5-intent-primary{
-    background-color: #8A9BA8;
-}
-
-.bp5-dark .sideview:not(.active) .tablist .bp5-intent-primary{
-    background-color: rgb(88, 100, 109);
-}
-
-.sideview > .toolbar > .bp5-button-group > .bp5-button:not([class*="bp5-intent-"]) {
-    box-shadow: inset 0 0 0 1px rgba(16, 22, 26, 0.2), inset 0 -1px 0 rgba(16, 22, 26, 0.1);
-}
-
-.sideview > .toolbar > .bp5-button-group > .bp5-button:first-child:not([class*="bp5-intent-"]) {
-    margin-left:-1px;
-}
-
-.sideview > .toolbar > .bp5-button-group > .bp5-button:last-child:not([class*="bp5-intent-"]) {
-    box-shadow:inset 0 -1px 0 rgba(16, 22, 26, 0.1);
-}
-
-.tablist .bp5-button .bp5-button-text{
-    overflow:hidden;
-    white-space: nowrap;
-    text-overflow:ellipsis;
-}
 
 .tablist-wrapper{
     position: relative;
@@ -467,45 +249,5 @@ body.bp5-dark .app-loader.active{
     top:0;
 }
 
-/* intent colors on any span */
-span.bp5-intent-success{
-    color:#0d8050;
-}
+/* intent colors - now handled by Mantine theme */
 
-span.bp5-intent-danger{
-    color:#c23030;
-}
-
-span.bp5-intent-primary{
-    color:#106ba3;
-}
-
-span.bp5-intent-warning{
-    color:#bf7326;
-}
-
-.bp5-dark span.bp5-intent-success{
-    color:#0f9960;
-}
-
-.bp5-dark span.bp5-intent-danger{
-    color:#db3737;
-}
-
-.bp5-dark span.bp5-intent-primary{
-    color:#137cbd;
-}
-
-.bp5-dark span.bp5-intent-warning{
-    color:#d9822b;
-}
-
-/* patch for linux/win dialogs that may show scrollbar */
-.bp5-overlay-inline .bp5-overlay-content,
-.bp5-overlay-scroll-container .bp5-overlay-content{
-    max-height:100%;
-}
-
-.bp5-portal .bp5-overlay.bp5-overlay-scroll-container{
-    overflow:hidden;
-}

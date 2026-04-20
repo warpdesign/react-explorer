@@ -122,7 +122,7 @@ export const LeftPanel = observer(({ hide }: { hide: boolean }) => {
 
     return (
         <>
-            <ScrollArea overscrollBehavior="contain" scrollbarSize={8} scrollHideDelay={500} bg="background" h="100%">
+            <ScrollArea overscrollBehavior="contain" scrollbarSize={8} scrollHideDelay={500} h="100%">
                 <Tree
                     tree={tree}
                     data={nodes}
@@ -136,7 +136,7 @@ export const LeftPanel = observer(({ hide }: { hide: boolean }) => {
                                     <IconButton
                                         pl="xs"
                                         w="100%"
-                                        size="xs"
+                                        size="sm"
                                         icon={IconCaretRightFilled}
                                         variant="transparent"
                                         radius="0"
@@ -150,7 +150,7 @@ export const LeftPanel = observer(({ hide }: { hide: boolean }) => {
                                 {nodeProps && (
                                     <IconButton
                                         w="100%"
-                                        size="xs"
+                                        size="sm"
                                         icon={nodeProps.icon}
                                         radius="0"
                                         onClick={(e) => onNodeClick(node, e)}

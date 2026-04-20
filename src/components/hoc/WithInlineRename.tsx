@@ -117,6 +117,13 @@ export function withInlineRename<T extends InlineRenameProps>(
                         defaultValue={item.name}
                         autoFocus
                         size="xs"
+                        styles={{
+                            input: {
+                                padding: '2px 6px',
+                                minHeight: '24px',
+                                height: '24px',
+                            },
+                        }}
                     />
                 )}
             </>

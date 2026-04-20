@@ -238,7 +238,7 @@ const PrefsDialog = observer(({ isOpen, onClose }: PrefsProps) => {
                 </Text>
             </ScrollArea>
 
-            <Group justify="end" pt="md" mt="md" style={{ borderTop: '1px solid var(--mantine-color-gray-3)' }}>
+            <Group justify="end" pt="md" mt="md" style={{ borderTop: '1px solid var(--mantine-color-default-border)' }}>
                 <Button onClick={onClose} variant="filled" color="gray">
                     {t('COMMON.CLOSE')}
                 </Button>

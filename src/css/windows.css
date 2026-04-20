@@ -1,4 +1,1 @@
-/* put ok button first on Windows */
-.win32 .bp5-alert-footer .bp5-button:first-child, .win32 .bp5-dialog-footer .bp5-button:first-child {
-    order: 1;
-}
+/* put ok button first on Windows - now handled by Mantine Modal button order */

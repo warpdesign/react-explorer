@@ -3,7 +3,6 @@ import { screen, render, setup, t, isSelected } from 'rtl'
 
 import { Nav } from '../Nav'
 import { AppState } from '$src/state/appState'
-import { Classes } from '@blueprintjs/core'
 
 describe('Nav', () => {
     const options = {
@@ -38,8 +37,9 @@ describe('Nav', () => {
 
         const splitViewButton = container.querySelector('[data-icon="panel-stats"]')
         expect(splitViewButton).toBeInTheDocument()
-        expect(splitViewButton.classList.contains(Classes.INTENT_PRIMARY)).toBe(
-            options.providerProps.appState.winStates[0].splitView,
+        // Split view button uses Mantine's light variant when active
+        expect(splitViewButton.parentElement.getAttribute('data-variant')).toBe(
+            options.providerProps.appState.winStates[0].splitView ? 'light' : 'subtle',
         )
     })
 

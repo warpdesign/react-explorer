@@ -168,10 +168,10 @@ As a starting point you may use the `FsGeneric` skeleton.
 React-Explorer makes use of the following libraries/components:
 
 - [React](https://reactjs.org)
-- [Electron](https://electron.s.org)
+- [Electron](https://electronjs.org)
 - [TypeScript](https://typescriptlang.org)
 - [MobX](https://mobx.js.org)
-- [Blueprintjs](https://blueprintjs.com)
+- [Mantine UI](https://mantine.dev)
 - [i18next](https://i18next.com) & [react-i18n](https://github.com/i18next/react-i18next)
 
 ## Licence

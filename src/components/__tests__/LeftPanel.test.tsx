@@ -1,7 +1,6 @@
 import React from 'react'
 
 import { render, screen, setup, t, waitForElementToBeRemoved } from 'rtl'
-import { IconNames } from '@blueprintjs/icons'
 import { AppState } from '$src/state/appState'
 import { ALL_DIRS, USERNAME } from '$src/utils/platform'
 import { SettingsState } from '$src/state/settingsState'
@@ -87,14 +86,13 @@ describe('LeftPanel', () => {
         })
 
         it('should collapse tree when clicking on root label', async () => {
-            const { container, user } = setup(<LeftPanel {...PROPS} />, options)
+            const { user } = setup(<LeftPanel {...PROPS} />, options)
 
-            const toggleElement = container.querySelectorAll(`[data-icon="${IconNames.CHEVRON_RIGHT}"]`)[0]
+            // Click on the Shortcuts label to collapse it
+            const shortcutsLabel = screen.getByText(t('FAVORITES_PANEL.SHORTCUTS'))
+            await user.click(shortcutsLabel)
 
-            console.log(toggleElement)
-
-            await user.click(toggleElement)
-
+            // User folders should be hidden after collapse
             userFolders.forEach(([id]) => {
                 const label = id === 'HOME_DIR' ? USERNAME : t(`FAVORITES_PANEL.${id}`)
                 waitForElementToBeRemoved(() => screen.queryByText(label))

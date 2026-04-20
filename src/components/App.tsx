@@ -8,9 +8,7 @@ import {
     Stack,
     Text,
     TextInput,
-    colorsTuple,
     createTheme,
-    virtualColor,
 } from '@mantine/core'
 import { MantineProvider } from '@mantine/core'
 import { ModalsProvider } from '@mantine/modals'
@@ -46,22 +44,7 @@ import '$src/css/main.css'
 import '$src/css/mantine-extensions.css'
 
 const theme = createTheme({
-    colors: {
-        ['blue-background-dark']: colorsTuple('#293742'),
-        ['blue-background-light']: colorsTuple('#ced9e080'),
-        ['gray-light']: colorsTuple('#4a5056'),
-        ['gray-dark']: colorsTuple('#eeeeee'),
-        background: virtualColor({
-            light: 'blue-background-light',
-            dark: 'blue-background-dark',
-            name: 'background',
-        }),
-        button: virtualColor({
-            light: 'gray-light',
-            dark: 'gray-dark',
-            name: 'button',
-        }),
-    },
+    primaryColor: 'blue',
     components: {
         Select: Select.extend({
             styles: {
@@ -376,16 +359,19 @@ const App = observer(() => {
                         <AppShell.Header>
                             <Nav />
                         </AppShell.Header>
-                        {/* <div onClickCapture={handleClick} onContextMenuCapture={handleClick} className={mainClass}> */}
                         <AppShell.Navbar>
                             <LeftPanel hide={!isExplorer} />
                         </AppShell.Navbar>
-                        <AppShell.Main h="100%" display={'flex'}>
+                        <AppShell.Main
+                            h="100%"
+                            display={'flex'}
+                            onClickCapture={handleClick}
+                            onContextMenuCapture={handleClick}
+                        >
                             {<SideView viewState={views[0]} hide={!isExplorer} />}
                             {splitView && <SideView viewState={views[1]} hide={!isExplorer} />}
                             <Downloads hide={isExplorer} />
                         </AppShell.Main>
-                        {/* </div> */}
                         {cache?.cursor && <PreviewDialog />}
                     </AppShell>
                 </ModalsProvider>

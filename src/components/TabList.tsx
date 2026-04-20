@@ -15,7 +15,7 @@ import { ALL_DIRS } from '$src/utils/platform'
 import {
     Icon,
     IconProps,
-    IconFolder,
+    IconFolderFilled,
     IconFolderExclamation,
     IconSquareRoundedX,
     IconCirclePlusFilled,
@@ -43,7 +43,7 @@ export const getTabIconTabler = (
         }
     }
 
-    return IconFolder
+    return IconFolderFilled
 }
 
 const TabList = observer(() => {
@@ -217,7 +217,8 @@ const TabList = observer(() => {
                         leftSection={<TabIcon size={16} onContextMenu={(e) => onFolderContextMenu(index, e)} />}
                         rightSection={closeIcon}
                         radius="0"
-                        variant={cache.isVisible ? 'filled' : 'default'}
+                        variant={cache.isVisible ? 'light' : 'default'}
+                        color={cache.isVisible && !viewState.isActive ? 'gray' : undefined}
                         className="tab"
                         bd="xl"
                     >
@@ -226,8 +227,8 @@ const TabList = observer(() => {
                 )
             })}
             <Flex align="center" mx="sm">
-                <ActionIcon variant="white" radius="xl" title={t('TABS.NEW')} size="sm">
-                    <IconCirclePlusFilled stroke={1.5} onClick={() => addTab(viewState.getVisibleCacheIndex())} />
+                <ActionIcon variant="subtle" title={t('TABS.NEW')} c="dimmed" size="sm">
+                    <IconCirclePlusFilled onClick={() => addTab(viewState.getVisibleCacheIndex())} />
                 </ActionIcon>
             </Flex>
         </Button2.Group>

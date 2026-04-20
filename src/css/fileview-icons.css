@@ -8,7 +8,7 @@
 }
 
 .fileview-icons textarea {
-    font-family: -apple-system, "BlinkMacSystemFont", "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Open Sans", "Helvetica Neue", "blueprint-icons-16", sans-serif;
+    font-family: -apple-system, "BlinkMacSystemFont", "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Open Sans", "Helvetica Neue", sans-serif;
     resize: none;
     text-align: center;
 }
@@ -23,9 +23,9 @@
     bottom:0;
     left:0;
     background:transparent url(../../img/link.png) no-repeat;
-    background-color:white;
+    background-color:var(--mantine-color-white);
     background-size:100% 100%;
     width:10px;
     height:10px;
-    border:1px solid rgba(0,0,0,.4);
+    border:1px solid var(--mantine-color-default-border);
 }

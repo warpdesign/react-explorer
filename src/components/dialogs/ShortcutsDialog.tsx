@@ -82,9 +82,7 @@ export const buildShortcuts = async (t: TFunction<'translation', undefined>): Pr
 }
 
 const parseCombo = (combo: string): string[] => {
-    // Parse Blueprint combo format (e.g., "mod + shift + n") into individual keys
     return combo.split(' + ').map((key) => {
-        // Convert Blueprint's special keys to display names
         const keyMap: Record<string, string> = {
             mod: isMac ? '⌘' : 'Ctrl',
             meta: isMac ? '⌘' : 'Ctrl',
@@ -197,7 +195,12 @@ const ShortcutsDialog = ({ isOpen, onClose }: ShortcutsProps) => {
                 )}
             </ScrollArea>
 
-            <Group justify="flex-end" pt="md" mt="md" style={{ borderTop: '1px solid var(--mantine-color-gray-3)' }}>
+            <Group
+                justify="flex-end"
+                pt="md"
+                mt="md"
+                style={{ borderTop: '1px solid var(--mantine-color-default-border)' }}
+            >
                 <Button onClick={onClose} className="data-cy-close" variant="filled" color="gray">
                     {t('COMMON.CLOSE')}
                 </Button>

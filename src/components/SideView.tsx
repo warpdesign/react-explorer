@@ -77,7 +77,7 @@ export const SideView = observer(({ hide, viewState }: SideViewProps) => {
                     <Loader size="lg" />
                 </Overlay>
                 <Overlay shouldShow={dropOverlayActive} id={`drop-overlay-${viewState.viewId}`}>
-                    <DropOverlayIcon size={80} color="#d9dde0" />
+                    <DropOverlayIcon size={80} />
                 </Overlay>
             </div>
         </Provider>

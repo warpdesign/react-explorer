@@ -29,7 +29,7 @@ export const Name = ({ data, onInlineEdit, disabledInlineEdit }: Props) => {
 
     return (
         <div className="name">
-            <IconComponent size={16} style={{ marginRight: '8px' }} />
+            <IconComponent size={20} style={{ marginRight: '8px' }} />
             <Text onInlineEdit={onInlineEdit} item={data} disabledInlineEdit={disabledInlineEdit}></Text>
         </div>
     )

@@ -7,22 +7,16 @@
 
 .win32 .custom-scrollbar::-webkit-scrollbar-thumb,
 .linux .custom-scrollbar::-webkit-scrollbar-thumb {
-    background: rgba(90, 90, 90, .3);
+    background: var(--mantine-color-default-border);
     border-radius: 5px;
 }
-  
+
 .win32 .custom-scrollbar::-webkit-scrollbar-track,
 .linux .custom-scrollbar::-webkit-scrollbar-track {
-    background: rgba(0, 0, 0, 0);
+    background: transparent;
 }
 
 .win32 .favoritesPanel,
 .linux .favoritesPanel {
     overflow: overlay;
-}
-
-.bp5-dark.win32 .custom-scrollbar::-webkit-scrollbar-thumb,
-.bp5-dark.linux .custom-scrollbar::-webkit-scrollbar-thumb {
-    background: rgba(0, 0, 0, .6);
-    border: 1px solid rgba(255, 255, 255, .2);
 }

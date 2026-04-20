@@ -10,15 +10,10 @@ import { FileState } from '$src/state/fileState'
 import { useTranslation } from 'react-i18next'
 
 const lightTheme = {
-    tertiary: '#ffffff',
     disableThemeScrollbar: true,
 }
 
 const darkTheme = {
-    tertiary: '#1f2933',
-    textPrimary: '#ffffff',
-    textSecondary: '#d3d3d3',
-    textTertiary: '#9e9e9e',
     disableThemeScrollbar: true,
 }
 
@@ -56,7 +51,7 @@ export const PreviewDialog = observer(() => {
                     {file.fullname}
                 </Text>
                 {file.isDir === false && (
-                    <Button onClick={() => cache.openFile(appState, cache.cursor)} size="sm" variant="filled">
+                    <Button onClick={() => cache.openFile(appState, cache.cursor)} size="sm" variant="light">
                         {t('DIALOG.PREVIEW.OPEN')}
                     </Button>
                 )}

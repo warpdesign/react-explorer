@@ -258,7 +258,7 @@ export const Toolbar = observer(({ active }: Props) => {
                 onKeyUp={onKeyUp}
                 placeholder={t('COMMON.PATH_PLACEHOLDER')}
                 rightSection={
-                    <ActionIcon className="data-cy-reload" onClick={onReload} variant="subtle" size="sm">
+                    <ActionIcon className="data-cy-reload" onClick={onReload} variant="subtle" size="sm" c="dimmed">
                         <IconRefresh size={16} />
                     </ActionIcon>
                 }
