@@ -1,14 +1,21 @@
 import React from 'react'
 
 import { ViewModeName } from '$src/hooks/useViewMode'
-import { Button, Icon, IconName, Menu, MenuDivider, MenuItem } from '@blueprintjs/core'
+import { Button, Menu } from '@mantine/core'
+import {
+    IconCheck,
+    IconColumns,
+    IconGridDots,
+    IconSortAscending,
+    IconSortDescending,
+    IconFileText,
+    IconChartBar,
+} from '@tabler/icons-react'
 import { IconNames } from '@blueprintjs/icons'
 import { useTranslation } from 'react-i18next'
-import { Popover2 } from '@blueprintjs/popover2'
 import { TSORT_METHOD_NAME, TSORT_ORDER } from '$src/services/FsSort'
 
-export const getTickIcon = (str: string, expectedStr: string): IconName | undefined =>
-    str === expectedStr ? 'small-tick' : 'blank'
+export const getTickIcon = (str: string, expectedStr: string) => (str === expectedStr ? <IconCheck size={16} /> : null)
 
 export const ViewToggleMenu = ({
     viewmode,
@@ -20,20 +27,22 @@ export const ViewToggleMenu = ({
     const { t } = useTranslation()
 
     return (
-        <Menu>
-            <MenuItem
-                text={t('TOOLBAR.DETAILS_VIEW')}
-                icon={getTickIcon(viewmode, 'details')}
+        <>
+            <Menu.Item
+                leftSection={getTickIcon(viewmode, 'details')}
+                rightSection={<IconColumns size={16} />}
                 onClick={() => onClick('details')}
-                labelElement={<Icon icon={IconNames.PROPERTIES} />}
-            />
-            <MenuItem
-                text={t('TOOLBAR.ICON_VIEW')}
-                icon={getTickIcon(viewmode, 'icons')}
+            >
+                {t('TOOLBAR.DETAILS_VIEW')}
+            </Menu.Item>
+            <Menu.Item
+                leftSection={getTickIcon(viewmode, 'icons')}
+                rightSection={<IconGridDots size={16} />}
                 onClick={() => onClick('icons')}
-                labelElement={<Icon icon={IconNames.GRID_VIEW} />}
-            />
-        </Menu>
+            >
+                {t('TOOLBAR.ICON_VIEW')}
+            </Menu.Item>
+        </>
     )
 }
 
@@ -47,9 +56,21 @@ export const ViewToggle = ({
     const { t } = useTranslation()
 
     return (
-        <Popover2 content={<ViewToggleMenu onClick={onClick} viewmode={viewmode} />} placement="bottom-start">
-            <Button icon={IconNames.GRID_VIEW} title={t('TOOLBAR.CHANGE_VIEW')} />
-        </Popover2>
+        <Menu position="bottom-start">
+            <Menu.Target>
+                <Button
+                    variant="default"
+                    size="compact-sm"
+                    title={t('TOOLBAR.CHANGE_VIEW')}
+                    style={{ minWidth: 'auto', padding: '4px 8px' }}
+                >
+                    <IconGridDots size={16} />
+                </Button>
+            </Menu.Target>
+            <Menu.Dropdown>
+                <ViewToggleMenu onClick={onClick} viewmode={viewmode} />
+            </Menu.Dropdown>
+        </Menu>
     )
 }
 
@@ -65,29 +86,37 @@ export const SortMenu = ({
     const { t } = useTranslation()
 
     return (
-        <Menu>
-            <MenuItem
-                icon={getTickIcon(sortMethod, 'name')}
-                text={t('FILETABLE.COL_NAME')}
+        <>
+            <Menu.Item
+                leftSection={getTickIcon(sortMethod, 'name')}
+                rightSection={<IconFileText size={16} />}
                 onClick={() => onClick('name', sortOrder)}
-            />
-            <MenuItem
-                icon={getTickIcon(sortMethod, 'size')}
-                text={t('FILETABLE.COL_SIZE')}
+            >
+                {t('FILETABLE.COL_NAME')}
+            </Menu.Item>
+            <Menu.Item
+                leftSection={getTickIcon(sortMethod, 'size')}
+                rightSection={<IconChartBar size={16} />}
                 onClick={() => onClick('size', sortOrder)}
-            />
-            <MenuDivider />
-            <MenuItem
-                icon={getTickIcon(sortOrder, 'asc')}
-                text={t('FILETABLE.SORT_ASCENDING')}
+            >
+                {t('FILETABLE.COL_SIZE')}
+            </Menu.Item>
+            <Menu.Divider />
+            <Menu.Item
+                leftSection={getTickIcon(sortOrder, 'asc')}
+                rightSection={<IconSortAscending size={16} />}
                 onClick={() => onClick(sortMethod, 'asc')}
-            />
-            <MenuItem
-                icon={getTickIcon(sortOrder, 'desc')}
-                text={t('FILETABLE.SORT_DESCENDING')}
+            >
+                {t('FILETABLE.SORT_ASCENDING')}
+            </Menu.Item>
+            <Menu.Item
+                leftSection={getTickIcon(sortOrder, 'desc')}
+                rightSection={<IconSortDescending size={16} />}
                 onClick={() => onClick(sortMethod, 'desc')}
-            />
-        </Menu>
+            >
+                {t('FILETABLE.SORT_DESCENDING')}
+            </Menu.Item>
+        </>
     )
 }
 
@@ -99,8 +128,20 @@ export const SortMenuToggle = (props: {
     const { t } = useTranslation()
 
     return (
-        <Popover2 content={<SortMenu {...props} />} placement="bottom-start">
-            <Button icon={IconNames.SORT} title={t('TOOLBAR.CHANGE_SORT_METHOD')} />
-        </Popover2>
+        <Menu position="bottom-start">
+            <Menu.Target>
+                <Button
+                    variant="default"
+                    size="compact-sm"
+                    title={t('TOOLBAR.CHANGE_SORT_METHOD')}
+                    style={{ minWidth: 'auto', padding: '4px 8px' }}
+                >
+                    <IconSortAscending size={16} />
+                </Button>
+            </Menu.Target>
+            <Menu.Dropdown>
+                <SortMenu {...props} />
+            </Menu.Dropdown>
+        </Menu>
     )
 }

@@ -1,10 +1,9 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react'
 import { observer } from 'mobx-react'
 import { InputGroup, ControlGroup, Button, ButtonGroup, HotkeysTarget2, Classes } from '@blueprintjs/core'
-import { IconNames } from '@blueprintjs/icons'
-import { Menu } from '@mantine/core'
+import { Menu, Button as MantineButton } from '@mantine/core'
 import { useTranslation } from 'react-i18next'
-import { IconX } from '@tabler/icons-react'
+import { IconX, IconFolderPlus, IconChevronDown } from '@tabler/icons-react'
 
 import { FileMenu } from '$src/components/FileMenu'
 import { MakedirDialog } from '$src/components/dialogs/MakedirDialog'
@@ -222,7 +221,13 @@ export const Toolbar = observer(({ active }: Props) => {
                     <SortMenuToggle sortMethod={sortMethod} sortOrder={sortOrder} onClick={onSortChange} />
                     <Menu position="bottom-start">
                         <Menu.Target>
-                            <Button rightIcon="caret-down" icon={IconNames.FOLDER_NEW} />
+                            <MantineButton
+                                variant="default"
+                                size="compact-sm"
+                                leftSection={<IconFolderPlus size={16} />}
+                                rightSection={<IconChevronDown size={14} />}
+                                style={{ minWidth: 'auto', padding: '4px 8px' }}
+                            />
                         </Menu.Target>
                         <Menu.Dropdown>
                             <FileMenu
