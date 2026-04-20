@@ -256,8 +256,14 @@ const FileView = observer(({ hide }: Props) => {
         }
     }
 
-    const getDraggedProps = (index: number): DraggedObject => {
-        const { isSelected, nodeData } = nodes[index]
+    const getDraggedProps = (index: number): DraggedObject | null => {
+        const { isSelected, nodeData, isEditing } = nodes[index]
+
+        // Disable drag when file is being inline-renamed to allow text selection
+        if (isEditing) {
+            console.log('isEditing', isEditing)
+            return null
+        }
 
         return {
             fileState: cache,

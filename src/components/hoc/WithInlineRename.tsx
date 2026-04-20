@@ -1,5 +1,5 @@
 import React, { ReactElement, useEffect, useRef } from 'react'
-import { InputGroup, TextArea } from '@blueprintjs/core'
+import { TextInput, Textarea } from '@mantine/core'
 
 import { isMac } from '$src/utils/platform'
 import { InlineEditEvent } from '$src/hooks/useViewMode'
@@ -10,7 +10,7 @@ import { getSelectionRange } from '$src/utils/fileUtils'
 export interface InlineRenameProps {
     item: FileViewItem
     onInlineEdit?: (event: InlineEditEvent) => void
-    selectedCount: number
+    disabledInlineEdit: boolean
     onClick?: (e: React.MouseEvent<HTMLElement>) => void
 }
 
@@ -26,7 +26,7 @@ export function withInlineRename<T extends InlineRenameProps>(
     return (props: T) => {
         const inputRef = useRef<HTMLInputElement>()
         const timeoutRef = useRef<ReturnType<typeof setTimeout>>()
-        const { selectedCount, item, onInlineEdit } = props
+        const { item, onInlineEdit, disabledInlineEdit } = props
         const { isEditing, isSelected } = item
 
         useEffect(() => {
@@ -48,7 +48,7 @@ export function withInlineRename<T extends InlineRenameProps>(
                 action: 'cancel',
             })
 
-        const InputElement = type === 'text' ? InputGroup : TextArea
+        const InputElement = type === 'text' ? TextInput : Textarea
         const inputProps = type === 'textarea' ? { rows: 2 } : {}
 
         return (
@@ -59,7 +59,7 @@ export function withInlineRename<T extends InlineRenameProps>(
                         onClick={(e: React.MouseEvent<HTMLElement>) => {
                             if (
                                 !timeoutRef.current &&
-                                selectedCount < 2 &&
+                                !disabledInlineEdit &&
                                 !e.shiftKey &&
                                 !(isMac ? e.metaKey : e.ctrlKey)
                             ) {
@@ -84,8 +84,7 @@ export function withInlineRename<T extends InlineRenameProps>(
                     />
                 ) : (
                     <InputElement
-                        type={type}
-                        inputRef={inputRef as any}
+                        ref={inputRef as any}
                         spellCheck={false}
                         onBlur={(event) => {
                             if (isEditing && onInlineEdit) {
@@ -102,7 +101,7 @@ export function withInlineRename<T extends InlineRenameProps>(
                                 switch (event.key) {
                                     case 'Enter':
                                         event.preventDefault()
-                                        onInlineEdit({
+                                        onInlineEdit?.({
                                             event,
                                             action: 'validate',
                                             data: event.currentTarget.value,
@@ -117,7 +116,7 @@ export function withInlineRename<T extends InlineRenameProps>(
                         }}
                         defaultValue={item.name}
                         autoFocus
-                        small
+                        size="xs"
                     />
                 )}
             </>

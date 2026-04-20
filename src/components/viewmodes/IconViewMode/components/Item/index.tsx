@@ -78,7 +78,7 @@ export const Item = ({
                 <TruncatedText
                     lines={2}
                     item={item}
-                    selectedCount={dragProps.fileState.selected.length}
+                    disabledInlineEdit={!dragProps || dragProps.fileState.selected.length >= 2}
                     onInlineEdit={onInlineEdit}
                 />
             </div>

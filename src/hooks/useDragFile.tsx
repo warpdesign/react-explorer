@@ -25,7 +25,7 @@ export const useDragFile = ({ dragProps, isDarkModeActive }: UseDragFileOptions)
     })
 
     const dragPreview =
-        dragProps.dragFiles.length > 1
+        dragProps?.dragFiles?.length > 1
             ? createDragPreview(t('DRAG.MULTIPLE', { count: dragProps.dragFiles.length }), isDarkModeActive)
             : undefined
 

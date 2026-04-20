@@ -22,16 +22,16 @@ const Text = withInlineRename(({ item, onClick }: TextProps) => {
 interface Props {
     data: FileViewItem
     onInlineEdit?: (event: InlineEditEvent) => void
-    selectedCount: number
+    disabledInlineEdit: boolean
 }
 
-export const Name = ({ data, onInlineEdit, selectedCount }: Props) => {
+export const Name = ({ data, onInlineEdit, disabledInlineEdit }: Props) => {
     const { icon } = data
 
     return (
         <div className="name">
             <Icon icon={icon}></Icon>
-            <Text onInlineEdit={onInlineEdit} item={data} selectedCount={selectedCount}></Text>
+            <Text onInlineEdit={onInlineEdit} item={data} disabledInlineEdit={disabledInlineEdit}></Text>
         </div>
     )
 }

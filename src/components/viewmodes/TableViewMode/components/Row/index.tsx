@@ -53,7 +53,11 @@ export const Row = ({
                 {...mouseProps}
                 style={{ width: '100%', height: '100%', alignItems: 'center', display: 'flex' }}
             >
-                <Name data={rowData} onInlineEdit={onInlineEdit} selectedCount={dragProps.fileState.selected.length} />
+                <Name
+                    data={rowData}
+                    onInlineEdit={onInlineEdit}
+                    disabledInlineEdit={!dragProps || dragProps.fileState.selected.length >= 2}
+                />
                 <Size data={rowData} />
             </div>
         </>
