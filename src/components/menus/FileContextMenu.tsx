@@ -1,5 +1,6 @@
 import React from 'react'
-import { Menu, MenuItem, MenuDivider, Intent } from '@blueprintjs/core'
+import { Menu } from '@mantine/core'
+import { IconCopy, IconClipboard, IconTrash } from '@tabler/icons-react'
 import { useTranslation } from 'react-i18next'
 
 import { useStores } from '$src/hooks/useStores'
@@ -51,18 +52,18 @@ const FileContextMenu = ({ fileUnderMouse }: Props) => {
     // - mouse over selection ? => selection
     // - mouse over non selection ? => single element
     return (
-        <Menu>
-            <MenuItem icon="duplicate" text={t('APP_MENUS.COPY')} disabled={!fileUnderMouse} onClick={onCopy} />
-            <MenuItem icon="clipboard" text={t('APP_MENUS.PASTE')} disabled={!isPasteEnabled} onClick={onPaste} />
-            <MenuDivider />
-            <MenuItem
-                icon="delete"
-                intent={Intent.DANGER}
-                text={t('APP_MENUS.DELETE')}
-                disabled={!fileUnderMouse}
-                onClick={onDelete}
-            />
-        </Menu>
+        <>
+            <Menu.Item leftSection={<IconCopy size={16} />} disabled={!fileUnderMouse} onClick={onCopy}>
+                {t('APP_MENUS.COPY')}
+            </Menu.Item>
+            <Menu.Item leftSection={<IconClipboard size={16} />} disabled={!isPasteEnabled} onClick={onPaste}>
+                {t('APP_MENUS.PASTE')}
+            </Menu.Item>
+            <Menu.Divider />
+            <Menu.Item leftSection={<IconTrash size={16} />} color="red" disabled={!fileUnderMouse} onClick={onDelete}>
+                {t('APP_MENUS.DELETE')}
+            </Menu.Item>
+        </>
     )
 }
 

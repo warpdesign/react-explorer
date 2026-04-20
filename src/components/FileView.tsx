@@ -1,6 +1,6 @@
-import React, { useCallback, useRef, MutableRefObject } from 'react'
+import React, { useCallback, useRef, MutableRefObject, useState } from 'react'
 import { observer } from 'mobx-react'
-import { ContextMenu2, ContextMenu2ChildrenProps, ContextMenu2ContentProps } from '@blueprintjs/popover2'
+import { Menu } from '@mantine/core'
 import { HotkeysTarget2, Classes, HotkeyConfig } from '@blueprintjs/core'
 import { useTranslation } from 'react-i18next'
 import classNames from 'classnames'
@@ -304,60 +304,70 @@ const FileView = observer(({ hide }: Props) => {
             : []),
     ]
 
-    const renderFileContextMenu = (props: ContextMenu2ContentProps): JSX.Element => {
-        const index = rightClickFileIndexRef.current
-        const rightClickFile = index > -1 && index < rowCount ? files[index] : undefined
-        return props.isOpen ? <FileContextMenu fileUnderMouse={rightClickFile} /> : null
+    const [contextMenuOpened, setContextMenuOpened] = useState(false)
+    const [contextMenuPosition, setContextMenuPosition] = useState({ x: 0, y: 0 })
+
+    const handleContextMenu = (e: React.MouseEvent) => {
+        e.preventDefault()
+        setContextMenuPosition({ x: e.clientX, y: e.clientY })
+        setContextMenuOpened(true)
     }
+
+    const rightClickFile =
+        rightClickFileIndexRef.current > -1 && rightClickFileIndexRef.current < rowCount
+            ? files[rightClickFileIndexRef.current]
+            : undefined
 
     return (
         <HotkeysTarget2 hotkeys={hotkeys}>
-            <ContextMenu2 content={renderFileContextMenu}>
-                {(ctxMenuProps: ContextMenu2ChildrenProps) => (
-                    <div
-                        ref={ctxMenuProps.ref}
-                        onContextMenu={(e) => {
-                            // use files.length to tell menu handler we clicked on the blank area
-                            rightClickFileIndexRef.current = files.length
-                            ctxMenuProps.onContextMenu(e)
-                        }}
-                        className={classNames('fileListSizerWrapper', ctxMenuProps.className)}
-                    >
-                        {ctxMenuProps.popover}
-                        <ViewMode
-                            cursorIndex={cursorIndex}
-                            itemCount={nodes.length}
-                            getItem={getRow}
-                            getDragProps={getDraggedProps}
-                            onItemClick={onItemClick}
-                            onItemDoubleClick={onItemDoubleClick}
-                            onHeaderClick={onHeaderClick}
-                            onBlankAreaClick={onBlankAreaClick}
-                            onInlineEdit={onInlineEdit}
-                            onItemRightClick={({ index, event }) => {
-                                rightClickFileIndexRef.current = index
-                                ctxMenuProps.onContextMenu(event)
-                            }}
-                            columns={[
-                                {
-                                    label: t('FILETABLE.COL_NAME'),
-                                    key: 'name',
-                                    sort: cache.sortMethod === 'name' ? cache.sortOrder : 'none',
-                                },
-                                {
-                                    label: t('FILETABLE.COL_SIZE'),
-                                    key: 'size',
-                                    sort: cache.sortMethod === 'size' ? cache.sortOrder : 'none',
-                                },
-                            ]}
-                            status={cache.status}
-                            error={cache.error}
-                            isDarkModeActive={isDarkModeActive}
-                            options={viewmodeOptions}
-                        />
-                    </div>
-                )}
-            </ContextMenu2>
+            <div
+                onContextMenu={(e) => {
+                    // use files.length to tell menu handler we clicked on the blank area
+                    rightClickFileIndexRef.current = files.length
+                    handleContextMenu(e)
+                }}
+                className="fileListSizerWrapper"
+            >
+                <Menu opened={contextMenuOpened} onChange={setContextMenuOpened} withinPortal={false}>
+                    <Menu.Target>
+                        <div style={{ position: 'fixed', left: contextMenuPosition.x, top: contextMenuPosition.y }} />
+                    </Menu.Target>
+                    <Menu.Dropdown>
+                        <FileContextMenu fileUnderMouse={rightClickFile} />
+                    </Menu.Dropdown>
+                </Menu>
+                <ViewMode
+                    cursorIndex={cursorIndex}
+                    itemCount={nodes.length}
+                    getItem={getRow}
+                    getDragProps={getDraggedProps}
+                    onItemClick={onItemClick}
+                    onItemDoubleClick={onItemDoubleClick}
+                    onHeaderClick={onHeaderClick}
+                    onBlankAreaClick={onBlankAreaClick}
+                    onInlineEdit={onInlineEdit}
+                    onItemRightClick={({ index, event }) => {
+                        rightClickFileIndexRef.current = index
+                        handleContextMenu(event)
+                    }}
+                    columns={[
+                        {
+                            label: t('FILETABLE.COL_NAME'),
+                            key: 'name',
+                            sort: cache.sortMethod === 'name' ? cache.sortOrder : 'none',
+                        },
+                        {
+                            label: t('FILETABLE.COL_SIZE'),
+                            key: 'size',
+                            sort: cache.sortMethod === 'size' ? cache.sortOrder : 'none',
+                        },
+                    ]}
+                    status={cache.status}
+                    error={cache.error}
+                    isDarkModeActive={isDarkModeActive}
+                    options={viewmodeOptions}
+                />
+            </div>
         </HotkeysTarget2>
     )
 })
