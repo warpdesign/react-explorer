@@ -152,10 +152,6 @@ body.bp5-dark .tableRow .bp5-icon {
     display: flex;
 }
 
-.tableHeader > div:first-child > span:first-child {
-    flex-grow: 1;
-}
-
 .tableHeader:last-child {
     border:none;
 }

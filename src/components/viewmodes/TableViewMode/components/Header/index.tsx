@@ -1,8 +1,8 @@
 import React from 'react'
+import { IconCaretDown, IconCaretUp, IconGripVertical } from '@tabler/icons-react'
 
 import { Column, HeaderMouseEvent } from '$src/hooks/useViewMode'
 import { TSORT_ORDER } from '$src/services/FsSort'
-import { Icon } from '@blueprintjs/core'
 
 interface HeaderProps {
     columns: Column[]
@@ -13,13 +13,13 @@ interface HeaderProps {
 export const SortIndicator = ({ sort }: { sort: TSORT_ORDER | 'none' }) => {
     switch (sort) {
         case 'none':
-            return <Icon icon={<span />} />
+            return <div style={{ width: 16, height: 16 }} />
 
         case 'asc':
-            return <Icon icon="caret-up" />
+            return <IconCaretUp size={16} />
 
         case 'desc':
-            return <Icon icon="caret-down" />
+            return <IconCaretDown size={16} />
     }
 }
 
@@ -27,7 +27,7 @@ export const Header = ({ onClick, columns, height }: HeaderProps) => {
     return (
         <div
             className="tableHeader headerRow"
-            style={{ height: `${height}px` }}
+            style={{ height: `${height}px`, display: 'flex', alignItems: 'center' }}
             onContextMenu={(e) => e.stopPropagation()}
         >
             {columns.map(({ label, key, sort }, i) => {
@@ -38,11 +38,18 @@ export const Header = ({ onClick, columns, height }: HeaderProps) => {
                             event.stopPropagation()
                             onClick({ event, data: key })
                         }}
-                        style={{ fontWeight: `${sort === 'none' ? 'normal' : 'bold'}` }}
+                        style={{
+                            fontWeight: `${sort === 'none' ? 'normal' : 'bold'}`,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                        }}
                     >
-                        <span>{label}</span>
-                        <SortIndicator sort={sort} />
-                        {i === 0 ? <Icon icon="drag-handle-vertical"></Icon> : undefined}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                            <span>{label}</span>
+                            <SortIndicator sort={sort} />
+                        </div>
+                        {i === 0 ? <IconGripVertical size={16} /> : undefined}
                     </div>
                 )
             })}
