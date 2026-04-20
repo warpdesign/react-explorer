@@ -1,45 +1,49 @@
-import React, { useEffect, useCallback, useState, useRef } from 'react'
-import { ipcRenderer, webFrame } from 'electron'
-import { platform } from 'process'
-import { Select, TextInput, Radio, AppShell, virtualColor, colorsTuple, Button as ButtonMantine } from '@mantine/core'
-import { createTheme, MantineProvider } from '@mantine/core'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
+import {
+    AppShell,
+    Button as ButtonMantine,
+    Modal,
+    Radio,
+    Select,
+    Stack,
+    Text,
+    TextInput,
+    colorsTuple,
+    createTheme,
+    virtualColor,
+} from '@mantine/core'
+import { MantineProvider } from '@mantine/core'
 import { ModalsProvider } from '@mantine/modals'
 import { Notifications } from '@mantine/notifications'
-import { FocusStyleManager, Alert, Classes, Intent, Button } from '@blueprintjs/core'
 import classNames from 'classnames'
+import { ipcRenderer, webFrame } from 'electron'
+import { reaction } from 'mobx'
 import { Provider, observer } from 'mobx-react'
+import { platform } from 'process'
 import { Trans, useTranslation } from 'react-i18next'
 
-import { isMac } from '$src/utils/platform'
-import { SideView } from '$src/components/SideView'
+import { PreviewDialog } from './dialogs/PreviewDialog'
 import { Downloads } from '$src/components/Downloads'
+import { LeftPanel } from '$src/components/LeftPanel'
 import { Nav } from '$src/components/Nav'
+import { SideView } from '$src/components/SideView'
 import { PrefsDialog } from '$src/components/dialogs/PrefsDialog'
 import { ShortcutsDialog } from '$src/components/dialogs/ShortcutsDialog'
-import { LeftPanel } from '$src/components/LeftPanel'
+import { KeyboardHotkeys } from '$src/components/shortcuts/KeyboardHotkeys'
+import { MenuAccelerators } from '$src/components/shortcuts/MenuAccelerators'
+import Keys from '$src/constants/keys'
+import { triggerUpdateMenus } from '$src/events'
+import { useEventListener } from '$src/hooks/useEventListener'
+import { useStores } from '$src/hooks/useStores'
+import { ReactiveProperties } from '$src/types'
 import { shouldCatchEvent } from '$src/utils/dom'
 import { sendFakeCombo } from '$src/utils/keyboard'
-import { MenuAccelerators } from '$src/components/shortcuts/MenuAccelerators'
-import { KeyboardHotkeys } from '$src/components/shortcuts/KeyboardHotkeys'
-import { useStores } from '$src/hooks/useStores'
-import { useEventListener } from '$src/hooks/useEventListener'
-
-import Keys from '$src/constants/keys'
+import { isMac } from '$src/utils/platform'
 
 import '@mantine/core/styles.css'
 import '@mantine/notifications/styles.css'
-import '@blueprintjs/core/lib/css/blueprint.css'
-// import '@blueprintjs/icons/lib/css/blueprint-icons.css'
-// import '@blueprintjs/popover2/lib/css/blueprint-popover2.css'
 import '$src/css/main.css'
 import '$src/css/mantine-extensions.css'
-// import '$src/css/windows.css'
-// import '$src/css/scrollbars.css'
-
-import { reaction } from 'mobx'
-import { ReactiveProperties } from '$src/types'
-import { triggerUpdateMenus } from '$src/events'
-import { PreviewDialog } from './dialogs/PreviewDialog'
 
 const theme = createTheme({
     colors: {
@@ -86,7 +90,7 @@ const App = observer(() => {
     const { appState } = useStores('appState')
     const { t, i18n } = useTranslation()
     const [isExitDialogOpen, setIsExitDialogOpen] = useState(false)
-    const refIsOverlayOpen = useRef(document.body.classList.contains('bp5-overlay-open'))
+    const refIsOverlayOpen = useRef(document.querySelector('[data-mantine-portal]') !== null)
 
     const {
         settingsState,
@@ -137,8 +141,8 @@ const App = observer(() => {
     useEffect(() => {
         const observer = new MutationObserver((mutationList) => {
             for (const mutation of mutationList) {
-                if (mutation.attributeName === 'class') {
-                    refIsOverlayOpen.current = document.body.classList.contains(Classes.OVERLAY_OPEN)
+                if (mutation.attributeName === 'class' || mutation.type === 'childList') {
+                    refIsOverlayOpen.current = document.querySelector('[data-mantine-portal]') !== null
                     triggerUpdateMenus(
                         t('APP_MENUS', { returnObjects: true }) as Record<string, string>,
                         getReactiveProps(),
@@ -147,7 +151,7 @@ const App = observer(() => {
             }
         })
 
-        observer.observe(document.body, { attributes: true })
+        observer.observe(document.body, { attributes: true, childList: true, subtree: true })
 
         return () => observer.disconnect()
     }, [])
@@ -161,9 +165,6 @@ const App = observer(() => {
     }, [progress])
 
     useEffect(() => {
-        // do not show outlines when using the mouse
-        FocusStyleManager.onlyShowFocusOnTabs()
-
         document.body.classList.add('loaded', platform)
 
         if (window.ENV.CY || window.ENV.NODE_ENV === 'development') {
@@ -312,11 +313,7 @@ const App = observer(() => {
     }
 
     const setDarkThemeClass = (): void => {
-        if (settingsState.isDarkModeActive) {
-            document.body.classList.add(Classes.DARK)
-        } else {
-            document.body.classList.remove(Classes.DARK)
-        }
+        // Mantine handles dark mode via forceColorScheme prop, no need for body class
     }
 
     const count = appState.transferListState.pendingTransfers
@@ -341,30 +338,38 @@ const App = observer(() => {
                         }}
                         className={mainClass}
                     >
-                        <Alert
-                            cancelButtonText={t('DIALOG.QUIT.BT_KEEP_TRANSFERS')}
-                            confirmButtonText={t('DIALOG.QUIT.BT_STOP_TRANSFERS')}
-                            icon="warning-sign"
-                            intent={Intent.WARNING}
-                            onClose={onExitDialogClose}
-                            isOpen={isExitDialogOpen}
+                        <Modal
+                            opened={isExitDialogOpen}
+                            onClose={() => onExitDialogClose(false)}
+                            title={t('DIALOG.QUIT.TITLE')}
+                            closeOnEscape={true}
                         >
-                            <p>
-                                <Trans
-                                    i18nKey="DIALOG.QUIT.CONTENT"
-                                    count={count}
-                                    tOptions={{ interpolation: { prefix: '[[', suffix: ']]' } }}
-                                >
-                                    There are <b>[[ count ]]</b> transfers <b>in progress</b>.<br />
-                                    <br />
-                                    Exiting the app now will <b>cancel</b> the downloads.
-                                </Trans>
-                            </p>
-                        </Alert>
-                        <PrefsDialog isOpen={isPrefsOpen} onClose={() => appState.togglePrefsDialog(false)} />
+                            <Stack gap="md">
+                                <Text>
+                                    <Trans
+                                        i18nKey="DIALOG.QUIT.CONTENT"
+                                        count={count}
+                                        tOptions={{ interpolation: { prefix: '[[', suffix: ']]' } }}
+                                    >
+                                        There are <b>[[ count ]]</b> transfers <b>in progress</b>.<br />
+                                        <br />
+                                        Exiting the app now will <b>cancel</b> the downloads.
+                                    </Trans>
+                                </Text>
+                                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
+                                    <ButtonMantine onClick={() => onExitDialogClose(false)} variant="default">
+                                        {t('DIALOG.QUIT.BT_KEEP_TRANSFERS')}
+                                    </ButtonMantine>
+                                    <ButtonMantine onClick={() => onExitDialogClose(true)} color="red">
+                                        {t('DIALOG.QUIT.BT_STOP_TRANSFERS')}
+                                    </ButtonMantine>
+                                </div>
+                            </Stack>
+                        </Modal>
+                        <PrefsDialog isOpen={isPrefsOpen} onClose={() => appState?.togglePrefsDialog(false)} />
                         <ShortcutsDialog
                             isOpen={isShortcutsOpen}
-                            onClose={() => appState.toggleShortcutsDialog(false)}
+                            onClose={() => appState?.toggleShortcutsDialog(false)}
                         />
                         <MenuAccelerators onExitComboDown={onExitComboDown} />
                         <KeyboardHotkeys />
