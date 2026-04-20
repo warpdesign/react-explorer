@@ -1,5 +1,6 @@
 import * as React from 'react'
-import { Menu, MenuItem, MenuDivider } from '@blueprintjs/core'
+import { Menu } from '@mantine/core'
+import { IconFolderPlus, IconCopy, IconTrash } from '@tabler/icons-react'
 import { observer } from 'mobx-react'
 import { useTranslation } from 'react-i18next'
 
@@ -30,24 +31,22 @@ export const FileMenu = observer(({ onFileAction, selectedItemsLength, isDisable
 
     return (
         <>
-            <Menu>
-                <MenuItem disabled={isDisabled} text={t('COMMON.MAKEDIR')} icon="folder-new" onClick={onNewfolder} />
-                <MenuDivider />
-                <MenuItem
-                    text={t('FILEMENU.PASTE', { count: clipboardLength })}
-                    icon="duplicate"
-                    onClick={onPaste}
-                    disabled={!clipboardLength || isDisabled}
-                />
-                <MenuDivider />
-                <MenuItem
-                    text={t('FILEMENU.DELETE', { count: selectedItemsLength })}
-                    onClick={onDelete}
-                    intent={(selectedItemsLength && 'danger') || 'none'}
-                    icon="delete"
-                    disabled={!selectedItemsLength || isDisabled}
-                />
-            </Menu>
+            <Menu.Item leftSection={<IconFolderPlus size={16} />} onClick={onNewfolder} disabled={isDisabled}>
+                {t('COMMON.MAKEDIR')}
+            </Menu.Item>
+            <Menu.Divider />
+            <Menu.Item leftSection={<IconCopy size={16} />} onClick={onPaste} disabled={!clipboardLength || isDisabled}>
+                {t('FILEMENU.PASTE', { count: clipboardLength })}
+            </Menu.Item>
+            <Menu.Divider />
+            <Menu.Item
+                leftSection={<IconTrash size={16} />}
+                onClick={onDelete}
+                disabled={!selectedItemsLength || isDisabled}
+                color={selectedItemsLength ? 'red' : undefined}
+            >
+                {t('FILEMENU.DELETE', { count: selectedItemsLength })}
+            </Menu.Item>
         </>
     )
 })

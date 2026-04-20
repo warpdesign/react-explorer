@@ -1,6 +1,7 @@
 import * as React from 'react'
 import { useState } from 'react'
-import { Dialog, Classes, Intent, Button, InputGroup, FormGroup } from '@blueprintjs/core'
+import { Modal, Button, TextInput, Group, Text, Stack } from '@mantine/core'
+import { IconFolderPlus } from '@tabler/icons-react'
 import { useTranslation } from 'react-i18next'
 
 import { optionKey } from '$src/utils/platform'
@@ -58,9 +59,6 @@ const MakedirDialog = ({ onValidation, onClose, isOpen, parentPath }: MakedirPro
 
     const { t } = useTranslation()
 
-    const intent = (!isValid && 'danger') || 'none'
-    const helperText = (!isValid && <span>{t('DIALOG.MAKEDIR.NOT_VALID')}</span>) || <span>&nbsp;</span>
-
     const sep = parentPath.match(/\//) ? '/' : '\\'
 
     if (!parentPath.endsWith(sep)) {
@@ -68,48 +66,53 @@ const MakedirDialog = ({ onValidation, onClose, isOpen, parentPath }: MakedirPro
     }
 
     return (
-        <Dialog
-            icon="folder-new"
-            title={t('COMMON.MAKEDIR')}
-            isOpen={isOpen}
-            autoFocus={true}
-            enforceFocus={true}
-            canEscapeKeyClose={true}
-            usePortal={true}
+        <Modal
+            opened={isOpen}
             onClose={cancelClose}
-            className="makedirDialog"
+            title={
+                <Group gap="xs">
+                    <IconFolderPlus size={20} />
+                    {t('COMMON.MAKEDIR')}
+                </Group>
+            }
+            centered
+            closeOnEscape={true}
+            withCloseButton
         >
-            <div onKeyDown={onKeyDown} onKeyUp={onKeyUp}>
-                <div className={Classes.DIALOG_BODY}>
-                    <p>{t('DIALOG.MAKEDIR.TITLE')}</p>
-                    <FormGroup
-                        helperText={helperText}
-                        inline={true}
-                        labelFor="directory-input"
-                        labelInfo={`${parentPath}`}
-                    >
-                        <InputGroup
-                            onChange={onPathChange}
-                            placeholder={t('DIALOG.MAKEDIR.NAME')}
-                            value={path}
-                            id="directory-input"
-                            name="directory-input"
-                            intent={intent}
-                            autoFocus
-                        />
-                    </FormGroup>
-                </div>
-                <div className={Classes.DIALOG_FOOTER}>
-                    <div className={Classes.DIALOG_FOOTER_ACTIONS}>
-                        <Button onClick={cancelClose}>{t('COMMON.CANCEL')}</Button>
+            <Stack gap="md" onKeyDown={onKeyDown} onKeyUp={onKeyUp}>
+                <Text size="sm">{t('DIALOG.MAKEDIR.TITLE')}</Text>
 
-                        <Button intent={Intent.PRIMARY} onClick={onCreate} disabled={!path.length || !isValid}>
-                            {(!isOptionKeyPressed && t('DIALOG.MAKEDIR.CREATE')) || t('DIALOG.MAKEDIR.CREATE_READ')}
-                        </Button>
-                    </div>
+                <div>
+                    <TextInput
+                        placeholder={t('DIALOG.MAKEDIR.NAME')}
+                        value={path}
+                        onChange={onPathChange}
+                        error={!isValid}
+                        id="directory-input"
+                        name="directory-input"
+                        autoFocus
+                        data-autofocus
+                    />
+                    <Text
+                        size="xs"
+                        c={!isValid ? 'red' : 'transparent'}
+                        style={{ minHeight: '1.25rem', marginTop: '0.25rem' }}
+                    >
+                        {!isValid ? t('DIALOG.MAKEDIR.NOT_VALID') : '\u00A0'}
+                    </Text>
                 </div>
-            </div>
-        </Dialog>
+
+                <Group justify="flex-end" pt="md">
+                    <Button onClick={cancelClose} variant="subtle" color="gray">
+                        {t('COMMON.CANCEL')}
+                    </Button>
+
+                    <Button variant="filled" onClick={onCreate} disabled={!path.length || !isValid}>
+                        {(!isOptionKeyPressed && t('DIALOG.MAKEDIR.CREATE')) || t('DIALOG.MAKEDIR.CREATE_READ')}
+                    </Button>
+                </Group>
+            </Stack>
+        </Modal>
     )
 }
 
