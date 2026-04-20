@@ -198,6 +198,8 @@ button.small:hover{
     flex-direction: column;
     flex-grow: 0;
     align-self: center;
+    align-items: center;
+    margin: auto;
 }
 
 .downloads.empty .bp5-icon{

@@ -1,20 +1,26 @@
 import * as React from 'react'
-import { TreeNodeInfo, Tree, Icon, Intent, Classes, IconName, ProgressBar } from '@blueprintjs/core'
-import { intentClass } from '@blueprintjs/core/lib/esm/common/classes'
-import { reaction, toJS, IReactionDisposer, IObservableArray, runInAction } from 'mobx'
+import { ActionIcon, Box, Collapse, Group, Progress, Stack, Text } from '@mantine/core'
+import { IconChevronDown, IconChevronRight, IconCircleFilled, IconFile, IconFolder, IconX } from '@tabler/icons-react'
+import { IObservableArray, IReactionDisposer, reaction, runInAction, toJS } from 'mobx'
 import { inject } from 'mobx-react'
+import { WithTranslation, withTranslation } from 'react-i18next'
 import i18next from 'i18next'
-import { withTranslation, WithTranslation } from 'react-i18next'
-import classNames from 'classnames'
 
-import { AppState } from '$src/state/appState'
-import type { TransferState, FileTransfer } from '$src/state/transferState'
-import { formatBytes } from '$src/utils/formatBytes'
 import { showAlertModal } from '$src/components/AppAlert'
 import CONFIG from '$src/config/appConfig'
-import { isWin } from '$src/utils/platform'
-import { TypeIcons } from '$src/constants/icons'
+import { TypeIconsTabler } from '$src/constants/icons'
+import { AppState } from '$src/state/appState'
 import { TransferListState } from '$src/state/transferListState'
+import type { FileTransfer, TransferState } from '$src/state/transferState'
+import { formatBytes } from '$src/utils/formatBytes'
+import { isWin } from '$src/utils/platform'
+
+type IntentType = 'none' | 'primary' | 'success' | 'warning' | 'danger'
+
+interface TransferTreeNode {
+    transfer: TransferState
+    intent: IntentType
+}
 
 interface Props extends WithTranslation {
     hide: boolean
@@ -29,17 +35,12 @@ interface Expandables {
 }
 
 interface State {
-    nodes: TreeNodeInfo[]
+    nodes: TransferTreeNode[]
     expandedNodes: Expandables
 }
 
-interface NodeData {
-    transferElement: FileTransfer
-    transferId: number
-}
-
 class DownloadsClass extends React.Component<Props, State> {
-    private disposer: IReactionDisposer
+    private disposer!: IReactionDisposer
     private appState: AppState
     private transferListState: TransferListState
 
@@ -50,7 +51,7 @@ class DownloadsClass extends React.Component<Props, State> {
         this.transferListState = this.appState.transferListState
 
         this.state = {
-            nodes: this.getTreeData(this.transferListState.transfers),
+            nodes: this.getTransferNodes(this.transferListState.transfers),
             expandedNodes: {},
         }
 
@@ -70,7 +71,7 @@ class DownloadsClass extends React.Component<Props, State> {
                 return toJS(this.transferListState.transfers)
             },
             (transfers: TransferState[]): void => {
-                this.setState({ nodes: this.getTreeData(transfers) })
+                this.setState({ nodes: this.getTransferNodes(transfers) })
             },
             {
                 delay: 500,
@@ -87,7 +88,7 @@ class DownloadsClass extends React.Component<Props, State> {
     }
 
     public onLanguageChanged = (/* lang: string */): void => {
-        const nodes = this.getTreeData(this.transferListState.transfers)
+        const nodes = this.getTransferNodes(this.transferListState.transfers)
         this.setState({ nodes })
     }
 
@@ -99,19 +100,10 @@ class DownloadsClass extends React.Component<Props, State> {
         this.unbindLanguageChange()
     }
 
-    private handleNodeCollapse = (node: TreeNodeInfo): void => {
+    private toggleTransfer = (transferId: number): void => {
         const { expandedNodes } = this.state
-        expandedNodes[node.id] = false
-        node.isExpanded = false
-
-        this.setState(this.state)
-    }
-
-    private handleNodeExpand = (node: TreeNodeInfo): void => {
-        const { expandedNodes } = this.state
-        expandedNodes[node.id] = true
-        node.isExpanded = true
-        this.setState(this.state)
+        expandedNodes[transferId] = !expandedNodes[transferId]
+        this.setState({ expandedNodes })
     }
 
     showTransferAlert(): Promise<boolean> {
@@ -134,7 +126,7 @@ class DownloadsClass extends React.Component<Props, State> {
     async onCloseClick(transferId: number): Promise<void> {
         const transfer = this.transferListState.getTransfer(transferId)
 
-        if (transfer.hasEnded()) {
+        if (transfer?.hasEnded()) {
             this.deleteTransfer(transferId)
         } else {
             const cancel = await this.showTransferAlert()
@@ -144,44 +136,24 @@ class DownloadsClass extends React.Component<Props, State> {
         }
     }
 
-    onNodeDoubleClick = (node: TreeNodeInfo, nodePath: number[]): void => {
-        // no first-level: this is a file
-        if (nodePath.length > 1) {
-            const transfer = (node.nodeData as NodeData).transferElement
-            const transferId = (node.nodeData as NodeData).transferId
-            if (transfer.status === 'done') {
-                this.appState.openTransferredFile(transferId, transfer.file)
-            }
+    onFileDoubleClick = (transferId: number, transfer: FileTransfer): void => {
+        if (transfer.status === 'done') {
+            this.appState.openTransferredFile(transferId, transfer.file)
         }
     }
 
-    onNodeClick = (node: TreeNodeInfo, nodePath: number[]): void => {
-        // first-level node
-        if (nodePath.length === 1) {
-            const { expandedNodes } = this.state
-            node.isExpanded = !node.isExpanded
-            expandedNodes[node.id] = node.isExpanded
-
-            this.setState(this.state)
-        }
-    }
-
-    getIntent(transfer: TransferState): Intent {
+    getIntent(transfer: TransferState): IntentType {
         console.log(transfer.status, transfer)
         const status = transfer.status
-        let intent: Intent = Intent.NONE
+        let intent: IntentType = 'none'
         if (!status.match(/queued|calculating/)) {
-            intent = status.match(/error|cancelled/)
-                ? Intent.DANGER
-                : status.match(/started/)
-                ? Intent.PRIMARY
-                : Intent.SUCCESS
+            intent = status.match(/error|cancelled/) ? 'danger' : status.match(/started/) ? 'primary' : 'success'
             if (status !== 'started') {
                 // some errors
                 const errors = transfer.errors
                 if (errors) {
                     console.log('errors', errors, transfer.elements.length)
-                    intent = errors === transfer.elements.length ? Intent.DANGER : Intent.WARNING
+                    intent = errors === transfer.elements.length ? 'danger' : 'warning'
                 }
             }
         }
@@ -189,12 +161,23 @@ class DownloadsClass extends React.Component<Props, State> {
         return intent
     }
 
-    getTransferIcon(intent: Intent): JSX.Element {
-        return <Icon icon="dot" className={Classes.TREE_NODE_ICON} intent={intent}></Icon>
+    getIntentColor(intent: IntentType): string {
+        const colorMap = {
+            none: 'gray',
+            primary: 'blue',
+            success: 'green',
+            warning: 'yellow',
+            danger: 'red',
+        }
+        return colorMap[intent]
     }
 
-    getFileIcon(filetype: string): IconName {
-        return (filetype && TypeIcons[filetype]) || TypeIcons['any']
+    getTransferIcon(intent: IntentType): JSX.Element {
+        return <IconCircleFilled size={16} color={`var(--mantine-color-${this.getIntentColor(intent)}-6)`} />
+    }
+
+    getFileIcon(filetype: string): React.ComponentType {
+        return (filetype && TypeIconsTabler[filetype]) || TypeIconsTabler['any']
     }
 
     createTransferLabel(transfer: TransferState, className: string): JSX.Element {
@@ -203,7 +186,7 @@ class DownloadsClass extends React.Component<Props, State> {
         const ended = transfer.hasEnded()
         const transferSize = (transfer.status !== 'calculating' && sizeFormatted) || ''
         const currentSize = ended ? sizeFormatted : formatBytes(transfer.progress)
-        const percent = transfer.status === 'calculating' ? 0 : transfer.progress / transfer.size
+        const percent = transfer.status === 'calculating' ? 0 : (transfer.progress / transfer.size) * 100
         const errors = transfer.errors
         const rightLabel = ended
             ? errors
@@ -213,17 +196,27 @@ class DownloadsClass extends React.Component<Props, State> {
 
         return (
             <span className={className}>
-                {!ended && <ProgressBar value={percent} intent={Intent.PRIMARY} animate={false}></ProgressBar>}
+                {!ended && (
+                    <Progress
+                        value={percent}
+                        color="blue"
+                        size="xs"
+                        style={{ minWidth: '100px', display: 'inline-block', marginRight: '8px' }}
+                    />
+                )}
                 {rightLabel}
-                <Icon
+                <ActionIcon
                     className="action"
                     onClick={(e) => {
                         e.stopPropagation()
                         this.onCloseClick(transfer.id)
                     }}
-                    intent="danger"
-                    icon="small-cross"
-                />
+                    color="red"
+                    variant="transparent"
+                    size="sm"
+                >
+                    <IconX size={14} />
+                </ActionIcon>
             </span>
         )
     }
@@ -239,10 +232,7 @@ class DownloadsClass extends React.Component<Props, State> {
         const isCancelled = file.status.match(/cancelled/)
         let errorMessage = ''
 
-        const spanClass = classNames({
-            [Classes.INTENT_DANGER]: isError,
-            [Classes.INTENT_SUCCESS]: done,
-        })
+        const color = isError ? 'red' : done ? 'green' : undefined
 
         if (isError) {
             errorMessage = (isError && file.error && file.error.message) || t('DOWNLOADS.ERROR')
@@ -251,61 +241,19 @@ class DownloadsClass extends React.Component<Props, State> {
         }
 
         return (
-            <span className={spanClass}>
+            <Text size="sm" c={color}>
                 {started && t('DOWNLOADS.PROGRESS', { current: fileProgress, size: fileSize })}
                 {queued && t('DOWNLOADS.QUEUED')}
                 {!started && !queued && (done ? fileSize : errorMessage)}
-            </span>
+            </Text>
         )
     }
 
-    getTreeData(transfers: TransferState[]): TreeNodeInfo[] {
-        const treeData: TreeNodeInfo[] = []
-
-        for (const transfer of transfers) {
-            const intent = this.getIntent(transfer)
-            const className = intentClass(intent)
-            const sep = isWin ? '\\' : '/'
-            const node: TreeNodeInfo = {
-                id: transfer.id,
-                hasCaret: true,
-                icon: this.getTransferIcon(intent),
-                label: (
-                    <span className={className}>
-                        {' '}
-                        {transfer.srcName} ⇢ {transfer.dstName}
-                    </span>
-                ),
-                secondaryLabel: this.createTransferLabel(transfer, className),
-                isExpanded: !!this.state.expandedNodes[transfer.id],
-                childNodes: [],
-            }
-
-            let i = 0
-            for (const element of transfer.elements) {
-                if (!element.file.isDir || element.status === 'error') {
-                    const id = transfer.id + '_' + i
-                    const { file } = element
-                    const filetype = file.type
-
-                    node.childNodes.push({
-                        id: id,
-                        icon: file.isDir ? 'folder-close' : this.getFileIcon(filetype),
-                        label: element.subDirectory ? element.subDirectory + sep + file.fullname : file.fullname,
-                        secondaryLabel: this.createFileRightLabel(element),
-                        nodeData: {
-                            transferElement: element,
-                            transferId: transfer.id,
-                        },
-                    })
-                    i++
-                }
-            }
-
-            treeData.push(node)
-        }
-
-        return treeData
+    getTransferNodes(transfers: TransferState[]): TransferTreeNode[] {
+        return transfers.map((transfer) => ({
+            transfer,
+            intent: this.getIntent(transfer),
+        }))
     }
 
     componentWillUnmount(): void {
@@ -313,24 +261,78 @@ class DownloadsClass extends React.Component<Props, State> {
     }
 
     renderTransferTree(): JSX.Element {
-        const { nodes } = this.state
+        const { nodes, expandedNodes } = this.state
         const { t } = this.props
+        const sep = isWin ? '\\' : '/'
 
         if (nodes.length) {
             return (
-                <Tree
-                    className={`downloads ${CONFIG.CUSTOM_SCROLLBAR_CLASSNAME}`}
-                    contents={nodes}
-                    onNodeCollapse={this.handleNodeCollapse}
-                    onNodeExpand={this.handleNodeExpand}
-                    onNodeClick={this.onNodeClick}
-                    onNodeDoubleClick={this.onNodeDoubleClick}
-                />
+                <Stack gap={0} className={`downloads ${CONFIG.CUSTOM_SCROLLBAR_CLASSNAME}`}>
+                    {nodes.map(({ transfer, intent }) => {
+                        const isExpanded = expandedNodes[transfer.id]
+                        const color = this.getIntentColor(intent)
+                        const ChevronIcon = isExpanded ? IconChevronDown : IconChevronRight
+
+                        return (
+                            <Box key={transfer.id}>
+                                <Group
+                                    gap="xs"
+                                    p="xs"
+                                    style={{ cursor: 'pointer', borderBottom: '1px solid var(--mantine-color-gray-3)' }}
+                                    onClick={() => this.toggleTransfer(transfer.id)}
+                                >
+                                    <ChevronIcon size={16} />
+                                    <IconCircleFilled size={12} color={`var(--mantine-color-${color}-6)`} />
+                                    <Text size="sm" style={{ flex: 1 }}>
+                                        {transfer.srcName} ⇢ {transfer.dstName}
+                                    </Text>
+                                    {this.createTransferLabel(transfer, '')}
+                                </Group>
+                                <Collapse in={isExpanded}>
+                                    <Stack gap={0} pl="xl">
+                                        {transfer.elements.map((element, i) => {
+                                            if (!element.file.isDir || element.status === 'error') {
+                                                const { file } = element
+                                                const filetype = file.type
+                                                const FileIcon = file.isDir ? IconFolder : this.getFileIcon(filetype)
+                                                const fileName = element.subDirectory
+                                                    ? element.subDirectory + sep + file.fullname
+                                                    : file.fullname
+
+                                                return (
+                                                    <Group
+                                                        key={`${transfer.id}_${i}`}
+                                                        gap="xs"
+                                                        p="xs"
+                                                        style={{
+                                                            cursor: element.status === 'done' ? 'pointer' : 'default',
+                                                            borderBottom: '1px solid var(--mantine-color-gray-2)',
+                                                        }}
+                                                        onDoubleClick={() =>
+                                                            this.onFileDoubleClick(transfer.id, element)
+                                                        }
+                                                    >
+                                                        <FileIcon size={16} />
+                                                        <Text size="sm" style={{ flex: 1 }}>
+                                                            {fileName}
+                                                        </Text>
+                                                        {this.createFileRightLabel(element)}
+                                                    </Group>
+                                                )
+                                            }
+                                            return null
+                                        })}
+                                    </Stack>
+                                </Collapse>
+                            </Box>
+                        )
+                    })}
+                </Stack>
             )
         } else {
             return (
                 <div className="downloads empty">
-                    <Icon iconSize={80} icon="document" color="#d9dde0"></Icon>
+                    <IconFile size={80} color="var(--mantine-color-gray-5)" />
                     <p style={{ textAlign: 'center' }}>{t('DOWNLOADS.EMPTY_TITLE')}</p>
                 </div>
             )

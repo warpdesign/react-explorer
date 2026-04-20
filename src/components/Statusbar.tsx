@@ -5,6 +5,7 @@ import { observer } from 'mobx-react'
 import { useTranslation } from 'react-i18next'
 import { useStores } from '$src/hooks/useStores'
 import { filterDirs, filterFiles } from '$src/utils/fileUtils'
+import { FileDescriptor } from '$src/services/Fs'
 
 interface Props {
     content: string
@@ -28,7 +29,8 @@ const Statusbar = observer(() => {
     const { viewState } = useStores('viewState')
     const { t } = useTranslation()
     const fileCache = viewState?.getVisibleCache()
-    const { files, showHiddenFiles } = fileCache || { files: [], showHiddenFiles: false }
+    const files: FileDescriptor[] = fileCache?.files || []
+    const showHiddenFiles = fileCache?.showHiddenFiles || false
 
     const numDirs = filterDirs(files).length
     const numFiles = filterFiles(files).length

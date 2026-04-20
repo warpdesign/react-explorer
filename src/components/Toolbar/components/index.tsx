@@ -11,7 +11,6 @@ import {
     IconFileText,
     IconChartBar,
 } from '@tabler/icons-react'
-import { IconNames } from '@blueprintjs/icons'
 import { useTranslation } from 'react-i18next'
 import { TSORT_METHOD_NAME, TSORT_ORDER } from '$src/services/FsSort'
 
