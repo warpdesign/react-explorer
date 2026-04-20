@@ -1,10 +1,11 @@
 import * as React from 'react'
-import { Dialog, Classes, Intent, Button, InputGroup, FormGroup, Colors } from '@blueprintjs/core'
+import { Alert, Button, Group, Modal, Stack, TextInput } from '@mantine/core'
+import { IconGlobe, IconLock, IconUser } from '@tabler/icons-react'
 import { inject } from 'mobx-react'
-import { withTranslation, WithTranslation } from 'react-i18next'
+import { WithTranslation, withTranslation } from 'react-i18next'
 
-import { FileState } from '$src/state/fileState'
 import Keys from '$src/constants/keys'
+import { FileState } from '$src/state/fileState'
 
 interface LoginProps extends WithTranslation {
     isOpen: boolean
@@ -130,97 +131,71 @@ class LoginDialogClass extends React.Component<LoginProps, LoginState> {
         }
 
         return (
-            <Dialog
-                icon="globe-network"
-                title={t('DIALOG.LOGIN.TITLE', { server: server })}
-                isOpen={this.props.isOpen}
-                autoFocus={true}
-                enforceFocus={true}
-                canEscapeKeyClose={true}
-                usePortal={true}
+            <Modal
+                opened={this.props.isOpen}
                 onClose={this.cancelClose}
+                title={t('DIALOG.LOGIN.TITLE', { server: server })}
+                closeOnEscape={true}
+                trapFocus={true}
                 className="loginDialog"
             >
-                <div className={Classes.DIALOG_BODY}>
-                    {error && (
-                        <p className="error" style={{ backgroundColor: Colors.RED4 }}>
-                            {t('ERRORS.GENERIC', { error })}
-                        </p>
-                    )}
-                    <FormGroup inline={true} labelFor="server" labelInfo={t('DIALOG.LOGIN.SERVER')}>
-                        <InputGroup
-                            onChange={this.onInputChange}
-                            placeholder={t('DIALOG.LOGIN.SERVER_NAME')}
-                            disabled={busy}
-                            value={server}
-                            id="server"
-                            name="server"
-                            leftIcon="globe"
-                        />
-                    </FormGroup>
-                    <FormGroup
-                        inline={true}
-                        labelFor="user"
-                        labelInfo={t('DIALOG.LOGIN.USERNAME')}
-                        helperText={<span>{t('DIALOG.LOGIN.HINT_USERNAME')}</span>}
-                    >
-                        <InputGroup
-                            onChange={this.onInputChange}
-                            placeholder={t('DIALOG.LOGIN.USERINPUT')}
-                            disabled={busy}
-                            value={user}
-                            inputRef={this.refHandler}
-                            id="user"
-                            name="user"
-                            leftIcon="person"
-                            autoFocus
-                        />
-                    </FormGroup>
-                    <FormGroup
-                        inline={true}
-                        labelFor="password"
-                        labelInfo={t('DIALOG.LOGIN.PASSWORD')}
-                        helperText={t('DIALOG.LOGIN.HINT_PASSWORD')}
-                    >
-                        <InputGroup
-                            onChange={this.onInputChange}
-                            placeholder={t('DIALOG.LOGIN.PASSWORDINPUT')}
-                            disabled={busy}
-                            value={password}
-                            id="password"
-                            name="password"
-                            type="password"
-                            leftIcon="lock"
-                        />
-                    </FormGroup>
-                    <FormGroup inline={true} labelFor="port" labelInfo={t('DIALOG.LOGIN.PORT')}>
-                        <InputGroup
-                            onChange={this.onInputChange}
-                            disabled={busy}
-                            value={port.toString()}
-                            id="port"
-                            name="port"
-                            type="number"
-                            leftIcon="lock"
-                        />
-                    </FormGroup>
-                </div>
-                <div className={Classes.DIALOG_FOOTER}>
-                    <div className={Classes.DIALOG_FOOTER_ACTIONS}>
-                        <Button onClick={this.cancelClose} disabled={busy}>
+                <Stack gap="md">
+                    {error && <Alert color="red">{t('ERRORS.GENERIC', { error })}</Alert>}
+                    <TextInput
+                        label={t('DIALOG.LOGIN.SERVER')}
+                        placeholder={t('DIALOG.LOGIN.SERVER_NAME')}
+                        leftSection={<IconGlobe size={16} />}
+                        onChange={this.onInputChange}
+                        disabled={busy}
+                        value={server}
+                        id="server"
+                        name="server"
+                    />
+                    <TextInput
+                        label={t('DIALOG.LOGIN.USERNAME')}
+                        placeholder={t('DIALOG.LOGIN.USERINPUT')}
+                        description={t('DIALOG.LOGIN.HINT_USERNAME')}
+                        leftSection={<IconUser size={16} />}
+                        onChange={this.onInputChange}
+                        disabled={busy}
+                        value={user}
+                        ref={this.refHandler}
+                        id="user"
+                        name="user"
+                        autoFocus
+                    />
+                    <TextInput
+                        label={t('DIALOG.LOGIN.PASSWORD')}
+                        placeholder={t('DIALOG.LOGIN.PASSWORDINPUT')}
+                        description={t('DIALOG.LOGIN.HINT_PASSWORD')}
+                        leftSection={<IconLock size={16} />}
+                        onChange={this.onInputChange}
+                        disabled={busy}
+                        value={password}
+                        id="password"
+                        name="password"
+                        type="password"
+                    />
+                    <TextInput
+                        label={t('DIALOG.LOGIN.PORT')}
+                        leftSection={<IconLock size={16} />}
+                        onChange={this.onInputChange}
+                        disabled={busy}
+                        value={port?.toString() || '21'}
+                        id="port"
+                        name="port"
+                        type="number"
+                    />
+                    <Group justify="flex-end" mt="md">
+                        <Button onClick={this.cancelClose} disabled={busy} variant="default">
                             {t('COMMON.CANCEL')}
                         </Button>
-                        <Button
-                            loading={busy}
-                            intent={Intent.PRIMARY}
-                            onClick={this.onLogin}
-                            disabled={!this.canLogin()}
-                        >
+                        <Button loading={busy} onClick={this.onLogin} disabled={!this.canLogin()}>
                             {t('DIALOG.LOGIN.LOGIN')}
                         </Button>
-                    </div>
-                </div>
-            </Dialog>
+                    </Group>
+                </Stack>
+            </Modal>
         )
     }
 }
