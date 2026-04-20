@@ -1,16 +1,13 @@
 import React from 'react'
-import { Classes } from '@blueprintjs/core'
+
 import { getSelectionRange } from './fileUtils'
 
 export function shouldCatchEvent(e: Event): boolean {
     const element = e.target as HTMLElement
     const tagName = (element && element.tagName.toLowerCase()) || ''
+    const isOverlayOpen = document.querySelector('[data-mantine-portal]') !== null
 
-    return (
-        !tagName.match(/input|textarea/) &&
-        (!element || !element.classList.contains(Classes.MENU_ITEM)) &&
-        !document.body.classList.contains(Classes.OVERLAY_OPEN)
-    )
+    return !tagName.match(/input|textarea/) && (!element || !element.closest('[role="menuitem"]')) && !isOverlayOpen
 }
 
 export function isEditable(element: Element): boolean {
@@ -35,8 +32,10 @@ export function selectLeftPart(name: string, element: HTMLElement): void {
     const range = document.createRange()
     const textNode = element.firstChild
 
-    range.setStart(textNode, selectionRange.start)
-    range.setEnd(textNode, selectionRange.end)
-    selection.empty()
-    selection.addRange(range)
+    if (textNode && selection) {
+        range.setStart(textNode, selectionRange.start)
+        range.setEnd(textNode, selectionRange.end)
+        selection.empty()
+        selection.addRange(range)
+    }
 }
