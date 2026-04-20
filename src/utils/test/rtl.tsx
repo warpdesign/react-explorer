@@ -1,21 +1,23 @@
 import React from 'react'
 import type { ReactElement } from 'react'
-import { render, screen, configure, waitForElementToBeRemoved, RenderOptions } from '@testing-library/react'
+import { RenderOptions, render, screen, waitForElementToBeRemoved } from '@testing-library/react'
 import { within } from '@testing-library/dom'
 import type { MatcherFunction } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
+import { MantineProvider } from '@mantine/core'
+import { ModalsProvider } from '@mantine/modals'
+import { vol } from 'memfs'
+import { configure as configureMobx } from 'mobx'
 import { Provider } from 'mobx-react'
 import { DndProvider } from 'react-dnd'
 import { HTML5Backend } from 'react-dnd-html5-backend'
-import { i18n } from './i18n'
 import { I18nextProvider } from 'react-i18next'
-import { Classes, HotkeysProvider } from '@blueprintjs/core'
-import { vol } from 'memfs'
-import userEvent from '@testing-library/user-event'
-import { configure as configureMobx } from 'mobx'
 
+import en from '$src/locale/lang/en.json'
 import { registerFs } from '$src/services/Fs'
 import { FsVirtual } from '$src/services/plugins/FsVirtual'
-import en from '$src/locale/lang/en.json'
+
+import { i18n } from './i18n'
 const i18next = i18n.i18next
 
 // jest doesn't have require.context so we patch this include
@@ -86,7 +88,9 @@ const customRender = (
         <DndProvider backend={HTML5Backend}>
             <Provider {...providerProps}>
                 <I18nextProvider i18n={i18n.i18next}>
-                    <HotkeysProvider>{ui}</HotkeysProvider>
+                    <MantineProvider>
+                        <ModalsProvider>{ui}</ModalsProvider>
+                    </MantineProvider>
                 </I18nextProvider>
             </Provider>
         </DndProvider>,
@@ -134,7 +138,7 @@ const setup = (jsx: ReactElement, options = {}) => {
 
 const wait = (delay = 0) => new Promise((res) => setTimeout(res, delay))
 
-const isSelected = (element: HTMLElement) => element.classList.contains(Classes.INTENT_PRIMARY)
+const isSelected = (element: HTMLElement) => element.classList.contains('selected')
 
 const t = i18n.i18next.t
 const LOCALE_EN = en.translations
