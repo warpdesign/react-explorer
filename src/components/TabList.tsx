@@ -9,7 +9,7 @@ import { sendFakeCombo } from '$src/utils/keyboard'
 import { showAlertModal } from '$src/components/AppAlert'
 import { LocalizedError } from '$src/locale/error'
 import { useStores } from '$src/hooks/useStores'
-import { UserHomeIcons, UserHomeIconsTabler } from '$src/constants/icons'
+import { UserHomeIconsTabler } from '$src/constants/icons'
 import { ActionIcon, Button as Button2, Flex } from '@mantine/core'
 import { ALL_DIRS } from '$src/utils/platform'
 import {
@@ -22,14 +22,14 @@ import {
 } from '@tabler/icons-react'
 
 /**
- * build a list of { regex, IconName } to match folders with an icon
+ * build a list of { regex, Icon } to match folders with an icon
  * For eg:
  * {
  *    regex: /^/Users/leo$/,
- *    icon: 'home'
+ *    icon: IconHomeFilled
  * }
  */
-export const TabIcons = Object.keys(UserHomeIcons).map((dirname: string) => ({
+export const TabIcons = Object.keys(UserHomeIconsTabler).map((dirname: string) => ({
     regex: new RegExp(`^${ALL_DIRS[dirname]}$`),
     icon: UserHomeIconsTabler[dirname],
 }))

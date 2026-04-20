@@ -1,12 +1,11 @@
-import { IconName } from '@blueprintjs/core'
-import { IconNames } from '@blueprintjs/icons'
 import { observable, runInAction } from 'mobx'
-import { isMac, isWin } from '$src/utils/platform'
 import * as nodeDiskInfo from 'node-disk-info'
-
-import { ALL_DIRS } from '$src/utils/platform'
-import { WSL_PREFIX, getWSLDistributions, WslDistribution } from '$src/utils/wsl'
 import type Drive from 'node-disk-info/dist/classes/drive'
+import { Icon, IconProps } from '@tabler/icons-react'
+import { IconDatabase, IconFolder, IconBrandWindows } from '@tabler/icons-react'
+
+import { ALL_DIRS, isMac, isWin } from '$src/utils/platform'
+import { WSL_PREFIX, WslDistribution, getWSLDistributions } from '$src/utils/wsl'
 
 const CHECK_FOR_DRIVES_DELAY = 5000
 const CHECK_FOR_WSL_DELAY = 30000
@@ -14,7 +13,7 @@ const CHECK_FOR_WSL_DELAY = 30000
 export interface Favorite {
     label: string
     path: string
-    icon?: IconName
+    icon?: React.ForwardRefExoticComponent<IconProps & React.RefAttributes<Icon>>
     isReadOnly: boolean
     isRemovable?: boolean
     isVirtual?: boolean
@@ -41,7 +40,7 @@ export class FavoritesState {
             Object.entries(ALL_DIRS).map((dir: string[]) => ({
                 label: dir[0],
                 path: dir[1],
-                icon: IconNames.DATABASE,
+                icon: IconDatabase,
                 isReadOnly: false,
             })),
         )
@@ -58,7 +57,7 @@ export class FavoritesState {
                 distribs.map(({ name, hasINotify }) => ({
                     label: name,
                     path: `${WSL_PREFIX}${name}\\`,
-                    icon: IconNames.SOCIAL_MEDIA,
+                    icon: IconBrandWindows,
                     hasINotify,
                     isReadOnly: true,
                 })),
@@ -75,7 +74,7 @@ export class FavoritesState {
             const favorite: Favorite = {
                 label,
                 path: mounted,
-                icon: IconNames.FOLDER_CLOSE,
+                icon: IconFolder,
                 isReadOnly: false,
             }
             elements.push(favorite)
