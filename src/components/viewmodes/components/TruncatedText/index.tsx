@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react'
-import { Colors } from '@blueprintjs/core'
 import { FileViewItem } from '$src/types'
-import { withInlineRename, InlineRenameProps } from '$src/components/hoc/WithInlineRename'
+import { InlineRenameProps, withInlineRename } from '$src/components/hoc/WithInlineRename'
 
 interface TruncateProps extends InlineRenameProps {
     item: FileViewItem
@@ -47,7 +46,9 @@ export const TruncatedText = withInlineRename(
                     display: 'block',
                     padding: '4px',
                     borderRadius: '4px',
-                    ...(isSelected ? { color: Colors.WHITE, backgroundColor: Colors.BLUE3 } : {}),
+                    ...(isSelected
+                        ? { color: 'var(--mantine-color-white)', backgroundColor: 'var(--mantine-color-blue-6)' }
+                        : {}),
                 }}
                 onClick={onClick}
             >
