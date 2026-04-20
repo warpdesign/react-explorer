@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react'
-import { Dialog, Classes, Button, KeyComboTag, InputGroup, Callout } from '@blueprintjs/core'
+import { Modal, TextInput, Alert, Kbd, Stack, Group, Button, Title, ScrollArea } from '@mantine/core'
+import { IconFilter, IconBulb } from '@tabler/icons-react'
 import type { TFunction } from 'i18next'
 import { useTranslation } from 'react-i18next'
 
 import { isMac } from '$src/utils/platform'
-import CONFIG from '$src/config/appConfig'
 import { getKeyboardLayoutMap } from '$src/utils/keyboard'
 
 interface ShortcutsProps {
@@ -81,15 +81,52 @@ export const buildShortcuts = async (t: TFunction<'translation', undefined>): Pr
     }
 }
 
-const renderShortcuts = (shortcuts: Combo[]) =>
-    shortcuts.map((shortcut) => (
-        <div key={shortcut.combo} className={Classes.HOTKEY}>
-            <div className={Classes.HOTKEY_LABEL}>{shortcut.label}</div>
-            <KeyComboTag combo={shortcut.combo}></KeyComboTag>
-        </div>
-    ))
+const parseCombo = (combo: string): string[] => {
+    // Parse Blueprint combo format (e.g., "mod + shift + n") into individual keys
+    return combo.split(' + ').map((key) => {
+        // Convert Blueprint's special keys to display names
+        const keyMap: Record<string, string> = {
+            mod: isMac ? '⌘' : 'Ctrl',
+            meta: isMac ? '⌘' : 'Ctrl',
+            ctrl: 'Ctrl',
+            alt: isMac ? '⌥' : 'Alt',
+            shift: 'Shift',
+            escape: 'Esc',
+            backspace: '⌫',
+            space: 'Space',
+            left: '←',
+            right: '→',
+            up: '↑',
+            down: '↓',
+            tab: 'Tab',
+        }
+        return keyMap[key.toLowerCase()] || key.toUpperCase()
+    })
+}
 
-const renderTitle = (title: string) => <h4 className={Classes.HEADING}>{title}</h4>
+const renderShortcuts = (shortcuts: Combo[]) =>
+    shortcuts.map((shortcut) => {
+        const keys = parseCombo(shortcut.combo)
+        return (
+            <Group key={shortcut.combo} justify="space-between" py="xs" style={{ minHeight: '2.5rem' }}>
+                <div style={{ flex: 1 }}>{shortcut.label}</div>
+                <Group gap="xs">
+                    {keys.map((key, index) => (
+                        <React.Fragment key={index}>
+                            {index > 0 && <span style={{ opacity: 0.5 }}>+</span>}
+                            <Kbd>{key}</Kbd>
+                        </React.Fragment>
+                    ))}
+                </Group>
+            </Group>
+        )
+    })
+
+const renderTitle = (title: string) => (
+    <Title order={4} mt="lg" mb="sm">
+        {title}
+    </Title>
+)
 
 const ShortcutsDialog = ({ isOpen, onClose }: ShortcutsProps) => {
     const { t, i18n } = useTranslation()
@@ -118,51 +155,54 @@ const ShortcutsDialog = ({ isOpen, onClose }: ShortcutsProps) => {
     // }, [])
 
     return (
-        <Dialog
-            icon="lightbulb"
-            title={t('NAV.SHORTCUTS')}
-            isOpen={isOpen}
-            autoFocus={true}
-            enforceFocus={true}
-            canEscapeKeyClose={true}
-            usePortal={true}
+        <Modal
+            opened={isOpen}
             onClose={onClose}
-            className="shortcutsDialog"
+            title={
+                <Group gap="xs">
+                    <IconBulb size={20} />
+                    {t('NAV.SHORTCUTS')}
+                </Group>
+            }
+            size="lg"
+            centered
+            closeOnEscape={true}
+            withCloseButton
         >
-            <div className={`${Classes.DIALOG_BODY}`}>
-                <InputGroup
-                    leftIcon="filter"
-                    onChange={(e) => {
-                        setFilter(e.target.value)
-                    }}
-                    placeholder={t('DIALOG.SHORTCUTS.FILTER_PLACEHOLDER')}
-                    value={filter}
-                />
-                <div className={`${Classes.HOTKEY_COLUMN} ${CONFIG.CUSTOM_SCROLLBAR_CLASSNAME}`}>
-                    {isEmpty ? (
-                        <Callout>{t('DIALOG.SHORTCUTS.NO_RESULTS')}</Callout>
-                    ) : (
-                        <>
-                            {sections.map((label) =>
-                                visibleShortcuts[label].length ? (
-                                    <React.Fragment key={`title_${label}`}>
-                                        {renderTitle(label)}
-                                        {renderShortcuts(visibleShortcuts[label])}
-                                    </React.Fragment>
-                                ) : null,
-                            )}
-                        </>
-                    )}
-                </div>
-            </div>
-            <div className={Classes.DIALOG_FOOTER}>
-                <div className={Classes.DIALOG_FOOTER_ACTIONS}>
-                    <Button onClick={onClose} className="data-cy-close">
-                        {t('COMMON.CLOSE')}
-                    </Button>
-                </div>
-            </div>
-        </Dialog>
+            <TextInput
+                leftSection={<IconFilter size={16} />}
+                onChange={(e) => {
+                    setFilter(e.target.value)
+                }}
+                placeholder={t('DIALOG.SHORTCUTS.FILTER_PLACEHOLDER')}
+                value={filter}
+                size="sm"
+                mb="md"
+            />
+
+            <ScrollArea h="calc(90vh - 300px)" mih="200px" type="hover" offsetScrollbars scrollbarSize={10}>
+                {isEmpty ? (
+                    <Alert color="blue">{t('DIALOG.SHORTCUTS.NO_RESULTS')}</Alert>
+                ) : (
+                    <Stack gap="xs" pb="md">
+                        {sections.map((label) =>
+                            visibleShortcuts[label].length ? (
+                                <React.Fragment key={`title_${label}`}>
+                                    {renderTitle(label)}
+                                    <Stack gap={0}>{renderShortcuts(visibleShortcuts[label])}</Stack>
+                                </React.Fragment>
+                            ) : null,
+                        )}
+                    </Stack>
+                )}
+            </ScrollArea>
+
+            <Group justify="flex-end" pt="md" mt="md" style={{ borderTop: '1px solid var(--mantine-color-gray-3)' }}>
+                <Button onClick={onClose} className="data-cy-close" variant="filled" color="gray">
+                    {t('COMMON.CLOSE')}
+                </Button>
+            </Group>
+        </Modal>
     )
 }
 

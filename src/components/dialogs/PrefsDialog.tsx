@@ -1,11 +1,10 @@
 import * as React from 'react'
 import { useState } from 'react'
-import { Intent } from '@blueprintjs/core'
 import { useTranslation } from 'react-i18next'
 import { languageList } from '$src/locale/i18n'
 import { ipcRenderer } from 'electron'
 
-import { Modal, Radio, Group, Select, TextInput, ActionIcon, Tooltip, Button, Text } from '@mantine/core'
+import { Modal, Radio, Group, Select, TextInput, ActionIcon, Tooltip, Button, Text, ScrollArea } from '@mantine/core'
 import { IconFlag, IconSun, IconFolder, IconTerminal, IconPlayerPlayFilled, IconTrash } from '@tabler/icons-react'
 
 import { debounce } from '$src/utils/debounce'
@@ -108,13 +107,16 @@ const PrefsDialog = observer(({ isOpen, onClose }: PrefsProps) => {
         ]
     }
 
-    const onLanguageSelect = (value: string): void => {
+    const onLanguageSelect = (value: string | null): void => {
+        if (!value) return
         settingsState.setLanguage(value)
         settingsState.saveSettings()
     }
 
-    const onThemeSelect = (value: Theme['value']): void => {
-        settingsState.setActiveTheme(value === 'auto' ? 'auto' : value === 'true')
+    const onThemeSelect = (value: string | null): void => {
+        if (!value) return
+        const themeValue = value as Theme['value']
+        settingsState.setActiveTheme(themeValue === 'auto' ? 'auto' : themeValue === 'true')
         settingsState.saveSettings()
     }
 
@@ -136,7 +138,7 @@ const PrefsDialog = observer(({ isOpen, onClose }: PrefsProps) => {
         code &&
             showAlertModal({
                 message: t('DIALOG.PREFS.TEST_TERMINAL_FAILED', { terminal, code }),
-                intent: Intent.DANGER,
+                intent: 'danger',
                 icon: 'error',
                 modalId: 'prefsTestTerminalError',
             }).then((res) => console.log('closed', res))
@@ -169,73 +171,74 @@ const PrefsDialog = observer(({ isOpen, onClose }: PrefsProps) => {
             opened={isOpen}
             title={t('DIALOG.PREFS.TITLE')}
             withCloseButton
-            pr="xl"
         >
-            <Select
-                label={t('DIALOG.PREFS.LANGUAGE')}
-                rightSection={<IconFlag size={16} />}
-                data={languageItems}
-                allowDeselect={false}
-                defaultValue={selectedLanguage.value}
-                size="sm"
-                onChange={onLanguageSelect}
-            ></Select>
+            <ScrollArea h="calc(90vh - 300px)" mih="200px" type="hover" offsetScrollbars scrollbarSize={10}>
+                <Select
+                    label={t('DIALOG.PREFS.LANGUAGE')}
+                    rightSection={<IconFlag size={16} />}
+                    data={languageItems}
+                    allowDeselect={false}
+                    defaultValue={selectedLanguage.value}
+                    size="sm"
+                    onChange={onLanguageSelect}
+                ></Select>
 
-            <Select
-                label={t('DIALOG.PREFS.THEME')}
-                rightSection={<IconSun size={16} />}
-                data={themeItems}
-                allowDeselect={false}
-                defaultValue={selectedTheme.value}
-                size="sm"
-                onChange={onThemeSelect}
-                my="lg"
-            ></Select>
+                <Select
+                    label={t('DIALOG.PREFS.THEME')}
+                    rightSection={<IconSun size={16} />}
+                    data={themeItems}
+                    allowDeselect={false}
+                    defaultValue={selectedTheme.value}
+                    size="sm"
+                    onChange={onThemeSelect}
+                    my="lg"
+                ></Select>
 
-            <Radio.Group
-                label={t('DIALOG.PREFS.DEFAULT_VIEW_MODE')}
-                value={defaultViewMode}
-                onChange={onChangeViewMode}
-                name="default-view-mode"
-                className="data-cy-default-view-mode"
-            >
-                <Group>
-                    <Radio label={t('TOOLBAR.ICON_VIEW')} value="icons" />
-                    <Radio label={t('TOOLBAR.DETAILS_VIEW')} value="details" />
-                </Group>
-            </Radio.Group>
+                <Radio.Group
+                    label={t('DIALOG.PREFS.DEFAULT_VIEW_MODE')}
+                    value={defaultViewMode}
+                    onChange={onChangeViewMode}
+                    name="default-view-mode"
+                    className="data-cy-default-view-mode"
+                >
+                    <Group>
+                        <Radio label={t('TOOLBAR.ICON_VIEW')} value="icons" />
+                        <Radio label={t('TOOLBAR.DETAILS_VIEW')} value="details" />
+                    </Group>
+                </Radio.Group>
 
-            <TextInput
-                label={t('DIALOG.PREFS.DEFAULT_FOLDER')}
-                value={defaultFolder}
-                onBlur={onFolderBlur}
-                onChange={onFolderChange}
-                leftSection={<IconFolder size={16} />}
-                withErrorStyles={false}
-                error={(!isFolderValid && t('DIALOG.PREFS.INVALID_FOLDER')) || ''}
-                spellCheck={false}
-                my="lg"
-            />
+                <TextInput
+                    label={t('DIALOG.PREFS.DEFAULT_FOLDER')}
+                    value={defaultFolder}
+                    onBlur={onFolderBlur}
+                    onChange={onFolderChange}
+                    leftSection={<IconFolder size={16} />}
+                    withErrorStyles={false}
+                    error={(!isFolderValid && t('DIALOG.PREFS.INVALID_FOLDER')) || ''}
+                    spellCheck={false}
+                    my="lg"
+                />
 
-            <TextInput
-                label={t('DIALOG.PREFS.DEFAULT_TERMINAL')}
-                value={defaultTerminal}
-                onChange={onTerminalChange}
-                leftSection={<IconTerminal size={16} />}
-                rightSection={testTerminalButton}
-                spellCheck={false}
-                my="lg"
-            />
+                <TextInput
+                    label={t('DIALOG.PREFS.DEFAULT_TERMINAL')}
+                    value={defaultTerminal}
+                    onChange={onTerminalChange}
+                    leftSection={<IconTerminal size={16} />}
+                    rightSection={testTerminalButton}
+                    spellCheck={false}
+                    my="lg"
+                />
 
-            <Button variant="filled" leftSection={<IconTrash size={16} />} onClick={onResetPrefs}>
-                {t('DIALOG.PREFS.RESET')}
-            </Button>
+                <Button variant="filled" leftSection={<IconTrash size={16} />} onClick={onResetPrefs}>
+                    {t('DIALOG.PREFS.RESET')}
+                </Button>
 
-            <Text size="xs" c="red.9">
-                {t('DIALOG.PREFS.RESET_HELP')}
-            </Text>
+                <Text size="xs" c="red.9" mb="md">
+                    {t('DIALOG.PREFS.RESET_HELP')}
+                </Text>
+            </ScrollArea>
 
-            <Group justify="end">
+            <Group justify="end" pt="md" mt="md" style={{ borderTop: '1px solid var(--mantine-color-gray-3)' }}>
                 <Button onClick={onClose} variant="filled" color="gray">
                     {t('COMMON.CLOSE')}
                 </Button>
