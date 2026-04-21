@@ -11,6 +11,7 @@ import { Item } from './components/Item'
 export interface IconViewModeOptions {
     iconSize: number
     isSplitViewActive: boolean
+    isViewActive: boolean
 }
 
 export const IconViewMode = forwardRef<ViewModeActions, ViewModeProps<IconViewModeOptions>>(
@@ -28,12 +29,13 @@ export const IconViewMode = forwardRef<ViewModeActions, ViewModeProps<IconViewMo
             status,
             cursorIndex = -1,
             isDarkModeActive,
-            options: { iconSize, isSplitViewActive },
+            options,
         }: ViewModeProps<IconViewModeOptions>,
         ref,
     ) => {
         const tableRef: React.MutableRefObject<HTMLDivElement> = useRef()
         const [rowWidth, setRowWidth] = useState(0)
+        const { iconSize = 56, isSplitViewActive = false, isViewActive = true } = options || {}
         // margin between items: we need to add it to the width
         const margin = 4
         const itemWidth = iconSize * 1.9 + margin * 2
@@ -190,6 +192,7 @@ export const IconViewMode = forwardRef<ViewModeActions, ViewModeProps<IconViewMo
                                             getDragProps={getDragProps}
                                             isDarkModeActive={isDarkModeActive}
                                             iconSize={iconSize}
+                                            isViewActive={isViewActive}
                                         />
                                     ))}
                                 </div>

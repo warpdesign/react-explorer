@@ -14,6 +14,7 @@ interface Props {
     margin: number
     iconSize: number
     isDarkModeActive: boolean
+    isViewActive: boolean
     onItemClick: (event: ItemMouseEvent) => void
     onItemDoubleClick: (event: ItemMouseEvent) => void
     onItemRightClick: (event: ItemMouseEvent) => void
@@ -33,6 +34,7 @@ export const Item = ({
     itemIndex,
     iconSize,
     isDarkModeActive,
+    isViewActive,
 }: Props) => {
     const clickHandler = makeEvent(itemIndex, item, onItemClick)
     const doubleClickHandler = makeEvent(itemIndex, item, onItemDoubleClick)
@@ -87,6 +89,7 @@ export const Item = ({
                     item={item}
                     disabledInlineEdit={!dragProps || (dragProps.fileState?.selected.length ?? 0) >= 2}
                     onInlineEdit={onInlineEdit}
+                    isViewActive={isViewActive}
                 />
             </div>
             {dragPreview}

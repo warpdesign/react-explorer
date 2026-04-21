@@ -90,6 +90,7 @@ const FileView = observer(({ hide }: Props) => {
     const viewmodeOptions = {
         iconSize: 56,
         isSplitViewActive: winState.splitView,
+        isViewActive,
     }
 
     const searchStringRef = useRef<string>('')

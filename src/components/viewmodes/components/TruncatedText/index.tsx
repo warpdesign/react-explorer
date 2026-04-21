@@ -6,10 +6,11 @@ interface TruncateProps extends InlineRenameProps {
     item: FileViewItem
     lines: number
     ellipsis?: string
+    isViewActive?: boolean
 }
 
 export const TruncatedText = withInlineRename(
-    ({ lines, ellipsis = '....', item, onClick }: TruncateProps) => {
+    ({ lines, ellipsis = '....', item, onClick, isViewActive = true }: TruncateProps) => {
         const { isSelected, name: text } = item
         const [displayText, setDisplayText] = useState(text)
         const textRef = useRef(null)
@@ -47,7 +48,12 @@ export const TruncatedText = withInlineRename(
                     padding: '4px',
                     borderRadius: '4px',
                     ...(isSelected
-                        ? { color: 'var(--mantine-color-white)', backgroundColor: 'var(--mantine-color-blue-6)' }
+                        ? {
+                              color: isViewActive ? 'var(--mantine-color-white)' : 'inherit',
+                              backgroundColor: isViewActive
+                                  ? 'var(--mantine-color-blue-6)'
+                                  : 'var(--mantine-color-gray-light)',
+                          }
                         : {}),
                 }}
                 onClick={onClick}
