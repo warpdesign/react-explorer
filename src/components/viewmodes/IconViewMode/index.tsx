@@ -1,6 +1,7 @@
-import React, { forwardRef, useImperativeHandle, useRef, useEffect, useLayoutEffect, useState } from 'react'
+import React, { forwardRef, useImperativeHandle, useEffect } from 'react'
 import { useVirtualizer } from '@tanstack/react-virtual'
 
+import { useElementSize } from '@mantine/hooks'
 import { ViewModeActions, ViewModeProps } from '$src/hooks/useViewMode'
 import { ArrowKey } from '$src/types'
 
@@ -33,12 +34,11 @@ export const IconViewMode = forwardRef<ViewModeActions, ViewModeProps<IconViewMo
         }: ViewModeProps<IconViewModeOptions>,
         ref,
     ) => {
-        const tableRef: React.MutableRefObject<HTMLDivElement> = useRef()
-        const [rowWidth, setRowWidth] = useState(0)
-        const { iconSize = 56, isSplitViewActive = false, isViewActive = true } = options || {}
+        const { ref: tableRef, width: rowWidth } = useElementSize()
+        const { iconSize = 56, isViewActive = true } = options || {}
         // margin between items: we need to add it to the width
         const margin = 4
-        const itemWidth = iconSize * 1.9 + margin * 2
+        const itemWidth = iconSize * 1.8 + margin * 2
         const itemsPerRow = Math.floor(rowWidth / itemWidth)
         const extraRow = itemCount % itemsPerRow ? 1 : 0
         const numRows = itemsPerRow > 0 ? Math.floor(itemCount / itemsPerRow) + extraRow : 0
@@ -65,14 +65,6 @@ export const IconViewMode = forwardRef<ViewModeActions, ViewModeProps<IconViewMo
         const virtualItems = virtualizer.getVirtualItems()
         const scrollToIndex = virtualizer.scrollToIndex
         const totalSize = virtualizer.getTotalSize()
-
-        // Cecalculate width on mount and when splitView mode is changed
-        // TODO: would be a good idea to do it on resize as well, but could be
-        // expensive.
-        useLayoutEffect(() => {
-            const { width } = tableRef.current.getBoundingClientRect()
-            setRowWidth(width)
-        }, [isSplitViewActive])
 
         useImperativeHandle(
             ref,
