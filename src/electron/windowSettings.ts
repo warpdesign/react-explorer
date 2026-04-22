@@ -23,9 +23,9 @@ interface DevToolsWindowSettings {
 }
 
 const WINDOW_DEFAULT_SETTINGS: WindowSettings = {
-    minWidth: 750,
+    minWidth: 900,
     minHeight: 240,
-    width: 800,
+    width: 900,
     height: 600,
     custom: { splitView: false },
 }

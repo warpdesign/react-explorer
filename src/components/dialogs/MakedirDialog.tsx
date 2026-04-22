@@ -27,11 +27,11 @@ const MakedirDialog = ({ onValidation, onClose, isOpen, parentPath }: MakedirPro
         }
     }
 
-    const cancelClose = (): void => onClose('', false)
+    const cancelClose = (): void => onClose?.('', false)
 
     const onCreate = (): void => {
         if (onValidation(path)) {
-            onClose(path, isOptionKeyPressed)
+            onClose?.(path, isOptionKeyPressed)
         } else {
             setIsValid(false)
         }
@@ -65,6 +65,13 @@ const MakedirDialog = ({ onValidation, onClose, isOpen, parentPath }: MakedirPro
         parentPath += sep
     }
 
+    const ref = React.useRef<HTMLInputElement>(null)
+
+    React.useEffect(() => {
+        // Workaround for https://github.com/mantinedev/mantine/issues/8857
+        setTimeout(() => ref.current?.focus(), 10)
+    }, [])
+
     return (
         <Modal
             opened={isOpen}
@@ -90,8 +97,8 @@ const MakedirDialog = ({ onValidation, onClose, isOpen, parentPath }: MakedirPro
                         error={!isValid}
                         id="directory-input"
                         name="directory-input"
-                        autoFocus
                         data-autofocus
+                        ref={ref}
                     />
                     <Text
                         size="xs"

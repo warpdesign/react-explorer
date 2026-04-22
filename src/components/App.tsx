@@ -1,15 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react'
-import {
-    AppShell,
-    Button as ButtonMantine,
-    Modal,
-    Radio,
-    Select,
-    Stack,
-    Text,
-    TextInput,
-    createTheme,
-} from '@mantine/core'
+import { AppShell, Button, Modal, Radio, Select, Stack, Text, TextInput, createTheme } from '@mantine/core'
 import { MantineProvider } from '@mantine/core'
 import { ModalsProvider } from '@mantine/modals'
 import { Notifications } from '@mantine/notifications'
@@ -61,7 +51,7 @@ const theme = createTheme({
                 label: { paddingBottom: '.2rem' },
             },
         }),
-        Button: ButtonMantine.extend({
+        Button: Button.extend({
             styles: {
                 inner: { justifyContent: 'left' },
             },
@@ -340,12 +330,12 @@ const App = observer(() => {
                                     </Trans>
                                 </Text>
                                 <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
-                                    <ButtonMantine onClick={() => onExitDialogClose(false)} variant="default">
+                                    <Button onClick={() => onExitDialogClose(false)} variant="default">
                                         {t('DIALOG.QUIT.BT_KEEP_TRANSFERS')}
-                                    </ButtonMantine>
-                                    <ButtonMantine onClick={() => onExitDialogClose(true)} color="red">
+                                    </Button>
+                                    <Button onClick={() => onExitDialogClose(true)} color="red">
                                         {t('DIALOG.QUIT.BT_STOP_TRANSFERS')}
-                                    </ButtonMantine>
+                                    </Button>
                                 </div>
                             </Stack>
                         </Modal>

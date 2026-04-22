@@ -23,6 +23,10 @@
     display: flex;
 }
 
+.fileListSizerWrapper [tabindex]:focus-visible {
+    outline: none;
+}
+
 .tableRow .size {
     margin-right: 10px;
     text-align:right;
