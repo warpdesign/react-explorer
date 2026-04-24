@@ -1,7 +1,7 @@
 import { clipboard, Menu, BrowserWindow, MenuItemConstructorOptions, MenuItem, app, ipcMain, dialog } from 'electron'
 
 import { isMac, isLinux, VERSIONS } from '$src/electron/osSupport'
-import { KeyboardLayoutMap, ReactiveProperties } from '$src/types'
+import { ReactiveProperties } from '$src/types'
 
 const ACCELERATOR_EVENT = 'menu_accelerator'
 

@@ -86,7 +86,7 @@ const FileView = observer(({ hide }: Props) => {
 
     const rightClickFileIndexRef = useRef<number | null>(null)
 
-    const { ViewMode, getActions, viewmodeRef } = useViewMode(viewmode)
+    const { ViewMode, getActions } = useViewMode(viewmode)
     const viewmodeOptions = {
         iconSize: 56,
         isSplitViewActive: winState.splitView,

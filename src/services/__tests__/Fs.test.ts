@@ -3,7 +3,7 @@
  */
 import { describeUnix } from '../../utils/test/helpers'
 
-import { MakeId, ExeMaskAll, ExeMaskGroup, ExeMaskUser, filetype, sameID, FileID } from '../Fs'
+import { MakeId, ExeMaskAll, ExeMaskGroup, ExeMaskUser, filetype, sameID } from '../Fs'
 
 describe('makeId', () => {
     it('should return FileID from stats using ino > 1', () => {

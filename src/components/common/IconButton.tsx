@@ -8,12 +8,12 @@ export interface IconButtonProps extends PolymorphicComponentProps<'button', But
     active?: boolean
 }
 
-export const IconButton = ({ icon: Icon, iconProps, children, active, ...rest }: IconButtonProps) => (
+export const IconButton = ({ icon: Icon, iconProps, children, active, onClick, ...rest }: IconButtonProps) => (
     <Button
         leftSection={<Icon size={18} stroke={1.5} {...iconProps} />}
         variant={active ? 'light' : 'subtle'}
         color={active ? undefined : 'button'}
-        style={{ pointerEvents: active ? 'none' : 'auto' }}
+        onClick={active ? undefined : onClick}
         {...rest}
     >
         {children}

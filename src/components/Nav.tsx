@@ -5,14 +5,7 @@ import { useTranslation } from 'react-i18next'
 import { HamburgerMenu } from '$src/components/HamburgerMenu'
 import { useStores } from '$src/hooks/useStores'
 import { ActionIcon, Divider, Group, Menu, Button, Indicator } from '@mantine/core'
-import {
-    IconAdjustmentsHorizontal,
-    IconBorderVertical,
-    IconHomeFilled,
-    IconDownload,
-    IconLayoutSidebarRight,
-    IconMenu2,
-} from '@tabler/icons-react'
+import { IconHomeFilled, IconDownload, IconLayoutSidebarRight, IconMenu2 } from '@tabler/icons-react'
 
 const Nav = observer(() => {
     const { appState } = useStores('appState')

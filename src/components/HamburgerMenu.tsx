@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { useTranslation } from 'react-i18next'
 import { Menu } from '@mantine/core'
-import { IconAdjustmentsHorizontal, IconBulb, IconSettings } from '@tabler/icons-react'
+import { IconBulb, IconSettings } from '@tabler/icons-react'
 
 interface HamburgerProps {
     onOpenPrefs: () => void

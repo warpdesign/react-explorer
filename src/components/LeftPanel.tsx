@@ -9,7 +9,7 @@ import { UserHomeIconsTabler } from '$src/constants/icons'
 import { FavoritesState } from '$src/state/favoritesState'
 import { showAlertModal } from '$src/components/AppAlert'
 
-import { Group, ScrollArea, TreeNodeData, Tree, UseTreeReturnType } from '@mantine/core'
+import { Group, ScrollArea, TreeNodeData, Tree, UseTreeReturnType, Tooltip, Text } from '@mantine/core'
 import { IconCaretRightFilled, IconFolder } from '@tabler/icons-react'
 import { IconButton } from './common/IconButton'
 
@@ -149,18 +149,22 @@ export const LeftPanel = observer(({ hide }: { hide: boolean }) => {
                                     </IconButton>
                                 )}
                                 {nodeProps && (
-                                    <IconButton
-                                        w="100%"
-                                        size="sm"
-                                        icon={nodeProps.icon}
-                                        radius="0"
-                                        onClick={(e) => onNodeClick(node, e)}
-                                        active={nodeProps.isSelected}
-                                        pl="lg"
-                                        fw={400}
-                                    >
-                                        {node.label}
-                                    </IconButton>
+                                    <Tooltip label={nodeProps.path} openDelay={1000}>
+                                        <IconButton
+                                            w="100%"
+                                            size="sm"
+                                            icon={nodeProps.icon}
+                                            radius="0"
+                                            onClick={(e) => onNodeClick(node, e)}
+                                            active={nodeProps.isSelected}
+                                            pl="lg"
+                                            fw={400}
+                                        >
+                                            <Text truncate="end" size="sm" style={{ flex: 1 }}>
+                                                {node.label}
+                                            </Text>
+                                        </IconButton>
+                                    </Tooltip>
                                 )}
                             </Group>
                         )

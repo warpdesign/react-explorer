@@ -1,6 +1,4 @@
-import * as React from 'react'
 import { useHotkeys } from '@mantine/hooks'
-import { observer } from 'mobx-react'
 import { ipcRenderer } from 'electron'
 
 import { useStores } from '$src/hooks/useStores'

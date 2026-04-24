@@ -1,4 +1,4 @@
-import { observable, action, computed, makeObservable, runInAction } from 'mobx'
+import { observable, action, makeObservable, runInAction } from 'mobx'
 import type { Readable } from 'stream'
 
 import { FsApi, FileDescriptor } from '$src/services/Fs'

@@ -1,6 +1,6 @@
 import React from 'react'
 
-import { render, screen, vol, t, waitFor, wait } from 'rtl'
+import { render, screen, vol, t, waitFor } from 'rtl'
 import { ViewState } from '$src/state/viewState'
 import { AppState } from '$src/state/appState'
 import { filterFiles, filterDirs } from '$src/utils/fileUtils'
