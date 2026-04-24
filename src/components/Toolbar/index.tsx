@@ -193,7 +193,7 @@ export const Toolbar = observer(({ active }: Props) => {
     const canGoForward = history.length > 1 && current < history.length - 1
 
     return (
-        <Group gap="xs" className="toolbar" wrap="nowrap" style={{ padding: '4px' }}>
+        <Group gap="xs" className="toolbar" wrap="nowrap" style={{ padding: '4px' }} mx="xs">
             <Button.Group>
                 <Button
                     title={t('TOOLBAR.BACK')}

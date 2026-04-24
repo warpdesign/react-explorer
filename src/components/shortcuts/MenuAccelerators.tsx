@@ -213,7 +213,7 @@ class MenuAcceleratorsClass extends React.Component<Props> {
         cache.sortOrder !== 'desc' && cache.setSort(cache.sortMethod, 'desc')
     }
 
-    renderMenuAccelerators(): React.ReactElement {
+    renderMenuAccelerators(): React.ReactElement<Record<string, unknown>> {
         return (
             <Accelerators>
                 <Accelerator combo="CmdOrCtrl+Shift+C" onClick={this.onCopyPath}></Accelerator>

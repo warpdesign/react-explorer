@@ -1,4 +1,4 @@
-import { Icon, IconProps } from '@tabler/icons-react'
+import { IconProps } from '@tabler/icons-react'
 import { IpcRendererEvent } from 'electron/renderer'
 import React from 'react'
 
@@ -20,7 +20,7 @@ export interface ViewDescriptor {
 
 export interface FileViewItem {
     name: string
-    icon: React.ForwardRefExoticComponent<IconProps & React.RefAttributes<Icon>>
+    icon: React.ForwardRefExoticComponent<IconProps & React.RefAttributes<SVGSVGElement>>
     size: string
     isSelected: boolean
     isEditing: boolean

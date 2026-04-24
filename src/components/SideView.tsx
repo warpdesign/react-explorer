@@ -67,7 +67,7 @@ export const SideView = observer(({ hide, viewState }: SideViewProps) => {
 
     return (
         <Provider viewState={viewState}>
-            <div ref={drop} id={divId} className={activeClass}>
+            <div ref={drop as unknown as React.Ref<HTMLDivElement>} id={divId} className={activeClass}>
                 {needLogin && <LoginDialog isOpen={needLogin} onValidation={onValidation} onClose={onClose} />}
                 <TabList />
                 <Toolbar active={!busy} />

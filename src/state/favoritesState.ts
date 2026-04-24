@@ -1,7 +1,7 @@
 import { observable, runInAction } from 'mobx'
 import * as nodeDiskInfo from 'node-disk-info'
 import type Drive from 'node-disk-info/dist/classes/drive'
-import { Icon, IconProps } from '@tabler/icons-react'
+import { IconProps } from '@tabler/icons-react'
 import { IconDatabase, IconFolder, IconBrandWindows } from '@tabler/icons-react'
 
 import { ALL_DIRS, isMac, isWin } from '$src/utils/platform'
@@ -13,7 +13,7 @@ const CHECK_FOR_WSL_DELAY = 30000
 export interface Favorite {
     label: string
     path: string
-    icon?: React.ForwardRefExoticComponent<IconProps & React.RefAttributes<Icon>>
+    icon?: React.ForwardRefExoticComponent<IconProps & React.RefAttributes<SVGSVGElement>>
     isReadOnly: boolean
     isRemovable?: boolean
     isVirtual?: boolean

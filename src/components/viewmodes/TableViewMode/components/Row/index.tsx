@@ -49,7 +49,7 @@ export const Row = ({
         <>
             {dragPreview}
             <div
-                ref={dragRef}
+                ref={dragRef as unknown as React.Ref<HTMLDivElement>}
                 {...mouseProps}
                 style={{ width: '100%', height: '100%', alignItems: 'center', display: 'flex' }}
             >

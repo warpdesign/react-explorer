@@ -513,7 +513,9 @@ export const FsLocal: Fs = {
         }
     },
     displaypath(str: string): { shortPath: string; fullPath: string } {
-        const split = str.split(SEP)
+        // Remove trailing separator to avoid empty last segment
+        const normalized = str.endsWith(SEP) ? str.slice(0, -1) : str
+        const split = normalized.split(SEP)
         return {
             fullPath: str,
             shortPath: split.slice(-1)[0] || str,

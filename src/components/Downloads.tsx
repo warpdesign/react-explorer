@@ -1,6 +1,14 @@
 import * as React from 'react'
 import { ActionIcon, Box, Collapse, Group, Progress, Stack, Text } from '@mantine/core'
-import { IconChevronDown, IconChevronRight, IconCircleFilled, IconFile, IconFolder, IconX } from '@tabler/icons-react'
+import {
+    IconChevronDown,
+    IconChevronRight,
+    IconCircleFilled,
+    IconFile,
+    IconFolder,
+    IconProps,
+    IconX,
+} from '@tabler/icons-react'
 import { IObservableArray, IReactionDisposer, reaction, runInAction, toJS } from 'mobx'
 import { inject } from 'mobx-react'
 import { WithTranslation, withTranslation } from 'react-i18next'
@@ -176,7 +184,7 @@ class DownloadsClass extends React.Component<Props, State> {
         return <IconCircleFilled size={16} color={`var(--mantine-color-${this.getIntentColor(intent)}-6)`} />
     }
 
-    getFileIcon(filetype: string): React.ComponentType {
+    getFileIcon(filetype: string): React.ForwardRefExoticComponent<IconProps & React.RefAttributes<SVGSVGElement>> {
         return (filetype && TypeIconsTabler[filetype]) || TypeIconsTabler['any']
     }
 
@@ -288,7 +296,7 @@ class DownloadsClass extends React.Component<Props, State> {
                                     </Text>
                                     {this.createTransferLabel(transfer, '')}
                                 </Group>
-                                <Collapse in={isExpanded}>
+                                <Collapse expanded={isExpanded}>
                                     <Stack gap={0} pl="xl">
                                         {transfer.elements.map((element, i) => {
                                             if (!element.file.isDir || element.status === 'error') {

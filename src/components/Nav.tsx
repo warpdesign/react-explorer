@@ -5,7 +5,14 @@ import { useTranslation } from 'react-i18next'
 import { HamburgerMenu } from '$src/components/HamburgerMenu'
 import { useStores } from '$src/hooks/useStores'
 import { ActionIcon, Divider, Group, Menu, Button, Indicator } from '@mantine/core'
-import { IconAdjustmentsHorizontal, IconBorderVertical, IconHomeFilled, IconDownload } from '@tabler/icons-react'
+import {
+    IconAdjustmentsHorizontal,
+    IconBorderVertical,
+    IconHomeFilled,
+    IconDownload,
+    IconLayoutSidebarRight,
+    IconMenu2,
+} from '@tabler/icons-react'
 
 const Nav = observer(() => {
     const { appState } = useStores('appState')
@@ -65,13 +72,13 @@ const Nav = observer(() => {
                             onClick={onToggleSplitView}
                             title={t('NAV.SPLITVIEW')}
                         >
-                            <IconBorderVertical size={24} stroke={1.5} />
+                            <IconLayoutSidebarRight size={24} stroke={1.5} />
                         </ActionIcon>
                         <Divider size="sm" orientation="vertical" />
                         <Menu width={200} position="bottom" withArrow shadow="md">
                             <Menu.Target>
                                 <ActionIcon variant="subtle" size="lg" c="dimmed">
-                                    <IconAdjustmentsHorizontal size={24} stroke={1.5} />
+                                    <IconMenu2 size={24} stroke={1.5} />
                                 </ActionIcon>
                             </Menu.Target>
                             <Menu.Dropdown className="data-cy-app-menu">

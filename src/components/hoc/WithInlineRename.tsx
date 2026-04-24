@@ -24,8 +24,8 @@ export function withInlineRename<T extends InlineRenameProps>(
     { type = 'text' }: Options = {},
 ) {
     return (props: T) => {
-        const inputRef = useRef<HTMLInputElement>()
-        const timeoutRef = useRef<ReturnType<typeof setTimeout>>()
+        const inputRef = useRef<HTMLInputElement>(null)
+        const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
         const { item, onInlineEdit, disabledInlineEdit } = props
         const { isEditing, isSelected } = item
 
@@ -65,7 +65,7 @@ export function withInlineRename<T extends InlineRenameProps>(
                             ) {
                                 e.persist()
                                 timeoutRef.current = setTimeout(() => {
-                                    timeoutRef.current = undefined
+                                    timeoutRef.current = null
                                     // Only enable inline edit if row was selected when the click happened:
                                     // this prevents enabling inline edit when the user clicked on a non-selected row
                                     isSelected &&
@@ -77,8 +77,10 @@ export function withInlineRename<T extends InlineRenameProps>(
                                 }, CLICK_DELAY)
                             } else {
                                 // double-click: do nothing
-                                clearTimeout(timeoutRef.current)
-                                timeoutRef.current = undefined
+                                if (timeoutRef.current) {
+                                    clearTimeout(timeoutRef.current)
+                                }
+                                timeoutRef.current = null
                             }
                         }}
                     />

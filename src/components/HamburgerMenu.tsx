@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { useTranslation } from 'react-i18next'
 import { Menu } from '@mantine/core'
-import { IconAdjustmentsHorizontal, IconBulb } from '@tabler/icons-react'
+import { IconAdjustmentsHorizontal, IconBulb, IconSettings } from '@tabler/icons-react'
 
 interface HamburgerProps {
     onOpenPrefs: () => void
@@ -13,7 +13,7 @@ export const HamburgerMenu = ({ onOpenPrefs, onOpenShortcuts }: HamburgerProps) 
 
     return (
         <>
-            <Menu.Item leftSection={<IconAdjustmentsHorizontal size={14} />} onClick={onOpenPrefs}>
+            <Menu.Item leftSection={<IconSettings size={14} />} onClick={onOpenPrefs}>
                 {t('NAV.PREFS')}
             </Menu.Item>
             <Menu.Item leftSection={<IconBulb size={14} />} onClick={onOpenShortcuts}>

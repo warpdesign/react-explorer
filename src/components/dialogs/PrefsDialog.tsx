@@ -5,7 +5,15 @@ import { languageList } from '$src/locale/i18n'
 import { ipcRenderer } from 'electron'
 
 import { Modal, Radio, Group, Select, TextInput, ActionIcon, Tooltip, Button, Text, ScrollArea } from '@mantine/core'
-import { IconFlag, IconSun, IconFolder, IconTerminal, IconPlayerPlayFilled, IconTrash } from '@tabler/icons-react'
+import {
+    IconFlag,
+    IconSun,
+    IconFolder,
+    IconTerminal,
+    IconPlayerPlayFilled,
+    IconTrash,
+    IconSettings,
+} from '@tabler/icons-react'
 
 import { debounce } from '$src/utils/debounce'
 import { FsLocal, FolderExists } from '$src/services/plugins/FsLocal'
@@ -166,10 +174,15 @@ const PrefsDialog = observer(({ isOpen, onClose }: PrefsProps) => {
     return (
         <Modal
             centered
-            closeOnEscape={false}
+            closeOnEscape={true}
             onClose={onClose}
             opened={isOpen}
-            title={t('DIALOG.PREFS.TITLE')}
+            title={
+                <Group gap="xs">
+                    <IconSettings size={20} />
+                    {t('DIALOG.PREFS.TITLE')}
+                </Group>
+            }
             withCloseButton
         >
             <ScrollArea h="calc(90vh - 300px)" mih="200px" type="hover" offsetScrollbars scrollbarSize={10}>

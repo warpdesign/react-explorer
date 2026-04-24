@@ -58,7 +58,7 @@ export const Item = ({
     return (
         <>
             <div
-                ref={dragRef}
+                ref={dragRef as unknown as React.Ref<HTMLDivElement>}
                 className={classNames(item.isSelected && 'selected', item.className)}
                 style={{
                     margin: `${margin}px`,

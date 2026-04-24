@@ -5,7 +5,7 @@ export interface Options extends AddEventListenerOptions {
 }
 
 export const useEventListener = (name: string, handler: EventListener, options: Options = {}) => {
-    const savedHandler = useRef<EventListener>()
+    const savedHandler = useRef<EventListener | null>(null)
     const { element = document, ...listenerOptions } = options
 
     useEffect(() => {
@@ -13,7 +13,7 @@ export const useEventListener = (name: string, handler: EventListener, options: 
     }, [handler])
 
     useEffect(() => {
-        const listener = (e: Event) => savedHandler.current(e)
+        const listener = (e: Event) => savedHandler.current?.(e)
 
         element.addEventListener(name, listener, listenerOptions)
 

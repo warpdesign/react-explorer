@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useRef, useEffect } from 'react'
 import { observer } from 'mobx-react'
 import { MenuItemConstructorOptions, ipcRenderer } from 'electron'
 import { useTranslation } from 'react-i18next'
@@ -10,15 +10,14 @@ import { showAlertModal } from '$src/components/AppAlert'
 import { LocalizedError } from '$src/locale/error'
 import { useStores } from '$src/hooks/useStores'
 import { UserHomeIconsTabler } from '$src/constants/icons'
-import { ActionIcon, Button as Button2, Flex } from '@mantine/core'
+import { ActionIcon, Flex, Tabs, Scroller } from '@mantine/core'
 import { ALL_DIRS } from '$src/utils/platform'
 import {
-    Icon,
     IconProps,
     IconFolderFilled,
     IconFolderExclamation,
     IconSquareRoundedX,
-    IconCirclePlusFilled,
+    IconCirclePlus,
 } from '@tabler/icons-react'
 
 /**
@@ -36,7 +35,7 @@ export const TabIcons = Object.keys(UserHomeIconsTabler).map((dirname: string) =
 
 export const getTabIconTabler = (
     path: string,
-): React.ForwardRefExoticComponent<IconProps & React.RefAttributes<Icon>> => {
+): React.ForwardRefExoticComponent<IconProps & React.RefAttributes<SVGSVGElement>> => {
     for (const obj of TabIcons) {
         if (obj.regex.test(path)) {
             return obj.icon
@@ -50,6 +49,7 @@ const TabList = observer(() => {
     const { viewState, settingsState } = useStores('viewState', 'settingsState')
     const [selectedMenuIndex, setSelectedMenuIndex] = useState(-1)
     const { t } = useTranslation()
+    const tabsContainerRef = useRef<HTMLDivElement>(null)
 
     useIpcRendererListener(
         'context-menu-tab-list:click',
@@ -189,49 +189,70 @@ const TabList = observer(() => {
     // TODO: this will be created at each render: this should only be re-rendered
     // whenever the language has changed
 
-    return (
-        <Button2.Group flex={0}>
-            {caches.map((cache, index) => {
-                const closeIcon = cache.isVisible && caches.length > 1 && (
-                    <IconSquareRoundedX
-                        size={16}
-                        onClick={(e) => {
-                            e.stopPropagation()
-                            closeTab(index, e)
-                        }}
-                    />
-                )
-                const path = cache.path
-                const TabIcon = cache.error ? IconFolderExclamation : getTabIconTabler(path)
-                const tabInfo = (cache.getFS() && cache.getFS().displaypath(path)) || {
-                    fullPath: '',
-                    shortPath: '',
-                }
+    // we need the active cache index
+    const visibleCacheIndex = viewState.getVisibleCacheIndex()
 
-                return (
-                    <Button2
-                        key={'' + viewId + index}
-                        onContextMenu={() => onContextMenu(index)}
-                        onClick={() => selectTab(index)}
-                        title={tabInfo.fullPath}
-                        leftSection={<TabIcon size={16} onContextMenu={(e) => onFolderContextMenu(index, e)} />}
-                        rightSection={closeIcon}
-                        radius="0"
-                        variant={cache.isVisible ? 'light' : 'default'}
-                        color={cache.isVisible && !viewState.isActive ? 'gray' : undefined}
-                        className="tab"
-                        bd="xl"
-                    >
-                        {tabInfo.shortPath}
-                    </Button2>
-                )
-            })}
-            <Flex align="center" mx="sm">
-                <ActionIcon variant="subtle" title={t('TABS.NEW')} c="dimmed" size="sm">
-                    <IconCirclePlusFilled onClick={() => addTab(viewState.getVisibleCacheIndex())} />
-                </ActionIcon>
-            </Flex>
-        </Button2.Group>
+    // Scroll active tab into view when it changes
+    useEffect(() => {
+        const selectedTab = tabsContainerRef.current?.querySelector('[aria-selected="true"]')
+        selectedTab?.scrollIntoView({
+            behavior: 'smooth',
+            block: 'nearest',
+            inline: 'nearest',
+        })
+    }, [visibleCacheIndex])
+
+    return (
+        <Flex wrap="nowrap" align="center">
+            <div ref={tabsContainerRef} style={{ flex: '0 1 auto', minWidth: 0, margin: 'var(--mantine-spacing-sm)' }}>
+                <Tabs value={visibleCacheIndex.toString()}>
+                    <Tabs.List>
+                        <Scroller>
+                            {caches.map((cache, index) => {
+                                const closeIcon = caches.length > 1 && (
+                                    <IconSquareRoundedX
+                                        size={16}
+                                        onClick={(e) => {
+                                            e.stopPropagation()
+                                            closeTab(index, e)
+                                        }}
+                                    />
+                                )
+                                const path = cache.path
+                                const TabIcon = cache.error ? IconFolderExclamation : getTabIconTabler(path)
+                                const tabInfo = (cache.getFS() && cache.getFS().displaypath(path)) || {
+                                    fullPath: '',
+                                    shortPath: '',
+                                }
+
+                                return (
+                                    <Tabs.Tab
+                                        key={'' + viewId + index}
+                                        value={index.toString()}
+                                        onContextMenu={() => onContextMenu(index)}
+                                        onClick={() => selectTab(index)}
+                                        title={tabInfo.fullPath}
+                                        leftSection={
+                                            <TabIcon size={16} onContextMenu={(e) => onFolderContextMenu(index, e)} />
+                                        }
+                                        rightSection={closeIcon}
+                                        // variant={cache.isVisible ? 'light' : 'default'}
+                                        // color={cache.isVisible && !viewState.isActive ? 'gray' : undefined}
+                                        className="tab"
+                                        bd="xl"
+                                    >
+                                        {tabInfo.shortPath}
+                                    </Tabs.Tab>
+                                )
+                            })}
+                        </Scroller>
+                    </Tabs.List>
+                </Tabs>
+            </div>
+            <ActionIcon variant="subtle" title={t('TABS.NEW')} c="dimmed" size="sm" style={{ flex: 'none' }} mr="sm">
+                <IconCirclePlus onClick={() => addTab(viewState.getVisibleCacheIndex())} />
+            </ActionIcon>
+        </Flex>
     )
 })
 

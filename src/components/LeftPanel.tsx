@@ -9,7 +9,6 @@ import { UserHomeIconsTabler } from '$src/constants/icons'
 import { FavoritesState } from '$src/state/favoritesState'
 import { showAlertModal } from '$src/components/AppAlert'
 
-import '$src/css/favoritesPanel.css'
 import { Group, ScrollArea, TreeNodeData, Tree, UseTreeReturnType } from '@mantine/core'
 import { IconCaretRightFilled, IconFolder } from '@tabler/icons-react'
 import { IconButton } from './common/IconButton'
@@ -112,6 +111,8 @@ export const LeftPanel = observer(({ hide }: { hide: boolean }) => {
         selectedState: [],
         initialize: () => {},
         setHoveredNode: () => {},
+        isNodeLoading: () => false,
+        getNodeLoadError: (): null => null,
         toggleExpanded: (value: string) => {
             setExpandedState({
                 ...expandedState,
@@ -156,6 +157,7 @@ export const LeftPanel = observer(({ hide }: { hide: boolean }) => {
                                         onClick={(e) => onNodeClick(node, e)}
                                         active={nodeProps.isSelected}
                                         pl="lg"
+                                        fw={400}
                                     >
                                         {node.label}
                                     </IconButton>

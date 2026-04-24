@@ -41,7 +41,7 @@ export const TableViewMode = forwardRef<ViewModeActions, ViewModeProps<undefined
         }: ViewModeProps<undefined>,
         ref,
     ) => {
-        const tableRef: React.MutableRefObject<HTMLDivElement> = useRef()
+        const tableRef = useRef<HTMLDivElement>(null)
         // const { totalSize, virtualItems, scrollToIndex } = useVirtual({
         //     size: itemCount,
         //     parentRef: tableRef,
@@ -53,7 +53,7 @@ export const TableViewMode = forwardRef<ViewModeActions, ViewModeProps<undefined
             count: itemCount,
             getScrollElement: () => tableRef.current,
             estimateSize: React.useCallback(() => ROW_HEIGHT, []),
-            overscan: 0,
+            overscan: 15,
         })
 
         const virtualItems = virtualizer.getVirtualItems()

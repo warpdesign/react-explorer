@@ -84,7 +84,7 @@ export const useViewMode = (name: ViewModeName): ViewModeReturnProps & { viewmod
     if (!ViewMode) {
         throw `could not find viewmode "${name}"`
     }
-    const viewmodeRef = useRef()
+    const viewmodeRef = useRef<ViewModeActions | null>(null)
 
     return {
         ViewMode: useCallback(

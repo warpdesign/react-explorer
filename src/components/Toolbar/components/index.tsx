@@ -10,6 +10,8 @@ import {
     IconSortDescending,
     IconFileText,
     IconChartBar,
+    IconLayoutGrid,
+    IconListDetails,
 } from '@tabler/icons-react'
 import { useTranslation } from 'react-i18next'
 import { TSORT_METHOD_NAME, TSORT_ORDER } from '$src/services/FsSort'
@@ -30,14 +32,14 @@ export const ViewToggleMenu = ({
         <>
             <Menu.Item
                 leftSection={getTickIcon(viewmode, 'details')}
-                rightSection={<IconColumns size={16} />}
+                rightSection={<IconListDetails size={16} />}
                 onClick={() => onClick('details')}
             >
                 {t('TOOLBAR.DETAILS_VIEW')}
             </Menu.Item>
             <Menu.Item
                 leftSection={getTickIcon(viewmode, 'icons')}
-                rightSection={<IconGridDots size={16} />}
+                rightSection={<IconLayoutGrid size={16} />}
                 onClick={() => onClick('icons')}
             >
                 {t('TOOLBAR.ICON_VIEW')}

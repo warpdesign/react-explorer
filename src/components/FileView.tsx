@@ -1,4 +1,4 @@
-import React, { useCallback, useRef, MutableRefObject, useState } from 'react'
+import React, { useCallback, useRef, useState } from 'react'
 import { observer } from 'mobx-react'
 import { Menu } from '@mantine/core'
 import { useHotkeys } from '@mantine/hooks'
@@ -84,7 +84,7 @@ const FileView = observer(({ hide }: Props) => {
     )
     const rowCount = nodes.length
 
-    const rightClickFileIndexRef: MutableRefObject<number> = useRef<number>()
+    const rightClickFileIndexRef = useRef<number | null>(null)
 
     const { ViewMode, getActions, viewmodeRef } = useViewMode(viewmode)
     const viewmodeOptions = {
@@ -299,7 +299,9 @@ const FileView = observer(({ hide }: Props) => {
     }
 
     const rightClickFile =
-        rightClickFileIndexRef.current > -1 && rightClickFileIndexRef.current < rowCount
+        rightClickFileIndexRef.current !== null &&
+        rightClickFileIndexRef.current > -1 &&
+        rightClickFileIndexRef.current < rowCount
             ? files[rightClickFileIndexRef.current]
             : undefined
 

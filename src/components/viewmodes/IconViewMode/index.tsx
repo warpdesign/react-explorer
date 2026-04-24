@@ -1,4 +1,4 @@
-import React, { forwardRef, useImperativeHandle, useEffect } from 'react'
+import React, { forwardRef, useImperativeHandle, useEffect, useRef } from 'react'
 import { useVirtualizer } from '@tanstack/react-virtual'
 
 import { useElementSize } from '@mantine/hooks'
@@ -34,7 +34,8 @@ export const IconViewMode = forwardRef<ViewModeActions, ViewModeProps<IconViewMo
         }: ViewModeProps<IconViewModeOptions>,
         ref,
     ) => {
-        const { ref: tableRef, width: rowWidth } = useElementSize()
+        const { ref: sizeRef, width: rowWidth } = useElementSize()
+        const tableRef = useRef<HTMLDivElement>(null)
         const { iconSize = 56, isViewActive = true } = options || {}
         // margin between items: we need to add it to the width
         const margin = 4
@@ -132,7 +133,10 @@ export const IconViewMode = forwardRef<ViewModeActions, ViewModeProps<IconViewMo
         return (
             <div
                 className="fileview-icons"
-                ref={tableRef}
+                ref={(node) => {
+                    tableRef.current = node
+                    sizeRef(node)
+                }}
                 style={{
                     height: '100%',
                     width: '100%',

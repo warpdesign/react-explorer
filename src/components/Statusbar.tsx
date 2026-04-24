@@ -18,7 +18,13 @@ const ToggleHiddenFilesButton = ({ content, showHiddenFiles, onClick }: Props) =
 
     return (
         <Tooltip label={content}>
-            <ActionIcon onClick={onClick} variant="transparent" color={showHiddenFiles ? 'blue' : 'gray'} size="sm">
+            <ActionIcon
+                onClick={onClick}
+                variant="transparent"
+                color={showHiddenFiles ? 'blue' : 'gray'}
+                size="sm"
+                ml="xs"
+            >
                 <HiddenToggleIcon size={16} />
             </ActionIcon>
         </Tooltip>
@@ -41,7 +47,7 @@ const Statusbar = observer(() => {
     )
 
     return (
-        <div className="status-bar" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <div className="status-bar" style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.75rem' }}>
             <ToggleHiddenFilesButton showHiddenFiles={showHiddenFiles} content={content} onClick={onClick} />
             {`${t('STATUS.FILES', { count: numFiles })}, ${t('STATUS.FOLDERS', {
                 count: numDirs,

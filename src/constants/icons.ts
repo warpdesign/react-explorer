@@ -1,5 +1,4 @@
 import {
-    Icon,
     IconCameraFilled,
     IconDeviceImac,
     IconDownload,
@@ -17,7 +16,7 @@ import {
 } from '@tabler/icons-react'
 
 export const UserHomeIconsTabler: {
-    [index: string]: React.ForwardRefExoticComponent<IconProps & React.RefAttributes<Icon>>
+    [index: string]: React.ForwardRefExoticComponent<IconProps & React.RefAttributes<SVGSVGElement>>
 } = {
     DOWNLOADS_DIR: IconDownload,
     MUSIC_DIR: IconMusic,
@@ -29,7 +28,7 @@ export const UserHomeIconsTabler: {
 }
 
 export const TypeIconsTabler: {
-    [key: string]: React.ForwardRefExoticComponent<IconProps & React.RefAttributes<Icon>>
+    [key: string]: React.ForwardRefExoticComponent<IconProps & React.RefAttributes<SVGSVGElement>>
 } = {
     img: IconPhotoFilled,
     any: IconFileFilled,

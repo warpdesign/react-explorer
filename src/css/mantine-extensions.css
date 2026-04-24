@@ -1,0 +1,5 @@
+.root {
+  [data-variant='primary'] {
+    color: var(--mantine-color-text);
+  }
+}
